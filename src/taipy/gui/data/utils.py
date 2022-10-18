@@ -67,8 +67,9 @@ class Decimator(ABC):
 
 def _df_data_filter(
     dataframe: pd.DataFrame,
-    x_column_name: t.Union[None, str],
+    x_column_name: t.Optional[str],
     y_column_name: str,
+    z_column_name: str,
     decimator: Decimator,
     payload: t.Dict[str, t.Any],
 ):
@@ -79,7 +80,8 @@ def _df_data_filter(
             index += 1
         x_column_name = f"tAiPy_index_{index}"
         df[x_column_name] = df.index
-    points = df[[x_column_name, y_column_name]].to_numpy()
+    column_list = [x_column_name, y_column_name, z_column_name] if z_column_name else [x_column_name, y_column_name]
+    points = df[column_list].to_numpy()
     mask = decimator.decimate(points, payload)
     return df[mask]
 

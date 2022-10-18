@@ -42,16 +42,31 @@ class ScatterDecimator(Decimator):
             return mask
         mask.fill(False)
         grid_x, grid_y = round(width / self._binning_ratio), round(height / self._binning_ratio)
-        grid = np.empty((grid_x + 1, grid_y + 1), dtype=np.uint8)
-        grid.fill(0)
         x_col, y_col = data[:, 0], data[:, 1]
         min_x, max_x = np.amin(x_col), np.amax(x_col)
         min_y, max_y = np.amin(y_col), np.amax(y_col)
         min_max_x_diff, min_max_y_diff = max_x - min_x, max_y - min_y
         x_grid_map = np.rint((x_col - min_x) * grid_x / min_max_x_diff).astype(int)
         y_grid_map = np.rint((y_col - min_y) * grid_y / min_max_y_diff).astype(int)
-        for i in np.arange(n_rows):
-            if grid[x_grid_map[i], y_grid_map[i]] < self._max_overlap_points:
-                grid[x_grid_map[i], y_grid_map[i]] += 1
-                mask[i] = True
+        z_grid_map = None
+        grid_shape = (grid_x + 1, grid_y + 1)
+        if len(data[0]) == 3:
+            grid_z = grid_x
+            grid_shape = (grid_x + 1, grid_y + 1, grid_z + 1)  # type: ignore
+            z_col = data[:, 2]
+            min_z, max_z = np.amin(z_col), np.amax(z_col)
+            min_max_z_diff = max_z - min_z
+            z_grid_map = np.rint((z_col - min_z) * grid_z / min_max_z_diff).astype(int)
+        grid = np.empty(grid_shape, dtype=np.uint8)
+        grid.fill(0)
+        if z_grid_map is not None:
+            for i in np.arange(n_rows):
+                if grid[x_grid_map[i], y_grid_map[i], z_grid_map[i]] < self._max_overlap_points:
+                    grid[x_grid_map[i], y_grid_map[i], z_grid_map[i]] += 1
+                    mask[i] = True
+        else:
+            for i in np.arange(n_rows):
+                if grid[x_grid_map[i], y_grid_map[i]] < self._max_overlap_points:
+                    grid[x_grid_map[i], y_grid_map[i]] += 1
+                    mask[i] = True
         return mask

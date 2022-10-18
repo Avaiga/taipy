@@ -127,6 +127,34 @@ const getValueFromCol = (values: TraceValueType | undefined, col: string): (stri
     return [];
 };
 
+const getAxis = (traces: string[][], columns: Record<string, ColumnDesc>, axis: number) => {
+    if (traces.length > 0 && traces[0].length > axis && traces[0][axis] && columns[traces[0][axis]])
+        return columns[traces[0][axis]].dfid
+    return undefined
+}
+
+const getDecimatorPayload = (
+    decimator: string | undefined,
+    plotDiv: HTMLDivElement | null,
+    modes: string[],
+    columns: Record<string, ColumnDesc>,
+    traces: string[][],
+    relayoutData?: PlotRelayoutEvent
+) => {
+    return decimator
+        ? {
+              width: plotDiv?.clientWidth,
+              height: plotDiv?.clientHeight,
+              xAxis: getAxis(traces, columns, 0),
+              yAxis: getAxis(traces, columns, 1),
+              zAxis: getAxis(traces, columns, 2),
+              decimator: decimator,
+              relayoutData: relayoutData,
+              chartMode: modes[0],
+          }
+        : undefined;
+};
+
 const selectedPropRe = /selected(\d+)/;
 
 const ONE_COLUMN_CHART = ["pie"];
@@ -223,29 +251,19 @@ const Chart = (props: ChartProp) => {
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            const decimatorPayload = decimator
-                ? {
-                      width: plotRef.current?.clientWidth,
-                      height: plotRef.current?.clientHeight,
-                      xAxis:
-                          config.traces.length &&
-                          config.traces[0].length &&
-                          config.traces[0][0] &&
-                          config.columns[config.traces[0][0]].dfid,
-                      yAxis:
-                          config.traces.length == 1 &&
-                          config.traces[0].length > 1 &&
-                          config.columns[config.traces[0][1]] &&
-                          config.columns[config.traces[0][1]].dfid,
-                      decimator: decimator,
-                      chartMode: config.modes[0],
-                  }
-                : undefined;
             dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "");
-            dispatch(createRequestChartUpdateAction(updateVarName, id, backCols, dataKey.current, decimatorPayload));
+            dispatch(
+                createRequestChartUpdateAction(
+                    updateVarName,
+                    id,
+                    backCols,
+                    dataKey.current,
+                    getDecimatorPayload(decimator, plotRef.current, config.modes, config.columns, config.traces),
+                )
+            );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, config.traces, updateVarName, id, decimator]);
+    }, [refresh, dispatch, config.columns, config.traces, config.modes, updateVarName, id, decimator]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
@@ -381,35 +399,24 @@ const Chart = (props: ChartProp) => {
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
             onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
-            if (decimator) {
+            if (decimator && !config.types.includes("scatter3d")) {
                 const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
                 const eventDataKey = Object.keys(eventData)
                     .map((v) => v + "=" + eventData[v as keyof typeof eventData])
                     .join("-");
                 dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "") + "--" + eventDataKey;
-                const decimatorPayload = {
-                    width: plotRef.current?.clientWidth,
-                    height: plotRef.current?.clientHeight,
-                    xAxis:
-                        config.traces.length &&
-                        config.traces[0].length &&
-                        config.traces[0][0] &&
-                        config.columns[config.traces[0][0]].dfid,
-                    yAxis:
-                        config.traces.length == 1 &&
-                        config.traces[0].length > 1 &&
-                        config.columns[config.traces[0][1]] &&
-                        config.columns[config.traces[0][1]].dfid,
-                    decimator: decimator,
-                    relayoutData: eventData,
-                    chartMode: config.modes[0],
-                };
                 dispatch(
-                    createRequestChartUpdateAction(updateVarName, id, backCols, dataKey.current, decimatorPayload)
+                    createRequestChartUpdateAction(
+                        updateVarName,
+                        id,
+                        backCols,
+                        dataKey.current,
+                        getDecimatorPayload(decimator, plotRef.current, config.modes, config.columns, config.traces, eventData),
+                    )
                 );
             }
         },
-        [dispatch, onRangeChange, id, config.modes, config.columns, config.traces, updateVarName, decimator]
+        [dispatch, onRangeChange, id, config.modes, config.columns, config.traces, config.types, updateVarName, decimator]
     );
 
     const onAfterPlot = useCallback(() => {

@@ -271,9 +271,13 @@ class _PandasDataAccessor(_DataAccessor):
                 gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
             )
             if isinstance(decimator_instance, PropertyType.decimator.value):
-                x_column, y_column = decimator_payload.get("xAxis", ""), decimator_payload.get("yAxis", "")
+                x_column, y_column, z_column = (
+                    decimator_payload.get("xAxis", ""),
+                    decimator_payload.get("yAxis", ""),
+                    decimator_payload.get("zAxis", ""),
+                )
                 chart_mode = decimator_payload.get("chartMode", [])
-                if decimator_instance._zoom and "relayoutData" in decimator_payload:
+                if decimator_instance._zoom and "relayoutData" in decimator_payload and not z_column:
                     relayoutData = decimator_payload.get("relayoutData", {})
                     x0 = relayoutData.get("xaxis.range[0]")
                     x1 = relayoutData.get("xaxis.range[1]")
@@ -286,7 +290,7 @@ class _PandasDataAccessor(_DataAccessor):
                 if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max, chart_mode):
                     try:
                         value = _df_data_filter(
-                            value, x_column, y_column, decimator=decimator_instance, payload=decimator_payload
+                            value, x_column, y_column, z_column, decimator=decimator_instance, payload=decimator_payload
                         )
                         gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
                     except Exception as e:
