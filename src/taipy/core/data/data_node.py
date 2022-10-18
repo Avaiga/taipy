@@ -181,10 +181,13 @@ class DataNode(_Entity):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def expiration_date(self) -> datetime:
-        if not self._last_edit_date:
+        last_edit_date = self.last_edit_date
+        validity_period = self._validity_period
+
+        if not last_edit_date:
             raise NoData(f"Data node {self.id} has not been written yet.")
 
-        return self._last_edit_date + self.validity_period if self.validity_period else self._last_edit_date
+        return last_edit_date + validity_period if validity_period else last_edit_date
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
