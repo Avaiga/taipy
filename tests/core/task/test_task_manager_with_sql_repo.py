@@ -28,7 +28,7 @@ from taipy.config.config import Config
 
 def test_create_and_save():
     Config.global_config.repository_type = "sql"
-    # _TaskManager._repository = _TaskSQLRepository()
+
     _TaskManager._repository = _TaskRepositoryFactory._build_repository()
 
     input_configs = [Config.configure_data_node("my_input", "in_memory")]
@@ -60,7 +60,7 @@ def test_create_and_save():
 
 def test_do_not_recreate_existing_data_node():
     Config.global_config.repository_type = "sql"
-    # _TaskManager._repository = _TaskSQLRepository()
+
     _TaskManager._repository = _TaskRepositoryFactory._build_repository()
 
     input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
@@ -76,8 +76,8 @@ def test_do_not_recreate_existing_data_node():
 
 def test_do_not_recreate_existing_task():
     Config.global_config.repository_type = "sql"
-    _TaskManager._repository = _TaskSQLRepository()  # TODO: This also does not work
-    # _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+
+    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
 
     input_config_scope_pipeline = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
     output_config_scope_pipeline = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
@@ -146,7 +146,7 @@ def test_do_not_recreate_existing_task():
 
 def test_set_and_get_task():
     Config.global_config.repository_type = "sql"
-    # _TaskManager._repository = _TaskSQLRepository()
+
     _TaskManager._repository = _TaskRepositoryFactory._build_repository()
 
     task_id_1 = TaskId("id1")
@@ -200,7 +200,7 @@ def test_set_and_get_task():
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     Config.global_config.repository_type = "sql"
-    # _TaskManager._repository = _TaskSQLRepository()
+
     _TaskManager._repository = _TaskRepositoryFactory._build_repository()
 
     embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
@@ -226,7 +226,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
 
 def test_delete_raise_exception():
     Config.global_config.repository_type = "sql"
-    # _TaskManager._repository = _TaskSQLRepository()
+
     _TaskManager._repository = _TaskRepositoryFactory._build_repository()
 
     dn_input_config_1 = Config.configure_data_node(
@@ -243,7 +243,7 @@ def test_delete_raise_exception():
 
 def test_hard_delete():
     Config.global_config.repository_type = "sql"
-    # _TaskManager._repository = _TaskSQLRepository()
+
     _TaskManager._repository = _TaskRepositoryFactory._build_repository()
 
     dn_input_config_1 = Config.configure_data_node(

@@ -62,7 +62,6 @@ def test_create_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
 
     _SchedulerFactory._build_dispatcher()
@@ -89,7 +88,6 @@ def test_get_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
     _SchedulerFactory._build_dispatcher()
 
@@ -108,7 +106,6 @@ def test_get_latest_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
     _SchedulerFactory._build_dispatcher()
 
@@ -133,7 +130,6 @@ def test_get_latest_job():
 def test_get_job_unknown():
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
     assert _JobManager._get(JobId("Unknown")) is None
 
@@ -142,7 +138,6 @@ def test_get_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
     _SchedulerFactory._build_dispatcher()
 
@@ -158,7 +153,6 @@ def test_delete_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
     _SchedulerFactory._build_dispatcher()
 
@@ -186,7 +180,6 @@ def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
     _SchedulerFactory._build_dispatcher()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
@@ -207,7 +200,6 @@ def test_force_deleting_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     Config.global_config.repository_type = "sql"
 
-    # _JobManager._repository = _JobSQLRepository()
     _JobManager._repository = _JobRepositoryFactory._build_repository()
     _SchedulerFactory._build_dispatcher()
 

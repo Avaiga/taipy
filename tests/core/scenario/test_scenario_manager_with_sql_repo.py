@@ -38,11 +38,6 @@ def test_set_and_get_scenario(cycle):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # TODO: Test failing due to ScenarioRepositoryFactory is building the ScenarioFSRepository
-    # by default but loaded the SQLRepository to self.repo and then passing the dir_name params to it.
-    # SQLRepository doesn't understand the dir_name params => test failed
-
-    # _ScenarioManager._repository = _ScenarioSQLRepository() # NOTE: this works
     _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
     _SchedulerFactory._build_dispatcher()
 
@@ -148,9 +143,6 @@ def test_create_scenario_does_not_modify_config():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # TODO: test is failing with the same reason as above
-
-    # _ScenarioManager._repository = _ScenarioSQLRepository() # NOTE: this works
     _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
     _SchedulerFactory._build_dispatcher()
 
@@ -182,9 +174,6 @@ def test_create_and_delete_scenario():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # TODO: test is failing with the same reason as above
-
-    # _ScenarioManager._repository = _ScenarioSQLRepository() # NOTE: this works
     _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
     _SchedulerFactory._build_dispatcher()
 
@@ -256,9 +245,6 @@ def test_scenario_manager_only_creates_data_node_once():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # TODO: test is failing with the same reason as above
-
-    # _ScenarioManager._repository = _ScenarioSQLRepository() # NOTE: this works
     _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
     _SchedulerFactory._build_dispatcher()
 
@@ -303,9 +289,6 @@ def test_scenario_manager_only_creates_data_node_once():
 def test_scenario_create_from_task_config():
     Config.global_config.repository_type = "sql"
 
-    # TODO: test is failing with the same reason as above
-
-    # _ScenarioManager._repository = _ScenarioSQLRepository() # NOTE: this works
     _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
 
     data_node_1_config = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)

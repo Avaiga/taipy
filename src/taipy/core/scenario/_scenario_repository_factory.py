@@ -11,12 +11,18 @@
 
 from typing import Any, Union
 
+from taipy.config.config import Config
+
 from .._repository._repository_factory import _RepositoryFactory
 from ..common._utils import _load_fct
 from ._scenario_fs_repository import _ScenarioFSRepository
+from ._scenario_sql_repository import _ScenarioSQLRepository
 
 
 class _ScenarioRepositoryFactory(_RepositoryFactory):
+
+    _REPOSITORY_MAP = {"default": _ScenarioFSRepository, "sql": _ScenarioSQLRepository}
+
     @classmethod
     def _build_repository(cls) -> Union[_ScenarioFSRepository, Any]:  # type: ignore
         if cls._using_enterprise():
@@ -25,4 +31,4 @@ class _ScenarioRepositoryFactory(_RepositoryFactory):
                 "_ScenarioRepositoryFactory",
             )
             return factory._build_repository()  # type: ignore
-        return _ScenarioFSRepository()
+        return cls._REPOSITORY_MAP.get(Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default"))()  # type: ignore

@@ -32,13 +32,8 @@ def file_exists(file_path: str) -> bool:
 
 class TestDataManager:
     def test_create_data_node_and_modify_properties_does_not_modify_config(self):
-        # TODO: Test failing due to ScenarioRepositoryFactory is building the ScenarioFSRepository
-        # by default but loaded the SQLRepository to self.repo and then passing the dir_name params to it.
-        # SQLRepository doesn't understand the dir_name params => test failed
-
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         dn_config = Config.configure_data_node(id="name", foo="bar")
@@ -56,7 +51,6 @@ class TestDataManager:
     def test_create_raises_exception_with_wrong_type(self):
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         wrong_type_dn_config = DataNodeConfig(id="foo", storage_type="bar", scope=DataNodeConfig._DEFAULT_SCOPE)
@@ -66,7 +60,6 @@ class TestDataManager:
     def test_create_from_same_config_generates_new_data_node_and_new_id(self):
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         dn_config = Config.configure_data_node(id="foo", storage_type="in_memory")
@@ -77,7 +70,6 @@ class TestDataManager:
     def test_create_uses_overridden_attributes_in_config_file(self):
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
@@ -99,7 +91,6 @@ class TestDataManager:
     def test_get_if_not_exists(self):
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         with pytest.raises(ModelNotFound):
@@ -108,7 +99,6 @@ class TestDataManager:
     def test_get_all(self):
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         _DataManager._delete_all()
@@ -126,7 +116,6 @@ class TestDataManager:
     def test_set(self):
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         dn = InMemoryDataNode(
@@ -155,7 +144,6 @@ class TestDataManager:
     def test_delete(self):
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
         _DataManager._delete_all()
 
@@ -181,7 +169,6 @@ class TestDataManager:
 
         Config.global_config.repository_type = "sql"
 
-        # _DataManager._repository = _DataSQLRepository()  # NOTE: This works
         _DataManager._repository = _DataRepositoryFactory._build_repository()
 
         global_dn_config = Config.configure_data_node(

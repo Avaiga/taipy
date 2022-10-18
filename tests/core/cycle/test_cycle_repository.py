@@ -76,13 +76,8 @@ def test_get_primary(tmpdir, cycle, current_datetime):
 
 
 def test_save_and_load_for_sql_repo(tmpdir, cycle):
-    # TODO: Test failing due to ScenarioRepositoryFactory is building the ScenarioFSRepository
-    # by default but loaded the SQLRepository to self.repo and then passing the dir_name params to it.
-    # SQLRepository doesn't understand the dir_name params => test failed
-
     Config.global_config.repository_type = "sql"
 
-    # repository = _CycleSQLRepository()  # NOTE: This works
     repository = _CycleRepositoryFactory._build_repository()
     repository.base_path = tmpdir
     repository._save(cycle)
@@ -95,23 +90,16 @@ def test_save_and_load_for_sql_repo(tmpdir, cycle):
 
 
 def test_from_and_to_model_for_sql_repo(cycle, cycle_model):
-    # TODO: test is failing with the same reason as above
-
     Config.global_config.repository_type = "sql"
 
-    # repository = _CycleSQLRepository()  # NOTE: This works
     repository = _CycleRepositoryFactory._build_repository()
     assert repository._to_model(cycle) == cycle_model
     assert repository._from_model(cycle_model) == cycle
 
 
 def test_get_primary_for_sql_repo(tmpdir, cycle, current_datetime):
-
-    # TODO: test is failing with the same reason as above
-
     Config.global_config.repository_type = "sql"
 
-    # cycle_repository = _CycleSQLRepository()  # NOTE: This works
     cycle_repository = _CycleRepositoryFactory._build_repository()
 
     cycle_repository._delete_all()

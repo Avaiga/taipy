@@ -32,14 +32,9 @@ from taipy.config.config import Config
 
 
 def test_set_and_get_pipeline():
-    # TODO: Test failing due to ScenarioRepositoryFactory is building the ScenarioFSRepository
-    # by default but loaded the SQLRepository to self.repo and then passing the dir_name params to it.
-    # SQLRepository doesn't understand the dir_name params => test failed
-
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    # _PipelineManager._repository = _PipelineSQLRepository() # NOTE: this works
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
 
     _SchedulerFactory._build_dispatcher()
@@ -134,8 +129,6 @@ def mult_by_3(nb: int):
 def test_get_or_create_data():
     # only create intermediate data node once
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -184,11 +177,8 @@ def test_get_or_create_data():
 
 
 def test_do_not_recreate_existing_pipeline_except_same_config():
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
-
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
-
     dn_input_config_scope_scenario = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
     dn_output_config_scope_scenario = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task(
@@ -199,6 +189,7 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     # Scope is scenario
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     assert len(_PipelineManager._get_all()) == 1
+    # TODO: failed because couldn't detect the already created pipeline
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
     assert len(_PipelineManager._get_all()) == 1
     assert pipeline_1.id == pipeline_2.id
@@ -316,8 +307,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
 
 def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -347,7 +336,6 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
 
 def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -375,7 +363,6 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
 
 def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -403,7 +390,6 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
 
 def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -430,7 +416,6 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
 
 
 def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -461,7 +446,6 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
 
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -492,7 +476,6 @@ def test_hard_delete_shared_entities():
 
 
 def test_data_node_creation_pipeline():
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
@@ -517,7 +500,6 @@ def test_data_node_creation_pipeline():
 
 
 def test_data_node_creation_scenario():
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
     _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()

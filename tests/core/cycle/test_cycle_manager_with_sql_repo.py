@@ -29,13 +29,8 @@ from taipy.config.config import Config
 
 
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
-    # TODO: Test failing due to ScenarioRepositoryFactory is building the ScenarioFSRepository
-    # by default but loaded the SQLRepository to self.repo and then passing the dir_name params to it.
-    # SQLRepository doesn't understand the dir_name params => test failed
-
     Config.global_config.repository_type = "sql"
 
-    # _CycleManager._repository = _CycleSQLRepository()  # NOTE: This works
     _CycleManager._repository = _CycleRepositoryFactory._build_repository()
 
     _CycleManager._delete_all()
@@ -87,10 +82,8 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
 
 
 def test_create_and_delete_cycle_entity(tmpdir):
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
-    # _CycleManager._repository = _CycleSQLRepository()  # NOTE: This works
     _CycleManager._repository = _CycleRepositoryFactory._build_repository()
 
     _CycleManager._delete_all()
@@ -147,10 +140,8 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
 
 def test_get_cycle_start_date_and_end_date():
-    # TODO: test is failing with the same reason as above
     Config.global_config.repository_type = "sql"
 
-    # _CycleManager._repository = _CycleSQLRepository()  # NOTE: This works
     _CycleManager._repository = _CycleRepositoryFactory._build_repository()
 
     _CycleManager._delete_all()

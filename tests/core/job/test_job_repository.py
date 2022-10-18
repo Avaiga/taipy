@@ -108,7 +108,6 @@ class TestJobRepository:
     def test_save_and_load_with_sql_repo(self):
         Config.global_config.repository_type = "sql"
 
-        # repository = _JobSQLRepository()
         repository = _JobRepositoryFactory._build_repository()
 
         repository._save(job)
@@ -122,7 +121,6 @@ class TestJobRepository:
     def test_from_and_to_model_with_sql_repo(self):
         Config.global_config.repository_type = "sql"
 
-        # repository = _JobSQLRepository()
         repository = _JobRepositoryFactory._build_repository()
 
         assert repository._to_model(job) == job_model

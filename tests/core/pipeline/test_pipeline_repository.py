@@ -31,12 +31,7 @@ class TestPipelineRepository:
         assert repository._from_model(pipeline_model) == pipeline
 
     def test_save_and_load_with_sql_repo(self, tmpdir, pipeline):
-        # TODO: Test failing due to ScenarioRepositoryFactory is building the ScenarioFSRepository
-        # by default but loaded the SQLRepository to self.repo and then passing the dir_name params to it.
-        # SQLRepository doesn't understand the dir_name params => test failed
-
         Config.global_config.repository_type = "sql"
-        # repository = _PipelineSQLRepository() # NOTE: this works
         repository = _PipelineRepositoryFactory._build_repository()
 
         repository.base_path = tmpdir
@@ -47,11 +42,8 @@ class TestPipelineRepository:
         assert pipeline.id == loaded_pipeline.id
 
     def test_from_and_to_model_with_sql_repo(self, pipeline, pipeline_model):
-        # TODO: test is failing with the same reason as above
-
         Config.global_config.repository_type = "sql"
 
-        # repository = _PipelineSQLRepository() # NOTE: this works
         repository = _PipelineRepositoryFactory._build_repository()
 
         assert repository._to_model(pipeline) == pipeline_model

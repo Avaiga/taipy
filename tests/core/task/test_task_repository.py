@@ -78,7 +78,6 @@ class TestTaskRepository:
     def test_save_and_load_with_sql_repo(self, tmpdir):
         Config.global_config.repository_type = "sql"
 
-        # repository = _TaskSQLRepository()   # NOTE: this works
         repository = _TaskRepositoryFactory._build_repository()  # type: ignore
 
         repository._save(task)
@@ -92,7 +91,6 @@ class TestTaskRepository:
     def test_from_and_to_model_with_sql_repo(self):
         Config.global_config.repository_type = "sql"
 
-        # repository = _TaskSQLRepository()   # NOTE: this works
         repository = _TaskRepositoryFactory._build_repository()  # type: ignore
 
         assert repository._to_model(task) == task_model
