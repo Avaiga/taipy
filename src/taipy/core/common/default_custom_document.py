@@ -13,6 +13,20 @@ from taipy.config.common._validate_id import _validate_id
 
 
 class DefaultCustomDocument:
-    def __init__(self, **data):
-        for attribute_name, value in data.items():
+    """The default class for \"custom_document\" property to configure a `MongoCollectionDataNode^`.
+
+    Attributes:
+        **kwargs: Attributes of the DefaultCustomDocument object.
+
+    Example:
+        - `document = DefaultCustomDocument(name="example", age=30})`
+        will return a DefaultCustomDocument object so that `document.name` returns `"example"`,
+        and `document.age` returns `30`.
+        - `document = DefaultCustomDocument(date="12/24/2018", temperature=20})`
+        will return a DefaultCustomDocument object so that `document.date` returns `"12/24/2018"`,
+        and `document.temperature` returns `20`.
+    """
+
+    def __init__(self, **kwargs):
+        for attribute_name, value in kwargs.items():
             setattr(self, _validate_id(attribute_name), value)

@@ -43,7 +43,16 @@ class MongoCollectionDataNode(DataNode):
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties. Note that the
-            _properties_ parameter must at least contain an entry for _"db_name"_, _"collection_name"_, and _"custom_document"_.
+            _properties_ parameter must at least contain an entry for _"db_name"_ and _"collection_name"_:
+
+            - _"db_name"_ `(str)`: The database name.\n
+            - _"collection_name"_ `(str)`: The collection in the database to read from and to write the data to.\n
+            - _"custom_document"_ `(Any)`: The custom document class to store, encode, and decode data when reading and writing to a Mongo collection.\n
+            - _"db_username"_ `(str)`: The database username.\n
+            - _"db_password"_ `(str)`: The database password.\n
+            - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.\n
+            - _"db_port"_ `(int)`: The database port. The default value is 27017.\n
+            - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database connection string.\n
     """
 
     __STORAGE_TYPE = "mongo_collection"

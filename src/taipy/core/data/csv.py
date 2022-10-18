@@ -45,7 +45,11 @@ class CSVDataNode(DataNode):
             and not completed yet. False otherwise.
         path (str): The path to the CSV file.
         properties (dict[str, Any]): A dictionary of additional properties. The _properties_
-            must have a _"default_path"_ or _"path"_ entry with the path of the CSV file.
+            must have a _"default_path"_ or _"path"_ entry with the path of the CSV file:
+
+            - _"default_path"_ `(str)`: The default path of the CSV file.\n
+            - _"has_header"_ `(bool)`: If True, indicates that the CSV file has a header.\n
+            - _"exposed_type"_: The exposed type of the data read from CSV file. The default value is `pandas`.\n
     """
 
     __STORAGE_TYPE = "csv"
