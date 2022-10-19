@@ -66,10 +66,6 @@ def return_a_number_with_sleep():
     return 10
 
 
-def print_with_sleep(a):
-    print(a)
-
-
 # ################################  TEST METHODS    ##################################
 
 

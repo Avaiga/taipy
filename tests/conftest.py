@@ -218,7 +218,9 @@ def tmp_sqlite(tmpdir_factory):
 
 @pytest.fixture(scope="function", autouse=True)
 def setup():
-    delete_everything()
+    init_config()
+    init_scheduler()
+    init_managers()
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -241,44 +243,59 @@ def init_config():
     Config._collector = IssueCollector()
     Config._serializer = _TomlSerializer()
 
-    Config._register_default(JobConfig("development"))
-    Config.job_config = Config.unique_sections[JobConfig.name]
+    from src.taipy.core.config import _inject_section
+
+    _inject_section(
+        JobConfig, "job_config", JobConfig("development"), [("configure_job_executions", JobConfig._configure)]
+    )
+    _inject_section(
+        DataNodeConfig,
+        "data_nodes",
+        DataNodeConfig.default_config(),
+        [
+            ("configure_data_node", DataNodeConfig._configure),
+            ("configure_default_data_node", DataNodeConfig._configure_default),
+            ("configure_csv_data_node", DataNodeConfig._configure_csv),
+            ("configure_json_data_node", DataNodeConfig._configure_json),
+            ("configure_sql_table_data_node", DataNodeConfig._configure_sql_table),
+            ("configure_sql_data_node", DataNodeConfig._configure_sql),
+            ("configure_mongo_collection_data_node", DataNodeConfig._configure_mongo_collection),
+            ("configure_in_memory_data_node", DataNodeConfig._configure_in_memory),
+            ("configure_pickle_data_node", DataNodeConfig._configure_pickle),
+            ("configure_excel_data_node", DataNodeConfig._configure_excel),
+            ("configure_generic_data_node", DataNodeConfig._configure_generic),
+        ],
+    )
+    _inject_section(
+        TaskConfig,
+        "tasks",
+        TaskConfig.default_config(),
+        [("configure_task", TaskConfig._configure), ("configure_default_task", TaskConfig._configure_default)],
+    )
+    _inject_section(
+        PipelineConfig,
+        "pipelines",
+        PipelineConfig.default_config(),
+        [
+            ("configure_pipeline", PipelineConfig._configure),
+            ("configure_default_pipeline", PipelineConfig._configure_default),
+        ],
+    )
+    _inject_section(
+        ScenarioConfig,
+        "scenarios",
+        ScenarioConfig.default_config(),
+        [
+            ("configure_scenario", ScenarioConfig._configure),
+            ("configure_default_scenario", ScenarioConfig._configure_default),
+            ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
+        ],
+    )
     _Checker.add_checker(_JobConfigChecker)
-    Config.configure_job_executions = JobConfig._configure
-
-    Config._register_default(DataNodeConfig.default_config())
-    Config.data_nodes = Config.sections[DataNodeConfig.name]
     _Checker.add_checker(_DataNodeConfigChecker)
-    Config.configure_data_node = DataNodeConfig._configure
-    Config.configure_default_data_node = DataNodeConfig._configure_default
-    Config.configure_csv_data_node = DataNodeConfig._configure_csv
-    Config.configure_json_data_node = DataNodeConfig._configure_json
-    Config.configure_sql_table_data_node = DataNodeConfig._configure_sql_table
-    Config.configure_sql_data_node = DataNodeConfig._configure_sql
-    Config.configure_mongo_collection_data_node = DataNodeConfig._configure_mongo_collection
-    Config.configure_in_memory_data_node = DataNodeConfig._configure_in_memory
-    Config.configure_pickle_data_node = DataNodeConfig._configure_pickle
-    Config.configure_excel_data_node = DataNodeConfig._configure_excel
-    Config.configure_generic_data_node = DataNodeConfig._configure_generic
-
-    Config._register_default(TaskConfig.default_config())
-    Config.tasks = Config.sections[TaskConfig.name]
     _Checker.add_checker(_TaskConfigChecker)
-    Config.configure_task = TaskConfig._configure
-    Config.configure_default_task = TaskConfig._configure_default
-
-    Config._register_default(PipelineConfig.default_config())
     _Checker.add_checker(_PipelineConfigChecker)
-    Config.pipelines = Config.sections[PipelineConfig.name]
-    Config.configure_pipeline = PipelineConfig._configure
-    Config.configure_default_pipeline = PipelineConfig._configure_default
-
-    Config._register_default(ScenarioConfig.default_config())
-    Config.scenarios = Config.sections[ScenarioConfig.name]
     _Checker.add_checker(_ScenarioConfigChecker)
-    Config.configure_scenario = ScenarioConfig._configure
-    Config.configure_default_scenario = ScenarioConfig._configure_default
-    Config.configure_scenario_from_tasks = ScenarioConfig._configure_from_tasks
 
 
 def init_managers():
