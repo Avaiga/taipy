@@ -236,12 +236,17 @@ class ExcelDataNode(DataNode):
             kwargs = {}
             if not self.properties[self.__HAS_HEADER_PROPERTY]:
                 kwargs["header"] = None
-            pandas_df =  pandas.read_excel(
+            df = pandas.read_excel(
                 self._path,
                 sheet_name=sheet_names,
                 **kwargs,
             )
-            return pd.DataFrame(pandas_df)
+            if isinstance(df, dict):
+                for key, value in df.items():
+                    df[key] = pd.DataFrame(value)
+                return df
+
+            return pd.DataFrame(df)
 
         except pandas.errors.EmptyDataError:
             return pd.DataFrame()

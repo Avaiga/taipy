@@ -16,8 +16,8 @@ from time import sleep
 from typing import Dict
 
 import modin.pandas as pd
-import pandas
 import numpy as np
+import pandas
 import pytest
 
 from src.taipy.core.common.alias import DataNodeId
@@ -650,34 +650,29 @@ class TestExcelDataNode:
     @pytest.mark.parametrize(
         "content,columns",
         [
-            ([{"a": [11], "b": [22], "c": [33]}, {"a": [44], "b": [55], "c": [66]}], None),
-            # ([[11, 22, 33], [44, 55, 66]], None),
-            # ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"]),
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], None),
+            ([[11, 22, 33], [44, 55, 66]], None),
+            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"]),
         ],
     )
     def test_write_multi_sheet(self, excel_file_with_multi_sheet, default_multi_sheet_data_frame, content, columns):
         sheet_names = ["Sheet1", "Sheet2"]
-        
-        print(f'\n\n\ncontent: {content}')
-        print(f'columns: {columns}')
-        print(f'\n{default_multi_sheet_data_frame["Sheet1"].values}')
-        
+
         excel_dn = ExcelDataNode(
             "foo",
             Scope.PIPELINE,
             properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names},
         )
-        print(f'\n{excel_dn.read()}\n\n\n')
-        for sheet_name in sheet_names:
+
+        for sheet_name in enumerate(sheet_names):
             assert np.array_equal(excel_dn.read()[sheet_name].values, default_multi_sheet_data_frame[sheet_name].values)
 
         multi_sheet_content = {sheet_name: pd.DataFrame(content) for sheet_name in sheet_names}
 
         excel_dn.write(multi_sheet_content)
-        data_pandas = excel_dn.read()
 
         for sheet_name in sheet_names:
-            assert np.array_equal(data_pandas[sheet_name].values, multi_sheet_content[sheet_name].values)
+            assert np.array_equal(excel_dn.read()[sheet_name].values, multi_sheet_content[sheet_name].values)
 
     def test_set_path(self):
         dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.xlsx"})
