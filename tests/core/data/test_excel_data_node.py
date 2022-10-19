@@ -664,7 +664,7 @@ class TestExcelDataNode:
             properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names},
         )
 
-        for sheet_name in enumerate(sheet_names):
+        for sheet_name in sheet_names:
             assert np.array_equal(excel_dn.read()[sheet_name].values, default_multi_sheet_data_frame[sheet_name].values)
 
         multi_sheet_content = {sheet_name: pd.DataFrame(content) for sheet_name in sheet_names}
