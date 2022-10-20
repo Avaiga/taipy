@@ -225,6 +225,8 @@ class ElementLibrary(ABC):
     def get_scripts(self) -> t.List[str]:
         """
         Returns the list of resources names for the scripts.
+        If a resource name is an absolute URL it will be used as is, if it's not it will be
+        passed to get_resource to retrieve a local Path to the resource.
 
         The default implementation returns an empty list, indicating that this library contains
         no custom visual elements.
