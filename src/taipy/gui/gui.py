@@ -23,6 +23,7 @@ import typing as t
 import warnings
 from importlib import util
 from types import FrameType
+from urllib.parse import urlparse
 
 import __main__
 import markdown as md_lib
@@ -1641,13 +1642,13 @@ class Gui:
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"{Gui._EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
         scripts = [
-            f"{Gui._EXTENSION_ROOT}{name}/{s}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}{name}/{s}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_scripts() or [])
         ]
         styles = [
-            f"{Gui._EXTENSION_ROOT}{name}/{s}"
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}{name}/{s}"
             for name, libs in Gui.__extensions.items()
             for lib in libs
             for s in (lib.get_styles() or [])
