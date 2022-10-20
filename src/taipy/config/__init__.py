@@ -23,7 +23,7 @@ from .common.frequency import Frequency
 
 def _config_doc(func):
     def func_with_doc(section, attribute_name, default, configuration_methods):
-        if "taipy-doc" in os.getcwd():
+        if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
             with open('config_doc.txt', 'a') as f:
                 from inspect import signature
                 for exposed_configuration_method, configuration_method in configuration_methods:
