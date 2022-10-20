@@ -139,7 +139,6 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
                 entity = self.__to_entity(entry)
                 key = config, owner
                 res[key] = entity
-                configs_and_owner_ids.remove(key)
 
         return res
 
@@ -150,14 +149,14 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             query = (
                 self.session.query(_TaipyModel)
                 .filter_by(model_name=self.model_name)
-                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
+                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id.id}"'))
                 .filter(_TaipyModel.document.contains(f'"owner_id": "{owner_id}"'))
             )
         else:
             query = (
                 self.session.query(_TaipyModel)
                 .filter_by(model_name=self.model_name)
-                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
+                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id.id}"'))
                 .filter(_TaipyModel.document.contains('"owner_id": null'))
             )
         if only_first:
