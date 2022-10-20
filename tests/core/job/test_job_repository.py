@@ -107,7 +107,7 @@ class TestJobRepository:
         assert repository._from_model(job_model).id == job.id
 
     def test_save_and_load_with_sql_repo(self):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()
@@ -124,7 +124,7 @@ class TestJobRepository:
         assert j.id == job.id
 
     def test_from_and_to_model_with_sql_repo(self):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()

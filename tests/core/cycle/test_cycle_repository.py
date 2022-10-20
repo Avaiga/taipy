@@ -75,7 +75,7 @@ def test_get_primary(tmpdir, cycle, current_datetime):
 
 
 def test_save_and_load_for_sql_repo(tmpdir, cycle):
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     repository = _CycleRepositoryFactory._build_repository()
     repository.base_path = tmpdir
@@ -89,7 +89,7 @@ def test_save_and_load_for_sql_repo(tmpdir, cycle):
 
 
 def test_from_and_to_model_for_sql_repo(cycle, cycle_model):
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     repository = _CycleRepositoryFactory._build_repository()
     assert repository._to_model(cycle) == cycle_model
@@ -97,7 +97,7 @@ def test_from_and_to_model_for_sql_repo(cycle, cycle_model):
 
 
 def test_get_primary_for_sql_repo(tmpdir, cycle, current_datetime):
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     cycle_repository = _CycleRepositoryFactory._build_repository()
 

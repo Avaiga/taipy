@@ -17,6 +17,7 @@ import pytest
 from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
@@ -29,11 +30,14 @@ def file_exists(file_path: str) -> bool:
     return os.path.exists(file_path)
 
 
+def init_managers():
+    _DataManagerFactory._build_manager()._delete_all()
+
+
 class TestDataManager:
     def test_create_data_node_and_modify_properties_does_not_modify_config(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         dn_config = Config.configure_data_node(id="name", foo="bar")
         dn = _DataManager._create_and_set(dn_config, None, None)
@@ -48,18 +52,16 @@ class TestDataManager:
         assert dn.properties.get("baz") == "qux"
 
     def test_create_raises_exception_with_wrong_type(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         wrong_type_dn_config = DataNodeConfig(id="foo", storage_type="bar", scope=DataNodeConfig._DEFAULT_SCOPE)
         with pytest.raises(InvalidDataNodeType):
             _DataManager._create_and_set(wrong_type_dn_config, None, None)
 
     def test_create_from_same_config_generates_new_data_node_and_new_id(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         dn_config = Config.configure_data_node(id="foo", storage_type="in_memory")
         dn = _DataManager._create_and_set(dn_config, None, None)
@@ -67,9 +69,8 @@ class TestDataManager:
         assert dn_2.id != dn.id
 
     def test_create_uses_overridden_attributes_in_config_file(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
@@ -88,17 +89,15 @@ class TestDataManager:
         assert csv_dn.has_header
 
     def test_get_if_not_exists(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         with pytest.raises(ModelNotFound):
             _DataManager._repository.load("test_data_node_2")
 
     def test_get_all(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         _DataManager._delete_all()
         assert len(_DataManager._get_all()) == 0
@@ -113,9 +112,8 @@ class TestDataManager:
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
 
     def test_set(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         dn = InMemoryDataNode(
             "config_id",
@@ -141,9 +139,8 @@ class TestDataManager:
         assert _DataManager._get(dn.id).config_id == "foo"
 
     def test_delete(self):
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
         _DataManager._delete_all()
 
         dn_1 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_1")
@@ -166,9 +163,8 @@ class TestDataManager:
         def _get_or_create_dn(config, *args):
             return _DataManager._bulk_get_or_create([config], *args)[config]
 
-        Config.global_config.repository_type = "sql"
-
-        _DataManager._repository = _DataRepositoryFactory._build_repository()
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
 
         global_dn_config = Config.configure_data_node(
             id="test_data_node", storage_type="in_memory", scope=Scope.GLOBAL, data="In memory Data Node"

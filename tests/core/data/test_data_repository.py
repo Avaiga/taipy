@@ -79,7 +79,7 @@ class TestDataRepository:
             assert self.data_node.prop == "bar"
 
     def test_save_and_load_with_sql_repo(self, tmpdir):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         repository = _DataRepositoryFactory._build_repository()
 
@@ -90,14 +90,14 @@ class TestDataRepository:
         assert isinstance(dn, DataNode)
 
     def test_from_and_to_model_with_sql_repo(self):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         repository = _DataRepositoryFactory._build_repository()
         assert repository._to_model(self.data_node) == self.data_node_model
         assert repository._from_model(self.data_node_model) == self.data_node
 
     def test_data_node_with_env_variable_value_not_serialized_with_sql_repo(self):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
             repository = _DataRepositoryFactory._build_repository()

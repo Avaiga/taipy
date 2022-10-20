@@ -76,7 +76,7 @@ class TestTaskRepository:
         assert len(t.input) == 1
 
     def test_save_and_load_with_sql_repo(self, tmpdir):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
         repository = _TaskRepositoryFactory._build_repository()  # type: ignore
@@ -90,7 +90,7 @@ class TestTaskRepository:
         assert len(t.input) == 1
 
     def test_from_and_to_model_with_sql_repo(self):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
         repository = _TaskRepositoryFactory._build_repository()  # type: ignore

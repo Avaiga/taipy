@@ -30,7 +30,7 @@ def init_managers():
 
 
 def test_create_and_save():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -62,7 +62,7 @@ def test_create_and_save():
 
 
 def test_do_not_recreate_existing_data_node():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -78,7 +78,7 @@ def test_do_not_recreate_existing_data_node():
 
 
 def test_do_not_recreate_existing_task():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     assert len(_TaskManager._get_all()) == 0
@@ -152,7 +152,7 @@ def test_do_not_recreate_existing_task():
 
 
 def test_set_and_get_task():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -206,7 +206,7 @@ def test_set_and_get_task():
 
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -232,7 +232,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
 
 
 def test_delete_raise_exception():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -249,7 +249,7 @@ def test_delete_raise_exception():
 
 
 def test_hard_delete():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 

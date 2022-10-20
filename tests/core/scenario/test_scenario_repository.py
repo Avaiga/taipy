@@ -32,7 +32,7 @@ def test_from_and_to_model(scenario, scenario_model):
 
 
 def test_save_and_load_with_sql_repo(tmpdir, scenario):
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     repository = _ScenarioRepositoryFactory._build_repository()
     repository._save(scenario)
@@ -43,7 +43,7 @@ def test_save_and_load_with_sql_repo(tmpdir, scenario):
 
 
 def test_from_and_to_model_with_sql_repo(scenario, scenario_model):
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     repository = _ScenarioRepositoryFactory._build_repository()
 

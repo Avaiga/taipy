@@ -30,7 +30,7 @@ class TestPipelineRepository:
         assert repository._from_model(pipeline_model) == pipeline
 
     def test_save_and_load_with_sql_repo(self, tmpdir, pipeline):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
         repository = _PipelineRepositoryFactory._build_repository()
 
         repository.base_path = tmpdir
@@ -41,7 +41,7 @@ class TestPipelineRepository:
         assert pipeline.id == loaded_pipeline.id
 
     def test_from_and_to_model_with_sql_repo(self, pipeline, pipeline_model):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
 
         repository = _PipelineRepositoryFactory._build_repository()
 

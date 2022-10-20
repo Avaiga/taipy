@@ -44,7 +44,7 @@ def init_managers():
 
 def test_set_and_get_pipeline():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -139,7 +139,7 @@ def mult_by_3(nb: int):
 def test_get_or_create_data():
     # only create intermediate data node once
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -187,8 +187,7 @@ def test_get_or_create_data():
 
 
 def test_do_not_recreate_existing_pipeline_except_same_config():
-    Config.global_config.repository_type = "sql"
-
+    Config.configure_global_app(repository_type="sql")
     init_managers()
 
     dn_input_config_scope_scenario = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
@@ -198,14 +197,8 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config = Config.configure_pipeline("pipeline_config_1", [task_config])
 
-    Config.global_config.repository_type = "sql"
-    init_managers()
-
     # Scope is scenario
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
-    print(_PipelineManager._repository)
-    print(_TaskManager._repository)
-    print(_DataManager._repository)
     assert len(_PipelineManager._get_all()) == 1
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
     assert len(_PipelineManager._get_all()) == 1
@@ -228,9 +221,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_2])
 
-    Config.global_config.repository_type = "sql"
-    init_managers()
-
     # Scope is scenario and global
     pipeline_5 = _PipelineManager._get_or_create(pipeline_config_2)
     assert len(_PipelineManager._get_all()) == 3
@@ -252,9 +242,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])
 
-    Config.global_config.repository_type = "sql"
-    init_managers()
-
     # Scope is global
     pipeline_9 = _PipelineManager._get_or_create(pipeline_config_3)
     assert len(_PipelineManager._get_all()) == 5
@@ -274,9 +261,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
         "task_config_4", print, dn_input_config_scope_pipeline_4, dn_output_config_scope_global_4
     )
     pipeline_config_4 = Config.configure_pipeline("pipeline_config_4", [task_config_4])
-
-    Config.global_config.repository_type = "sql"
-    init_managers()
 
     # TODO: these tests can detect already created task while the below failed
 
@@ -305,9 +289,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_5 = Config.configure_pipeline("pipeline_config_5", [task_config_5])
 
-    Config.global_config.repository_type = "sql"
-    init_managers()
-
     # TODO: cannot detect already created task (check the repo again to see if using SQL or FS)
 
     # Scope is scenario and pipeline
@@ -331,9 +312,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_6 = Config.configure_pipeline("pipeline_config_6", [task_config_6])
 
-    Config.global_config.repository_type = "sql"
-    init_managers()
-
     # TODO: cannot detect already created task (check the repo again to see if using SQL or FS)
 
     pipeline_19 = _PipelineManager._get_or_create(pipeline_config_6)
@@ -347,7 +325,7 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
 
 def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -379,7 +357,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
 
 def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -406,7 +384,7 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
 
 def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -433,7 +411,7 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
 
 def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -460,7 +438,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
 
 def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -489,7 +467,7 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
 
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _SchedulerFactory._build_dispatcher()
@@ -519,7 +497,7 @@ def test_hard_delete_shared_entities():
 
 
 def test_data_node_creation_pipeline():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -543,7 +521,7 @@ def test_data_node_creation_pipeline():
 
 
 def test_data_node_creation_scenario():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 

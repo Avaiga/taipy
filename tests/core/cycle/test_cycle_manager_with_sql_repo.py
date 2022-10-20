@@ -28,7 +28,7 @@ from taipy.config.config import Config
 
 
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     _CycleManager._repository = _CycleRepositoryFactory._build_repository()
 
@@ -81,7 +81,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
 
 
 def test_create_and_delete_cycle_entity(tmpdir):
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     _CycleManager._repository = _CycleRepositoryFactory._build_repository()
 
@@ -139,7 +139,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
 
 def test_get_cycle_start_date_and_end_date():
-    Config.global_config.repository_type = "sql"
+    Config.configure_global_app(repository_type="sql")
 
     _CycleManager._repository = _CycleRepositoryFactory._build_repository()
 
