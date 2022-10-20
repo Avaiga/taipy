@@ -14,6 +14,7 @@ from typing import Type
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._pipeline_manager import _PipelineManager
+from ._pipeline_repository_factory import _PipelineRepositoryFactory
 
 
 class _PipelineManagerFactory(_ManagerFactory):
@@ -21,4 +22,5 @@ class _PipelineManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_PipelineManager]:  # type: ignore
         if cls._using_enterprise():
             return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager", "_PipelineManager")  # type: ignore
+        _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()  # type: ignore
         return _PipelineManager

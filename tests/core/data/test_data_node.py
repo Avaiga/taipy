@@ -35,7 +35,7 @@ class FakeDataNode(InMemoryDataNode):
     write_has_been_called = 0
 
     def __init__(self, config_id, **kwargs):
-        super().__init__(config_id, Scope.PIPELINE, **kwargs)
+        super().__init__(config_id=config_id, scope=Scope.PIPELINE, **kwargs)
 
     def _read(self, query=None):
         self.read_has_been_called += 1
