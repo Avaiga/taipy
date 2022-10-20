@@ -112,6 +112,9 @@ class TestJobRepository:
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()
 
+        _DataManagerFactory._build_manager()._delete_all()
+        _TaskManagerFactory._build_manager()._delete_all()
+
         repository = _JobRepositoryFactory._build_repository()
         repository._delete_all()
 
@@ -125,6 +128,9 @@ class TestJobRepository:
 
     def test_from_and_to_model_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
+
+        _DataManagerFactory._build_manager()._delete_all()
+        _TaskManagerFactory._build_manager()._delete_all()
 
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()

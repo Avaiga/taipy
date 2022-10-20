@@ -197,8 +197,14 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config = Config.configure_pipeline("pipeline_config_1", [task_config])
 
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
     # Scope is scenario
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
+    print(_PipelineManager._repository)
+    print(_TaskManager._repository)
+    print(_DataManager._repository)
     assert len(_PipelineManager._get_all()) == 1
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
     assert len(_PipelineManager._get_all()) == 1
@@ -221,6 +227,9 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_2])
 
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
     # Scope is scenario and global
     pipeline_5 = _PipelineManager._get_or_create(pipeline_config_2)
     assert len(_PipelineManager._get_all()) == 3
@@ -242,6 +251,9 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])
 
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
     # Scope is global
     pipeline_9 = _PipelineManager._get_or_create(pipeline_config_3)
     assert len(_PipelineManager._get_all()) == 5
@@ -261,8 +273,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
         "task_config_4", print, dn_input_config_scope_pipeline_4, dn_output_config_scope_global_4
     )
     pipeline_config_4 = Config.configure_pipeline("pipeline_config_4", [task_config_4])
-
-    # TODO: these tests can detect already created task while the below failed
 
     # Scope is global and pipeline
     pipeline_12 = _PipelineManager._get_or_create(pipeline_config_4)
@@ -289,8 +299,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_5 = Config.configure_pipeline("pipeline_config_5", [task_config_5])
 
-    # TODO: cannot detect already created task (check the repo again to see if using SQL or FS)
-
     # Scope is scenario and pipeline
     pipeline_16 = _PipelineManager._get_or_create(pipeline_config_5)
     assert len(_PipelineManager._get_all()) == 10
@@ -311,8 +319,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
         "task_config_6", print, dn_input_config_scope_pipeline_6, dn_output_config_scope_pipeline_6
     )
     pipeline_config_6 = Config.configure_pipeline("pipeline_config_6", [task_config_6])
-
-    # TODO: cannot detect already created task (check the repo again to see if using SQL or FS)
 
     pipeline_19 = _PipelineManager._get_or_create(pipeline_config_6)
     assert len(_PipelineManager._get_all()) == 13
