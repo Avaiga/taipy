@@ -16,15 +16,16 @@ import pytest
 
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound
 from src.taipy.core.job._job_model import _JobModel
 from src.taipy.core.job._job_repository import _JobRepository
 from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
-from src.taipy.core.job._job_sql_repository import _JobSQLRepository
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -108,7 +109,11 @@ class TestJobRepository:
     def test_save_and_load_with_sql_repo(self):
         Config.global_config.repository_type = "sql"
 
+        _DataManagerFactory._build_manager()._delete_all()
+        _TaskManagerFactory._build_manager()._delete_all()
+
         repository = _JobRepositoryFactory._build_repository()
+        repository._delete_all()
 
         repository._save(job)
         with pytest.raises(ModelNotFound):
@@ -121,7 +126,11 @@ class TestJobRepository:
     def test_from_and_to_model_with_sql_repo(self):
         Config.global_config.repository_type = "sql"
 
+        _DataManagerFactory._build_manager()._delete_all()
+        _TaskManagerFactory._build_manager()._delete_all()
+
         repository = _JobRepositoryFactory._build_repository()
+        repository._delete_all()
 
         assert repository._to_model(job) == job_model
         with pytest.raises(ModelNotFound):

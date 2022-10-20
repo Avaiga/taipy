@@ -12,7 +12,6 @@
 from datetime import datetime
 
 from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
-from src.taipy.core.cycle._cycle_sql_repository import _CycleSQLRepository
 from src.taipy.core.cycle.cycle import Cycle
 from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config

@@ -32,19 +32,19 @@ from src.taipy.core.config import (
     _ScenarioConfigChecker,
     _TaskConfigChecker,
 )
-from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle.cycle import Cycle
-from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.job._job_manager_factory import _JobManagerFactory
+from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline.pipeline import Pipeline
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
 from taipy.config._toml_serializer import _TomlSerializer
@@ -228,8 +228,8 @@ def teardown():
 
 def delete_everything():
     init_scheduler()
-    init_managers()
     init_config()
+    init_managers()
 
 
 def init_config():
@@ -282,12 +282,12 @@ def init_config():
 
 
 def init_managers():
-    _ScenarioManager._delete_all()
-    _PipelineManager._delete_all()
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _JobManager._delete_all()
-    _CycleManager._delete_all()
+    _ScenarioManagerFactory._build_manager()._delete_all()
+    _PipelineManagerFactory._build_manager()._delete_all()
+    _DataManagerFactory._build_manager()._delete_all()
+    _TaskManagerFactory._build_manager()._delete_all()
+    _JobManagerFactory._build_manager()._delete_all()
+    _CycleManagerFactory._build_manager()._delete_all()
 
 
 def init_scheduler():

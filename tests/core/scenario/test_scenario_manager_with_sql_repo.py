@@ -18,27 +18,38 @@ from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import DeletingPrimaryScenario
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
-from src.taipy.core.scenario._scenario_sql_repository import _ScenarioSQLRepository
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
+def init_managers():
+    _CycleManagerFactory._build_manager()._delete_all()
+    _ScenarioManagerFactory._build_manager()._delete_all()
+    _PipelineManagerFactory._build_manager()._delete_all()
+    _TaskManagerFactory._build_manager()._delete_all()
+    _DataManagerFactory._build_manager()._delete_all()
+
+
 def test_set_and_get_scenario(cycle):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     scenario_id_1 = ScenarioId("scenario_id_1")
@@ -143,7 +154,7 @@ def test_create_scenario_does_not_modify_config():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     creation_date_1 = datetime.now()
@@ -174,7 +185,7 @@ def test_create_and_delete_scenario():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     creation_date_1 = datetime.now()
@@ -245,7 +256,7 @@ def test_scenario_manager_only_creates_data_node_once():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
@@ -289,7 +300,7 @@ def test_scenario_manager_only_creates_data_node_once():
 def test_scenario_create_from_task_config():
     Config.global_config.repository_type = "sql"
 
-    _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
+    init_managers()
 
     data_node_1_config = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
     data_node_2_config = Config.configure_data_node(

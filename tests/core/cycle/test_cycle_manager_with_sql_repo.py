@@ -16,7 +16,6 @@ from src.taipy.core.common.alias import CycleId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
-from src.taipy.core.cycle._cycle_sql_repository import _CycleSQLRepository
 from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job._job_manager import _JobManager

@@ -13,23 +13,26 @@ import uuid
 
 import pytest
 
-from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core.common.alias import TaskId
 from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
-from src.taipy.core.task._task_sql_repository import _TaskSQLRepository
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
+def init_managers():
+    _TaskManagerFactory._build_manager()._delete_all()
+    _DataManagerFactory._build_manager()._delete_all()
+
+
 def test_create_and_save():
     Config.global_config.repository_type = "sql"
 
-    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+    init_managers()
 
     input_configs = [Config.configure_data_node("my_input", "in_memory")]
     output_configs = Config.configure_data_node("my_output", "in_memory")
@@ -61,7 +64,7 @@ def test_create_and_save():
 def test_do_not_recreate_existing_data_node():
     Config.global_config.repository_type = "sql"
 
-    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+    init_managers()
 
     input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
     output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
@@ -77,15 +80,19 @@ def test_do_not_recreate_existing_data_node():
 def test_do_not_recreate_existing_task():
     Config.global_config.repository_type = "sql"
 
-    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+    init_managers()
+    assert len(_TaskManager._get_all()) == 0
 
     input_config_scope_pipeline = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
     output_config_scope_pipeline = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
     task_config = Config.configure_task("foo", print, input_config_scope_pipeline, output_config_scope_pipeline)
     # task_config scope is Pipeline
 
+    # TODO: Auto set config back to filesystem when running with other tests
+
     task_1 = _create_task_from_config(task_config)
     assert len(_TaskManager._get_all()) == 1
+    # TODO: cannot detect already created task
     _TaskManager._bulk_get_or_create([task_config])  # Do not create. It already exists for None pipeline
     assert len(_TaskManager._get_all()) == 1
     task_2 = _create_task_from_config(
@@ -147,7 +154,7 @@ def test_do_not_recreate_existing_task():
 def test_set_and_get_task():
     Config.global_config.repository_type = "sql"
 
-    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+    init_managers()
 
     task_id_1 = TaskId("id1")
     first_task = Task("name_1", print, [], [], task_id_1)
@@ -201,7 +208,7 @@ def test_set_and_get_task():
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     Config.global_config.repository_type = "sql"
 
-    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+    init_managers()
 
     embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
     embedded_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
@@ -227,7 +234,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
 def test_delete_raise_exception():
     Config.global_config.repository_type = "sql"
 
-    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+    init_managers()
 
     dn_input_config_1 = Config.configure_data_node(
         "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
@@ -244,7 +251,7 @@ def test_delete_raise_exception():
 def test_hard_delete():
     Config.global_config.repository_type = "sql"
 
-    _TaskManager._repository = _TaskRepositoryFactory._build_repository()
+    init_managers()
 
     dn_input_config_1 = Config.configure_data_node(
         "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"

@@ -16,7 +16,6 @@ from unittest import mock
 from src.taipy.core.common.alias import DataNodeId, JobId
 from src.taipy.core.data._data_model import _DataNodeModel
 from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
-from src.taipy.core.data._data_sql_repository import _DataSQLRepository
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.data_node import DataNode
 from taipy.config.common.scope import Scope

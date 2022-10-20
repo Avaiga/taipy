@@ -15,11 +15,11 @@ import pytest
 
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.exceptions.exceptions import NonExistingDataNode
 from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
-from src.taipy.core.task._task_sql_repository import _TaskSQLRepository
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -78,6 +78,7 @@ class TestTaskRepository:
     def test_save_and_load_with_sql_repo(self, tmpdir):
         Config.global_config.repository_type = "sql"
 
+        _DataManagerFactory._build_manager()._delete_all()
         repository = _TaskRepositoryFactory._build_repository()  # type: ignore
 
         repository._save(task)
@@ -91,6 +92,7 @@ class TestTaskRepository:
     def test_from_and_to_model_with_sql_repo(self):
         Config.global_config.repository_type = "sql"
 
+        _DataManagerFactory._build_manager()._delete_all()
         repository = _TaskRepositoryFactory._build_repository()  # type: ignore
 
         assert repository._to_model(task) == task_model

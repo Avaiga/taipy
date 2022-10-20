@@ -18,25 +18,35 @@ from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import PipelineId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
-from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
-from src.taipy.core.pipeline._pipeline_sql_repository import _PipelineSQLRepository
+from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+
+
+def init_managers():
+    _ScenarioManagerFactory._build_manager()._delete_all()
+    _PipelineManagerFactory._build_manager()._delete_all()
+    _TaskManagerFactory._build_manager()._delete_all()
+    _DataManagerFactory._build_manager()._delete_all()
+    _JobManagerFactory._build_manager()._delete_all()
 
 
 def test_set_and_get_pipeline():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
-
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     pipeline_id_1 = PipelineId("id1")
@@ -131,7 +141,7 @@ def test_get_or_create_data():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
@@ -178,7 +188,9 @@ def test_get_or_create_data():
 
 def test_do_not_recreate_existing_pipeline_except_same_config():
     Config.global_config.repository_type = "sql"
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+
+    init_managers()
+
     dn_input_config_scope_scenario = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
     dn_output_config_scope_scenario = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task(
@@ -186,10 +198,15 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config = Config.configure_pipeline("pipeline_config_1", [task_config])
 
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
     # Scope is scenario
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
+    print(_PipelineManager._repository)
+    print(_TaskManager._repository)
+    print(_DataManager._repository)
     assert len(_PipelineManager._get_all()) == 1
-    # TODO: failed because couldn't detect the already created pipeline
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
     assert len(_PipelineManager._get_all()) == 1
     assert pipeline_1.id == pipeline_2.id
@@ -210,6 +227,9 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
         "task_config_2", print, dn_input_config_scope_scenario_2, dn_output_config_scope_global_2
     )
     pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_2])
+
+    Config.global_config.repository_type = "sql"
+    init_managers()
 
     # Scope is scenario and global
     pipeline_5 = _PipelineManager._get_or_create(pipeline_config_2)
@@ -232,6 +252,9 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])
 
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
     # Scope is global
     pipeline_9 = _PipelineManager._get_or_create(pipeline_config_3)
     assert len(_PipelineManager._get_all()) == 5
@@ -251,6 +274,11 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
         "task_config_4", print, dn_input_config_scope_pipeline_4, dn_output_config_scope_global_4
     )
     pipeline_config_4 = Config.configure_pipeline("pipeline_config_4", [task_config_4])
+
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
+    # TODO: these tests can detect already created task while the below failed
 
     # Scope is global and pipeline
     pipeline_12 = _PipelineManager._get_or_create(pipeline_config_4)
@@ -277,6 +305,11 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_5 = Config.configure_pipeline("pipeline_config_5", [task_config_5])
 
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
+    # TODO: cannot detect already created task (check the repo again to see if using SQL or FS)
+
     # Scope is scenario and pipeline
     pipeline_16 = _PipelineManager._get_or_create(pipeline_config_5)
     assert len(_PipelineManager._get_all()) == 10
@@ -298,6 +331,11 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_6 = Config.configure_pipeline("pipeline_config_6", [task_config_6])
 
+    Config.global_config.repository_type = "sql"
+    init_managers()
+
+    # TODO: cannot detect already created task (check the repo again to see if using SQL or FS)
+
     pipeline_19 = _PipelineManager._get_or_create(pipeline_config_6)
     assert len(_PipelineManager._get_all()) == 13
     pipeline_20 = _PipelineManager._get_or_create(pipeline_config_6)
@@ -311,15 +349,17 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
+    # TODO: Config.global_config.repository_type was resetted back to filesystem when running whole file test?
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node(
         "my_output", "in_memory", scope=Scope.PIPELINE, default_data="works !"
     )
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     _PipelineManager._submit(pipeline.id)
 
@@ -328,6 +368,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
+
     _PipelineManager._hard_delete(pipeline.id)
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 0
@@ -340,7 +381,7 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
@@ -367,7 +408,7 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
@@ -394,7 +435,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
@@ -418,10 +459,10 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
 
 
 def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
@@ -450,7 +491,7 @@ def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
     _SchedulerFactory._build_dispatcher()
 
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
@@ -480,7 +521,7 @@ def test_hard_delete_shared_entities():
 def test_data_node_creation_pipeline():
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
 
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
     input_global_dn = Config.configure_data_node("my_global_input", "in_memory", scope=Scope.GLOBAL)
@@ -504,7 +545,7 @@ def test_data_node_creation_pipeline():
 def test_data_node_creation_scenario():
     Config.global_config.repository_type = "sql"
 
-    _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()
+    init_managers()
 
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
     input_global_dn = Config.configure_data_node("my_global_input", "in_memory", scope=Scope.GLOBAL)

@@ -14,9 +14,7 @@ import multiprocessing
 import os
 import random
 import string
-from functools import partial
 from time import sleep
-from unittest import mock
 
 import pytest
 
@@ -28,7 +26,6 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.exceptions.exceptions import JobNotDeletedException
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
-from src.taipy.core.job._job_sql_repository import _JobSQLRepository
 from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope

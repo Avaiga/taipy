@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
-from src.taipy.core.pipeline._pipeline_sql_repository import _PipelineSQLRepository
 from src.taipy.core.pipeline.pipeline import Pipeline
 from taipy.config.config import Config
 
