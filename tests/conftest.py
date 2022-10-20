@@ -227,9 +227,9 @@ def teardown():
 
 
 def delete_everything():
-    init_scheduler()
     init_config()
     init_managers()
+    init_scheduler()
 
 
 def init_config():
