@@ -288,6 +288,8 @@ def init_managers():
     _TaskManagerFactory._build_manager()._delete_all()
     _JobManagerFactory._build_manager()._delete_all()
     _CycleManagerFactory._build_manager()._delete_all()
+    if os.path.exists("./None"):
+        os.remove("./None")
 
 
 def init_scheduler():
