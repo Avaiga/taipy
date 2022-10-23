@@ -185,7 +185,7 @@ class DataNode(_Entity):
         validity_period = self._validity_period
 
         if not last_edit_date:
-            raise NoData(f"Data node {self.id} has not been written yet.")
+            raise NoData(f"Data node {self.id} from config {self.config_id} has not been written yet.")
 
         return last_edit_date + validity_period if validity_period else last_edit_date
 
@@ -289,7 +289,7 @@ class DataNode(_Entity):
             NoData^: If the data has not been written yet.
         """
         if not self.last_edit_date:
-            raise NoData(f"Data node {self.id} has not been written yet.")
+            raise NoData(f"Data node {self.id} from config {self.config_id} has not been written yet.")
         return self._read()
 
     def read(self) -> Any:
@@ -301,7 +301,9 @@ class DataNode(_Entity):
         try:
             return self.read_or_raise()
         except NoData:
-            self.__logger.warning(f"Data node {self.id} is being read but has never been written.")
+            self.__logger.warning(
+                f"Data node {self.id} from config {self.config_id} is being read but has never been " f"written."
+            )
             return None
 
     def write(self, data, job_id: Optional[JobId] = None):
@@ -342,7 +344,7 @@ class DataNode(_Entity):
                 If no _at_ datetime is provided, the current datetime is used.
             job_id (JobId^): An optional identifier of the writer.
         Note:
-            The data node  can be locked with the method `(DataNode.)lock_edit()^`.
+            The data node can be locked with the method `(DataNode.)lock_edit()^`.
         """
         self.last_edit_date = at or datetime.now()  # type: ignore
         self.edit_in_progress = False  # type: ignore
