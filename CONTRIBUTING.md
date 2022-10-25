@@ -55,7 +55,7 @@ Taipy is organised in four main repositories:
 Taipy's repositories follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) and
 [PEP 484](https://www.python.org/dev/peps/pep-0484/) coding convention.
 
-## TypeScript
+### TypeScript
 
 Taipy's repositories use the [ESLint](https://eslint.org/) and [TypeScript ESLint](https://github.com/typescript-eslint/typescript-eslint) plugin to ensure a common set of rules.
 
