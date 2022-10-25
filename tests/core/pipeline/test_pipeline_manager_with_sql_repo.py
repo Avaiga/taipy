@@ -197,9 +197,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config = Config.configure_pipeline("pipeline_config_1", [task_config])
 
-    Config.global_config.repository_type = "sql"
-    init_managers()
-
     # Scope is scenario
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     print(_PipelineManager._repository)
@@ -227,9 +224,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_2])
 
-    Config.global_config.repository_type = "sql"
-    init_managers()
-
     # Scope is scenario and global
     pipeline_5 = _PipelineManager._get_or_create(pipeline_config_2)
     assert len(_PipelineManager._get_all()) == 3
@@ -250,9 +244,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
         "task_config_3", print, dn_input_config_scope_global_3, dn_output_config_scope_global_3
     )
     pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])
-
-    Config.global_config.repository_type = "sql"
-    init_managers()
 
     # Scope is global
     pipeline_9 = _PipelineManager._get_or_create(pipeline_config_3)
