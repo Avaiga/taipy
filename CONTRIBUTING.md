@@ -85,7 +85,7 @@ Find an issue without the label `current sprint` and add a comment on it to info
 working on it.
 
 1. Make your [own fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) of the repository
-   target by the issue. Clone it on our local machine, then go inside the directory.
+   target by the issue. Clone it on your local machine, then go inside the directory.
 
 2. We are working with [Pipenv](https://github.com/pypa/pipenv) for our virtualenv.
    Create a local env and install development package by running `pipenv install --dev`, then run tests with `pipenv
