@@ -1,9 +1,0 @@
-﻿Name,Type,Default,Doc
-*value,dynamic(any),None,The value represented by this control.
-password,bool,False,"If True, the text is obscured: all input characters are displayed as an asterisk ('*')."
-label,str,None,The label associated with the input.
->sharedInput,,,
->on_change,,,
-multiline,bool,False,"If True, the text is presented as a multi line input."
-lines_shown,int,5,"The height of the displayed element if multiline is True."
->propagate,,,

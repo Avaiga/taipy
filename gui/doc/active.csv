@@ -1,3 +1,0 @@
-Name,Type,Default,Doc
-active,dynamic(bool),True,"Indicates if this component is active.
-An inactive component allows no user interaction."

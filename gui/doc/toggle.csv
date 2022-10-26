@@ -1,6 +1,0 @@
-﻿Name,Type,Default,Doc
-*value,,,
-theme,bool,FALSE,"If set, this toggle control acts as a way to set the application Theme (dark or light)."
->lovComp,,,
-allow_unselect,bool,FALSE,"If set, this allows de-selection and the value is set to unselected_value."
->propagate,,,

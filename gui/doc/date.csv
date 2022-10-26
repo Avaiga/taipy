@@ -1,9 +1,0 @@
-﻿name,type,default,doc
-*date,dynamic(datetime),,"The date that this control represents and can modify.
-It is typically bound to a <code>datetime</code> object."
-with_time,bool,False,Whether or not to show the time part of the date.
-format,str,,"The format to apply to the value.
-See below."
-editable,dynamic(bool),True,Shows the date as a formatted string if not editable.
->on_change,,,
->propagate,,,

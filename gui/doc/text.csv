@@ -1,6 +1,0 @@
-﻿Name,Type,Default,Doc
-*value,dynamic(Any),"""""",The value displayed as text by this control.
-format,str,,"The format to apply to the value.
-See below."
->on_change,,,
->shared,,,
