@@ -1,6 +1,0 @@
-﻿Name,Type,Default,Doc
-*value,str,,Title of this block element.
-expanded,bool,True,"If True, the block is expanded, and the content is displayed.<br/>
-If False, the block is collapsed and its content is hidden."
->partial,,,
->shared,,,

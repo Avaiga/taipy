@@ -1,5 +1,0 @@
-﻿Name,Type,Default,Doc
-partial,Partial,,"A Partial object that holds the content of the dialog.
-This should not be defined if <i>page</i> is set."
-page,str,,"The page name to show as the content of the dialog.
-This should not be defined if <i>partial</i> is set."

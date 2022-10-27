@@ -1,6 +1,6 @@
 {
   "name": "taipy-gui",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.0",
@@ -35,6 +35,7 @@
     "react-dom": "$react-dom"
   },
   "scripts": {
+    "inst": "npm i --omit=optional",
     "start": "echo no start see python",
     "build:dev": "webpack --mode development",
     "build": "webpack --mode production",

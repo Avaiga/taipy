@@ -1,4 +1,0 @@
-﻿Name,Type,Default,Doc
-*value,dict|list[dict]|tuple|list[tuple],,"The different statuses to represent. See below."
-without_close,bool,FALSE,"If True, the user cannot hide the child statuses."
->shared,,,

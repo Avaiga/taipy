@@ -1,6 +1,0 @@
-﻿Name,Type,Default,Doc
-id,str,,The identifier that will be assigned to the rendered HTML component.
-properties,"dict[str, any]",,Bound to a dictionary that contains additional properties for this element.
-class_name,str,,"List of CSS class names that will be associated with the generated HTML Element.
-This class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
-hover_text,dynamic(str),,"Information that is displayed when the user hovers over this element."
