@@ -233,7 +233,7 @@ def _register_gui_config():
             return as_dict
 
         @classmethod
-        def _from_dict(cls, as_dict: t.Dict[str, t.Any]):
+        def _from_dict(cls, as_dict: t.Dict[str, t.Any], *_):
             return _GuiSection(property_list=list(default_config), **as_dict)
 
         def _update(self, as_dict: t.Dict[str, t.Any]):
