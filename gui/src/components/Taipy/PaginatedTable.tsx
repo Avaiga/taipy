@@ -124,18 +124,16 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     filter = filter || col.filter;
                     if (typeof col.notEditable != "boolean") {
                         col.notEditable = !editable;
-                    } else {
-                        col.notEditable = col.notEditable || !editable;
                     }
                 });
                 addDeleteColumn(
-                    (!!active && editable && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
+                    (active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
                     columns
                 );
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
-                const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
+                const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
                     if (columns[col].style) {
-                        pv[columns[col].dfid] = columns[col].style as string;
+                        pv[columns[col].dfid] = columns[col].style;
                     }
                     hNan = hNan || !!columns[col].nanValue;
                     return pv;
@@ -361,7 +359,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
-                                                    active && editable && onAdd ? (
+                                                    active && onAdd ? (
                                                         <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}
@@ -453,10 +451,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     formatConfig={formatConfig}
                                                     rowIndex={index}
                                                     onValidation={
-                                                        active && editable && onEdit ? onCellValidation : undefined
+                                                        active && !columns[col].notEditable && onEdit ? onCellValidation : undefined
                                                     }
                                                     onDeletion={
-                                                        active && editable && onDelete ? onRowDeletion : undefined
+                                                        active && onDelete ? onRowDeletion : undefined
                                                     }
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                 />

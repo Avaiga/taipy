@@ -420,9 +420,9 @@ class _Builder:
                         warnings.warn(f"{self.__element_name} filter[{k}] is not in the list of displayed columns")
             editables = self.get_name_indexed_property("editable")
             for k, v in editables.items():
-                if not _is_boolean_true(v):
+                if _is_boolean(v):
                     if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
-                        col_desc["notEditable"] = True
+                        col_desc["notEditable"] = not _is_boolean_true(v)
                     else:
                         warnings.warn(f"{self.__element_name} editable[{k}] is not in the list of displayed columns")
             group_by = self.get_name_indexed_property("group_by")
