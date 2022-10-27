@@ -350,7 +350,7 @@ export const EditableCell = (props: EditableCellProps) => {
             ) : (
                 <Box sx={cellBoxSx}>
                     {renderCellValue(value, colDesc, formatConfig, nanValue)}
-                    {onValidation && !colDesc.notEditable ? (
+                    {onValidation ? (
                         <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                             <EditIcon fontSize="inherit" />
                         </IconButton>
