@@ -46,7 +46,7 @@ class UniqueSectionForTest(UniqueSection):
 
     @classmethod
     def _from_dict(cls, as_dict: Dict[str, Any], id=None, config: Optional[_Config] = None):
-        as_dict.pop(cls._ID_KEY, id)
+        as_dict.pop(cls._ID_KEY, None)
         attribute = as_dict.pop(cls._MY_ATTRIBUTE_KEY, None)
         return UniqueSectionForTest(attribute=attribute, **as_dict)
 

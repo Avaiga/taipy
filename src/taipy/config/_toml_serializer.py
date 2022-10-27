@@ -96,11 +96,11 @@ class _TomlSerializer:
         return cls.__from_dict(cls._pythonify(dict(toml.loads(config_as_string))))
 
     @staticmethod
-    def __extract_node(config_as_dict, cls_config, node, config: Optional[dict]) -> Dict[str, Section]:
+    def __extract_node(config_as_dict, cls_config, node, config: Optional[Any]) -> Dict[str, Section]:
         res = {}
-        for key, value in config_as_dict.get(node, {}).items(): # my_task, {input=[], output=[my_data_node], ...}
+        for key, value in config_as_dict.get(node, {}).items():  # my_task, {input=[], output=[my_data_node], ...}
             key = _validate_id(key)
-            res[key] = cls_config._from_dict(value, key, config) # if config is None else cls_config._from_dict(key,
+            res[key] = cls_config._from_dict(value, key, config)  # if config is None else cls_config._from_dict(key,
             # value, config)
         return res
 
@@ -111,7 +111,7 @@ class _TomlSerializer:
         for section_name, sect_as_dict in as_dict.items():
             if section_class := cls._section_class.get(section_name, None):
                 if issubclass(section_class, UniqueSection):
-                    config._unique_sections[section_name] = section_class._from_dict(sect_as_dict, None)
+                    config._unique_sections[section_name] = section_class._from_dict(sect_as_dict, None, None)
                 elif issubclass(section_class, Section):
                     config._sections[section_name] = cls.__extract_node(as_dict, section_class, section_name, config)
         return config
