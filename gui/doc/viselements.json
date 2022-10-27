@@ -864,7 +864,7 @@
           {
             "name": "editable",
             "type": "dynamic(bool)",
-            "default_value": "False",
+            "default_value": "True",
             "doc": "Indicates, if True, that all columns can be edited."
           },
           {
@@ -892,7 +892,7 @@
             "name": "size",
             "type": "str",
             "default_value": "\"small\"",
-            "doc": "The size of the rows, valid values are small or medium."
+            "doc": "The size of the rows, valid values are \"small\" and \"medium\"."
           }
         ]
       }
