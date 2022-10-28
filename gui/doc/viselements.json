@@ -974,23 +974,6 @@
           }
         ]
       }
-    ],
-    [
-      "partial",
-      {
-        "properties": [
-          {
-            "name": "partial",
-            "type": "Partial",
-            "doc": "A Partial object that holds the content of the dialog.\nThis should not be defined if <i>page</i> is set."
-          },
-          {
-            "name": "page",
-            "type": "str",
-            "doc": "The page name to show as the content of the dialog.\nThis should not be defined if <i>partial</i> is set."
-          }
-        ]
-      }
     ]
   ],
   "blocks": [
@@ -1175,6 +1158,23 @@
             "name": "on_change",
             "type": "Callback",
             "doc": "The name of a function that is triggered when the value is updated.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>"
+          }
+        ]
+      }
+    ],
+    [
+      "partial",
+      {
+        "properties": [
+          {
+            "name": "partial",
+            "type": "Partial",
+            "doc": "A Partial object that holds the content of the dialog.\nThis should not be defined if <i>page</i> is set."
+          },
+          {
+            "name": "page",
+            "type": "str",
+            "doc": "The page name to show as the content of the dialog.\nThis should not be defined if <i>partial</i> is set."
           }
         ]
       }
