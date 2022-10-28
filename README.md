@@ -1,4 +1,8 @@
 # Taipy Core
+[![tests](https://github.com/Avaiga/taipy-core/actions/workflows/tests.yml/badge.svg)](https://github.com/Avaiga/taipy-core/actions/workflows/tests.yml)
+[![Python](https://img.shields.io/pypi/pyversions/taipy-core)](https://pypi.org/project/taipy-core)
+[![PyPI](https://img.shields.io/pypi/v/taipy-core.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy-core)
+
 
 ## License
 Copyright 2022 Avaiga Private Limited
@@ -12,13 +16,14 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 
 ## Usage
-- [License](#license)
-- [Usage](#usage)
-- [Taipy Core](#what-is-taipy-core)
-- [Installation](#installation)
-- [Contributing](#contributing)
-- [Code of conduct](#code-of-conduct)
-- [Directory Structure](#directory-structure)
+  - [Taipy Core](#taipy-core)
+  - [License](#license)
+  - [Usage](#usage)
+  - [What is Taipy Core](#what-is-taipy-core)
+  - [Installation](#installation)
+  - [Contributing](#contributing)
+  - [Code of conduct](#code-of-conduct)
+  - [Directory Structure](#directory-structure)
 
 ## What is Taipy Core
 
