@@ -253,6 +253,7 @@
           {
             "name": "data",
             "default_property": true,
+            "required": true,
             "type": "any",
             "doc": "The data object bound to this chart control."
           },
@@ -743,6 +744,7 @@
           {
             "name": "data",
             "default_property": true,
+            "required": true,
             "type": "any",
             "doc": "The data to be represented in this table."
           },
