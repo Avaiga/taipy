@@ -21,6 +21,7 @@ with open("README.md") as readme_file:
 requirements = [
     "networkx>=2.6,<3.0",
     "openpyxl>=3.0.3,<4.0",
+    "modin[dask]>=0.16.2,<1.0",
     "pandas>=1.3.4,<2.0",
     "pymongo>=4.2.0,<5.0",
     "sqlalchemy>=1.4,<2.0",
