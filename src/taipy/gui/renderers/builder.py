@@ -524,16 +524,6 @@ class _Builder:
             "theta",  # 22
         )
         trace = self.__get_multiple_indexed_attributes(names)
-        if not trace[0]:
-            if trace[18]:
-                trace[0] = trace[18]  # substitute Lon to x
-            elif trace[21]:
-                trace[0] = trace[21]  # substitute r to x
-        if not trace[1]:
-            if trace[19]:
-                trace[1] = trace[19]  # substitute Lat to y
-            elif trace[22]:
-                trace[1] = trace[22]  # substitute theta to y
         if not trace[5]:
             # mode
             trace[5] = default_mode
