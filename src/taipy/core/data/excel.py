@@ -256,7 +256,7 @@ class ExcelDataNode(DataNode):
 
     def _read_as_modin_dataframe(
         self, sheet_names=None
-    ) -> Union[dict[Union[int, str], modin_pd.DataFrame], modin_pd.DataFrame]:
+    ) -> Union[Dict[Union[int, str], modin_pd.DataFrame], modin_pd.DataFrame]:
         if sheet_names is None:
             sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
         try:
