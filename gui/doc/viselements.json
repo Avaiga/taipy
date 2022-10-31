@@ -19,7 +19,7 @@
             "name": "raw",
             "type": "bool",
             "default_value": "False",
-            "doc": "If set to True, the component renders as an HTML &<lt;span&gt; element without any default style."
+            "doc": "If set to True, the component renders as an HTML &lt;span&gt; element without any default style."
           },
           {
             "name": "format",
