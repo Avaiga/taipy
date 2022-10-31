@@ -16,6 +16,12 @@
             "doc": "The value displayed as text by this control."
           },
           {
+            "name": "raw",
+            "type": "bool",
+            "default_value": "False",
+            "doc": "If set to True, the component renders as an HTML &lt;span&gt; element without any default style."
+          },
+          {
             "name": "format",
             "type": "str",
             "doc": "The format to apply to the value.\nSee below."

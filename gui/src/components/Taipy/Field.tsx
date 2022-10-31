@@ -15,12 +15,20 @@ import React, { useMemo } from "react";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
-import { TaipyFieldProps } from "./utils";
 import { formatWSValue } from "../../utils";
 import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { TaipyBaseProps, TaipyHoverProps } from "./utils";
+
+interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
+    dataType?: string;
+    value: string | number;
+    defaultValue?: string;
+    format?: string;
+    raw?: boolean;
+}
 
 const Field = (props: TaipyFieldProps) => {
-    const { className, id, dataType, format, defaultValue } = props;
+    const { className, id, dataType, format, defaultValue, raw } = props;
     const formatConfig = useFormatConfig();
 
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
@@ -36,9 +44,15 @@ const Field = (props: TaipyFieldProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <Typography className={className} id={id} component="span">
-                {value}
-            </Typography>
+            {raw ? (
+                <span className={className} id={id}>
+                    {value}
+                </span>
+            ) : (
+                <Typography className={className} id={id} component="span">
+                    {value}
+                </Typography>
+            )}
         </Tooltip>
     );
 };
