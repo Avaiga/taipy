@@ -232,7 +232,7 @@ class ExcelDataNode(DataNode):
             return {sheet_name: df.to_numpy() for sheet_name, df in sheets.items()}
         return sheets.to_numpy()
 
-    def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
+    def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
         if sheet_names is None:
             sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
         try:
