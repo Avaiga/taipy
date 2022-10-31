@@ -140,7 +140,6 @@ class _JobDispatcher(threading.Thread):
             outputs: List[DataNode] = list(task.output.values())
             fct = task.function
             results = fct(*cls.__read_inputs(inputs))
-            # breakpoint()
             return cls.__write_data(outputs, results, job_id)
         except Exception as e:
             return [e]

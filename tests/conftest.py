@@ -15,7 +15,7 @@ import shutil
 from datetime import datetime
 from queue import Queue
 
-import modin.pandas as pd
+import pandas as pd
 import pytest
 from distributed import Client
 

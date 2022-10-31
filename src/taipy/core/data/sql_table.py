@@ -12,6 +12,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 from sqlalchemy import MetaData, Table
@@ -105,7 +106,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
 
     def _do_write(self, data, engine, connection) -> None:
         table = self._create_table(engine)
-        if isinstance(data, pd.DataFrame):
+        if isinstance(data, (modin_pd.DataFrame, pd.DataFrame)):
             self._insert_dataframe(data, table, connection)
         else:
             if isinstance(data, np.ndarray):
@@ -141,7 +142,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         connection.execute(table.insert(), data)
 
     @staticmethod
-    def _insert_dataframe(df: pd.DataFrame, table: Any, connection: Any) -> None:
+    def _insert_dataframe(df: Union[modin_pd.DataFrame, pd.DataFrame], table: Any, connection: Any) -> None:
         """
         :param data: a pandas dataframe
         :param table: a SQLAlchemy object that represents a table

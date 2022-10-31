@@ -37,7 +37,7 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
     _CUSTOM_DOCUMENT_KEY = "custom_document"
     _WRITE_QUERY_BUILDER_NAME_KEY = "write_query_builder_name"
     _WRITE_QUERY_BUILDER_MODULE_KEY = "write_query_builder_module"
-    _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas"]
+    _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas", "modin"]
 
     def __init__(self, **kwargs):
         kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})

@@ -287,6 +287,7 @@ class TestDataNode:
         df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)
         COLUMN_NAME_1 = "a"
         COLUMN_NAME_2 = "b"
+        # breakpoint()
         assert isinstance(df_dn[COLUMN_NAME_1], _FilterDataNode)
         assert isinstance(df_dn[[COLUMN_NAME_1, COLUMN_NAME_2]], _FilterDataNode)
 
@@ -299,7 +300,7 @@ class TestDataNode:
         assert NotImplemented == dn.filter((("any", 0, Operator.LESS_THAN)), JoinOperator.AND)
         assert NotImplemented == dn.filter((("any", 0, Operator.LESS_OR_EQUAL)), JoinOperator.AND)
         assert NotImplemented == dn.filter((("any", 0, Operator.GREATER_THAN)))
-        assert NotImplemented == dn.filter((("any", 0, Operator.GREATER_OR_EQUAL)))
+        assert NotImplemented == dn.filter(("any", 0, Operator.GREATER_OR_EQUAL))
 
         df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)
 

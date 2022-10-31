@@ -109,6 +109,7 @@ def test_complex():
     # |      |
     # |      |
     # t4     d4
+    os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _SchedulerFactory._build_scheduler()
 
@@ -187,6 +188,8 @@ def test_complex():
     assert excel_sum_res.to_numpy().flatten().tolist() == [i * 2 for i in range(1, 11)]
     assert average(csv_sum_res["number"] - excel_sum_res["number"]) == csv_out.to_numpy()[0]
     assert average((csv_sum_res["number"] - excel_sum_res["number"]) * 10) == excel_out.to_numpy()[0]
+
+    del os.environ["MODIN_PERSISTENT_PICKLE"]
 
     for path in [csv_path_sum, excel_path_sum, csv_path_out, excel_path_out]:
         os.remove(path)
