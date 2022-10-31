@@ -82,6 +82,7 @@ interface ChartConfig {
     textAnchors: string[];
     options: Record<string, unknown>[];
     bases: string[];
+    axysSubst: Array<{ x?: string; y?: string; z?: string }>;
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -129,9 +130,9 @@ const getValueFromCol = (values: TraceValueType | undefined, col: string): (stri
 
 const getAxis = (traces: string[][], columns: Record<string, ColumnDesc>, axis: number) => {
     if (traces.length > 0 && traces[0].length > axis && traces[0][axis] && columns[traces[0][axis]])
-        return columns[traces[0][axis]].dfid
-    return undefined
-}
+        return columns[traces[0][axis]].dfid;
+    return undefined;
+};
 
 const getDecimatorPayload = (
     decimator: string | undefined,
@@ -158,7 +159,6 @@ const getDecimatorPayload = (
 const selectedPropRe = /selected(\d+)/;
 
 const ONE_COLUMN_CHART = ["pie"];
-const LAT_LON_CHART = ["scattermapbox", "scattergeo", "densitymapbox"]; // choropleth doesn't rely on latlon
 
 const Chart = (props: ChartProp) => {
     const {
@@ -245,6 +245,7 @@ const Chart = (props: ChartProp) => {
             textAnchors: [],
             options: [],
             bases: [],
+            axysSubst: []
         } as ChartConfig;
     }, [props.config]);
 
@@ -258,7 +259,7 @@ const Chart = (props: ChartProp) => {
                     id,
                     backCols,
                     dataKey.current,
-                    getDecimatorPayload(decimator, plotRef.current, config.modes, config.columns, config.traces),
+                    getDecimatorPayload(decimator, plotRef.current, config.modes, config.columns, config.traces)
                 )
             );
         }
@@ -345,19 +346,23 @@ const Chart = (props: ChartProp) => {
                 }
                 const xs = getValue(datum, trace, 0);
                 const ys = getValue(datum, trace, 1);
-                if (LAT_LON_CHART.includes(ret.type as string)) {
-                    ret.lon = xs;
-                    ret.lat = ys;
+                const baseX = ys && ys.length ? xs : Array.from(Array(xs ? xs.length : 0).keys());
+                const baseY = ys && ys.length ? ys : xs;
+                if (config.axysSubst[idx]?.x) {
+                    ret[config.axysSubst[idx].x as string] = baseX;
                 } else {
-                    if (ys && ys.length) {
-                        ret.x = xs;
-                        ret.y = ys;
-                    } else {
-                        ret.x = Array.from(Array(xs && xs.length).keys());
-                        ret.y = xs;
-                    }
+                    ret.x = baseX;
                 }
-                ret.z = getValue(datum, trace, 2, true);
+                if (config.axysSubst[idx]?.y) {
+                    ret[config.axysSubst[idx].y as string] = baseY;
+                } else {
+                    ret.y = baseY;
+                }
+                if (config.axysSubst[idx]?.z) {
+                    ret[config.axysSubst[idx].z as string] = getValue(datum, trace, 2, true);
+                } else {
+                    ret.z = getValue(datum, trace, 2, true);
+                }
                 ret.text = getValue(datum, config.texts, idx, true);
                 ret.xaxis = config.xaxis[idx];
                 ret.yaxis = config.yaxis[idx];
@@ -411,12 +416,29 @@ const Chart = (props: ChartProp) => {
                         id,
                         backCols,
                         dataKey.current,
-                        getDecimatorPayload(decimator, plotRef.current, config.modes, config.columns, config.traces, eventData),
+                        getDecimatorPayload(
+                            decimator,
+                            plotRef.current,
+                            config.modes,
+                            config.columns,
+                            config.traces,
+                            eventData
+                        )
                     )
                 );
             }
         },
-        [dispatch, onRangeChange, id, config.modes, config.columns, config.traces, config.types, updateVarName, decimator]
+        [
+            dispatch,
+            onRangeChange,
+            id,
+            config.modes,
+            config.columns,
+            config.traces,
+            config.types,
+            updateVarName,
+            decimator,
+        ]
     );
 
     const onAfterPlot = useCallback(() => {

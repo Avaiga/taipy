@@ -301,6 +301,16 @@
             "doc": "Column name for the <i>latitude</i> value. Synonym for <i>y</i>."
           },
           {
+            "name": "r",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>r</i> value. Synonym for <i>x</i>. cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
+          },
+          {
+            "name": "theta",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>theta</i> value. Synonym for <i>y</i>.  cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
+          },
+          {
             "name": "text",
             "type": "indexed(str)",
             "doc": "Column name for the text associated to the point for the indicated trace.\nThis is meaningful only when _mode_ has the <i>text</i> option."

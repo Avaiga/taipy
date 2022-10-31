@@ -60,6 +60,21 @@ class _Builder:
 
     __BLOCK_CONTROLS = ["dialog", "expandable", "pane", "part"]
 
+    __CHART_AXYS_SUBSTITUTION = {
+        "scattermapbox": {"x": "lon", "y": "lat"},
+        "scattergeo": {"x": "lon", "y": "lat"},
+        "densitymapbox": {"x": "lon", "y": "lat"},
+        "scatterpolar": {"x": "r", "y": "theta"},
+        "scatterpolargl": {"x": "r", "y": "theta"},
+    }
+    __CHART_AXYS_SUBSTITUTION_INDEXES = {
+        "scattermapbox": ((0, 18), (1, 19)),
+        "scattergeo": ((0, 18), (1, 19)),
+        "densitymapbox": ((0, 18), (1, 19)),
+        "scatterpolar": ((0, 21), (1, 22)),
+        "scatterpolargl": ((0, 21), (1, 22)),
+    }
+
     def __init__(
         self,
         gui: "Gui",
@@ -505,16 +520,30 @@ class _Builder:
             "lon",  # 18
             "lat",
             "base",  # 20
+            "r",
+            "theta",  # 22
         )
         trace = self.__get_multiple_indexed_attributes(names)
-        if not trace[0] and trace[18]:
-            trace[0] = trace[18]  # substitute Lon to x
-        if not trace[1] and trace[19]:
-            trace[1] = trace[19]  # substitute Lat to y
+        if not trace[0]:
+            if trace[18]:
+                trace[0] = trace[18]  # substitute Lon to x
+            elif trace[21]:
+                trace[0] = trace[21]  # substitute r to x
+        if not trace[1]:
+            if trace[19]:
+                trace[1] = trace[19]  # substitute Lat to y
+            elif trace[22]:
+                trace[1] = trace[22]  # substitute theta to y
         if not trace[5]:
             # mode
             trace[5] = default_mode
         trace[6] = str(trace[6]).strip().lower() if trace[6] else default_type
+        # axys substitution
+        substitutions = _Builder.__CHART_AXYS_SUBSTITUTION_INDEXES.get(trace[6], tuple())
+        for subst in substitutions:
+            if not trace[subst[0]] and trace[subst[1]]:
+                trace[subst[0]] = trace[subst[1]]
+        chart_axys_subst = []
         if not trace[8]:
             # xaxis
             trace[8] = "x"
@@ -527,16 +556,18 @@ class _Builder:
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
             while len([x for x in indexed_trace if x]):
-                if not indexed_trace[0] and indexed_trace[18]:
-                    indexed_trace[0] = indexed_trace[18]  # substitute Lon to x
-                if not indexed_trace[1] and indexed_trace[19]:
-                    indexed_trace[1] = indexed_trace[19]  # substitute Lat to y
+                for subst in substitutions:
+                    if not indexed_trace[subst[0]] and indexed_trace[subst[1]]:
+                        indexed_trace[subst[0]] = indexed_trace[subst[1]]
+                chart_axys_subst.append(_Builder.__CHART_AXYS_SUBSTITUTION.get(indexed_trace[6] or trace[6]))
                 self.__check_dict(indexed_trace, (11, 12, 17), names)
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
                 idx += 1
                 indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         else:
             traces.append(trace)
+            # axys substitution
+            chart_axys_subst.append(_Builder.__CHART_AXYS_SUBSTITUTION.get(trace[6]))
 
         # read column definitions
         data = self.__attributes.get("data")
@@ -582,21 +613,22 @@ class _Builder:
 
             ret_dict = {
                 "columns": columns,
-                "labels": [reverse_cols.get(t[3], (t[3] or "")) for t in traces],
-                "texts": [reverse_cols.get(t[4], (t[4] or None)) for t in traces],
-                "modes": [t[5] for t in traces],
-                "types": [t[6] for t in traces],
-                "xaxis": [t[8] for t in traces],
-                "yaxis": [t[9] for t in traces],
+                "labels": [reverse_cols.get(tr[3], (tr[3] or "")) for tr in traces],
+                "texts": [reverse_cols.get(tr[4], (tr[4] or None)) for tr in traces],
+                "modes": [tr[5] for tr in traces],
+                "types": [tr[6] for tr in traces],
+                "xaxis": [tr[8] for tr in traces],
+                "yaxis": [tr[9] for tr in traces],
                 "markers": markers,
-                "selectedMarkers": [t[12] or ({"color": t[10]} if t[10] else None) for t in traces],
-                "traces": [[reverse_cols.get(c, c) for c in [t[0], t[1], t[2]]] for t in traces],
-                "orientations": [t[13] for t in traces],
-                "names": [t[14] for t in traces],
-                "lines": [t[15] if isinstance(t[15], dict) else {"dash": t[15]} for t in traces],
-                "textAnchors": [t[16] for t in traces],
-                "options": [t[17] for t in traces],
-                "bases": [reverse_cols.get(t[20], (t[20] or "")) for t in traces],
+                "selectedMarkers": [tr[12] or ({"color": tr[10]} if tr[10] else None) for tr in traces],
+                "traces": [[reverse_cols.get(c, c) for c in [tr[0], tr[1], tr[2]]] for tr in traces],
+                "orientations": [tr[13] for tr in traces],
+                "names": [tr[14] for tr in traces],
+                "lines": [tr[15] if isinstance(tr[15], (dict, _MapDict)) else {"dash": tr[15]} for tr in traces],
+                "textAnchors": [tr[16] for tr in traces],
+                "options": [tr[17] for tr in traces],
+                "bases": [reverse_cols.get(tr[20], (tr[20] or "")) for tr in traces],
+                "axysSubst": chart_axys_subst,
             }
 
             self.__set_json_attribute("config", ret_dict)
