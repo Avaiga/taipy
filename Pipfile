@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 networkx = "==2.6"
-openpyxl = "==3.0.3"
+openpyxl = "==3.0.7"
 sqlalchemy = "==1.4"
 toml = "==0.10"
 taipy-config = {git = "https://git@github.com/avaiga/taipy-config.git@develop"}
