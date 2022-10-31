@@ -42,13 +42,6 @@ export interface TaipyChangeProps {
     onChange?: string;
 }
 
-export interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
-    dataType?: string;
-    value: string | number;
-    defaultValue?: string;
-    format?: string;
-}
-
 export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, TaipyLabelProps {
     type: string;
     value: string;
