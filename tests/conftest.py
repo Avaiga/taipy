@@ -17,7 +17,6 @@ from queue import Queue
 
 import pandas as pd
 import pytest
-from distributed import Client
 
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
@@ -55,7 +54,6 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
-client = Client()
 current_time = datetime.now()
 _SchedulerFactory._build_scheduler()
 

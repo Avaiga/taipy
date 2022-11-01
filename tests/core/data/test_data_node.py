@@ -287,7 +287,6 @@ class TestDataNode:
         df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)
         COLUMN_NAME_1 = "a"
         COLUMN_NAME_2 = "b"
-        # breakpoint()
         assert isinstance(df_dn[COLUMN_NAME_1], _FilterDataNode)
         assert isinstance(df_dn[[COLUMN_NAME_1, COLUMN_NAME_2]], _FilterDataNode)
 

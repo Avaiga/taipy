@@ -11,7 +11,6 @@ toml = "==0.10"
 taipy-config = {git = "https://git@github.com/avaiga/taipy-config.git@develop"}
 pymongo = "==4.2.0"
 modin = {extras = ["dask"], version = "==0.16.2"}
-bokeh = "*"
 
 [dev-packages]
 black = "*"
