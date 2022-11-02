@@ -60,14 +60,14 @@ class _Builder:
 
     __BLOCK_CONTROLS = ["dialog", "expandable", "pane", "part"]
 
-    __CHART_AXYS_SUBSTITUTION = {
+    __CHART_AXIS_SUBSTITUTION = {
         "scattermapbox": {"x": "lon", "y": "lat"},
         "scattergeo": {"x": "lon", "y": "lat"},
         "densitymapbox": {"x": "lon", "y": "lat"},
         "scatterpolar": {"x": "r", "y": "theta"},
         "scatterpolargl": {"x": "r", "y": "theta"},
     }
-    __CHART_AXYS_SUBSTITUTION_INDEXES = {
+    __CHART_AXIS_SUBSTITUTION_INDEXES = {
         "scattermapbox": ((0, 18), (1, 19)),
         "scattergeo": ((0, 18), (1, 19)),
         "densitymapbox": ((0, 18), (1, 19)),
@@ -528,12 +528,12 @@ class _Builder:
             # mode
             trace[5] = default_mode
         trace[6] = str(trace[6]).strip().lower() if trace[6] else default_type
-        # axys substitution
-        substitutions = _Builder.__CHART_AXYS_SUBSTITUTION_INDEXES.get(trace[6], tuple())
+        # axis substitution
+        substitutions = _Builder.__CHART_AXIS_SUBSTITUTION_INDEXES.get(trace[6], tuple())
         for subst in substitutions:
             if not trace[subst[0]] and trace[subst[1]]:
                 trace[subst[0]] = trace[subst[1]]
-        chart_axys_subst = []
+        chart_axis_subst = []
         if not trace[8]:
             # xaxis
             trace[8] = "x"
@@ -549,15 +549,15 @@ class _Builder:
                 for subst in substitutions:
                     if not indexed_trace[subst[0]] and indexed_trace[subst[1]]:
                         indexed_trace[subst[0]] = indexed_trace[subst[1]]
-                chart_axys_subst.append(_Builder.__CHART_AXYS_SUBSTITUTION.get(indexed_trace[6] or trace[6]))
+                chart_axis_subst.append(_Builder.__CHART_AXIS_SUBSTITUTION.get(indexed_trace[6] or trace[6]))
                 self.__check_dict(indexed_trace, (11, 12, 17), names)
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
                 idx += 1
                 indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         else:
             traces.append(trace)
-            # axys substitution
-            chart_axys_subst.append(_Builder.__CHART_AXYS_SUBSTITUTION.get(trace[6]))
+            # axis substitution
+            chart_axis_subst.append(_Builder.__CHART_AXIS_SUBSTITUTION.get(trace[6]))
 
         # read column definitions
         data = self.__attributes.get("data")
@@ -618,7 +618,7 @@ class _Builder:
                 "textAnchors": [tr[16] for tr in traces],
                 "options": [tr[17] for tr in traces],
                 "bases": [reverse_cols.get(tr[20], (tr[20] or "")) for tr in traces],
-                "axysSubst": chart_axys_subst,
+                "axisSubst": chart_axis_subst,
             }
 
             self.__set_json_attribute("config", ret_dict)
