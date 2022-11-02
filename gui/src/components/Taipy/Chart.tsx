@@ -159,6 +159,7 @@ const getDecimatorPayload = (
 const selectedPropRe = /selected(\d+)/;
 
 const ONE_COLUMN_CHART = ["pie"];
+const NO_INDEX_CHARTS = ["histogram"];
 
 const Chart = (props: ChartProp) => {
     const {
@@ -344,24 +345,30 @@ const Chart = (props: ChartProp) => {
                         (ret.marker as PlotMarker).size = arr as number[];
                     }
                 }
-                const xs = getValue(datum, trace, 0);
-                const ys = getValue(datum, trace, 1);
-                const baseX = ys && ys.length ? xs : Array.from(Array(xs ? xs.length : 0).keys());
-                const baseY = ys && ys.length ? ys : xs;
-                if (config.axysSubst[idx]?.x) {
-                    ret[config.axysSubst[idx].x as string] = baseX;
-                } else {
-                    ret.x = baseX;
+                const xs = getValue(datum, trace, 0) || [];
+                const ys = getValue(datum, trace, 1) || [];
+                const addIndex = !NO_INDEX_CHARTS.includes(config.types[idx]) && !ys.length;
+                const baseX =  addIndex ? Array.from(Array(xs.length).keys()) : xs;
+                const baseY = addIndex ? xs : ys;
+                if (baseX.length) {
+                    if (config.axysSubst[idx]?.x) {
+                        ret[config.axysSubst[idx].x as string] = baseX;
+                    } else {
+                        ret.x = baseX;
+                    }
                 }
-                if (config.axysSubst[idx]?.y) {
-                    ret[config.axysSubst[idx].y as string] = baseY;
-                } else {
-                    ret.y = baseY;
+                if (baseY.length) {
+                    if (config.axysSubst[idx]?.y) {
+                        ret[config.axysSubst[idx].y as string] = baseY;
+                    } else {
+                        ret.y = baseY;
+                    }
                 }
+                const baseZ = getValue(datum, trace, 2, true);
                 if (config.axysSubst[idx]?.z) {
-                    ret[config.axysSubst[idx].z as string] = getValue(datum, trace, 2, true);
+                    ret[config.axysSubst[idx].z as string] = baseZ;
                 } else {
-                    ret.z = getValue(datum, trace, 2, true);
+                    ret.z = baseZ;
                 }
                 ret.text = getValue(datum, config.texts, idx, true);
                 ret.xaxis = config.xaxis[idx];
