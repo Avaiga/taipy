@@ -82,7 +82,7 @@ interface ChartConfig {
     textAnchors: string[];
     options: Record<string, unknown>[];
     bases: string[];
-    axysSubst: Array<{ x?: string; y?: string; z?: string }>;
+    axisSubst: Array<{ x?: string; y?: string; z?: string }>;
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -246,7 +246,7 @@ const Chart = (props: ChartProp) => {
             textAnchors: [],
             options: [],
             bases: [],
-            axysSubst: []
+            axisSubst: []
         } as ChartConfig;
     }, [props.config]);
 
@@ -351,22 +351,22 @@ const Chart = (props: ChartProp) => {
                 const baseX =  addIndex ? Array.from(Array(xs.length).keys()) : xs;
                 const baseY = addIndex ? xs : ys;
                 if (baseX.length) {
-                    if (config.axysSubst[idx]?.x) {
-                        ret[config.axysSubst[idx].x as string] = baseX;
+                    if (config.axisSubst[idx]?.x) {
+                        ret[config.axisSubst[idx].x as string] = baseX;
                     } else {
                         ret.x = baseX;
                     }
                 }
                 if (baseY.length) {
-                    if (config.axysSubst[idx]?.y) {
-                        ret[config.axysSubst[idx].y as string] = baseY;
+                    if (config.axisSubst[idx]?.y) {
+                        ret[config.axisSubst[idx].y as string] = baseY;
                     } else {
                         ret.y = baseY;
                     }
                 }
                 const baseZ = getValue(datum, trace, 2, true);
-                if (config.axysSubst[idx]?.z) {
-                    ret[config.axysSubst[idx].z as string] = baseZ;
+                if (config.axisSubst[idx]?.z) {
+                    ret[config.axisSubst[idx].z as string] = baseZ;
                 } else {
                     ret.z = baseZ;
                 }
