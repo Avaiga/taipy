@@ -365,6 +365,7 @@ describe("PaginatedTable Component", () => {
             expect(queryAllByTestId("CheckIcon")).toHaveLength(0);
             expect(queryAllByTestId("ClearIcon")).toHaveLength(0);
 
+            dispatch.mockClear();
             await userEvent.click(edits[2]);
             await userEvent.click(getByTestId("CheckIcon"));
             expect(dispatch).toHaveBeenCalledWith({
@@ -379,6 +380,43 @@ describe("PaginatedTable Component", () => {
                 },
                 type: "SEND_ACTION_ACTION",
             });
+
+            await userEvent.click(edits[3]);
+            const input2 = document.querySelector("input");
+            expect(input2).not.toBeNull();
+            if (input2) {
+                if (input2.type == "checkbox") {
+                    await userEvent.click(input2);
+                    await userEvent.click(getByTestId("ClearIcon"));
+                } else {
+                    await userEvent.type(input2, "{Esc}");
+                }
+            }
+
+            dispatch.mockClear();
+            await userEvent.click(edits[5]);
+            const input3 = document.querySelector("input");
+            expect(input3).not.toBeNull();
+            if (input3) {
+                if (input3.type == "checkbox") {
+                    await userEvent.click(input3);
+                    await userEvent.click(getByTestId("CheckIcon"));
+                } else {
+                    await userEvent.type(input3, "{Enter}");
+                }
+            }
+            expect(dispatch).toHaveBeenCalledWith({
+                name: "",
+                payload: {
+                    action: "onEdit",
+                    args: [],
+                    col: "int",
+                    index: 1,
+                    user_value: 823,
+                    value: 823,
+                },
+                type: "SEND_ACTION_ACTION",
+            });
         });
     });
     it("can add", async () => {
@@ -390,6 +428,7 @@ describe("PaginatedTable Component", () => {
             </TaipyContext.Provider>
         );
 
+        dispatch.mockClear();
         const addButton = getByTestId("AddIcon");
         await userEvent.click(addButton);
         expect(dispatch).toHaveBeenCalledWith({
@@ -422,7 +461,7 @@ describe("PaginatedTable Component", () => {
             </TaipyContext.Provider>
         );
 
-        const deleteButtons = getAllByTestId("DeleteIcon");
+        let deleteButtons = getAllByTestId("DeleteIcon");
         expect(deleteButtons).not.toHaveLength(0);
         await userEvent.click(deleteButtons[0]);
         const checkButton = getByTestId("CheckIcon");
@@ -441,6 +480,14 @@ describe("PaginatedTable Component", () => {
         expect(queryAllByTestId("ClearIcon")).toHaveLength(0);
 
         await userEvent.click(deleteButtons[2]);
+        const input3 = document.querySelector("input");
+        expect(input3).not.toBeNull();
+        input3 && (await userEvent.type(input3, "{esc}"));
+
+        deleteButtons = getAllByTestId("DeleteIcon");
+
+        dispatch.mockClear();
+        await userEvent.click(deleteButtons[0]);
         const input2 = document.querySelector("input");
         expect(input2).not.toBeNull();
         input2 && (await userEvent.type(input2, "{enter}"));
