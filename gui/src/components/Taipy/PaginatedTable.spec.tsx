@@ -113,7 +113,7 @@ const editableValue = {
         ],
         rowcount: 2,
         start: 0,
-    }
+    },
 };
 const editableColumns = JSON.stringify({
     bool: { dfid: "bool", type: "bool", index: 0 },
@@ -121,7 +121,6 @@ const editableColumns = JSON.stringify({
     float: { dfid: "float", type: "float", index: 2 },
     Code: { dfid: "Code", type: "str", index: 3 },
 });
-
 
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
@@ -365,6 +364,21 @@ describe("PaginatedTable Component", () => {
             await userEvent.click(clearButton);
             expect(queryAllByTestId("CheckIcon")).toHaveLength(0);
             expect(queryAllByTestId("ClearIcon")).toHaveLength(0);
+
+            await userEvent.click(edits[2]);
+            await userEvent.click(getByTestId("CheckIcon"));
+            expect(dispatch).toHaveBeenCalledWith({
+                name: "",
+                payload: {
+                    action: "onEdit",
+                    args: [],
+                    col: "float",
+                    index: 0,
+                    user_value: 1.5,
+                    value: 1.5,
+                },
+                type: "SEND_ACTION_ACTION",
+            });
         });
     });
     it("can add", async () => {
@@ -378,11 +392,20 @@ describe("PaginatedTable Component", () => {
 
         const addButton = getByTestId("AddIcon");
         await userEvent.click(addButton);
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "",
+            payload: {
+                action: "onAdd",
+                args: [],
+                index: 0,
+            },
+            type: "SEND_ACTION_ACTION",
+        });
     });
     it("can delete", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getAllByTestId, rerender } = render(
+        const { getAllByTestId, getByTestId, queryAllByTestId, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} columns={editableColumns} showAll={true} onDelete="onDelete" />
             </TaipyContext.Provider>
@@ -402,5 +425,33 @@ describe("PaginatedTable Component", () => {
         const deleteButtons = getAllByTestId("DeleteIcon");
         expect(deleteButtons).not.toHaveLength(0);
         await userEvent.click(deleteButtons[0]);
+        const checkButton = getByTestId("CheckIcon");
+        getByTestId("ClearIcon");
+        await userEvent.click(checkButton);
+        expect(queryAllByTestId("CheckIcon")).toHaveLength(0);
+        expect(queryAllByTestId("ClearIcon")).toHaveLength(0);
+
+        await userEvent.click(deleteButtons[1]);
+        const clearButton = getByTestId("ClearIcon");
+        const input = document.querySelector("input");
+        expect(input).not.toBeNull();
+        input && (await userEvent.type(input, "1"));
+        await userEvent.click(clearButton);
+        expect(queryAllByTestId("CheckIcon")).toHaveLength(0);
+        expect(queryAllByTestId("ClearIcon")).toHaveLength(0);
+
+        await userEvent.click(deleteButtons[2]);
+        const input2 = document.querySelector("input");
+        expect(input2).not.toBeNull();
+        input2 && (await userEvent.type(input2, "{enter}"));
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "",
+            payload: {
+                action: "onDelete",
+                args: [],
+                index: 0,
+            },
+            type: "SEND_ACTION_ACTION",
+        });
     });
 });
