@@ -80,62 +80,7 @@ export const EDIT_COL = "taipy_edit";
 
 export const LINE_STYLE = "__taipy_line_style__";
 
-export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
-    if (cols[key1].index < cols[key2].index) {
-        return -1;
-    }
-    if (cols[key1].index > cols[key2].index) {
-        return 1;
-    }
-    return 0;
-};
-
 export const defaultDateFormat = "yyyy/MM/dd";
-
-const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
-    if (val === null || val === undefined) {
-        return "";
-    }
-    switch (col.type) {
-        case "datetime":
-            return getDateTimeString(val as string, col.format || defaultDateFormat, formatConf, col.tz);
-        case "int":
-        case "float":
-            if (val === "NaN") {
-                return nanValue || "";
-            }
-            return getNumberString(val as number, col.format, formatConf);
-        default:
-            return val as string;
-    }
-};
-const VALID_BOOLEAN_STRINGS = ["true", "1", "t", "y", "yes", "yeah", "sure"];
-
-const isBooleanTrue = (val: RowValue) =>
-    typeof val == "string" ? VALID_BOOLEAN_STRINGS.some((s) => s == val.trim().toLowerCase()) : !!val;
-
-const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
-    if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
-        return <Switch checked={val as boolean} size="small" title={val ? "True" : "False"} sx={iconInRowSx} />;
-    }
-    return <>{formatValue(val as RowValue, col, formatConf, nanValue)}</>;
-};
-
-const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
-    switch (col.type) {
-        case "int":
-        case "float":
-            base.align = "right";
-            break;
-        case "bool":
-            base.align = "center";
-            break;
-    }
-    if (col.width) {
-        base.width = col.width;
-    }
-    return base;
-};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TableValueType = Record<string, Record<string, any>>;
@@ -176,6 +121,9 @@ export const baseBoxSx = { width: "100%" };
 export const paperSx = { width: "100%", mb: 2 };
 export const tableSx = { minWidth: 250 };
 export const headBoxSx = { display: "flex", alignItems: "flex-start" };
+export const iconInRowSx = { fontSize: "body2.fontSize" };
+const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
+const tableFontSx = { fontSize: "body2.fontSize" };
 
 export interface OnCellValidation {
     (value: RowValue, rowIndex: number, colName: string, userValue: string): void;
@@ -197,8 +145,57 @@ interface EditableCellProps {
     tableCellProps?: Partial<TableCellProps>;
 }
 
-export const addDeleteColumn = (render: number, columns: Record<string, ColumnDesc>) => {
-    if (render) {
+export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
+    cols[key1].index < cols[key2].index ? -1 : cols[key1].index > cols[key2].index ? 1 : 0;
+
+const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
+    if (val === null || val === undefined) {
+        return "";
+    }
+    switch (col.type) {
+        case "datetime":
+            return getDateTimeString(val as string, col.format || defaultDateFormat, formatConf, col.tz);
+        case "int":
+        case "float":
+            if (val === "NaN") {
+                return nanValue || "";
+            }
+            return getNumberString(val as number, col.format, formatConf);
+        default:
+            return val as string;
+    }
+};
+
+const VALID_BOOLEAN_STRINGS = ["true", "1", "t", "y", "yes", "yeah", "sure"];
+
+const isBooleanTrue = (val: RowValue) =>
+    typeof val == "string" ? VALID_BOOLEAN_STRINGS.some((s) => s == val.trim().toLowerCase()) : !!val;
+
+const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
+    if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
+        return <Switch checked={val as boolean} size="small" title={val ? "True" : "False"} sx={iconInRowSx} />;
+    }
+    return <>{formatValue(val as RowValue, col, formatConf, nanValue)}</>;
+};
+
+const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
+    switch (col.type) {
+        case "int":
+        case "float":
+            base.align = "right";
+            break;
+        case "bool":
+            base.align = "center";
+            break;
+    }
+    if (col.width) {
+        base.width = col.width;
+    }
+    return base;
+};
+
+export const addDeleteColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
+    if (nbToRender) {
         Object.keys(columns).forEach((key) => columns[key].index++);
         columns[EDIT_COL] = {
             dfid: EDIT_COL,
@@ -206,7 +203,7 @@ export const addDeleteColumn = (render: number, columns: Record<string, ColumnDe
             format: "",
             title: "",
             index: 0,
-            width: render * 4 + "em",
+            width: nbToRender * 4 + "em",
             filter: false,
         };
     }
@@ -217,10 +214,6 @@ export const getClassName = (row: Record<string, unknown>, style?: string) =>
     style ? (row[style] as string) : undefined;
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
-
-const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
-export const iconInRowSx = { fontSize: "body2.fontSize" };
-const tableFontSx = { fontSize: "body2.fontSize" };
 
 export const EditableCell = (props: EditableCellProps) => {
     const {

@@ -177,7 +177,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                   return pv;
               }, "-agg")
             : "";
-        const cols = colsOrder.map((col) => columns[col].dfid);
+        const cols = colsOrder.map((col) => columns[col].dfid).filter(c => c != EDIT_COL);
         pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}${appliedFilters.map(
             (af) => `${af.col}${af.action}${af.value}`
         )}`;
