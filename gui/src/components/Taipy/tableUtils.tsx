@@ -111,7 +111,8 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
 };
 const VALID_BOOLEAN_STRINGS = ["true", "1", "t", "y", "yes", "yeah", "sure"];
 
-const isBooleanTrue = (val: RowValue) => typeof val == "string" ? VALID_BOOLEAN_STRINGS.some(s => s == val.trim().toLowerCase()) : !!val;
+const isBooleanTrue = (val: RowValue) =>
+    typeof val == "string" ? VALID_BOOLEAN_STRINGS.some((s) => s == val.trim().toLowerCase()) : !!val;
 
 const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
@@ -238,6 +239,7 @@ export const EditableCell = (props: EditableCellProps) => {
     const [deletion, setDeletion] = useState(false);
 
     const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
+    const onBoolChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
 
     const onCheckClick = useCallback(() => {
         let castedVal = val;
@@ -259,7 +261,7 @@ export const EditableCell = (props: EditableCellProps) => {
                     // ignore
                 }
                 break;
-            }
+        }
         onValidation && onValidation(castedVal, rowIndex, colDesc.dfid, val as string);
         setEdit((e) => !e);
     }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type]);
@@ -306,24 +308,45 @@ export const EditableCell = (props: EditableCellProps) => {
     return (
         <TableCell {...getCellProps(colDesc, tableCellProps)} className={className}>
             {edit ? (
-                <Input
-                    value={val}
-                    onChange={onChange}
-                    onKeyDown={onKeyDown}
-                    inputRef={setInputFocus}
-                    margin="dense"
-                    sx={tableFontSx}
-                    endAdornment={
-                        <>
+                colDesc.type?.startsWith("bool") ? (
+                    <Box sx={cellBoxSx}>
+                        <Switch
+                            checked={val as boolean}
+                            size="small"
+                            title={val ? "True" : "False"}
+                            sx={iconInRowSx}
+                            onChange={onBoolChange}
+                            inputRef={setInputFocus}
+                        />
+                        <div>
                             <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                 <CheckIcon fontSize="inherit" />
                             </IconButton>
                             <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                                 <ClearIcon fontSize="inherit" />
                             </IconButton>
-                        </>
-                    }
-                />
+                        </div>
+                    </Box>
+                ) : (
+                    <Input
+                        value={val}
+                        onChange={onChange}
+                        onKeyDown={onKeyDown}
+                        inputRef={setInputFocus}
+                        margin="dense"
+                        sx={tableFontSx}
+                        endAdornment={
+                            <>
+                                <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                    <CheckIcon fontSize="inherit" />
+                                </IconButton>
+                                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                    <ClearIcon fontSize="inherit" />
+                                </IconButton>
+                            </>
+                        }
+                    />
+                )
             ) : EDIT_COL === colDesc.dfid ? (
                 deletion ? (
                     <Input
