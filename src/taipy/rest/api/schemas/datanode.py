@@ -33,6 +33,7 @@ class DataNodeConfigSchema(Schema):
     name = fields.String()
     storage_type = fields.String()
     scope = fields.Integer()
+    cacheable = fields.Boolean()
 
     @pre_dump
     def serialize_scope(self, obj, **kwargs):
@@ -56,13 +57,20 @@ class PickleDataNodeConfigSchema(DataNodeConfigSchema):
     default_data = fields.Inferred()
 
 
-class SQLDataNodeConfigSchema(DataNodeConfigSchema):
-    db_username = fields.String()
-    db_password = fields.String()
+class SQLTableDataNodeConfigSchema(DataNodeConfigSchema):
     db_name = fields.String()
-    db_engine = fields.String()
+    table_name = fields.String()
+
+
+class SQLDataNodeConfigSchema(DataNodeConfigSchema):
+    db_name = fields.String()
     read_query = fields.String()
-    write_table = fields.String()
+    write_query = fields.List(fields.String())
+
+
+class MongoCollectionDataNodeConfigSchema(DataNodeConfigSchema):
+    db_name = fields.String()
+    collection_name = fields.String()
 
 
 class ExcelDataNodeConfigSchema(DataNodeConfigSchema):

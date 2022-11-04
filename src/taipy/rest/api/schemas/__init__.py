@@ -20,7 +20,9 @@ from .datanode import (
     InMemoryDataNodeConfigSchema,
     JSONDataNodeConfigSchema,
     PickleDataNodeConfigSchema,
+    SQLTableDataNodeConfigSchema,
     SQLDataNodeConfigSchema,
+    MongoCollectionDataNodeConfigSchema,
 )
 from .job import JobSchema
 from .pipeline import PipelineResponseSchema, PipelineSchema
