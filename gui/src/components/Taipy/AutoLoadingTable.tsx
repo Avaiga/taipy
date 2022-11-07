@@ -298,7 +298,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                           return pv;
                       }, "-agg")
                     : "";
-                const cols = colsOrder.map((col) => columns[col].dfid);
+                const cols = colsOrder.map((col) => columns[col].dfid).filter(c => c != EDIT_COL);
                 const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}`;
                 page.current = {
                     key: key,
