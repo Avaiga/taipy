@@ -27,6 +27,7 @@ import { SingleItem } from "./lovUtils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
+import { useClassNames } from "../../utils/hooks";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
@@ -34,11 +35,13 @@ const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { label, onAction = "", lov, width, inactiveIds = [], active = true, className } = props;
+    const { label, onAction = "", lov, width, inactiveIds = [], active = true } = props;
     const [selectedValue, setSelectedValue] = useState("");
     const [opened, setOpened] = useState(false);
     const { dispatch } = useContext(TaipyContext);
     const theme = useTheme();
+
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const clickHandler = useCallback(
         (evt: MouseEvent<HTMLElement>) => {

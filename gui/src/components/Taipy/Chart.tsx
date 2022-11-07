@@ -45,7 +45,7 @@ import {
     createSendUpdateAction,
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -164,7 +164,6 @@ const NO_INDEX_CHARTS = ["histogram"];
 const Chart = (props: ChartProp) => {
     const {
         title = "",
-        className,
         width = "100%",
         height,
         updateVarName,
@@ -182,6 +181,7 @@ const Chart = (props: ChartProp) => {
     const theme = useTheme();
 
     const refresh = data === null;
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);

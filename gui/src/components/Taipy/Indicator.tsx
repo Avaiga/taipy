@@ -18,7 +18,7 @@ import { styled } from "@mui/material/styles";
 import { sprintf } from "sprintf-js";
 
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 
 interface IndicatorProps extends TaipyBaseProps, TaipyHoverProps {
     min?: number;
@@ -43,6 +43,7 @@ const Indicator = (props: IndicatorProps) => {
     const { min = 0, max = 100, display, defaultDisplay, format, value, defaultValue = 0, width, height } = props;
 
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const getLabel = useCallback(() => {
@@ -99,7 +100,7 @@ const Indicator = (props: IndicatorProps) => {
         <Tooltip title={hover || ""}>
             <TpSlider
                 id={props.id}
-                className={props.className}
+                className={className}
                 min={0}
                 max={100}
                 value={getValue(value === undefined ? defaultValue : value, min, max)}

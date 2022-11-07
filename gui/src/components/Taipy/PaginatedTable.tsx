@@ -65,7 +65,7 @@ import {
     iconInRowSx,
     DEFAULT_SIZE,
 } from "./tableUtils";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
@@ -75,7 +75,6 @@ const rowsPerPageOptions: PageSizeOptionsType = [10, 50, 100, 500];
 
 const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const {
-        className,
         id,
         updateVarName,
         pageSize = 100,
@@ -105,6 +104,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const formatConfig = useFormatConfig();
 
     const refresh = props.data === null;
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);

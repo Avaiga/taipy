@@ -31,7 +31,9 @@ interface TaipyDynamicProps extends TaipyBaseProps {
 
 export interface TaipyBaseProps {
     id?: string;
+    libClassName?: string;
     className?: string;
+    dynamicClassName?: string;
 }
 
 export interface TaipyMultiSelectProps {

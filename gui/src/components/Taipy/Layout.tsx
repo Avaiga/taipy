@@ -14,14 +14,13 @@
 import React, { ReactNode, useMemo } from "react";
 import Box from "@mui/material/Box";
 
-import { useIsMobile } from "../../utils/hooks";
+import { useClassNames, useIsMobile } from "../../utils/hooks";
+import { TaipyBaseProps } from "./utils";
 
-interface LayoutProps {
-    id?: string;
+interface LayoutProps extends TaipyBaseProps {
     columns?: string;
     columns_Mobile_?: string;
     children?: ReactNode;
-    className?: string;
     gap?: string;
 }
 
@@ -40,6 +39,8 @@ const expandCols = (cols: string) => {
 
 const Layout = (props: LayoutProps) => {
     const { columns = "1 1", gap = "0.5rem", columns_Mobile_ = "1" } = props;
+
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const isMobile = useIsMobile();
     const sx = useMemo(() => {
         return {
@@ -50,7 +51,7 @@ const Layout = (props: LayoutProps) => {
     }, [columns, columns_Mobile_, gap, isMobile]);
 
     return (
-        <Box id={props.id} className={props.className} sx={sx}>
+        <Box id={props.id} className={className} sx={sx}>
             {props.children}
         </Box>
     );

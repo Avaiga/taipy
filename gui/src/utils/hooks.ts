@@ -94,6 +94,17 @@ export const useDispatch = () => {
     return dispatch;
 }
 
+/**
+ * A React hook to manage classNames (dynamic and static).
+ * cf. useDynamicProperty
+ *
+ * @param libClassName - The default static className.
+ * @param dynamicClassName - The bound className.
+ * @param className - The default user set className.
+ * @returns The complete list of applicable classNames.
+ */
+export const useClassNames = (libClassName?: string, dynamicClassName?: string, className?: string) => ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();
+
 export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>): void => {
     // Get a mutable ref object where we can store props ...
     // ... for comparison next time this hook runs.

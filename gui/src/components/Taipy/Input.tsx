@@ -18,7 +18,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
 
@@ -34,7 +34,6 @@ const getActionKeys = (keys?: string): string[] => {
 
 const Input = (props: TaipyInputProps) => {
     const {
-        className,
         type,
         id,
         updateVarName,
@@ -51,6 +50,7 @@ const Input = (props: TaipyInputProps) => {
     const [actionKeys] = useState(() => (onAction ? getActionKeys(props.actionKeys) : []));
 
     const changeDelay = typeof props.changeDelay === "number" && props.changeDelay >= 0 ? props.changeDelay : 300;
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

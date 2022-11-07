@@ -24,7 +24,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
-import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
 
@@ -40,12 +40,13 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 const boxSx = { display: "inline-block" };
 
 const DateSelector = (props: DateSelectorProps) => {
-    const { className, updateVarName, withTime = false, id, propagate = true } = props;
+    const { updateVarName, withTime = false, id, propagate = true } = props;
     const { dispatch } = useContext(TaipyContext);
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
     const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz));
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);

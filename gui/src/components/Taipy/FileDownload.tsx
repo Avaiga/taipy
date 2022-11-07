@@ -17,7 +17,7 @@ import Fab from "@mui/material/Fab";
 import Tooltip from "@mui/material/Tooltip";
 import FileDownloadIco from "@mui/icons-material/FileDownload";
 
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { noDisplayStyle, TaipyActiveProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
@@ -36,10 +36,11 @@ interface FileDownloadProps extends TaipyActiveProps {
 }
 
 const FileDownload = (props: FileDownloadProps) => {
-    const { id, className, auto, name, bypassPreview, onAction, label, defaultLabel = "" } = props;
+    const { id, auto, name, bypassPreview, onAction, label, defaultLabel = "" } = props;
     const aRef = useRef<HTMLAnchorElement>(null);
     const { dispatch } = useContext(TaipyContext);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);

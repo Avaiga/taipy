@@ -19,7 +19,7 @@ import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
 
 interface ImageProps extends TaipyActiveProps {
@@ -97,9 +97,10 @@ const ImageMarked = styled("span")(({ theme }) => ({
 }));
 
 const Image = (props: ImageProps) => {
-    const { className, id, onAction, width = 300, height } = props;
+    const { id, onAction, width = 300, height } = props;
     const { dispatch } = useContext(TaipyContext);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const label = useDynamicProperty(props.label, props.defaultLabel, undefined);

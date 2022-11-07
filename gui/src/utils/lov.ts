@@ -11,6 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
+import { TaipyBaseProps } from "../components/Taipy/utils";
 import { stringIcon } from "./icon";
 
 /**
@@ -25,12 +26,11 @@ export interface LovItem {
     children?: LovItem[];
 }
 
-export interface MenuProps {
+export interface MenuProps extends TaipyBaseProps {
     label?: string;
     width?: string;
     onAction?: string;
     inactiveIds?: string[];
     lov?: LovItem[];
     active?: boolean;
-    className?: string;
 }

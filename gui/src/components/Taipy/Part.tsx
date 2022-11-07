@@ -14,12 +14,11 @@
 import React, { ReactNode } from "react";
 import Box from "@mui/material/Box";
 
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
+import { TaipyBaseProps } from "./utils";
 
-interface PartProps {
-    id?: string;
-    className?: string;
+interface PartProps extends TaipyBaseProps {
     render?: boolean;
     defaultRender?: boolean;
     page?: string;
@@ -28,8 +27,11 @@ interface PartProps {
 }
 
 const Part = (props: PartProps) => {
-    const {id, className, children, page, partial} = props;
+    const {id, children, page, partial} = props;
+
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
+
     return render ? (
         <Box id={id} className={className}>
             {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
