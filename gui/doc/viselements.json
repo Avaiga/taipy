@@ -1254,7 +1254,7 @@
           },
           {
             "name": "class_name",
-            "type": "str",
+            "type": "dynamic(str)",
             "doc": "List of CSS class names that will be associated with the generated HTML Element.\nThis class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
           },
           {
