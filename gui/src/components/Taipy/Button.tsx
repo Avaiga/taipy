@@ -18,7 +18,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
 
 interface ButtonProps extends TaipyActiveProps {
@@ -28,10 +28,11 @@ interface ButtonProps extends TaipyActiveProps {
 }
 
 const Button = (props: ButtonProps) => {
-    const { className, id, onAction = "", defaultLabel } = props;
+    const { id, onAction = "", defaultLabel } = props;
     const [value, setValue] = useState<stringIcon>("");
     const { dispatch } = useContext(TaipyContext);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

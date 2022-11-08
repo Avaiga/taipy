@@ -286,16 +286,23 @@ class _Builder:
         return self.set_attribute(_to_camel_case(name), str(strattr))
 
     def __set_dynamic_string_attribute(
-        self, name: str, default_value: t.Optional[str] = None, with_update: t.Optional[bool] = False
+        self,
+        name: str,
+        default_value: t.Optional[str] = None,
+        with_update: t.Optional[bool] = False,
+        dynamic_property_name: t.Optional[str] = None,
     ):
         hash_name = self.__hashes.get(name)
         str_val = self.__attributes.get(name, default_value)
         if str_val is not None:
-            self.set_attribute(_to_camel_case(f"default_{name}"), str(str_val))
+            self.set_attribute(
+                _to_camel_case(f"default_{name}" if dynamic_property_name is None else name), str(str_val)
+            )
         if hash_name:
+            prop_name = _to_camel_case(name if dynamic_property_name is None else dynamic_property_name)
             if with_update:
-                self.__update_vars.append(f"{name}={hash_name}")
-            self.__set_react_attribute(name, hash_name)
+                self.__update_vars.append(f"{prop_name}={hash_name}")
+            self.__set_react_attribute(prop_name, hash_name)
         return self
 
     def __set_function_attribute(
@@ -321,7 +328,7 @@ class _Builder:
         strattr = self.__attributes.get(attr_name)
         cls = self.__gui._get_user_instance(class_name=str(strattr), class_type=PropertyType.decimator.value)
         if isinstance(cls, PropertyType.decimator.value):
-            self.__set_string_or_number_attribute(attr_name, strattr)
+            self.__set_string_attribute(attr_name, strattr)
 
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
         attr = self.__attributes.get(name, default_value)
@@ -701,11 +708,8 @@ class _Builder:
         return self
 
     def __set_class_names(self):
-        classes = [self.__lib_name + "-" + self.__control_type.replace("_", "-")]
-        if cl := self.__attributes.get("class_name"):
-            classes.append(str(cl))
-
-        return self.set_attribute("className", " ".join(classes))
+        self.set_attribute("libClassName", self.__lib_name + "-" + self.__control_type.replace("_", "-"))
+        return self.__set_dynamic_string_attribute("class_name", dynamic_property_name="dynamic_class_name")
 
     def _set_dataType(self):
         value = self.__attributes.get("value")

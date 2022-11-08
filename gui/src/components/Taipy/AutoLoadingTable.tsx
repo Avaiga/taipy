@@ -58,7 +58,7 @@ import {
     iconInRowSx,
     DEFAULT_SIZE,
 } from "./tableUtils";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 
 interface RowData {
@@ -143,7 +143,6 @@ const getCellSx = (width: string | number | undefined, size = DEFAULT_SIZE) => (
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
     const {
-        className,
         id,
         updateVarName,
         height = "60vh",
@@ -170,6 +169,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const headerRow = useRef<HTMLTableRowElement>(null);
     const formatConfig = useFormatConfig();
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);

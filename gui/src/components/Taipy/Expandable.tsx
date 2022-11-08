@@ -18,7 +18,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Tooltip from "@mui/material/Tooltip";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { TaipyActiveProps } from "./utils";
 import TaipyRendered from "../pages/TaipyRendered";
 
@@ -33,9 +33,10 @@ interface ExpandableProps extends TaipyActiveProps {
 }
 
 const Expandable = (props: ExpandableProps) => {
-    const { id, expanded = true, defaultExpanded, title, defaultTitle, className, page, partial } = props;
+    const { id, expanded = true, defaultExpanded, title, defaultTitle, page, partial } = props;
     const [opened, setOpened] = useState(defaultExpanded === undefined ? expanded : defaultExpanded);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

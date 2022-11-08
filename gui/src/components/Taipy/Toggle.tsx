@@ -22,7 +22,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import ThemeToggle from "./ThemeToggle";
 import { LovProps, useLovListMemo } from "./lovUtils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { getUpdateVar } from "./utils";
 import { Icon, IconAvatar } from "../../utils/icon";
 
@@ -42,7 +42,6 @@ const Toggle = (props: ToggleProps) => {
         label,
         updateVarName = "",
         propagate = true,
-        className,
         lov,
         defaultLov = "",
         unselectedValue = "",
@@ -51,6 +50,8 @@ const Toggle = (props: ToggleProps) => {
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [value, setValue] = useState(props.defaultValue)
+
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
