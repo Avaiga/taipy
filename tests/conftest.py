@@ -219,15 +219,13 @@ def tmp_sqlite(tmpdir_factory):
 
 @pytest.fixture(scope="function", autouse=True)
 def setup():
-    delete_everything()
+    init_config()
+    init_scheduler()
+    init_managers()
 
 
 @pytest.fixture(scope="function", autouse=True)
 def teardown():
-    delete_everything()
-
-
-def delete_everything():
     init_scheduler()
     init_config()
     init_managers()
