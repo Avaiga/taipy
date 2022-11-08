@@ -13,9 +13,11 @@ import uuid
 
 import pytest
 
+from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core.common.alias import TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
+from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
@@ -265,6 +267,50 @@ def test_hard_delete():
     _TaskManager._hard_delete(task_1.id)
     assert len(_TaskManager._get_all()) == 0
     assert len(_DataManager._get_all()) == 2
+
+
+def test_submit_task():
+    data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
+    task_1 = Task(
+        "grault",
+        print,
+        [data_node_1],
+        [data_node_2],
+        TaskId("t1"),
+    )
+
+    class MockScheduler(_Scheduler):
+        submit_calls = []
+        submit_ids = []
+
+        def submit_task(self, task, submit_id=None, callbacks=None, force=False, wait=False, timeout=None):
+            submit_id = submit_id if submit_id else f"SUBMISSION_{str(uuid.uuid4())}"
+            self.submit_calls.append(task)
+            self.submit_ids.append(submit_id)
+            return None
+
+    _TaskManager._scheduler = MockScheduler
+
+    # Task does not exist, we expect an exception
+    with pytest.raises(NonExistingTask):
+        _TaskManager._submit(task_1)
+    with pytest.raises(NonExistingTask):
+        _TaskManager._submit(task_1.id)
+
+    _TaskManager._set(task_1)
+    _TaskManager._submit(task_1)
+    call_ids = [call.id for call in MockScheduler.submit_calls]
+    assert call_ids == [task_1.id]
+    assert len(MockScheduler.submit_ids) == 1
+
+    _TaskManager._submit(task_1)
+    assert len(MockScheduler.submit_ids) == 2
+    assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
+
+    _TaskManager._submit(task_1)
+    assert len(MockScheduler.submit_ids) == 3
+    assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
 
 
 def _create_task_from_config(task_config, *args, **kwargs):

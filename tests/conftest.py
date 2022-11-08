@@ -32,6 +32,7 @@ from src.taipy.core.config import (
     _ScenarioConfigChecker,
     _TaskConfigChecker,
 )
+from taipy.config.checker._checkers._gLobal_config_checker import _GlobalConfigChecker
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle.cycle import Cycle
@@ -218,9 +219,7 @@ def tmp_sqlite(tmpdir_factory):
 
 @pytest.fixture(scope="function", autouse=True)
 def setup():
-    init_config()
-    init_scheduler()
-    init_managers()
+    delete_everything()
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -229,9 +228,10 @@ def teardown():
 
 
 def delete_everything():
+    init_scheduler()
     init_config()
     init_managers()
-    init_scheduler()
+    init_config()
 
 
 def init_config():
@@ -242,6 +242,7 @@ def init_config():
     Config._applied_config = _Config._default_config()
     Config._collector = IssueCollector()
     Config._serializer = _TomlSerializer()
+    _Checker._checkers = [_GlobalConfigChecker]
 
     from src.taipy.core.config import _inject_section
 
@@ -315,3 +316,4 @@ def init_scheduler():
     _SchedulerFactory._build_dispatcher()
     _SchedulerFactory._scheduler.jobs_to_run = Queue()
     _SchedulerFactory._scheduler.blocked_jobs = []
+    _TaskManagerFactory._build_manager()._scheduler = _SchedulerFactory._build_scheduler
