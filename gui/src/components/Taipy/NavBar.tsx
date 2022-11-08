@@ -26,14 +26,14 @@ import { useLocation, useNavigate } from "react-router";
 
 import Link from "./Link";
 import { LovProps, useLovListMemo, LovImage } from "./lovUtils";
-import { useDynamicProperty, useIsMobile } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { TaipyContext } from "../../context/taipyContext";
 import { LovItem } from "../../utils/lov";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
 const NavBar = (props: LovProps) => {
-    const { id, className, lov, defaultLov = "" } = props;
+    const { id, lov, defaultLov = "" } = props;
     const { state } = useContext(TaipyContext);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const location = useLocation();
@@ -41,6 +41,7 @@ const NavBar = (props: LovProps) => {
     const isMobile = useIsMobile();
     const [opened, setOpened] = useState(false);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     let lovList = useLovListMemo(lov, defaultLov);
     if (!lovList.length) {

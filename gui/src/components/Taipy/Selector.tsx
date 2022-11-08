@@ -45,7 +45,7 @@ import {
     treeSelBaseSx,
     useLovListMemo,
 } from "./lovUtils";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { Icon } from "../../utils/icon";
 
 const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
@@ -95,7 +95,6 @@ const Selector = (props: SelTreeProps) => {
         filter = false,
         multiple = false,
         dropdown = false,
-        className,
         propagate = true,
         lov,
         updateVars = "",
@@ -108,6 +107,7 @@ const Selector = (props: SelTreeProps) => {
     const { dispatch } = useContext(TaipyContext);
     const theme = useTheme();
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

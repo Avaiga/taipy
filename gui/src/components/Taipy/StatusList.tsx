@@ -20,7 +20,7 @@ import Popover, { PopoverOrigin } from "@mui/material/Popover";
 
 import Status, { StatusType } from "./Status";
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 
 const getStatusIntValue = (status: string) => {
     status = status.toLowerCase();
@@ -89,12 +89,13 @@ interface StatusListProps extends TaipyBaseProps, TaipyHoverProps {
 }
 
 const StatusList = (props: StatusListProps) => {
-    const { value, defaultValue, className, withoutClose = false } = props;
+    const { value, defaultValue, withoutClose = false } = props;
     const [values, setValues] = useState<StatusDel[]>([]);
     const [opened, setOpened] = useState(false);
     const [multiple, setMultiple] = useState(false);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     useEffect(() => {

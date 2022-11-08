@@ -60,7 +60,7 @@ describe("MenuCtl Component", () => {
             expect(dispatch).toHaveBeenCalledWith({
                 menu: {
                     active: true,
-                    className: undefined,
+                    className: "",
                     inactiveIds: ["id1", "id2"],
                     label: "MenuCtl",
                     lov: [

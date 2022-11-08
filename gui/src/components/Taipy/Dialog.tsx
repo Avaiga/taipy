@@ -27,7 +27,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyActiveProps } from "./utils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 
 interface DialogProps extends TaipyActiveProps {
     title: string;
@@ -61,12 +61,12 @@ const Dialog = (props: DialogProps) => {
         closeLabel = "Close",
         page,
         partial,
-        className,
         width,
         height,
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

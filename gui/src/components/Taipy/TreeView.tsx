@@ -34,7 +34,7 @@ import {
     treeSelBaseSx,
     useLovListMemo,
 } from "./lovUtils";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
@@ -130,7 +130,6 @@ const TreeView = (props: TreeViewProps) => {
         defaultLov = "",
         filter = false,
         multiple = false,
-        className,
         propagate = true,
         lov,
         updateVars = "",
@@ -147,6 +146,7 @@ const TreeView = (props: TreeViewProps) => {
     const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
     const { dispatch } = useContext(TaipyContext);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

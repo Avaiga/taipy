@@ -17,7 +17,7 @@ def test_menu_md(gui: Gui, test_client, helpers):
     md_string = "<|menu|lov={lov}|on_action=on_menu_action|>"
     expected_list = [
         "<MenuCtl",
-        'className="taipy-menu"',
+        'libClassName="taipy-menu"',
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;, &quot;Item 4&quot;]"',
         "lov={_TpL_tpec_TpExPr_lov_TPMDL_0}",
         'onAction="on_menu_action"',
@@ -31,7 +31,7 @@ def test_menu_html(gui: Gui, test_client, helpers):
     html_string = '<taipy:menu lov="{lov}" />'
     expected_list = [
         "<MenuCtl",
-        'className="taipy-menu"',
+        'libClassName="taipy-menu"',
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;, &quot;Item 4&quot;]"',
         "lov={_TpL_tpec_TpExPr_lov_TPMDL_0}",
         'updateVars="lov=_TpL_tpec_TpExPr_lov_TPMDL_0"',

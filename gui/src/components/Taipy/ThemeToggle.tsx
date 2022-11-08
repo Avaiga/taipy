@@ -23,6 +23,7 @@ import Brightness3 from "@mui/icons-material/Brightness3";
 import { TaipyActiveProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createThemeAction, getLocalStorageValue } from "../../context/taipyReducers";
+import { useClassNames } from "../../utils/hooks";
 
 interface ThemeToggleProps extends TaipyActiveProps {
     style?: CSSProperties;
@@ -42,8 +43,10 @@ const boxSx = {
 } as CSSProperties;
 
 const ThemeToggle = (props: ThemeToggleProps) => {
-    const { id, label = "Mode", style = {}, className, active = true } = props;
+    const { id, label = "Mode", style = {}, active = true } = props;
     const { state, dispatch } = useContext(TaipyContext);
+
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const changeMode = useCallback(
         (evt: MouseEvent, mode: PaletteMode) => mode !== null && dispatch(createThemeAction(mode === "dark")),

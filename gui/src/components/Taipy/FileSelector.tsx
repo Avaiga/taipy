@@ -19,7 +19,7 @@ import UploadFile from "@mui/icons-material/UploadFile";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 
@@ -42,7 +42,6 @@ const defaultSx = { minWidth: "0px" };
 
 const FileSelector = (props: FileSelectorProps) => {
     const {
-        className,
         id,
         onAction,
         defaultLabel = "",
@@ -59,6 +58,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const { state, dispatch } = useContext(TaipyContext);
     const fabRef = useRef<HTMLElement>(null);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

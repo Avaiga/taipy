@@ -17,7 +17,7 @@ def test_indicator_md(gui: Gui, test_client, helpers):
     md_string = "<|12|indicator|value={val}|min=1|max=20|format=%.2f|>"
     expected_list = [
         "<Indicator",
-        'className="taipy-indicator"',
+        'libClassName="taipy-indicator"',
         "defaultValue={15}",
         "display={12.0}",
         'format="%.2f"',
@@ -33,7 +33,7 @@ def test_menu_html(gui: Gui, test_client, helpers):
     html_string = '<taipy:indicator value="{val}" min="1" max="20" format="%.2f" >12</taipy:indicator>'
     expected_list = [
         "<Indicator",
-        'className="taipy-indicator"',
+        'libClassName="taipy-indicator"',
         "defaultValue={15}",
         "display={12.0}",
         'format="%.2f"',

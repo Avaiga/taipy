@@ -72,7 +72,7 @@ def test_lib_input_md(gui: Gui, test_client, helpers):
     md_string = "<|{val}|test_lib.testinput|multiline|>"
     expected_list = [
         "<TestLib_Input",
-        'className="test_lib-testinput"',
+        'libClassName="test_lib-testinput"',
         "multiline={true}",
         'defaultValue=""',
         "value={tpec_TpExPr_val_TPMDL_0}",

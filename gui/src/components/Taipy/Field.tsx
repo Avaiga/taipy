@@ -16,7 +16,7 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
 import { formatWSValue } from "../../utils";
-import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
 
 interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
@@ -28,9 +28,10 @@ interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
 }
 
 const Field = (props: TaipyFieldProps) => {
-    const { className, id, dataType, format, defaultValue, raw } = props;
+    const { id, dataType, format, defaultValue, raw } = props;
     const formatConfig = useFormatConfig();
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const value = useMemo(() => {

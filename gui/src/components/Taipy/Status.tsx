@@ -16,18 +16,18 @@ import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
 
 import { getInitials } from "../../utils";
+import { TaipyBaseProps } from "./utils";
+import { useClassNames } from "../../utils/hooks";
 
 export interface StatusType {
     status: string;
     message: string;
 }
 
-interface StatusProps {
-    id?: string;
+interface StatusProps extends TaipyBaseProps {
     value: StatusType;
     onClose?: (evt: MouseEvent) => void;
     icon?: ReactNode;
-    className?: string;
 }
 
 const status2Color = (status: string): "error" | "info" | "success" | "warning" => {
@@ -47,7 +47,9 @@ const status2Color = (status: string): "error" | "info" | "success" | "warning" 
 const chipSx = { alignSelf: "flex-start" };
 
 const Status = (props: StatusProps) => {
-    const { value, className, id } = props;
+    const { value, id } = props;
+
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const chipProps = useMemo(() => {
         const cp: Record<string, unknown> = {};

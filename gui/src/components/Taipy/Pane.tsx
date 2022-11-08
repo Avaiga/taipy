@@ -22,7 +22,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyActiveProps, TaipyChangeProps } from "./utils";
 
@@ -75,11 +75,11 @@ const Pane = (props: PaneProps) => {
         width = "30vw",
         updateVarName,
         propagate = true,
-        className,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [open, setOpen] = useState(defaultOpen === "true" || defaultOpen === true);
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 

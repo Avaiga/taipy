@@ -20,7 +20,7 @@ import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { getCssSize, getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
@@ -40,7 +40,6 @@ interface SliderProps extends LovProps<number | string, number | string> {
 
 const Slider = (props: SliderProps) => {
     const {
-        className,
         id,
         updateVarName,
         propagate = true,
@@ -57,6 +56,7 @@ const Slider = (props: SliderProps) => {
     const delayCall = useRef(-1);
     const lastVal = useRef<string|number>(0)
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const lovList = useLovListMemo(lov, defaultLov);
