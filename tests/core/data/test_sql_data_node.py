@@ -12,6 +12,7 @@
 from importlib import util
 from unittest import mock
 
+import modin.pandas as modin_pd
 import pandas as pd
 import pytest
 
@@ -29,7 +30,12 @@ class MyCustomObject:
         self.kwargs = kwargs
 
 
-def my_write_query_builder(data: pd.DataFrame):
+def my_write_query_builder_with_pandas(data: pd.DataFrame):
+    insert_data = list(data.itertuples(index=False, name=None))
+    return ["DELETE FROM foo", ("INSERT INTO foo VALUES (?,?)", insert_data)]
+
+
+def my_write_query_builder_with_modin(data: modin_pd.DataFrame):
     insert_data = list(data.itertuples(index=False, name=None))
     return ["DELETE FROM foo", ("INSERT INTO foo VALUES (?,?)", insert_data)]
 
@@ -39,67 +45,127 @@ def single_write_query_builder(data):
 
 
 class TestSQLDataNode:
-    __properties = [
+    __pandas_properties = [
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
             "read_query": "SELECT * FROM foo",
-            "write_query_builder": my_write_query_builder,
+            "write_query_builder": my_write_query_builder_with_pandas,
             "db_extra_args": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
             },
         },
     ]
+
+    __modin_properties = [
+        {
+            "db_name": "taipy",
+            "db_engine": "sqlite",
+            "read_query": "SELECT * FROM foo",
+            "write_query_builder": my_write_query_builder_with_modin,
+            "exposed_type": "modin",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+                "other": "value",
+            },
+        },
+    ]
+
     if util.find_spec("pyodbc"):
-        __properties.append(
+        __pandas_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
                 "db_engine": "mssql",
                 "read_query": "SELECT * FROM foo",
-                "write_query_builder": my_write_query_builder,
+                "write_query_builder": my_write_query_builder_with_pandas,
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
                 },
             },
         )
-    if util.find_spec("pymysql"):
-        __properties.append(
+        __modin_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
-                "db_engine": "mysql",
+                "db_engine": "mssql",
                 "read_query": "SELECT * FROM foo",
-                "write_query_builder": my_write_query_builder,
-                "db_extra_args": {
-                    "TrustServerCertificate": "yes",
-                },
-            },
-        )
-    if util.find_spec("psycopg2"):
-        __properties.append(
-            {
-                "db_username": "sa",
-                "db_password": "Passw0rd",
-                "db_name": "taipy",
-                "db_engine": "postgresql",
-                "read_query": "SELECT * FROM foo",
-                "write_query_builder": my_write_query_builder,
+                "write_query_builder": my_write_query_builder_with_modin,
+                "exposed_type": "modin",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
                 },
             },
         )
 
-    @pytest.mark.parametrize("properties", __properties)
-    def test_create(self, properties):
+    if util.find_spec("pymysql"):
+        __pandas_properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "mysql",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder_with_pandas,
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
+            },
+        )
+        __modin_properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "mysql",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder_with_modin,
+                "exposed_type": "modin",
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
+            },
+        )
+
+    if util.find_spec("psycopg2"):
+        __pandas_properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "postgresql",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder_with_pandas,
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
+            },
+        )
+        __modin_properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "postgresql",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder_with_modin,
+                "exposed_type": "modin",
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
+            },
+        )
+
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    @pytest.mark.parametrize("modin_properties", __modin_properties)
+    def test_create(self, pandas_properties, modin_properties):
         dn = SQLDataNode(
             "foo_bar",
             Scope.PIPELINE,
-            properties=properties,
+            properties=pandas_properties,
         )
         assert isinstance(dn, SQLDataNode)
         assert dn.storage_type() == "sql"
@@ -111,7 +177,24 @@ class TestSQLDataNode:
         assert dn.is_ready_for_reading
         assert dn.exposed_type == "pandas"
         assert dn.read_query == "SELECT * FROM foo"
-        assert dn.write_query_builder == my_write_query_builder
+        assert dn.write_query_builder == my_write_query_builder_with_pandas
+
+        dn = SQLDataNode(
+            "foo_bar",
+            Scope.PIPELINE,
+            properties=modin_properties,
+        )
+        assert isinstance(dn, SQLDataNode)
+        assert dn.storage_type() == "sql"
+        assert dn.config_id == "foo_bar"
+        assert dn.scope == Scope.PIPELINE
+        assert dn.id is not None
+        assert dn.owner_id is None
+        assert dn.job_ids == []
+        assert dn.is_ready_for_reading
+        assert dn.exposed_type == "modin"
+        assert dn.read_query == "SELECT * FROM foo"
+        assert dn.write_query_builder == my_write_query_builder_with_modin
 
     @pytest.mark.parametrize(
         "properties",
@@ -128,9 +211,10 @@ class TestSQLDataNode:
         with pytest.raises(MissingRequiredProperty):
             SQLDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
 
-    @pytest.mark.parametrize("properties", __properties)
-    def test_write_query_builder(self, properties):
-        custom_properties = properties.copy()
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    @pytest.mark.parametrize("modin_properties", __pandas_properties)
+    def test_write_query_builder(self, pandas_properties, modin_properties):
+        custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
@@ -147,4 +231,23 @@ class TestSQLDataNode:
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
+            assert engine_mock.mock_calls[4] == mock.call().__enter__().execute("DELETE FROM foo")
+
+        custom_properties = modin_properties.copy()
+        custom_properties.pop("db_extra_args")
+        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+            # mock connection execute
+            dn.write(modin_pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
+            assert engine_mock.mock_calls[4] == mock.call().__enter__().execute("DELETE FROM foo")
+            assert engine_mock.mock_calls[5] == mock.call().__enter__().execute(
+                "INSERT INTO foo VALUES (?,?)", [(1, 4), (2, 5), (3, 6)]
+            )
+
+        custom_properties["write_query_builder"] = single_write_query_builder
+        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
+
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+            # mock connection execute
+            dn.write(modin_pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert engine_mock.mock_calls[4] == mock.call().__enter__().execute("DELETE FROM foo")

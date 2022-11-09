@@ -299,7 +299,7 @@ class TestDataNode:
         assert NotImplemented == dn.filter((("any", 0, Operator.LESS_THAN)), JoinOperator.AND)
         assert NotImplemented == dn.filter((("any", 0, Operator.LESS_OR_EQUAL)), JoinOperator.AND)
         assert NotImplemented == dn.filter((("any", 0, Operator.GREATER_THAN)))
-        assert NotImplemented == dn.filter((("any", 0, Operator.GREATER_OR_EQUAL)))
+        assert NotImplemented == dn.filter(("any", 0, Operator.GREATER_OR_EQUAL))
 
         df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)
 

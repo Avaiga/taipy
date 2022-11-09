@@ -12,6 +12,7 @@
 from collections.abc import Hashable
 from typing import Dict, Iterable, List, Union
 
+import modin.pandas as modin_pd
 import pandas as pd
 from pandas.core.common import is_bool_indexer
 
@@ -21,7 +22,7 @@ class _FilterDataNode:
     __MULTI_SHEET_EXCEL_DATA_TYPE = "multi_sheet_excel"
     __CUSTOM_DATA_TYPE = "custom"
 
-    def __init__(self, data_node_id, data: Union[pd.DataFrame, List]) -> None:
+    def __init__(self, data_node_id, data: Union[pd.DataFrame, modin_pd.DataFrame, List]) -> None:
         self.data_node_id = data_node_id
         self.data = data
         self.data_type = None
@@ -33,11 +34,13 @@ class _FilterDataNode:
             self.data_type = self.__CUSTOM_DATA_TYPE
 
     def _is_pandas_object(self) -> bool:
-        return isinstance(self.data, pd.DataFrame) or isinstance(self.data, pd.Series)
+        return isinstance(self.data, (pd.DataFrame, modin_pd.DataFrame)) or isinstance(
+            self.data, (pd.Series, modin_pd.DataFrame)
+        )
 
     def is_multi_sheet_excel(self) -> bool:
         if isinstance(self.data, Dict):
-            has_df_children = all([isinstance(e, pd.DataFrame) for e in self.data.values()])
+            has_df_children = all([isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in self.data.values()])
             has_list_children = all([isinstance(e, List) for e in self.data.values()])
             return has_df_children or has_list_children
         return False
@@ -55,7 +58,7 @@ class _FilterDataNode:
             filtered_data = self.__getitem_hashable(key)
         elif isinstance(key, slice):
             filtered_data = self.__getitem_slice(key)
-        elif isinstance(key, pd.DataFrame):
+        elif isinstance(key, (pd.DataFrame, modin_pd.DataFrame)):
             filtered_data = self.__getitem_dataframe(key)
         elif is_bool_indexer(key):
             filtered_data = self.__getitem_bool_indexer(key)
@@ -73,7 +76,7 @@ class _FilterDataNode:
     def __getitem_slice(self, key):
         return self.data[key]
 
-    def __getitem_dataframe(self, key: pd.DataFrame):
+    def __getitem_dataframe(self, key: Union[pd.DataFrame, modin_pd.DataFrame]):
         if self.data_is_dataframe():
             return self.data[key]
         if self.data_is_list_of_dict():

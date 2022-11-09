@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
 
+import modin.pandas as modin_pd
 import pandas as pd
 
 from taipy.config.common.scope import Scope
@@ -56,7 +57,8 @@ class CSVDataNode(DataNode):
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PANDAS = "pandas"
-    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY]
+    __EXPOSED_TYPE_MODIN = "modin"
+    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_PATH_KEY = "default_path"
     __HAS_HEADER_PROPERTY = "has_header"
@@ -137,6 +139,8 @@ class CSVDataNode(DataNode):
     def _read(self):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
+            return self._read_as_modin_dataframe()
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
@@ -160,7 +164,9 @@ class CSVDataNode(DataNode):
     def _read_as_numpy(self):
         return self._read_as_pandas_dataframe().to_numpy()
 
-    def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
+    def _read_as_pandas_dataframe(
+        self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
+    ) -> pd.DataFrame:
         try:
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 if column_names:
@@ -173,8 +179,26 @@ class CSVDataNode(DataNode):
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
+    def _read_as_modin_dataframe(
+        self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None
+    ) -> modin_pd.DataFrame:
+        try:
+            if self.properties[self.__HAS_HEADER_PROPERTY]:
+                if column_names:
+                    return modin_pd.read_csv(self._path)[column_names]
+                return modin_pd.read_csv(self._path)
+            else:
+                if usecols:
+                    return modin_pd.read_csv(self._path, header=None, usecols=usecols)
+                return modin_pd.read_csv(self._path, header=None)
+        except pd.errors.EmptyDataError:
+            return modin_pd.DataFrame()
+
     def _write(self, data: Any):
-        pd.DataFrame(data).to_csv(self._path, index=False)
+        if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+            data.to_csv(self._path, index=False)
+        else:
+            pd.DataFrame(data).to_csv(self._path, index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.

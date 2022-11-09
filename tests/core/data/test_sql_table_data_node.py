@@ -12,6 +12,7 @@
 from importlib import util
 from unittest import mock
 
+import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 import pytest
@@ -31,7 +32,7 @@ class MyCustomObject:
 
 
 class TestSQLTableDataNode:
-    __properties = [
+    __pandas_properties = [
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
@@ -43,8 +44,21 @@ class TestSQLTableDataNode:
         },
     ]
 
+    __modin_properties = [
+        {
+            "db_name": "taipy",
+            "db_engine": "sqlite",
+            "table_name": "foo",
+            "exposed_type": "modin",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+                "other": "value",
+            },
+        },
+    ]
+
     if util.find_spec("pyodbc"):
-        __properties.append(
+        __pandas_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -56,9 +70,22 @@ class TestSQLTableDataNode:
                 },
             },
         )
+        __modin_properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "mssql",
+                "table_name": "foo",
+                "exposed_type": "modin",
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
+            },
+        )
 
     if util.find_spec("pymysql"):
-        __properties.append(
+        __pandas_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -70,9 +97,22 @@ class TestSQLTableDataNode:
                 },
             },
         )
+        __modin_properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "mysql",
+                "table_name": "foo",
+                "exposed_type": "modin",
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
+            },
+        )
 
     if util.find_spec("psycopg2"):
-        __properties.append(
+        __pandas_properties.append(
             {
                 "db_username": "sa",
                 "db_password": "Passw0rd",
@@ -84,13 +124,27 @@ class TestSQLTableDataNode:
                 },
             },
         )
+        __modin_properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "postgresql",
+                "table_name": "foo",
+                "exposed_type": "modin",
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
+            },
+        )
 
-    @pytest.mark.parametrize("properties", __properties)
-    def test_create(self, properties):
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    @pytest.mark.parametrize("modin_properties", __modin_properties)
+    def test_create(self, pandas_properties, modin_properties):
         dn = SQLTableDataNode(
             "foo_bar",
             Scope.PIPELINE,
-            properties=properties,
+            properties=pandas_properties,
         )
         assert isinstance(dn, SQLTableDataNode)
         assert dn.storage_type() == "sql_table"
@@ -101,6 +155,23 @@ class TestSQLTableDataNode:
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.exposed_type == "pandas"
+        assert dn.table_name == "foo"
+        assert dn._get_read_query() == "SELECT * FROM foo"
+
+        dn = SQLTableDataNode(
+            "foo_bar",
+            Scope.PIPELINE,
+            properties=modin_properties,
+        )
+        assert isinstance(dn, SQLTableDataNode)
+        assert dn.storage_type() == "sql_table"
+        assert dn.config_id == "foo_bar"
+        assert dn.scope == Scope.PIPELINE
+        assert dn.id is not None
+        assert dn.owner_id is None
+        assert dn.job_ids == []
+        assert dn.is_ready_for_reading
+        assert dn.exposed_type == "modin"
         assert dn.table_name == "foo"
         assert dn._get_read_query() == "SELECT * FROM foo"
 
@@ -121,16 +192,25 @@ class TestSQLTableDataNode:
 
     @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as", return_value="custom")
     @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
+    @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_modin_dataframe", return_value="modin")
     @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_numpy", return_value="numpy")
-    @pytest.mark.parametrize("properties", __properties)
-    def test_read(self, mock_read_as, mock_read_as_pandas_dataframe, mock_read_as_numpy, properties):
-        custom_properties = properties.copy()
-
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    @pytest.mark.parametrize("modin_properties", __modin_properties)
+    def test_read(
+        self,
+        mock_read_as,
+        mock_read_as_pandas_dataframe,
+        mock_read_as_modin_dataframe,
+        mock_read_as_numpy,
+        pandas_properties,
+        modin_properties,
+    ):
+        custom_properties = pandas_properties.copy()
         # Create SQLTableDataNode without exposed_type (Default is pandas.DataFrame)
         sql_data_node_as_pandas = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties=properties,
+            properties=pandas_properties,
         )
 
         assert sql_data_node_as_pandas.read() == "pandas"
@@ -147,9 +227,14 @@ class TestSQLTableDataNode:
 
         assert sql_data_source_as_numpy_object.read() == "numpy"
 
-    @pytest.mark.parametrize("properties", __properties)
-    def test_read_as(self, properties):
-        custom_properties = properties.copy()
+        # Create the same SQLDataSource but with modin exposed_type
+        sql_data_source_as_modin_object = SQLTableDataNode("foo", Scope.PIPELINE, properties=modin_properties)
+        assert sql_data_source_as_modin_object.properties["exposed_type"] == "modin"
+        assert sql_data_source_as_modin_object.read() == "modin"
+
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    def test_read_as(self, pandas_properties):
+        custom_properties = pandas_properties.copy()
 
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = MyCustomObject
@@ -213,9 +298,9 @@ class TestSQLTableDataNode:
             (np.array([np.array([1, 2]), np.array([3, 4])]), [[1, 2], [3, 4]], "_insert_tuples"),
         ],
     )
-    @pytest.mark.parametrize("properties", __properties)
-    def test_write(self, data, written_data, called_func, properties):
-        custom_properties = properties.copy()
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    def test_write(self, data, written_data, called_func, pandas_properties):
+        custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
 
@@ -229,21 +314,39 @@ class TestSQLTableDataNode:
                 dn.write(data)
                 mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
 
-    @pytest.mark.parametrize("properties", __properties)
-    def test_raise_error_invalid_exposed_type(self, properties):
-        custom_properties = properties.copy()
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    def test_raise_error_invalid_exposed_type(self, pandas_properties):
+        custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = "foo"
         with pytest.raises(InvalidExposedType):
             SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
 
-    @pytest.mark.parametrize("properties", __properties)
-    def test_write_dataframe(self, properties):
-        custom_properties = properties.copy()
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    @pytest.mark.parametrize("modin_properties", __modin_properties)
+    def test_write_dataframe(self, pandas_properties, modin_properties):
+        # test write pandas dataframe
+        custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
 
         df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+            "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
+        ):
+            cursor_mock = engine_mock.return_value.__enter__.return_value
+            cursor_mock.execute.side_effect = None
+
+            with mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
+                dn.write(df)
+                assert mck.call_args[0][0].equals(df)
+
+        # test write modin dataframe
+        custom_properties = modin_properties.copy()
+        custom_properties.pop("db_extra_args")
+        dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+
+        df = modin_pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
@@ -261,9 +364,9 @@ class TestSQLTableDataNode:
             np.array([]),
         ],
     )
-    @pytest.mark.parametrize("properties", __properties)
-    def test_write_empty_list(self, data, properties):
-        custom_properties = properties.copy()
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
+    def test_write_empty_list(self, data, pandas_properties):
+        custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
 
@@ -277,13 +380,13 @@ class TestSQLTableDataNode:
                 dn.write(data)
                 mck.assert_called_once_with(create_table_mock.return_value, cursor_mock)
 
-    @pytest.mark.parametrize("properties", __properties)
+    @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     @mock.patch("pandas.read_sql_query")
-    def test_engine_cache(self, _, properties):
+    def test_engine_cache(self, _, pandas_properties):
         dn = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties=properties,
+            properties=pandas_properties,
         )
 
         assert dn._engine is None

@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import Any, List, Optional, Set, Tuple, Union
 
+import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 
@@ -375,19 +376,21 @@ class DataNode(_Entity):
         if len(operators) == 0:
             return data
         if not ((type(operators[0]) == list) or (type(operators[0]) == tuple)):
-            if isinstance(data, pd.DataFrame):
+            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
                 return DataNode.__filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
             if isinstance(data, List):
                 return DataNode.__filter_list_per_key_value(data, operators[0], operators[1], operators[2])
         else:
-            if isinstance(data, pd.DataFrame):
+            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
                 return DataNode.__filter_dataframe(data, operators, join_operator=join_operator)
             if isinstance(data, List):
                 return DataNode.__filter_list(data, operators, join_operator=join_operator)
         return NotImplemented
 
     @staticmethod
-    def __filter_dataframe(df_data: pd.DataFrame, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+    def __filter_dataframe(
+        df_data: Union[pd.DataFrame, modin_pd.DataFrame], operators: Union[List, Tuple], join_operator=JoinOperator.AND
+    ):
         filtered_df_data = []
         if join_operator == JoinOperator.AND:
             how = "inner"
@@ -400,7 +403,9 @@ class DataNode(_Entity):
         return DataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
 
     @staticmethod
-    def __filter_dataframe_per_key_value(df_data: pd.DataFrame, key: str, value, operator: Operator):
+    def __filter_dataframe_per_key_value(
+        df_data: Union[pd.DataFrame, modin_pd.DataFrame], key: str, value, operator: Operator
+    ):
         df_by_col = df_data[key]
         if operator == Operator.EQUAL:
             df_by_col = df_by_col == value

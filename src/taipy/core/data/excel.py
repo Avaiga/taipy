@@ -12,8 +12,9 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from os.path import isfile
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+import modin.pandas as modin_pd
 import pandas as pd
 from openpyxl import load_workbook
 
@@ -67,7 +68,8 @@ class ExcelDataNode(DataNode):
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PANDAS = "pandas"
-    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY]
+    __EXPOSED_TYPE_MODIN = "modin"
+    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_PATH_KEY = "default_path"
     __HAS_HEADER_PROPERTY = "has_header"
@@ -157,6 +159,8 @@ class ExcelDataNode(DataNode):
     def _read(self):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
+            return self._read_as_modin_dataframe()
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
@@ -228,24 +232,61 @@ class ExcelDataNode(DataNode):
             return {sheet_name: df.to_numpy() for sheet_name, df in sheets.items()}
         return sheets.to_numpy()
 
-    def _read_as_pandas_dataframe(self, sheet_names=None):
+    def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
         if sheet_names is None:
             sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
         try:
-            kwargs = {}
+            kwargs: Dict[str, Any] = {}
             if not self.properties[self.__HAS_HEADER_PROPERTY]:
                 kwargs["header"] = None
-            return pd.read_excel(
+            df = pd.read_excel(
                 self._path,
                 sheet_name=sheet_names,
                 **kwargs,
             )
+            if isinstance(df, dict):
+                for key, value in df.items():
+                    df[key] = pd.DataFrame(value)
+                return df
+
+            return pd.DataFrame(df)
 
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
+    def _read_as_modin_dataframe(
+        self, sheet_names=None
+    ) -> Union[Dict[Union[int, str], modin_pd.DataFrame], modin_pd.DataFrame]:
+        if sheet_names is None:
+            sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
+        try:
+            kwargs: Dict[str, Any] = {}
+            if not self.properties[self.__HAS_HEADER_PROPERTY]:
+                kwargs["header"] = None
+            if kwargs.get("header", None):
+                return modin_pd.read_excel(
+                    self._path,
+                    sheet_name=sheet_names,
+                    **kwargs,
+                )
+            else:
+                df = pd.read_excel(
+                    self._path,
+                    sheet_name=sheet_names,
+                    **kwargs,
+                )
+                if isinstance(df, dict):
+                    for key, value in df.items():
+                        df[key] = modin_pd.DataFrame(value)
+                    return df
+
+            return modin_pd.DataFrame(df)
+
+        except pd.errors.EmptyDataError:
+            return modin_pd.DataFrame()
+
     def _write(self, data: Any):
-        if isinstance(data, Dict) and all([isinstance(x, pd.DataFrame) for x in data.values()]):
+        if isinstance(data, Dict) and all([isinstance(x, (pd.DataFrame, modin_pd.DataFrame)) for x in data.values()]):
             writer = pd.ExcelWriter(self._path)
             for key in data.keys():
                 data[key].to_excel(writer, key, index=False)
