@@ -16,7 +16,6 @@ if find_spec('taipy'):
         from taipy.config import Config
         from taipy.config import Scope
         from taipy.config import Frequency
-        from taipy.logger import *
 
     if find_spec("taipy.core"):
         from taipy.core.taipy import (
