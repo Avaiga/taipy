@@ -9,4 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+"""# Taipy Rest
+
+The Taipy Rest package exposes the Runnable `Rest^` service to provide REST APIs on top of Taipy Core. (more details
+on Taipy Core functionalities in the [user manual](../../../manuals/core/)).
+
+Once the `Rest^` service runs, users can call REST APIs to create, read, update, submit and remove Taipy entities
+(including cycles, scenarios, pipelines, tasks, jobs, and data nodes). It is handy when it comes to integrating a
+Taipy application in a more complex IT ecosystem.
+
+Please refer to [REST API](../../reference_rest/) page to get the exhaustive list of available APIs."""
+
+
 from .rest import Rest
