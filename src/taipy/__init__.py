@@ -49,6 +49,16 @@ if find_spec("taipy"):
             unsubscribe_scenario,
             untag,
         )
+        from taipy.core._core import Core
+        from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
+        from taipy.core.common.default_custom_document import DefaultCustomDocument
+        from taipy.core.cycle.cycle import Cycle
+        from taipy.core.data.data_node import DataNode
+        from taipy.core.job.job import Job
+        from taipy.core.job.status import Status
+        from taipy.core.pipeline.pipeline import Pipeline
+        from taipy.core.scenario.scenario import Scenario
+        from taipy.core.task.task import Task
 
     if find_spec("taipy.gui"):
         from taipy.gui import Gui
