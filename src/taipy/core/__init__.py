@@ -9,6 +9,36 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+"""# Taipy Core
+
+The Taipy Core package is a Python library designed to build powerful and customized data-driven back-end
+applications. It provides the necessary tools to help Python developers transform their algorithms into a
+complete back-end application.
+More details on the [Taipy Core](../../../manuals/core/) functionalities are available in the user manual.
+
+To build a Taipy Core application, the first step consists of setting up the Taipy configuration to design the
+characteristics and the behavior of your application.
+Import `Config^` from the `taipy.config^` module, then use the various methods of the `Config^` singleton class to
+configure your core application. In particular configure the [data nodes](../../../manuals/core/config/data-node-config,
+[tasks](../../../manuals/core/config/task-config), and [scenarios](../../../manuals/core/config/scenario-config).
+Please refer to the [Core configuration user manual](../../../manuals/core/config/) for more information and
+detailed examples.
+
+Once your application is configured, import module `import taipy as tp` so you can use any function described
+in the following [function](./#functions) section. In particular, the most used functions are `tp.create_scenario`,
+`tp.get_scenarios`, `tp.get_data_nodes`, `tp.submit`, used to get, create, and submit entities.
+
+!!! Note
+
+    Taipy Core provides a runnable service `Core^`. can run as a service in a dedicated thread. The purpose is to
+    have a dedicated thread responsible for dispatching the submitted jobs to an available executor for their execution.
+
+    In particular, this `Core^` service is automatically run when Core is used with taipy-rest or taipy-gui. See
+    [running services](../../../manuals/running_services/) page of the user manual for more details.
+
+"""
+
+
 from ._core import Core
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from .common.default_custom_document import DefaultCustomDocument
@@ -51,21 +81,3 @@ from .taipy import (
     untag,
 )
 from .task.task import Task
-
-"""# Taipy Core.
-
-The Taipy Core package is a Python library made to build powerful and customized data-driven back-end applications.
-It provides the necessary tools to help Python developers transform their algorithms into a complete
-back-end application.
-
-!!! Note "Optional packages"
-
-    There are Python packages that you can install in your environment to
-    add functionality to Taipy Core:
-
-    - [`pyodbc`](https://pypi.org/project/pyodbc/), [`pymysql`](https://pypi.org/project/PyMySQL/), [`psycopg2`](https://www.psycopg.org/): are used by data nodes configured using the predefined [`SQL data node config`](../../core/config/data-node-config.md#sql) with `mssql`, `mysql`, and `postgresql` engines, respectively.
-    You can install these packages :
-        - directly with the regular `pip install <package-name>` command with the `<package-name>` is `pyodbc`, `pymysql`, or `psycopg2`.
-        - by installing Taipy Core with extra packages for specific SQL engine, using: `pip install taipy-core[<sql-engine>]` with the `<sql-engine>` is `mssql`, `mysql`, or `postgresql`.
-        - or by installing complete Taipy with extra packages for specific SQL engine, using: `pip install taipy[<sql-engine>]` with the `<sql-engine>` is `mssql`, `mysql`, or `postgresql`.
-"""
