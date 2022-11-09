@@ -12,12 +12,44 @@
 from importlib.util import find_spec
 
 if find_spec('taipy'):
-    if find_spec('taipy.config'):
-        from taipy.config import *
+    if find_spec("taipy.config"):
+        from taipy.config import Config
+        from taipy.config import Scope
+        from taipy.config import Frequency
         from taipy.logger import *
 
-    if find_spec('taipy.core'):
-        from taipy.core import *
+    if find_spec("taipy.core"):
+        from taipy.core.taipy import (
+            cancel_job,
+            clean_all_entities,
+            compare_scenarios,
+            create_pipeline,
+            create_scenario,
+            delete,
+            delete_job,
+            delete_jobs,
+            export_scenario,
+            get,
+            get_cycles,
+            get_data_nodes,
+            get_jobs,
+            get_latest_job,
+            get_parents,
+            get_pipelines,
+            get_primary,
+            get_primary_scenarios,
+            get_scenarios,
+            get_tasks,
+            set,
+            set_primary,
+            submit,
+            subscribe_pipeline,
+            subscribe_scenario,
+            tag,
+            unsubscribe_pipeline,
+            unsubscribe_scenario,
+            untag,
+        )
 
     if find_spec('taipy.gui'):
         from taipy.gui import Gui
