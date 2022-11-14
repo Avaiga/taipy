@@ -272,7 +272,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The default data node configuration.
+            `DataNodeConfig^`: The default data node configuration.
         """
         section = DataNodeConfig(_Config.DEFAULT_KEY, storage_type, scope, cacheable, **properties)
         Config._register(section)
@@ -301,7 +301,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new data node configuration.
+            `DataNodeConfig^`: The new data node configuration.
         """
         section = DataNodeConfig(id, storage_type, scope, cacheable, **properties)
         Config._register(section)
@@ -330,7 +330,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new CSV data node configuration.
+            `DataNodeConfig^`: The new CSV data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -368,7 +368,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new JSON data node configuration.
+            `DataNodeConfig^`: The new JSON data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -409,7 +409,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new CSV data node configuration.
+            `DataNodeConfig^`: The new CSV data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -454,7 +454,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new Generic data node configuration.
+            `DataNodeConfig^`: The new Generic data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -490,7 +490,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new _in_memory_ data node configuration.
+            `DataNodeConfig^`: The new _in_memory_ data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -523,7 +523,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new pickle data node configuration.
+            `DataNodeConfig^`: The new pickle data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -575,7 +575,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new SQL data node configuration.
+            `DataNodeConfig^`: The new SQL data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -638,7 +638,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new SQL data node configuration.
+            `DataNodeConfig^`: The new SQL data node configuration.
         """
         section = DataNodeConfig(
             id,
@@ -696,7 +696,7 @@ class DataNodeConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            DataNodeConfig^: The new Mongo collection data node configuration.
+            `DataNodeConfig^`: The new Mongo collection data node configuration.
         """
         section = DataNodeConfig(
             id,

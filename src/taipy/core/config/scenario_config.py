@@ -150,7 +150,7 @@ class ScenarioConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            ScenarioConfig^: The new scenario configuration.
+            `ScenarioConfig^`: The new scenario configuration.
         """
         section = ScenarioConfig(id, pipeline_configs, frequency=frequency, comparators=comparators, **properties)
         Config._register(section)
@@ -191,7 +191,7 @@ class ScenarioConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            ScenarioConfig^: The new scenario configuration.
+            `ScenarioConfig^`: The new scenario configuration.
         """
         if not pipeline_id:
             pipeline_id = f"{id}_pipeline"
@@ -230,7 +230,7 @@ class ScenarioConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            ScenarioConfig^: The default scenario configuration.
+            `ScenarioConfig^`: The default scenario configuration.
         """
         section = ScenarioConfig(
             _Config.DEFAULT_KEY, pipeline_configs, frequency=frequency, comparators=comparators, **properties

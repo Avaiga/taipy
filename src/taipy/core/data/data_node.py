@@ -285,7 +285,7 @@ class DataNode(_Entity):
         """Read the data referenced by this data node.
 
         Returns:
-            Any: The data referenced by this data node.
+            The data referenced by this data node.
         Raises:
             NoData^: If the data has not been written yet.
         """
@@ -297,7 +297,7 @@ class DataNode(_Entity):
         """Read the data referenced by this data node.
 
         Returns:
-            Any: The data referenced by this data node. None if the data has not been written yet.
+            The data referenced by this data node. None if the data has not been written yet.
         """
         try:
             return self.read_or_raise()
@@ -479,7 +479,7 @@ class DataNode(_Entity):
         """Indicate if this data node is ready for reading.
 
         Returns:
-            bool: False if the data is locked for modification or if the data has never been written.
+            False if the data is locked for modification or if the data has never been written.
                 True otherwise.
         """
         if self._edit_in_progress:

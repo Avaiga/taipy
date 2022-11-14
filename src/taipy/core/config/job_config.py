@@ -88,7 +88,7 @@ class JobConfig(UniqueSection):
                 `&lt;env_var&gt;` is the name of environment variable.
             nb_of_workers (Optional[int, str]): Deprecated. Use max_nb_of_workers instead.
         Returns:
-            JobConfig^: The job execution configuration.
+            `JobConfig^`: The job execution configuration.
         """
         if nb_of_workers:
             _warn_deprecated("nb_or_workers", suggest="max_nb_of_workers")
