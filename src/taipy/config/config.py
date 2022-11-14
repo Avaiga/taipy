@@ -103,7 +103,7 @@ class Config:
             clean_entities_enabled (Optional[str]): The field to activate or deactivate the
                 'clean entities' feature. The default value is False.
         Returns:
-            GlobalAppConfig^: The global application configuration.
+            The global application configuration.
         """
         glob_cfg = GlobalAppConfig(root_folder, storage_folder, clean_entities_enabled, **properties)
         if cls._python_config._global_config is None:
@@ -120,7 +120,7 @@ class Config:
         This method logs issue messages and returns an issue collector.
 
         Returns:
-            IssueCollector^: Collector containing the info, warning and error issues.
+            Collector containing the info, warning and error issues.
         """
         cls._collector = _Checker._check(cls._applied_config)
         cls.__log_message(cls)
