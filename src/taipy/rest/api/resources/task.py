@@ -45,7 +45,8 @@ class TaskResource(Resource):
         Return a single task by *task_id*. If the task does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires `TAIPY_READER` role.
 
         Code example:
 
@@ -77,7 +78,8 @@ class TaskResource(Resource):
         Delete a task. If the task does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires `TAIPY_EDITOR` role.
 
         Code example:
 
@@ -133,7 +135,8 @@ class TaskList(Resource):
         Return an array of all tasks.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires `TAIPY_READER` role.
 
         Code example:
 
@@ -161,7 +164,8 @@ class TaskList(Resource):
         Create a new task from its *config_id*. If the config does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires `TAIPY_EDITOR` role.
 
         Code example:
 
@@ -234,7 +238,8 @@ class TaskExecutor(Resource):
         Execute a task by *task_id*. If the task does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EXECUTOR` role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires `TAIPY_EXECUTOR` role.
 
         Code example:
 

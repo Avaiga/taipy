@@ -314,7 +314,10 @@ class CycleList(Resource):
 
             === "Curl"
                 ```shell
-                    curl -X POST -H "Content-Type: application/json" -d '{"frequency": "DAILY", "properties": {}, "creation_date": "2020-01-01T00:00:00", "start_date": "2020-01-01T00:00:00", "end_date": "2020-01-01T00:00:00"}' http://localhost:5000/api/v1/cycles
+                    curl -X POST -H "Content-Type: application/json"\
+                    -d '{"frequency": "DAILY", "properties": {}, "creation_date": "2020-01-01T00:00:00",\
+                    "start_date": "2020-01-01T00:00:00", "end_date": "2020-01-01T00:00:00"}'\
+                    http://localhost:5000/api/v1/cycles
                 ```
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.

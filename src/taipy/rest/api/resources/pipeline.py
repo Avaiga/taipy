@@ -46,7 +46,8 @@ class PipelineResource(Resource):
         Return a single pipeline by pipeline_id. If the pipeline does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_READER_ role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires _TAIPY_READER_ role.
 
         Code example:
 
@@ -78,7 +79,8 @@ class PipelineResource(Resource):
         Delete a pipeline. If the pipeline does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_EDITOR_ role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires _TAIPY_EDITOR_ role.
 
         Code example:
 
@@ -135,7 +137,8 @@ class PipelineList(Resource):
         Return an array of all pipelines.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_READER_ role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires _TAIPY_READER_ role.
 
         Code example:
 
@@ -163,7 +166,8 @@ class PipelineList(Resource):
         Create a pipeline from its config_id. If the config does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_EDITOR_ role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires _TAIPY_EDITOR_ role.
 
         Code example:
 
@@ -237,7 +241,8 @@ class PipelineExecutor(Resource):
         Execute a pipeline from pipeline_id. If the pipeline does not exist, a 404 error is returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), This endpoint requires _TAIPY_EXECUTOR_ role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), This endpoint
+          requires _TAIPY_EXECUTOR_ role.
 
         Code example:
 

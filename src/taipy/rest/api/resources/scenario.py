@@ -79,7 +79,8 @@ class ScenarioResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get("http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
+                    response = requests.get(
+                    "http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
                     print(response)
                     print(response.json())
                 ```
@@ -162,7 +163,8 @@ class ScenarioResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.delete("http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
+                    response = requests.delete(
+                    "http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
                     print(response)
                     print(response.json())
                 ```
@@ -468,7 +470,8 @@ class ScenarioExecutor(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                     import requests
-                        response = requests.post("http://localhost:5000/api/v1/scenarios/submit/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
+                        response = requests.post(
+                        "http://localhost:5000/api/v1/scenarios/submit/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
                         print(response)
                         print(response.json())
                 ```

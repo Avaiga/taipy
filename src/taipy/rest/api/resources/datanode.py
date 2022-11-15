@@ -185,7 +185,8 @@ class DataNodeResource(Resource):
 
             === "Curl"
                 ```shell
-                    curl -X DELETE http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d
+                    curl -X DELETE \
+                    http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d
                 ```
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
@@ -207,12 +208,13 @@ class DataNodeResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.delete("http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d")
+                    response = requests.delete(
+                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d")
                     print(response)
                     print(response.json())
                 ```
-                `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the value of the  *datanode_id* parameter. It
-                represents the identifier of the Cycle we want to delete.
+                `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the value of the
+                *datanode_id* parameter. It represents the identifier of the Cycle we want to delete.
 
                 In case of success here is an output example:
                 ```
@@ -498,7 +500,8 @@ class DataNodeReader(Resource):
             === "Curl"
 
                 ```shell
-                  curl -X GET http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read
+                  curl -X GET \
+                  http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read
                 ```
 
                 `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the *datanode_id*
@@ -520,7 +523,8 @@ class DataNodeReader(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get("http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read")
+                    response = requests.get(
+                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read")
                     print(response)
                     print(response.json())
                 ```
