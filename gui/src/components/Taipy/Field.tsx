@@ -50,7 +50,7 @@ const Field = (props: TaipyFieldProps) => {
                     {value}
                 </span>
             ) : (
-                <Typography className={className} id={id} component="span">
+                <Typography className={className} id={id} component="span" sx={{fontWeight: "unset"}}>
                     {value}
                 </Typography>
             )}
