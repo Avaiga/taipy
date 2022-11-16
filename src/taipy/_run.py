@@ -11,9 +11,9 @@
 
 import typing as t
 
-from . import Gui
-from . import Rest
-from . import Core
+from taipy.gui import Gui
+from taipy.rest import Rest
+from taipy.core import Core
 
 
 def _run(*apps: t.List[t.Union[Gui, Rest, Core]], **kwargs) -> t.Optional[t.Union[Gui, Rest, Core]]:
