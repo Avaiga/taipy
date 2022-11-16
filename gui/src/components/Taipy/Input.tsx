@@ -100,7 +100,7 @@ const Input = (props: TaipyInputProps) => {
             <TextField
                 margin="dense"
                 hiddenLabel
-                value={value || ""}
+                value={value === undefined ? "": value}
                 className={className}
                 type={type}
                 id={id}
