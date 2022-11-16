@@ -27,6 +27,8 @@ interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     raw?: boolean;
 }
 
+const unsetWeightSx = {fontWeight: "unset"};
+
 const Field = (props: TaipyFieldProps) => {
     const { id, dataType, format, defaultValue, raw } = props;
     const formatConfig = useFormatConfig();
@@ -50,7 +52,7 @@ const Field = (props: TaipyFieldProps) => {
                     {value}
                 </span>
             ) : (
-                <Typography className={className} id={id} component="span">
+                <Typography className={className} id={id} component="span" sx={unsetWeightSx}>
                     {value}
                 </Typography>
             )}
