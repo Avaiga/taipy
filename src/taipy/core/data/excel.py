@@ -15,6 +15,7 @@ from os.path import isfile
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
+import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
 
@@ -211,7 +212,7 @@ class ExcelDataNode(DataNode):
             res = list()
             for row in work_sheet.rows:
                 res.append([col.value for col in row])
-            if self.properties[self.__HAS_HEADER_PROPERTY]:
+            if self.properties[self.__HAS_HEADER_PROPERTY] and res:
                 header = res.pop(0)
                 for i, row in enumerate(res):
                     res[i] = sheet_exposed_type(**dict([[h, r] for h, r in zip(header, row)]))
@@ -286,11 +287,18 @@ class ExcelDataNode(DataNode):
             return modin_pd.DataFrame()
 
     def _write(self, data: Any):
-        if isinstance(data, Dict) and all([isinstance(x, (pd.DataFrame, modin_pd.DataFrame)) for x in data.values()]):
+        if isinstance(data, Dict) and all(
+            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
+        ):
             writer = pd.ExcelWriter(self._path)
             for key in data.keys():
-                data[key].to_excel(writer, key, index=False)
+                if isinstance(data[key], np.ndarray):
+                    pd.DataFrame(data[key]).to_excel(writer, key, index=False)
+                else:
+                    data[key].to_excel(writer, key, index=False)
             writer.save()
+        elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+            data.to_excel(self._path, index=False)
         else:
             pd.DataFrame(data).to_excel(self._path, index=False)
 

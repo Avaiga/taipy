@@ -113,10 +113,18 @@ class TestExcelDataNode:
             )
 
     def test_read_with_header(self):
-        not_existing_excel = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx"})
         with pytest.raises(NoData):
+            not_existing_excel = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx"})
             assert not_existing_excel.read() is None
             not_existing_excel.read_or_raise()
+
+        empty_excel_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/empty.xlsx")
+        empty_excel = ExcelDataNode(
+            "foo",
+            Scope.PIPELINE,
+            properties={"path": empty_excel_path, "exposed_type": MyCustomObject, "has_header": True},
+        )
+        assert len(empty_excel.read()) == 0
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
@@ -772,6 +780,23 @@ class TestExcelDataNode:
 
         for sheet_name in sheet_names:
             assert np.array_equal(excel_dn.read()[sheet_name].values, multi_sheet_content[sheet_name].values)
+
+    def test_write_multi_sheet_numpy(self, excel_file_with_multi_sheet):
+        sheet_names = ["Sheet1", "Sheet2"]
+
+        excel_dn = ExcelDataNode(
+            "foo",
+            Scope.PIPELINE,
+            properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names, "exposed_type": "numpy"},
+        )
+
+        sheets_data = [[11, 22, 33], [44, 55, 66]]
+        data = {
+            sheet_name: pd.DataFrame(sheet_data).to_numpy() for sheet_name, sheet_data in zip(sheet_names, sheets_data)
+        }
+        excel_dn.write(data)
+        read_data = excel_dn.read()
+        assert all(np.array_equal(data[sheet_name], read_data[sheet_name]) for sheet_name in sheet_names)
 
     @pytest.mark.parametrize(
         "content,columns",
