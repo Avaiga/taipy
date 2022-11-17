@@ -10,14 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 from ._config import _Config
 from ._toml_serializer import _TomlSerializer
 from .checker._checker import _Checker
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
-from .exceptions.exceptions import ConfigurationIssueError
+from .exceptions.exceptions import ConfigurationIssueError, ConfigurationUpdateBlocked
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
@@ -28,6 +28,7 @@ class Config:
     """Configuration singleton."""
 
     _ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
+    __block_update = False
     __logger = _TaipyLogger._get_logger()
     _default_config = _Config._default_config()
     _python_config = _Config()
@@ -59,6 +60,9 @@ class Config:
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
+        if cls.__block_update:
+            raise ConfigurationUpdateBlocked()
+
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
         cls._file_config = cls._serializer._read(filename)
         cls.__compile_configs()
@@ -80,6 +84,18 @@ class Config:
             If _filename_ already exists, it is overwritten.
         """
         cls._serializer._write(cls._applied_config, filename)
+
+    @classmethod
+    def block_update(cls):
+        """Block update on the configuration.
+        """
+        cls.__block_update = True
+
+    @classmethod
+    def unblock_update(cls):
+        """Unblock update on the configuration.
+        """
+        cls.__block_update = False
 
     @classmethod
     def _export_code_config(cls, filename):
@@ -105,6 +121,9 @@ class Config:
         Returns:
             The global application configuration.
         """
+        if cls.__block_update:
+            raise ConfigurationUpdateBlocked()
+
         glob_cfg = GlobalAppConfig(root_folder, storage_folder, clean_entities_enabled, **properties)
         if cls._python_config._global_config is None:
             cls._python_config._global_config = glob_cfg
@@ -128,6 +147,9 @@ class Config:
 
     @classmethod
     def _register_default(cls, default_section: Section):
+        if cls.__block_update:
+            raise ConfigurationUpdateBlocked()
+
         if isinstance(default_section, UniqueSection):
             if cls._default_config._unique_sections.get(default_section.name, None):
                 cls._default_config._unique_sections[default_section.name]._update(default_section._to_dict())
@@ -146,6 +168,9 @@ class Config:
 
     @classmethod
     def _register(cls, section):
+        if cls.__block_update:
+            raise ConfigurationUpdateBlocked()
+
         if isinstance(section, UniqueSection):
             if cls._python_config._unique_sections.get(section.name, None):
                 cls._python_config._unique_sections[section.name]._update(section._to_dict())

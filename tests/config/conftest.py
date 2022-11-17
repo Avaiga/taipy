@@ -11,11 +11,11 @@
 
 import pytest
 
-from src.taipy.config.config import Config
-from src.taipy.config.section import Section
-from src.taipy.config.checker.issue_collector import IssueCollector
 from src.taipy.config._config import _Config
 from src.taipy.config._toml_serializer import _TomlSerializer
+from src.taipy.config.checker.issue_collector import IssueCollector
+from src.taipy.config.config import Config
+from src.taipy.config.section import Section
 from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 
@@ -27,6 +27,7 @@ def reset():
 
 
 def reset_configuration_singleton():
+    Config.unblock_update()
     Config._default_config = _Config()._default_config()
     Config._python_config = _Config()
     Config._file_config = None
@@ -44,4 +45,3 @@ def register_test_sections():
     Config._register_default(SectionForTest(Section._DEFAULT_KEY, "default_attribute", prop="default_prop", prop_int=0))
     Config.configure_section_for_tests = SectionForTest._configure
     Config.section_name = Config.sections[SectionForTest.name]
-
