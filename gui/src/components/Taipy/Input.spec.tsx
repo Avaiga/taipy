@@ -164,4 +164,14 @@ describe("Number Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
+    xit("shows 0", async () => {
+    //not working cf. https://github.com/testing-library/user-event/issues/1066
+    const { getByDisplayValue, rerender } = render(<Input value={"0"} type="number" />);
+        const elt = getByDisplayValue("0") as HTMLInputElement;
+        expect(elt).toBeInTheDocument();
+        await userEvent.type(elt, "{ArrowUp}");
+        expect(elt.value).toBe("1");
+        await userEvent.type(elt, "{ArrowDown}");
+        expect(elt.value).toBe("0");
+    });
 });
