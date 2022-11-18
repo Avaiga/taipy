@@ -10,21 +10,21 @@ on:
 jobs:
   test-package:
     timeout-minutes: 20
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
       - name: setup node version
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: Ensure package version is properly set
@@ -48,9 +48,9 @@ jobs:
           with open(f\"src{os.sep}taipy{os.sep}gui{os.sep}version.json\") as version_file:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
-              raise ValueError('Branch name mismatch')
+              raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
           """ > /tmp/check.py
-          python /tmp/check.py "${{ steps.extract_branch.outputs.branch }}"
+          python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
 
       - name: Install dependencies
         run: |
@@ -62,7 +62,7 @@ jobs:
           python setup.py build_py && python -m build
           rm -rf src
           pip install dist/*.tar.gz
-          pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps
@@ -72,17 +72,17 @@ jobs:
     needs: [test-package]
     timeout-minutes: 20
     environment: publish
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
       - name: setup node version
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
 
       - name: Install dependencies
@@ -105,11 +105,11 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8','3.9','3.10']
-        os: [ubuntu-20.04,windows-latest,macos-latest]
+        os: [ubuntu-22.04,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-versions }}
 
@@ -126,7 +126,7 @@ jobs:
       - name: Prepare tests
         run: |
           pip install --upgrade pip
-          pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps

@@ -13,13 +13,13 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-20.04, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-versions }}
 
@@ -36,7 +36,7 @@ jobs:
 
           # Run tests
           echo "installing playwright"
-          pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps
@@ -53,13 +53,13 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-20.04, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-versions }}
 
@@ -82,7 +82,7 @@ jobs:
 
           # Run test with optionals packages installed
           echo "installing playwright"
-          pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps
