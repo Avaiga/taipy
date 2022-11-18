@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import threading
 from abc import abstractmethod
 from multiprocessing import Lock
@@ -41,6 +42,7 @@ class _JobDispatcher(threading.Thread):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.scheduler = scheduler
+        Config.block_update()
 
     def start(self):
         """Start the dispatcher"""
@@ -136,6 +138,7 @@ class _JobDispatcher(threading.Thread):
         try:
             if mode != JobConfig._DEVELOPMENT_MODE:
                 Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
+                Config.block_update()
             inputs: List[DataNode] = list(task.input.values())
             outputs: List[DataNode] = list(task.output.values())
             fct = task.function

@@ -60,8 +60,9 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 def test_create_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
     task = _create_task(multiply, name="get_job")
+
+    _SchedulerFactory._build_dispatcher()
 
     job_1 = _JobManager._create(task, [print], "submit_id", True)
     assert _JobManager._get(job_1.id) == job_1
@@ -82,9 +83,10 @@ def test_create_jobs():
 
 def test_get_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="get_job")
+
+    _SchedulerFactory._build_dispatcher()
 
     job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
     assert _JobManager._get(job_1.id) == job_1
@@ -97,10 +99,11 @@ def test_get_job():
 
 def test_get_latest_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
+
+    _SchedulerFactory._build_dispatcher()
 
     job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
     assert _JobManager._get_latest(task) == job_1
@@ -123,9 +126,10 @@ def test_get_job_unknown():
 
 def test_get_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="get_all_jobs")
+
+    _SchedulerFactory._build_dispatcher()
 
     job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
     job_2 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_2")
@@ -135,9 +139,10 @@ def test_get_jobs():
 
 def test_delete_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="delete_job")
+
+    _SchedulerFactory._build_dispatcher()
 
     job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
     job_2 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_2")
@@ -159,8 +164,8 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
+    _SchedulerFactory._build_dispatcher()
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
 
@@ -176,9 +181,11 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 def test_force_deleting_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
+
+    _SchedulerFactory._build_dispatcher()
+
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
         assert_true_after_1_minute_max(job.is_running)
@@ -190,9 +197,11 @@ def test_force_deleting_unfinished_job():
 
 def test_cancel_single_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
+
+    _SchedulerFactory._build_dispatcher()
+
     assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
     _SchedulerFactory._dispatcher.stop()
     assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
@@ -212,9 +221,11 @@ def test_cancel_single_job():
 @mock.patch("src.taipy.core._scheduler._scheduler._Scheduler._cancel_jobs")
 def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
+
+    _SchedulerFactory._build_dispatcher()
+
     assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
     _SchedulerFactory._dispatcher.stop()
     assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
@@ -247,9 +258,11 @@ def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
 @mock.patch("src.taipy.core.job.job.Job.canceled")
 def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
+
+    _SchedulerFactory._build_dispatcher()
+
     assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
     _SchedulerFactory._dispatcher.stop()
     assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
@@ -278,9 +291,11 @@ def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
 
 def test_cancel_single_running_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
+
+    _SchedulerFactory._build_dispatcher()
+
     assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
     assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
 

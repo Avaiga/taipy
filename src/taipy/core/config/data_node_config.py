@@ -13,6 +13,7 @@ from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.config._config import _Config
+from taipy.config.common._config_blocker import _ConfigBlocker
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -201,6 +202,7 @@ class DataNodeConfig(Section):
         return _tpl._replace_templates(self._storage_type)
 
     @storage_type.setter  # type: ignore
+    @_ConfigBlocker._check()
     def storage_type(self, val):
         self._storage_type = val
 
@@ -209,6 +211,7 @@ class DataNodeConfig(Section):
         return _tpl._replace_templates(self._scope)
 
     @scope.setter  # type: ignore
+    @_ConfigBlocker._check()
     def scope(self, val):
         self._scope = val
 
@@ -217,6 +220,7 @@ class DataNodeConfig(Section):
         return _tpl._replace_templates(self._cacheable)
 
     @cacheable.setter  # type: ignore
+    @_ConfigBlocker._check()
     def cacheable(self, val):
         self._cacheable = val
 

@@ -255,7 +255,6 @@ class TestDataNode:
 
     def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-        _SchedulerFactory._build_dispatcher()
 
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle", cacheable=True)
@@ -268,6 +267,8 @@ class TestDataNode:
         pipeline_c = Config.configure_pipeline("pipeline_c", [task_a_b, task_b_c])
         pipeline_d = Config.configure_pipeline("pipeline_d", [task_a_b, task_b_d])
         scenario_cfg = Config.configure_scenario("scenario", [pipeline_c, pipeline_d])
+
+        _SchedulerFactory._build_dispatcher()
 
         scenario = tp.create_scenario(scenario_cfg)
         scenario.submit()

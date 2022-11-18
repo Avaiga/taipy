@@ -231,6 +231,7 @@ def teardown():
 
 
 def init_config():
+    Config.unblock_update()
     Config._default_config = _Config()._default_config()
     Config._python_config = _Config()
     Config._file_config = None
