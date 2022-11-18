@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Union
 
+from ..common._config_blocker import _ConfigBlocker
 from ..common._template_handler import _TemplateHandler as _tpl
 
 
@@ -66,6 +67,7 @@ class GlobalAppConfig:
         return _tpl._replace_templates(self._storage_folder)
 
     @storage_folder.setter  # type: ignore
+    @_ConfigBlocker._check()
     def storage_folder(self, val):
         self._storage_folder = val
 
@@ -74,6 +76,7 @@ class GlobalAppConfig:
         return _tpl._replace_templates(self._root_folder)
 
     @root_folder.setter  # type: ignore
+    @_ConfigBlocker._check()
     def root_folder(self, val):
         self._root_folder = val
 
@@ -84,24 +87,25 @@ class GlobalAppConfig:
         )
 
     @clean_entities_enabled.setter  # type: ignore
+    @_ConfigBlocker._check()
     def clean_entities_enabled(self, val):
         self._clean_entities_enabled = val
-    
+
     @property
     def repository_type(self):
         return _tpl._replace_templates(self._repository_type)
-    
+
     @repository_type.setter  # type: ignore
+    @_ConfigBlocker._check()
     def repository_type(self, val):
-        print(f"setter {val}")
         self._repository_type = val
-    
 
     @property
     def repository_properties(self):
         return {k: _tpl._replace_templates(v) for k, v in self._repository_properties.items()}
 
     @repository_properties.setter  # type: ignore
+    @_ConfigBlocker._check()
     def repository_properties(self, val):
         self._repository_properties = val
 
@@ -110,6 +114,7 @@ class GlobalAppConfig:
         return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
 
     @properties.setter  # type: ignore
+    @_ConfigBlocker._check()
     def properties(self, val):
         self._properties = val
 

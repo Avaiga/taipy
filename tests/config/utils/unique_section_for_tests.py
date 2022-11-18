@@ -10,10 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from src.taipy.config import Config
 from src.taipy.config._config import _Config
+from src.taipy.config.common._config_blocker import _ConfigBlocker
 from src.taipy.config.unique_section import UniqueSection
 
 
@@ -34,6 +35,7 @@ class UniqueSectionForTest(UniqueSection):
         return self._replace_templates(self._attribute)
 
     @attribute.setter  # type: ignore
+    @_ConfigBlocker._check()
     def attribute(self, val):
         self._attribute = val
 

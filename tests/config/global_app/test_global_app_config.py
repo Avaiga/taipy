@@ -63,8 +63,30 @@ def test_block_update_global_app_config():
     with pytest.raises(ConfigurationUpdateBlocked):
         Config.configure_global_app(root_folder="./new_root_folder/", storage_folder=".new_storage/")
 
+    with pytest.raises(ConfigurationUpdateBlocked):
+        Config.global_config.root_folder = "./new_root_folder/"
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        Config.global_config.storage_folder = ".new_storage/"
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        Config.global_config.clean_entities_enabled = True
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        Config.global_config.repository_type = "mongo"
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        Config.global_config.repository_properties = {}
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        Config.global_config.properties = {"foo": "bar"}
+
     global_config = Config.global_config
 
     # Test if the global_config stay as default
     assert global_config.root_folder == "./taipy/"
     assert global_config.storage_folder == ".data/"
+    assert global_config.clean_entities_enabled is False
+    assert global_config.repository_type == "filesystem"
+    assert global_config.repository_properties == {}
+    assert len(global_config.properties) == 0

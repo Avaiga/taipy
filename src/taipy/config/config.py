@@ -12,23 +12,23 @@
 import os
 from typing import Dict, Union
 
+from ..logger._taipy_logger import _TaipyLogger
 from ._config import _Config
 from ._toml_serializer import _TomlSerializer
 from .checker._checker import _Checker
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
-from .exceptions.exceptions import ConfigurationIssueError, ConfigurationUpdateBlocked
+from .common._config_blocker import _ConfigBlocker
+from .exceptions.exceptions import ConfigurationIssueError
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
-from ..logger._taipy_logger import _TaipyLogger
 
 
 class Config:
     """Configuration singleton."""
 
     _ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
-    __block_update = False
     __logger = _TaipyLogger._get_logger()
     _default_config = _Config._default_config()
     _python_config = _Config()
@@ -54,15 +54,13 @@ class Config:
         return cls._applied_config._global_config
 
     @classmethod
+    @_ConfigBlocker._check()
     def load(cls, filename):
         """Load a configuration file.
 
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
-        if cls.__block_update:
-            raise ConfigurationUpdateBlocked()
-
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
         cls._file_config = cls._serializer._read(filename)
         cls.__compile_configs()
@@ -87,21 +85,20 @@ class Config:
 
     @classmethod
     def block_update(cls):
-        """Block update on the configuration.
-        """
-        cls.__block_update = True
+        """Block update on the configuration signgleton."""
+        _ConfigBlocker._block()
 
     @classmethod
     def unblock_update(cls):
-        """Unblock update on the configuration.
-        """
-        cls.__block_update = False
+        """Unblock update on the configuration signgleton."""
+        _ConfigBlocker._unblock()
 
     @classmethod
     def _export_code_config(cls, filename):
         cls._serializer._write(cls._python_config, filename)
 
     @classmethod
+    @_ConfigBlocker._check()
     def configure_global_app(
         cls,
         root_folder: str = None,
@@ -121,9 +118,6 @@ class Config:
         Returns:
             The global application configuration.
         """
-        if cls.__block_update:
-            raise ConfigurationUpdateBlocked()
-
         glob_cfg = GlobalAppConfig(root_folder, storage_folder, clean_entities_enabled, **properties)
         if cls._python_config._global_config is None:
             cls._python_config._global_config = glob_cfg
@@ -146,10 +140,8 @@ class Config:
         return cls._collector
 
     @classmethod
+    @_ConfigBlocker._check()
     def _register_default(cls, default_section: Section):
-        if cls.__block_update:
-            raise ConfigurationUpdateBlocked()
-
         if isinstance(default_section, UniqueSection):
             if cls._default_config._unique_sections.get(default_section.name, None):
                 cls._default_config._unique_sections[default_section.name]._update(default_section._to_dict())
@@ -167,10 +159,8 @@ class Config:
         cls.__compile_configs()
 
     @classmethod
+    @_ConfigBlocker._check()
     def _register(cls, section):
-        if cls.__block_update:
-            raise ConfigurationUpdateBlocked()
-
         if isinstance(section, UniqueSection):
             if cls._python_config._unique_sections.get(section.name, None):
                 cls._python_config._unique_sections[section.name]._update(section._to_dict())

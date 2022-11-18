@@ -137,15 +137,35 @@ def test_section_registration_and_usage():
 
 
 def test_block_registration():
+    myUniqueSection = Config.configure_unique_section_for_tests(attribute="my_unique_attribute", prop="my_unique_prop")
+    mySection = Config.configure_section_for_tests(id="section_id", attribute="my_attribute", prop="my_prop", foo="bar")
+
     Config.block_update()
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        myUniqueSection = Config.configure_unique_section_for_tests(
-            attribute="my_unique_attribute", prop="my_unique_prop"
+        myNewUniqueSection = Config.configure_unique_section_for_tests(
+            attribute="my_new_unique_attribute", prop="my_new_unique_prop"
         )
+
     with pytest.raises(ConfigurationUpdateBlocked):
-        myFirstSection = Config.configure_section_for_tests(
-            id="first", attribute="my_attribute", prop="my_prop", foo="bar"
-        )
+        myNewSection = Config.configure_section_for_tests(id="new", attribute="my_attribute", prop="my_prop", foo="bar")
+
     with pytest.raises(ConfigurationUpdateBlocked):
-        my2ndSection = Config.configure_section_for_tests(id="second", attribute="my_2nd_attribute", prop="my_2nd_prop")
+        myUniqueSection.attribute = "foo"
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        myUniqueSection.properties = {"foo": "bar"}
+
+    # myUniqueSection stay the same
+    assert myUniqueSection.attribute == "my_unique_attribute"
+    assert myUniqueSection.properties == {"prop": "my_unique_prop"}
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        mySection.attribute = "foo"
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        mySection.properties = {"foo": "foo"}
+
+    # mySection stay the same
+    assert mySection.attribute == "my_attribute"
+    assert mySection.properties == {"prop": "my_prop", "foo": "bar"}
