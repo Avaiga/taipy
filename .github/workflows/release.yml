@@ -10,22 +10,22 @@ on:
 jobs:
   test-package:
     timeout-minutes: 20
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
       - name: Install npm
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: Ensure package version is properly set
@@ -49,9 +49,9 @@ jobs:
           with open(f\"src{os.sep}taipy{os.sep}gui{os.sep}version.json\") as version_file:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
-              raise ValueError('Branch name mismatch')
+              raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}'')
           """ > /tmp/check.py
-          python /tmp/check.py "${{ steps.extract_branch.outputs.branch }}"
+          python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
 
       - name: Install dependencies
         run: |
@@ -63,7 +63,7 @@ jobs:
           python setup.py build_py && python -m build
           rm -rf src
           pip install dist/*.tar.gz
-          pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps
@@ -73,18 +73,18 @@ jobs:
     needs: [test-package]
     timeout-minutes: 20
     name: Release package
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Extract commit hash
         shell: bash
-        run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
+        run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         id: extract_hash
 
       - name: Create/update release and tag
         run: |
-            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
+            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.HASH }} --notes "Release created using Github Workflows"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

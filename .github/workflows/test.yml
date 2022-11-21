@@ -12,19 +12,19 @@ jobs:
     timeout-minutes: 40
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-20.04, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-versions }}
 
       - name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dom dependencies
@@ -49,7 +49,7 @@ jobs:
           tox -p all
 
       - name: Code coverage
-        if: matrix.os == 'ubuntu-20.04' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
+        if: matrix.os == 'ubuntu-22.04' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
         uses: orgoro/coverage@v2
         with:
           coverageFile: coverage.xml
@@ -60,8 +60,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [16.x]
-        os: [ubuntu-20.04, windows-latest, macos-latest]
+        node-version: [18.x]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     defaults:
@@ -71,7 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -84,7 +84,7 @@ jobs:
       - run: npm test
 
       - name: Code coverage
-        if: matrix.os == 'ubuntu-20.04' && github.event_name == 'pull_request'
+        if: matrix.os == 'ubuntu-22.04' && github.event_name == 'pull_request'
         uses: artiomtr/jest-coverage-report-action@v2.0-rc.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
