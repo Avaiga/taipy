@@ -68,7 +68,8 @@ application.
 
 """
 
-from .config import _register_gui_config
+from importlib.util import find_spec
+
 from .gui import Gui
 from .gui_actions import (
     download,
@@ -88,4 +89,15 @@ from .renderers import Html, Markdown
 from .state import State
 from .utils import is_debugging
 
-_register_gui_config()
+if find_spec("taipy") and find_spec("taipy.config"):
+    from taipy.config import _inject_section
+
+    from ._default_config import default_config
+    from .gui_section import _GuiSection
+
+    _inject_section(
+        _GuiSection,
+        "gui_config",
+        _GuiSection(property_list=list(default_config)),
+        [("configure_gui", _GuiSection._configure)],
+    )
