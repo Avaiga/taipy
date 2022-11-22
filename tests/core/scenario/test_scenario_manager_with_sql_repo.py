@@ -155,11 +155,13 @@ def test_create_scenario_does_not_modify_config():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     creation_date_1 = datetime.now()
     name_1 = "name_1"
     scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
+
+    _SchedulerFactory._build_dispatcher()
+
     assert scenario_config.properties.get("name") is None
     assert len(scenario_config.properties) == 0
 
@@ -186,7 +188,6 @@ def test_create_and_delete_scenario():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     creation_date_1 = datetime.now()
     creation_date_2 = creation_date_1 + timedelta(minutes=10)
@@ -197,6 +198,8 @@ def test_create_and_delete_scenario():
     assert len(_ScenarioManager._get_all()) == 0
 
     scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
+
+    _SchedulerFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
     assert scenario_1.config_id == "sc"
@@ -257,7 +260,6 @@ def test_scenario_manager_only_creates_data_node_once():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
@@ -274,6 +276,8 @@ def test_scenario_manager_only_creates_data_node_once():
     scenario_config = Config.configure_scenario(
         "awesome_scenario", [pipeline_config_1, pipeline_config_2], Frequency.DAILY
     )
+
+    _SchedulerFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -312,6 +316,12 @@ def test_scenario_create_from_task_config():
     task_config_1 = Config.configure_task("t1", print, data_node_1_config, data_node_2_config, scope=Scope.GLOBAL)
     task_config_2 = Config.configure_task("t2", print, data_node_2_config, data_node_3_config, scope=Scope.GLOBAL)
     scenario_config_1 = Config.configure_scenario_from_tasks("s1", task_configs=[task_config_1, task_config_2])
+
+    pipeline_name = "p1"
+    scenario_config_2 = Config.configure_scenario_from_tasks(
+        "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
+    )
+
     _ScenarioManager._submit(_ScenarioManager._create(scenario_config_1))
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
@@ -321,10 +331,6 @@ def test_scenario_create_from_task_config():
     assert isinstance(scenario_config_1.pipeline_configs[0].id, str)
     assert scenario_config_1.pipeline_configs[0].id == f"{scenario_config_1.id}_pipeline"
 
-    pipeline_name = "p1"
-    scenario_config_2 = Config.configure_scenario_from_tasks(
-        "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
-    )
     _ScenarioManager._submit(_ScenarioManager._create(scenario_config_2))
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 2

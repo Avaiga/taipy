@@ -142,7 +142,6 @@ def test_get_or_create_data():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
@@ -152,6 +151,8 @@ def test_get_or_create_data():
     task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
     pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_two, task_config_mult_by_3])
     # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
+
+    _SchedulerFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -325,15 +326,15 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
-    # TODO: Config.global_config.repository_type was resetted back to filesystem when running whole file test?
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node(
         "my_output", "in_memory", scope=Scope.PIPELINE, default_data="works !"
     )
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+
+    _SchedulerFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     _PipelineManager._submit(pipeline.id)
@@ -357,12 +358,14 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+
+    _SchedulerFactory._build_dispatcher()
+
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
 
@@ -384,12 +387,14 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+
+    _SchedulerFactory._build_dispatcher()
+
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
 
@@ -411,12 +416,14 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+
+    _SchedulerFactory._build_dispatcher()
+
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
 
@@ -438,12 +445,14 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+
+    _SchedulerFactory._build_dispatcher()
+
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
     _PipelineManager._submit(pipeline_1.id)
@@ -467,7 +476,6 @@ def test_hard_delete_shared_entities():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
 
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.SCENARIO, default_data="testing")
@@ -475,6 +483,9 @@ def test_hard_delete_shared_entities():
     task_1 = Config.configure_task("task_1", print, input_dn, intermediate_dn)
     task_2 = Config.configure_task("task_2", print, intermediate_dn, output_dn)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_1, task_2])
+
+    _SchedulerFactory._build_dispatcher()
+
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
     _PipelineManager._submit(pipeline_1.id)
