@@ -32,7 +32,6 @@ from src.taipy.core.config import (
     _ScenarioConfigChecker,
     _TaskConfigChecker,
 )
-from taipy.config.checker._checkers._gLobal_config_checker import _GlobalConfigChecker
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle.cycle import Cycle
@@ -50,6 +49,7 @@ from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
 from taipy.config._toml_serializer import _TomlSerializer
 from taipy.config.checker._checker import _Checker
+from taipy.config.checker._checkers._gLobal_config_checker import _GlobalConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -305,8 +305,6 @@ def init_managers():
     _TaskManagerFactory._build_manager()._delete_all()
     _JobManagerFactory._build_manager()._delete_all()
     _CycleManagerFactory._build_manager()._delete_all()
-    if os.path.exists("./None"):
-        os.remove("./None")
 
 
 def init_scheduler():
@@ -315,4 +313,3 @@ def init_scheduler():
     _SchedulerFactory._build_dispatcher()
     _SchedulerFactory._scheduler.jobs_to_run = Queue()
     _SchedulerFactory._scheduler.blocked_jobs = []
-    _TaskManagerFactory._build_manager()._scheduler = _SchedulerFactory._build_scheduler
