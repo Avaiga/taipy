@@ -17,6 +17,7 @@ from typing import Any, Callable, Iterable, List, Optional, Type, TypeVar, Union
 from sqlalchemy import create_engine, delete
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from taipy.config.config import Config
 
@@ -58,7 +59,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
         try:
             # More sql databases can be easily added in the future
-            self.engine = create_engine(f"sqlite:///{properties.get('db_location')}")
+            self.engine = create_engine(
+                f"sqlite:///{properties.get('db_location')}?check_same_thread=False", poolclass=StaticPool
+            )
 
             # Maybe this should be in the taipy package? So it's not executed every time
             # the class is instantiated
@@ -192,7 +195,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         )
         self.session.commit()
 
-    def __to_entity(self, entry: _TaipyModel) -> Optional[Entity]:
+    def __to_entity(self, entry: _TaipyModel) -> Entity:
         return self.__model_to_entity(entry.document) if entry else None
 
     def __model_to_entity(self, file_content):
