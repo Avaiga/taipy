@@ -132,7 +132,7 @@ class Task(_Entity):
         """Retrieve the lowest scope of the task based on its data nodes.
 
         Returns:
-            Scope^: Lowest scope present in input and output data nodes or GLOBAL if there are
+            The lowest scope present in input and output data nodes or GLOBAL if there are
                 either no input or no output.
         """
         data_nodes = list(self.__input.values()) + list(self.__output.values())

@@ -15,9 +15,12 @@ from unittest import mock
 
 import pytest
 
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.config import DataNodeConfig
+from src.taipy.core.config.job_config import JobConfig
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationIssueError
+from taipy.config.exceptions.exceptions import ConfigurationIssueError, ConfigurationUpdateBlocked
 
 
 def test_data_node_config_check():
@@ -122,3 +125,83 @@ def test_data_node_with_env_variable_in_read_fct_params():
             "data_node", storage_type="generic", read_fct_params=["ENV[FOO]", "my_param", "ENV[BAZ]"]
         )
         assert Config.data_nodes["data_node"].read_fct_params == ["bar", "my_param", "qux"]
+
+
+def test_block_datanode_config_update_in_development_mode():
+    data_node_id = "data_node_id"
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    data_node_config = Config.configure_data_node(
+        id=data_node_id,
+        storage_type="pickle",
+        default_path="foo.p",
+        scope=Scope.SCENARIO,
+        cacheable=False,
+    )
+
+    assert Config.data_nodes[data_node_id].id == data_node_id
+    assert Config.data_nodes[data_node_id].default_path == "foo.p"
+    assert Config.data_nodes[data_node_id].storage_type == "pickle"
+    assert Config.data_nodes[data_node_id].scope == Scope.SCENARIO
+    assert Config.data_nodes[data_node_id].cacheable == False
+    assert Config.data_nodes[data_node_id].properties == {"default_path": "foo.p"}
+
+    _SchedulerFactory._build_dispatcher()
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.storage_type = "foo"
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.scope = Scope.PIPELINE
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.cacheable = True
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.properties = {"foo": "bar"}
+
+    assert Config.data_nodes[data_node_id].id == data_node_id
+    assert Config.data_nodes[data_node_id].default_path == "foo.p"
+    assert Config.data_nodes[data_node_id].storage_type == "pickle"
+    assert Config.data_nodes[data_node_id].scope == Scope.SCENARIO
+    assert Config.data_nodes[data_node_id].cacheable == False
+    assert Config.data_nodes[data_node_id].properties == {"default_path": "foo.p"}
+
+
+def test_block_datanode_config_update_in_standalone_mode():
+    data_node_id = "data_node_id"
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
+    data_node_config = Config.configure_data_node(
+        id=data_node_id,
+        storage_type="pickle",
+        default_path="foo.p",
+        scope=Scope.SCENARIO,
+        cacheable=False,
+    )
+
+    assert Config.data_nodes[data_node_id].id == data_node_id
+    assert Config.data_nodes[data_node_id].default_path == "foo.p"
+    assert Config.data_nodes[data_node_id].storage_type == "pickle"
+    assert Config.data_nodes[data_node_id].scope == Scope.SCENARIO
+    assert Config.data_nodes[data_node_id].cacheable == False
+    assert Config.data_nodes[data_node_id].properties == {"default_path": "foo.p"}
+
+    _SchedulerFactory._build_dispatcher()
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.storage_type = "foo"
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.scope = Scope.PIPELINE
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.cacheable = True
+
+    with pytest.raises(ConfigurationUpdateBlocked):
+        data_node_config.properties = {"foo": "bar"}
+
+    assert Config.data_nodes[data_node_id].id == data_node_id
+    assert Config.data_nodes[data_node_id].default_path == "foo.p"
+    assert Config.data_nodes[data_node_id].storage_type == "pickle"
+    assert Config.data_nodes[data_node_id].scope == Scope.SCENARIO
+    assert Config.data_nodes[data_node_id].cacheable == False
+    assert Config.data_nodes[data_node_id].properties == {"default_path": "foo.p"}

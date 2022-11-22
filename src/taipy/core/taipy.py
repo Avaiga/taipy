@@ -94,8 +94,7 @@ def get(
             It must match the identifier pattern of one of the entities (`Task^`, `DataNode^`,
             `Pipeline^` or `Scenario^`).
     Returns:
-        Union[Task^, DataNode^, Pipeline^, Scenario^, Job^, Cycle^]: The entity
-        matching the corresponding identifier. None if no entity is found.
+        The entity matching the corresponding identifier. None if no entity is found.
     Raises:
         ModelNotFound^: If _entity_id_ does not match a correct entity pattern.
     """
@@ -118,7 +117,7 @@ def get_tasks() -> List[Task]:
     """Return the list of all existing tasks.
 
     Returns:
-        List[Task^]: The list of tasks.
+        The list of tasks.
     """
     return _TaskManagerFactory._build_manager()._get_all()
 
@@ -167,7 +166,7 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
          cycle (Optional[Cycle^]): Cycle of the scenarios to return.
          tag (Optional[str]): Tag of the scenarios to return.
     Returns:
-        List[Scenario^]: The list of scenarios filtered by cycle or tag.
+        The list of scenarios filtered by cycle or tag.
     """
     if not cycle and not tag:
         return _ScenarioManagerFactory._build_manager()._get_all()
@@ -187,8 +186,8 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
     Parameters:
          cycle (Cycle^): The cycle of the primary scenario to return.
     Returns:
-        Optional[Scenario^]: The primary scenario of the cycle _cycle_.
-            If the cycle has no primary scenario, this method returns None.
+        The primary scenario of the cycle _cycle_. If the cycle has no
+            primary scenario, this method returns None.
     """
     return _ScenarioManagerFactory._build_manager()._get_primary(cycle)
 
@@ -197,7 +196,7 @@ def get_primary_scenarios() -> List[Scenario]:
     """Return the list of all primary scenarios.
 
     Returns:
-        List[Scenario^]: The list of all primary scenarios.
+        The list of all primary scenarios.
     """
     return _ScenarioManagerFactory._build_manager()._get_primary_scenarios()
 
@@ -250,8 +249,7 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] =
             if _datanode_config_id_ is None, the scenarios are compared based on all the defined
             comparators.
     Returns:
-        Dict[str, Any]: The comparison results. The key is the data node config identifier
-            that is compared.
+        The comparison results. The key is the data node config identifier that is compared.
     Raises:
         InsufficientScenarioToCompare^: Only one or no scenario for comparison is provided.
         NonExistingComparator^: The scenario comparator does not exist.
@@ -343,7 +341,7 @@ def get_pipelines() -> List[Pipeline]:
     """Return all existing pipelines.
 
     Returns:
-        List[Pipeline^]: The list of all pipelines.
+        The list of all pipelines.
     """
     return _PipelineManagerFactory._build_manager()._get_all()
 
@@ -352,7 +350,7 @@ def get_jobs() -> List[Job]:
     """Return all the existing jobs.
 
     Returns:
-        List[Job^]: The list of all jobs.
+        The list of all jobs.
     """
     return _JobManagerFactory._build_manager()._get_all()
 
@@ -390,8 +388,7 @@ def get_latest_job(task: Task) -> Optional[Job]:
     Parameters:
         task (Task^): The task to retrieve the latest job from.
     Returns:
-        Optional[Job^]: The latest job created from _task_. This is None if no job has been
-            created from _task_.
+        The latest job created from _task_. This is None if no job has been created from _task_.
     """
     return _JobManagerFactory._build_manager()._get_latest(task)
 
@@ -400,7 +397,7 @@ def get_data_nodes() -> List[DataNode]:
     """Return all the existing data nodes.
 
     Returns:
-        List[DataNode^]: The list of all data nodes.
+        The list of all data nodes.
     """
     return _DataManagerFactory._build_manager()._get_all()
 
@@ -409,7 +406,7 @@ def get_cycles() -> List[Cycle]:
     """Return the list of all existing cycles.
 
     Returns:
-        List[Cycle^]: The list of all cycles.
+        The list of all cycles.
     """
     return _CycleManagerFactory._build_manager()._get_all()
 
@@ -430,7 +427,7 @@ def create_scenario(
             If None, the current date time is used.
         name (Optional[str]): The displayable name of the scenario.
     Returns:
-        Scenario^: The new scenario.
+        The new scenario.
     """
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
@@ -441,7 +438,7 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     Parameters:
         config (PipelineConfig^): The pipeline configuration.
     Returns:
-        Pipeline^: The new pipeline.
+        The new pipeline.
     """
     return _PipelineManagerFactory._build_manager()._get_or_create(config)
 
@@ -453,7 +450,7 @@ def clean_all_entities() -> bool:
         Invoking this function is only recommended for development purposes.
 
     Returns:
-        bool: True if the operation succeeded, False otherwise.
+        True if the operation succeeded, False otherwise.
     """
     if not Config.global_config.clean_entities_enabled:
         __logger.warning("Please set 'clean_entities_enabled' to True to clean all entities.")
@@ -510,7 +507,7 @@ def get_parents(
         entity (Union[TaskId^, DataNodeId^, PipelineId^, Task, DataNode, Pipeline]): The entity or its
             identifier to get the parents.<br/>
     Returns:
-        Dict[str, Set[_Entity]]: The dictionary of all parent entities.
+        The dictionary of all parent entities.
             They are grouped by their type (Scenario^, Pipelines^, or tasks^) so each key corresponds
             to a level of the parents and the value is a set of the parent entities.
             An empty dictionary is returned if the entity does not have parents.<br/>

@@ -81,13 +81,15 @@ def test_build_standalone_job_dispatcher():
 
 def test_can_execute_2_workers():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
     lock = m.Lock()
 
     task_id = TaskId("task_id1")
     output = list(_DataManager._bulk_get_or_create([Config.configure_data_node("input1", default_data=21)]).values())
+
+    _SchedulerFactory._build_dispatcher()
+
     task = Task(
         config_id="name",
         input=[],

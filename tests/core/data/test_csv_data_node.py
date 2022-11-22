@@ -14,6 +14,7 @@ import pathlib
 from datetime import datetime
 from time import sleep
 
+import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 import pytest
@@ -90,12 +91,19 @@ class TestCSVDataNode:
             not_existing_csv.read_or_raise()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        # Create CSVDataNode without exposed_type (Default is pandas.DataFrame)
+        # # Create CSVDataNode without exposed_type (Default is pandas.DataFrame)
         csv_data_node_as_pandas = CSVDataNode("bar", Scope.PIPELINE, properties={"path": path})
         data_pandas = csv_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 10
         assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path).to_numpy())
+
+        # Create CSVDataNode with modin exposed_type
+        csv_data_node_as_modin = CSVDataNode("bar", Scope.PIPELINE, properties={"path": path, "exposed_type": "modin"})
+        data_modin = csv_data_node_as_modin.read()
+        assert isinstance(data_modin, modin_pd.DataFrame)
+        assert len(data_modin) == 10
+        assert np.array_equal(data_modin.to_numpy(), pd.read_csv(path).to_numpy())
 
         # Create CSVDataNode with numpy exposed_type
         csv_data_node_as_numpy = CSVDataNode(
@@ -134,6 +142,15 @@ class TestCSVDataNode:
         assert len(data_pandas) == 11
         assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path, header=None).to_numpy())
 
+        # Create CSVDataNode with modin exposed_type
+        csv_data_node_as_modin = CSVDataNode(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "modin"}
+        )
+        data_modin = csv_data_node_as_modin.read()
+        assert isinstance(data_modin, modin_pd.DataFrame)
+        assert len(data_modin) == 11
+        assert np.array_equal(data_modin.to_numpy(), modin_pd.read_csv(path, header=None).to_numpy())
+
         # Create CSVDataNode with numpy exposed_type
         csv_data_node_as_numpy = CSVDataNode(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
@@ -167,6 +184,29 @@ class TestCSVDataNode:
     )
     def test_write(self, csv_file, default_data_frame, content, columns):
         csv_dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": csv_file})
+        assert np.array_equal(csv_dn.read().values, default_data_frame.values)
+        if not columns:
+            csv_dn.write(content)
+            df = pd.DataFrame(content)
+        else:
+            csv_dn.write_with_column_names(content, columns)
+            df = pd.DataFrame(content, columns=columns)
+        assert np.array_equal(csv_dn.read().values, df.values)
+
+        csv_dn.write(None)
+        assert len(csv_dn.read()) == 0
+
+    @pytest.mark.parametrize(
+        "content,columns",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], None),
+            ([[11, 22, 33], [44, 55, 66]], None),
+            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"]),
+        ],
+    )
+    def test_write_modin(self, csv_file, default_data_frame, content, columns):
+        default_data_frame = modin_pd.DataFrame(default_data_frame)
+        csv_dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": csv_file, "exposed_type": "modin"})
         assert np.array_equal(csv_dn.read().values, default_data_frame.values)
         if not columns:
             csv_dn.write(content)
@@ -231,3 +271,4 @@ class TestCSVDataNode:
 
         dn.write(pd.DataFrame([7, 8, 9]))
         assert new_edit_date < dn.last_edit_date
+        os.unlink(temp_file_path)

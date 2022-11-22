@@ -18,7 +18,9 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
+from src.taipy.core import Core
 from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
+from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -32,6 +34,7 @@ from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 class TestTaipy:
@@ -238,6 +241,38 @@ class TestTaipy:
             tp.cancel_job("job_id")
             mck.assert_called_once_with("job_id")
 
+    def test_block_config_when_core_is_running_in_development_mode(self):
+        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+
+        input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.PIPELINE)
+        output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.PIPELINE)
+        task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
+        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
+        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+
+        scenario_1 = tp.create_scenario(scenario_cfg_1)
+        tp.submit(scenario_1)
+
+        with pytest.raises(ConfigurationUpdateBlocked):
+            blocked_scenario_config = Config.configure_scenario("block_scenario", pipeline_cfg_1)
+
+    def test_block_config_when_core_is_running_in_standalone_mode(self):
+        Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
+
+        input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.PIPELINE)
+        output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.PIPELINE)
+        task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
+        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
+        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+
+        Core().run()
+
+        scenario_1 = tp.create_scenario(scenario_cfg_1)
+        tp.submit(scenario_1)
+
+        with pytest.raises(ConfigurationUpdateBlocked):
+            blocked_scenario_config = Config.configure_scenario("block_scenario", pipeline_cfg_1)
+
     def test_get_data_node(self, data_node):
         with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as mck:
             tp.get(data_node.id)
@@ -293,6 +328,9 @@ class TestTaipy:
         assert len(_ScenarioManager._get_all()) == 1
         assert len(_CycleManager._get_all()) == 1
         assert len(_JobManager._get_all()) == 1
+
+        # Temporarily unblock config update to test config global app
+        Config.unblock_update()
 
         # Test with clean entities disabled
         Config.configure_global_app(clean_entities_enabled=False)

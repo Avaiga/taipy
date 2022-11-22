@@ -49,7 +49,7 @@ def test_build_scheduler():
         initialize.assert_called_once()
 
 
-def test_build_dispatcher():
+def test_build_development_dispatcher():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _SchedulerFactory._scheduler = None
     _SchedulerFactory._dispatcher = None
@@ -67,6 +67,8 @@ def test_build_dispatcher():
     _SchedulerFactory._build_dispatcher()
     assert isinstance(_SchedulerFactory._dispatcher, _DevelopmentJobDispatcher)
 
+
+def test_build_standalone_dispatcher():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
     assert isinstance(_SchedulerFactory._dispatcher, _StandaloneJobDispatcher)
@@ -82,7 +84,3 @@ def test_build_dispatcher():
     _SchedulerFactory._build_dispatcher(force_restart=True)
     assert _SchedulerFactory._dispatcher.is_running()
     assert _SchedulerFactory._dispatcher._nb_available_workers == 2
-
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
-    assert isinstance(_SchedulerFactory._dispatcher, _DevelopmentJobDispatcher)

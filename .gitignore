@@ -95,3 +95,5 @@ tasks
 pickles
 
 *.sqlite3
+
+dask-worker-space/

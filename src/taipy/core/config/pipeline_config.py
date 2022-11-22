@@ -91,7 +91,7 @@ class PipelineConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            PipelineConfig^: The new pipeline configuration.
+            `PipelineConfig^`: The new pipeline configuration.
         """
         section = PipelineConfig(id, task_configs, **properties)
         Config._register(section)
@@ -112,7 +112,7 @@ class PipelineConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            PipelineConfig^: The default pipeline configuration.
+            `PipelineConfig^`: The default pipeline configuration.
         """
         section = PipelineConfig(_Config.DEFAULT_KEY, task_configs, **properties)
         Config._register(section)

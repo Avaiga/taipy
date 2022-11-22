@@ -109,6 +109,7 @@ def test_complex():
     # |      |
     # |      |
     # t4     d4
+
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _SchedulerFactory._build_scheduler()
 

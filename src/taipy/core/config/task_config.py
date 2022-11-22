@@ -144,7 +144,7 @@ class TaskConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            TaskConfig^: The new task configuration.
+            `TaskConfig^`: The new task configuration.
         """
         section = TaskConfig(id, function, input, output, **properties)
         Config._register(section)
@@ -174,7 +174,7 @@ class TaskConfig(Section):
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            TaskConfig^: The default task configuration.
+            `TaskConfig^`: The default task configuration.
         """
         section = TaskConfig(_Config.DEFAULT_KEY, function, input, output, **properties)
         Config._register(section)

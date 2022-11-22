@@ -183,7 +183,6 @@ def test_get_cycle_start_date_and_end_date():
 
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
 
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
@@ -205,6 +204,9 @@ def test_hard_delete_shared_entities():
     scenario_config_2 = Config.configure_scenario(
         "scenario_config_2", [pipeline_config_3]
     )  # No Frequency so cycle attached to scenarios
+
+    _SchedulerFactory._build_dispatcher()
+
     scenario_1 = _ScenarioManager._create(scenario_config_1)
     scenario_2 = _ScenarioManager._create(scenario_config_1)
     scenario_3 = _ScenarioManager._create(scenario_config_2)
