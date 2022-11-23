@@ -124,6 +124,7 @@ class _Server:
                     return send_from_directory(base_path, path[len(k) + 1 :])
             if (
                 hasattr(__main__, "__file__")
+                and not self.__path_mapping
                 and str(
                     os.path.normpath(
                         file_path := ((base_path := os.path.dirname(__main__.__file__) + os.path.sep) + path)
@@ -132,7 +133,7 @@ class _Server:
                 and os.path.isfile(file_path)
             ):
                 return send_from_directory(base_path, path)
-            if str(os.path.normpath(file_path := (base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
+            if not self.__path_mapping and str(os.path.normpath(file_path := (base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
                 base_path
             ) and os.path.isfile(file_path):
                 return send_from_directory(base_path, path)
