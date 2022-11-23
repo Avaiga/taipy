@@ -246,7 +246,7 @@ const Chart = (props: ChartProp) => {
             textAnchors: [],
             options: [],
             bases: [],
-            axisSubst: []
+            axisSubst: [],
         } as ChartConfig;
     }, [props.config]);
 
@@ -348,7 +348,7 @@ const Chart = (props: ChartProp) => {
                 const xs = getValue(datum, trace, 0) || [];
                 const ys = getValue(datum, trace, 1) || [];
                 const addIndex = !NO_INDEX_CHARTS.includes(config.types[idx]) && !ys.length;
-                const baseX =  addIndex ? Array.from(Array(xs.length).keys()) : xs;
+                const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
                 const baseY = addIndex ? xs : ys;
                 if (baseX.length) {
                     if (config.axisSubst[idx]?.x) {
@@ -374,7 +374,10 @@ const Chart = (props: ChartProp) => {
                 ret.xaxis = config.xaxis[idx];
                 ret.yaxis = config.yaxis[idx];
                 ret.hovertext = getValue(datum, config.labels, idx, true);
-                ret.selectedpoints = getArrayValue(selected, idx, []);
+                const selPoints = getArrayValue(selected, idx, []);
+                if (selPoints?.length) {
+                    ret.selectedpoints = selPoints;
+                }
                 ret.orientation = getArrayValue(config.orientations, idx);
                 ret.line = getArrayValue(config.lines, idx);
                 ret.textposition = getArrayValue(config.textAnchors, idx);
