@@ -10,12 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from typing import Dict, Iterable, List, Optional, Set, Union
+from typing import Dict, Iterable, Optional, Set, Union
 
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
-from ..common._entity_ids import _EntityIds
 from ..common.alias import DataNodeId, PipelineId, ScenarioId, TaskId
 from ..config.data_node_config import DataNodeConfig
 from ..exceptions.exceptions import InvalidDataNodeType

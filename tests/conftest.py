@@ -227,7 +227,6 @@ def setup():
 @pytest.fixture(scope="function", autouse=True)
 def teardown():
     init_scheduler()
-    init_config()
     init_managers()
     init_config()
 
