@@ -26,6 +26,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
+from gitignore_parser import parse_gitignore
 
 from .renderers.json import _TaipyJsonProvider
 from .utils import _is_in_notebook, _RuntimeManager
@@ -73,6 +74,17 @@ class _Server:
                 print(message["status"])
             elif "type" in message:
                 gui._manage_message(message["type"], message)
+
+    def __is_ignored(self, file_path: str) -> bool:
+        if not hasattr(self, "_ignore_matches"):
+            ignore_file = (pathlib.Path(__main__.__file__).parent / ".taipyignore") if hasattr(__main__, "__file__") else None
+            if not ignore_file or not ignore_file.is_file():
+                ignore_file = pathlib.Path(self._gui._root_dir) / ".taipyignore"
+            self._ignore_matches = parse_gitignore(ignore_file) if ignore_file.is_file() and os.access(ignore_file, os.R_OK) else None
+
+        if callable(self._ignore_matches):
+            return self._ignore_matches(file_path)
+        return False
 
     def _get_default_blueprint(
         self,
@@ -124,18 +136,17 @@ class _Server:
                     return send_from_directory(base_path, path[len(k) + 1 :])
             if (
                 hasattr(__main__, "__file__")
-                and not self.__path_mapping
                 and str(
                     os.path.normpath(
                         file_path := ((base_path := os.path.dirname(__main__.__file__) + os.path.sep) + path)
                     )
                 ).startswith(base_path)
-                and os.path.isfile(file_path)
+                and os.path.isfile(file_path) and not self.__is_ignored(file_path)
             ):
                 return send_from_directory(base_path, path)
-            if not self.__path_mapping and str(os.path.normpath(file_path := (base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
+            if str(os.path.normpath(file_path := (base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
                 base_path
-            ) and os.path.isfile(file_path):
+            ) and os.path.isfile(file_path) and not self.__is_ignored(file_path):
                 return send_from_directory(base_path, path)
             return ("", 404)
 

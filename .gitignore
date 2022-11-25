@@ -122,6 +122,7 @@ dataset
 # Demos folder
 demo*/
 !demos/
+.taipyignore
 
 # Docker local dev
 docker-compose-dev*.yml

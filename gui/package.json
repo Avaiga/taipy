@@ -10,7 +10,7 @@
     "@mui/material": "^5.0.6",
     "@mui/x-date-pickers": "^5.0.0-beta.2",
     "apache-arrow": "^9.0.0",
-    "axios": "^0.27.2",
+    "axios": "^1.2.0",
     "date-fns": "^2.25.0",
     "date-fns-tz": "^1.1.6",
     "lodash": "^4.17.21",
@@ -95,7 +95,7 @@
     "css-loader": "^6.5.0",
     "css-mediaquery": "^0.1.2",
     "dotenv-webpack": "^8.0.0",
-    "dts-bundle-generator": "^6.12.0",
+    "dts-bundle-generator": "^7.1.0",
     "eslint": "^8.3.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
@@ -111,10 +111,10 @@
     "mock-socket": "^9.0.7",
     "ts-jest": "^29.0.0",
     "ts-loader": "^9.2.6",
-    "typedoc": "0.23.14",
+    "typedoc": "^0.23.21",
     "typedoc-plugin-markdown": "^3.13.4",
-    "typescript": "^4.4.4",
+    "typescript": "^4.9.3",
     "webpack": "^5.61.0",
-    "webpack-cli": "^4.9.1"
+    "webpack-cli": "^5.0.0"
   }
 }

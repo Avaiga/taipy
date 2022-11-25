@@ -43,6 +43,7 @@ requirements = [
     "gevent-websocket>=0.10.1,<0.11",
     "kthread>=0.2.3,<0.3",
     "taipy-config>=2.0,<3.0",
+    "gitignore-parser>=0.1,<0.2",
 ]
 
 test_requirements = ["pytest>=3.8"]
