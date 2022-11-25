@@ -22,3 +22,4 @@ class TaskSchema(Schema):
     function_name = fields.String()
     function_module = fields.String()
     output_ids = fields.List(fields.String)
+    version = fields.String()

@@ -96,11 +96,12 @@ class DataNodeResource(Resource):
                     "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                     "last_edit_date": "2022-08-10T16:03:40.855082",
                     "job_ids": [],
+                    "version": "latest",
+                    "cacheable": false,
                     "validity_days": null,
                     "validity_seconds": null,
                     "edit_in_progress": false,
                     "data_node_properties": {
-                        "cacheable": false,
                         "path": "daily-min-temperatures.csv",
                         "has_header": true}
                     }}
@@ -135,11 +136,12 @@ class DataNodeResource(Resource):
                     "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                     "last_edit_date": "2022-08-10T16:03:40.855082",
                     "job_ids": [],
+                    "version": "latest",
+                    "cacheable": false,
                     "validity_days": null,
                     "validity_seconds": null,
                     "edit_in_progress": false,
                     "data_node_properties": {
-                        "cacheable": false,
                         "path": "daily-min-temperatures.csv",
                         "has_header": true}
                     }}
@@ -301,11 +303,12 @@ class DataNodeList(Resource):
                         "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                         "last_edit_date": "2022-08-10T16:03:40.855082",
                         "job_ids": [],
+                        "version": "latest",
+                        "cacheable": false,
                         "validity_days": null,
                         "validity_seconds": null,
                         "edit_in_progress": false,
                         "data_node_properties": {
-                            "cacheable": false,
                             "path": "daily-min-temperatures.csv",
                             "has_header": true}
                     }}
@@ -339,11 +342,12 @@ class DataNodeList(Resource):
                         "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                         "last_edit_date": "2022-08-10T16:03:40.855082",
                         "job_ids": [],
+                        "version": "latest",
+                        "cacheable": false,
                         "validity_days": null,
                         "validity_seconds": null,
                         "edit_in_progress": false,
                         "data_node_properties": {
-                            "cacheable": false,
                             "path": "daily-min-temperatures.csv",
                             "has_header": true}
                     }}

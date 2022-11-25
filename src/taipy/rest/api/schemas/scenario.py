@@ -17,6 +17,7 @@ class ScenarioSchema(Schema):
     properties = fields.Dict()
     primary_scenario = fields.Boolean(default=False)
     tags = fields.List(fields.String)
+    version = fields.String()
 
 
 class ScenarioResponseSchema(ScenarioSchema):

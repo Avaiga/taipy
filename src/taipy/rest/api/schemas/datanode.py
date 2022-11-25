@@ -13,7 +13,6 @@ from marshmallow import Schema, fields, pre_dump
 
 
 class DataNodeSchema(Schema):
-
     config_id = fields.String()
     scope = fields.String()
     id = fields.String()
@@ -23,6 +22,8 @@ class DataNodeSchema(Schema):
     parent_ids = fields.List(fields.String)
     last_edit_date = fields.String()
     job_ids = fields.List(fields.String)
+    version = fields.String()
+    cacheable = fields.Boolean()
     validity_days = fields.Float()
     validity_seconds = fields.Float()
     edit_in_progress = fields.Boolean()

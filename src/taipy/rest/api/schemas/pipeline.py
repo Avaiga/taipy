@@ -17,6 +17,7 @@ class PipelineSchema(Schema):
     owner_id = fields.String()
     parent_ids = fields.List(fields.String)
     tasks = fields.List(fields.String)
+    version = fields.String()
     properties = fields.Dict()
 
 
