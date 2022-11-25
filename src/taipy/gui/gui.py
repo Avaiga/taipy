@@ -213,7 +213,9 @@ class Gui:
                 you want to access them using only '_assets_' in your application, you can
                 set _path_mapping={"assets": "/home/me/app_assets"}_. If your application
                 then requests the file _"/assets/images/logo.png"_, the server searches
-                for the file  _"/home/me/app_assets/images/logo.png"_.
+                for the file  _"/home/me/app_assets/images/logo.png"_.<br/>
+                If empty or not defined, access through the browser to all resources under the directory of the main python file
+                is allowed.
             env_filename (Optional[str]): An optional file from which to load application
                 configuration variables (see the
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance) section
