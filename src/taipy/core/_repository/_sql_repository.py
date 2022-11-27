@@ -106,10 +106,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _delete(self, model_id: str):
         number_of_deleted_entries = self.session.query(_TaipyModel).filter_by(model_id=model_id).delete()
-
         if not number_of_deleted_entries:
-            raise ModelNotFound(self.model, model_id)
-
+            raise ModelNotFound(str(self.model.__name__), model_id)
         self.session.commit()
 
     def _delete_all(self):

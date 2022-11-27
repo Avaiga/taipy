@@ -25,7 +25,7 @@ class InMemoryDataNode(DataNode):
 
     Warning:
         This Data Node implementation is not compatible with a parallel execution of taipy tasks,
-        but only with a Synchronous task executor. The purpose of `InMemoryDataNode` is to be used
+        but only with a task executor in development mode. The purpose of `InMemoryDataNode` is to be used
         for development or debugging.
 
     Attributes:
