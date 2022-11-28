@@ -82,7 +82,7 @@ interface ChartConfig {
     textAnchors: string[];
     options: Record<string, unknown>[];
     bases: string[];
-    axisSubst: Array<{ x?: string; y?: string; z?: string }>;
+    axisSubst: Array<string[]>;
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -350,25 +350,29 @@ const Chart = (props: ChartProp) => {
                 const addIndex = !NO_INDEX_CHARTS.includes(config.types[idx]) && !ys.length;
                 const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
                 const baseY = addIndex ? xs : ys;
+                const axisSubst = config.axisSubst.length > idx && Array.isArray(config.axisSubst[idx]) ? config.axisSubst[idx] : [] as string[];
                 if (baseX.length) {
-                    if (config.axisSubst[idx]?.x) {
-                        ret[config.axisSubst[idx].x as string] = baseX;
+                    if (axisSubst.length > 0 ) {
+                        ret[axisSubst[0]] = baseX;
                     } else {
                         ret.x = baseX;
                     }
                 }
                 if (baseY.length) {
-                    if (config.axisSubst[idx]?.y) {
-                        ret[config.axisSubst[idx].y as string] = baseY;
+                    if (axisSubst.length > 1) {
+                        ret[axisSubst[1]] = baseY;
                     } else {
                         ret.y = baseY;
                     }
                 }
                 const baseZ = getValue(datum, trace, 2, true);
-                if (config.axisSubst[idx]?.z) {
-                    ret[config.axisSubst[idx].z as string] = baseZ;
+                if (axisSubst.length > 2) {
+                    ret[axisSubst[2]] = baseZ;
                 } else {
                     ret.z = baseZ;
+                }
+                for (let i = 3; i < axisSubst.length; i++) {
+                    ret[axisSubst[i]] = getValue(datum, trace, i, true);
                 }
                 ret.text = getValue(datum, config.texts, idx, true);
                 ret.xaxis = config.xaxis[idx];

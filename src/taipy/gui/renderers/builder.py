@@ -60,20 +60,24 @@ class _Builder:
 
     __BLOCK_CONTROLS = ["dialog", "expandable", "pane", "part"]
 
-    __CHART_AXIS_SUBSTITUTION = {
-        "scattermapbox": {"x": "lon", "y": "lat"},
-        "scattergeo": {"x": "lon", "y": "lat"},
-        "densitymapbox": {"x": "lon", "y": "lat"},
-        "scatterpolar": {"x": "r", "y": "theta"},
-        "scatterpolargl": {"x": "r", "y": "theta"},
+    __CHART_AXIS_SUBSTITUTION: t.Dict[str, t.List[str]] = {
+        "scattermapbox": ["lon", "lat"],
+        "scattergeo": ["lon", "lat"],
+        "densitymapbox": ["lon", "lat"],
+        "scatterpolar": ["r", "theta"],
+        "scatterpolargl": ["r", "theta"],
+        "candlestick": ["x", "close", "open", "high", "low"],
     }
-    __CHART_AXIS_SUBSTITUTION_INDEXES = {
-        "scattermapbox": ((0, 18), (1, 19)),
-        "scattergeo": ((0, 18), (1, 19)),
-        "densitymapbox": ((0, 18), (1, 19)),
-        "scatterpolar": ((0, 21), (1, 22)),
-        "scatterpolargl": ((0, 21), (1, 22)),
+    __CHART_AXIS_SUBSTITUTION_INDEXES: t.Dict[str, t.Iterable[int]] = {
+        "scattermapbox": (18, 19),
+        "scattergeo": (18, 19),
+        "densitymapbox": (18, 19),
+        "scatterpolar": (21, 22),
+        "scatterpolargl": (21, 22),
+        "candlestick": (0, 23, 24, 25, 26)
     }
+
+    __DATA_INDEXES: t.Iterable[int] = (0, 1, 2)
 
     def __init__(
         self,
@@ -529,17 +533,17 @@ class _Builder:
             "base",  # 20
             "r",
             "theta",  # 22
+            "close",
+            "open", # 24
+            "high",
+            "low", #26
         )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[5]:
             # mode
             trace[5] = default_mode
         trace[6] = str(trace[6]).strip().lower() if trace[6] else default_type
-        # axis substitution
-        substitutions = _Builder.__CHART_AXIS_SUBSTITUTION_INDEXES.get(trace[6], tuple())
-        for subst in substitutions:
-            if not trace[subst[0]] and trace[subst[1]]:
-                trace[subst[0]] = trace[subst[1]]
+        data_indexes =  _Builder.__CHART_AXIS_SUBSTITUTION_INDEXES.get(trace[6], _Builder.__DATA_INDEXES)
         chart_axis_subst = []
         if not trace[8]:
             # xaxis
@@ -553,9 +557,6 @@ class _Builder:
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
             while len([x for x in indexed_trace if x]):
-                for subst in substitutions:
-                    if not indexed_trace[subst[0]] and indexed_trace[subst[1]]:
-                        indexed_trace[subst[0]] = indexed_trace[subst[1]]
                 chart_axis_subst.append(_Builder.__CHART_AXIS_SUBSTITUTION.get(indexed_trace[6] or trace[6]))
                 self.__check_dict(indexed_trace, (11, 12, 17), names)
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
@@ -577,10 +578,9 @@ class _Builder:
 
         # configure columns
         columns = set()
+        dt_idx = list(data_indexes) + [3, 4, 20]
         for trace in traces:
-            columns.update([t for t in trace[:5] if t])
-            if trace[20]:
-                columns.add(trace[20])
+            columns.update([trace[i] for i in dt_idx if trace[i]])
         # add optionnal column if any
         markers = [t[11] or ({"color": t[7]} if t[7] else None) for t in traces]
         opt_cols = set()
@@ -618,7 +618,7 @@ class _Builder:
                 "yaxis": [tr[9] for tr in traces],
                 "markers": markers,
                 "selectedMarkers": [tr[12] or ({"color": tr[10]} if tr[10] else None) for tr in traces],
-                "traces": [[reverse_cols.get(c, c) for c in [tr[0], tr[1], tr[2]]] for tr in traces],
+                "traces": [[reverse_cols.get(c, c) for c in [tr[i] for i in data_indexes]] for tr in traces],
                 "orientations": [tr[13] for tr in traces],
                 "names": [tr[14] for tr in traces],
                 "lines": [tr[15] if isinstance(tr[15], (dict, _MapDict)) else {"dash": tr[15]} for tr in traces],
