@@ -77,9 +77,10 @@ class _Server:
 
     def __is_ignored(self, file_path: str) -> bool:
         if not hasattr(self, "_ignore_matches"):
-            ignore_file = (pathlib.Path(__main__.__file__).parent / ".taipyignore") if hasattr(__main__, "__file__") else None
+            __IGNORE_FILE = ".taipyignore"
+            ignore_file = (pathlib.Path(__main__.__file__).parent / __IGNORE_FILE) if hasattr(__main__, "__file__") else None
             if not ignore_file or not ignore_file.is_file():
-                ignore_file = pathlib.Path(self._gui._root_dir) / ".taipyignore"
+                ignore_file = pathlib.Path(self._gui._root_dir) / __IGNORE_FILE
             self._ignore_matches = parse_gitignore(ignore_file) if ignore_file.is_file() and os.access(ignore_file, os.R_OK) else None
 
         if callable(self._ignore_matches):
