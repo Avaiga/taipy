@@ -27,7 +27,6 @@ from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.exceptions.exceptions import JobNotDeletedException
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.config._config import _Config
@@ -223,10 +222,10 @@ def test_force_deleting_unfinished_job():
 
 
 def _create_task(function, nb_outputs=1, name=None):
-    input1_dn_config = Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)
-    input2_dn_config = Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)
+    input1_dn_config = Config.configure_data_node("input1", scope=Scope.PIPELINE, default_data=21)
+    input2_dn_config = Config.configure_data_node("input2", scope=Scope.PIPELINE, default_data=2)
     output_dn_configs = [
-        Config.configure_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
+        Config.configure_data_node(f"output{i}", scope=Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
     ]
     _DataManager._bulk_get_or_create([cfg for cfg in output_dn_configs])
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))

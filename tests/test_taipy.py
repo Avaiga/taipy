@@ -251,10 +251,10 @@ class TestTaipy:
         scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        tp.submit(scenario_1)
+        tp.submit(scenario_1, wait=True)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            blocked_scenario_config = Config.configure_scenario("block_scenario", pipeline_cfg_1)
+            Config.configure_scenario("block_scenario", pipeline_cfg_1)
 
     def test_block_config_when_core_is_running_in_standalone_mode(self):
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
@@ -268,10 +268,10 @@ class TestTaipy:
         Core().run()
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        tp.submit(scenario_1)
+        tp.submit(scenario_1, wait=True)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            blocked_scenario_config = Config.configure_scenario("block_scenario", pipeline_cfg_1)
+            Config.configure_scenario("block_scenario", pipeline_cfg_1)
 
     def test_get_data_node(self, data_node):
         with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as mck:

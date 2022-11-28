@@ -32,19 +32,19 @@ from src.taipy.core.config import (
     _ScenarioConfigChecker,
     _TaskConfigChecker,
 )
-from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
+from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
 from src.taipy.core.cycle.cycle import Cycle
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
+from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
+from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
-from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario._scenario_model import _ScenarioModel
+from src.taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
 from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
+from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
 from taipy.config._toml_serializer import _TomlSerializer
@@ -219,15 +219,24 @@ def tmp_sqlite(tmpdir_factory):
 
 @pytest.fixture(scope="function", autouse=True)
 def setup():
+    assert check_repositories_are("default")
+    assert check_repositories_are_empty()
     init_config()
     init_scheduler()
     init_managers()
-
-
-@pytest.fixture(scope="function", autouse=True)
-def teardown():
+    init_config()
+    yield
     init_scheduler()
     init_managers()
+    assert check_repositories_are_empty()
+    if Config.global_config.repository_type == "default":
+        Config.unblock_update()
+        Config.configure_global_app(repository_type="sql")
+        assert check_repositories_are("sql")
+        assert check_repositories_are_empty()
+    init_config()
+    assert check_repositories_are("default")
+    assert check_repositories_are_empty()
     init_config()
 
 
@@ -298,12 +307,15 @@ def init_config():
 
 
 def init_managers():
-    _ScenarioManagerFactory._build_manager()._delete_all()
-    _PipelineManagerFactory._build_manager()._delete_all()
-    _DataManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _JobManagerFactory._build_manager()._delete_all()
-    _CycleManagerFactory._build_manager()._delete_all()
+    _CycleRepositoryFactory._build_repository()._delete_all()
+    _ScenarioRepositoryFactory._build_repository()._delete_all()
+    _PipelineRepositoryFactory._build_repository()._delete_all()
+    _JobRepositoryFactory._build_repository()._delete_all()
+    _TaskRepositoryFactory._build_repository()._delete_all()
+    _DataRepositoryFactory._build_repository()._delete_all()
+    import src.taipy.core.data.in_memory as in_memory
+
+    in_memory.in_memory_storage = {}
 
 
 def init_scheduler():
@@ -312,3 +324,69 @@ def init_scheduler():
     _SchedulerFactory._build_dispatcher()
     _SchedulerFactory._scheduler.jobs_to_run = Queue()
     _SchedulerFactory._scheduler.blocked_jobs = []
+
+
+def check_repositories_are(repo_type="default"):
+    cycle_repository = _CycleRepositoryFactory._build_repository()
+    expected_cycle_repository = _CycleRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
+    if type(cycle_repository) != type(expected_cycle_repository):
+        return False
+
+    scenario_repository = _ScenarioRepositoryFactory._build_repository()
+    expected_scenario_repository = _ScenarioRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
+    if type(scenario_repository) != type(expected_scenario_repository):
+        return False
+
+    pipeline_repository = _PipelineRepositoryFactory._build_repository()
+    expected_pipeline_repository = _PipelineRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
+    if type(pipeline_repository) != type(expected_pipeline_repository):
+        return False
+
+    task_repository = _TaskRepositoryFactory._build_repository()
+    expected_task_repository = _TaskRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
+    if type(task_repository) != type(expected_task_repository):
+        return False
+
+    job_repository = _JobRepositoryFactory._build_repository()
+    expected_job_repository = _JobRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
+    if type(job_repository) != type(expected_job_repository):
+        return False
+
+    data_repository = _DataRepositoryFactory._build_repository()
+    expected_data_repository = _DataRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
+    if type(data_repository) != type(expected_data_repository):
+        return False
+    return True
+
+
+def check_repositories_are_empty():
+    cycle_repository = _CycleRepositoryFactory._build_repository()
+    cycles = cycle_repository._load_all()
+    if len(cycles) != 0:
+        return False
+
+    scenario_repository = _ScenarioRepositoryFactory._build_repository()
+    scenarios = scenario_repository._load_all()
+    if len(scenarios) != 0:
+        return False
+
+    pipeline_repository = _PipelineRepositoryFactory._build_repository()
+    pipelines = pipeline_repository._load_all()
+    if len(pipelines) != 0:
+        return False
+
+    task_repository = _TaskRepositoryFactory._build_repository()
+    tasks = task_repository._load_all()
+    if len(tasks) != 0:
+        return False
+
+    job_repository = _JobRepositoryFactory._build_repository()
+    jobs = job_repository._load_all()
+    if len(jobs) != 0:
+        return False
+
+    data_repository = _DataRepositoryFactory._build_repository()
+    data_nodes = data_repository._load_all()
+    if len(data_nodes) != 0:
+        return False
+    return True
