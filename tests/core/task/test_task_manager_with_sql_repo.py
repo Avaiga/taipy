@@ -19,6 +19,7 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
+from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
@@ -27,6 +28,7 @@ from taipy.config.config import Config
 
 
 def init_managers():
+    _JobManagerFactory._build_manager()._delete_all()
     _TaskManagerFactory._build_manager()._delete_all()
     _DataManagerFactory._build_manager()._delete_all()
 

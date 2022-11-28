@@ -219,25 +219,44 @@ def tmp_sqlite(tmpdir_factory):
 
 @pytest.fixture(scope="function", autouse=True)
 def setup():
-    assert check_repositories_are("default")
-    assert check_repositories_are_empty()
+    if Config.global_config.repository_type == "sql":
+        close_sql_database_session_connection()
+        # assert check_repositories_are_empty()
+    # else:
+    # assert check_repositories_are("default")
+    # assert check_repositories_are_empty()
     init_config()
     init_scheduler()
     init_managers()
     init_config()
     yield
+
+
+@pytest.fixture(scope="function", autouse=True)
+def teardown():
+    if Config.global_config.repository_type == "sql":
+        close_sql_database_session_connection()
     init_scheduler()
     init_managers()
+    # assert check_repositories_are_empty()
+    # if Config.global_config.repository_type == "default":
+    #     Config.unblock_update()
+    #     Config.configure_global_app(repository_type="sql")
+    #     assert check_repositories_are("sql")
+    #     assert check_repositories_are_empty()
+    # init_config()
+    # assert check_repositories_are("default")
     assert check_repositories_are_empty()
-    if Config.global_config.repository_type == "default":
-        Config.unblock_update()
-        Config.configure_global_app(repository_type="sql")
-        assert check_repositories_are("sql")
-        assert check_repositories_are_empty()
     init_config()
-    assert check_repositories_are("default")
-    assert check_repositories_are_empty()
-    init_config()
+
+
+def close_sql_database_session_connection():
+    _ScenarioRepositoryFactory._build_repository().repo.session.close_all()
+    _PipelineRepositoryFactory._build_repository().repo.session.close_all()
+    _DataRepositoryFactory._build_repository().repo.session.close_all()
+    _TaskRepositoryFactory._build_repository().repo.session.close_all()
+    _JobRepositoryFactory._build_repository().repo.session.close_all()
+    _CycleRepositoryFactory._build_repository().repo.session.close_all()
 
 
 def init_config():
