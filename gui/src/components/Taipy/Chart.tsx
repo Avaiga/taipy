@@ -81,8 +81,7 @@ interface ChartConfig {
     texts: string[];
     textAnchors: string[];
     options: Record<string, unknown>[];
-    bases: string[];
-    axisSubst: Array<{ x?: string; y?: string; z?: string }>;
+    axisNames: Array<string[]>;
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -245,8 +244,7 @@ const Chart = (props: ChartProp) => {
             texts: [],
             textAnchors: [],
             options: [],
-            bases: [],
-            axisSubst: [],
+            axisNames: [],
         } as ChartConfig;
     }, [props.config]);
 
@@ -350,25 +348,29 @@ const Chart = (props: ChartProp) => {
                 const addIndex = !NO_INDEX_CHARTS.includes(config.types[idx]) && !ys.length;
                 const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
                 const baseY = addIndex ? xs : ys;
+                const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : [] as string[];
                 if (baseX.length) {
-                    if (config.axisSubst[idx]?.x) {
-                        ret[config.axisSubst[idx].x as string] = baseX;
+                    if (axisNames.length > 0 ) {
+                        ret[axisNames[0]] = baseX;
                     } else {
                         ret.x = baseX;
                     }
                 }
                 if (baseY.length) {
-                    if (config.axisSubst[idx]?.y) {
-                        ret[config.axisSubst[idx].y as string] = baseY;
+                    if (axisNames.length > 1) {
+                        ret[axisNames[1]] = baseY;
                     } else {
                         ret.y = baseY;
                     }
                 }
                 const baseZ = getValue(datum, trace, 2, true);
-                if (config.axisSubst[idx]?.z) {
-                    ret[config.axisSubst[idx].z as string] = baseZ;
+                if (axisNames.length > 2) {
+                    ret[axisNames[2]] = baseZ;
                 } else {
                     ret.z = baseZ;
+                }
+                for (let i = 3; i < axisNames.length; i++) {
+                    ret[axisNames[i]] = getValue(datum, trace, i, true);
                 }
                 ret.text = getValue(datum, config.texts, idx, true);
                 ret.xaxis = config.xaxis[idx];
@@ -381,7 +383,6 @@ const Chart = (props: ChartProp) => {
                 ret.orientation = getArrayValue(config.orientations, idx);
                 ret.line = getArrayValue(config.lines, idx);
                 ret.textposition = getArrayValue(config.textAnchors, idx);
-                ret.base = getValue(datum, config.bases, idx, true);
             }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {

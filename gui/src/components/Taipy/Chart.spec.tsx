@@ -57,7 +57,7 @@ const chartConfig = JSON.stringify({
     yaxis: ["y"],
     types: ["scatter"],
     modes: ["lines+markers"],
-    axisSubst: []
+    axisNames: []
 });
 
 const mapValue = {
@@ -83,7 +83,7 @@ const mapConfig = JSON.stringify({
     yaxis: ["y"],
     types: ["scattermapbox"],
     modes: ["markers"],
-    axisSubst: [{x: "lon", y: "lat"}]
+    axisNames: [["lon", "lat"]]
 });
 
 const mapLayout = JSON.stringify({

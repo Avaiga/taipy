@@ -278,12 +278,12 @@
           {
             "name": "x",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>x</i> axis. Synonym for <i>lon</i>."
+            "doc": "Column name for the <i>x</i> axis."
           },
           {
             "name": "y",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>y</i> axis. Synonym for <i>lat</i>."
+            "doc": "Column name for the <i>y</i> axis."
           },
           {
             "name": "z",
@@ -293,22 +293,42 @@
           {
             "name": "lon",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>longitude</i> value. Synonym for <i>x</i>."
+            "doc": "Column name for the <i>longitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/)."
           },
           {
             "name": "lat",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>latitude</i> value. Synonym for <i>y</i>."
+            "doc": "Column name for the <i>latitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/)."
           },
           {
             "name": "r",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>r</i> value. Synonym for <i>x</i>. cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
+            "doc": "Column name for the <i>r</i> value. Cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
           },
           {
             "name": "theta",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>theta</i> value. Synonym for <i>y</i>.  cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
+            "doc": "Column name for the <i>theta</i> value. Cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
+          },
+          {
+            "name": "high",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>high</i> value. Cf. [Ploty candlestick](https://plotly.com/javascript/reference/candlestick/)."
+          },
+          {
+            "name": "low",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>low</i> value. Cf. [Ploty candlestick](https://plotly.com/javascript/reference/candlestick/)."
+          },
+          {
+            "name": "open",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>open</i> value. Cf. [Ploty candlestick](https://plotly.com/javascript/reference/candlestick/)."
+          },
+          {
+            "name": "close",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>close</i> value. Cf. [Ploty candlestick](https://plotly.com/javascript/reference/candlestick/)."
           },
           {
             "name": "text",
