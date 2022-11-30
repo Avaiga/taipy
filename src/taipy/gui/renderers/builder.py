@@ -75,6 +75,7 @@ class _Chart_iprops(Enum):
     open = 24
     high = 25
     low = 26
+    locations = 27
 
 
 class _Builder:
@@ -97,6 +98,7 @@ class _Builder:
         "candlestick": (_Chart_iprops.x, _Chart_iprops.close, _Chart_iprops.open, _Chart_iprops.high, _Chart_iprops.low),
         "bar": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.base),
         "pie": (_Chart_iprops.x, ),
+        "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
     }
     __CHART_DEFAULT_AXIS: t.Iterable[_Chart_iprops] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
 
