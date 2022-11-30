@@ -107,6 +107,14 @@ def pickle_file_path(tmpdir_factory) -> str:
 
 
 @pytest.fixture(scope="function")
+def parquet_file_path(tmpdir_factory) -> str:
+    data = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    fn = tmpdir_factory.mktemp("data").join("df.parquet")
+    data.to_parquet(str(fn))
+    return fn.strpath
+
+
+@pytest.fixture(scope="function")
 def default_data_frame():
     return pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
 

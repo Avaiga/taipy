@@ -41,7 +41,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 data_node_config._STORAGE_TYPE_KEY,
                 data_node_config.storage_type,
                 f"`{data_node_config._STORAGE_TYPE_KEY}` field of DataNode `{data_node_config_id}` must be either csv, "
-                f"sql_table, sql, mongo_collection, pickle, excel, generic, json or in_memory.",
+                f"sql_table, sql, mongo_collection, pickle, excel, generic, json, parquet or in_memory.",
             )
 
     def _check_scope(self, data_node_config_id: str, data_node_config: DataNodeConfig):

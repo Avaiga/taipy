@@ -26,6 +26,7 @@ tox = ">=3.24"
 types-toml = ">=0.10.0"
 autopep8 = "*"
 mongomock = ">=4.1.2"
+pyarrow = "*"
 
 [requires]
 python_version = "3"

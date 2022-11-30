@@ -36,6 +36,7 @@ _inject_section(
         ("configure_default_data_node", DataNodeConfig._configure_default),
         ("configure_csv_data_node", DataNodeConfig._configure_csv),
         ("configure_json_data_node", DataNodeConfig._configure_json),
+        ("configure_parquet_data_node", DataNodeConfig._configure_parquet),
         ("configure_sql_table_data_node", DataNodeConfig._configure_sql_table),
         ("configure_sql_data_node", DataNodeConfig._configure_sql),
         ("configure_mongo_collection_data_node", DataNodeConfig._configure_mongo_collection),
