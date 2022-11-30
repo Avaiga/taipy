@@ -447,6 +447,21 @@
             "name": "height",
             "type": "str|int|float",
             "doc": "The height, in CSS units, of this element."
+          },
+          {
+            "name": "template",
+            "type": "dict",
+            "doc": "The plotly layout [template](https://plotly.com/javascript/layout-template/)."
+          },
+          {
+            "name": "template[dark]",
+            "type": "dict",
+            "doc": "The plotly layout template applied over the base template when theme is dark."
+          },
+          {
+            "name": "template[light]",
+            "type": "dict",
+            "doc": "The plotly layout template applied over the base template when theme is not dark."
           }
         ]
       }

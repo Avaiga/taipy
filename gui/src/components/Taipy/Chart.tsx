@@ -31,6 +31,7 @@ import {
     PlotSelectionEvent,
     ScatterLine,
     Color,
+    Template,
 } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
@@ -46,6 +47,7 @@ import {
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { toPlainObject } from "lodash";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -62,6 +64,9 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     render?: boolean;
     defaultRender?: boolean;
     decimator?: string;
+    template?: string;
+    template_Dark_?: string;
+    template_Light_?: string;
     //[key: `selected_${number}`]: number[];
 }
 
@@ -276,8 +281,16 @@ const Chart = (props: ChartProp) => {
                 console.info(`Error while parsing Chart.layout\n${(e as Error).message || e}`);
             }
         }
-        if (playout.mapbox && !playout.mapbox.style) {
-            playout.mapbox.style = theme.palette.mode;
+        let template = undefined;
+        try {
+            const tpl = props.template && JSON.parse(props.template);
+            const tplTheme = theme.palette.mode === "dark" ? props.template_Dark_ && JSON.parse(props.template_Dark_) : props.template_Light_ && JSON.parse(props.template_Light_);
+            template = tpl ? tplTheme ? {...tpl, ...tplTheme} : tpl : tplTheme ? tplTheme : undefined;
+        } catch (e) {
+            console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
+        }
+        if (template) {
+            playout.template = template;
         }
         return {
             ...playout,
@@ -298,7 +311,7 @@ const Chart = (props: ChartProp) => {
             },
             clickmode: "event+select",
         } as Layout;
-    }, [theme.palette.mode, title, config.columns, config.traces, props.layout]);
+    }, [theme.palette.mode, title, config.columns, config.traces, props.layout, props.template, props.template_Dark_, props.template_Light_]);
 
     const style = useMemo(
         () =>
