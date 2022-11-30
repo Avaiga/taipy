@@ -104,7 +104,7 @@ class JSONDataNode(DataNode):
         self._encoder = self._properties.get(self._ENCODER_KEY, _DefaultJSONEncoder)
 
         if not self._last_edit_date and isfile(self._path):  # type: ignore
-            self.unlock_edit()
+            self.last_edit_date = datetime.now()  # type: ignore
 
     @classmethod
     def storage_type(cls) -> str:

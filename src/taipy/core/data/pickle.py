@@ -99,7 +99,7 @@ class PickleDataNode(DataNode):
         if self._path is None:
             self._path = self.__build_path()
         if not self._last_edit_date and os.path.exists(self._path):
-            self.unlock_edit()
+            self.last_edit_date = datetime.now()  # type: ignore
         if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
 

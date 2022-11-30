@@ -114,7 +114,7 @@ class _AbstractSQLDataNode(DataNode):
         )
         self._engine = None
         if not self._last_edit_date:
-            self.unlock_edit()
+            self.last_edit_date = datetime.now()  # type: ignore
 
     def _check_required_properties(self, properties: Dict):
         db_engine = properties.get(self.__DB_ENGINE_KEY)

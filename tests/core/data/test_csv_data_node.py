@@ -144,7 +144,7 @@ class TestCSVDataNode:
 
         # Create CSVDataNode with modin exposed_type
         csv_data_node_as_modin = CSVDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "modin"}
+            "baz", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "modin"}
         )
         data_modin = csv_data_node_as_modin.read()
         assert isinstance(data_modin, modin_pd.DataFrame)
@@ -153,7 +153,7 @@ class TestCSVDataNode:
 
         # Create CSVDataNode with numpy exposed_type
         csv_data_node_as_numpy = CSVDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
+            "qux", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
         )
         data_numpy = csv_data_node_as_numpy.read()
         assert isinstance(data_numpy, np.ndarray)
@@ -162,7 +162,7 @@ class TestCSVDataNode:
 
         # Create the same CSVDataNode but with custom exposed_type
         csv_data_node_as_custom_object = CSVDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": MyCustomObject}
+            "quux", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": MyCustomObject}
         )
         data_custom = csv_data_node_as_custom_object.read()
         assert isinstance(data_custom, list)

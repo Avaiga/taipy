@@ -317,7 +317,10 @@ class DataNode(_Entity):
         from ._data_manager_factory import _DataManagerFactory
 
         self._write(data)
-        self.unlock_edit(job_id=job_id)
+        self.last_edit_date = datetime.now()  # type: ignore
+        if job_id:
+            self._job_ids.append(job_id)
+        self.unlock_edit()
         _DataManagerFactory._build_manager()._set(self)
 
     def lock_edit(self):
@@ -338,26 +341,20 @@ class DataNode(_Entity):
     def unlock_edit(self, at: datetime = None, job_id: JobId = None):
         """Unlocks the edit of the data node.
 
-        The _last_edit_date_ is updated.
-
         Parameters:
-            at (datetime): The optional datetime of the last modification.
-                If no _at_ datetime is provided, the current datetime is used.
-            job_id (JobId^): An optional identifier of the writer.
+            at (datetime): Deprecated.
+            job_id (JobId^): Deprecated.
         Note:
             The data node can be locked with the method `(DataNode.)lock_edit()^`.
         """
-        self.last_edit_date = at or datetime.now()  # type: ignore
         self.edit_in_progress = False  # type: ignore
-        if job_id:
-            self._job_ids.append(job_id)
 
     def unlock_edition(self, at: datetime = None, job_id: JobId = None):
         """
-        Deprecated. Use unlock_edit instead.
+        Deprecated. Use (DataNode.)unlock_edit()^` instead.
         """
         _warn_deprecated("unlock_edition", suggest="unlock_edit")
-        self.unlock_edit(at, job_id)
+        self.unlock_edit()
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """Read the data referenced by the data node, appying a filter.

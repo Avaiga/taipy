@@ -92,7 +92,7 @@ class GenericDataNode(DataNode):
             **properties,
         )
         if not self._last_edit_date:
-            self.unlock_edit()
+            self.last_edit_date = datetime.now()
 
     @classmethod
     def storage_type(cls) -> str:

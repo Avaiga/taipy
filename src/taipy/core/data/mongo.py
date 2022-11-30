@@ -125,7 +125,7 @@ class MongoCollectionDataNode(DataNode):
             self._encoder = custom_encoder
 
         if not self._last_edit_date:
-            self.unlock_edit()
+            self.last_edit_date = datetime.now()  # type: ignore
 
     def _check_custom_document(self, custom_document):
         if not isclass(custom_document):

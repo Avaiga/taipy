@@ -114,7 +114,7 @@ class CSVDataNode(DataNode):
             **properties,
         )
         if not self._last_edit_date and isfile(self._path):
-            self.unlock_edit()
+            self.last_edit_date = datetime.now()  # type: ignore
 
     @classmethod
     def storage_type(cls) -> str:
