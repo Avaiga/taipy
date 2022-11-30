@@ -142,7 +142,6 @@ class _JobDispatcher(threading.Thread):
             inputs: List[DataNode] = list(task.input.values())
             outputs: List[DataNode] = list(task.output.values())
 
-            # TODO: function is not an attribute of task
             fct = task.function
 
             results = fct(*cls.__read_inputs(inputs))

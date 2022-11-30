@@ -32,18 +32,24 @@ from src.taipy.core.config import (
     _ScenarioConfigChecker,
     _TaskConfigChecker,
 )
+from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
 from src.taipy.core.cycle.cycle import Cycle
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
+from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
 from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
@@ -221,32 +227,19 @@ def tmp_sqlite(tmpdir_factory):
 def setup():
     if Config.global_config.repository_type == "sql":
         close_sql_database_session_connection()
-        # assert check_repositories_are_empty()
-    # else:
-    # assert check_repositories_are("default")
-    # assert check_repositories_are_empty()
     init_config()
     init_scheduler()
     init_managers()
     init_config()
-    yield
 
 
 @pytest.fixture(scope="function", autouse=True)
 def teardown():
     if Config.global_config.repository_type == "sql":
         close_sql_database_session_connection()
+    init_config()
     init_scheduler()
     init_managers()
-    # assert check_repositories_are_empty()
-    # if Config.global_config.repository_type == "default":
-    #     Config.unblock_update()
-    #     Config.configure_global_app(repository_type="sql")
-    #     assert check_repositories_are("sql")
-    #     assert check_repositories_are_empty()
-    # init_config()
-    # assert check_repositories_are("default")
-    assert check_repositories_are_empty()
     init_config()
 
 
@@ -326,15 +319,12 @@ def init_config():
 
 
 def init_managers():
-    _CycleRepositoryFactory._build_repository()._delete_all()
-    _ScenarioRepositoryFactory._build_repository()._delete_all()
-    _PipelineRepositoryFactory._build_repository()._delete_all()
-    _JobRepositoryFactory._build_repository()._delete_all()
-    _TaskRepositoryFactory._build_repository()._delete_all()
-    _DataRepositoryFactory._build_repository()._delete_all()
-    import src.taipy.core.data.in_memory as in_memory
-
-    in_memory.in_memory_storage = {}
+    _CycleManagerFactory._build_manager()._delete_all()
+    _ScenarioManagerFactory._build_manager()._delete_all()
+    _PipelineManagerFactory._build_manager()._delete_all()
+    _JobManagerFactory._build_manager()._delete_all()
+    _TaskManagerFactory._build_manager()._delete_all()
+    _DataManagerFactory._build_manager()._delete_all()
 
 
 def init_scheduler():
