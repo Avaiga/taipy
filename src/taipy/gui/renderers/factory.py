@@ -99,6 +99,9 @@ class _Factory:
                 ("render", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
+                ("template", PropertyType.dict),
+                ("template[dark]", PropertyType.dict),
+                ("template[light]", PropertyType.dict),
             ]
         )
         ._get_chart_config("scatter", "lines+markers")
