@@ -81,6 +81,17 @@ def test_array_of_array(gui:Gui, helpers, small_dataframe):
     assert len(data) == 2
     assert len(data[0]) == 3
 
+def test_empty_array(gui:Gui, helpers, small_dataframe):
+    accessor = _ArrayDictDataAccessor()
+    an_array: list[str] = []
+    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
+    assert ret_data
+    value = ret_data["value"]
+    assert value
+    assert value["rowcount"] == 0
+    data = value["data"]
+    assert len(data) == 0
+
 def test_array_of_diff_array(gui:Gui, helpers, small_dataframe):
     accessor = _ArrayDictDataAccessor()
     an_array = [[1, 2, 3], [2, 4]]

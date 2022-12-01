@@ -29,7 +29,7 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
 
     def __get_dataframe(self, value: t.Any) -> t.Union[t.List[pd.DataFrame], pd.DataFrame]:
         if isinstance(value, list):
-            if isinstance(value[0], (str, int, float, bool)):
+            if not value or isinstance(value[0], (str, int, float, bool)):
                 return pd.DataFrame({"0": value})
             types = {type(x) for x in value}
             if len(types) == 1 and next(iter(types), None) == list:
