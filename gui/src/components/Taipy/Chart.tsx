@@ -377,10 +377,12 @@ const Chart = (props: ChartProp) => {
                     }
                 }
                 const baseZ = getValue(datum, trace, 2, true);
-                if (axisNames.length > 2) {
-                    ret[axisNames[2]] = baseZ;
-                } else {
-                    ret.z = baseZ;
+                if (baseZ) {
+                    if (axisNames.length > 2) {
+                        ret[axisNames[2]] = baseZ;
+                    } else {
+                        ret.z = baseZ;
+                    }
                 }
                 for (let i = 3; i < axisNames.length; i++) {
                     ret[axisNames[i]] = getValue(datum, trace, i, true);
