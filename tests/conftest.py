@@ -313,7 +313,8 @@ def create_job_list():
     return jobs
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def cleanup_files():
+    Config.unblock_update()
     if os.path.exists(".data"):
         shutil.rmtree(".data")
