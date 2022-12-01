@@ -30,8 +30,6 @@ import {
     PlotMouseEvent,
     PlotSelectionEvent,
     ScatterLine,
-    Color,
-    Template,
 } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
@@ -47,7 +45,6 @@ import {
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
-import { toPlainObject } from "lodash";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -164,7 +161,7 @@ const selectedPropRe = /selected(\d+)/;
 
 const ONE_COLUMN_CHART = ["pie"];
 const NO_INDEX_CHARTS = ["histogram"];
-const MARKER_TO_COL = ["color", "size", "symbol"];
+const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
 
 const Chart = (props: ChartProp) => {
     const {

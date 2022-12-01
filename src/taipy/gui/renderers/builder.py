@@ -101,7 +101,7 @@ class _Builder:
         "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
     }
     __CHART_DEFAULT_AXIS: t.Iterable[_Chart_iprops] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
-    __CHART_MARKER_TO_COLS: t.Iterable[str] = ("color", "size", "symbol")
+    __CHART_MARKER_TO_COLS: t.Iterable[str] = ("color", "size", "symbol", "opacity")
 
     def __init__(
         self,
@@ -617,7 +617,7 @@ class _Builder:
                 "yaxis": [tr[_Chart_iprops.yaxis.value] for tr in traces],
                 "markers": markers,
                 "selectedMarkers": [tr[_Chart_iprops.selected_marker.value] or ({"color": tr[_Chart_iprops.selected_color.value]} if tr[_Chart_iprops.selected_color.value] else None) for tr in traces],
-                "traces": [[reverse_cols.get(c, c) for c in [tr[i] for i in [e.value for e in (axis[j] if j < len(axis) else axis[0])]]] for j, tr in enumerate(traces)],
+                "traces": [[reverse_cols.get(c, c) for c in [tr[i] for i in [e.value for e in (axis[j] if j < len(axis) else axis[0])] if tr[i]]] for j, tr in enumerate(traces)],
                 "orientations": [tr[_Chart_iprops.orientation.value] for tr in traces],
                 "names": [tr[_Chart_iprops._name.value] for tr in traces],
                 "lines": [tr[_Chart_iprops.line.value] if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict)) else {"dash": tr[_Chart_iprops.line.value]} for tr in traces],
