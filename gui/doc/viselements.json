@@ -395,7 +395,7 @@
           {
             "name": "marker",
             "type": "indexed(dict[str, any])",
-            "doc": "The type of markers used for the indicated trace.\nSee <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.\nColor and size can be column name."
+            "doc": "The type of markers used for the indicated trace.\nSee <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.\nColor, size and symbol can be column name."
           },
           {
             "name": "line",

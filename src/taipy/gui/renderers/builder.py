@@ -101,6 +101,7 @@ class _Builder:
         "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
     }
     __CHART_DEFAULT_AXIS: t.Iterable[_Chart_iprops] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
+    __CHART_MARKER_TO_COLS: t.Iterable[str] = ("color", "size", "symbol")
 
     def __init__(
         self,
@@ -584,12 +585,10 @@ class _Builder:
         opt_cols = set()
         for m in markers:
             if isinstance(m, (dict, _MapDict)):
-                color = m.get("color")
-                if isinstance(color, str) and color not in columns:
-                    opt_cols.add(color)
-                size = m.get("size")
-                if isinstance(size, str) and size not in columns:
-                    opt_cols.add(size)
+                for prop in _Builder.__CHART_MARKER_TO_COLS:
+                    val = m.get(prop)
+                    if isinstance(val, str) and val not in columns:
+                        opt_cols.add(val)
 
         # Validate the column names
         columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
