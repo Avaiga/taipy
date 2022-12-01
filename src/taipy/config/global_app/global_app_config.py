@@ -102,7 +102,11 @@ class GlobalAppConfig:
 
     @property
     def repository_properties(self):
-        return {k: _tpl._replace_templates(v) for k, v in self._repository_properties.items()}
+        return (
+            {k: _tpl._replace_templates(v) for k, v in self._repository_properties.items()}
+            if self._repository_properties
+            else self._DEFAULT_REPOSITORY_PROPERTIES.copy()
+        )
 
     @repository_properties.setter  # type: ignore
     @_ConfigBlocker._check()
@@ -128,7 +132,7 @@ class GlobalAppConfig:
         config._storage_folder = cls._DEFAULT_STORAGE_FOLDER
         config._clean_entities_enabled = cls._CLEAN_ENTITIES_ENABLED_TEMPLATE
         config._repository_type = cls._DEFAULT_REPOSITORY_TYPE
-        config._repository_properties = cls._DEFAULT_REPOSITORY_PROPERTIES
+        config._repository_properties = cls._DEFAULT_REPOSITORY_PROPERTIES.copy()
         return config
 
     def _to_dict(self):

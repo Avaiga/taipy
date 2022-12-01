@@ -9,34 +9,35 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import toml  # type: ignore
+import json  # type: ignore
 
 from ._base_serializer import _BaseSerializer
 from ._config import _Config
 from .exceptions.exceptions import LoadingError
 
 
-class _TomlSerializer(_BaseSerializer):
+class _JsonSerializer(_BaseSerializer):
     """Convert configuration from TOML representation to Python Dict and reciprocally."""
 
     @classmethod
     def _write(cls, configuration: _Config, filename: str):
         with open(filename, "w") as fd:
-            toml.dump(cls._str(configuration), fd)
+            json.dump(cls._str(configuration), fd, ensure_ascii=False, indent=0, check_circular=False)
 
     @classmethod
     def _read(cls, filename: str) -> _Config:
         try:
-            config_as_dict = cls._pythonify(dict(toml.load(filename)))
+            with open(filename) as f:
+                config_as_dict = cls._pythonify(json.load(f))
             return cls._from_dict(config_as_dict)
-        except toml.TomlDecodeError as e:
+        except json.JSONDecodeError as e:
             error_msg = f"Can not load configuration {e}"
             raise LoadingError(error_msg)
 
     @classmethod
     def _serialize(cls, configuration: _Config) -> str:
-        return toml.dumps(cls._str(configuration))
+        return json.dumps(cls._str(configuration), ensure_ascii=False, indent=0, check_circular=False)
 
     @classmethod
     def _deserialize(cls, config_as_string: str) -> _Config:
-        return cls._from_dict(cls._pythonify(dict(toml.loads(config_as_string))))
+        return cls._from_dict(cls._pythonify(dict(json.loads(config_as_string))))

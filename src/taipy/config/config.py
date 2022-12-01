@@ -14,6 +14,7 @@ from typing import Dict, Union
 
 from ..logger._taipy_logger import _TaipyLogger
 from ._config import _Config
+from ._json_serializer import _JsonSerializer
 from ._toml_serializer import _TomlSerializer
 from .checker._checker import _Checker
 from .checker.issue_collector import IssueCollector
@@ -37,6 +38,7 @@ class Config:
     _applied_config = _Config._default_config()
     _collector = IssueCollector()
     _serializer = _TomlSerializer()
+    __json_serializer = _JsonSerializer()
 
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
@@ -156,6 +158,7 @@ class Config:
             else:
                 cls._default_config._sections[default_section.name] = {default_section.id: default_section}
         cls._serializer._section_class[default_section.name] = default_section.__class__
+        cls.__json_serializer._section_class[default_section.name] = default_section.__class__
         cls.__compile_configs()
 
     @classmethod
@@ -175,6 +178,7 @@ class Config:
             else:
                 cls._python_config._sections[section.name] = {section.id: section}
         cls._serializer._section_class[section.name] = section.__class__
+        cls.__json_serializer._section_class[section.name] = section.__class__
         cls.__compile_configs()
 
     @classmethod
@@ -207,6 +211,14 @@ class Config:
             cls.__logger.error(str(issue))
         if len(config._collector._errors) != 0:
             raise ConfigurationIssueError("Configuration issues found.")
+
+    @classmethod
+    def _to_json(cls, _config):
+        return cls.__json_serializer._serialize(_config)
+
+    @classmethod
+    def _from_json(cls, config_as_str: str):
+        return cls.__json_serializer._deserialize(config_as_str)
 
 
 Config._load_environment_file_config()

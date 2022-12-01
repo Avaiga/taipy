@@ -12,10 +12,13 @@
 import os
 import re
 from collections import UserDict
+from importlib import import_module
+from operator import attrgetter
+from pydoc import locate
 
+from ..exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
 from .frequency import Frequency
 from .scope import Scope
-from ..exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
 
 
 class _TemplateHandler:
@@ -102,3 +105,19 @@ class _TemplateHandler:
             return Frequency[str.upper(val)]
         except Exception:
             raise InconsistentEnvVariableError(f"{val} is not a valid frequency.")
+
+    @staticmethod
+    def _to_function(val: str):
+        module_name, fct_name = val.rsplit(".", 1)
+        try:
+            module = import_module(module_name)
+            return attrgetter(fct_name)(module)
+        except Exception:
+            raise InconsistentEnvVariableError(f"{val} is not a valid function.")
+
+    @staticmethod
+    def _to_class(val: str):
+        try:
+            return locate(val)
+        except Exception:
+            raise InconsistentEnvVariableError(f"{val} is not a valid class.")
