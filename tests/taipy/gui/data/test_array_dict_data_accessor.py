@@ -68,3 +68,28 @@ def test_aggregate(gui: Gui, helpers, small_dataframe):
     assert value["rowcount"] == 3
     data = value["data"]
     assert {"name": "A", "value": 5} in data
+
+def test_array_of_array(gui:Gui, helpers, small_dataframe):
+    accessor = _ArrayDictDataAccessor()
+    an_array = [[1, 2, 3], [2, 4, 6]]
+    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.JSON)
+    assert ret_data
+    value = ret_data["value"]
+    assert value
+    assert value["rowcount"] == 2
+    data = value["data"]
+    assert len(data) == 2
+    assert len(data[0]) == 3
+
+def test_array_of_diff_array(gui:Gui, helpers, small_dataframe):
+    accessor = _ArrayDictDataAccessor()
+    an_array = [[1, 2, 3], [2, 4]]
+    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
+    assert ret_data
+    value = ret_data["value"]
+    assert value
+    assert value["multi"] is True
+    data = value["data"]
+    assert len(data) == 2
+    assert len(data[0]["0/0"]) == 3
+    assert len(data[1]["1/0"]) == 2

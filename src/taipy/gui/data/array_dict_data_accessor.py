@@ -35,7 +35,7 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
             if len(types) == 1 and next(iter(types), None) == list:
                 lengths = {len(x) for x in value}
                 return (
-                    pd.DataFrame({str(i): v for i, v in enumerate(value)})
+                    pd.DataFrame(value)
                     if len(lengths) == 1
                     else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
                 )
