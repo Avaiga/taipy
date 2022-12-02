@@ -30,8 +30,6 @@ import {
     PlotMouseEvent,
     PlotSelectionEvent,
     ScatterLine,
-    Color,
-    Template,
 } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
@@ -47,7 +45,6 @@ import {
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
-import { toPlainObject } from "lodash";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -164,6 +161,7 @@ const selectedPropRe = /selected(\d+)/;
 
 const ONE_COLUMN_CHART = ["pie"];
 const NO_INDEX_CHARTS = ["histogram"];
+const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
 
 const Chart = (props: ChartProp) => {
     const {
@@ -337,25 +335,16 @@ const Chart = (props: ChartProp) => {
                 ret.values = getValue(datum, trace, 0);
                 ret.labels = getValue(datum, config.labels, idx, true);
             } else {
-                ret.marker = getArrayValue(config.markers, idx, {});
-                if (
-                    (ret.marker as PlotMarker).color !== undefined &&
-                    typeof (ret.marker as PlotMarker).color === "string"
-                ) {
-                    const arr = getValueFromCol(datum, (ret.marker as PlotMarker).color as string);
-                    if (arr.length) {
-                        (ret.marker as PlotMarker).color = arr as Color[];
+                ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
+                MARKER_TO_COL.forEach(prop => {
+                    const val = (ret.marker as Record<string, unknown>)[prop];
+                    if (val !== undefined && typeof val === "string") {
+                        const arr = getValueFromCol(datum, val as string);
+                        if (arr.length) {
+                            (ret.marker as Record<string, unknown>)[prop] = arr;
+                        }
                     }
-                }
-                if (
-                    (ret.marker as PlotMarker).size !== undefined &&
-                    typeof (ret.marker as PlotMarker).size === "string"
-                ) {
-                    const arr = getValueFromCol(datum, (ret.marker as PlotMarker).size as unknown as string);
-                    if (arr.length) {
-                        (ret.marker as PlotMarker).size = arr as number[];
-                    }
-                }
+                });
                 const xs = getValue(datum, trace, 0) || [];
                 const ys = getValue(datum, trace, 1) || [];
                 const addIndex = !NO_INDEX_CHARTS.includes(config.types[idx]) && !ys.length;
