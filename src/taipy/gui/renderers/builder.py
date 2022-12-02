@@ -594,6 +594,19 @@ class _Builder:
         # Validate the column names
         columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
 
+        # set default columns if not defined
+        icols = [[c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in columns.keys()] if c2]
+                 for i in range(len(traces))]
+
+        for i, tr in enumerate(traces):
+            if i < len(axis):
+                used_cols = {tr[ax.value] for ax in axis[i] if tr[ax.value]}
+                unused_cols = [c for c in icols[i] if c not in used_cols]
+                if unused_cols and any(not tr[ax.value] for ax in axis[i]):
+                    traces[i] = tuple(
+                        v or (unused_cols.pop(0) if unused_cols and _Chart_iprops(j) in axis[i] else v) for j, v in enumerate(tr)
+                    )
+
         if columns is not None:
             self.__attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
