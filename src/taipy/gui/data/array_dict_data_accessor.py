@@ -29,13 +29,13 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
 
     def __get_dataframe(self, value: t.Any) -> t.Union[t.List[pd.DataFrame], pd.DataFrame]:
         if isinstance(value, list):
-            if isinstance(value[0], (str, int, float, bool)):
+            if not value or isinstance(value[0], (str, int, float, bool)):
                 return pd.DataFrame({"0": value})
             types = {type(x) for x in value}
             if len(types) == 1 and next(iter(types), None) == list:
                 lengths = {len(x) for x in value}
                 return (
-                    pd.DataFrame({str(i): v for i, v in enumerate(value)})
+                    pd.DataFrame(value)
                     if len(lengths) == 1
                     else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
                 )

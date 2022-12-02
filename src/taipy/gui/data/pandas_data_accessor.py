@@ -164,7 +164,7 @@ class _PandasDataAccessor(_DataAccessor):
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
         if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
-            return value.dtypes.apply(lambda x: x.name).to_dict()  # type: ignore
+            return {str(k): v for k, v in value.dtypes.apply(lambda x: x.name).items()}
         elif isinstance(value, list):
             ret_dict: t.Dict[str, str] = {}
             for i, v in enumerate(value):
