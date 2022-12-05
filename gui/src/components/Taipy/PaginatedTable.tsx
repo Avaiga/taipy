@@ -462,7 +462,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     colDesc={columns[col]}
                                                     value={row[col]}
                                                     formatConfig={formatConfig}
-                                                    rowIndex={index}
+                                                    rowIndex={startIndex + index}
                                                     onValidation={
                                                         active && !columns[col].notEditable && onEdit ? onCellValidation : undefined
                                                     }
