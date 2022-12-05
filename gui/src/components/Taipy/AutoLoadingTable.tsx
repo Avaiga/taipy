@@ -430,6 +430,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onCellValidation,
             onDelete,
             onRowDeletion,
+            onAction,
+            onRowSelection,
             props.lineStyle,
             props.nanValue,
             size,
