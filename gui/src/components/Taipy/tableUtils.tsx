@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, CSSProperties } from "react";
+import React, { useState, useCallback, CSSProperties, MouseEvent } from "react";
 import TableCell, { TableCellProps } from "@mui/material/TableCell";
 import Box from "@mui/material/Box";
 import Input from "@mui/material/Input";
@@ -94,6 +94,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     onEdit?: string;
     onDelete?: string;
     onAdd?: string;
+    onAction?: string;
     editable?: boolean;
     defaultEditable?: boolean;
     lineStyle?: string;
@@ -133,6 +134,10 @@ export interface OnRowDeletion {
     (rowIndex: number): void;
 }
 
+export interface OnRowSelection {
+    (rowIndex: number): void;
+}
+
 interface EditableCellProps {
     rowIndex: number;
     value: RowValue;
@@ -140,6 +145,7 @@ interface EditableCellProps {
     formatConfig: FormatConfig;
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
+    onSelection?: OnRowSelection;
     nanValue?: string;
     className?: string;
     tableCellProps?: Partial<TableCellProps>;
@@ -223,6 +229,7 @@ export const EditableCell = (props: EditableCellProps) => {
         formatConfig,
         rowIndex,
         onDeletion,
+        onSelection,
         nanValue,
         className,
         tableCellProps = {},
@@ -259,9 +266,10 @@ export const EditableCell = (props: EditableCellProps) => {
         setEdit((e) => !e);
     }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type]);
 
-    const onEditClick = useCallback(() => {
+    const onEditClick = useCallback((evt?: MouseEvent) => {
         onValidation && setEdit((e) => !e);
         setVal(value);
+        evt && evt.stopPropagation();
     }, [onValidation, value]);
 
     const onKeyDown = useCallback(
@@ -283,7 +291,11 @@ export const EditableCell = (props: EditableCellProps) => {
         setDeletion((d) => !d);
     }, [onDeletion, rowIndex]);
 
-    const onDeleteClick = useCallback(() => onDeletion && setDeletion((d) => !d), [onDeletion]);
+    const onDeleteClick = useCallback((evt?: MouseEvent) => {
+        onDeletion && setDeletion((d) => !d);
+        evt && evt.stopPropagation();
+    }, [onDeletion]);
+
     const onDeleteKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
             switch (e.key) {
@@ -297,6 +309,11 @@ export const EditableCell = (props: EditableCellProps) => {
         },
         [onDeleteCheckClick, onDeleteClick]
     );
+
+    const onSelect = useCallback(() => {
+        onSelection && onSelection(rowIndex);
+        return false;
+    }, [onSelection, rowIndex]);
 
     return (
         <TableCell {...getCellProps(colDesc, tableCellProps)} className={className}>
@@ -364,7 +381,7 @@ export const EditableCell = (props: EditableCellProps) => {
                     </IconButton>
                 ) : null
             ) : (
-                <Box sx={cellBoxSx}>
+                <Box sx={cellBoxSx} onClick={onSelect}>
                     {renderCellValue(value, colDesc, formatConfig, nanValue)}
                     {onValidation ? (
                         <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
