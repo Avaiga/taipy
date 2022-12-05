@@ -24,7 +24,7 @@ jobs:
       - name: Install Tox
         run: pip install tox
 
-      - name: Run linter and all tests except Pyodbc's and Pymysql's and Psycopg2's
+      - name: Run linter and all tests except Pyodbc's, Pymysql's, Psycopg2's, and Fastparquet
         if: matrix.python-versions == '3.10' && matrix.os == 'windows-latest'
         env:
           TOX_PARALLEL_NO_SPINNER: 1

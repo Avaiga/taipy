@@ -19,6 +19,7 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
+    "pyarrow>=9.0,<10.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.0.7,<4.0",
     "modin[dask]>=0.16.2,<1.0",
@@ -30,7 +31,12 @@ requirements = [
 
 test_requirements = ["pytest>=3.8"]
 
-extras_require = {"mssql": ["pyodbc>=4,<4.1"], "mysql": ["pymysql>1,<1.1"], "postgresql": ["psycopg2>2.9,<2.10"]}
+extras_require = {
+    "fastparquet": ["fastparquet==2022.11.0"],
+    "mssql": ["pyodbc>=4,<4.1"],
+    "mysql": ["pymysql>1,<1.1"],
+    "postgresql": ["psycopg2>2.9,<2.10"],
+}
 
 setup(
     author="Avaiga",

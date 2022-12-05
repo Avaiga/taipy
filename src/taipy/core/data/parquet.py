@@ -20,7 +20,12 @@ from taipy.config.common.scope import Scope
 
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, JobId
-from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
+from ..exceptions.exceptions import (
+    InvalidExposedType,
+    MissingRequiredProperty,
+    UnknownCompressionAlgorithm,
+    UnknownParquetEngine,
+)
 from .data_node import DataNode
 
 
@@ -49,9 +54,8 @@ class ParquetDataNode(DataNode):
 
             - _"default_path"_ `(str)`: The default path of the Parquet file.\n
             - _"exposed_type"_: The exposed type of the data read from Parquet file. The default value is `pandas`.\n
-            - _"engine"_ `(str)`: Parquet library to use. If 'auto', then the option pandas.io.parquet.engine is used.
-                The default pandas.io.parquet.engine behavior is to try 'pyarrow', falling back to 'fastparquet' if 'pyarrow' is unavailable.
-                `{'auto', 'pyarrow', 'fastparquet'}`, default `'auto'`. \n
+            - _"engine"_ `(Optional[str])`: Parquet library to use. Possible values are _"fastparquet"_ or _"pyarrow"_.
+                The default value is _"pyarrow"_.
             - _"compression"_ `(Optional[str])`: Name of the compression to use. Use None for no compression.
                 `{'snappy', 'gzip', 'brotli', None}`, default `'snappy'`.\n
             - _"read_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.read_parquet_ method.\n
@@ -69,7 +73,9 @@ class ParquetDataNode(DataNode):
     __PATH_KEY = "path"
     __DEFAULT_PATH_KEY = "default_path"
     __ENGINE_PROPERTY = "engine"
+    __VALID_PARQUET_ENGINES = ["pyarrow", "fastparquet"]
     __COMPRESSION_PROPERTY = "compression"
+    __VALID_COMPRESSION_ALGORITHMS = ["snappy", "gzip", "brotli"]
     __READ_KWARGS_PROPERTY = "read_kwargs"
     __WRITE_KWARGS_PROPERTY = "write_kwargs"
     _REQUIRED_PROPERTIES: List[str] = []
@@ -98,9 +104,20 @@ class ParquetDataNode(DataNode):
 
         if self.__ENGINE_PROPERTY not in properties.keys():
             properties[self.__ENGINE_PROPERTY] = "pyarrow"
+        if properties[self.__ENGINE_PROPERTY] not in self.__VALID_PARQUET_ENGINES:
+            raise UnknownParquetEngine(
+                f"Invalid parquet engine: {properties[self.__ENGINE_PROPERTY]}. Supported engines are {', '.join(self.__VALID_PARQUET_ENGINES)}"
+            )
 
         if self.__COMPRESSION_PROPERTY not in properties.keys():
             properties[self.__COMPRESSION_PROPERTY] = "snappy"
+        if (
+            properties[self.__COMPRESSION_PROPERTY]
+            and properties[self.__COMPRESSION_PROPERTY] not in self.__VALID_COMPRESSION_ALGORITHMS
+        ):
+            raise UnknownCompressionAlgorithm(
+                f"Unsupported compression algorithm: {properties[self.__COMPRESSION_PROPERTY]}. Supported algorithms are {', '.join(self.__VALID_COMPRESSION_ALGORITHMS)}"
+            )
 
         if self.__READ_KWARGS_PROPERTY not in properties.keys():
             properties[self.__READ_KWARGS_PROPERTY] = {}
@@ -133,7 +150,7 @@ class ParquetDataNode(DataNode):
             **properties,
         )
         if not self._last_edit_date and isfile(self._path):
-            self.unlock_edit()
+            self.last_edit_date = datetime.now()  # type: ignore
 
     @classmethod
     def storage_type(cls) -> str:
@@ -215,6 +232,11 @@ class ParquetDataNode(DataNode):
             return None
 
         kwargs = self.properties[self.__READ_KWARGS_PROPERTY]
+        kwargs.update(
+            {
+                self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
+            }
+        )
         kwargs.update(read_kwargs)
 
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:

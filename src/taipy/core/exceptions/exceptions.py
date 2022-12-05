@@ -46,6 +46,14 @@ class UnknownDatabaseEngine(Exception):
     """Raised if the database engine is not known when creating a connection with a SQLDataNode."""
 
 
+class UnknownParquetEngine(Exception):
+    """Raised if the parquet engine is not known or not supported when create a ParquetDataNode."""
+
+
+class UnknownCompressionAlgorithm(Exception):
+    """Raised if the compression algorithm is not supported by ParquetDataNode."""
+
+
 class NonExistingDataNode(Exception):
     """Raised if a requested DataNode is not known by the DataNode Manager."""
 
