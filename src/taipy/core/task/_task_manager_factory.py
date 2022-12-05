@@ -13,6 +13,7 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ..task._task_repository_factory import _TaskRepositoryFactory
 from ._task_manager import _TaskManager
 
 
@@ -21,4 +22,5 @@ class _TaskManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_TaskManager]:  # type: ignore
         if cls._using_enterprise():
             return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager")  # type: ignore
+        _TaskManager._repository = _TaskRepositoryFactory._build_repository()  # type: ignore
         return _TaskManager

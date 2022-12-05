@@ -14,6 +14,7 @@ from typing import Type
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._data_manager import _DataManager
+from ._data_repository_factory import _DataRepositoryFactory
 
 
 class _DataManagerFactory(_ManagerFactory):
@@ -21,4 +22,5 @@ class _DataManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_DataManager]:  # type: ignore
         if cls._using_enterprise():
             return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager")  # type: ignore
+        _DataManager._repository = _DataRepositoryFactory._build_repository()  # type: ignore
         return _DataManager

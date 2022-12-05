@@ -141,7 +141,9 @@ class _JobDispatcher(threading.Thread):
                 Config.block_update()
             inputs: List[DataNode] = list(task.input.values())
             outputs: List[DataNode] = list(task.output.values())
+
             fct = task.function
+
             results = fct(*cls.__read_inputs(inputs))
             return cls.__write_data(outputs, results, job_id)
         except Exception as e:

@@ -17,6 +17,7 @@ import pytest
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.common.alias import ScenarioId, TaskId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
@@ -128,7 +129,7 @@ def test_add_property_to_scenario():
 def test_add_cycle_to_scenario(cycle):
     scenario = Scenario("foo", [], {})
     assert scenario.cycle is None
-    _CycleManager._set(cycle)
+    _CycleManagerFactory._build_manager()._set(cycle)
     scenario.cycle = cycle
 
     assert scenario.cycle == cycle

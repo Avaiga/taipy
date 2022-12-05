@@ -19,6 +19,7 @@ from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.data_node import DataNode
 from taipy.config.common.scope import Scope
+from taipy.config.config import Config
 
 
 class TestDataRepository:
@@ -70,6 +71,34 @@ class TestDataRepository:
         assert repository._from_model(self.data_node_model) == self.data_node
 
     def test_data_node_with_env_variable_value_not_serialized(self):
+        with mock.patch.dict(os.environ, {"FOO": "bar"}):
+            repository = _DataRepositoryFactory._build_repository()
+            assert repository._to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"
+            assert self.data_node._properties.data["prop"] == "ENV[FOO]"
+            assert self.data_node.properties["prop"] == "bar"
+            assert self.data_node.prop == "bar"
+
+    def test_save_and_load_with_sql_repo(self, tmpdir):
+        Config.configure_global_app(repository_type="sql")
+
+        repository = _DataRepositoryFactory._build_repository()
+
+        repository._save(self.data_node)
+        dn = repository.load("my_dn_id")
+
+        assert isinstance(dn, CSVDataNode)
+        assert isinstance(dn, DataNode)
+
+    def test_from_and_to_model_with_sql_repo(self):
+        Config.configure_global_app(repository_type="sql")
+
+        repository = _DataRepositoryFactory._build_repository()
+        assert repository._to_model(self.data_node) == self.data_node_model
+        assert repository._from_model(self.data_node_model) == self.data_node
+
+    def test_data_node_with_env_variable_value_not_serialized_with_sql_repo(self):
+        Config.configure_global_app(repository_type="sql")
+
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
             repository = _DataRepositoryFactory._build_repository()
             assert repository._to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"

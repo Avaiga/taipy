@@ -35,13 +35,18 @@ class FakeDataNode(InMemoryDataNode):
     write_has_been_called = 0
 
     def __init__(self, config_id, **kwargs):
-        super().__init__(config_id, Scope.PIPELINE, **kwargs)
+        scope = kwargs.pop("scope", Scope.PIPELINE)
+        super().__init__(config_id=config_id, scope=scope, **kwargs)
 
     def _read(self, query=None):
         self.read_has_been_called += 1
 
     def _write(self, data):
         self.write_has_been_called += 1
+
+    @classmethod
+    def storage_type(cls) -> str:
+        return "fake_inmemory"
 
     write = DataNode.write  # Make sure that the writing behavior comes from DataNode
 
@@ -57,6 +62,10 @@ class FakeDataframeDataNode(DataNode):
     def _read(self):
         return self.data
 
+    @classmethod
+    def storage_type(cls) -> str:
+        return "fake_df_dn"
+
 
 class FakeListDataNode(DataNode):
     class Row:
@@ -69,6 +78,10 @@ class FakeListDataNode(DataNode):
 
     def _read(self):
         return self.data
+
+    @classmethod
+    def storage_type(cls) -> str:
+        return "fake_list_dn"
 
 
 def funct_a_b(input: str):

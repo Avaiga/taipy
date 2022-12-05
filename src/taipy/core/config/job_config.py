@@ -11,6 +11,7 @@
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
+from taipy.config._config import _Config
 from taipy.config import Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.unique_section import UniqueSection
@@ -59,7 +60,7 @@ class JobConfig(UniqueSection):
         return as_dict
 
     @classmethod
-    def _from_dict(cls, config_as_dict: Dict[str, Any], id=None, config=None):
+    def _from_dict(cls, config_as_dict: Dict[str, Any], id=None, config: Optional[_Config] = None):
         mode = config_as_dict.pop(cls._MODE_KEY, None)
         job_config = JobConfig(mode, **config_as_dict)
         return job_config

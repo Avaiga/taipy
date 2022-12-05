@@ -14,6 +14,7 @@ from typing import Type
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._scenario_manager import _ScenarioManager
+from ._scenario_repository_factory import _ScenarioRepositoryFactory
 
 
 class _ScenarioManagerFactory(_ManagerFactory):
@@ -21,4 +22,5 @@ class _ScenarioManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_ScenarioManager]:  # type: ignore
         if cls._using_enterprise():
             return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager")  # type: ignore
+        _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
         return _ScenarioManager

@@ -72,9 +72,9 @@ def return_a_number_with_sleep():
 def test_skipped_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _SchedulerFactory._build_scheduler()
-    input_config = Config.configure_in_memory_data_node("input")
-    intermediate_config = Config.configure_in_memory_data_node("intermediate", cacheable=True)
-    output_config = Config.configure_in_memory_data_node("output", cacheable=True)
+    input_config = Config.configure_data_node("input")
+    intermediate_config = Config.configure_data_node("intermediate", cacheable=True)
+    output_config = Config.configure_data_node("output", cacheable=True)
     task_config_1 = Config.configure_task("first", mult_by_2, input_config, intermediate_config)
     task_config_2 = Config.configure_task("second", mult_by_2, intermediate_config, output_config)
     pipeline_config = Config.configure_pipeline("pipeline", [task_config_1, task_config_2])
@@ -128,7 +128,7 @@ def test_complex():
     inp_excel_dn_1 = Config.configure_excel_data_node("dn_excel_in_1", default_path=excel_path_inp, sheet_name="Sheet1")
     inp_excel_dn_2 = Config.configure_excel_data_node("dn_excel_in_2", default_path=excel_path_inp, sheet_name="Sheet1")
 
-    placeholder = Config.configure_in_memory_data_node("dn_placeholder", 10)
+    placeholder = Config.configure_data_node("dn_placeholder", default_data=10)
 
     dn_csv_sum = Config.configure_csv_data_node("dn_sum_csv", default_path=csv_path_sum)
     dn_excel_sum = Config.configure_excel_data_node("dn_sum_excel", default_path=excel_path_sum, sheet_name="Sheet1")

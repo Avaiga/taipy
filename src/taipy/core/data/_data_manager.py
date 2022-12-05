@@ -38,7 +38,6 @@ class _DataManager(_Manager[DataNode]):
         task_id: Optional[TaskId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
         dn_configs_and_owner_id = []
-
         for dn_config in data_node_configs:
             scope = dn_config.scope
             owner_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None

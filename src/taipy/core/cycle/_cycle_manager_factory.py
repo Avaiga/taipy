@@ -14,6 +14,7 @@ from typing import Type
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ..cycle._cycle_manager import _CycleManager
+from ._cycle_repository_factory import _CycleRepositoryFactory
 
 
 class _CycleManagerFactory(_ManagerFactory):
@@ -21,4 +22,5 @@ class _CycleManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_CycleManager]:  # type: ignore
         if cls._using_enterprise():
             return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager")  # type: ignore
+        _CycleManager._repository = _CycleRepositoryFactory._build_repository()
         return _CycleManager

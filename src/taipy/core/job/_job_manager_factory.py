@@ -14,6 +14,7 @@ from typing import Type
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._job_manager import _JobManager
+from ._job_repository_factory import _JobRepositoryFactory
 
 
 class _JobManagerFactory(_ManagerFactory):
@@ -21,4 +22,5 @@ class _JobManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_JobManager]:  # type: ignore
         if cls._using_enterprise():
             return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_manager", "_JobManager")  # type: ignore
+        _JobManager._repository = _JobRepositoryFactory._build_repository()  # type: ignore
         return _JobManager

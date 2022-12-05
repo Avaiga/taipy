@@ -9,8 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
 import json
+import os
 import pathlib
 import shutil
 
@@ -19,13 +19,16 @@ import pytest
 from src.taipy.core.exceptions.exceptions import InvalidExportPath
 from taipy.config.config import Config
 
-from .mocks import MockFSRepository, MockSQLRepository, MockModel, MockObj
+from .mocks import MockFSRepository, MockModel, MockObj, MockSQLRepository
 
 
 class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
-        [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
+        [
+            (MockFSRepository, {"model": MockModel, "dir_name": "mock_model"}),
+            (MockSQLRepository, {"model": MockModel}),
+        ],
     )
     def test_save_and_fetch_model(self, mock_repo, params):
 
@@ -38,12 +41,17 @@ class TestRepositoriesStorage:
 
     @pytest.mark.parametrize(
         "mock_repo,params",
-        [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
+        [
+            (MockFSRepository, {"model": MockModel, "dir_name": "mock_model"}),
+            (MockSQLRepository, {"model": MockModel}),
+        ],
     )
     def test_get_all(self, mock_repo, params):
 
         objs = []
         r = mock_repo(**params)
+        r._delete_all()
+
         for i in range(5):
             m = MockObj(f"uuid-{i}", f"Foo{i}")
             objs.append(m)
@@ -58,10 +66,14 @@ class TestRepositoriesStorage:
 
     @pytest.mark.parametrize(
         "mock_repo,params",
-        [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
+        [
+            (MockFSRepository, {"model": MockModel, "dir_name": "mock_model"}),
+            (MockSQLRepository, {"model": MockModel}),
+        ],
     )
     def test_delete_all(self, mock_repo, params):
         r = mock_repo(**params)
+        r._delete_all()
 
         for i in range(5):
             m = MockObj(f"uuid-{i}", f"Foo{i}")
@@ -76,11 +88,16 @@ class TestRepositoriesStorage:
 
     @pytest.mark.parametrize(
         "mock_repo,params",
-        [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
+        [
+            (MockFSRepository, {"model": MockModel, "dir_name": "mock_model"}),
+            (MockSQLRepository, {"model": MockModel}),
+        ],
     )
     def test_delete_many(self, mock_repo, params):
 
         r = mock_repo(**params)
+        r._delete_all()
+
         for i in range(5):
             m = MockObj(f"uuid-{i}", f"Foo{i}")
             r._save(m)
@@ -93,10 +110,14 @@ class TestRepositoriesStorage:
 
     @pytest.mark.parametrize(
         "mock_repo,params",
-        [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
+        [
+            (MockFSRepository, {"model": MockModel, "dir_name": "mock_model"}),
+            (MockSQLRepository, {"model": MockModel}),
+        ],
     )
     def test_search(self, mock_repo, params):
         r = mock_repo(**params)
+        r._delete_all()
 
         m = MockObj("uuid", "foo")
         r._save(m)
@@ -125,15 +146,15 @@ class TestRepositoriesStorage:
         r._save(m)
 
         r._export("uuid", export_path)
-        assert pathlib.Path(os.path.join(export_path, f"mock_model/uuid.json")).exists()
-        with open(os.path.join(export_path, f"mock_model/uuid.json"), "r") as exported_file:
+        assert pathlib.Path(os.path.join(export_path, "mock_model/uuid.json")).exists()
+        with open(os.path.join(export_path, "mock_model/uuid.json"), "r") as exported_file:
             exported_data = json.load(exported_file)
             assert exported_data["id"] == "uuid"
             assert exported_data["name"] == "foo"
 
         # Export to same location again should work
         r._export("uuid", export_path)
-        assert pathlib.Path(os.path.join(export_path, f"mock_model/uuid.json")).exists()
+        assert pathlib.Path(os.path.join(export_path, "mock_model/uuid.json")).exists()
 
         if mock_repo == MockFSRepository:
             with pytest.raises(InvalidExportPath):
@@ -141,7 +162,7 @@ class TestRepositoriesStorage:
 
         shutil.rmtree(export_path, ignore_errors=True)
 
-    def test_config_override(self):
+    def test_config_filesystem_repo_override(self):
         storage_folder = pathlib.Path("/tmp") / "fodo"
         repo = MockFSRepository(model=MockModel, dir_name="mock")
 

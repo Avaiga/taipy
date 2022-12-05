@@ -17,6 +17,7 @@ from typing import Any, Callable, Iterable, List, Optional, Type, TypeVar, Union
 from sqlalchemy import create_engine, delete
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from taipy.config.config import Config
 
@@ -58,7 +59,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
         try:
             # More sql databases can be easily added in the future
-            self.engine = create_engine(f"sqlite:///{properties.get('db_location')}")
+            self.engine = create_engine(
+                f"sqlite:///{properties.get('db_location')}?check_same_thread=False", poolclass=StaticPool
+            )
 
             # Maybe this should be in the taipy package? So it's not executed every time
             # the class is instantiated
@@ -102,7 +105,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.__insert_model(model)
 
     def _delete(self, model_id: str):
-        self.session.query(_TaipyModel).filter_by(model_id=model_id).delete()
+        number_of_deleted_entries = self.session.query(_TaipyModel).filter_by(model_id=model_id).delete()
+        if not number_of_deleted_entries:
+            raise ModelNotFound(str(self.model.__name__), model_id)
         self.session.commit()
 
     def _delete_all(self):
@@ -123,35 +128,42 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             return None
         return self.__to_entity(entry)
 
-    def _get_by_config_and_parent_id(self, config_id: str, parent_id: Optional[str]) -> Optional[Entity]:
-        entities = iter(self.__get_entities_by_config_and_parent(config_id, parent_id))
-        return next(entities, None)
+    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
+        entities = iter(self.__get_entities_by_config_and_owner(config_id, owner_id))
+        return self.__to_entity(next(entities, None))
 
-    def _get_by_configs_and_parent_ids(self, configs_and_parent_ids):
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
         res = {}
-        configs_and_parent_ids = set(configs_and_parent_ids)
+        configs_and_owner_ids = set(configs_and_owner_ids)
 
-        for config, parent in configs_and_parent_ids:
-            entry = self.__get_entities_by_config_and_parent(config, parent, only_first=True)
+        for config, owner in configs_and_owner_ids:
+            entry = self.__get_entities_by_config_and_owner(config.id, owner, only_first=True)
             if entry:
                 entity = self.__to_entity(entry)
-                key = config, parent
+                key = config, owner
                 res[key] = entity
-                configs_and_parent_ids.remove(key)
 
         return res
 
-    def __get_entities_by_config_and_parent(
-        self, config_id: str, parent_id: Optional[str] = "", only_first: bool = False
+    def __get_entities_by_config_and_owner(
+        self, config_id: str, owner_id: Optional[str] = "", only_first: bool = False
     ):
-        query = (
-            self.session.query(_TaipyModel)
-            .filter_by(model_name=self.model_name)
-            .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
-            .filter(_TaipyModel.document.contains(f'"parent_id": "{parent_id}"'))
-        )
+        if owner_id:
+            query = (
+                self.session.query(_TaipyModel)
+                .filter_by(model_name=self.model_name)
+                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
+                .filter(_TaipyModel.document.contains(f'"owner_id": "{owner_id}"'))
+            )
+        else:
+            query = (
+                self.session.query(_TaipyModel)
+                .filter_by(model_name=self.model_name)
+                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
+                .filter(_TaipyModel.document.contains('"owner_id": null'))
+            )
         if only_first:
             return query.first()
         return query.all()
@@ -182,7 +194,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.session.commit()
 
     def __to_entity(self, entry: _TaipyModel) -> Entity:
-        return self.__model_to_entity(entry.document)
+        return self.__model_to_entity(entry.document) if entry else None
 
     def __model_to_entity(self, file_content):
         data = json.loads(file_content, cls=_CustomDecoder)
