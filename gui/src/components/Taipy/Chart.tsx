@@ -160,7 +160,7 @@ const getDecimatorPayload = (
 const selectedPropRe = /selected(\d+)/;
 
 const ONE_COLUMN_CHART = ["pie"];
-const NO_INDEX_CHARTS = ["histogram"];
+const NO_INDEX_CHARTS = ["histogram", "heatmap"];
 const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
 
 const Chart = (props: ChartProp) => {

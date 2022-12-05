@@ -47,6 +47,7 @@ from .utils import (
 if t.TYPE_CHECKING:
     from ..gui import Gui
 
+
 class _Chart_iprops(Enum):
     x = 0
     y = 1
@@ -592,20 +593,26 @@ class _Builder:
 
         # Validate the column names
         columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
+
         # set default columns if not defined
         icols = [[c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in columns.keys()] if c2]
                  for i in range(len(traces))]
 
         for i, tr in enumerate(traces):
-            axis_idx = [e.value for e in (axis[i] if i < len(axis) else axis[0])]
-            if any(not tr[idx] for idx in axis_idx):
-                traces[i] = tuple(
-                    v or (icols[i].pop(0) if j in axis_idx and len(icols[i]) > 0 else v) for j, v in enumerate(tr)
-                )
+            if i < len(axis):
+                used_cols = {tr[ax.value] for ax in axis[i] if tr[ax.value]}
+                unused_cols = [c for c in icols[i] if c not in used_cols]
+                if unused_cols and any(not tr[ax.value] for ax in axis[i]):
+                    traces[i] = tuple(
+                        v or (unused_cols.pop(0) if unused_cols and _Chart_iprops(j) in axis[i] else v) for j, v in enumerate(tr)
+                    )
 
         if columns is not None:
             self.__attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
+
+            # List used axis
+            used_axis = [[e for e in (axis[j] if j < len(axis) else axis[0]) if tr[e.value]] for j, tr in enumerate(traces)]
 
             ret_dict = {
                 "columns": columns,
@@ -617,13 +624,13 @@ class _Builder:
                 "yaxis": [tr[_Chart_iprops.yaxis.value] for tr in traces],
                 "markers": markers,
                 "selectedMarkers": [tr[_Chart_iprops.selected_marker.value] or ({"color": tr[_Chart_iprops.selected_color.value]} if tr[_Chart_iprops.selected_color.value] else None) for tr in traces],
-                "traces": [[reverse_cols.get(c, c) for c in [tr[i] for i in [e.value for e in (axis[j] if j < len(axis) else axis[0])] if tr[i]]] for j, tr in enumerate(traces)],
+                "traces": [[reverse_cols.get(c, c) for c in [tr[e.value] for e in used_axis[j]]] for j, tr in enumerate(traces)],
                 "orientations": [tr[_Chart_iprops.orientation.value] for tr in traces],
                 "names": [tr[_Chart_iprops._name.value] for tr in traces],
-                "lines": [tr[_Chart_iprops.line.value] if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict)) else {"dash": tr[_Chart_iprops.line.value]} for tr in traces],
+                "lines": [tr[_Chart_iprops.line.value] if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict)) else {"dash": tr[_Chart_iprops.line.value]} if tr[_Chart_iprops.line.value] else None for tr in traces],
                 "textAnchors": [tr[_Chart_iprops.text_anchor.value] for tr in traces],
                 "options": [tr[_Chart_iprops.options.value] for tr in traces],
-                "axisNames": [[e.name for e in ax] for ax in axis],
+                "axisNames": [[e.name for e in ax] for ax in used_axis],
             }
 
             self.__set_json_attribute("config", ret_dict)
