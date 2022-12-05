@@ -252,6 +252,10 @@ prop_int = "0:int"
 attribute = "my_attribute"
 prop_fct_list = [ "tests.config.test_section_serialization.add:function",]
 prop_class_list = [ "tests.config.test_section_serialization.CustomClass:class",]
+
+[section_name.my_id_2]
+attribute = "my_attribute_2"
+prop_fct_list = [ "builtins.print:function", "builtins.pow:function",]
     """.strip()
 
     tf = NamedTemporaryFile()
@@ -266,6 +270,12 @@ prop_class_list = [ "tests.config.test_section_serialization.CustomClass:class",
         "my_attribute",
         prop_fct_list=[add],
         prop_class_list=[CustomClass],
+    )
+
+    Config.configure_section_for_tests(
+        "my_id_2",
+        "my_attribute_2",
+        prop_fct_list=[print, pow],
     )
 
     Config.export(tf.filename)
@@ -455,6 +465,13 @@ def test_read_write_json_configuration_file_with_function_and_class():
 "prop_class_list": [
 "tests.config.test_section_serialization.CustomClass:class"
 ]
+},
+"my_id_2": {
+"attribute": "my_attribute_2",
+"prop_fct_list": [
+"builtins.print:function",
+"builtins.pow:function"
+]
 }
 }
 }
@@ -474,14 +491,19 @@ def test_read_write_json_configuration_file_with_function_and_class():
         prop_fct_list=[add],
         prop_class_list=[CustomClass],
     )
+    Config.configure_section_for_tests(
+        "my_id_2",
+        "my_attribute_2",
+        prop_fct_list=[print, pow],
+    )
 
     Config.export(tf.filename)
-    actual_exported_toml = tf.read().strip()
-    assert actual_exported_toml == expected_json_config
+    actual_exported_json = tf.read().strip()
+    assert actual_exported_json == expected_json_config
 
     Config.load(tf.filename)
     tf2 = NamedTemporaryFile()
     Config.export(tf2.filename)
 
-    actual_exported_toml_2 = tf2.read().strip()
-    assert actual_exported_toml_2 == expected_json_config
+    actual_exported_json_2 = tf2.read().strip()
+    assert actual_exported_json_2 == expected_json_config

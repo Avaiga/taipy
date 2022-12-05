@@ -11,6 +11,7 @@
 
 import inspect
 import re
+import types
 from abc import abstractmethod
 from typing import Any, Dict, Optional
 
@@ -65,7 +66,7 @@ class _BaseSerializer(object):
             return str(as_dict) + ":int"
         if isinstance(as_dict, float):
             return str(as_dict) + ":float"
-        if inspect.isfunction(as_dict):
+        if inspect.isfunction(as_dict) or isinstance(as_dict, types.BuiltinFunctionType):
             return as_dict.__module__ + "." + as_dict.__name__ + ":function"
         if inspect.isclass(as_dict):
             return as_dict.__module__ + "." + as_dict.__qualname__ + ":class"

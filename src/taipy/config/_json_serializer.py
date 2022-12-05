@@ -17,7 +17,7 @@ from .exceptions.exceptions import LoadingError
 
 
 class _JsonSerializer(_BaseSerializer):
-    """Convert configuration from TOML representation to Python Dict and reciprocally."""
+    """Convert configuration from JSON representation to Python Dict and reciprocally."""
 
     @classmethod
     def _write(cls, configuration: _Config, filename: str):
