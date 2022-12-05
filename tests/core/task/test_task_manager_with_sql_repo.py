@@ -90,13 +90,9 @@ def test_do_not_recreate_existing_task():
     input_config_scope_pipeline = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
     output_config_scope_pipeline = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
     task_config = Config.configure_task("foo", print, input_config_scope_pipeline, output_config_scope_pipeline)
-    # task_config scope is Pipeline
-
-    # TODO: Auto set config back to filesystem when running with other tests
 
     task_1 = _create_task_from_config(task_config)
     assert len(_TaskManager._get_all()) == 1
-    # TODO: cannot detect already created task
     _TaskManager._bulk_get_or_create([task_config])  # Do not create. It already exists for None pipeline
     assert len(_TaskManager._get_all()) == 1
     task_2 = _create_task_from_config(

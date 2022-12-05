@@ -306,7 +306,7 @@ def test_cancel_single_running_job():
         assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 1)
         assert_true_after_1_minute_max(job.is_running)
         _JobManager._cancel(job.id)
-        assert_true_after_1_minute_max(job.is_running)  # TODO: probably the job was succeeded and this test failed
+        assert_true_after_1_minute_max(job.is_running)
     assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
     assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
     assert_true_after_1_minute_max(job.is_completed)
