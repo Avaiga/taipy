@@ -61,7 +61,7 @@ outputs = []
 
 [TASK.t1]
 inputs = [ "dn1:SECTION",]
-function = "<built-in function print>"
+function = "builtins.print:function"
 outputs = [ "dn2:SECTION",]
 description = "t1 description"
 
