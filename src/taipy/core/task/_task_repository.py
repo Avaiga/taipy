@@ -41,6 +41,7 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
             function_name=task._function.__name__,
             function_module=task._function.__module__,
             output_ids=self.__to_ids(task.output.values()),
+            version=task.version,
         )
 
     def _from_model(self, model: _TaskModel) -> Task:
@@ -52,6 +53,7 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
             function=_load_fct(model.function_module, model.function_name),
             input=self.__to_data_nodes(model.input_ids),
             output=self.__to_data_nodes(model.output_ids),
+            version=model.version,
         )
 
     def load(self, model_id: str) -> Task:
@@ -74,6 +76,9 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
 
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
+
+    def _delete_by(self, attribute: str, value: str):
+        return self.repo._delete_by(attribute, value)
 
     def _search(self, attribute: str, value: Any) -> Optional[Task]:
         return self.repo._search(attribute, value)

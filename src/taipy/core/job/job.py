@@ -17,6 +17,7 @@ from typing import Callable, List
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._version._version_manager import _VersionManager
 from ..common._entity import _Entity
 from ..common._reload import _self_reload, _self_setter
 from ..common.alias import JobId
@@ -47,11 +48,12 @@ class Job(_Entity):
         status (Status^): The current status of this job.
         creation_date (datetime): The date of this job's creation.
         stacktrace (List[str]): The list of stacktraces of the exceptions raised during the execution.
+        version (str): The string indicates the application version of the job to instantiate. If not provided, the current version is used.
     """
 
     _MANAGER_NAME = "job"
 
-    def __init__(self, id: JobId, task: Task, submit_id: str, force=False):
+    def __init__(self, id: JobId, task: Task, submit_id: str, force=False, version=None):
         self.id = id
         self._task = task
         self._force = force
@@ -61,6 +63,7 @@ class Job(_Entity):
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
+        self._version = version or _VersionManager.get_current_version()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -109,6 +112,10 @@ class Job(_Entity):
     @property
     def stacktrace(self) -> List[str]:
         return self._stacktrace
+
+    @property  # type: ignore
+    def version(self):
+        return self._version
 
     def __contains__(self, task: Task):
         return self.task.id == task.id

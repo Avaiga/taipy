@@ -13,9 +13,10 @@ import datetime
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
-from taipy.config.config import Config
+from taipy.config import Config
 
 from .._manager._manager import _Manager
+from .._version._version_manager import _VersionManager
 from ..common._entity_ids import _EntityIds
 from ..common.alias import ScenarioId
 from ..config.scenario_config import ScenarioConfig
@@ -107,6 +108,7 @@ class _ScenarioManager(_Manager[Scenario]):
         props = config._properties.copy()
         if name:
             props["name"] = name
+        version = _VersionManager.get_current_version()
         scenario = Scenario(
             str(config.id),  # type: ignore
             pipelines,
@@ -115,6 +117,7 @@ class _ScenarioManager(_Manager[Scenario]):
             creation_date,
             is_primary=is_primary_scenario,
             cycle=cycle,
+            version=version,
         )
         for pipeline in pipelines:
             pipeline._parent_ids.update([scenario_id])
@@ -277,6 +280,18 @@ class _ScenarioManager(_Manager[Scenario]):
         entity_ids_to_delete = cls._get_children_entity_ids(scenario)
         entity_ids_to_delete.scenario_ids.add(scenario.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+
+    @classmethod
+    def _delete_by_version(cls, version_number: str):
+        """
+        Deletes scenario by the version number.
+
+        Check if the cycle is only attached to this scenario, then delete it.
+        """
+        while scenario := cls._repository._search("version", version_number):
+            if scenario.cycle and len(cls._get_all_by_cycle(scenario.cycle)) == 1:
+                _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
+            cls._repository._delete(scenario.id)
 
     @classmethod
     def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:

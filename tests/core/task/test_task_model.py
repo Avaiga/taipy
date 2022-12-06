@@ -23,6 +23,7 @@ def test_deprecated_properties():
             "function_name": "function_name",
             "function_module": "function_module",
             "output_ids": ["output_id"],
+            "version": "latest",
         }
     )
     assert model.owner_id == "owner_id"
@@ -40,6 +41,7 @@ def test_override_deprecated_properties():
             "function_name": "function_name",
             "function_module": "function_module",
             "output_ids": ["output_id"],
+            "version": "latest",
         }
     )
     assert model.owner_id == "owner_id"

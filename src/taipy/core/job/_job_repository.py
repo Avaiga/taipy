@@ -45,11 +45,14 @@ class _JobRepository(_AbstractRepository[_JobModel, Job]):  # type: ignore
             job._creation_date.isoformat(),
             self._serialize_subscribers(job._subscribers),
             job._stacktrace,
+            version=job.version,
         )
 
     def _from_model(self, model: _JobModel):
         task_repository = _TaskRepositoryFactory._build_repository()
-        job = Job(id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id)
+        job = Job(
+            id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id, version=model.version
+        )
 
         job.status = model.status  # type: ignore
         job.force = model.force  # type: ignore
@@ -83,6 +86,9 @@ class _JobRepository(_AbstractRepository[_JobModel, Job]):  # type: ignore
 
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
+
+    def _delete_by(self, attribute: str, value: str):
+        return self.repo._delete_by(attribute, value)
 
     def _search(self, attribute: str, value: Any) -> Optional[Job]:
         return self.repo._search(attribute, value)

@@ -33,3 +33,16 @@ class _TaipyModel(Base):  # type: ignore
         self.model_id = model_id
         self.model_name = model_name
         self.document = document
+
+
+class _TaipyVersion(Base):  # type: ignore
+    """_TaipyVersion Represents the table used to store versioning information of taipy configs."""
+
+    __tablename__ = "taipy_version"
+
+    id = Column(Text, primary_key=True)
+    config = Column(Text)
+
+    def __int__(self, id: str, config: Json):
+        self.id = id
+        self.config = config

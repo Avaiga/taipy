@@ -24,6 +24,7 @@ from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._version._version_manager import _VersionManager
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
@@ -59,6 +60,7 @@ class DataNode(_Entity):
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
@@ -85,6 +87,7 @@ class DataNode(_Entity):
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
+        version: str = None,
         cacheable: bool = False,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
@@ -100,6 +103,7 @@ class DataNode(_Entity):
         self._edit_in_progress = edit_in_progress
         self._job_ids = _ListAttributes(self, job_ids or list())
 
+        self._version = version or _VersionManager.get_current_version()
         self._cacheable = cacheable
         self._validity_period = validity_period
 
@@ -199,6 +203,10 @@ class DataNode(_Entity):
     @_self_setter(_MANAGER_NAME)
     def name(self, val):
         self._name = val
+
+    @property  # type: ignore
+    def version(self):
+        return self._version
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

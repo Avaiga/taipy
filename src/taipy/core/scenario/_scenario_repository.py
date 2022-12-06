@@ -44,6 +44,7 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
             primary_scenario=scenario._primary_scenario,
             subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
+            version=scenario.version,
             cycle=self.__to_cycle_id(scenario._cycle),
         )
 
@@ -61,6 +62,7 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
                 _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                 for it in model.subscribers
             ],
+            version=model.version,
         )
         return scenario
 

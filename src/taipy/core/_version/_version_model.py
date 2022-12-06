@@ -11,37 +11,22 @@
 
 import dataclasses
 from dataclasses import dataclass
-from typing import Any, Dict, List
-
-from ..common.alias import JobId
-from .status import Status
+from typing import Any, Dict
 
 
 @dataclass
-class _JobModel:
-    id: JobId
-    task_id: str
-    status: Status
-    force: bool
-    submit_id: str
+class _VersionModel:
+    id: str
+    config: Dict[str, Any]
     creation_date: str
-    subscribers: List[Dict]
-    stacktrace: List[str]
-    version: str
 
     def to_dict(self) -> Dict[str, Any]:
-        return {**dataclasses.asdict(self), "status": repr(self.status)}
+        return dataclasses.asdict(self)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return _JobModel(
+        return _VersionModel(
             id=data["id"],
-            task_id=data["task_id"],
-            status=Status._from_repr(data["status"]),
-            force=data["force"],
-            submit_id=data["submit_id"],
+            config=data["config"],
             creation_date=data["creation_date"],
-            subscribers=data["subscribers"],
-            stacktrace=data["stacktrace"],
-            version=data["version"],
         )

@@ -26,6 +26,7 @@ class _PipelineModel:
     properties: Dict[str, Any]
     tasks: List[TaskId]
     subscribers: List[Dict]
+    version: str
 
     def to_dict(self) -> Dict[str, Any]:
         return dataclasses.asdict(self)
@@ -40,4 +41,5 @@ class _PipelineModel:
             properties=data["properties"],
             tasks=data["tasks"],
             subscribers=data["subscribers"],
+            version=data["version"],
         )

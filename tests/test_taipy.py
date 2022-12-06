@@ -18,7 +18,6 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
-from src.taipy.core import Core
 from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.pipeline_config import PipelineConfig
@@ -35,6 +34,8 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+
+from .core.utils.core_service_for_test import CoreForTest
 
 
 class TestTaipy:
@@ -265,7 +266,7 @@ class TestTaipy:
         pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
         scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
 
-        Core().run()
+        CoreForTest().run()
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
         tp.submit(scenario_1, wait=True)

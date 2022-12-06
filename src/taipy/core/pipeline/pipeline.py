@@ -19,6 +19,7 @@ import networkx as nx
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
+from .._version._version_manager import _VersionManager
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
@@ -43,6 +44,7 @@ class Pipeline(_Entity):
         pipeline_id (str): The Unique identifier of the pipeline.
         owner_id (str):  The identifier of the owner (scenario_id, cycle_id) or None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent scenarios.
+        version (str): The string indicates the application version of the pipeline to instantiate. If not provided, the current version is used.
     """
 
     _ID_PREFIX = "PIPELINE"
@@ -58,6 +60,7 @@ class Pipeline(_Entity):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         subscribers: List[_Subscriber] = None,
+        version: str = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
@@ -67,6 +70,8 @@ class Pipeline(_Entity):
 
         self._subscribers = _ListAttributes(self, subscribers or list())
         self._properties = _Properties(self, **properties)
+
+        self._version = version or _VersionManager.get_current_version()
 
     @property  # type: ignore
     def parent_id(self):
@@ -129,6 +134,10 @@ class Pipeline(_Entity):
     @_self_setter(_MANAGER_NAME)
     def subscribers(self, val):
         self._subscribers = val or set()
+
+    @property  # type: ignore
+    def version(self):
+        return self._version
 
     @property  # type: ignore
     def properties(self):

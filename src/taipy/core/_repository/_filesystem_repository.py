@@ -115,6 +115,10 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         for model_id in model_ids:
             self._delete(model_id)
 
+    def _delete_by(self, attribute: str, value: str):
+        while entity := self._search(attribute, value):
+            self._delete(entity.id)  # type: ignore
+
     def _search(self, attribute: str, value: str) -> Optional[Entity]:
         return next(self.__search(attribute, value), None)
 

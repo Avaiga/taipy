@@ -11,7 +11,6 @@
 
 import pytest
 
-from src.taipy.core import Core
 from src.taipy.core._scheduler._dispatcher import _DevelopmentJobDispatcher, _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
@@ -19,12 +18,14 @@ from src.taipy.core.config.job_config import JobConfig
 from taipy.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
+from .utils.core_service_for_test import CoreForTest
+
 
 class TestCore:
     def test_run_core_as_a_service_development_mode(self):
         _SchedulerFactory._dispatcher = None
 
-        core = Core()
+        core = CoreForTest()
         assert core._scheduler is not None
         assert core._scheduler == _Scheduler
         assert _SchedulerFactory._scheduler is not None
@@ -42,7 +43,7 @@ class TestCore:
     def test_run_core_as_a_service_standalone_mode(self):
         _SchedulerFactory._dispatcher = None
 
-        core = Core()
+        core = CoreForTest()
         assert core._scheduler is not None
         assert core._scheduler == _Scheduler
         assert _SchedulerFactory._scheduler is not None
@@ -62,17 +63,17 @@ class TestCore:
     def test_block_config_update_when_core_service_is_running_development_mode(self):
         _SchedulerFactory._dispatcher = None
 
-        core = Core()
+        core = CoreForTest()
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
         core.run()
         with pytest.raises(ConfigurationUpdateBlocked):
-            blocked_config = Config.configure_data_node(id="i1")
+            Config.configure_data_node(id="i1")
 
     def test_block_config_update_when_core_service_is_running_standalone_mode(self):
         _SchedulerFactory._dispatcher = None
 
-        core = Core()
+        core = CoreForTest()
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
         core.run()
         with pytest.raises(ConfigurationUpdateBlocked):
-            blocked_config = Config.configure_data_node(id="i1")
+            Config.configure_data_node(id="i1")

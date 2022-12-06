@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
+from .._version._version_manager import _VersionManager
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
@@ -49,6 +50,7 @@ class Scenario(_Entity):
         cycle (Cycle^): The cycle of the scenario.
         subscribers (Set[Callable]): The set of callbacks to be called on `Job^`'s status change.
         tags (Set[str]): The list of scenario's tags.
+        version (str): The string indicates the application version of the scenario to instantiate. If not provided, the current version is used.
     """
 
     _ID_PREFIX = "SCENARIO"
@@ -66,6 +68,7 @@ class Scenario(_Entity):
         cycle: Cycle = None,
         subscribers: List[_Subscriber] = None,
         tags: Set[str] = None,
+        version: str = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
@@ -75,6 +78,7 @@ class Scenario(_Entity):
         self._subscribers = _ListAttributes(self, subscribers or list())
         self._primary_scenario = is_primary
         self._tags = tags or set()
+        self._version = version or _VersionManager.get_current_version()
 
         self._properties = _Properties(self, **properties)
 
@@ -158,6 +162,10 @@ class Scenario(_Entity):
     @_self_setter(_MANAGER_NAME)
     def tags(self, val):
         self._tags = val or set()
+
+    @property  # type: ignore
+    def version(self):
+        return self._version
 
     @property  # type: ignore
     def properties(self):

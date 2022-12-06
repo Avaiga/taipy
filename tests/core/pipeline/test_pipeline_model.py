@@ -22,6 +22,7 @@ def test_deprecated_properties():
             "properties": {},
             "tasks": ["task_id_1"],
             "subscribers": [{}],
+            "version": "latest",
         }
     )
     assert model.owner_id == "owner_id"
@@ -38,6 +39,7 @@ def test_override_deprecated_properties():
             "properties": {},
             "tasks": ["task_id_1"],
             "subscribers": [{}],
+            "version": "latest",
         }
     )
     assert model.owner_id == "owner_id"

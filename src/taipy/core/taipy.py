@@ -465,6 +465,15 @@ def clean_all_entities() -> bool:
     return True
 
 
+def clean_all_entities_by_version(version_number):
+    """Delete all entities belongs to a version from the Taipy data folder."""
+    _JobManagerFactory._build_manager()._delete_by_version(version_number)
+    _ScenarioManagerFactory._build_manager()._delete_by_version(version_number)
+    _PipelineManagerFactory._build_manager()._delete_by_version(version_number)
+    _TaskManagerFactory._build_manager()._delete_by_version(version_number)
+    _DataManagerFactory._build_manager()._delete_by_version(version_number)
+
+
 def export_scenario(
     scenario_id: ScenarioId,
     folder_path: Union[str, pathlib.Path],

@@ -238,3 +238,7 @@ class ModeNotAvailable(Exception):
 
 class InvalidExportPath(Exception):
     """Raised if the export path is not valid."""
+
+
+class VersionAlreadyExists(Exception):
+    """Raised if it is trying to create a Version that has already exists."""

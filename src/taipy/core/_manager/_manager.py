@@ -41,6 +41,13 @@ class _Manager(Generic[EntityType]):
         cls._repository._delete_many(ids)
 
     @classmethod
+    def _delete_by_version(cls, version_number: str):
+        """
+        Deletes entities by version number.
+        """
+        cls._repository._delete_by("version", version_number)  # type: ignore
+
+    @classmethod
     def _delete(cls, id):
         """
         Deletes an entity by id.

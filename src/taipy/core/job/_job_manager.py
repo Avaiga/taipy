@@ -13,6 +13,7 @@ import uuid
 from typing import Callable, Iterable, Optional, Union
 
 from .._manager._manager import _Manager
+from .._version._version_manager import _VersionManager
 from ..common.alias import JobId
 from ..exceptions.exceptions import JobNotDeletedException
 from ..task.task import Task
@@ -28,8 +29,13 @@ class _JobManager(_Manager[Job]):
 
     @classmethod
     def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:
+        version = _VersionManager.get_current_version()
         job = Job(
-            id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"), task=task, submit_id=submit_id, force=force
+            id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"),
+            task=task,
+            submit_id=submit_id,
+            force=force,
+            version=version,
         )
         cls._set(job)
         job._on_status_change(*callbacks)

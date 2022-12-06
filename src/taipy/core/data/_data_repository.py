@@ -113,6 +113,7 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
             list(data_node._parent_ids),
             data_node._last_edit_date.isoformat() if data_node._last_edit_date else None,
             data_node._job_ids.data,
+            data_node._version,
             data_node._cacheable,
             data_node._validity_period.days if data_node._validity_period else None,
             data_node._validity_period.seconds if data_node._validity_period else None,
@@ -212,6 +213,7 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
             parent_ids=set(model.parent_ids),
             last_edit_date=datetime.fromisoformat(model.last_edit_date) if model.last_edit_date else None,
             job_ids=model.job_ids,
+            version=model.version,
             cacheable=model.cacheable,
             validity_period=validity_period,
             edit_in_progress=model.edit_in_progress,
@@ -235,6 +237,9 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
 
     def _delete_all(self):
         return self.repo._delete_all()
+
+    def _delete_by(self, attribute: str, value: str):
+        return self.repo._delete_by(attribute, value)
 
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)

@@ -25,6 +25,7 @@ class _TaskModel:
     function_name: str
     function_module: str
     output_ids: List[str]
+    version: str
 
     def to_dict(self) -> Dict[str, Any]:
         return dataclasses.asdict(self)
@@ -40,4 +41,5 @@ class _TaskModel:
             function_name=data["function_name"],
             function_module=data["function_module"],
             output_ids=data["output_ids"],
+            version=data["version"],
         )

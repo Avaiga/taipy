@@ -52,6 +52,7 @@ from .scenario.scenario import Scenario
 from .taipy import (
     cancel_job,
     clean_all_entities,
+    clean_all_entities_by_version,
     compare_scenarios,
     create_pipeline,
     create_scenario,

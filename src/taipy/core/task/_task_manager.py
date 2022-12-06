@@ -11,11 +11,13 @@
 
 from typing import Callable, List, Optional, Type, Union
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
 from .._scheduler._abstract_scheduler import _AbstractScheduler
 from .._scheduler._scheduler_factory import _SchedulerFactory
+from .._version._version_manager import _VersionManager
 from ..common._entity_ids import _EntityIds
 from ..common.alias import PipelineId, ScenarioId, TaskId
 from ..config.task_config import TaskConfig
@@ -74,6 +76,7 @@ class _TaskManager(_Manager[Task]):
             if task := tasks_by_config.get((task_config, owner_id)):
                 tasks.append(task)
             else:
+                version = _VersionManager.get_current_version()
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
                 task = Task(
@@ -83,6 +86,7 @@ class _TaskManager(_Manager[Task]):
                     outputs,
                     owner_id=owner_id,
                     parent_ids=set(),
+                    version=version,
                 )
                 for dn in set(inputs + outputs):
                     dn._parent_ids.update([task.id])

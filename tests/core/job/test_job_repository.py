@@ -39,13 +39,14 @@ data_node = CSVDataNode(
     "task_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],
+    "latest",
     False,
     None,
     False,
     {"path": "/path", "has_header": True},
 )
 
-task = Task("config_id", print, [data_node], [], TaskId("task_id"), owner_id="owner_id")
+task = Task("config_id", print, [data_node], [], TaskId("task_id"), owner_id="owner_id", version="latest")
 
 
 def f():
@@ -69,7 +70,7 @@ class A:
         pass
 
 
-job = Job(JobId("id"), task, "submit_id")
+job = Job(JobId("id"), task, "submit_id", version="latest")
 job._subscribers = [f, A.f, A.g, A.h, A.B.f]
 job._exceptions = [traceback.TracebackException.from_exception(Exception())]
 
@@ -82,6 +83,7 @@ job_model = _JobModel(
     creation_date=job._creation_date.isoformat(),
     subscribers=_JobRepository._serialize_subscribers(job._subscribers),
     stacktrace=job._stacktrace,
+    version="latest",
 )
 
 

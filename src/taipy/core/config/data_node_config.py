@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import json
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -30,13 +31,14 @@ class DataNodeConfig(Section):
     needed to create an actual data node.
 
     Attributes:
-        id (str):  Unique identifier of the data node config. It must be a valid Python variable name.
+        id (str): Unique identifier of the data node config. It must be a valid Python variable name.
         storage_type (str): Storage type of the data nodes created from the data node config. The possible values
             are : "csv", "excel", "pickle", "sql_table", "sql", "mongo_collection", "generic", "json", "parquet" and "in_memory".
             The default value is "pickle".
             Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
         scope (Scope^):  The `Scope^` of the data nodes instantiated from the data node config. The default value is
             SCENARIO.
+        cacheable (bool): If True, indicates that the data node is cacheable. The default value is _False_.
         **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
@@ -206,7 +208,7 @@ class DataNodeConfig(Section):
         super().__init__(id, **properties)
 
     def __copy__(self):
-        return DataNodeConfig(self.id, self._storage_type, self._scope, **copy(self._properties))
+        return DataNodeConfig(self.id, self._storage_type, self._scope, self._cacheable, **copy(self._properties))
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return _tpl._replace_templates(self._properties.get(item))
