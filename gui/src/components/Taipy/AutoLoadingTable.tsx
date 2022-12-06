@@ -57,6 +57,7 @@ import {
     LINE_STYLE,
     iconInRowSx,
     DEFAULT_SIZE,
+    OnRowSelection,
 } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -72,6 +73,7 @@ interface RowData {
     formatConfig: FormatConfig;
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
+    onRowSelection?: OnRowSelection;
     lineStyle?: string;
     nanValue?: string;
 }
@@ -90,6 +92,7 @@ const Row = ({
         formatConfig,
         onValidation,
         onDeletion,
+        onRowSelection,
         lineStyle,
         nanValue,
     },
@@ -119,6 +122,7 @@ const Row = ({
                     rowIndex={index}
                     onValidation={!columns[col].notEditable ? onValidation: undefined}
                     onDeletion={onDeletion}
+                    onSelection={onRowSelection}
                     nanValue={columns[col].nanValue || nanValue}
                     tableCellProps={cellProps[cidx]}
                 />
@@ -154,6 +158,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         onEdit = "",
         onDelete = "",
         onAdd = "",
+        onAction = "",
         size = DEFAULT_SIZE,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
@@ -372,6 +377,17 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         [dispatch, updateVarName, onDelete]
     );
 
+    const onRowSelection: OnRowSelection = useCallback(
+        (rowIndex: number) =>
+            dispatch(
+                createSendActionNameAction(updateVarName, {
+                    action: onAction,
+                    index: rowIndex,
+                })
+            ),
+        [dispatch, updateVarName, onAction]
+    );
+
     const onTaipyItemsRendered = useCallback(
         (onItemsR: (props: ListOnItemsRenderedProps) => undefined) =>
             ({ visibleStartIndex, visibleStopIndex }: { visibleStartIndex: number; visibleStopIndex: number }) => {
@@ -398,6 +414,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             formatConfig: formatConfig,
             onValidation: active && onEdit ? onCellValidation : undefined,
             onDeletion: active && onDelete ? onRowDeletion : undefined,
+            onRowSelection: active && onAction ? onRowSelection : undefined,
             lineStyle: props.lineStyle,
             nanValue: props.nanValue,
         }),
@@ -413,6 +430,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onCellValidation,
             onDelete,
             onRowDeletion,
+            onAction,
+            onRowSelection,
             props.lineStyle,
             props.nanValue,
             size,

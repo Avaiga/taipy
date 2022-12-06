@@ -67,6 +67,8 @@ def _get_columns_dict(  # noqa: C901
         for col in col_types_keys:
             columns[col] = {"index": idx}
             idx += 1
+    else:
+        columns = {str(k): v for k, v in columns.items()}
     idx = 0
     for col, ctype in col_types.items():
         col = str(col)

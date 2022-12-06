@@ -446,6 +446,7 @@ class _Factory:
                 ("on_edit", PropertyType.function),
                 ("on_delete", PropertyType.function),
                 ("on_add", PropertyType.function),
+                ("on_action", PropertyType.function),
                 ("nan_value",),
                 ("filter", PropertyType.boolean),
                 ("hover_text", PropertyType.dynamic_string),

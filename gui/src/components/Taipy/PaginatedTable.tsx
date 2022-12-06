@@ -64,6 +64,7 @@ import {
     ColumnDesc,
     iconInRowSx,
     DEFAULT_SIZE,
+    OnRowSelection,
 } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -87,6 +88,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         onEdit = "",
         onDelete = "",
         onAdd = "",
+        onAction = "",
         width = "100vw",
         size = DEFAULT_SIZE,
     } = props;
@@ -305,6 +307,17 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         [dispatch, updateVarName, onDelete]
     );
 
+    const onRowSelection: OnRowSelection = useCallback(
+        (rowIndex: number) =>
+            dispatch(
+                createSendActionNameAction(updateVarName, {
+                    action: onAction,
+                    index: rowIndex,
+                })
+            ),
+        [dispatch, updateVarName, onAction]
+    );
+
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
 
     const pso = useMemo(() => {
@@ -449,13 +462,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     colDesc={columns[col]}
                                                     value={row[col]}
                                                     formatConfig={formatConfig}
-                                                    rowIndex={index}
+                                                    rowIndex={startIndex + index}
                                                     onValidation={
                                                         active && !columns[col].notEditable && onEdit ? onCellValidation : undefined
                                                     }
                                                     onDeletion={
                                                         active && onDelete ? onRowDeletion : undefined
                                                     }
+                                                    onSelection={active && onAction ? onRowSelection : undefined}
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                 />
                                             ))}
