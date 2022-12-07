@@ -278,12 +278,12 @@ describe("PaginatedTable Component", () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const selected = [2, 4, 6];
-        const { findAllByText, rerender } = await render(
+        const { findAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} columns={tableColumns} />
             </TaipyContext.Provider>
         );
-        await rerender(
+        rerender(
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                 <PaginatedTable selected={selected} data={tableValue as TableValueType} columns={tableColumns} />
             </TaipyContext.Provider>
