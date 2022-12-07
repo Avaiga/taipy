@@ -21,7 +21,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 import { TableValueType } from "./tableUtils";
 
-const valueKey = "0-100-Entity,Daily hospital occupancy--asc";
+const valueKey = "0-99-Entity,Daily hospital occupancy--asc";
 const tableValue = {
     [valueKey]: {
         data: [
@@ -167,7 +167,7 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 columns: ["Entity", "Daily hospital occupancy"],
-                end: 100,
+                end: 99,
                 id: "table",
                 orderby: "",
                 pagekey: valueKey,
@@ -196,10 +196,10 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 columns: ["Entity", "Daily hospital occupancy"],
-                end: 100,
+                end: 99,
                 id: undefined,
                 orderby: "Entity",
-                pagekey: "0-100-Entity,Daily hospital occupancy-Entity-asc",
+                pagekey: "0-99-Entity,Daily hospital occupancy-Entity-asc",
                 handlenan: false,
                 sort: "asc",
                 start: 0,
@@ -241,10 +241,10 @@ describe("PaginatedTable Component", () => {
             name: "",
             payload: {
                 columns: ["Entity", "Daily hospital occupancy"],
-                end: 200,
+                end: 199,
                 id: "table",
                 orderby: "",
-                pagekey: "100-200-Entity,Daily hospital occupancy--asc",
+                pagekey: "100-199-Entity,Daily hospital occupancy--asc",
                 handlenan: false,
                 sort: "asc",
                 start: 100,
@@ -497,6 +497,39 @@ describe("PaginatedTable Component", () => {
                 action: "onDelete",
                 args: [],
                 index: 0,
+            },
+            type: "SEND_ACTION_ACTION",
+        });
+    });
+    it("can select", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText, rerender } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable data={undefined} columns={editableColumns} showAll={true} onAction="onSelect" />
+            </TaipyContext.Provider>
+        );
+
+        rerender(
+            <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
+                <PaginatedTable
+                    data={editableValue as TableValueType}
+                    columns={editableColumns}
+                    showAll={true}
+                    onAction="onSelect"
+                />
+            </TaipyContext.Provider>
+        );
+
+        dispatch.mockClear();
+        const elt = getByText("823");
+        await userEvent.click(elt);
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "",
+            payload: {
+                action: "onSelect",
+                args: [],
+                index: 1,
             },
             type: "SEND_ACTION_ACTION",
         });
