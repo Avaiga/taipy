@@ -298,10 +298,15 @@ class _Builder:
             if not optional:
                 warnings.warn(f"Property {name} is required for control {self.__control_type}")
             return self
-        try:
-            val = float(value)
-        except ValueError:
-            raise ValueError(f"Property {name} expects a number for control {self.__control_type}")
+        if isinstance(value, str):
+            try:
+                val = float(value)
+            except ValueError:
+                raise ValueError(f"Property {name} expects a number for control {self.__control_type}")
+        elif isinstance(value, numbers.Number):
+            val = value # type: ignore
+        else:
+            raise ValueError(f"Property {name} expects a number for control {self.__control_type}, received {type(value)}")
         return self.__set_react_attribute(_to_camel_case(name), val)
 
     def __set_string_attribute(
@@ -442,7 +447,7 @@ class _Builder:
     def __update_col_desc_from_indexed(self, columns: t.Dict[str, t.Any], name: str):
         col_value = self.get_name_indexed_property(name)
         for k, v in col_value.items():
-            if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
+            if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
                 if col_desc.get(_to_camel_case(name)) is None:
                     col_desc[_to_camel_case(name)] = str(v)
             else:
@@ -465,27 +470,27 @@ class _Builder:
             filters = self.get_name_indexed_property("filter")
             for k, v in filters.items():
                 if _is_boolean_true(v):
-                    if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
+                    if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
                         col_desc["filter"] = True
                     else:
                         warnings.warn(f"{self.__element_name} filter[{k}] is not in the list of displayed columns")
             editables = self.get_name_indexed_property("editable")
             for k, v in editables.items():
                 if _is_boolean(v):
-                    if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
+                    if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
                         col_desc["notEditable"] = not _is_boolean_true(v)
                     else:
                         warnings.warn(f"{self.__element_name} editable[{k}] is not in the list of displayed columns")
             group_by = self.get_name_indexed_property("group_by")
             for k, v in group_by.items():
                 if _is_boolean_true(v):
-                    if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
+                    if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
                         col_desc["groupBy"] = True
                     else:
                         warnings.warn(f"{self.__element_name} group_by[{k}] is not in the list of displayed columns")
             apply = self.get_name_indexed_property("apply")
             for k, v in apply.items():  # pragma: no cover
-                if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
+                if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
                     if callable(v):
                         value = self.__hashes.get(f"apply[{k}]")
                     elif isinstance(v, str):
@@ -510,7 +515,7 @@ class _Builder:
                     self.set_attribute("lineStyle", value)
             styles = self.get_name_indexed_property("style")
             for k, v in styles.items():  # pragma: no cover
-                if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
+                if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
                     if callable(v):
                         value = self.__hashes.get(f"style[{k}]")
                     elif isinstance(v, str):
@@ -609,7 +614,7 @@ class _Builder:
 
         if columns is not None:
             self.__attributes["columns"] = columns
-            reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
+            reverse_cols = {str(cd.get("dfid")): c for c, cd in columns.items()}
 
             # List used axis
             used_axis = [[e for e in (axis[j] if j < len(axis) else axis[0]) if tr[e.value]] for j, tr in enumerate(traces)]

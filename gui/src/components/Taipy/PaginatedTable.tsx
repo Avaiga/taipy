@@ -78,7 +78,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const {
         id,
         updateVarName,
-        pageSize = 100,
         pageSizeOptions,
         allowAllRows = false,
         showAll = false,
@@ -92,6 +91,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         width = "100vw",
         size = DEFAULT_SIZE,
     } = props;
+    const pageSize = (props.pageSize === undefined || props.pageSize < 1) ? 100 : Math.round(props.pageSize);
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(pageSize);
@@ -170,7 +170,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [props.data]);
 
     useEffect(() => {
-        const endIndex = showAll ? -1 : startIndex + rowsPerPage;
+        const endIndex = showAll ? -1 : startIndex + rowsPerPage - 1;
         const agg = aggregates.length
             ? colsOrder.reduce((pv, col, idx) => {
                   if (aggregates.includes(columns[col].dfid)) {
@@ -329,11 +329,15 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 console.log("PaginatedTable pageSizeOptions is wrong ", pageSizeOptions, e);
             }
         }
-        if (allowAllRows) {
-            return psOptions.concat([{ value: -1, label: "All" }]);
+        if (pageSize > 0 && !psOptions.some(ps => typeof ps === "number" ? ps === pageSize: (typeof ps.value === "number" ? ps.value === pageSize : false))) {
+            psOptions.push({ value: pageSize, label: "" + pageSize});
         }
+        if (allowAllRows) {
+            psOptions.push({ value: -1, label: "All" });
+        }
+        psOptions.sort((a, b) => (typeof a === "number" ? a : a.value) - (typeof b === "number" ? b : b.value));
         return psOptions;
-    }, [pageSizeOptions, allowAllRows]);
+    }, [pageSizeOptions, allowAllRows, pageSize]);
 
     const { rows, rowCount } = useMemo(() => {
         const ret = { rows: [], rowCount: 0 } as { rows: RowType[]; rowCount: number };

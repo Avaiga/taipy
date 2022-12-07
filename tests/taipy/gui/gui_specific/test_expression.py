@@ -97,7 +97,7 @@ def test_expression_table_control(gui: Gui, test_client, helpers):
     gui._bind_var_val("pd", pd)
     gui._bind_var_val("series_1", pd.Series(["a", "b", "c"], name="Letters"))
     gui._bind_var_val("series_2", pd.Series([1, 2, 3], name="Numbers"))
-    md_string = "<|{pd.concat([series_1, series_2], axis=1)}|table|page_size=10|columns=Letters;Numbers|>"
+    md_string = "<|{pd.concat([series_1, series_2], axis=1)}|table|columns=Letters;Numbers|>"
     expected_list = [
         "<Table",
         'columns="{&quot;Letters&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Letters&quot;&#x7D;, &quot;Numbers&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Numbers&quot;&#x7D;}"',

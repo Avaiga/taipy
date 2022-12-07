@@ -434,7 +434,7 @@ class _Factory:
         ._get_dataframe_attributes()
         .set_attributes(
             [
-                ("page_size", PropertyType.react, 100),
+                ("page_size", PropertyType.number, "100"),
                 ("allow_all_rows", PropertyType.boolean),
                 ("show_all", PropertyType.boolean),
                 ("auto_loading", PropertyType.boolean),
