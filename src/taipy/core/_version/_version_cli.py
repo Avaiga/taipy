@@ -49,6 +49,15 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     """,
 )
 @click.option(
+    "--production",
+    "-p",
+    "mode",
+    flag_value="production",
+    help="""
+        When execute Taipy application in `production` mode, all entities of Taipy application are saved.
+    """,
+)
+@click.option(
     "--version-number",
     type=str,
     default=None,

@@ -19,6 +19,7 @@ from ._scheduler._scheduler import _Scheduler
 from ._scheduler._scheduler_factory import _SchedulerFactory
 from ._version._version_cli import version_cli
 from ._version._version_manager import _VersionManager
+from .exceptions.exceptions import VersionAlreadyExists
 from .taipy import clean_all_entities_by_version
 
 
@@ -57,21 +58,28 @@ class Core:
                 curren_version_number = str(uuid.uuid4())
 
             override = _override
+            if override:
+                clean_all_entities_by_version(curren_version_number)
 
         elif mode == "development":
             curren_version_number = _VersionManager.get_development_version()
             _VersionManager.set_development_version(curren_version_number)
             override = True
 
+            clean_all_entities_by_version(curren_version_number)
             _TaipyLogger._get_logger().info(
                 f"Development mode: Clean all entities with version {curren_version_number}"
             )
+
+        elif mode == "production":
+            curren_version_number = mode
+            override = True
 
         else:
             _TaipyLogger._get_logger().error("Undefined execution mode.")
             return
 
-        if override:
-            clean_all_entities_by_version(curren_version_number)
-
-        _VersionManager.set_current_version(curren_version_number, override)
+        try:
+            _VersionManager.set_current_version(curren_version_number, override)
+        except VersionAlreadyExists as e:
+            raise SystemExit(e)

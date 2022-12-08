@@ -43,9 +43,9 @@ class _VersionFSRepository(_FileSystemRepository):
         return version
 
     def _load_all(self) -> List[_Version]:
-        """Only load the json file that has \"id\" property.
+        """Only load the json file that has "id" property.
 
-        The \"version.json\" does not have the \"id\" property.
+        The "version.json" does not have the "id" property.
         """
         return self._load_all_by(by="id")
 
