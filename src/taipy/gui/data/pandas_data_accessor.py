@@ -262,9 +262,9 @@ class _PandasDataAccessor(_DataAccessor):
                         # reverse order
                         new_indexes = new_indexes[::-1]
                     new_indexes = new_indexes[slice(start, end + 1)]
-                    if not _PandasDataAccessor.__INDEX_COL in value.columns:
+                    if _PandasDataAccessor.__INDEX_COL not in value.columns:
                         value[_PandasDataAccessor.__INDEX_COL] = value.index
-                    if not _PandasDataAccessor.__INDEX_COL in columns:
+                    if _PandasDataAccessor.__INDEX_COL not in columns:
                         columns.append(_PandasDataAccessor.__INDEX_COL)
                 except Exception:
                     warnings.warn(f"Cannot sort {var_name} on columns {order_by}.")
