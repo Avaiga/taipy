@@ -58,6 +58,7 @@ import {
     iconInRowSx,
     DEFAULT_SIZE,
     OnRowSelection,
+    getRowIndex,
 } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -358,12 +359,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 createSendActionNameAction(updateVarName, {
                     action: onEdit,
                     value: value,
-                    index: rowIndex,
+                    index: getRowIndex(rows[rowIndex], rowIndex),
                     col: colName,
                     user_value: userValue,
                 })
             ),
-        [dispatch, updateVarName, onEdit]
+        [dispatch, updateVarName, onEdit, rows]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
@@ -371,10 +372,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             dispatch(
                 createSendActionNameAction(updateVarName, {
                     action: onDelete,
-                    index: rowIndex,
+                    index: getRowIndex(rows[rowIndex], rowIndex),
                 })
             ),
-        [dispatch, updateVarName, onDelete]
+        [dispatch, updateVarName, onDelete, rows]
     );
 
     const onRowSelection: OnRowSelection = useCallback(
@@ -382,10 +383,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             dispatch(
                 createSendActionNameAction(updateVarName, {
                     action: onAction,
-                    index: rowIndex,
+                    index: getRowIndex(rows[rowIndex], rowIndex),
                 })
             ),
-        [dispatch, updateVarName, onAction]
+        [dispatch, updateVarName, onAction, rows]
     );
 
     const onTaipyItemsRendered = useCallback(

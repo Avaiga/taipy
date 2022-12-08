@@ -65,6 +65,7 @@ import {
     iconInRowSx,
     DEFAULT_SIZE,
     OnRowSelection,
+    getRowIndex,
 } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -282,42 +283,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         [startIndex, dispatch, updateVarName, onAdd]
     );
 
-    const onCellValidation: OnCellValidation = useCallback(
-        (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
-            dispatch(
-                createSendActionNameAction(updateVarName, {
-                    action: onEdit,
-                    value: value,
-                    index: rowIndex,
-                    col: colName,
-                    user_value: userValue,
-                })
-            ),
-        [dispatch, updateVarName, onEdit]
-    );
-
-    const onRowDeletion: OnRowDeletion = useCallback(
-        (rowIndex: number) =>
-            dispatch(
-                createSendActionNameAction(updateVarName, {
-                    action: onDelete,
-                    index: rowIndex,
-                })
-            ),
-        [dispatch, updateVarName, onDelete]
-    );
-
-    const onRowSelection: OnRowSelection = useCallback(
-        (rowIndex: number) =>
-            dispatch(
-                createSendActionNameAction(updateVarName, {
-                    action: onAction,
-                    index: rowIndex,
-                })
-            ),
-        [dispatch, updateVarName, onAction]
-    );
-
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
 
     const pso = useMemo(() => {
@@ -351,6 +316,42 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         }
         return ret;
     }, [value]);
+
+    const onCellValidation: OnCellValidation = useCallback(
+        (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
+            dispatch(
+                createSendActionNameAction(updateVarName, {
+                    action: onEdit,
+                    value: value,
+                    index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
+                    col: colName,
+                    user_value: userValue,
+                })
+            ),
+        [dispatch, updateVarName, onEdit, rows, startIndex]
+    );
+
+    const onRowDeletion: OnRowDeletion = useCallback(
+        (rowIndex: number) =>
+            dispatch(
+                createSendActionNameAction(updateVarName, {
+                    action: onDelete,
+                    index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
+                })
+            ),
+        [dispatch, updateVarName, onDelete, rows, startIndex]
+    );
+
+    const onRowSelection: OnRowSelection = useCallback(
+        (rowIndex: number) =>
+            dispatch(
+                createSendActionNameAction(updateVarName, {
+                    action: onAction,
+                    index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
+                })
+            ),
+        [dispatch, updateVarName, onAction, rows, startIndex]
+    );
 
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
@@ -466,7 +467,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     colDesc={columns[col]}
                                                     value={row[col]}
                                                     formatConfig={formatConfig}
-                                                    rowIndex={startIndex + index}
+                                                    rowIndex={index}
                                                     onValidation={
                                                         active && !columns[col].notEditable && onEdit ? onCellValidation : undefined
                                                     }
