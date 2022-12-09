@@ -46,3 +46,4 @@ class _TaipyJsonEncoder(JSONEncoder):
 
 class _TaipyJsonProvider(DefaultJSONProvider):
     default = staticmethod(_default)  # type: ignore
+    sort_keys = False

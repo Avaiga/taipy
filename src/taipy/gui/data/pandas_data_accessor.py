@@ -34,6 +34,8 @@ class _PandasDataAccessor(_DataAccessor):
 
     __types = (pd.DataFrame,)
 
+    __INDEX_COL = "_tp_index"
+
     @staticmethod
     def get_supported_classes() -> t.List[str]:
         return [t.__name__ for t in _PandasDataAccessor.__types]  # type: ignore
@@ -252,11 +254,21 @@ class _PandasDataAccessor(_DataAccessor):
             # deal with sort
             order_by = payload.get("orderby")
             if isinstance(order_by, str) and len(order_by):
-                new_indexes = value[order_by].values.argsort(axis=0)
-                if payload.get("sort") == "desc":
-                    # reverse order
-                    new_indexes = new_indexes[::-1]
-                new_indexes = new_indexes[slice(start, end + 1)]
+                try:
+                    if value.columns.dtype.name == "int64":
+                        order_by = int(order_by)
+                    new_indexes = value[order_by].values.argsort(axis=0)
+                    if payload.get("sort") == "desc":
+                        # reverse order
+                        new_indexes = new_indexes[::-1]
+                    new_indexes = new_indexes[slice(start, end + 1)]
+                    if _PandasDataAccessor.__INDEX_COL not in value.columns:
+                        value[_PandasDataAccessor.__INDEX_COL] = value.index
+                    if _PandasDataAccessor.__INDEX_COL not in columns:
+                        columns.append(_PandasDataAccessor.__INDEX_COL)
+                except Exception:
+                    warnings.warn(f"Cannot sort {var_name} on columns {order_by}.")
+                    new_indexes = slice(start, end + 1)  # type: ignore
             else:
                 new_indexes = slice(start, end + 1)  # type: ignore
             value = self.__build_transferred_cols(gui, columns, value.iloc[new_indexes], styles=payload.get("styles"))
