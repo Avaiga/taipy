@@ -10,16 +10,19 @@
 # specific language governing permissions and limitations under the License.
 
 
-def assert_true_after_1_minute_max(assertion):
+def assert_true_after_time(assertion, msg=None, time=60):
     from datetime import datetime
     from time import sleep
 
     start = datetime.now()
-    while (datetime.now() - start).seconds < 60:
+    while (datetime.now() - start).seconds < time:
         sleep(0.1)  # Limit CPU usage
         try:
             if assertion():
                 return
-        except Exception as e:
-            print("Raise (test_scheduler):", e)
+        except BaseException as e:
+            print("Raise : ", e)
+            continue
+    if msg:
+        print(msg)
     assert assertion()

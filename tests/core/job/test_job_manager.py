@@ -33,7 +33,7 @@ from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.utils import assert_true_after_1_minute_max
+from tests.core.utils import assert_true_after_time
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -169,13 +169,13 @@ def test_raise_when_trying_to_delete_unfinished_job():
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
 
-        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
-        assert_true_after_1_minute_max(job.is_running)
+        assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 1)
+        assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
-    assert_true_after_1_minute_max(job.is_completed)
+    assert_true_after_time(job.is_completed)
     _JobManager._delete(job)
 
 
@@ -188,7 +188,7 @@ def test_force_deleting_unfinished_job():
 
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
-        assert_true_after_1_minute_max(job.is_running)
+        assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
         _JobManager._delete(job, force=True)
@@ -202,17 +202,17 @@ def test_cancel_single_job():
 
     _SchedulerFactory._build_dispatcher()
 
-    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
+    assert_true_after_time(_SchedulerFactory._dispatcher.is_running)
     _SchedulerFactory._dispatcher.stop()
-    assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
+    assert_true_after_time(lambda: not _SchedulerFactory._dispatcher.is_running())
 
     job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
 
-    assert_true_after_1_minute_max(job.is_pending)
-    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
+    assert_true_after_time(job.is_pending)
+    assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 0)
     _JobManager._cancel(job.id)
-    assert_true_after_1_minute_max(job.is_canceled)
-    assert_true_after_1_minute_max(job.is_canceled)
+    assert_true_after_time(job.is_canceled)
+    assert_true_after_time(job.is_canceled)
 
 
 @mock.patch(
@@ -226,9 +226,9 @@ def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
 
     _SchedulerFactory._build_dispatcher()
 
-    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
+    assert_true_after_time(_SchedulerFactory._dispatcher.is_running)
     _SchedulerFactory._dispatcher.stop()
-    assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
+    assert_true_after_time(lambda: not _SchedulerFactory._dispatcher.is_running())
 
     job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
     job.canceled()
@@ -263,9 +263,9 @@ def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
 
     _SchedulerFactory._build_dispatcher()
 
-    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
+    assert_true_after_time(_SchedulerFactory._dispatcher.is_running)
     _SchedulerFactory._dispatcher.stop()
-    assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
+    assert_true_after_time(lambda: not _SchedulerFactory._dispatcher.is_running())
 
     job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
     job.completed()
@@ -296,20 +296,20 @@ def test_cancel_single_running_job():
 
     _SchedulerFactory._build_dispatcher()
 
-    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
-    assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
+    assert_true_after_time(_SchedulerFactory._dispatcher.is_running)
+    assert_true_after_time(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
 
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
 
-        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
-        assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 1)
-        assert_true_after_1_minute_max(job.is_running)
+        assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 1)
+        assert_true_after_time(job.is_running)
         _JobManager._cancel(job.id)
-        assert_true_after_1_minute_max(job.is_running)
-    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
-    assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
-    assert_true_after_1_minute_max(job.is_completed)
+        assert_true_after_time(job.is_running)
+    assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
+    assert_true_after_time(job.is_completed)
 
 
 def test_cancel_subsequent_jobs():
@@ -337,47 +337,47 @@ def test_cancel_subsequent_jobs():
         job_2 = _SchedulerFactory._scheduler.submit_task(task_2, submit_id=submit_id_1)
         job_3 = _SchedulerFactory._scheduler.submit_task(task_3, submit_id=submit_id_1)
 
-        assert_true_after_1_minute_max(lambda: _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0)
-        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._scheduler.blocked_jobs) == 2)
-        assert_true_after_1_minute_max(job_1.is_running)
-        assert_true_after_1_minute_max(job_2.is_blocked)
-        assert_true_after_1_minute_max(job_3.is_blocked)
+        assert_true_after_time(lambda: _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0)
+        assert_true_after_time(lambda: len(_SchedulerFactory._scheduler.blocked_jobs) == 2)
+        assert_true_after_time(job_1.is_running)
+        assert_true_after_time(job_2.is_blocked)
+        assert_true_after_time(job_3.is_blocked)
 
         submit_id_2 = "submit_2"
         job_4 = _SchedulerFactory._scheduler.submit_task(task_1, submit_id=submit_id_2)
         job_5 = _SchedulerFactory._scheduler.submit_task(task_2, submit_id=submit_id_2)
         job_6 = _SchedulerFactory._scheduler.submit_task(task_3, submit_id=submit_id_2)
 
-        assert_true_after_1_minute_max(job_4.is_pending)
-        assert_true_after_1_minute_max(job_5.is_blocked)
-        assert_true_after_1_minute_max(job_6.is_blocked)
+        assert_true_after_time(job_4.is_pending)
+        assert_true_after_time(job_5.is_blocked)
+        assert_true_after_time(job_6.is_blocked)
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 1
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 4
 
         _JobManager._cancel(job_4)
-        assert_true_after_1_minute_max(job_4.is_canceled)
-        assert_true_after_1_minute_max(job_5.is_abandoned)
-        assert_true_after_1_minute_max(job_6.is_abandoned)
+        assert_true_after_time(job_4.is_canceled)
+        assert_true_after_time(job_5.is_abandoned)
+        assert_true_after_time(job_6.is_abandoned)
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 2
 
         _JobManager._cancel(job_1)
-        assert_true_after_1_minute_max(job_1.is_running)
-        assert_true_after_1_minute_max(job_2.is_abandoned)
-        assert_true_after_1_minute_max(job_3.is_abandoned)
+        assert_true_after_time(job_1.is_running)
+        assert_true_after_time(job_2.is_abandoned)
+        assert_true_after_time(job_3.is_abandoned)
 
-    assert_true_after_1_minute_max(job_1.is_completed)
-    assert_true_after_1_minute_max(job_2.is_abandoned)
-    assert_true_after_1_minute_max(job_3.is_abandoned)
-    assert_true_after_1_minute_max(job_4.is_canceled)
-    assert_true_after_1_minute_max(job_5.is_abandoned)
-    assert_true_after_1_minute_max(job_6.is_abandoned)
-    assert_true_after_1_minute_max(
+    assert_true_after_time(job_1.is_completed)
+    assert_true_after_time(job_2.is_abandoned)
+    assert_true_after_time(job_3.is_abandoned)
+    assert_true_after_time(job_4.is_canceled)
+    assert_true_after_time(job_5.is_abandoned)
+    assert_true_after_time(job_6.is_abandoned)
+    assert_true_after_time(
         lambda: all(
             not _SchedulerFactory._scheduler._is_blocked(job) for job in [job_1, job_2, job_3, job_4, job_5, job_6]
         )
     )
-    assert_true_after_1_minute_max(lambda: _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0)
+    assert_true_after_time(lambda: _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0)
 
 
 def _create_task(function, nb_outputs=1, name=None):

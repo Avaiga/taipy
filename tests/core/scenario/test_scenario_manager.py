@@ -44,7 +44,7 @@ from src.taipy.core.task.task import Task
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.utils import assert_true_after_1_minute_max
+from tests.core.utils import assert_true_after_time
 from tests.core.utils.NotifyMock import NotifyMock
 
 
@@ -1074,14 +1074,14 @@ def test_scenarios_comparison_standalone_mode():
     _ScenarioManager._submit(scenario_2.id)
 
     bar_comparison = _ScenarioManager._compare(scenario_1, scenario_2, data_node_config_id="bar")["bar"]
-    assert_true_after_1_minute_max(lambda: bar_comparison["subtraction"] == 0)
+    assert_true_after_time(lambda: bar_comparison["subtraction"] == 0)
 
     foo_comparison = _ScenarioManager._compare(scenario_1, scenario_2, data_node_config_id="foo")["foo"]
-    assert_true_after_1_minute_max(lambda: len(foo_comparison.keys()) == 2)
-    assert_true_after_1_minute_max(lambda: foo_comparison["addition"] == 2)
-    assert_true_after_1_minute_max(lambda: foo_comparison["subtraction"] == 0)
+    assert_true_after_time(lambda: len(foo_comparison.keys()) == 2)
+    assert_true_after_time(lambda: foo_comparison["addition"] == 2)
+    assert_true_after_time(lambda: foo_comparison["subtraction"] == 0)
 
-    assert_true_after_1_minute_max(lambda: len(_ScenarioManager._compare(scenario_1, scenario_2).keys()) == 2)
+    assert_true_after_time(lambda: len(_ScenarioManager._compare(scenario_1, scenario_2).keys()) == 2)
 
     with pytest.raises(NonExistingScenarioConfig):
         _ScenarioManager._compare(scenario_3, scenario_3)

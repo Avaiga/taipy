@@ -32,7 +32,7 @@ from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.utils import assert_true_after_1_minute_max
+from tests.core.utils import assert_true_after_time
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -193,13 +193,13 @@ def test_raise_when_trying_to_delete_unfinished_job():
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
 
-        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
-        assert_true_after_1_minute_max(job.is_running)
+        assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 1)
+        assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
-    assert_true_after_1_minute_max(job.is_completed)
+    assert_true_after_time(job.is_completed)
     _JobManager._delete(job)
 
 
@@ -214,7 +214,7 @@ def test_force_deleting_unfinished_job():
 
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
-        assert_true_after_1_minute_max(job.is_running)
+        assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
         _JobManager._delete(job, force=True)

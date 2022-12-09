@@ -103,7 +103,7 @@ class TestCSVDataNode:
         data_modin = csv_data_node_as_modin.read()
         assert isinstance(data_modin, modin_pd.DataFrame)
         assert len(data_modin) == 10
-        assert np.array_equal(data_modin.to_numpy(), pd.read_csv(path).to_numpy())
+        assert np.array_equal(data_modin.to_numpy(), modin_pd.read_csv(path).to_numpy())
 
         # Create CSVDataNode with numpy exposed_type
         csv_data_node_as_numpy = CSVDataNode(

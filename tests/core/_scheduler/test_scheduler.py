@@ -35,7 +35,7 @@ from taipy.config import Config
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
-from tests.core.utils import assert_true_after_1_minute_max
+from tests.core.utils import assert_true_after_time
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -250,13 +250,13 @@ def test_update_status_fail_job_in_parallel():
     _DataManager._set(dn_2)
 
     job = _Scheduler.submit_task(task_0, "submit_id")
-    assert_true_after_1_minute_max(job.is_failed)
+    assert_true_after_time(job.is_failed)
 
     job_0, job_3, job_1, job_2 = _Scheduler.submit(pipeline)
-    assert_true_after_1_minute_max(job_0.is_failed)
-    assert_true_after_1_minute_max(job_3.is_completed)
-    assert_true_after_1_minute_max(lambda: all([job.is_abandoned() for job in [job_1, job_2]]))
-    assert_true_after_1_minute_max(lambda: all(not _Scheduler._is_blocked(job) for job in [job_0, job_1, job_2, job_3]))
+    assert_true_after_time(job_0.is_failed)
+    assert_true_after_time(job_3.is_completed)
+    assert_true_after_time(lambda: all([job.is_abandoned() for job in [job_1, job_2]]))
+    assert_true_after_time(lambda: all(not _Scheduler._is_blocked(job) for job in [job_0, job_1, job_2, job_3]))
 
 
 def test_submit_task_in_parallel():
@@ -272,11 +272,11 @@ def test_submit_task_in_parallel():
     with lock:
         assert task.output[f"{task.config_id}_output0"].read() == 0
         job = _Scheduler.submit_task(task, "submit_id")
-        assert_true_after_1_minute_max(job.is_running)
-        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(job.is_running)
+        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
 
-    assert_true_after_1_minute_max(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
-    assert_true_after_1_minute_max(job.is_completed)
+    assert_true_after_time(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
+    assert_true_after_time(job.is_completed)
     assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
 
 
@@ -298,7 +298,7 @@ def test_submit_task_synchronously_in_parallel():
     task = Task("sleep_task", function=partial(sleep, sleep_period))
     job = _Scheduler.submit_task(task, "submit_id", wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
-    assert_true_after_1_minute_max(job.is_completed)
+    assert_true_after_time(job.is_completed)
 
 
 def test_submit_fail_task_synchronously_in_parallel():
@@ -310,7 +310,7 @@ def test_submit_fail_task_synchronously_in_parallel():
     task = Task("sleep_task", function=partial(sleep_and_raise_error_fct, sleep_period))
     job = _Scheduler.submit_task(task, "submit_id", wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
-    assert_true_after_1_minute_max(job.is_failed)
+    assert_true_after_time(job.is_failed)
 
 
 def test_submit_task_synchronously_in_parallel_with_timeout():
@@ -323,7 +323,7 @@ def test_submit_task_synchronously_in_parallel_with_timeout():
     job = _Scheduler.submit_task(task, "submit_id", wait=True, timeout=sleep_period - 1)
     assert sleep_period - 1 <= (datetime.now() - start_time).seconds <= sleep_period
     assert job.is_running()
-    assert_true_after_1_minute_max(job.is_completed)
+    assert_true_after_time(job.is_completed)
 
 
 def test_submit_task_multithreading_multiple_task():
@@ -345,20 +345,20 @@ def test_submit_task_multithreading_multiple_task():
 
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
-            assert_true_after_1_minute_max(job_1.is_running)
-            assert_true_after_1_minute_max(job_2.is_running)
-            assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+            assert_true_after_time(job_1.is_running)
+            assert_true_after_time(job_2.is_running)
+            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
 
-        assert_true_after_1_minute_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
+        assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
         assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
-        assert_true_after_1_minute_max(job_2.is_completed)
-        assert_true_after_1_minute_max(job_1.is_running)
-        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(job_2.is_completed)
+        assert_true_after_time(job_1.is_running)
+        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
 
-    assert_true_after_1_minute_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
-    assert_true_after_1_minute_max(job_1.is_completed)
-    assert_true_after_1_minute_max(job_2.is_completed)
-    assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
+    assert_true_after_time(job_1.is_completed)
+    assert_true_after_time(job_2.is_completed)
+    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
@@ -377,34 +377,34 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
     with lock_0:
         job_0 = _Scheduler.submit_task(task_0, "submit_id_0")
-        assert_true_after_1_minute_max(job_0.is_running)
-        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(job_0.is_running)
+        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
         with lock_1:
             with lock_2:
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
                 job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
                 job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
-                assert_true_after_1_minute_max(job_0.is_running)
-                assert_true_after_1_minute_max(job_1.is_pending)
-                assert_true_after_1_minute_max(job_2.is_running)
-                assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+                assert_true_after_time(job_0.is_running)
+                assert_true_after_time(job_1.is_pending)
+                assert_true_after_time(job_2.is_running)
+                assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
 
-            assert_true_after_1_minute_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
+            assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
-            assert_true_after_1_minute_max(job_0.is_running)
-            assert_true_after_1_minute_max(job_1.is_running)
-            assert_true_after_1_minute_max(job_2.is_completed)
-            assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+            assert_true_after_time(job_0.is_running)
+            assert_true_after_time(job_1.is_running)
+            assert_true_after_time(job_2.is_completed)
+            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
 
-        assert_true_after_1_minute_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
+        assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
         assert task_0.output[f"{task_0.config_id}_output0"].read() == 0
-        assert_true_after_1_minute_max(job_0.is_running)
-        assert_true_after_1_minute_max(job_1.is_completed)
+        assert_true_after_time(job_0.is_running)
+        assert_true_after_time(job_1.is_completed)
         assert job_2.is_completed()
-        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
 
-    assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
     assert task_0.output[f"{task_0.config_id}_output0"].read() == 42
     assert job_0.is_completed()
     assert job_1.is_completed()
@@ -438,25 +438,25 @@ def test_blocked_task():
     assert len(_Scheduler.blocked_jobs) == 0
     job_2 = _Scheduler.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
     assert job_2.is_blocked()  # since bar is not up_to_date the job 2 is blocked
-    assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
     assert len(_Scheduler.blocked_jobs) == 1
     with lock_2:
         with lock_1:
             job_1 = _Scheduler.submit_task(task_1, "submit_id_1")  # job 1 is submitted and locked
-            assert_true_after_1_minute_max(job_1.is_running)  # so it is still running
-            assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+            assert_true_after_time(job_1.is_running)  # so it is still running
+            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
-            assert_true_after_1_minute_max(job_2.is_blocked)  # the job_2 remains blocked
-        assert_true_after_1_minute_max(job_1.is_completed)  # job1 unlocked and can complete
+            assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
+        assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
-        assert_true_after_1_minute_max(job_2.is_running)  # And job 2 can start running
-        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(job_2.is_running)  # And job 2 can start running
+        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
         assert len(_Scheduler.blocked_jobs) == 0
-    assert_true_after_1_minute_max(job_2.is_completed)  # job 2 unlocked so it can complete
+    assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
-    assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_task_scheduler_create_synchronous_dispatcher():
@@ -476,8 +476,8 @@ def test_task_scheduler_create_standalone_dispatcher():
 def modified_config_task(n):
     from taipy.config import Config
 
-    assert_true_after_1_minute_max(lambda: Config.global_config.storage_folder == ".my_data/")
-    assert_true_after_1_minute_max(lambda: Config.global_config.custom_property == "custom_property")
+    assert_true_after_time(lambda: Config.global_config.storage_folder == ".my_data/")
+    assert_true_after_time(lambda: Config.global_config.custom_property == "custom_property")
     return n * 2
 
 
@@ -497,8 +497,8 @@ def test_can_exec_task_with_modified_config():
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
     jobs = pipeline.submit()
-    assert_true_after_1_minute_max(jobs[0].is_finished)
-    assert_true_after_1_minute_max(
+    assert_true_after_time(jobs[0].is_finished)
+    assert_true_after_time(
         jobs[0].is_completed
     )  # If the job is completed, that means the asserts in the task are successful
     taipy.clean_all_entities()
@@ -541,7 +541,7 @@ def test_cannot_exec_task_that_update_config():
     jobs = pipeline.submit()
 
     # The job should fail due to an exception is raised
-    assert_true_after_1_minute_max(jobs[0].is_failed)
+    assert_true_after_time(jobs[0].is_failed)
 
 
 def test_can_execute_task_with_development_mode():
