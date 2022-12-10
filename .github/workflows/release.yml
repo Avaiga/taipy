@@ -63,7 +63,7 @@ jobs:
           python setup.py build_py && python -m build
           rm -rf src
           pip install dist/*.tar.gz
-          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock playwright pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps

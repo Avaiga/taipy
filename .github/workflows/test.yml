@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-        python-versions: ['3.8', '3.9', '3.10']
+        python-versions: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-22.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
@@ -45,7 +45,7 @@ jobs:
         env:
           TOX_PARALLEL_NO_SPINNER: 1
         run: |
-          pip install tox==3.25.1
+          pip install tox
           tox -p all
 
       - name: Code coverage

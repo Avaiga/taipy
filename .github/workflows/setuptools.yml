@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 40
     strategy:
       matrix:
-        python-versions: ['3.8', '3.9', '3.10']
+        python-versions: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-22.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
@@ -22,6 +22,10 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-versions }}
+      - name: Install npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
       - name: Install Taipy without dependencies
         run: |
@@ -36,7 +40,7 @@ jobs:
 
           # Run tests
           echo "installing playwright"
-          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock playwright pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps
@@ -52,7 +56,7 @@ jobs:
     timeout-minutes: 40
     strategy:
       matrix:
-        python-versions: ['3.8', '3.9', '3.10']
+        python-versions: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-22.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
@@ -62,6 +66,10 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-versions }}
+      - name: Install npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
       - name: install libmagic on macos
         if: matrix.os == 'macos-latest'
@@ -82,7 +90,7 @@ jobs:
 
           # Run test with optionals packages installed
           echo "installing playwright"
-          pip install pytest pytest-mock "playwright<1.28" pytest-playwright pytest-timeout testbook
+          pip install pytest pytest-mock playwright pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps

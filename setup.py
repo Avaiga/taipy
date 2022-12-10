@@ -38,7 +38,7 @@ requirements = [
     "pytz>=2021.3,<2022.2",
     "tzlocal>=3.0,<5.0",
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "gevent>=21.12.0,<22.0",
+    "gevent>=22.10.2,<23.0",
     "gevent-websocket>=0.10.1,<0.11",
     "kthread>=0.2.3,<0.3",
     "taipy-config>=2.0,<3.0",
@@ -53,7 +53,7 @@ extras_require = {
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
-    "arrow": ["pyarrow>=9.0,<10.0"],
+    "arrow": ["pyarrow>=10.0.1,<11.0"],
     "simple-websocket": [
         "simple-websocket>=0.9,<1.0",
     ],

@@ -9,7 +9,7 @@
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
     "@mui/x-date-pickers": "^5.0.0-beta.2",
-    "apache-arrow": "^9.0.0",
+    "apache-arrow": "^10.0.1",
     "axios": "^1.2.0",
     "date-fns": "^2.25.0",
     "date-fns-tz": "^1.1.6",

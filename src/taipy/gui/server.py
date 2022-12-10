@@ -22,6 +22,7 @@ import webbrowser
 from importlib import util
 
 import __main__
+import contextlib
 from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -69,6 +70,7 @@ class _Server:
         CORS(self._flask)
 
         self.__path_mapping = path_mapping
+        self._is_running = False
 
         # Websocket (handle json message)
         @self._ws.on("message")
@@ -194,6 +196,7 @@ class _Server:
         return self._flask.test_client()
 
     def _run_notebook(self):
+        self._is_running = True
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
     def _get_async_mode(self) -> str:
@@ -240,10 +243,16 @@ class _Server:
             return
         if self._get_async_mode() != "threading":
             use_reloader = False
+        self._is_running = True
         self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)
 
     def stop_thread(self):
-        if hasattr(self, "_thread") and self._thread.is_alive():
-            self._thread.kill()
+        if hasattr(self, "_thread") and self._thread.is_alive() and self._is_running:
+            self._is_running = False
+            with contextlib.suppress(Exception):
+                if self._get_async_mode() == "gevent":
+                    self._ws.wsgi_server.stop()
+                else:
+                    self._thread.kill()
             while self._is_port_open(self._host, self._port):
                 time.sleep(0.1)
