@@ -126,13 +126,14 @@ class Helpers:
     def run_e2e_multi_client(gui: Gui):
         with warnings.catch_warnings(record=True):
             gui.run(run_server=False, run_browser=False, single_client=False)
-            gui._server.runWithWS(
+            gui._server.run(
                 host=gui._get_config("host", "127.0.0.1"),
                 port=gui._get_config("port", 5000),
                 debug=False,
                 use_reloader=False,
                 flask_log=False,
                 run_in_thread=True,
+                allow_unsafe_werkzeug=False,
             )
         while not Helpers.port_check():
             time.sleep(0.1)

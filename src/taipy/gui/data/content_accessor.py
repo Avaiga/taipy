@@ -43,7 +43,7 @@ class _ContentAccessor:
         return url_path
 
     def get_content_path(
-        self, url_path: str, file_name: str, bypass: t.Union[str, None]
+        self, url_path: str, file_name: str, bypass: t.Optional[str]
     ) -> t.Tuple[t.Union[pathlib.Path, None], bool]:
         content_path = self.__content_paths.get(url_path)
         if not content_path:

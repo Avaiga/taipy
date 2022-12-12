@@ -34,6 +34,8 @@ from flask import __version__ as flask_version  # type: ignore
 from flask import g, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
+from taipy.logger._taipy_logger import _TaipyLogger
+
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
@@ -1475,6 +1477,116 @@ class Gui:
                     ]
         return config
 
+    def __init_server(self):
+        app_config = self._config.config
+        # Init server if there is no server
+        if not hasattr(self, "_server"):
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                async_mode=app_config["async_mode"],
+            )
+
+        # Stop and reinitialize the server if it is still running as a thread
+        if (_is_in_notebook() or app_config["run_in_thread"]) and hasattr(self._server, "_thread"):
+            self.stop()
+            self._flask_blueprint = []
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                async_mode=app_config["async_mode"],
+            )
+            self._bindings()._new_scopes()
+
+    def __init_ngrok(self):
+        app_config = self._config.config
+        if app_config["run_server"] and app_config["ngrok_token"]:  # pragma: no cover
+            if not util.find_spec("pyngrok"):
+                raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
+            ngrok.set_auth_token(app_config["ngrok_token"])
+            http_tunnel = ngrok.connect(app_config["port"], "http")
+            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {http_tunnel.public_url}")
+
+    def __bind_default_function(self):
+        with self.get_flask_app().app_context():
+            self.__var_dir.process_imported_var()
+            # bind on_* function if available
+            self.__bind_local_func("on_init")
+            self.__bind_local_func("on_change")
+            self.__bind_local_func("on_action")
+            self.__bind_local_func("on_navigate")
+            self.__bind_local_func("on_exception")
+            self.__bind_local_func("on_status")
+
+    def __register_blueprint(self):
+        # add en empty main page if it is not defined
+        if Gui.__root_page_name not in self._config.routes:
+            new_page = _Page()
+            new_page._route = Gui.__root_page_name
+            new_page._renderer = _EmptyPage()
+            self._config.pages.append(new_page)
+            self._config.routes.append(Gui.__root_page_name)
+
+        pages_bp = Blueprint("taipy_pages", __name__)
+        self._flask_blueprint.append(pages_bp)
+
+        # server URL Rule for taipy images
+        images_bp = Blueprint("taipy_images", __name__)
+        images_bp.add_url_rule(f"{Gui.__CONTENT_ROOT}<path:path>", view_func=self.__serve_content)
+        self._flask_blueprint.append(images_bp)
+
+        # server URL for uploaded files
+        upload_bp = Blueprint("taipy_upload", __name__)
+        upload_bp.add_url_rule(Gui.__UPLOAD_URL, view_func=self.__upload_files, methods=["POST"])
+        self._flask_blueprint.append(upload_bp)
+
+        # server URL for extension resources
+        extension_bp = Blueprint("taipy_extensions", __name__)
+        extension_bp.add_url_rule(f"{Gui._EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
+        scripts = [
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}{name}/{s}"
+            for name, libs in Gui.__extensions.items()
+            for lib in libs
+            for s in (lib.get_scripts() or [])
+        ]
+        styles = [
+            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}{name}/{s}"
+            for name, libs in Gui.__extensions.items()
+            for lib in libs
+            for s in (lib.get_styles() or [])
+        ]
+        self._flask_blueprint.append(extension_bp)
+
+        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
+        self._flask_blueprint.append(
+            self._server._get_default_blueprint(
+                static_folder=f"{_absolute_path}{os.path.sep}webapp",
+                template_folder=f"{_absolute_path}{os.path.sep}webapp",
+                title=self._get_config("title", "Taipy App"),
+                favicon=self._get_config("favicon", "/favicon.png"),
+                root_margin=self._get_config("margin", None),
+                scripts=scripts,
+                styles=styles,
+                version=self.__get_version(),
+                client_config=self.__get_client_config(),
+                watermark=self._get_config("watermark", None),
+            )
+        )
+
+        # Run parse markdown to force variables binding at runtime
+        pages_bp.add_url_rule("/taipy-jsx/<path:page_name>", view_func=self.__render_page)
+
+        # server URL Rule for flask rendered react-router
+        pages_bp.add_url_rule("/taipy-init", view_func=self.__init_route)
+
+        # Register Flask Blueprint if available
+        for bp in self._flask_blueprint:
+            self._server.get_flask().register_blueprint(bp)
+
     def run(
         self,
         run_server: bool = True,
@@ -1541,49 +1653,21 @@ class Gui:
         if not hasattr(self, "_root_dir"):
             self._root_dir = run_root_dir
 
+        kwargs = {
+            **kwargs,
+            "run_server": run_server,
+            "run_in_thread": run_in_thread,
+            "async_mode": async_mode,
+        }
+
         # Load application config from multiple sources (env files, kwargs, command line)
         self._config._build_config(run_root_dir, self.__env_filename, kwargs)
 
-        if app_config["debug"] and async_mode != "threading":
-            async_mode = "threading"
-            warnings.warn(
-                "'async_mode' parameter is overridden to 'threading'. Using Flask Development Server in Debug mode."
-            )
+        self._config.resolve()
 
-        # Init server if there is no server
-        if not hasattr(self, "_server"):
-            self._server = _Server(
-                self,
-                path_mapping=self._path_mapping,
-                flask=self._flask,
-                css_file=self._css_file,
-                async_mode=async_mode,
-            )
+        self.__init_server()
 
-        # Stop and reinitialize the server if it is still running as a thread
-        if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
-            self.stop()
-            self._flask_blueprint = []
-            self._server = _Server(
-                self,
-                path_mapping=self._path_mapping,
-                flask=self._flask,
-                css_file=self._css_file,
-                async_mode=async_mode,
-            )
-            self._bindings()._new_scopes()
-
-        # Special config for notebook runtime
-        if _is_in_notebook() or run_in_thread:
-            self._config.config["single_client"] = True
-
-        if run_server and app_config["ngrok_token"]:  # pragma: no cover
-            if not util.find_spec("pyngrok"):
-                raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
-            ngrok.set_auth_token(app_config["ngrok_token"])
-            http_tunnel = ngrok.connect(app_config["port"], "http")
-            app_config["use_reloader"] = False
-            print(f" * NGROK Public Url: {http_tunnel.public_url}")
+        self.__init_ngrok()
 
         locals_bind = _filter_locals(self.__frame.f_locals)
 
@@ -1598,84 +1682,14 @@ class Gui:
             # to allow gui.state.x in notebook mode
             self.state = self.__state
 
-        with self.get_flask_app().app_context():
-            self.__var_dir.process_imported_var()
-            # bind on_* function if available
-            self.__bind_local_func("on_init")
-            self.__bind_local_func("on_change")
-            self.__bind_local_func("on_action")
-            self.__bind_local_func("on_navigate")
-            self.__bind_local_func("on_exception")
-            self.__bind_local_func("on_status")
+        self.__bind_default_function()
 
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
         self.__evaluator = _Evaluator(glob_ctx)
 
-        # add en empty main page if it is not defined
-        if Gui.__root_page_name not in self._config.routes:
-            new_page = _Page()
-            new_page._route = Gui.__root_page_name
-            new_page._renderer = _EmptyPage()
-            self._config.pages.append(new_page)
-            self._config.routes.append(Gui.__root_page_name)
-
-        pages_bp = Blueprint("taipy_pages", __name__)
-        self._flask_blueprint.append(pages_bp)
-
-        # server URL Rule for taipy images
-        images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(f"{Gui.__CONTENT_ROOT}<path:path>", view_func=self.__serve_content)
-        self._flask_blueprint.append(images_bp)
-
-        # server URL for uploaded files
-        upload_bp = Blueprint("taipy_upload", __name__)
-        upload_bp.add_url_rule(Gui.__UPLOAD_URL, view_func=self.__upload_files, methods=["POST"])
-        self._flask_blueprint.append(upload_bp)
-
-        # server URL for extension resources
-        extension_bp = Blueprint("taipy_extensions", __name__)
-        extension_bp.add_url_rule(f"{Gui._EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
-        scripts = [
-            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}{name}/{s}"
-            for name, libs in Gui.__extensions.items()
-            for lib in libs
-            for s in (lib.get_scripts() or [])
-        ]
-        styles = [
-            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}{name}/{s}"
-            for name, libs in Gui.__extensions.items()
-            for lib in libs
-            for s in (lib.get_styles() or [])
-        ]
-        self._flask_blueprint.append(extension_bp)
-
-        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
-        self._flask_blueprint.append(
-            self._server._get_default_blueprint(
-                static_folder=f"{_absolute_path}{os.path.sep}webapp",
-                template_folder=f"{_absolute_path}{os.path.sep}webapp",
-                title=self._get_config("title", "Taipy App"),
-                favicon=self._get_config("favicon", "/favicon.png"),
-                root_margin=self._get_config("margin", None),
-                scripts=scripts,
-                styles=styles,
-                version=self.__get_version(),
-                client_config=self.__get_client_config(),
-                watermark=self._get_config("watermark", None),
-            )
-        )
-
-        # Run parse markdown to force variables binding at runtime
-        pages_bp.add_url_rule("/taipy-jsx/<path:page_name>", view_func=self.__render_page)
-
-        # server URL Rule for flask rendered react-router
-        pages_bp.add_url_rule("/taipy-init", view_func=self.__init_route)
-
-        # Register Flask Blueprint if available
-        for bp in self._flask_blueprint:
-            self._server.get_flask().register_blueprint(bp)
+        self.__register_blueprint()
 
         # Register data accessor communicaiton data format (JSON, Apache Arrow)
         self._accessors._set_data_format(_DataFormat.APACHE_ARROW if app_config["use_arrow"] else _DataFormat.JSON)
@@ -1687,13 +1701,14 @@ class Gui:
         if not run_server:
             return self.get_flask_app()
 
-        return self._server.runWithWS(
+        return self._server.run(
             host=app_config["host"],
             port=app_config["port"],
             debug=app_config["debug"],
             use_reloader=app_config["use_reloader"],
             flask_log=app_config["flask_log"],
-            run_in_thread=run_in_thread,
+            run_in_thread=app_config["run_in_thread"],
+            allow_unsafe_werkzeug=app_config["allow_unsafe_werkzeug"],
         )
 
     def stop(self):
@@ -1707,4 +1722,4 @@ class Gui:
         """
         if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
             self._server.stop_thread()
-            print("Gui server has been stopped.")
+            _TaipyLogger._get_logger().info("Gui server has been stopped.")

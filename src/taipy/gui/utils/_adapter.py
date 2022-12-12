@@ -137,7 +137,7 @@ class _Adapter:
                 return self.__get_label(value["label"], False)
         return None
 
-    def __get_children(self, value: t.Any) -> t.Union[t.List[t.Any], None]:
+    def __get_children(self, value: t.Any) -> t.Optional[t.List[t.Any]]:
         if isinstance(value, (tuple, list)) and len(value) > 2:
             return value[2] if isinstance(value[2], list) else [value[2]]
         elif hasattr(value, "children"):

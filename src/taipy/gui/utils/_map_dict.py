@@ -88,13 +88,13 @@ class _MapDict(object):
     def items(self):
         return self._dict.items()
 
-    def get(self, key: t.Any, default_value: t.Optional[str] = None) -> t.Union[t.Any, None]:
+    def get(self, key: t.Any, default_value: t.Optional[str] = None) -> t.Optional[t.Any]:
         return self._dict.get(key, default_value)
 
     def clear(self) -> None:
         self._dict.clear()
 
-    def setdefault(self, key, value=None) -> t.Union[t.Any, None]:
+    def setdefault(self, key, value=None) -> t.Optional[t.Any]:
         return self._dict.setdefault(key, value)
 
     def pop(self, key, default=None) -> t.Any:

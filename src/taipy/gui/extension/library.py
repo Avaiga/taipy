@@ -126,7 +126,7 @@ class Element:
         self,
         name,
         gui: "Gui",
-        properties: t.Union[t.Dict[str, t.Any], None],
+        properties: t.Optional[t.Dict[str, t.Any]],
         lib: "ElementLibrary",
         is_html: t.Optional[bool] = False,
     ) -> t.Union[t.Any, t.Tuple[str, str]]:

@@ -11,24 +11,27 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import pathlib
 import re
 import socket
+import sys
 import time
 import typing as t
 import webbrowser
 from importlib import util
 
 import __main__
-import contextlib
 from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
 from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
+
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .renderers.json import _TaipyJsonProvider
 from .utils import _is_in_notebook, _RuntimeManager
@@ -76,7 +79,7 @@ class _Server:
         @self._ws.on("message")
         def handle_message(message) -> None:
             if "status" in message:
-                print(message["status"])
+                _TaipyLogger._get_logger().info(message["status"])
             elif "type" in message:
                 gui._manage_message(message["type"], message)
 
@@ -107,7 +110,7 @@ class _Server:
         styles: t.List[str],
         version: str,
         client_config: t.Dict[str, t.Any],
-        watermark: t.Union[str, None],
+        watermark: t.Optional[str],
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
@@ -220,7 +223,7 @@ class _Server:
             if not patcher.is_monkey_patched("time"):
                 monkey_patch(time=True)
 
-    def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread):
+    def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug):
         host_value = host if host != "0.0.0.0" else "localhost"
         if _is_in_notebook() or run_in_thread:
             runtime_manager = _RuntimeManager()
@@ -232,7 +235,10 @@ class _Server:
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True
-            print(f" * Server starting on http://{host_value}:{port}")
+            if not is_running_from_reloader():
+                _TaipyLogger._get_logger().info(f" * Server starting on http://{host_value}:{port}")
+            else:
+                _TaipyLogger._get_logger().info(f" * Server reloaded on http://{host_value}:{port}")
         if not is_running_from_reloader() and self._gui._get_config("run_browser", False):
             webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
         if _is_in_notebook() or run_in_thread:
@@ -241,17 +247,28 @@ class _Server:
             self._thread = KThread(target=self._run_notebook)
             self._thread.start()
             return
-        if self._get_async_mode() != "threading":
-            use_reloader = False
         self._is_running = True
-        self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)
+        run_config = {
+            "app": self._flask,
+            "host": host,
+            "port": port,
+            "debug": debug,
+            "use_reloader": use_reloader,
+        }
+        # flask-socketio specific conditions for 'allow_unsafe_werkzeug' parameters to be popped out of kwargs
+        if not sys.stdin or not sys.stdin.isatty():
+            run_config = {**run_config, "allow_unsafe_werkzeug": allow_unsafe_werkzeug}
+        self._ws.run(**run_config)
 
     def stop_thread(self):
         if hasattr(self, "_thread") and self._thread.is_alive() and self._is_running:
             self._is_running = False
             with contextlib.suppress(Exception):
                 if self._get_async_mode() == "gevent":
-                    self._ws.wsgi_server.stop()
+                    if self._ws.wsgi_server is not None:
+                        self._ws.wsgi_server.stop()
+                    else:
+                        self._thread.kill()
                 else:
                     self._thread.kill()
             while self._is_port_open(self._host, self._port):

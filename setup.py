@@ -43,6 +43,7 @@ requirements = [
     "kthread>=0.2.3,<0.3",
     "taipy-config>=2.0,<3.0",
     "gitignore-parser>=0.1,<0.2",
+    "simple-websocket>=0.9,<1.0",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -54,9 +55,6 @@ extras_require = {
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
     "arrow": ["pyarrow>=10.0.1,<11.0"],
-    "simple-websocket": [
-        "simple-websocket>=0.9,<1.0",
-    ],
 }
 
 

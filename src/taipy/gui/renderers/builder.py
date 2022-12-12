@@ -17,8 +17,8 @@ import typing as t
 import warnings
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
-from inspect import isclass
 from enum import Enum
+from inspect import isclass
 
 from ..partial import Partial
 from ..types import PropertyType, _get_taipy_type
@@ -96,9 +96,15 @@ class _Builder:
         "densitymapbox": (_Chart_iprops.lon, _Chart_iprops.lat),
         "scatterpolar": (_Chart_iprops.r, _Chart_iprops.theta),
         "scatterpolargl": (_Chart_iprops.r, _Chart_iprops.theta),
-        "candlestick": (_Chart_iprops.x, _Chart_iprops.close, _Chart_iprops.open, _Chart_iprops.high, _Chart_iprops.low),
+        "candlestick": (
+            _Chart_iprops.x,
+            _Chart_iprops.close,
+            _Chart_iprops.open,
+            _Chart_iprops.high,
+            _Chart_iprops.low,
+        ),
         "bar": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.base),
-        "pie": (_Chart_iprops.x, ),
+        "pie": (_Chart_iprops.x,),
         "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
     }
     __CHART_DEFAULT_AXIS: t.Iterable[_Chart_iprops] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
@@ -109,7 +115,7 @@ class _Builder:
         gui: "Gui",
         control_type: str,
         element_name: str,
-        attributes: t.Union[t.Dict[str, t.Any], None],
+        attributes: t.Optional[t.Dict[str, t.Any]],
         hash_names: t.Dict[str, str] = {},
         default_value="<Empty>",
         lib_name: str = "taipy",
@@ -304,9 +310,11 @@ class _Builder:
             except ValueError:
                 raise ValueError(f"Property {name} expects a number for control {self.__control_type}")
         elif isinstance(value, numbers.Number):
-            val = value # type: ignore
+            val = value  # type: ignore
         else:
-            raise ValueError(f"Property {name} expects a number for control {self.__control_type}, received {type(value)}")
+            raise ValueError(
+                f"Property {name} expects a number for control {self.__control_type}, received {type(value)}"
+            )
         return self.__set_react_attribute(_to_camel_case(name), val)
 
     def __set_string_attribute(
@@ -544,7 +552,9 @@ class _Builder:
         if not trace[_Chart_iprops.mode.value]:
             trace[_Chart_iprops.mode.value] = default_mode
         # type
-        trace[_Chart_iprops.type.value] = str(trace[_Chart_iprops.type.value]).strip().lower() if trace[_Chart_iprops.type.value] else default_type
+        trace[_Chart_iprops.type.value] = (
+            str(trace[_Chart_iprops.type.value]).strip().lower() if trace[_Chart_iprops.type.value] else default_type
+        )
         if not trace[_Chart_iprops.xaxis.value]:
             trace[_Chart_iprops.xaxis.value] = "x"
         if not trace[_Chart_iprops.yaxis.value]:
@@ -557,9 +567,16 @@ class _Builder:
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
             while len([x for x in indexed_trace if x]):
-                axis.append(_Builder.__CHART_AXIS.get(indexed_trace[_Chart_iprops.type.value] or trace[_Chart_iprops.type.value], _Builder.__CHART_DEFAULT_AXIS))
+                axis.append(
+                    _Builder.__CHART_AXIS.get(
+                        indexed_trace[_Chart_iprops.type.value] or trace[_Chart_iprops.type.value],
+                        _Builder.__CHART_DEFAULT_AXIS,
+                    )
+                )
                 # marker selected_marker options
-                self.__check_dict(indexed_trace, (_Chart_iprops.marker, _Chart_iprops.selected_marker, _Chart_iprops.options))
+                self.__check_dict(
+                    indexed_trace, (_Chart_iprops.marker, _Chart_iprops.selected_marker, _Chart_iprops.options)
+                )
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
                 idx += 1
                 indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
@@ -584,10 +601,16 @@ class _Builder:
         # configure columns
         columns = set()
         for j, trace in enumerate(traces):
-            dt_idx = tuple(e.value for e in (axis[j] if j < len(axis) else axis[0]) + (_Chart_iprops.label, _Chart_iprops.text))
+            dt_idx = tuple(
+                e.value for e in (axis[j] if j < len(axis) else axis[0]) + (_Chart_iprops.label, _Chart_iprops.text)
+            )
             columns.update([trace[i] for i in dt_idx if trace[i]])
         # add optionnal column if any
-        markers = [t[_Chart_iprops.marker.value] or ({"color": t[_Chart_iprops.color.value]} if t[_Chart_iprops.color.value] else None) for t in traces]
+        markers = [
+            t[_Chart_iprops.marker.value]
+            or ({"color": t[_Chart_iprops.color.value]} if t[_Chart_iprops.color.value] else None)
+            for t in traces
+        ]
         opt_cols = set()
         for m in markers:
             if isinstance(m, (dict, _MapDict)):
@@ -600,8 +623,9 @@ class _Builder:
         columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
 
         # set default columns if not defined
-        icols = [[c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in columns.keys()] if c2]
-                 for i in range(len(traces))]
+        icols = [
+            [c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in columns.keys()] if c2] for i in range(len(traces))
+        ]
 
         for i, tr in enumerate(traces):
             if i < len(axis):
@@ -609,7 +633,8 @@ class _Builder:
                 unused_cols = [c for c in icols[i] if c not in used_cols]
                 if unused_cols and any(not tr[ax.value] for ax in axis[i]):
                     traces[i] = tuple(
-                        v or (unused_cols.pop(0) if unused_cols and _Chart_iprops(j) in axis[i] else v) for j, v in enumerate(tr)
+                        v or (unused_cols.pop(0) if unused_cols and _Chart_iprops(j) in axis[i] else v)
+                        for j, v in enumerate(tr)
                     )
 
         if columns is not None:
@@ -617,22 +642,47 @@ class _Builder:
             reverse_cols = {str(cd.get("dfid")): c for c, cd in columns.items()}
 
             # List used axis
-            used_axis = [[e for e in (axis[j] if j < len(axis) else axis[0]) if tr[e.value]] for j, tr in enumerate(traces)]
+            used_axis = [
+                [e for e in (axis[j] if j < len(axis) else axis[0]) if tr[e.value]] for j, tr in enumerate(traces)
+            ]
 
             ret_dict = {
                 "columns": columns,
-                "labels": [reverse_cols.get(tr[_Chart_iprops.label.value], (tr[_Chart_iprops.label.value] or "")) for tr in traces],
-                "texts": [reverse_cols.get(tr[_Chart_iprops.text.value], (tr[_Chart_iprops.text.value] or None)) for tr in traces],
+                "labels": [
+                    reverse_cols.get(tr[_Chart_iprops.label.value], (tr[_Chart_iprops.label.value] or ""))
+                    for tr in traces
+                ],
+                "texts": [
+                    reverse_cols.get(tr[_Chart_iprops.text.value], (tr[_Chart_iprops.text.value] or None))
+                    for tr in traces
+                ],
                 "modes": [tr[_Chart_iprops.mode.value] for tr in traces],
                 "types": [tr[_Chart_iprops.type.value] for tr in traces],
                 "xaxis": [tr[_Chart_iprops.xaxis.value] for tr in traces],
                 "yaxis": [tr[_Chart_iprops.yaxis.value] for tr in traces],
                 "markers": markers,
-                "selectedMarkers": [tr[_Chart_iprops.selected_marker.value] or ({"color": tr[_Chart_iprops.selected_color.value]} if tr[_Chart_iprops.selected_color.value] else None) for tr in traces],
-                "traces": [[reverse_cols.get(c, c) for c in [tr[e.value] for e in used_axis[j]]] for j, tr in enumerate(traces)],
+                "selectedMarkers": [
+                    tr[_Chart_iprops.selected_marker.value]
+                    or (
+                        {"color": tr[_Chart_iprops.selected_color.value]}
+                        if tr[_Chart_iprops.selected_color.value]
+                        else None
+                    )
+                    for tr in traces
+                ],
+                "traces": [
+                    [reverse_cols.get(c, c) for c in [tr[e.value] for e in used_axis[j]]] for j, tr in enumerate(traces)
+                ],
                 "orientations": [tr[_Chart_iprops.orientation.value] for tr in traces],
                 "names": [tr[_Chart_iprops._name.value] for tr in traces],
-                "lines": [tr[_Chart_iprops.line.value] if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict)) else {"dash": tr[_Chart_iprops.line.value]} if tr[_Chart_iprops.line.value] else None for tr in traces],
+                "lines": [
+                    tr[_Chart_iprops.line.value]
+                    if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict))
+                    else {"dash": tr[_Chart_iprops.line.value]}
+                    if tr[_Chart_iprops.line.value]
+                    else None
+                    for tr in traces
+                ],
                 "textAnchors": [tr[_Chart_iprops.text_anchor.value] for tr in traces],
                 "options": [tr[_Chart_iprops.options.value] for tr in traces],
                 "axisNames": [[e.name for e in ax] for ax in used_axis],
