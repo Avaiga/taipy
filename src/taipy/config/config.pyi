@@ -468,7 +468,7 @@ class Config:
         """
 
     @classmethod
-    def configure_scenario_from_tasks(
+    def configure_default_scenario(
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = ...,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = ...,
@@ -537,7 +537,7 @@ class Config:
     @classmethod
     def configure_task(
         id: str,
-        function,
+        function: Callable,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
         **properties: Dict[str, Any]
@@ -556,5 +556,30 @@ class Config:
                 arguments.
         Returns:
             `TaskConfig^`: The new task configuration.
+        """
+    
+    @classmethod
+    def configure_default_task(
+        function: Callable,
+        input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
+        output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
+        **properties: Dict[str, Any]
+    ):
+        """Configure the default values for task configurations.
+        This function creates the _default task configuration_ object,
+        where all task configuration objects will find their default
+        values when needed.
+        Parameters:
+            function (Callable): The python function called by Taipy to run the task.
+            input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+                input data node configurations. This can be a unique data node
+                configuration if there is a single input data node, or None if there are none.
+            output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+                output data node configurations. This can be a unique data node
+                configuration if there is a single output data node, or None if there are none.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
+        Returns:
+            `TaskConfig^`: The default task configuration.
         """
     
