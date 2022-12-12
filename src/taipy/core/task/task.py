@@ -15,7 +15,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Set, Union
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._reload import _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
@@ -63,7 +63,7 @@ class Task(_Entity):
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
         self._function = function
-        self._version = version or _VersionManager.get_current_version()
+        self._version = version or _VersionManagerFactory._build_manager()._get_current_version()
 
     @property  # type: ignore
     def parent_id(self):

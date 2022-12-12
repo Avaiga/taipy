@@ -9,17 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import glob
 import multiprocessing
-import os
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from functools import partial
 from time import sleep
 from unittest import mock
 from unittest.mock import MagicMock
-
-import pytest
 
 from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
@@ -30,15 +26,6 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job.job import Job
 from src.taipy.core.task.task import Task
 from taipy.config.config import Config
-
-
-@pytest.fixture(scope="function", autouse=True)
-def reset_configuration_singleton():
-    yield
-
-    for f in glob.glob("*.p"):
-        print(f"deleting file {f}")
-        os.remove(f)
 
 
 def execute(lock):

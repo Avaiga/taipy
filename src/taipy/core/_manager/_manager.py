@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
-from typing import Generic, Iterable, List, TypeVar, Union
+from typing import Generic, Iterable, List, Optional, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
@@ -45,7 +45,7 @@ class _Manager(Generic[EntityType]):
         """
         Deletes entities by version number.
         """
-        cls._repository._delete_by("version", version_number)  # type: ignore
+        cls._repository._delete_by("version", version_number, version_number="all")  # type: ignore
 
     @classmethod
     def _delete(cls, id):
@@ -62,18 +62,18 @@ class _Manager(Generic[EntityType]):
         cls._repository._save(entity)
 
     @classmethod
-    def _get_all(cls) -> List[EntityType]:
+    def _get_all(cls, version_number: Optional[str] = None) -> List[EntityType]:
         """
         Returns all entities.
         """
-        return cls._repository._load_all()
+        return cls._repository._load_all(version_number)
 
     @classmethod
-    def _get_all_by(cls, by) -> List[EntityType]:
+    def _get_all_by(cls, by, version_number: Optional[str] = None) -> List[EntityType]:
         """
-        Returns all entities.
+        Returns all entities based on a criteria.
         """
-        return cls._repository._load_all_by(by)
+        return cls._repository._load_all_by(by, version_number)
 
     @classmethod
     def _get(cls, entity: Union[str, EntityType], default=None) -> EntityType:

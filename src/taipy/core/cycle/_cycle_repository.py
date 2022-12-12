@@ -55,11 +55,11 @@ class _CycleRepository(_AbstractRepository[_CycleModel, Cycle]):  # type: ignore
     def load(self, model_id: str) -> Cycle:
         return self.repo.load(model_id)
 
-    def _load_all(self) -> List[Cycle]:
-        return self.repo._load_all()
+    def _load_all(self, version_number: Optional[str] = "all") -> List[Cycle]:
+        return self.repo._load_all(version_number)
 
-    def _load_all_by(self, by) -> List[Cycle]:
-        return self.repo._load_all_by(by)
+    def _load_all_by(self, by, version_number: Optional[str] = "all") -> List[Cycle]:
+        return self.repo._load_all_by(by, version_number)
 
     def _save(self, entity: Cycle):
         return self.repo._save(entity)
@@ -73,8 +73,8 @@ class _CycleRepository(_AbstractRepository[_CycleModel, Cycle]):  # type: ignore
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
 
-    def _search(self, attribute: str, value: Any) -> Optional[Cycle]:
-        return self.repo._search(attribute, value)
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = "all") -> Optional[Cycle]:
+        return self.repo._search(attribute, value, version_number)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)

@@ -78,14 +78,14 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             raise ModelNotFound(self.model, model_id)  # type: ignore
         return self.__to_entity(entry)
 
-    def _load_all(self) -> List[Entity]:
+    def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
         try:
             entries = self.session.query(_TaipyModel).filter_by(model_name=self.model_name)
             return [self.__to_entity(e) for e in entries]
         except NoResultFound:
             return []
 
-    def _load_all_by(self, by) -> List[Entity]:
+    def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Entity]:
         try:
             entries = (
                 self.session.query(_TaipyModel)
@@ -118,7 +118,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.session.execute(delete(_TaipyModel).where(_TaipyModel.model_id.in_(ids)))
         self.session.commit()
 
-    def _search(self, attribute: str, value: Any) -> Optional[Entity]:
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Entity]:
         entry = (
             self.session.query(_TaipyModel)
             .filter_by(model_name=self.model_name)

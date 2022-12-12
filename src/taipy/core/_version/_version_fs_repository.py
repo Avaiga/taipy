@@ -12,7 +12,7 @@
 import json
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from taipy.config.config import Config
 
@@ -42,12 +42,15 @@ class _VersionFSRepository(_FileSystemRepository):
         version.creation_date = datetime.fromisoformat(model.creation_date)
         return version
 
-    def _load_all(self) -> List[_Version]:
+    def _load_all(self, version_number: Optional[str] = "all") -> List[_Version]:
         """Only load the json file that has "id" property.
 
         The "version.json" does not have the "id" property.
         """
-        return self._load_all_by(by="id")
+        return self._load_all_by(by="id", version_number=version_number)
+
+    def _load_all_by(self, by, version_number: Optional[str] = "all"):
+        return super()._load_all_by(by, version_number)
 
     def _set_current_version(self, version_number):
         if self._version_file_path.exists():
@@ -95,7 +98,9 @@ class _VersionFSRepository(_FileSystemRepository):
         try:
             with open(self._version_file_path, "r") as f:
                 file_content = json.load(f)
-            return file_content[self._DEVELOPMENT_VERSION_KEY]
+            if version_number := file_content[self._DEVELOPMENT_VERSION_KEY]:
+                return version_number
+            return str(uuid.uuid4())
 
         except FileNotFoundError:
             version_number = str(uuid.uuid4())

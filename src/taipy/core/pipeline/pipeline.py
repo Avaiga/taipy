@@ -19,7 +19,7 @@ import networkx as nx
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
@@ -71,7 +71,7 @@ class Pipeline(_Entity):
         self._subscribers = _ListAttributes(self, subscribers or list())
         self._properties = _Properties(self, **properties)
 
-        self._version = version or _VersionManager.get_current_version()
+        self._version = version or _VersionManagerFactory._build_manager()._get_current_version()
 
     @property  # type: ignore
     def parent_id(self):

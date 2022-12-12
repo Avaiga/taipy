@@ -18,6 +18,7 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.pipeline_config import PipelineConfig
@@ -317,6 +318,8 @@ class TestTaipy:
         )
         pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
         scenario_config = Config.configure_scenario("my_scenario", pipeline_config)
+
+        CoreForTest().run()
         _CycleManager._set(cycle)
 
         scenario = _ScenarioManager._create(scenario_config)
@@ -329,6 +332,7 @@ class TestTaipy:
         assert len(_ScenarioManager._get_all()) == 1
         assert len(_CycleManager._get_all()) == 1
         assert len(_JobManager._get_all()) == 1
+        assert len(_VersionManager._get_all()) == 1
 
         # Temporarily unblock config update to test config global app
         Config.unblock_update()
@@ -343,6 +347,7 @@ class TestTaipy:
         assert len(_ScenarioManager._get_all()) == 1
         assert len(_CycleManager._get_all()) == 1
         assert len(_JobManager._get_all()) == 1
+        assert len(_VersionManager._get_all()) == 1
         assert not success
 
         # Test with clean entities enabled
@@ -355,6 +360,7 @@ class TestTaipy:
         assert len(_ScenarioManager._get_all()) == 0
         assert len(_CycleManager._get_all()) == 0
         assert len(_JobManager._get_all()) == 0
+        assert len(_VersionManager._get_all()) == 0
         assert success
 
     def test_export_scenario_filesystem(self):

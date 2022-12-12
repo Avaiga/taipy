@@ -17,6 +17,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from src.taipy.core._manager._manager import _Manager
 from src.taipy.core._repository._repository import _AbstractRepository
 from src.taipy.core._repository._repository_adapter import _RepositoryAdapter
+from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
 
 
@@ -24,19 +25,25 @@ from taipy.config.config import Config
 class MockModel:
     id: str
     name: str
+    version: str
 
     def to_dict(self):
         return dataclasses.asdict(self)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return MockModel(id=data["id"], name=data["name"])
+        return MockModel(id=data["id"], name=data["name"], version=data["version"])
 
 
 @dataclass
 class MockEntity:
-    id: str
-    name: str
+    def __init__(self, id: str, name: str, version: str = None) -> None:
+        self.id = id
+        self.name = name
+        if version:
+            self.version = version
+        else:
+            self.version = _VersionManager._get_current_version()
 
 
 class MockRepository(_AbstractRepository):  # type: ignore
@@ -45,19 +52,19 @@ class MockRepository(_AbstractRepository):  # type: ignore
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
 
     def _to_model(self, obj: MockEntity):
-        return MockModel(obj.id, obj.name)
+        return MockModel(obj.id, obj.name, obj.version)
 
     def _from_model(self, model: MockModel):
-        return MockEntity(model.id, model.name)
+        return MockEntity(model.id, model.name, model.version)
 
     def load(self, model_id: str) -> MockEntity:
         return self.repo.load(model_id)
 
-    def _load_all(self) -> List[MockEntity]:
-        return self.repo._load_all()
+    def _load_all(self, version_number: Optional[str] = None) -> List[MockEntity]:
+        return self.repo._load_all(version_number)
 
-    def _load_all_by(self, by) -> List[MockEntity]:
-        return self.repo._load_all_by(by)
+    def _load_all_by(self, by, version_number) -> List[MockEntity]:
+        return self.repo._load_all_by(by, version_number)
 
     def _save(self, entity: MockEntity):
         return self.repo._save(entity)
@@ -71,8 +78,8 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
 
-    def _search(self, attribute: str, value: Any) -> Optional[MockEntity]:
-        return self.repo._search(attribute, value)
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[MockEntity]:
+        return self.repo._search(attribute, value, version_number)
 
     @property
     def _storage_folder(self) -> pathlib.Path:

@@ -16,7 +16,7 @@ from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity_ids import _EntityIds
 from ..common.alias import PipelineId, ScenarioId
 from ..config.pipeline_config import PipelineConfig
@@ -87,7 +87,7 @@ class _PipelineManager(_Manager[Pipeline]):
         if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(str(pipeline_config.id), owner_id):
             return pipelines_from_owner
 
-        version = _VersionManager.get_current_version()
+        version = _VersionManagerFactory._build_manager()._get_current_version()
         pipeline = Pipeline(
             str(pipeline_config.id),  # type: ignore
             dict(**pipeline_config._properties),

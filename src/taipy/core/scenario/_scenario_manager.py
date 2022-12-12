@@ -16,7 +16,7 @@ from typing import Any, Callable, List, Optional, Union
 from taipy.config import Config
 
 from .._manager._manager import _Manager
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity_ids import _EntityIds
 from ..common.alias import ScenarioId
 from ..config.scenario_config import ScenarioConfig
@@ -108,7 +108,7 @@ class _ScenarioManager(_Manager[Scenario]):
         props = config._properties.copy()
         if name:
             props["name"] = name
-        version = _VersionManager.get_current_version()
+        version = _VersionManagerFactory._build_manager()._get_current_version()
         scenario = Scenario(
             str(config.id),  # type: ignore
             pipelines,
@@ -181,7 +181,7 @@ class _ScenarioManager(_Manager[Scenario]):
 
     @classmethod
     def _get_all_by_cycle(cls, cycle: Cycle) -> List[Scenario]:
-        return cls._get_all_by(cycle.id)
+        return cls._get_all_by(cycle.id, "all")
 
     @classmethod
     def _get_primary_scenarios(cls) -> List[Scenario]:
@@ -288,7 +288,7 @@ class _ScenarioManager(_Manager[Scenario]):
 
         Check if the cycle is only attached to this scenario, then delete it.
         """
-        while scenario := cls._repository._search("version", version_number):
+        while scenario := cls._repository._search("version", version_number, version_number="all"):
             if scenario.cycle and len(cls._get_all_by_cycle(scenario.cycle)) == 1:
                 _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
             cls._repository._delete(scenario.id)

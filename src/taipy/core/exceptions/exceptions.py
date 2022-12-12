@@ -242,3 +242,10 @@ class InvalidExportPath(Exception):
 
 class VersionAlreadyExists(Exception):
     """Raised if it is trying to create a Version that has already exists."""
+
+
+class NonExistingVersion(Exception):
+    """Raised if request a Version that is not known by the Version Manager."""
+
+    def __init__(self, version_number: str):
+        self.message = f"Version: {version_number} does not exist."

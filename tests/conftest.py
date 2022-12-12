@@ -19,6 +19,8 @@ import pandas as pd
 import pytest
 
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
+from src.taipy.core._version._version_repository_factory import _VersionRepositoryFactory
 from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from src.taipy.core.config import (
     DataNodeConfig,
@@ -134,13 +136,17 @@ def default_multi_sheet_data_frame():
     }
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def cleanup_files():
-    from time import sleep
+    if os.path.exists("None"):
+        os.remove("None")
 
-    sleep(0.1)
+    yield
+
     if os.path.exists(".data"):
         shutil.rmtree(".data", ignore_errors=True)
+    if os.path.exists(".my_data"):
+        shutil.rmtree(".my_data", ignore_errors=True)
 
 
 @pytest.fixture(scope="function")
@@ -251,19 +257,20 @@ def tmp_sqlite(tmpdir_factory):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def setup():
+def clean_repository():
     if Config.global_config.repository_type == "sql":
         close_sql_database_session_connection()
+        init_managers()
     init_config()
     init_scheduler()
     init_managers()
     init_config()
 
+    yield
 
-@pytest.fixture(scope="function", autouse=True)
-def teardown():
     if Config.global_config.repository_type == "sql":
         close_sql_database_session_connection()
+        init_managers()
     init_config()
     init_scheduler()
     init_managers()
@@ -352,6 +359,7 @@ def init_managers():
     _JobManagerFactory._build_manager()._delete_all()
     _TaskManagerFactory._build_manager()._delete_all()
     _DataManagerFactory._build_manager()._delete_all()
+    _VersionManagerFactory._build_manager()._delete_all()
 
 
 def init_scheduler():
@@ -392,6 +400,12 @@ def check_repositories_are(repo_type="default"):
     expected_data_repository = _DataRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
     if type(data_repository) != type(expected_data_repository):
         return False
+
+    version_repository = _VersionRepositoryFactory._build_repository()
+    expected_version_repository = _VersionRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
+    if type(version_repository) != type(expected_version_repository):
+        return False
+
     return True
 
 
@@ -425,4 +439,10 @@ def check_repositories_are_empty():
     data_nodes = data_repository._load_all()
     if len(data_nodes) != 0:
         return False
+
+    version_repository = _VersionRepositoryFactory._build_repository()
+    version = version_repository._load_all()
+    if len(version) != 0:
+        return False
+
     return True

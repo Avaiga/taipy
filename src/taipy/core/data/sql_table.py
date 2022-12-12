@@ -19,7 +19,7 @@ from sqlalchemy import MetaData, Table
 
 from taipy.config.common.scope import Scope
 
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..common.alias import DataNodeId, JobId
 from ..exceptions.exceptions import MissingRequiredProperty
 from .abstract_sql import _AbstractSQLDataNode
@@ -94,7 +94,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
             parent_ids=parent_ids,
             last_edit_date=last_edit_date,
             job_ids=job_ids,
-            version=version or _VersionManager.get_current_version(),
+            version=version or _VersionManagerFactory._build_manager()._get_current_version(),
             cacheable=cacheable,
             validity_period=validity_period,
             edit_in_progress=edit_in_progress,

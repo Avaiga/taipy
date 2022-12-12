@@ -11,7 +11,7 @@
 
 import calendar
 from datetime import datetime, time, timedelta
-from typing import Optional
+from typing import List, Optional
 
 from taipy.config.common.frequency import Frequency
 
@@ -40,6 +40,20 @@ class _CycleManager(_Manager[Cycle]):
         )
         cls._set(cycle)
         return cycle
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[Cycle]:
+        """
+        Returns all entities.
+        """
+        return cls._repository._load_all(version_number)
+
+    @classmethod
+    def _get_all_by(cls, by, version_number: Optional[str] = "all") -> List[Cycle]:
+        """
+        Returns all entities based on a criteria.
+        """
+        return cls._repository._load_all_by(by, version_number)
 
     @classmethod
     def _get_or_create(

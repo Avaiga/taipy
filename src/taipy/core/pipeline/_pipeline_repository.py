@@ -78,11 +78,11 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
     def load(self, model_id: str) -> Pipeline:
         return self.repo.load(model_id)
 
-    def _load_all(self) -> List[Pipeline]:
-        return self.repo._load_all()
+    def _load_all(self, version_number: Optional[str] = None) -> List[Pipeline]:
+        return self.repo._load_all(version_number)
 
-    def _load_all_by(self, by) -> List[Pipeline]:
-        return self.repo._load_all_by(by)
+    def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Pipeline]:
+        return self.repo._load_all_by(by, version_number)
 
     def _save(self, entity: Pipeline):
         return self.repo._save(entity)
@@ -96,11 +96,11 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
 
-    def _delete_by(self, attribute: str, value: str):
-        return self.repo._delete_by(attribute, value)
+    def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
+        return self.repo._delete_by(attribute, value, version_number)
 
-    def _search(self, attribute: str, value: Any) -> Optional[Pipeline]:
-        return self.repo._search(attribute, value)
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Pipeline]:
+        return self.repo._search(attribute, value, version_number)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)

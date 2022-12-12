@@ -24,7 +24,7 @@ from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
@@ -103,7 +103,7 @@ class DataNode(_Entity):
         self._edit_in_progress = edit_in_progress
         self._job_ids = _ListAttributes(self, job_ids or list())
 
-        self._version = version or _VersionManager.get_current_version()
+        self._version = version or _VersionManagerFactory._build_manager()._get_current_version()
         self._cacheable = cacheable
         self._validity_period = validity_period
 

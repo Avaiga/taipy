@@ -69,11 +69,11 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
     def load(self, model_id: str) -> Scenario:
         return self.repo.load(model_id)
 
-    def _load_all(self) -> List[Scenario]:
-        return self.repo._load_all()
+    def _load_all(self, version_number: Optional[str] = None) -> List[Scenario]:
+        return self.repo._load_all(version_number)
 
-    def _load_all_by(self, by) -> List[Scenario]:
-        return self.repo._load_all_by(by)
+    def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Scenario]:
+        return self.repo._load_all_by(by, version_number)
 
     def _save(self, entity: Scenario):
         return self.repo._save(entity)
@@ -87,8 +87,8 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
 
-    def _search(self, attribute: str, value: Any) -> Optional[Scenario]:
-        return self.repo._search(attribute, value)
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Scenario]:
+        return self.repo._search(attribute, value, version_number)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)

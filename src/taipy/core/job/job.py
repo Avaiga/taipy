@@ -17,7 +17,7 @@ from typing import Callable, List
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._reload import _self_reload, _self_setter
 from ..common.alias import JobId
@@ -63,7 +63,7 @@ class Job(_Entity):
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
-        self._version = version or _VersionManager.get_current_version()
+        self._version = version or _VersionManagerFactory._build_manager()._get_current_version()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
