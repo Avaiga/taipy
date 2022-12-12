@@ -258,7 +258,7 @@ class _Builder:
         """
         return self.__set_react_attribute(_to_camel_case(name), value)
 
-    def set_dict_attribute(self, name: str):
+    def set_dict_attribute(self, name: str, default_value: t.Optional[t.Dict[str, t.Any]] = None):
         """
         TODO
         Defines a React attribute as a stringified json dict.
@@ -266,8 +266,12 @@ class _Builder:
 
         Arguments:
             name (str): The property name.
+            default value (dict): iused if no value is specified
         """
-        if dict_attr := self.__attributes.get(name):
+        dict_attr = self.__attributes.get(name)
+        if dict_attr is None:
+            dict_attr = default_value
+        if dict_attr is not None:
             if isinstance(dict_attr, str):
                 vals = [x.strip().split(":") for x in dict_attr.split(";")]
                 dict_attr = {val[0].strip(): val[1].strip() for val in vals if len(val) > 1}
@@ -1044,7 +1048,7 @@ class _Builder:
             elif var_type == PropertyType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.dict:
-                self.set_dict_attribute(attr[0])
+                self.set_dict_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.dynamic_list:
                 self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.boolean_or_list:
