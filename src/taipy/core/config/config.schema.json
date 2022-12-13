@@ -357,23 +357,32 @@
       "type": "object",
       "properties": {
         "root_folder": {
+          "description": "Path of the base folder for the taipy application. The default value is ./taipy/",
           "type": "string"
         },
         "storage_folder": {
+          "description": "Folder name used to store Taipy data. The default value is .data/. It is used in conjunction with the root_folder field",
           "type": "string"
         },
         "clean_entities_enabled": {
+          "description": "Boolean field to activate/deactivate the clean entities feature.",
           "enum": [
             "True:bool",
             "False:bool"
-          ]
+          ],
+          "default": "False:bool"
         },
         "read_entity_retry": {
-          "description": "20:int",
-          "type": "string"
+          "description": "Number of time to retry before return failure to read an entity.",
+          "type": "int"
         },
         "repository_type": {
-          "type": "string"
+          "description": "The repository type that is used to store the entities.",
+          "enum": [
+            "sql",
+            "filesystem"
+          ],
+          "default": "filesystem"
         },
         "repository_properties": {
           "type": "dict"
@@ -388,11 +397,12 @@
           "enum": [
             "standalone",
             "development"
-          ]
+          ],
+          "default": "standalone"
         },
         "max_nb_of_workers": {
-          "description": "2:int",
-          "type": "string"
+          "description": "mode: standalone specific. The maximum number of jobs able to run in parallel.",
+          "type": "int"
         }
       }
     }
