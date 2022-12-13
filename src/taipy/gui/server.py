@@ -256,7 +256,7 @@ class _Server:
             "use_reloader": use_reloader,
         }
         # flask-socketio specific conditions for 'allow_unsafe_werkzeug' parameters to be popped out of kwargs
-        if not sys.stdin or not sys.stdin.isatty():
+        if self._get_async_mode() == "threading" and (not sys.stdin or not sys.stdin.isatty()):
             run_config = {**run_config, "allow_unsafe_werkzeug": allow_unsafe_werkzeug}
         self._ws.run(**run_config)
 
