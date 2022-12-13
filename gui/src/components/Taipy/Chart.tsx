@@ -86,7 +86,7 @@ interface ChartConfig {
     axisNames: Array<string[]>;
 }
 
-const chartDarkTemplate = {
+const darkTemplate = {
     "data": {
         "barpolar": [
             {
@@ -1108,7 +1108,7 @@ const Chart = (props: ChartProp) => {
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
-            const tplTheme = theme.palette.mode === "dark" ? (props.template_Dark_ ? JSON.parse(props.template_Dark_) : chartDarkTemplate) : props.template_Light_ && JSON.parse(props.template_Light_);
+            const tplTheme = theme.palette.mode === "dark" ? (props.template_Dark_ ? JSON.parse(props.template_Dark_) : darkTemplate) : props.template_Light_ && JSON.parse(props.template_Light_);
             template = tpl ? tplTheme ? {...tpl, ...tplTheme} : tpl : tplTheme ? tplTheme : undefined;
         } catch (e) {
             console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
