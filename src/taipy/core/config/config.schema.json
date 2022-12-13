@@ -107,7 +107,7 @@
           },
           "db_extra_args": {
             "description": "storage_type: sql, sql_table, mongo_collection specific. The default value of db_extra_args is None",
-            "type": "dict"
+            "type": "object"
           },
           "table_name": {
             "description": "storage_type: sql_table specific.",
@@ -163,11 +163,11 @@
           },
           "read_kwargs": {
             "description": "storage_type: parquet specific. Additional parameters when reading parquet files, default is an empty dictionary",
-            "type": "dict"
+            "type": "object"
           },
           "write_kwargs": {
             "description": "storage_type: parquet specific.Additional parameters when writing parquet files, default is an empty dictionary",
-            "type": "dict"
+            "type": "object"
           },
           "if": {
             "properties": {
@@ -344,7 +344,7 @@
           },
           "comparators": {
             "description": "The list of functions used to compare scenarios. A comparator function is attached to a scenario's data node configuration. During the scenario comparison, each comparator is applied to all the data nodes instantiated from the data node configuration attached to the comparator.",
-            "type": "dict",
+            "type": "object",
             "items": {
               "type": "string"
             }
@@ -385,7 +385,7 @@
           "default": "filesystem"
         },
         "repository_properties": {
-          "type": "dict"
+          "type": "object"
         }
       }
     },
