@@ -11,11 +11,13 @@
 
 from .config import Config
 
+
 # Default config loaded by app.py
 default_config: Config = {
     "allow_unsafe_werkzeug": False,
     "async_mode": "gevent",
     "change_delay": None,
+    "chart_dark_template": None,
     "dark_mode": True,
     "dark_theme": None,
     "debug": False,

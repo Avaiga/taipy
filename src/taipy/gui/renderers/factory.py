@@ -100,7 +100,7 @@ class _Factory:
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
                 ("template", PropertyType.dict),
-                ("template[dark]", PropertyType.dict),
+                ("template[dark]", PropertyType.dict, gui._get_config("chart_dark_template", None)),
                 ("template[light]", PropertyType.dict),
             ]
         )
