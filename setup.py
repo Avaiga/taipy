@@ -41,6 +41,7 @@ setup(
     install_requires=requirements,
     long_description=readme,
     long_description_content_type="text/markdown",
+    include_package_data=True,
     license="Apache License 2.0",
     keywords="taipy-config",
     name="taipy-config",
