@@ -13,7 +13,7 @@
       "additionalProperties": {
         "properties": {
           "scope": {
-            "description": "",
+            "description": "An enum value among GLOBAL, CYCLE, SCENARIO or PIPELINE that represents the visibility of the data node in the graph of entities.",
             "type": "string",
             "enum": [
               "GLOBAL",
@@ -25,7 +25,7 @@
             "default": "SCENARIO"
           },
           "storage_type": {
-            "description": "",
+            "description": "An enum value indicating the type of storage of the data node.",
             "type": "string",
             "enum": [
               "pickle",
@@ -274,7 +274,7 @@
         "type": "object",
         "properties": {
           "inputs": {
-            "description": "The input data nodes referring the parameter(s) data of the function to be executed.",
+            "description": "The input data node configs referring to the data node whose data will be passed as a parameter of the function to be executed.",
             "type": "array",
             "items": {
               "type": "string"
@@ -282,7 +282,7 @@
             "uniqueItems": true
           },
           "outputs": {
-            "description": "The output data nodes referring the result(s) data of the function to be executed.",
+            "description": "The output data node configs referring to the data node whose data will be populated by the result of the function to be executed.",
             "type": "array",
             "items": {
               "type": "string"
@@ -373,7 +373,7 @@
           "default": "False:bool"
         },
         "read_entity_retry": {
-          "description": "Number of time to retry before return failure to read an entity.",
+          "description": "Number of times to retry before return failure to read an entity.",
           "type": "int"
         },
         "repository_type": {
