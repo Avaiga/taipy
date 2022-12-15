@@ -1,0 +1,410 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taipy.io/config.schema.json",
+  "title": "Taipy Config",
+  "description": "Taipy Config",
+  "type": "object",
+  "properties": {
+    "DATA_NODE": {
+      "description": "Data nodes",
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": {
+        "properties": {
+          "scope": {
+            "description": "An enum value among GLOBAL, CYCLE, SCENARIO or PIPELINE that represents the visibility of the data node in the graph of entities.",
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "CYCLE",
+              "SCENARIO",
+              "PIPELINE",
+              ""
+            ],
+            "default": "SCENARIO"
+          },
+          "storage_type": {
+            "description": "An enum value indicating the type of storage of the data node.",
+            "type": "string",
+            "enum": [
+              "pickle",
+              "csv",
+              "excel",
+              "json",
+              "mongo_collection",
+              "sql",
+              "sql_table",
+              "in_memory",
+              "generic",
+              "parquet",
+              ""
+            ],
+            "default": "pickle"
+          },
+          "cacheable": {
+            "description": "A boolean value as a string: one of [False:bool, True:bool]",
+            "type": "string",
+            "enum": [
+              "False:bool",
+              "True:bool"
+            ],
+            "default": "False:bool"
+          },
+          "default_path": {
+            "description": "storage_type: pickle, csv, excel, json, parquet specific.",
+            "type": "string"
+          },
+          "default_data": {
+            "description": "storage_type: pickle, in_memory specific.",
+            "type": [
+              "string",
+              "array",
+              "object",
+              "integer",
+              "boolean"
+            ]
+          },
+          "has_header": {
+            "description": "storage_type: csv, excel specific. Boolean value as a string.",
+            "type": "string"
+          },
+          "exposed_type": {
+            "description": "storage_type: csv, excel, sql, sql_table, parquet specific. If the exposed_type value provided is numpy, the data node will read the csv file to a numpy array. If the provided value is a custom class, data node will create a list of custom object with the given custom class, each object will represent a row in the csv file.If exposed_type is not provided, the data node will read the csv file as a pandas DataFrame.",
+            "type": "string"
+          },
+          "sheet_name": {
+            "description": "storage_type: excel specific. If sheet_name is provided with a list of sheet names, the data node will return a dictionary with the key being the sheet name and the value being the data of the corresponding sheet. If a string is provided, the data node will read only the data of the corresponding sheet. The default value of sheet_name is None and the data node will return all sheets in the provided Excel file when reading it.",
+            "type": "string"
+          },
+          "db_username": {
+            "description": "storage_type: sql, sql_table, mongo_collection specific.",
+            "type": "string"
+          },
+          "db_password": {
+            "description": "storage_type: sql, sql_table, mongo_collection specific.",
+            "type": "string"
+          },
+          "db_name": {
+            "description": "storage_type: sql, sql_table, mongo_collection specific.",
+            "type": "string"
+          },
+          "db_engine": {
+            "description": "storage_type: sql, sql_table specific. One of sqlite, mssql, mysql, postgresql",
+            "type": "string"
+          },
+          "db_port": {
+            "description": "storage_type: sql, sql_table, mongo_collection specific. Default 1443 for SQL and 27017 for mongo",
+            "type": "string"
+          },
+          "db_host": {
+            "description": "storage_type: sql, sql_table, mongo_collection specific. Default localhost",
+            "type": "string"
+          },
+          "db_driver": {
+            "description": "storage_type: sql, sql_table specific. The default value of db_driver is \"ODBC Driver 17 for SQL Server\".",
+            "type": "string"
+          },
+          "db_extra_args": {
+            "description": "storage_type: sql, sql_table, mongo_collection specific. The default value of db_extra_args is None",
+            "type": "object"
+          },
+          "table_name": {
+            "description": "storage_type: sql_table specific.",
+            "type": "string"
+          },
+          "read_query": {
+            "description": "storage_type: sql, mongo_collection specific. The query that will be used by Taipy to read the data from the database.",
+            "type": "string"
+          },
+          "write_query_builder": {
+            "description": "storage_type: sql specific. A callable function that takes in the data as an input parameter and returns a list of SQL queries to be executed when the write data node method is called.",
+            "type": "string"
+          },
+          "collection_name ": {
+            "description": "storage_type: mongo_collection specific.",
+            "type": "string"
+          },
+          "custom_document": {
+            "description": "storage_type: mongo_collection specific.",
+            "type": "string"
+          },
+          "read_fct": {
+            "description": "storage_type: generic specific.",
+            "type": "string"
+          },
+          "write_fct": {
+            "description": "storage_type: generic specific.",
+            "type": "string"
+          },
+          "read_fct_params": {
+            "description": "storage_type: generic specific.",
+            "type": "array"
+          },
+          "write_fct_params": {
+            "description": "storage_type: generic specific.",
+            "type": "array"
+          },
+          "encoder": {
+            "description": "storage_type: json specific.",
+            "type": "string"
+          },
+          "decoder": {
+            "description": "storage_type: json specific.",
+            "type": "string"
+          },
+          "compression": {
+            "description": "storage_type: parquet specific. The name of the compression to use, default is None for no compression",
+            "type": "string"
+          },
+          "engine": {
+            "description": "storage_type: parquet specific.The name of the parquet library to use, default is pyarrow",
+            "type": "string"
+          },
+          "read_kwargs": {
+            "description": "storage_type: parquet specific. Additional parameters when reading parquet files, default is an empty dictionary",
+            "type": "object"
+          },
+          "write_kwargs": {
+            "description": "storage_type: parquet specific.Additional parameters when writing parquet files, default is an empty dictionary",
+            "type": "object"
+          },
+          "if": {
+            "properties": {
+              "storage_type": {
+                "enum": [
+                  "csv",
+                  "excel",
+                  "json"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "default_path"
+            ]
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "storage_type": {
+                  "const": "generic"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "read_fct",
+                "write_fct"
+              ]
+            },
+            "else": {
+              "if": {
+                "properties": {
+                  "storage_type": {
+                    "enum": [
+                      "sql",
+                      "sql_table",
+                      "mongo_collection"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "db_name"
+                ],
+                "if": {
+                  "properties": {
+                    "storage_type": {
+                      "enum": [
+                        "sql",
+                        "sql_table"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "db_username",
+                    "db_password",
+                    "db_engine"
+                  ],
+                  "if": {
+                    "properties": {
+                      "storage_type": {
+                        "constant": "sql"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "read_query",
+                      "write_query_builder"
+                    ]
+                  },
+                  "else": {
+                    "then": {
+                      "required": [
+                        "table_name"
+                      ]
+                    }
+                  }
+                },
+                "else": {
+                  "then": {
+                    "required": [
+                      "collection_name"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "TASK": {
+      "description": "Tasks",
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "description": "The input data node configs referring to the data node whose data will be passed as a parameter of the function to be executed.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "outputs": {
+            "description": "The output data node configs referring to the data node whose data will be populated by the result of the function to be executed.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "function": {
+            "description": "",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PIPELINE": {
+      "description": "Pipelines",
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "description": "The list of tasks configurations.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "SCENARIO": {
+      "description": "Scenarios",
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "pipelines": {
+            "description": "The list of pipeline configs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "frequency": {
+            "description": "The recurrence of the scenarios instantiated from this configuration. Based on this frequency the scenarios will be attached to the right cycles.",
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "QUARTERLY",
+              "YEARLY"
+            ]
+          },
+          "comparators": {
+            "description": "The list of functions used to compare scenarios. A comparator function is attached to a scenario's data node configuration. During the scenario comparison, each comparator is applied to all the data nodes instantiated from the data node configuration attached to the comparator.",
+            "type": "object",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "TAIPY": {
+      "description": "Taipy",
+      "type": "object",
+      "properties": {
+        "root_folder": {
+          "description": "Path of the base folder for the taipy application. The default value is ./taipy/",
+          "type": "string"
+        },
+        "storage_folder": {
+          "description": "Folder name used to store Taipy data. The default value is .data/. It is used in conjunction with the root_folder field",
+          "type": "string"
+        },
+        "clean_entities_enabled": {
+          "description": "Boolean field to activate/deactivate the clean entities feature.",
+          "enum": [
+            "True:bool",
+            "False:bool"
+          ],
+          "default": "False:bool"
+        },
+        "read_entity_retry": {
+          "description": "Number of times to retry before return failure to read an entity.",
+          "type": "int"
+        },
+        "repository_type": {
+          "description": "The repository type that is used to store the entities.",
+          "enum": [
+            "sql",
+            "filesystem"
+          ],
+          "default": "filesystem"
+        },
+        "repository_properties": {
+          "type": "object"
+        }
+      }
+    },
+    "JOB": {
+      "description": "Job",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "standalone",
+            "development"
+          ],
+          "default": "standalone"
+        },
+        "max_nb_of_workers": {
+          "description": "mode: standalone specific. The maximum number of jobs able to run in parallel.",
+          "type": "int"
+        }
+      }
+    }
+  }
+}
