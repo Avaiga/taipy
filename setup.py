@@ -19,7 +19,7 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "pyarrow>=9.0,<10.0",
+    "pyarrow>=10.0.1,<11.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.0.7,<4.0",
     "modin[dask]>=0.16.2,<1.0",

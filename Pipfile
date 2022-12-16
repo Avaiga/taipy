@@ -8,7 +8,7 @@ click = "==8.1.3"
 modin = {extras = ["dask"], version = "==0.16.2"}
 networkx = "==2.6"
 openpyxl = "==3.0.7"
-pyarrow = "==9.0.0"
+pyarrow = "==10.0.1"
 pymongo = "==4.2.0"
 sqlalchemy = "==1.4.18"
 toml = "==0.10"
