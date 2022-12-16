@@ -213,7 +213,10 @@ class ParquetDataNode(DataNode):
         }
         kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
         kwargs.update(write_kwargs)
-        pd.DataFrame(data).to_parquet(self._path, **kwargs)
+        if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+            data.to_parquet(self._path, **kwargs)
+        else:
+            pd.DataFrame(data).to_parquet(self._path, **kwargs)
 
         self._last_edit_date = datetime.now()
         if job_id:

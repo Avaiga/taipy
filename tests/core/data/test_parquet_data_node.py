@@ -233,12 +233,18 @@ class TestParquetDataNode:
         assert new_edit_date < dn.last_edit_date
         os.unlink(temp_file_path)
 
-    def test_write_to_disk(self, tmpdir_factory):
+    @pytest.mark.parametrize(
+        "data",
+        [
+            [{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}],
+            pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+        ],
+    )
+    def test_write_to_disk(self, tmpdir_factory, data):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
         dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path})
-
-        df = pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])
-        dn.write(df)
+        dn.write(data)
 
         assert pathlib.Path(temp_file_path).exists()
         assert isinstance(dn.read(), pd.DataFrame)
