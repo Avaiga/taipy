@@ -1,5 +1,5 @@
 # Taipy
-[![tests](https://github.com/Avaiga/taipy-core/actions/workflows/tests.yml/badge.svg)](https://github.com/Avaiga/taipy/actions/workflows/tests.yml)
+[![tests](https://github.com/Avaiga/taipy/actions/workflows/tests.yml/badge.svg)](https://github.com/Avaiga/taipy/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/pypi/pyversions/taipy)](https://pypi.org/project/taipy)
 [![PyPI](https://img.shields.io/pypi/v/taipy.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy)
 
