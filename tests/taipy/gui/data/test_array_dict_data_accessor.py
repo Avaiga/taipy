@@ -104,3 +104,22 @@ def test_array_of_diff_array(gui:Gui, helpers, small_dataframe):
     assert len(data) == 2
     assert len(data[0]["0/0"]) == 3
     assert len(data[1]["1/0"]) == 2
+
+def test_array_of_dicts(gui:Gui, helpers, small_dataframe):
+    accessor = _ArrayDictDataAccessor()
+    an_array_of_dicts = [{"temperatures": [[17.2, 27.4, 28.6, 21.5],
+                     [5.6, 15.1, 20.2, 8.1],
+                     [26.6, 22.8, 21.8, 24.0],
+                     [22.3, 15.5, 13.4, 19.6],
+                     [3.9, 18.9, 25.7, 9.8]],
+    "cities": ["Hanoi", "Paris", "Rio de Janeiro", "Sydney", "Washington"]}, {
+    "seasons": ["Winter", "Summer", "Spring", "Autumn"]}]
+    ret_data = accessor.get_data(gui, "x", an_array_of_dicts, {"start": 0, "end": -1, "alldata": True}, _DataFormat.JSON)
+    assert ret_data
+    value = ret_data["value"]
+    assert value
+    assert value["multi"] is True
+    data = value["data"]
+    assert len(data) == 2
+    assert len(data[0]["temperatures"]) == 5
+    assert len(data[1]["seasons"]) == 4
