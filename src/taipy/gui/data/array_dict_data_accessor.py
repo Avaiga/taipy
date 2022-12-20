@@ -32,21 +32,24 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
             if not value or isinstance(value[0], (str, int, float, bool)):
                 return pd.DataFrame({"0": value})
             types = {type(x) for x in value}
-            if len(types) == 1 and next(iter(types), None) == list:
-                lengths = {len(x) for x in value}
-                return (
-                    pd.DataFrame(value)
-                    if len(lengths) == 1
-                    else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
-                )
-
-            elif pd.DataFrame in types:
-                if len(types) == 1:
+            if len(types) == 1:
+                type_elt = next(iter(types), None)
+                if type_elt == list:
+                    lengths = {len(x) for x in value}
+                    return (
+                        pd.DataFrame(value)
+                        if len(lengths) == 1
+                        else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
+                    )
+                elif type_elt == dict:
+                    return [pd.DataFrame(v) for v in value]
+                elif type_elt == pd.DataFrame:
                     return value
-                elif len(types) == 2 and list in types:
-                    return [
-                        v if isinstance(v, pd.DataFrame) else pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)
-                    ]
+
+            elif len(types) == 2 and list in types and pd.DataFrame in types:
+                return [
+                    v if isinstance(v, pd.DataFrame) else pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)
+                ]
         elif isinstance(value, _MapDict):
             return pd.DataFrame(value._dict)
         return pd.DataFrame(value)
