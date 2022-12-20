@@ -12,6 +12,7 @@
 import os
 import re
 from collections import UserDict
+from datetime import datetime
 from importlib import import_module
 from operator import attrgetter
 from pydoc import locate
@@ -91,6 +92,13 @@ class _TemplateHandler:
             return float(val)
         except ValueError:
             raise InconsistentEnvVariableError(f"{val} is not a float.")
+
+    @staticmethod
+    def _to_datetime(val: str) -> datetime:
+        try:
+            return datetime.fromisoformat(val)
+        except ValueError:
+            raise InconsistentEnvVariableError(f"{val} is not a valid datetime.")
 
     @staticmethod
     def _to_scope(val: str) -> Scope:
