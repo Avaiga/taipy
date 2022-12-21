@@ -231,6 +231,7 @@ def invoke_long_callback(
                - If this parameter is set to a bool value, then:
 
                    - If True, this indicates that *user_function* has finished properly.
+                        The last argument passed will be the result of the user_function call.
                    - If False, this indicates that *user_function* failed.
 
                - If this parameter is set to an int value, then this value indicates
@@ -258,10 +259,10 @@ def invoke_long_callback(
             warnings.warn(f"invoke_long_callback: Exception raised in function {function_name}.\n{e}")
 
     def callback_on_status(
-        status: t.Union[int, bool], e: t.Optional[Exception] = None, function_name: t.Optional[str] = None
+        status: t.Union[int, bool], e: t.Optional[Exception] = None, function_name: t.Optional[str] = None, function_result: t.Optional[t.Any] = None
     ):
         if callable(user_status_function):
-            invoke_callback(this_gui, str(state_id), user_status_function, [status] + list(user_status_function_args))
+            invoke_callback(this_gui, str(state_id), user_status_function, [status] + list(user_status_function_args) + [function_result])
         if e:
             invoke_callback(
                 this_gui,
@@ -275,8 +276,8 @@ def invoke_long_callback(
 
     def user_function_in_thread(*uf_args):
         try:
-            user_function(*uf_args)
-            callback_on_status(True)
+            res = user_function(*uf_args)
+            callback_on_status(True, function_result = res)
         except Exception as e:
             callback_on_status(False, e, user_function.__name__)
 

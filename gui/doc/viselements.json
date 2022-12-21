@@ -46,7 +46,8 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "The name of a function that is triggered when the button is pressed.\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>"
+            "doc": "The name of a function that is triggered when the button is pressed.\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           }
         ]
       }
@@ -358,7 +359,9 @@
           {
             "name": "on_range_change",
             "type": "Callback",
-            "doc": "Callback function called when the visible part of the x axis changes.\nThe function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">plotly</a>.</li>\n</ul>"
+            "doc": "Callback function called when the visible part of the x axis changes.\nThe function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">plotly</a>.</li>\n</ul>",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
+
           },
           {
             "name": "columns",
@@ -492,7 +495,8 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "The name of a function that is triggered when the download is initiated.\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>"
+            "doc": "The name of a function that is triggered when the download is initiated.\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"]]
           },
           {
             "name": "auto",
@@ -542,7 +546,8 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "The name of the function that will be triggered.\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>"
+            "doc": "The name of the function that will be triggered.\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"]]
           },
           {
             "name": "multiple",
@@ -587,7 +592,8 @@
           {
             "name": "on_action",
             "type": "str",
-            "doc": "The name of a function that is triggered when the user clicks on the image.\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>"
+            "doc": "The name of a function that is triggered when the user clicks on the image.\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "width",
@@ -705,7 +711,8 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "The name of the function that will be triggered when a menu option is selected.<br/>\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>"
+            "doc": "The name of the function that will be triggered when a menu option is selected.<br/>\nAll the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           }
         ]
       }
@@ -933,22 +940,26 @@
           {
             "name": "on_edit",
             "type": "Callback",
-            "doc": "The name of a function that is to be triggered when a cell edition is validated.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value as entered by the user.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot edit cells."
+            "doc": "The name of a function that is to be triggered when a cell edition is validated.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value as entered by the user.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot edit cells.",
+            "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "on_delete",
             "type": "str",
-            "doc": "The name of a function that is to be triggered when a row is deleted.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot delete rows."
+            "doc": "The name of a function that is to be triggered when a row is deleted.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot delete rows.",
+            "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "on_add",
             "type": "str",
-            "doc": "The name of a function that is to be triggered when the user requests a row to be added.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot add rows."
+            "doc": "The name of a function that is to be triggered when the user requests a row to be added.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot add rows.",
+            "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "on_action",
             "type": "str",
-            "doc": "The name of a function that is to be triggered when the user selects a row.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li></ul></li></ul>."
+            "doc": "The name of a function that is to be triggered when the user selects a row.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li></ul></li></ul>.",
+            "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "size",
@@ -978,7 +989,8 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "Name of a function that is triggered when a button is pressed.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>\n"
+            "doc": "Name of a function that is triggered when a button is pressed.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>\n",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "close_label",
@@ -1129,7 +1141,8 @@
           {
             "name": "on_close",
             "type": "Callback",
-            "doc": "The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>\nIf this property is not set, no function is called when this pane is closed."
+            "doc": "The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>\nIf this property is not set, no function is called when this pane is closed.",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"]]
           },
           {
             "name": "anchor",
@@ -1219,7 +1232,8 @@
           {
             "name": "on_change",
             "type": "Callback",
-            "doc": "The name of a function that is triggered when the value is updated.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>"
+            "doc": "The name of a function that is triggered when the value is updated.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>",
+            "signature": [["state", "State"], ["var_name", "str"], ["value", ""]]
           }
         ]
       }
@@ -1271,7 +1285,8 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "Name of a function that is triggered when a specific key is pressed.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args (List):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>\n"
+            "doc": "Name of a function that is triggered when a specific key is pressed.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the input.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args (List):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>\n",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "action_keys",
