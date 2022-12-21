@@ -8,8 +8,45 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 class Config:
+    @_Classproperty
+    def unique_sections(cls) -> Dict[str, UniqueSection]:
+        """Return all unique sections."""
+    @_Classproperty
+    def sections(cls) -> Dict[str, Dict[str, Section]]:
+        """Return all non unique sections."""
+    @_Classproperty
+    def global_config(cls) -> GlobalAppConfig:
+        """Return configuration values related to the global application as a `GlobalAppConfig^`."""
+    @classmethod
+    @_ConfigBlocker._check()
+    def load(cls, filename):
+        """Load a configuration file.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the toml configuration file to load.
+        """
+    @classmethod
+    def export(cls, filename):
+        """Export a configuration.
+
+        The export is done in a toml file.
+
+        The exported configuration is a compilation from the three possible methods to configure
+        the application: the python code configuration, the file configuration and the environment
+        configuration.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the file to export.
+        Note:
+            If _filename_ already exists, it is overwritten.
+        """
+    @classmethod
+    def block_update(cls):
+        """Block update on the configuration signgleton."""
+    @classmethod
+    def unblock_update(cls):
+        """Unblock update on the configuration signgleton."""
     @classmethod
     def configure_global_app(
         cls,
@@ -29,7 +66,15 @@ class Config:
         Returns:
             The global application configuration.
         """
+    @classmethod
+    def check(cls) -> IssueCollector:
+        """Check configuration.
 
+        This method logs issue messages and returns an issue collector.
+
+        Returns:
+            Collector containing the info, warning and error issues.
+        """
     @staticmethod
     def configure_data_node(
         id: str,
@@ -38,7 +83,7 @@ class Config:
         cacheable: bool = ...,
         **properties: Dict[str, Any],
     ):
-       """Configure a new data node configuration.
+        """Configure a new data node configuration.
         Parameters:
             id (str): The unique identifier of the new data node configuration.
             storage_type (str): The data node configuration storage type. The possible values
@@ -55,7 +100,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new data node configuration.
         """
-    
     @staticmethod
     def configure_default_data_node(
         storage_type: str,
@@ -63,7 +107,7 @@ class Config:
         cacheable: bool = ...,
         **properties: Dict[str, Any],
     ):
-       """Configure the default values for data node configurations.
+        """Configure the default values for data node configurations.
         This function creates the _default data node configuration_ object,
         where all data node configuration objects will find their default
         values when needed.
@@ -79,7 +123,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The default data node configuration.
         """
-    
     @staticmethod
     def configure_csv_data_node(
         id: str,
@@ -104,7 +147,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new CSV data node configuration.
         """
-
     @staticmethod
     def configure_json_data_node(
         id: str,
@@ -113,7 +155,7 @@ class Config:
         decoder: json.JSONDecoder = ...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new JSON data node configuration.
         Parameters:
@@ -129,7 +171,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new JSON data node configuration.
         """
-
     @staticmethod
     def configure_parquet_data_node(
         id: str,
@@ -141,7 +182,7 @@ class Config:
         write_kwargs: Dict = ...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new Parquet data node configuration.
         Parameters:
@@ -164,7 +205,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new Parquet data node configuration.
         """
-
     @staticmethod
     def configure_sql_table_data_node(
         id: str,
@@ -180,7 +220,7 @@ class Config:
         exposed_type=...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new SQL table data node configuration.
         Parameters:
@@ -205,7 +245,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new SQL data node configuration.
         """
-
     @staticmethod
     def configure_sql_data_node(
         id: str,
@@ -222,7 +261,7 @@ class Config:
         exposed_type=...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new SQL data node configuration.
         Parameters:
@@ -248,7 +287,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new SQL data node configuration.
         """
-
     @staticmethod
     def configure_mongo_collection_data_node(
         id: str,
@@ -262,7 +300,7 @@ class Config:
         db_extra_args: Dict[str, Any] = ...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new Mongo collection data node configuration.
         Parameters:
@@ -285,14 +323,13 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new Mongo collection data node configuration.
         """
-
     @staticmethod
     def configure_in_memory_data_node(
         id: str,
         default_data: Optional[Any] = ...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new _in_memory_ data node configuration.
         Parameters:
@@ -307,14 +344,13 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new _in_memory_ data node configuration.
         """
-
     @staticmethod
     def configure_pickle_data_node(
         id: str,
         default_data: Optional[Any] = ...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new pickle data node configuration.
         Parameters:
@@ -329,7 +365,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new pickle data node configuration.
         """
-
     @staticmethod
     def configure_excel_data_node(
         id: str,
@@ -339,7 +374,7 @@ class Config:
         exposed_type=...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new Excel data node configuration.
         Parameters:
@@ -357,7 +392,6 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new CSV data node configuration.
         """
-
     @staticmethod
     def configure_generic_data_node(
         id: str,
@@ -367,7 +401,7 @@ class Config:
         write_fct_params: List = ...,
         scope: Scope = ...,
         cacheable: bool = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new generic data node configuration.
         Parameters:
@@ -388,13 +422,12 @@ class Config:
         Returns:
             `DataNodeConfig^`: The new Generic data node configuration.
         """
-    
     @classmethod
     def configure_job_executions(
         mode: str = ...,
         nb_of_workers: Union[int, str] = ...,
         max_nb_of_workers: Union[int, str] = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure job execution.
         Parameters:
@@ -410,13 +443,8 @@ class Config:
         Returns:
             `JobConfig^`: The job execution configuration.
         """
-    
     @classmethod
-    def configure_pipeline(
-        id: str,
-        task_configs: Union[TaskConfig, List[TaskConfig]],
-        **properties: Dict[str, Any]
-    ):
+    def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]):
         """Configure a new pipeline configuration.
         Parameters:
             id (str): The unique identifier of the new pipeline configuration.
@@ -428,12 +456,8 @@ class Config:
         Returns:
             `PipelineConfig^`: The new pipeline configuration.
         """
-    
     @classmethod
-    def configure_default_pipeline(
-        task_configs: Union[TaskConfig, List[TaskConfig]],
-        **properties: Dict[str, Any]
-    ):
+    def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]):
         """Configure the default values for pipeline configurations.
         This function creates the _default pipeline configuration_ object,
         where all pipeline configuration objects will find their default
@@ -447,14 +471,13 @@ class Config:
         Returns:
             `PipelineConfig^`: The default pipeline configuration.
         """
-    
     @classmethod
     def configure_scenario(
         id: str,
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = ...,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new scenario configuration.
         Parameters:
@@ -477,13 +500,12 @@ class Config:
         Returns:
             `ScenarioConfig^`: The new scenario configuration.
         """
-
     @classmethod
     def configure_default_scenario(
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = ...,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure the default values for scenario configurations.
         This function creates the _default scenario configuration_ object,
@@ -508,7 +530,6 @@ class Config:
         Returns:
             `ScenarioConfig^`: The default scenario configuration.
         """
-
     @classmethod
     def configure_scenario_from_tasks(
         id: str,
@@ -516,7 +537,7 @@ class Config:
         frequency: Optional[Frequency] = ...,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = ...,
         pipeline_id: Optional[str] = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new scenario configuration made of a single new pipeline configuration.
         A new pipeline configuration is created as well. If _pipeline_id_ is not provided,
@@ -544,14 +565,13 @@ class Config:
         Returns:
             `ScenarioConfig^`: The new scenario configuration.
         """
-    
     @classmethod
     def configure_task(
         id: str,
         function: Callable,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure a new task configuration.
         Parameters:
@@ -568,13 +588,12 @@ class Config:
         Returns:
             `TaskConfig^`: The new task configuration.
         """
-    
     @classmethod
     def configure_default_task(
         function: Callable,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,
-        **properties: Dict[str, Any]
+        **properties: Dict[str, Any],
     ):
         """Configure the default values for task configurations.
         This function creates the _default task configuration_ object,
@@ -593,4 +612,3 @@ class Config:
         Returns:
             `TaskConfig^`: The default task configuration.
         """
-    
