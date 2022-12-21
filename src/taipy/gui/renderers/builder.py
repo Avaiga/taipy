@@ -77,6 +77,8 @@ class _Chart_iprops(Enum):
     high = 25
     low = 26
     locations = 27
+    values = 28
+    labels = 29
 
 
 class _Builder:
@@ -104,11 +106,13 @@ class _Builder:
             _Chart_iprops.low,
         ),
         "bar": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.base),
-        "pie": (_Chart_iprops.x,),
+        "pie": (_Chart_iprops.values, _Chart_iprops.labels),
         "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
+        "funnelarea": (_Chart_iprops.values, )
     }
     __CHART_DEFAULT_AXIS: t.Iterable[_Chart_iprops] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
     __CHART_MARKER_TO_COLS: t.Iterable[str] = ("color", "size", "symbol", "opacity")
+    __CHART_NO_INDEX: t.Iterable[str] = ("pie", "histogram", "heatmap", "funnelarea")
 
     def __init__(
         self,
@@ -685,6 +689,7 @@ class _Builder:
                 "textAnchors": [tr[_Chart_iprops.text_anchor.value] for tr in traces],
                 "options": [tr[_Chart_iprops.options.value] for tr in traces],
                 "axisNames": [[e.name for e in ax] for ax in used_axis],
+                "addIndex": [tr[_Chart_iprops.type.value] not in _Builder.__CHART_NO_INDEX for tr in traces]
             }
 
             self.__set_json_attribute("config", ret_dict)

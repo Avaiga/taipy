@@ -59,8 +59,11 @@ export interface TaipyLabelProps {
     label?: string;
 }
 
-export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined =>
-    (arr && idx < arr.length && arr[idx]) || defVal;
+export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined => {
+    const val = (Array.isArray(arr) && idx < arr.length) ? arr[idx] : undefined;
+    return val ?? defVal;
+}
+
 
 /**
  * Extracts the backend name of a property.

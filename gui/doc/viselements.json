@@ -292,12 +292,12 @@
           {
             "name": "lon",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>longitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/)."
+            "doc": "Column name for the <i>longitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/#scattergeo-lon)."
           },
           {
             "name": "lat",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>latitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/)."
+            "doc": "Column name for the <i>latitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/#scattergeo-lat)."
           },
           {
             "name": "r",
@@ -312,27 +312,37 @@
           {
             "name": "high",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>high</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/)."
+            "doc": "Column name for the <i>high</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-high)."
           },
           {
             "name": "low",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>low</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/)."
+            "doc": "Column name for the <i>low</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-low)."
           },
           {
             "name": "open",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>open</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/)."
+            "doc": "Column name for the <i>open</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-open)."
           },
           {
             "name": "close",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>close</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/)."
+            "doc": "Column name for the <i>close</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-close)."
           },
           {
             "name": "locations",
             "type": "indexed(str)",
             "doc": "Column name for the <i>locations</i> value. Cf. [Ploty Choropleth Map](https://plotly.com/javascript/choropleth-maps/)."
+          },
+          {
+            "name": "values",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>values</i> value. Cf. [Ploty Pie](https://plotly.com/javascript/reference/pie/#pie-values) or [Ploty FunnelArea](https://plotly.com/javascript/reference/funnelarea/#funnelarea-values)."
+          },
+          {
+            "name": "labels",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>labels</i> value. Cf. [Ploty Pie](https://plotly.com/javascript/reference/pie/#pie-labels)."
           },
           {
             "name": "text",
