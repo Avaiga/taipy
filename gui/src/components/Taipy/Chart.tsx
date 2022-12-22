@@ -84,6 +84,7 @@ interface ChartConfig {
     textAnchors: string[];
     options: Record<string, unknown>[];
     axisNames: Array<string[]>;
+    addIndex: Array<boolean>;
 }
 
 const darkTemplate = {
@@ -985,8 +986,6 @@ const getDecimatorPayload = (
 
 const selectedPropRe = /selected(\d+)/;
 
-const ONE_COLUMN_CHART = ["pie"];
-const NO_INDEX_CHARTS = ["histogram", "heatmap"];
 const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
 
 const Chart = (props: ChartProp) => {
@@ -1074,6 +1073,7 @@ const Chart = (props: ChartProp) => {
             textAnchors: [],
             options: [],
             axisNames: [],
+            addIndex: [],
         } as ChartConfig;
     }, [props.config]);
 
@@ -1157,10 +1157,6 @@ const Chart = (props: ChartProp) => {
                     getArrayValue(config.names, idx) ||
                     (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
             } as Record<string, unknown>;
-            if (ONE_COLUMN_CHART.includes(config.types[idx])) {
-                ret.values = getValue(datum, trace, 0);
-                ret.labels = getValue(datum, config.labels, idx, true);
-            } else {
                 ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
                 MARKER_TO_COL.forEach(prop => {
                     const val = (ret.marker as Record<string, unknown>)[prop];
@@ -1173,7 +1169,7 @@ const Chart = (props: ChartProp) => {
                 });
                 const xs = getValue(datum, trace, 0) || [];
                 const ys = getValue(datum, trace, 1) || [];
-                const addIndex = !NO_INDEX_CHARTS.includes(config.types[idx]) && !ys.length;
+                const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
                 const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
                 const baseY = addIndex ? xs : ys;
                 const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : [] as string[];
@@ -1213,7 +1209,6 @@ const Chart = (props: ChartProp) => {
                 ret.orientation = getArrayValue(config.orientations, idx);
                 ret.line = getArrayValue(config.lines, idx);
                 ret.textposition = getArrayValue(config.textAnchors, idx);
-            }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
                 ret.selected = { marker: selectedMarker };
