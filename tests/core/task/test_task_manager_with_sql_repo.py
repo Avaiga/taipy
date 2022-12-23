@@ -96,16 +96,16 @@ def test_do_not_recreate_existing_task():
     _TaskManager._bulk_get_or_create([task_config])  # Do not create. It already exists for None pipeline
     assert len(_TaskManager._get_all()) == 1
     task_2 = _create_task_from_config(
-        task_config, "whatever_scenario"
+        task_config, None, "whatever_scenario"
     )  # Do not create. It already exists for None pipeline
     assert len(_TaskManager._get_all()) == 1
     assert task_1.id == task_2.id
-    task_3 = _create_task_from_config(task_config, "whatever_scenario", "pipeline_1")
+    task_3 = _create_task_from_config(task_config, None, "whatever_scenario", "pipeline_1")
     assert len(_TaskManager._get_all()) == 2
     assert task_1.id == task_2.id
     assert task_2.id != task_3.id
     task_4 = _create_task_from_config(
-        task_config, "other_sc", "pipeline_1"
+        task_config, None, "other_sc", "pipeline_1"
     )  # Do not create. It already exists for pipeline_1
     assert len(_TaskManager._get_all()) == 2
     assert task_1.id == task_2.id
@@ -123,25 +123,27 @@ def test_do_not_recreate_existing_task():
     assert len(_TaskManager._get_all()) == 3
     assert task_5.id == task_6.id
     task_7 = _create_task_from_config(
-        task_config_2, None, "A_pipeline"
+        task_config_2, None, None, "A_pipeline"
     )  # Do not create. It already exists for None scenario
     assert len(_TaskManager._get_all()) == 3
     assert task_5.id == task_6.id
     assert task_6.id == task_7.id
-    task_8 = _create_task_from_config(task_config_2, "scenario_1", "A_pipeline")  # Create even if pipeline is the same.
+    task_8 = _create_task_from_config(
+        task_config_2, None, "scenario_1", "A_pipeline"
+    )  # Create even if pipeline is the same.
     assert len(_TaskManager._get_all()) == 4
     assert task_5.id == task_6.id
     assert task_6.id == task_7.id
     assert task_7.id != task_8.id
     task_9 = _create_task_from_config(
-        task_config_2, "scenario_1", "bar"
+        task_config_2, None, "scenario_1", "bar"
     )  # Do not create. It already exists for scenario_1
     assert len(_TaskManager._get_all()) == 4
     assert task_5.id == task_6.id
     assert task_6.id == task_7.id
     assert task_7.id != task_8.id
     assert task_8.id == task_9.id
-    task_10 = _create_task_from_config(task_config_2, "scenario_2", "baz")
+    task_10 = _create_task_from_config(task_config_2, None, "scenario_2", "baz")
     assert len(_TaskManager._get_all()) == 5
     assert task_5.id == task_6.id
     assert task_6.id == task_7.id
@@ -149,6 +151,53 @@ def test_do_not_recreate_existing_task():
     assert task_8.id == task_9.id
     assert task_9.id != task_10.id
     assert task_7.id != task_10.id
+
+    input_config_scope_cycle = Config.configure_data_node("my_input_3", "in_memory", Scope.CYCLE)
+    output_config_scope_cycle = Config.configure_data_node("my_output_3", "in_memory", Scope.CYCLE)
+    task_config_3 = Config.configure_task("xyz", print, input_config_scope_cycle, output_config_scope_cycle)
+    # task_config_3 scope is Cycle
+
+    task_11 = _create_task_from_config(task_config_3)
+    assert len(_TaskManager._get_all()) == 6
+    task_12 = _create_task_from_config(task_config_3)  # Do not create. It already exists for None cycle
+    assert len(_TaskManager._get_all()) == 6
+    assert task_11.id == task_12.id
+    task_13 = _create_task_from_config(
+        task_config_3, None, None, "pipeline"
+    )  # Do not create. It already exists for None cycle
+    assert len(_TaskManager._get_all()) == 6
+    assert task_11.id == task_12.id
+    assert task_12.id == task_13.id
+    task_14 = _create_task_from_config(
+        task_config_3, None, "scenario", "pipeline"
+    )  # Do not create. It already exists for None cycle
+    assert len(_TaskManager._get_all()) == 6
+    assert task_11.id == task_12.id
+    assert task_12.id == task_13.id
+    assert task_13.id == task_14.id
+    task_15 = _create_task_from_config(
+        task_config_3, None, "scenario", "pipeline"
+    )  # Do not create. It already exists for None cycle
+    assert len(_TaskManager._get_all()) == 6
+    assert task_11.id == task_12.id
+    assert task_12.id == task_13.id
+    assert task_13.id == task_14.id
+    assert task_14.id == task_15.id
+    task_16 = _create_task_from_config(task_config_3, "cycle", None, None)
+    assert len(_TaskManager._get_all()) == 7
+    assert task_11.id == task_12.id
+    assert task_12.id == task_13.id
+    assert task_13.id == task_14.id
+    assert task_14.id == task_15.id
+    assert task_15.id != task_16.id
+    task_17 = _create_task_from_config(task_config_3, "cycle", None, None)
+    assert len(_TaskManager._get_all()) == 7
+    assert task_11.id == task_12.id
+    assert task_12.id == task_13.id
+    assert task_13.id == task_14.id
+    assert task_14.id == task_15.id
+    assert task_15.id != task_16.id
+    assert task_16.id == task_17.id
 
 
 def test_set_and_get_task():

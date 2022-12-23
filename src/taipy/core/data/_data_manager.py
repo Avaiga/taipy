@@ -12,12 +12,11 @@
 import os
 from typing import Dict, Iterable, Optional, Set, Union
 
-from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common.alias import DataNodeId, PipelineId, ScenarioId, TaskId
+from ..common.alias import CycleId, DataNodeId, PipelineId, ScenarioId, TaskId
 from ..config.data_node_config import DataNodeConfig
 from ..exceptions.exceptions import InvalidDataNodeType
 from ._data_repository_factory import _DataRepositoryFactory
@@ -35,6 +34,7 @@ class _DataManager(_Manager[DataNode]):
     def _bulk_get_or_create(
         cls,
         data_node_configs: Set[DataNodeConfig],
+        cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
         task_id: Optional[TaskId] = None,
@@ -42,7 +42,15 @@ class _DataManager(_Manager[DataNode]):
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
             scope = dn_config.scope
-            owner_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
+            owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
+            if scope == Scope.PIPELINE:
+                owner_id = pipeline_id
+            elif scope == Scope.SCENARIO:
+                owner_id = scenario_id
+            elif scope == Scope.CYCLE:
+                owner_id = cycle_id
+            else:
+                owner_id = None
             dn_configs_and_owner_id.append((dn_config, owner_id))
 
         data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore

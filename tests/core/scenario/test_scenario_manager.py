@@ -257,7 +257,7 @@ def test_assign_scenario_as_parent_of_pipeline():
     scenario_config_1 = Config.configure_scenario("scenario_1", [pipeline_config_1])
     scenario_config_2 = Config.configure_scenario("scenario_2", [pipeline_config_1, pipeline_config_2])
 
-    pipeline = _PipelineManager._get_or_create(pipeline_config_1, "scenario_id")
+    pipeline = _PipelineManager._get_or_create(pipeline_config_1, None, "scenario_id")
 
     assert pipeline.parent_ids == {"scenario_id"}
     assert all([task.parent_ids == {pipeline.id} for task in pipeline.tasks.values()])

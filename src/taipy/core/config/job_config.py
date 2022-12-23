@@ -11,8 +11,8 @@
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
-from taipy.config._config import _Config
 from taipy.config import Config
+from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.unique_section import UniqueSection
 

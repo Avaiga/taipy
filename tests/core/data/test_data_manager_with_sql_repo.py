@@ -169,6 +169,9 @@ class TestDataManager:
         global_dn_config = Config.configure_data_node(
             id="test_data_node", storage_type="in_memory", scope=Scope.GLOBAL, data="In memory Data Node"
         )
+        cycle_dn_config = Config.configure_data_node(
+            id="test_data_node1", storage_type="in_memory", scope=Scope.CYCLE, data="In memory scenario"
+        )
         scenario_dn_config = Config.configure_data_node(
             id="test_data_node2", storage_type="in_memory", scope=Scope.SCENARIO, data="In memory scenario"
         )
@@ -185,31 +188,31 @@ class TestDataManager:
         assert len(_DataManager._get_all()) == 1
         assert global_dn.id == global_dn_bis.id
 
-        scenario_dn = _get_or_create_dn(scenario_dn_config, "scenario_id")
+        scenario_dn = _get_or_create_dn(scenario_dn_config, None, "scenario_id")
         assert len(_DataManager._get_all()) == 2
-        scenario_dn_bis = _get_or_create_dn(scenario_dn_config, "scenario_id")
+        scenario_dn_bis = _get_or_create_dn(scenario_dn_config, None, "scenario_id")
         assert len(_DataManager._get_all()) == 2
         assert scenario_dn.id == scenario_dn_bis.id
-        scenario_dn_ter = _get_or_create_dn(scenario_dn_config, "scenario_id", "whatever_pipeline_id")
+        scenario_dn_ter = _get_or_create_dn(scenario_dn_config, None, "scenario_id", "whatever_pipeline_id")
         assert len(_DataManager._get_all()) == 2
         assert scenario_dn.id == scenario_dn_bis.id
         assert scenario_dn_bis.id == scenario_dn_ter.id
-        scenario_dn_quater = _get_or_create_dn(scenario_dn_config, "scenario_id_2")
+        scenario_dn_quater = _get_or_create_dn(scenario_dn_config, None, "scenario_id_2")
         assert len(_DataManager._get_all()) == 3
         assert scenario_dn.id == scenario_dn_bis.id
         assert scenario_dn_bis.id == scenario_dn_ter.id
         assert scenario_dn_ter.id != scenario_dn_quater.id
 
-        pipeline_dn = _get_or_create_dn(pipeline_dn_config, "scenario_id", "pipeline_1")
+        pipeline_dn = _get_or_create_dn(pipeline_dn_config, None, "scenario_id", "pipeline_1")
         assert len(_DataManager._get_all()) == 4
-        pipeline_dn_bis = _get_or_create_dn(pipeline_dn_config, "scenario_id", "pipeline_1")
+        pipeline_dn_bis = _get_or_create_dn(pipeline_dn_config, None, "scenario_id", "pipeline_1")
         assert len(_DataManager._get_all()) == 4
         assert pipeline_dn.id == pipeline_dn_bis.id
-        pipeline_dn_ter = _get_or_create_dn(pipeline_dn_config, "scenario_id", "pipeline_2")
+        pipeline_dn_ter = _get_or_create_dn(pipeline_dn_config, None, "scenario_id", "pipeline_2")
         assert len(_DataManager._get_all()) == 5
         assert pipeline_dn.id == pipeline_dn_bis.id
         assert pipeline_dn.id != pipeline_dn_ter.id
-        pipeline_dn_quater = _get_or_create_dn(pipeline_dn_config, "other_scenario_id", "pipeline_2")
+        pipeline_dn_quater = _get_or_create_dn(pipeline_dn_config, None, "other_scenario_id", "pipeline_2")
         assert len(_DataManager._get_all()) == 5
         assert pipeline_dn.id == pipeline_dn_bis.id
         assert pipeline_dn_bis.id != pipeline_dn_ter.id
@@ -222,3 +225,27 @@ class TestDataManager:
         assert pipeline_dn_bis.id != pipeline_dn_ter.id
         assert pipeline_dn_bis.id != pipeline_dn_quinquies.id
         assert pipeline_dn_ter.id != pipeline_dn_quinquies.id
+
+        assert len(_DataManager._get_all()) == 6
+        cycle_dn = _get_or_create_dn(cycle_dn_config, "cycle_id", None, None)
+        assert len(_DataManager._get_all()) == 7
+        cycle_dn_1 = _get_or_create_dn(cycle_dn_config, "cycle_id", None, None)
+        assert len(_DataManager._get_all()) == 7
+        assert cycle_dn.id == cycle_dn_1.id
+        cycle_dn_2 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id", None)
+        assert len(_DataManager._get_all()) == 7
+        assert cycle_dn.id == cycle_dn_2.id
+        cycle_dn_3 = _get_or_create_dn(cycle_dn_config, "cycle_id", None, "pipeline_id")
+        assert len(_DataManager._get_all()) == 7
+        assert cycle_dn.id == cycle_dn_3.id
+        cycle_dn_4 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id", "pipeline_id")
+        assert len(_DataManager._get_all()) == 7
+        assert cycle_dn.id == cycle_dn_4.id
+        cycle_dn_5 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id_2", "pipeline_id")
+        assert len(_DataManager._get_all()) == 7
+        assert cycle_dn.id == cycle_dn_5.id
+
+        assert cycle_dn_1.id == cycle_dn_2.id
+        assert cycle_dn_2.id == cycle_dn_3.id
+        assert cycle_dn_3.id == cycle_dn_4.id
+        assert cycle_dn_4.id == cycle_dn_5.id

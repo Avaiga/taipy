@@ -95,15 +95,17 @@ class _ScenarioManager(_Manager[Scenario]):
         name: str = None,
     ) -> Scenario:
         scenario_id = Scenario._new_id(str(config.id))  # type: ignore
-        pipelines = [
-            _PipelineManagerFactory._build_manager()._get_or_create(p_config, scenario_id)
-            for p_config in config.pipeline_configs
-        ]
         cycle = (
             _CycleManagerFactory._build_manager()._get_or_create(config.frequency, creation_date)
             if config.frequency
             else None
         )
+
+        pipelines = [
+            _PipelineManagerFactory._build_manager()._get_or_create(p_config, cycle.id if cycle else None, scenario_id)
+            for p_config in config.pipeline_configs
+        ]
+
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
         if name:
