@@ -112,16 +112,9 @@ baz = "ENV[QUX]"
             baz="ENV[QUX]",
         )
 
-        Config.export(tf.filename)
+        Config.backup(tf.filename)
         actual_config = tf.read().strip()
         assert actual_config == expected_toml_config
-
-        # Config.load(tf.filename)
-        # tf2 = NamedTemporaryFile()
-        # Config.export(tf2.filename)
-
-        # actual_config_2 = tf2.read().strip()
-        # assert actual_config_2 == expected_toml_config
 
 
 def test_read_toml_configuration_file():
@@ -164,7 +157,7 @@ baz = "ENV[QUX]"
     with mock.patch.dict(
         os.environ, {"FOO": "in_memory", "QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}
     ):
-        Config.load(tf.filename)
+        Config.override(tf.filename)
 
         assert Config.global_config.repository_properties is not None
         assert Config.global_config.repository_properties.get("db_location") == "foo.db"
@@ -205,7 +198,7 @@ baz = "ENV[QUX]"
         assert Config.sections[SectionForTest.name]["my_id"].baz == "qux"
 
         tf2 = NamedTemporaryFile()
-        Config.export(tf2.filename)
+        Config.backup(tf2.filename)
         actual_config_2 = tf2.read().strip()
         assert actual_config_2 == toml_config
 
@@ -220,7 +213,7 @@ repository_type = "filesystem"
     """.strip()
 
     tf = NamedTemporaryFile(toml_config)
-    Config.load(tf.filename)
+    Config.override(tf.filename)
 
     # Without serializing repository_properties, it should return an empty dict
     assert Config.global_config.repository_properties == {}
@@ -274,13 +267,13 @@ prop_fct_list = [ "builtins.print:function", "builtins.pow:function",]
         prop_fct_list=[print, pow],
     )
 
-    Config.export(tf.filename)
+    Config.backup(tf.filename)
     actual_exported_toml = tf.read().strip()
     assert actual_exported_toml == expected_toml_config
 
-    Config.load(tf.filename)
+    Config.override(tf.filename)
     tf2 = NamedTemporaryFile()
-    Config.export(tf2.filename)
+    Config.backup(tf2.filename)
 
     actual_exported_toml_2 = tf2.read().strip()
     assert actual_exported_toml_2 == expected_toml_config
@@ -348,7 +341,7 @@ def test_write_json_configuration_file():
         prop_scope="SCENARIO",
         baz="ENV[QUX]",
     )
-    Config.export(tf.filename)
+    Config.backup(tf.filename)
     actual_config = tf.read()
     assert actual_config == expected_json_config
 
@@ -395,7 +388,7 @@ def test_read_json_configuration_file():
     Config._serializer = _JsonSerializer()
     tf = NamedTemporaryFile(json_config)
 
-    Config.load(tf.filename)
+    Config.override(tf.filename)
 
     assert Config.unique_sections is not None
     assert Config.unique_sections[UniqueSectionForTest.name] is not None
@@ -423,7 +416,7 @@ def test_read_json_configuration_file():
     assert Config.sections[SectionForTest.name]["my_id"].prop_list == ["unique_section_name"]
 
     tf2 = NamedTemporaryFile()
-    Config.export(tf2.filename)
+    Config.backup(tf2.filename)
     actual_config_2 = tf2.read().strip()
     assert actual_config_2 == json_config
 
@@ -491,13 +484,13 @@ def test_read_write_json_configuration_file_with_function_and_class():
         prop_fct_list=[print, pow],
     )
 
-    Config.export(tf.filename)
+    Config.backup(tf.filename)
     actual_exported_json = tf.read().strip()
     assert actual_exported_json == expected_json_config
 
-    Config.load(tf.filename)
+    Config.override(tf.filename)
     tf2 = NamedTemporaryFile()
-    Config.export(tf2.filename)
+    Config.backup(tf2.filename)
 
     actual_exported_json_2 = tf2.read().strip()
     assert actual_exported_json_2 == expected_json_config

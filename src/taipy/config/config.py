@@ -58,13 +58,13 @@ class Config:
     @classmethod
     @_ConfigBlocker._check()
     def load(cls, filename):
-        """Load a configuration file.
+        """Load a configuration file from Taipy Studio and replaces the current python config.
 
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
-        cls._file_config = cls._serializer._read(filename)
+        cls._python_config = cls._serializer._read(filename)
         cls.__compile_configs()
         cls.__logger.info(f"Configuration '{filename}' successfully loaded.")
 
@@ -74,7 +74,22 @@ class Config:
 
         The export is done in a toml file.
 
-        The exported configuration is a compilation from the three possible methods to configure
+        The exported configuration is taken from the python code configuration.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the file to export.
+        Note:
+            If _filename_ already exists, it is overwritten.
+        """
+        cls._serializer._write(cls._python_config, filename)
+
+    @classmethod
+    def backup(cls, filename):
+        """Backup a configuration.
+
+        The backup is done in a toml file.
+
+        The backed up configuration is a compilation from the three possible methods to configure
         the application: the python code configuration, the file configuration and the environment
         configuration.
 
@@ -84,6 +99,20 @@ class Config:
             If _filename_ already exists, it is overwritten.
         """
         cls._serializer._write(cls._applied_config, filename)
+
+    @classmethod
+    @_ConfigBlocker._check()
+    def override(cls, filename):
+        """Load a configuration from a file and overrides the current config.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the toml configuration file to load.
+        """
+        cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
+        cls._file_config = cls._serializer._read(filename)
+        cls.__logger.info("Overriding configuration.'")
+        cls.__compile_configs()
+        cls.__logger.info(f"Configuration '{filename}' successfully loaded.")
 
     @classmethod
     def block_update(cls):
@@ -182,7 +211,7 @@ class Config:
         cls.__compile_configs()
 
     @classmethod
-    def _load_environment_file_config(cls):
+    def _override_env_file(cls):
         if config_filename := os.environ.get(cls._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
             cls.__logger.info(f"Loading configuration provided by environment variable. Filename: '{config_filename}'")
             cls._env_file_config = cls._serializer._read(config_filename)
@@ -190,7 +219,7 @@ class Config:
 
     @classmethod
     def __compile_configs(cls):
-        Config._load_environment_file_config()
+        Config._override_env_file()
         cls._applied_config = _Config._default_config()
         if cls._default_config:
             cls._applied_config._update(cls._default_config)
@@ -221,4 +250,4 @@ class Config:
         return cls.__json_serializer._deserialize(config_as_str)
 
 
-Config._load_environment_file_config()
+Config._override_env_file()
