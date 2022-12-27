@@ -125,10 +125,6 @@ class Config:
         _ConfigBlocker._unblock()
 
     @classmethod
-    def _export_code_config(cls, filename):
-        cls._serializer._write(cls._python_config, filename)
-
-    @classmethod
     @_ConfigBlocker._check()
     def configure_global_app(
         cls,
