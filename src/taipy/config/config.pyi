@@ -25,27 +25,45 @@ class Config:
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
         """Return all unique sections."""
+
     @_Classproperty
     def sections(cls) -> Dict[str, Dict[str, Section]]:
         """Return all non unique sections."""
+
     @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
         """Return configuration values related to the global application as a `GlobalAppConfig^`."""
+
     @classmethod
     @_ConfigBlocker._check()
     def load(cls, filename):
-        """Load a configuration file.
+        """Load a configuration file from Taipy Studio and replaces the current python config.
 
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
+
     @classmethod
     def export(cls, filename):
         """Export a configuration.
 
         The export is done in a toml file.
 
-        The exported configuration is a compilation from the three possible methods to configure
+        The exported configuration is taken from the python code configuration.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the file to export.
+        Note:
+            If _filename_ already exists, it is overwritten.
+        """
+
+    @classmethod
+    def backup(cls, filename):
+        """Backup a configuration.
+
+        The backup is done in a toml file.
+
+        The backed up configuration is a compilation from the three possible methods to configure
         the application: the python code configuration, the file configuration and the environment
         configuration.
 
@@ -54,12 +72,24 @@ class Config:
         Note:
             If _filename_ already exists, it is overwritten.
         """
+
+    @classmethod
+    @_ConfigBlocker._check()
+    def override(cls, filename):
+        """Load a configuration from a file and overrides the current config.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the toml configuration file to load.
+        """
+
     @classmethod
     def block_update(cls):
         """Block update on the configuration signgleton."""
+
     @classmethod
     def unblock_update(cls):
         """Unblock update on the configuration signgleton."""
+
     @classmethod
     def configure_global_app(
         cls,
