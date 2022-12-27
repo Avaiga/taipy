@@ -916,10 +916,14 @@ class Gui:
             args = args[:arg_count]
         return user_function(*args)
 
-    def _call_user_callback(self, state_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any]) -> t.Any:
+    def _call_user_callback(
+        self, state_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
+    ) -> t.Any:
         try:
             with self.get_flask_app().app_context():
                 self.__set_client_id_in_context(state_id)
+                if module_context is not None:
+                    self._set_locals_context(module_context)
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:
             if not self._call_on_exception(user_callback.__name__, e):

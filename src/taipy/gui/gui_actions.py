@@ -145,6 +145,20 @@ def get_state_id(state: State) -> t.Optional[str]:
     return None
 
 
+def get_module_context(state: State) -> t.Optional[str]:
+    """Get the name of the module currently in used when using page scopes
+
+    Arguments:
+        state (State^): The current user state as received in any callback.
+
+    Returns:
+        The name of the current module
+    """
+    if state and isinstance(state._gui, Gui):
+        return state._gui._get_locals_context()
+    return None
+
+
 def get_context_id(state: State) -> t.Any:
     warnings.warn("'get_context_id()' was deprecated in Taipy GUI 2.0. Use 'get_state_id()' instead.")
     return get_state_id(state)
@@ -174,7 +188,13 @@ def get_module_name_from_state(state: State) -> t.Optional[str]:
     return None
 
 
-def invoke_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
+def invoke_callback(
+    gui: Gui,
+    state_id: str,
+    callback: t.Callable,
+    args: t.Union[t.Tuple, t.List],
+    module_context: t.Optional[str] = None,
+) -> t.Any:
     """Invoke a user callback in a given state.
 
     See the [User Manual section on Long Running Callbacks in a Thread](../../gui/callbacks/#long-running-callbacks-in-a-thread)
@@ -186,9 +206,10 @@ def invoke_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union
         callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
             The first parameter of this function **must** be a `State^`.
         args (Union[Tuple, List]): The remaining arguments, as a List or a Tuple.
+        module_context (Optional[str]): the name of the module that will be used.
     """
     if isinstance(gui, Gui):
-        return gui._call_user_callback(state_id, callback, list(args))
+        return gui._call_user_callback(state_id, callback, list(args), module_context)
     warnings.warn("'invoke_callback()' must be called with a valid Gui instance")
 
 
@@ -249,7 +270,8 @@ def invoke_long_callback(
         return
 
     state_id = get_state_id(state)
-    if not isinstance(state_id, str):
+    module_context = get_module_context(state)
+    if not isinstance(state_id, str) or not isinstance(module_context, str):
         return
 
     this_gui = state._gui
@@ -259,10 +281,19 @@ def invoke_long_callback(
             warnings.warn(f"invoke_long_callback: Exception raised in function {function_name}.\n{e}")
 
     def callback_on_status(
-        status: t.Union[int, bool], e: t.Optional[Exception] = None, function_name: t.Optional[str] = None, function_result: t.Optional[t.Any] = None
+        status: t.Union[int, bool],
+        e: t.Optional[Exception] = None,
+        function_name: t.Optional[str] = None,
+        function_result: t.Optional[t.Any] = None,
     ):
         if callable(user_status_function):
-            invoke_callback(this_gui, str(state_id), user_status_function, [status] + list(user_status_function_args) + [function_result])
+            invoke_callback(
+                this_gui,
+                str(state_id),
+                user_status_function,
+                [status] + list(user_status_function_args) + [function_result],
+                str(module_context),
+            )
         if e:
             invoke_callback(
                 this_gui,
@@ -272,12 +303,13 @@ def invoke_long_callback(
                     str(function_name),
                     e,
                 ),
+                str(module_context),
             )
 
     def user_function_in_thread(*uf_args):
         try:
             res = user_function(*uf_args)
-            callback_on_status(True, function_result = res)
+            callback_on_status(True, function_result=res)
         except Exception as e:
             callback_on_status(False, e, user_function.__name__)
 
