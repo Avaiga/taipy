@@ -18,7 +18,7 @@ from taipy.config.common.scope import Scope
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity_ids import _EntityIds
-from ..common.alias import PipelineId, ScenarioId
+from ..common.alias import CycleId, PipelineId, ScenarioId
 from ..config.pipeline_config import PipelineConfig
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
@@ -75,14 +75,27 @@ class _PipelineManager(_Manager[Pipeline]):
         cls._set(pipeline)
 
     @classmethod
-    def _get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
+    def _get_or_create(
+        cls,
+        pipeline_config: PipelineConfig,
+        cycle_id: Optional[CycleId] = None,
+        scenario_id: Optional[ScenarioId] = None,
+    ) -> Pipeline:
         pipeline_id = Pipeline._new_id(str(pipeline_config.id))  # type: ignore
 
         task_manager = _TaskManagerFactory._build_manager()
-        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, scenario_id, pipeline_id)
+        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id, pipeline_id)
 
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
-        owner_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
+        owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
+        if scope == Scope.PIPELINE:
+            owner_id = pipeline_id
+        elif scope == Scope.SCENARIO:
+            owner_id = scenario_id
+        elif scope == Scope.CYCLE:
+            owner_id = cycle_id
+        else:
+            owner_id = None
 
         if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(str(pipeline_config.id), owner_id):
             return pipelines_from_owner

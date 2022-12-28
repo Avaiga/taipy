@@ -228,9 +228,9 @@ def test_hard_delete_shared_entities():
     scenario_3.submit()
 
     assert len(_ScenarioManager._get_all()) == 3
-    assert len(_PipelineManager._get_all()) == 5
-    assert len(_TaskManager._get_all()) == 7
-    assert len(_DataManager._get_all()) == 8
+    assert len(_PipelineManager._get_all()) == 6
+    assert len(_TaskManager._get_all()) == 8
+    assert len(_DataManager._get_all()) == 9
     assert len(_JobManager._get_all()) == 11
     assert len(_CycleManager._get_all()) == 1
     _CycleManager._hard_delete(scenario_1.cycle.id)
@@ -238,5 +238,5 @@ def test_hard_delete_shared_entities():
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 3
+    assert len(_JobManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2

@@ -207,13 +207,15 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
     assert len(_PipelineManager._get_all()) == 1
     assert pipeline_1.id == pipeline_2.id
-    pipeline_3 = _PipelineManager._get_or_create(pipeline_config, "a_scenario")  # Create even if the config is the same
+    pipeline_3 = _PipelineManager._get_or_create(
+        pipeline_config, None, "a_scenario"
+    )  # Create even if the config is the same
     assert len(_PipelineManager._get_all()) == 2
     assert pipeline_1.id == pipeline_2.id
     assert pipeline_3.id != pipeline_1.id
     assert pipeline_3.id != pipeline_2.id
     pipeline_4 = _PipelineManager._get_or_create(
-        pipeline_config, "a_scenario"
+        pipeline_config, None, "a_scenario"
     )  # Do not create because existed pipeline
     assert len(_PipelineManager._get_all()) == 2
     assert pipeline_3.id == pipeline_4.id
@@ -231,11 +233,11 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_6 = _PipelineManager._get_or_create(pipeline_config_2)
     assert len(_PipelineManager._get_all()) == 3
     assert pipeline_5.id == pipeline_6.id
-    pipeline_7 = _PipelineManager._get_or_create(pipeline_config_2, "another_scenario")
+    pipeline_7 = _PipelineManager._get_or_create(pipeline_config_2, None, "another_scenario")
     assert len(_PipelineManager._get_all()) == 4
     assert pipeline_7.id != pipeline_6.id
     assert pipeline_7.id != pipeline_5.id
-    pipeline_8 = _PipelineManager._get_or_create(pipeline_config_2, "another_scenario")
+    pipeline_8 = _PipelineManager._get_or_create(pipeline_config_2, None, "another_scenario")
     assert len(_PipelineManager._get_all()) == 4
     assert pipeline_7.id == pipeline_8.id
 
@@ -253,7 +255,7 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert len(_PipelineManager._get_all()) == 5
     assert pipeline_9.id == pipeline_10.id
     pipeline_11 = _PipelineManager._get_or_create(
-        pipeline_config_3, "another_new_scenario"
+        pipeline_config_3, None, "another_new_scenario"
     )  # Do not create because scope is global
     assert len(_PipelineManager._get_all()) == 5
     assert pipeline_11.id == pipeline_10.id
@@ -272,12 +274,12 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_13 = _PipelineManager._get_or_create(pipeline_config_4)  # Create a new pipeline because new pipeline ID
     assert len(_PipelineManager._get_all()) == 7
     assert pipeline_12.id != pipeline_13.id
-    pipeline_14 = _PipelineManager._get_or_create(pipeline_config_4, "another_new_scenario_2")
+    pipeline_14 = _PipelineManager._get_or_create(pipeline_config_4, None, "another_new_scenario_2")
     assert len(_PipelineManager._get_all()) == 8
     assert pipeline_14.id != pipeline_12.id
     assert pipeline_14.id != pipeline_13.id
     pipeline_15 = _PipelineManager._get_or_create(
-        pipeline_config_4, "another_new_scenario_2"
+        pipeline_config_4, None, "another_new_scenario_2"
     )  # Don't create because scope is pipeline
     assert len(_PipelineManager._get_all()) == 9
     assert pipeline_15.id != pipeline_14.id
@@ -298,7 +300,7 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert len(_PipelineManager._get_all()) == 11
     assert pipeline_16.id != pipeline_17.id
     pipeline_18 = _PipelineManager._get_or_create(
-        pipeline_config_5, "random_scenario"
+        pipeline_config_5, None, "random_scenario"
     )  # Create because scope is pipeline
     assert len(_PipelineManager._get_all()) == 12
     assert pipeline_18.id != pipeline_17.id
@@ -318,7 +320,110 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert len(_PipelineManager._get_all()) == 14
     assert pipeline_19.id != pipeline_20.id
 
-    _PipelineManager._delete_all()
+    dn_input_config_scope_pipeline_7 = Config.configure_data_node("my_input_7", "in_memory", scope=Scope.CYCLE)
+    dn_output_config_scope_global_7 = Config.configure_data_node("my_output_7", "in_memory", scope=Scope.GLOBAL)
+    task_config_7 = Config.configure_task(
+        "task_config_7", print, dn_input_config_scope_pipeline_7, dn_output_config_scope_global_7
+    )
+    pipeline_config_7 = Config.configure_pipeline("pipeline_config_7", [task_config_7])
+
+    # Scope is global and cycle
+    pipeline_21 = _PipelineManager._get_or_create(pipeline_config_7)
+    assert len(_PipelineManager._get_all()) == 15
+    pipeline_22 = _PipelineManager._get_or_create(pipeline_config_7)
+    assert len(_PipelineManager._get_all()) == 15
+    assert pipeline_21.id == pipeline_22.id
+    pipeline_23 = _PipelineManager._get_or_create(pipeline_config_7, "cycle")
+    assert len(_PipelineManager._get_all()) == 16
+    assert pipeline_21.id == pipeline_22.id
+    assert pipeline_22.id != pipeline_23.id
+
+    pipeline_24 = _PipelineManager._get_or_create(pipeline_config_7, None, "scenario")
+    assert len(_PipelineManager._get_all()) == 16
+    assert pipeline_21.id == pipeline_22.id
+    assert pipeline_22.id != pipeline_23.id
+    assert pipeline_22.id == pipeline_24.id
+
+    pipeline_25 = _PipelineManager._get_or_create(pipeline_config_7, "cycle", "scenario")
+    assert len(_PipelineManager._get_all()) == 16
+    assert pipeline_21.id == pipeline_22.id
+    assert pipeline_22.id != pipeline_23.id
+    assert pipeline_22.id == pipeline_24.id
+    assert pipeline_22.id != pipeline_25.id
+    assert pipeline_23.id == pipeline_25.id
+
+    dn_input_config_scope_pipeline_8 = Config.configure_data_node("my_input_8", "in_memory", scope=Scope.CYCLE)
+    dn_output_config_scope_scenario_8 = Config.configure_data_node("my_output_8", "in_memory", scope=Scope.SCENARIO)
+    task_config_8 = Config.configure_task(
+        "task_config_8", print, dn_input_config_scope_pipeline_8, dn_output_config_scope_scenario_8
+    )
+    pipeline_config_8 = Config.configure_pipeline("pipeline_config_8", [task_config_8])
+
+    pipeline_26 = _PipelineManager._get_or_create(pipeline_config_8)
+    assert len(_PipelineManager._get_all()) == 17
+    pipeline_27 = _PipelineManager._get_or_create(pipeline_config_8)
+    assert len(_PipelineManager._get_all()) == 17
+    assert pipeline_26.id == pipeline_27.id
+    pipeline_28 = _PipelineManager._get_or_create(pipeline_config_8, None, "random_scenario")
+    assert len(_PipelineManager._get_all()) == 18
+    assert pipeline_28.id != pipeline_27.id
+    assert pipeline_28.id != pipeline_26.id
+    pipeline_29 = _PipelineManager._get_or_create(pipeline_config_8, "a_cycle", "random_scenario")
+    assert len(_PipelineManager._get_all()) == 18
+    assert pipeline_29.id != pipeline_27.id
+    assert pipeline_29.id != pipeline_26.id
+    assert pipeline_29.id == pipeline_28.id
+
+    dn_input_config_scope_pipeline_9 = Config.configure_data_node("my_input_9", "in_memory", scope=Scope.CYCLE)
+    dn_output_config_scope_pipeline_9 = Config.configure_data_node("my_output_9", "in_memory", scope=Scope.CYCLE)
+    task_config_9 = Config.configure_task(
+        "task_config_9", print, dn_input_config_scope_pipeline_9, dn_output_config_scope_pipeline_9
+    )
+    pipeline_config_9 = Config.configure_pipeline("pipeline_config_9", [task_config_9])
+
+    pipeline_30 = _PipelineManager._get_or_create(pipeline_config_9)
+    assert len(_PipelineManager._get_all()) == 19
+    pipeline_31 = _PipelineManager._get_or_create(pipeline_config_9)
+    assert len(_PipelineManager._get_all()) == 19
+    assert pipeline_30.id == pipeline_31.id
+    pipeline_32 = _PipelineManager._get_or_create(pipeline_config_9, "a_cycle", None)
+    assert len(_PipelineManager._get_all()) == 20
+    assert pipeline_30.id == pipeline_31.id
+    assert pipeline_30.id != pipeline_32.id
+    assert pipeline_31.id != pipeline_32.id
+    pipeline_33 = _PipelineManager._get_or_create(pipeline_config_9, None, "a_scenario")
+    assert len(_PipelineManager._get_all()) == 20
+    assert pipeline_30.id == pipeline_31.id
+    assert pipeline_30.id != pipeline_32.id
+    assert pipeline_31.id != pipeline_32.id
+    assert pipeline_33.id != pipeline_32.id
+    assert pipeline_30.id == pipeline_33.id
+    pipeline_34 = _PipelineManager._get_or_create(pipeline_config_9, "a_cycle", "a_scenario")
+    assert len(_PipelineManager._get_all()) == 20
+    assert pipeline_30.id == pipeline_31.id
+    assert pipeline_30.id != pipeline_32.id
+    assert pipeline_31.id != pipeline_32.id
+    assert pipeline_33.id != pipeline_32.id
+    assert pipeline_32.id == pipeline_34.id
+    assert pipeline_33.id != pipeline_34.id
+
+    dn_input_config_scope_pipeline_10 = Config.configure_data_node("my_input_10", "in_memory", scope=Scope.PIPELINE)
+    dn_output_config_scope_scenario_10 = Config.configure_data_node("my_output_10", "in_memory", scope=Scope.CYCLE)
+    task_config_10 = Config.configure_task(
+        "task_config_10", print, dn_input_config_scope_pipeline_10, dn_output_config_scope_scenario_10
+    )
+    pipeline_config_10 = Config.configure_pipeline("pipeline_config_10", [task_config_10])
+
+    pipeline_35 = _PipelineManager._get_or_create(pipeline_config_10)
+    assert len(_PipelineManager._get_all()) == 21
+    pipeline_36 = _PipelineManager._get_or_create(pipeline_config_10)
+    assert len(_PipelineManager._get_all()) == 22
+    assert pipeline_35.id != pipeline_36.id
+    pipeline_37 = _PipelineManager._get_or_create(pipeline_config_10, "random_cycle")
+    assert len(_PipelineManager._get_all()) == 23
+    assert pipeline_35.id != pipeline_36.id
+    assert pipeline_36.id != pipeline_37.id
+    assert pipeline_35.id != pipeline_37.id
 
 
 def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
