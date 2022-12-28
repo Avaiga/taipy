@@ -37,8 +37,7 @@ class Config:
     @classmethod
     @_ConfigBlocker._check()
     def load(cls, filename):
-        """Load a configuration file from Taipy Studio and replaces the current python config.
-
+        """Load a configuration file to replace the current python config and trigger the Config compilation.
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
