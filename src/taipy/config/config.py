@@ -59,6 +59,7 @@ class Config:
     @_ConfigBlocker._check()
     def load(cls, filename):
         """Load a configuration file to replace the current python config and trigger the Config compilation.
+
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
         """
@@ -98,6 +99,18 @@ class Config:
             If _filename_ already exists, it is overwritten.
         """
         cls._serializer._write(cls._applied_config, filename)
+
+    @classmethod
+    @_ConfigBlocker._check()
+    def restore(cls, filename):
+        """Restore a configuration file and replace the current applied configuration.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the toml configuration file to load.
+        """
+        cls.__logger.info(f"Restoring configuration. Filename: '{filename}'")
+        cls._applied_config = cls._serializer._read(filename)
+        cls.__logger.info(f"Configuration '{filename}' successfully restored.")
 
     @classmethod
     @_ConfigBlocker._check()

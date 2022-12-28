@@ -74,6 +74,15 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
+    def restore(cls, filename):
+        """Restore a configuration file and replace the current applied configuration.
+
+        Parameters:
+            filename (Union[str, Path]): The path of the toml configuration file to load.
+        """
+
+    @classmethod
+    @_ConfigBlocker._check()
     def override(cls, filename):
         """Load a configuration from a file and overrides the current config.
 
