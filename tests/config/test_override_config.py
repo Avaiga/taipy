@@ -117,7 +117,7 @@ def test_code_configuration_does_not_override_file_configuration():
 foo = 2
     """
     )
-    Config.load(config_from_filename.filename)
+    Config.override(config_from_filename.filename)
 
     Config.configure_global_app(foo=21)
 
@@ -131,7 +131,7 @@ def test_code_configuration_does_not_override_file_configuration_including_env_v
 foo = 2
     """
     )
-    Config.load(config_from_filename.filename)
+    Config.override(config_from_filename.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "21"}):
         Config.configure_global_app(foo="ENV[FOO]")
