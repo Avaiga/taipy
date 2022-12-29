@@ -95,7 +95,7 @@ class _Builder:
     __CHART_AXIS: t.Dict[str, t.Iterable[_Chart_iprops]] = {
         "scattermapbox": (_Chart_iprops.lon, _Chart_iprops.lat),
         "scattergeo": (_Chart_iprops.lon, _Chart_iprops.lat),
-        "densitymapbox": (_Chart_iprops.lon, _Chart_iprops.lat),
+        "densitymapbox": (_Chart_iprops.lon, _Chart_iprops.lat, _Chart_iprops.z),
         "scatterpolar": (_Chart_iprops.r, _Chart_iprops.theta),
         "scatterpolargl": (_Chart_iprops.r, _Chart_iprops.theta),
         "candlestick": (
