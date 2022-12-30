@@ -45,7 +45,7 @@ class _TaipyBase(ABC):
 
     @staticmethod
     def get_hash():
-        return NotImplemented
+        return NotImplementedError
 
 
 class _TaipyData(_TaipyBase):

@@ -205,7 +205,7 @@ class ElementLibrary(ABC):
         - What is this name used for?
         - What if two libraries with the same same get added to the Gui?
         """
-        return NotImplemented
+        return NotImplementedError  # type: ignore
 
     def get_js_module_name(self) -> str:
         """
