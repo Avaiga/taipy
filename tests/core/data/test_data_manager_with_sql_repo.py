@@ -72,7 +72,7 @@ class TestDataManager:
         Config.configure_global_app(repository_type="sql")
         init_managers()
 
-        Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
+        Config.override(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
         csv_dn_cfg = Config.configure_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
         csv_dn = _DataManager._create_and_set(csv_dn_cfg, None, None)
