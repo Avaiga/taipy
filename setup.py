@@ -20,6 +20,7 @@ with open("README.md") as readme_file:
 
 requirements = [
     "toml>=0.10,<0.11",
+    "deepdiff>=6.2,<6.3"
 ]
 
 test_requirements = ["pytest>=3.8"]

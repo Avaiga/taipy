@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 toml = "==0.10"
+deepdiff = "==6.2.2"
 
 [dev-packages]
 black = "*"

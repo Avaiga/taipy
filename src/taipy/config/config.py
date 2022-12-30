@@ -250,11 +250,11 @@ class Config:
             raise ConfigurationIssueError("Configuration issues found.")
 
     @classmethod
-    def _to_json(cls, _config):
+    def _to_json(cls, _config: _Config) -> str:
         return cls.__json_serializer._serialize(_config)
 
     @classmethod
-    def _from_json(cls, config_as_str: str):
+    def _from_json(cls, config_as_str: str) -> _Config:
         return cls.__json_serializer._deserialize(config_as_str)
 
 
