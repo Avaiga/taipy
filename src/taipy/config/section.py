@@ -32,25 +32,25 @@ class Section:
 
     @abstractmethod
     def __copy__(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     @abstractmethod
     def name(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def _to_dict(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def _from_dict(cls, config_as_dict: Dict[str, Any], id, config):
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def _update(self, config_as_dict, default_section=None):
-        raise NotImplemented
+        raise NotImplementedError
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return self._replace_templates(self._properties.get(item, None))

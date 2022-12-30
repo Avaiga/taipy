@@ -36,7 +36,7 @@ class _BaseSerializer(object):
     @classmethod
     @abstractmethod
     def _write(cls, configuration: _Config, filename: str):
-        return NotImplemented
+        return NotImplementedError
 
     @classmethod
     def _str(cls, configuration: _Config):
