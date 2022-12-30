@@ -104,7 +104,7 @@ max_nb_of_workers = -1
     assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
-    Config.load(tf.filename)
+    Config.override(tf.filename)
 
     assert Config.job_config.max_nb_of_workers == -1
     assert Config.global_config.clean_entities_enabled
@@ -134,17 +134,17 @@ start_executor = "ENV[BAR]"
     assert not Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
-        Config.load(tf.filename)
+        Config.override(tf.filename)
         assert Config.job_config.max_nb_of_workers == 6
         assert Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
         with pytest.raises(InconsistentEnvVariableError):
-            Config.load(tf.filename)
+            Config.override(tf.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "5"}):
         with pytest.raises(MissingEnvVariableError):
-            Config.load(tf.filename)
+            Config.override(tf.filename)
 
 
 def test_code_configuration_do_not_override_file_configuration():
@@ -154,7 +154,7 @@ def test_code_configuration_do_not_override_file_configuration():
 max_nb_of_workers = 2
     """
     )
-    Config.load(config_from_filename.filename)
+    Config.override(config_from_filename.filename)
 
     Config.configure_job_executions(max_nb_of_workers=21)
 
@@ -168,7 +168,7 @@ def test_code_configuration_do_not_override_file_configuration_including_env_var
 max_nb_of_workers = 2
     """
     )
-    Config.load(config_from_filename.filename)
+    Config.override(config_from_filename.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "21"}):
         Config.configure_job_executions(max_nb_of_workers="ENV[FOO]")
@@ -183,7 +183,7 @@ max_nb_of_workers = 2
     """
     )
     Config.configure_job_executions(max_nb_of_workers=21)
-    Config.load(config_from_filename.filename)
+    Config.override(config_from_filename.filename)
 
     assert Config.job_config.max_nb_of_workers == 2  # From file config
 
@@ -198,7 +198,7 @@ max_nb_of_workers = "ENV[FOO]:int"
     Config.configure_job_executions(max_nb_of_workers=21)
 
     with mock.patch.dict(os.environ, {"FOO": "2"}):
-        Config.load(config_from_filename.filename)
+        Config.override(config_from_filename.filename)
         assert Config.job_config.max_nb_of_workers == 2  # From file config
 
 
@@ -230,7 +230,7 @@ clean_entities_enabled = false
     assert Config.job_config.max_nb_of_workers == -1
 
     # File config is applied
-    Config.load(file_config.filename)
+    Config.override(file_config.filename)
     assert Config.global_config.clean_entities_enabled is False
     assert Config.job_config.max_nb_of_workers == 10
     assert Config.data_nodes["my_datanode"].has_header
@@ -269,7 +269,7 @@ clean_entities_enabled = false
         assert Config.data_nodes["my_datanode"].path == "/baz/data/csv"
 
         # File config is applied
-        Config.load(file_config.filename)
+        Config.override(file_config.filename)
         assert Config.global_config.clean_entities_enabled is False
         assert Config.job_config.max_nb_of_workers == 10
         assert Config.data_nodes["my_datanode"].has_header

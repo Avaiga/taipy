@@ -159,13 +159,13 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     config_test_scenario()
 
     tf = NamedTemporaryFile()
-    Config.export(tf.filename)
+    Config.backup(tf.filename)
     actual_config = tf.read().strip()
     assert actual_config == expected_toml_config
 
     Config.load(tf.filename)
     tf2 = NamedTemporaryFile()
-    Config.export(tf2.filename)
+    Config.backup(tf2.filename)
 
     actual_config_2 = tf2.read().strip()
     assert actual_config_2 == expected_toml_config
@@ -320,13 +320,13 @@ def test_read_write_json_configuration_file():
     config_test_scenario()
 
     tf = NamedTemporaryFile()
-    Config.export(tf.filename)
+    Config.backup(tf.filename)
     actual_config = tf.read().strip()
     assert actual_config == expected_json_config
 
     Config.load(tf.filename)
     tf2 = NamedTemporaryFile()
-    Config.export(tf2.filename)
+    Config.backup(tf2.filename)
 
     actual_config_2 = tf2.read().strip()
     assert actual_config_2 == expected_json_config

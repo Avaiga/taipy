@@ -109,13 +109,13 @@ owner = "Raymond Kopa"
         p1_cfg_v2 = Config.configure_pipeline("p1", t1_cfg_v2, cron="daily")
         Config.configure_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
         Config.configure_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
-        Config.export(tf.filename)
+        Config.backup(tf.filename)
         actual_config = tf.read().strip()
 
         assert actual_config == expected_config
         Config.load(tf.filename)
         tf2 = NamedTemporaryFile()
-        Config.export(tf2.filename)
+        Config.backup(tf2.filename)
         actual_config_2 = tf2.read().strip()
         assert actual_config_2 == expected_config
 
