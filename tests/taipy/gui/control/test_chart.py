@@ -10,6 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+import random
+import datetime
+import typing as t
 
 from taipy.gui import Gui
 
@@ -154,3 +157,57 @@ def test_map_md(gui: Gui, helpers):
         'updateVarName="_TpD_tpec_TpExPr_mapData_TPMDL_0"',
     ]
     helpers.test_control_md(gui, md, expected_list)
+
+def test_chart_indexed_properties(gui: Gui, helpers):
+    data: t.Dict[str, t.Any] = {}
+    data["Date"] = [datetime.datetime(2021, 12, i) for i in range(1, 31)]
+
+    data["La Rochelle"] = [10 + 6 * random.random() for _ in range(1, 31)]
+    data["Montpellier"] = [16 + 6 * random.random() for _ in range(1, 31)]
+    data["Paris"] = [6 + 6 * random.random() for _ in range(1, 31)]
+
+    data["La Rochelle 1"] = [x * (1 + (random.random() / 10)) for x in data["La Rochelle"]]
+    data["La Rochelle 2"] = [x * (1 - (random.random() / 10)) for x in data["La Rochelle"]]
+
+    data["Montpellier 1"] = [x * (1 + (random.random() / 10)) for x in data["Montpellier"]]
+    data["Montpellier 2"] = [x * (1 - (random.random() / 10)) for x in data["Montpellier"]]
+
+    md = "<|{data}|chart|x=Date|mode=lines|y[1]=La Rochelle|y[2]=La Rochelle 1|y[3]=La Rochelle 2|y[4]=Montpellier|y[5]=Montpellier 1|y[6]=Montpellier 2|line[2]=dashdot|line[3]=dash|line[5]=dashdot|line[6]=dash|color[2]=blue|color[3]=blue|color[5]=red|color[6]=red|>"
+
+    gui._set_frame(inspect.currentframe())
+    expected_list = [
+        "<Chart",
+        '&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]',
+        '&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]',
+    ]
+    helpers.test_control_md(gui, md, expected_list)
+
+
+def test_chart_indexed_properties_with_arrays(gui: Gui, helpers):
+    data: t.Dict[str, t.Any] = {}
+    data["Date"] = [datetime.datetime(2021, 12, i) for i in range(1, 31)]
+
+    data["La Rochelle"] = [10 + 6 * random.random() for _ in range(1, 31)]
+    data["Montpellier"] = [16 + 6 * random.random() for _ in range(1, 31)]
+    data["Paris"] = [6 + 6 * random.random() for _ in range(1, 31)]
+
+    data["La Rochelle 1"] = [x * (1 + (random.random() / 10)) for x in data["La Rochelle"]]
+    data["La Rochelle 2"] = [x * (1 - (random.random() / 10)) for x in data["La Rochelle"]]
+
+    data["Montpellier 1"] = [x * (1 + (random.random() / 10)) for x in data["Montpellier"]]
+    data["Montpellier 2"] = [x * (1 - (random.random() / 10)) for x in data["Montpellier"]]
+
+    ys = ["La Rochelle", "La Rochelle 1", "La Rochelle 2", "Montpellier", "Montpellier 1", "Montpellier 2"]
+    lines = [None, "dashdot", "dash", None, "dashdot", "dash"]
+    colors = [None, "blue", "blue", None, "red", "red"]
+
+    md = "<|{data}|chart|x=Date|mode=lines|y={ys}|line={lines}|color={colors}|>"
+
+    gui._set_frame(inspect.currentframe())
+    expected_list = [
+        "<Chart",
+        '&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]',
+        '&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]',
+    ]
+    helpers.test_control_md(gui, md, expected_list)
+

@@ -567,6 +567,17 @@ class _Builder:
             trace[_Chart_iprops.xaxis.value] = "x"
         if not trace[_Chart_iprops.yaxis.value]:
             trace[_Chart_iprops.yaxis.value] = "y"
+        # Indexed properties: Check for arrays
+        for prop in _Chart_iprops:
+            values = trace[prop.value]
+            if isinstance(values, (list, tuple)) and len(values):
+                for idx, val in enumerate(values):
+                    if idx == 0:
+                        trace[prop.value] = val
+                    if val is not None:
+                        indexed_prop = f"{prop.name}[{idx + 1}]"
+                        if self.__attributes.get(indexed_prop) is None:
+                            self.__attributes[indexed_prop] = val
         # marker selected_marker options
         self.__check_dict(trace, (_Chart_iprops.marker, _Chart_iprops.selected_marker, _Chart_iprops.options))
         axis = []
@@ -696,13 +707,6 @@ class _Builder:
             self._set_chart_selected(max=len(traces))
             self.__set_refresh_on_update()
         return self
-
-    def _set_chart_layout(self):
-        if layout := self.__attributes.get("layout"):
-            if isinstance(layout, (dict, _MapDict)):
-                self.__set_json_attribute("layout", layout)
-            else:
-                warnings.warn(f"Chart control: layout attribute should be a dict\n'{str(layout)}'")
 
     def _set_string_with_check(self, var_name: str, values: t.List[str], default_value: t.Optional[str] = None):
         value = self.__attributes.get(var_name, default_value)
