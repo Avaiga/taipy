@@ -46,9 +46,9 @@ def test_build_development_job_dispatcher():
     assert isinstance(dispatcher, _DevelopmentJobDispatcher)
     assert dispatcher._nb_available_workers == 1
 
-    assert dispatcher.start() == NotImplemented
+    assert dispatcher.start() == NotImplementedError
     assert dispatcher.is_running()
-    assert dispatcher.stop() == NotImplemented
+    assert dispatcher.stop() == NotImplementedError
 
 
 def test_build_standalone_job_dispatcher():

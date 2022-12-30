@@ -23,7 +23,7 @@ class _RepositoryFactory:
     @classmethod
     @abstractmethod
     def _build_repository(cls) -> Type[_AbstractRepository]:  # type: ignore
-        return NotImplemented
+        return NotImplementedError
 
     @classmethod
     def _using_enterprise(cls) -> bool:

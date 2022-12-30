@@ -308,12 +308,12 @@ class TestDataNode:
         dn = FakeDataNode("fake_dn")
         dn.write("Any data")
 
-        assert NotImplemented == dn.filter((("any", 0, Operator.EQUAL)), JoinOperator.OR)
-        assert NotImplemented == dn.filter((("any", 0, Operator.NOT_EQUAL)), JoinOperator.OR)
-        assert NotImplemented == dn.filter((("any", 0, Operator.LESS_THAN)), JoinOperator.AND)
-        assert NotImplemented == dn.filter((("any", 0, Operator.LESS_OR_EQUAL)), JoinOperator.AND)
-        assert NotImplemented == dn.filter((("any", 0, Operator.GREATER_THAN)))
-        assert NotImplemented == dn.filter(("any", 0, Operator.GREATER_OR_EQUAL))
+        assert NotImplementedError == dn.filter((("any", 0, Operator.EQUAL)), JoinOperator.OR)
+        assert NotImplementedError == dn.filter((("any", 0, Operator.NOT_EQUAL)), JoinOperator.OR)
+        assert NotImplementedError == dn.filter((("any", 0, Operator.LESS_THAN)), JoinOperator.AND)
+        assert NotImplementedError == dn.filter((("any", 0, Operator.LESS_OR_EQUAL)), JoinOperator.AND)
+        assert NotImplementedError == dn.filter((("any", 0, Operator.GREATER_THAN)))
+        assert NotImplementedError == dn.filter(("any", 0, Operator.GREATER_OR_EQUAL))
 
         df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)
 

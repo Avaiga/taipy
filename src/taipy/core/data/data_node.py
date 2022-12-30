@@ -287,7 +287,7 @@ class DataNode(_Entity):
     @classmethod
     @abstractmethod
     def storage_type(cls) -> str:
-        return NotImplemented
+        return NotImplementedError
 
     def read_or_raise(self) -> Any:
         """Read the data referenced by this data node.
@@ -390,7 +390,7 @@ class DataNode(_Entity):
                 return DataNode.__filter_dataframe(data, operators, join_operator=join_operator)
             if isinstance(data, List):
                 return DataNode.__filter_list(data, operators, join_operator=join_operator)
-        return NotImplemented
+        return NotImplementedError
 
     @staticmethod
     def __filter_dataframe(
@@ -402,7 +402,7 @@ class DataNode(_Entity):
         elif join_operator == JoinOperator.OR:
             how = "outer"
         else:
-            return NotImplemented
+            return NotImplementedError
         for key, value, operator in operators:
             filtered_df_data.append(DataNode.__filter_dataframe_per_key_value(df_data, key, value, operator))
         return DataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
@@ -442,7 +442,7 @@ class DataNode(_Entity):
         elif join_operator == JoinOperator.OR:
             return list(set(np.concatenate(filtered_list_data)))
         else:
-            return NotImplemented
+            return NotImplementedError
 
     @staticmethod
     def __filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
@@ -469,11 +469,11 @@ class DataNode(_Entity):
 
     @abstractmethod
     def _read(self):
-        return NotImplemented
+        return NotImplementedError
 
     @abstractmethod
     def _write(self, data):
-        return NotImplemented
+        return NotImplementedError
 
     def __getitem__(self, items):
         return _FilterDataNode(self.id, self._read())[items]

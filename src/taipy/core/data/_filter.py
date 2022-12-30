@@ -152,10 +152,10 @@ class _FilterDataNode:
             if other.data_is_dataframe():
                 filtered_data = self.data & other.data
             else:
-                return NotImplemented
+                return NotImplementedError
         else:
             if other.data_is_dataframe():
-                return NotImplemented
+                return NotImplementedError
             else:
                 filtered_data = [s and o for s, o in zip(self.data, other.data)]
         return _FilterDataNode(self.data_node_id, filtered_data)
@@ -165,10 +165,10 @@ class _FilterDataNode:
             if other.data_is_dataframe():
                 filtered_data = self.data | other.data
             else:
-                return NotImplemented
+                return NotImplementedError
         else:
             if other.data_is_dataframe():
-                return NotImplemented
+                return NotImplementedError
             else:
                 filtered_data = [s or o for s, o in zip(self.data, other.data)]
         return _FilterDataNode(self.data_node_id, filtered_data)

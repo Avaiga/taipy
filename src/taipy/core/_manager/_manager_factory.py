@@ -23,7 +23,7 @@ class _ManagerFactory:
     @classmethod
     @abstractmethod
     def _build_manager(cls) -> Type[_Manager]:  # type: ignore
-        return NotImplemented
+        return NotImplementedError
 
     @classmethod
     def _using_enterprise(cls) -> bool:

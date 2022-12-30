@@ -24,16 +24,16 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
         super().__init__(scheduler)
 
     def start(self):
-        return NotImplemented
+        return NotImplementedError
 
     def is_running(self) -> bool:
         return True
 
     def stop(self):
-        return NotImplemented
+        return NotImplementedError
 
     def run(self):
-        return NotImplemented
+        return NotImplementedError
 
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
