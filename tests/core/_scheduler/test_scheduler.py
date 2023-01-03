@@ -16,6 +16,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timedelta
 from functools import partial
 from time import sleep
+from unittest import mock
 
 import pytest
 
@@ -30,7 +31,6 @@ from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config import Config
-from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from tests.core.utils import assert_true_after_time
@@ -145,6 +145,21 @@ def test_submit_task_that_return_multiple_outputs():
         == with_list.output[f"{with_list.config_id}_output1"].read()
         == 21
     )
+
+
+def test_submit_task_with_input_dn_wrong_file_path():
+    from taipy.logger._taipy_logger import _TaipyLogger
+
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+
+    dn_cfg = Config.configure_csv_data_node("wrong_file_path", default_path="wrong_path.csv")
+    input_dn = _DataManager._bulk_get_or_create([dn_cfg]).values()
+    task = Task("task_cfg", print, input=input_dn)
+
+    _SchedulerFactory._build_dispatcher()
+    job = _Scheduler.submit_task(task)
+    assert job.is_blocked()
+    # TODO: test that warning message was called
 
 
 def test_submit_task_returns_single_iterable_output():

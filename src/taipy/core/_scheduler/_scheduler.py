@@ -21,6 +21,7 @@ from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..common.alias import JobId
+from ..data import DataNode
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
@@ -167,8 +168,8 @@ class _Scheduler(_AbstractScheduler):
             except Exception:
                 pass
 
-    @staticmethod
-    def _is_blocked(obj: Union[Task, Job]) -> bool:
+    @classmethod
+    def _is_blocked(cls, obj: Union[Task, Job]) -> bool:
         """Returns True if the execution of the `Job^` or the `Task^` is blocked by the execution of another `Job^`.
 
         Parameters:
@@ -177,9 +178,17 @@ class _Scheduler(_AbstractScheduler):
         Returns:
              True if one of its input data nodes is blocked.
         """
+
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
         data_manager = _DataManagerFactory._build_manager()
-        return any(not data_manager._get(dn.id).is_ready_for_reading for dn in data_nodes)
+
+        def get_dn_is_ready_for_reading(dn: DataNode):
+            dn = data_manager._get(dn.id)
+            if dn.is_ready_for_reading is None:
+                cls.__logger.error(f"{dn.id} is not ready to be read.")
+            return dn.is_ready_for_reading
+
+        return any(not get_dn_is_ready_for_reading(dn) for dn in data_nodes)
 
     @staticmethod
     def _unlock_edit_on_jobs_outputs(jobs: Union[Job, List[Job], Set[Job]]):
