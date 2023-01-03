@@ -12,6 +12,9 @@ specify which trace you target.
 Indexed properties can have a default value (using the *property_name* syntax with
 no index) which is overridden by any specified indexed property.
 
+Indexed properties can also be declared as a list associated to the default property (*property_name* syntax with
+no index).
+
 The _data_ property supported types are:
 
 - pandas Dataframe
