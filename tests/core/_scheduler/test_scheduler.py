@@ -16,7 +16,6 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timedelta
 from functools import partial
 from time import sleep
-from unittest import mock
 
 import pytest
 
