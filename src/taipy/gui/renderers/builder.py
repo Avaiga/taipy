@@ -560,9 +560,8 @@ class _Builder:
         if not trace[_Chart_iprops.mode.value]:
             trace[_Chart_iprops.mode.value] = default_mode
         # type
-        trace[_Chart_iprops.type.value] = (
-            str(trace[_Chart_iprops.type.value]).strip().lower() if trace[_Chart_iprops.type.value] else default_type
-        )
+        if not trace[_Chart_iprops.type.value]:
+            trace[_Chart_iprops.type.value] = default_type
         if not trace[_Chart_iprops.xaxis.value]:
             trace[_Chart_iprops.xaxis.value] = "x"
         if not trace[_Chart_iprops.yaxis.value]:
