@@ -23,6 +23,7 @@ from werkzeug.serving import is_running_from_reloader
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ._gui_cli import _GuiCLI
 from ._page import _Page
 from .partial import Partial
 from .utils import _is_in_notebook
@@ -144,25 +145,10 @@ class _Config(object):
         # return user defined IANA Time Zone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
         return tz
 
-    def _init_argparse(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-P", "--port", nargs="?", default="", const="", help="Specify server port")
-        parser.add_argument("-H", "--host", nargs="?", default="", const="", help="Specify server host")
+    def _handle_argparse(self):
+        _GuiCLI._create_parser()
+        args = _GuiCLI._parse_arguments()
 
-        parser.add_argument("--ngrok-token", nargs="?", default="", const="", help="Specify NGROK Authtoken")
-
-        debug_group = parser.add_mutually_exclusive_group()
-        debug_group.add_argument("--debug", help="Turn on debug", action="store_true")
-        debug_group.add_argument("--no-debug", help="Turn off debug", action="store_true")
-
-        reloader_group = parser.add_mutually_exclusive_group()
-        reloader_group.add_argument("--use-reloader", help="Auto reload on code changes", action="store_true")
-        reloader_group.add_argument("--no-reloader", help="No reload on code changes", action="store_true")
-
-        args, unknown_args = parser.parse_known_args()
-        self._handle_argparse(args)
-
-    def _handle_argparse(self, args):  # pragma: no cover
         config = self.config
         if args.port:
             if not _Config.__RE_PORT_NUMBER.match(args.port):
@@ -206,8 +192,9 @@ class _Config(object):
                         warnings.warn(
                             f"Invalid env value in Gui.run: {key} - {value}. Unable to parse value to the correct type.\n{e}"
                         )
+
         # Load from system arguments
-        self._init_argparse()
+        self._handle_argparse()
 
         # Taipy-config
         if find_spec("taipy") and find_spec("taipy.config"):
