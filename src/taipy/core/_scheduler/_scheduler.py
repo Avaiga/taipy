@@ -21,7 +21,7 @@ from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..common.alias import JobId
-from ..data import CSVDataNode, DataNode, ExcelDataNode, JSONDataNode, PickleDataNode
+from ..data import CSVDataNode, DataNode, ExcelDataNode, JSONDataNode, ParquetDataNode, PickleDataNode
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
@@ -189,6 +189,8 @@ class _Scheduler(_AbstractScheduler):
                     CSVDataNode.storage_type(),
                     ExcelDataNode.storage_type(),
                     JSONDataNode.storage_type(),
+                    PickleDataNode.storage_type(),
+                    ParquetDataNode.storage_type(),
                 ]:
                     cls.__logger.warning(
                         f"{dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong path : {dn.path}"
