@@ -129,12 +129,14 @@ class PickleDataNode(DataNode):
 
     def _read(self):
         os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
-        return pickle.load(open(self._path, "rb"))
+        with open(self._path, "rb") as pf:
+            return pickle.load(pf)
 
     def _write(self, data):
         if isinstance(data, (pd.DataFrame, pd.Series)):
             os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
-        pickle.dump(data, open(self._path, "wb"))
+        with open(self._path, "wb") as pf:
+            pickle.dump(data, pf)
 
     def __build_path(self):
 
