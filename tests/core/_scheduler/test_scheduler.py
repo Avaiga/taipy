@@ -147,20 +147,20 @@ def test_submit_task_that_return_multiple_outputs():
     )
 
 
-def test_submit_task_with_input_dn_wrong_file_path(capfd):
+def test_submit_task_with_input_dn_wrong_file_path(caplog):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
     dn_cfg = Config.configure_csv_data_node("wrong_file_path", default_path="wrong_path.csv")
+
+    _SchedulerFactory._build_dispatcher()
     input_dn = _DataManager._bulk_get_or_create([dn_cfg])[dn_cfg]
     task = Task("task_cfg", print, input=[input_dn])
 
-    _SchedulerFactory._build_dispatcher()
     job = _Scheduler.submit_task(task)
     assert job.is_blocked()
 
-    stdout, _ = capfd.readouterr()
-    expected_outputs = f"[Taipy][WARNING] {input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong path : {input_dn.path}"
-    assert all([expected_output in stdout for expected_output in expected_outputs])
+    stdout = caplog.text
+    expected_output = f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong path : {input_dn.path}"
+    assert expected_output in stdout
 
 
 def test_submit_task_returns_single_iterable_output():
