@@ -147,19 +147,20 @@ def test_submit_task_that_return_multiple_outputs():
     )
 
 
-def test_submit_task_with_input_dn_wrong_file_path():
-    from taipy.logger._taipy_logger import _TaipyLogger
-
+def test_submit_task_with_input_dn_wrong_file_path(capfd):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     dn_cfg = Config.configure_csv_data_node("wrong_file_path", default_path="wrong_path.csv")
-    input_dn = _DataManager._bulk_get_or_create([dn_cfg]).values()
-    task = Task("task_cfg", print, input=input_dn)
+    input_dn = _DataManager._bulk_get_or_create([dn_cfg])[dn_cfg]
+    task = Task("task_cfg", print, input=[input_dn])
 
     _SchedulerFactory._build_dispatcher()
     job = _Scheduler.submit_task(task)
     assert job.is_blocked()
-    # TODO: test that warning message was called
+
+    stdout, _ = capfd.readouterr()
+    expected_outputs = f"[Taipy][WARNING] {input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong path : {input_dn.path}"
+    assert all([expected_output in stdout for expected_output in expected_outputs])
 
 
 def test_submit_task_returns_single_iterable_output():

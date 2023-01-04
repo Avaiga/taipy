@@ -21,7 +21,7 @@ from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..common.alias import JobId
-from ..data import DataNode
+from ..data import CSVDataNode, DataNode, ExcelDataNode, JSONDataNode, PickleDataNode
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
@@ -184,8 +184,17 @@ class _Scheduler(_AbstractScheduler):
 
         def get_dn_is_ready_for_reading(dn: DataNode):
             dn = data_manager._get(dn.id)
-            if dn.is_ready_for_reading is None:
-                cls.__logger.error(f"{dn.id} is not ready to be read.")
+            if dn.is_ready_for_reading is False and not dn._last_edit_date:
+                if dn.storage_type() in [
+                    CSVDataNode.storage_type(),
+                    ExcelDataNode.storage_type(),
+                    JSONDataNode.storage_type(),
+                ]:
+                    cls.__logger.warning(
+                        f"{dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong path : {dn.path}"
+                    )
+                else:
+                    cls.__logger.warning(f"{dn.id} cannot be read because it has never been written.")
             return dn.is_ready_for_reading
 
         return any(not get_dn_is_ready_for_reading(dn) for dn in data_nodes)
