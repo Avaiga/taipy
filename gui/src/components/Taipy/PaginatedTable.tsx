@@ -405,7 +405,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     data-dfid={columns[col].dfid}
                                                     onClick={onSort}
                                                     disabled={!active}
-                                                    hideSortIcon={true}
+                                                    hideSortIcon={!active}
                                                 >
                                                     <Box sx={headBoxSx}>
                                                         {columns[col].groupBy ? (

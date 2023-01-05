@@ -123,9 +123,14 @@ describe("AutoLoadingTable Component", () => {
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={true} />);
+        const { getByText, getAllByTestId } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={true} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
+        expect(getAllByTestId("ArrowDownwardIcon").length).toBeGreaterThan(0);
+    });
+    it("hides sort icons when not active", async () => {
+        const { queryByTestId } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={false} />);
+        expect(queryByTestId("ArrowDownwardIcon")).toBeNull();
     });
     // keep getting undefined Error from jest, it seems to be linked to the setTimeout that makes the code run after the end of the test :-(
     // https://github.com/facebook/jest/issues/12262
