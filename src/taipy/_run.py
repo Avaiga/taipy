@@ -29,6 +29,13 @@ def _run(*apps: t.List[t.Union[Gui, Rest, Core]], **kwargs) -> t.Optional[t.Unio
     rest = __typing_get(apps, Rest)
     core = __typing_get(apps, Core)
 
+    if gui and core:
+        from taipy.core._version._version_cli import _VersioningCLI
+        from taipy.gui._gui_cli import _GuiCLI
+
+        _VersioningCLI._create_parser()
+        _GuiCLI._create_parser()
+
     if rest or core:
         if not core:
             core = Core()
