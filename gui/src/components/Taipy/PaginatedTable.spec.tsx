@@ -146,9 +146,14 @@ describe("PaginatedTable Component", () => {
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} active={true} />);
+        const { getByText, getAllByTestId } = render(<PaginatedTable data={undefined} columns={tableColumns} active={true} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
+        expect(getAllByTestId("ArrowDownwardIcon").length).toBeGreaterThan(0);
+    });
+    it("Hides sort icons when not active", async () => {
+        const { queryByTestId } = render(<PaginatedTable data={undefined} columns={tableColumns} active={false} />);
+        expect(queryByTestId("ArrowDownwardIcon")).toBeNull();
     });
     it("dispatch 2 well formed messages at first render", async () => {
         const dispatch = jest.fn();

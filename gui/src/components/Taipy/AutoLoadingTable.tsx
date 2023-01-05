@@ -491,6 +491,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                     data-dfid={columns[col].dfid}
                                                     onClick={onSort}
                                                     disabled={!active}
+                                                    hideSortIcon={!active}
                                                 >
                                                     <Box sx={headBoxSx}>
                                                         {columns[col].groupBy ? (
