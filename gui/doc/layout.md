@@ -17,7 +17,7 @@ The default layout contains 2 columns in desktop mode and 1 column in mobile mod
         ```
         <|layout|
 
-            <|{some content}|>
+        <|{some content}|>
 
         |>
         ```
@@ -43,9 +43,9 @@ The _gap_ between adjacent cells is set by default to 0.5rem and can be specifie
 
         ```
         <|layout|gap=20px|
-            ...
-            <|{some content}|>
-            ...
+        ...
+        <|{some content}|>
+        ...
         |>
         ```
   
@@ -70,15 +70,15 @@ You can use the fr CSS unit so that the middle column use all the available spac
         ```
         <|layout|columns=50px 1fr 50px|
 
-            <|{1st column content}|>
+        <|{1st column content}|>
 
-            <|{2nd column content}|>
+        <|{2nd column content}|>
 
-            <|{3rd column content}|>
+        <|{3rd column content}|>
 
-            <|{1st column and second row content}|>
+        <|{1st column and second row content}|>
 
-            ...
+        ...
         |>
         ```
   
@@ -113,15 +113,15 @@ The _columns[mobile]_ property allows to specify a different layout when running
         ```
         <|layout|columns=50px 1fr 50px|columns[mobile]=1 1|
 
-            <|{1st column content}|>
+        <|{1st column content}|>
 
-            <|{2nd column content}|>
+        <|{2nd column content}|>
 
-            <|{3rd column content or 2nd row 1st column on mobile}|>
+        <|{3rd column content or 2nd row 1st column on mobile}|>
 
-            <|{1st column and second row content or 2nd row 2nd column on mobile}|>
+        <|{1st column and second row content or 2nd row 2nd column on mobile}|>
 
-            ...
+        ...
         |>
         ```
   
