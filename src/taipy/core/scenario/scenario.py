@@ -50,7 +50,7 @@ class Scenario(_Entity):
         cycle (Cycle^): The cycle of the scenario.
         subscribers (Set[Callable]): The set of callbacks to be called on `Job^`'s status change.
         tags (Set[str]): The list of scenario's tags.
-        version (str): The string indicates the application version of the scenario to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the scenario to instantiate. If not provided, the latest version is used.
     """
 
     _ID_PREFIX = "SCENARIO"
@@ -78,7 +78,7 @@ class Scenario(_Entity):
         self._subscribers = _ListAttributes(self, subscribers or list())
         self._primary_scenario = is_primary
         self._tags = tags or set()
-        self._version = version or _VersionManagerFactory._build_manager()._get_current_version()
+        self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
         self._properties = _Properties(self, **properties)
 

@@ -109,7 +109,7 @@ class _AbstractSQLDataNode(DataNode):
             parent_ids,
             last_edit_date,
             job_ids,
-            version or _VersionManagerFactory._build_manager()._get_current_version(),
+            version or _VersionManagerFactory._build_manager()._get_latest_version(),
             cacheable,
             validity_period,
             edit_in_progress,

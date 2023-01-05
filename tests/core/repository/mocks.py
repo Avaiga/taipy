@@ -41,7 +41,7 @@ class MockObj:
         if version:
             self.version = version
         else:
-            self.version = _VersionManager._get_current_version()
+            self.version = _VersionManager._get_latest_version()
 
 
 class MockFSRepository(_FileSystemRepository):

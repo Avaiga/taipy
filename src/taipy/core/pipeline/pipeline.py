@@ -44,7 +44,7 @@ class Pipeline(_Entity):
         pipeline_id (str): The Unique identifier of the pipeline.
         owner_id (str):  The identifier of the owner (scenario_id, cycle_id) or None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent scenarios.
-        version (str): The string indicates the application version of the pipeline to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the pipeline to instantiate. If not provided, the latest version is used.
     """
 
     _ID_PREFIX = "PIPELINE"
@@ -71,7 +71,7 @@ class Pipeline(_Entity):
         self._subscribers = _ListAttributes(self, subscribers or list())
         self._properties = _Properties(self, **properties)
 
-        self._version = version or _VersionManagerFactory._build_manager()._get_current_version()
+        self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @property  # type: ignore
     def parent_id(self):

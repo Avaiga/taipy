@@ -9,12 +9,15 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import List, Optional
+import uuid
+from typing import List, Optional, Union
 
 from taipy.config import Config
+from taipy.config._config_comparator import _ConfigComparator
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
-from ..exceptions.exceptions import NonExistingVersion, VersionAlreadyExists
+from ..exceptions.exceptions import ModelNotFound, NonExistingVersion, VersionConflictWithPythonConfig
 from ._version import _Version
 from ._version_repository_factory import _VersionRepositoryFactory
 
@@ -22,21 +25,41 @@ from ._version_repository_factory import _VersionRepositoryFactory
 class _VersionManager(_Manager[_Version]):
     _ENTITY_NAME = _Version.__name__
 
-    __DEVELOPMENT_VERSION_NUMBER = ["development", "dev"]
-    __CURRENT_VERSION_NUMBER = "current"
-    __ALL_VERSION_NUMBER = ["all", ""]
+    __DEVELOPMENT_VERSION = ["development", "dev"]
+    __LATEST_VERSION = "latest"
+    __PRODUCTION_VERSION = "production"
+    __ALL_VERSION = ["all", ""]
 
-    __DEFAULT_VERSION = __CURRENT_VERSION_NUMBER
+    __DEFAULT_VERSION = __LATEST_VERSION
 
     _repository = _VersionRepositoryFactory._build_repository()  # type: ignore
 
     @classmethod
-    def get_or_create(cls, id: str, override: bool) -> _Version:
-        if version := cls._get(id):
-            if not override:
-                raise VersionAlreadyExists(f"Version {id} already exists.")
+    def _get(cls, entity: Union[str, _Version], default=None) -> _Version:
+        """
+        Returns the version entity by id or reference.
+        """
+        entity_id = entity if isinstance(entity, str) else entity.id  # type: ignore
+        try:
+            return cls._repository.load(entity_id)
+        except ModelNotFound:
+            return default
 
-            version.config = Config._applied_config
+    @classmethod
+    def _get_or_create(cls, id: str, override: bool) -> _Version:
+        if version := cls._get(id):
+            config_diff = _ConfigComparator._compare(version.config, Config._applied_config)
+            if config_diff["added_items"] or config_diff["removed_items"] or config_diff["modified_items"]:
+                _TaipyLogger._get_logger().warning(
+                    f"The Configuration of version {id} is conflict with the current Python Config."
+                )
+
+                if override:
+                    _TaipyLogger._get_logger().warning(f"Overriding version {id} ...")
+                    version.config = Config._applied_config
+                else:
+                    raise VersionConflictWithPythonConfig(config_diff)
+
         else:
             version = _Version(id=id, config=Config._applied_config)
 
@@ -58,33 +81,95 @@ class _VersionManager(_Manager[_Version]):
         return cls._repository._load_all_by(by, version_number)
 
     @classmethod
-    def _set_current_version(cls, version_number: str, override: bool):
-        cls.get_or_create(version_number, override)
-        cls._repository._set_current_version(version_number)
-
-    @classmethod
-    def _get_current_version(cls) -> str:
-        return cls._repository._get_current_version()
-
-    @classmethod
-    def _set_development_version(cls, version_number: str):
-        cls.get_or_create(version_number, override=True)
+    def _set_development_version(cls, version_number: str) -> str:
+        cls._get_or_create(version_number, override=True)
         cls._repository._set_development_version(version_number)
+        return version_number
 
     @classmethod
     def _get_development_version(cls) -> str:
-        return cls._repository._get_development_version()
+        try:
+            return cls._repository._get_development_version()
+        except FileNotFoundError:
+            return cls._set_development_version(str(uuid.uuid4()))
+
+    @classmethod
+    def _set_experiment_version(cls, version_number: str, override: bool) -> str:
+        if version_number == cls._get_development_version():
+            raise SystemExit(
+                f"Version number {version_number} is already a development version. Please choose a different version number for experiment mode."
+            )
+
+        if version_number in cls._get_production_version():
+            raise SystemExit(
+                f"Version number {version_number} is already a production version. Please choose a different version number for experiment mode."
+            )
+
+        cls._get_or_create(version_number, override)
+        cls._repository._set_latest_version(version_number)
+        return version_number
+
+    @classmethod
+    def _get_latest_version(cls) -> str:
+        try:
+            return cls._repository._get_latest_version()
+        except FileNotFoundError:
+            # If there is no version in the system yet, create a new version as development version
+            # This set the default versioning behavior on Jupyter notebook to Development mode
+            return cls._set_development_version(str(uuid.uuid4()))
+
+    @classmethod
+    def _set_production_version(cls, version_number: str, override: bool) -> str:
+        production_versions = cls._get_production_version()
+
+        # Check if all previous production versions are compatible with current Python Config
+        for production_version in production_versions:
+            if version := cls._get(production_version):
+                config_diff = _ConfigComparator._compare(version.config, Config._applied_config)
+                if config_diff["added_items"] or config_diff["removed_items"] or config_diff["modified_items"]:
+                    _TaipyLogger._get_logger().error(
+                        f"The Configuration of version {production_version} is conflict with the current Python Config."
+                    )
+                    raise VersionConflictWithPythonConfig(config_diff)
+            else:
+                raise NonExistingVersion(production_version)
+
+        if version_number == cls._get_development_version():
+            cls._set_development_version(str(uuid.uuid4()))
+
+        cls._get_or_create(version_number, override)
+        cls._repository._set_production_version(version_number)
+        return version_number
+
+    @classmethod
+    def _get_production_version(cls) -> List[str]:
+        try:
+            return cls._repository._get_production_version()
+        except FileNotFoundError:
+            return []
+
+    @classmethod
+    def _delete_production_version(cls, version_number) -> str:
+        return cls._repository._delete_production_version(version_number)
 
     @classmethod
     def _replace_version_number(cls, version_number):
         if version_number is None:
-            version_number = cls.__DEFAULT_VERSION
+            version_number = cls._replace_version_number(cls.__DEFAULT_VERSION)
 
-        if version_number == cls.__CURRENT_VERSION_NUMBER:
-            return cls._get_current_version()
-        if version_number in cls.__DEVELOPMENT_VERSION_NUMBER:
+            production_versions = cls._get_production_version()
+
+            if version_number not in production_versions:
+                return version_number
+            return production_versions
+
+        if version_number == cls.__LATEST_VERSION:
+            return cls._get_latest_version()
+        if version_number in cls.__DEVELOPMENT_VERSION:
             return cls._get_development_version()
-        if version_number in cls.__ALL_VERSION_NUMBER:
+        if version_number in cls.__PRODUCTION_VERSION:
+            return cls._get_production_version()
+        if version_number in cls.__ALL_VERSION:
             return ""
         if version := cls._get(version_number):
             return version.id

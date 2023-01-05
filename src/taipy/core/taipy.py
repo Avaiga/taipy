@@ -26,7 +26,7 @@ from .cycle._cycle_manager_factory import _CycleManagerFactory
 from .cycle.cycle import Cycle
 from .data._data_manager_factory import _DataManagerFactory
 from .data.data_node import DataNode
-from .exceptions.exceptions import ModelNotFound
+from .exceptions.exceptions import ModelNotFound, NonExistingVersion, VersionIsNotProductionVersion
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .pipeline._pipeline_manager_factory import _PipelineManagerFactory
@@ -430,6 +430,11 @@ def create_scenario(
     Returns:
         The new scenario.
     """
+    if (
+        latest_version_number := _VersionManagerFactory._build_manager()._get_latest_version()
+    ) == _VersionManagerFactory._build_manager()._get_development_version():
+        clean_all_entities_by_version(latest_version_number)
+        _VersionManagerFactory._build_manager()._set_development_version(latest_version_number)
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
 
@@ -441,6 +446,11 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     Returns:
         The new pipeline.
     """
+    if (
+        latest_version_number := _VersionManagerFactory._build_manager()._get_latest_version()
+    ) == _VersionManagerFactory._build_manager()._get_development_version():
+        clean_all_entities_by_version(latest_version_number)
+        _VersionManagerFactory._build_manager()._set_development_version(latest_version_number)
     return _PipelineManagerFactory._build_manager()._get_or_create(config)
 
 
@@ -469,12 +479,23 @@ def clean_all_entities() -> bool:
 
 def clean_all_entities_by_version(version_number):
     """Delete all entities belongs to a version from the Taipy data folder."""
+    version_manager = _VersionManagerFactory._build_manager()
+    try:
+        version_number = version_manager._replace_version_number(version_number)
+    except NonExistingVersion as e:
+        raise SystemExit(e)
+
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
     _ScenarioManagerFactory._build_manager()._delete_by_version(version_number)
     _PipelineManagerFactory._build_manager()._delete_by_version(version_number)
     _TaskManagerFactory._build_manager()._delete_by_version(version_number)
     _DataManagerFactory._build_manager()._delete_by_version(version_number)
-    _VersionManagerFactory._build_manager()._delete(version_number)
+
+    version_manager._delete(version_number)
+    try:
+        version_manager._delete_production_version(version_number)
+    except VersionIsNotProductionVersion:
+        pass
 
 
 def export_scenario(

@@ -29,7 +29,7 @@ class _JobManager(_Manager[Job]):
 
     @classmethod
     def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:
-        version = _VersionManagerFactory._build_manager()._get_current_version()
+        version = _VersionManagerFactory._build_manager()._get_latest_version()
         job = Job(
             id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"),
             task=task,

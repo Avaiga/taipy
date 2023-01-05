@@ -86,7 +86,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         r = []
         try:
             for f in self.dir_path.iterdir():
-                if entity := self.__to_entity(f, retry=Config.global_config.read_entity_retry or 0, by=version_number):
+                if entity := self.__to_entity(
+                    f, retry=Config.global_config.read_entity_retry or 0, version_number=version_number
+                ):
                     r.append(entity)
         except FileNotFoundError:
             pass
@@ -100,7 +102,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         r = []
         try:
             for f in self.dir_path.iterdir():
-                if entity := self.__to_entity(f, by=[by, version_number]):
+                if entity := self.__to_entity(f, by=by, version_number=version_number):
                     r.append(entity)
         except FileNotFoundError:
             pass
@@ -135,7 +137,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         return next(self.__search(attribute, value, version_number), None)
 
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
-        # Only get the entity from the current version
+        # Only get the entity from the latest version
         from .._version._version_manager_factory import _VersionManagerFactory
 
         version_number = _VersionManagerFactory._build_manager()._replace_version_number(None)
@@ -144,7 +146,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
             entities = map(
                 lambda f: self.__to_entity(
-                    f, by=[owner_id, version_number], retry=Config.global_config.read_entity_retry or 0
+                    f, by=owner_id, version_number=version_number, retry=Config.global_config.read_entity_retry or 0
                 ),
                 files,
             )
@@ -188,26 +190,39 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(version_number))
 
     def __to_entity(
-        self, filepath, by: Union[Optional[str], List[Optional[str]]] = None, retry: Optional[int] = 0
+        self,
+        filepath,
+        by: Union[Optional[str], List[Optional[str]]] = None,
+        version_number: Union[Optional[str], List[Optional[str]]] = None,
+        retry: Optional[int] = 0,
     ) -> Optional[Entity]:
+        if not isinstance(by, List):
+            by = [by] if by else []
+
+        if not isinstance(version_number, List):
+            version_number = [version_number] if version_number else []
+
+        by_version = list(map(lambda version: f'"version": "{version}"', version_number) if version_number else [""])
+
         try:
             with open(filepath, "r") as f:
                 file_content = f.read()
 
-            if isinstance(by, List):
-                if all(condition in file_content for condition in by if condition):
+            if by or by_version:
+                if (
+                    all(criteria in file_content for criteria in by if criteria) and
+                    any(version in file_content for version in by_version)
+                ):
                     return self.__model_to_entity(file_content)
                 else:
                     return None
 
-            elif isinstance(by, str):
-                return self.__model_to_entity(file_content) if by in file_content else None
-
             return self.__model_to_entity(file_content)
+
         except Exception as e:
             if retry and retry > 0:
                 time.sleep(0.5)
-                return self.__to_entity(filepath, by=by, retry=retry - 1)
+                return self.__to_entity(filepath, by=by, version_number=version_number, retry=retry - 1)
             raise e
 
     def __model_to_entity(self, file_content):
@@ -219,10 +234,14 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         self.dir_path.mkdir(parents=True, exist_ok=True)
 
     def __match_file_and_get_entity(self, filepath, config_and_owner_ids, retry: Optional[int] = 0):
-        # Only get the entity from the current version
+        # Only get the entity from the latest version
         from .._version._version_manager_factory import _VersionManagerFactory
 
         version_number = _VersionManagerFactory._build_manager()._replace_version_number(None)
+
+        if not isinstance(version_number, List):
+            version_number = [version_number] if version_number else []
+        version_number = [f'"version": "{version}"' for version in version_number]
 
         filename = filepath.name
 
@@ -232,7 +251,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                     file_content = f.read()
 
                 for config_id, owner_id in match:
-                    if version_number not in file_content:
+                    if not all(version in file_content for version in version_number):
                         continue
 
                     if owner_id and owner_id not in file_content:

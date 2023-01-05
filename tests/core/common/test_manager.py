@@ -43,7 +43,7 @@ class MockEntity:
         if version:
             self.version = version
         else:
-            self.version = _VersionManager._get_current_version()
+            self.version = _VersionManager._get_latest_version()
 
 
 class MockRepository(_AbstractRepository):  # type: ignore
@@ -105,6 +105,8 @@ class TestManager:
         assert MockManager._get(m.id) == m
 
     def test_get_all(self):
+        MockManager._delete_all()
+
         objs = []
         for i in range(5):
             m = MockEntity(f"uuid-{i}", f"Foo{i}")

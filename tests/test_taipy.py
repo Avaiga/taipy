@@ -18,6 +18,7 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
+from src.taipy.core import Core
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
@@ -35,8 +36,6 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
-
-from .core.utils.core_service_for_test import CoreForTest
 
 
 class TestTaipy:
@@ -267,7 +266,7 @@ class TestTaipy:
         pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
         scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
 
-        CoreForTest().run()
+        Core().run()
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
         tp.submit(scenario_1, wait=True)
@@ -319,7 +318,7 @@ class TestTaipy:
         pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
         scenario_config = Config.configure_scenario("my_scenario", pipeline_config)
 
-        CoreForTest().run()
+        Core().run()
         _CycleManager._set(cycle)
 
         scenario = _ScenarioManager._create(scenario_config)
@@ -354,13 +353,13 @@ class TestTaipy:
         Config.configure_global_app(clean_entities_enabled=True)
         success = tp.clean_all_entities()
         # File should not exist after clean_all_entities since clean_entities_enabled is True
+        assert len(_VersionManager._get_all()) == 0
         assert len(_DataManager._get_all()) == 0
         assert len(_TaskManager._get_all()) == 0
         assert len(_PipelineManager._get_all()) == 0
         assert len(_ScenarioManager._get_all()) == 0
         assert len(_CycleManager._get_all()) == 0
         assert len(_JobManager._get_all()) == 0
-        assert len(_VersionManager._get_all()) == 0
         assert success
 
     def test_export_scenario_filesystem(self):
@@ -379,13 +378,8 @@ class TestTaipy:
         scenario_cfg_2 = Config.configure_scenario("s2", pipeline_cfg_2, Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        scenario_2 = tp.create_scenario(scenario_cfg_2)
-
         job_1 = tp.submit(scenario_1)
         job_1 = job_1[scenario_1.p1.id][0]
-
-        job_2 = tp.submit(scenario_2)
-        job_2 = job_2[scenario_2.p2.id][0]
 
         # Export scenario 1
         tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_1")
@@ -398,6 +392,10 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
 
+        scenario_2 = tp.create_scenario(scenario_cfg_2)
+        job_2 = tp.submit(scenario_2)
+        job_2 = job_2[scenario_2.p2.id][0]
+
         # Export scenario 2
         scenario_2.export(pathlib.Path.cwd() / "./tmp/exp_scenario_2")
         assert sorted(os.listdir("./tmp/exp_scenario_2/data_nodes")) == sorted(
@@ -409,17 +407,17 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
 
-        # Export scenario 1 into the folder containing scenario 2 files
-        tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_2")
+        # Export scenario 2 into the folder containing scenario 1 files
+        tp.export_scenario(scenario_2.id, "./tmp/exp_scenario_1")
         # Should have the files as scenario 1 only
-        assert sorted(os.listdir("./tmp/exp_scenario_2/tasks")) == sorted([f"{scenario_1.t1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/pipelines")) == sorted([f"{scenario_1.p1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/scenarios")) == sorted([f"{scenario_1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_1/pipelines")) == sorted([f"{scenario_2.p2.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_2.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_2.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
 
         with pytest.raises(InvalidExportPath):
-            tp.export_scenario(scenario_1.id, Config.global_config.storage_folder)
+            tp.export_scenario(scenario_2.id, Config.global_config.storage_folder)
 
         shutil.rmtree("./tmp", ignore_errors=True)
 

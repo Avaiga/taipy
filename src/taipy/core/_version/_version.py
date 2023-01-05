@@ -10,18 +10,19 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from taipy.config import Config
+from taipy.config._config import _Config
 
 from ..common._entity import _Entity
 
 
 class _Version(_Entity):
     def __init__(self, id: str, config: Any) -> None:
-        self.id = id
-        self.config = config
-        self.creation_date = datetime.now()
+        self.id: str = id
+        self.config: _Config = config
+        self.creation_date: datetime = datetime.now()
 
     def __eq__(self, other):
         return self.id == other.id and self.__is_config_eq(other)

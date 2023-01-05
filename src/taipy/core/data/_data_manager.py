@@ -73,7 +73,7 @@ class _DataManager(_Manager[DataNode]):
         cls, data_node_config: DataNodeConfig, owner_id: Optional[str], parent_ids: Optional[Set[str]]
     ) -> DataNode:
         try:
-            version = _VersionManagerFactory._build_manager()._get_current_version()
+            version = _VersionManagerFactory._build_manager()._get_latest_version()
             props = data_node_config._properties.copy()
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
@@ -116,3 +116,8 @@ class _DataManager(_Manager[DataNode]):
     def _delete_all(cls):
         cls._clean_pickle_files(cls._get_all())
         super()._delete_all()
+
+    @classmethod
+    def _delete_by_version(cls, version_number: str):
+        cls._clean_pickle_files(cls._get_all(version_number))
+        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")  # type: ignore

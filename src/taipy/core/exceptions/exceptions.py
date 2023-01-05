@@ -240,8 +240,44 @@ class InvalidExportPath(Exception):
     """Raised if the export path is not valid."""
 
 
-class VersionAlreadyExists(Exception):
-    """Raised if it is trying to create a Version that has already exists."""
+class VersionConflictWithPythonConfig(Exception):
+    """Raised if the Config of the requested version is conflict with the current Python Config."""
+
+    def __init__(self, config_diff):
+        message = ""
+        dq = '"'
+
+        if added_items := config_diff["added_items"]:
+            message += f"Added {'objects' if len(added_items) > 1 else 'object'}:\n"
+
+            for diff in added_items:
+                ((entity_name, entity_id, attribute), added_object) = diff
+                message += f"\t{entity_name} {dq}{entity_id}{dq} {f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} added: {added_object}\n"
+
+            message += "\n"
+
+        if removed_items := config_diff["removed_items"]:
+            message += f"Removed {'objects' if len(removed_items) > 1 else 'object'}:\n"
+
+            for diff in removed_items:
+                ((entity_name, entity_id, attribute), removed_object) = diff
+                message += f"\t{entity_name} {dq}{entity_id}{dq} {f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} removed\n"
+
+            message += "\n"
+
+        if modified_items := config_diff["modified_items"]:
+            message += f"Modified {'objects' if len(modified_items) > 1 else 'object'}:\n"
+
+            for diff in modified_items:
+                ((entity_name, entity_id, attribute), (old_value, new_value)) = diff
+                message += f"\t{entity_name} {dq}{entity_id}{dq} {f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} modified: "
+                message += f"{old_value} -> {new_value}\n"
+
+            message += "\n"
+
+        message += "To override these changes, run your application with --override option."
+
+        self.message = message
 
 
 class NonExistingVersion(Exception):
@@ -249,3 +285,7 @@ class NonExistingVersion(Exception):
 
     def __init__(self, version_number: str):
         self.message = f"Version: {version_number} does not exist."
+
+
+class VersionIsNotProductionVersion(Exception):
+    """Raised if the version is not a production version."""

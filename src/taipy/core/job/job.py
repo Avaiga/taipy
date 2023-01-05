@@ -48,7 +48,7 @@ class Job(_Entity):
         status (Status^): The current status of this job.
         creation_date (datetime): The date of this job's creation.
         stacktrace (List[str]): The list of stacktraces of the exceptions raised during the execution.
-        version (str): The string indicates the application version of the job to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the job to instantiate. If not provided, the latest version is used.
     """
 
     _MANAGER_NAME = "job"
@@ -63,7 +63,7 @@ class Job(_Entity):
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
-        self._version = version or _VersionManagerFactory._build_manager()._get_current_version()
+        self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

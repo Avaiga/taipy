@@ -84,7 +84,7 @@ class _TaskManager(_Manager[Task]):
             if task := tasks_by_config.get((task_config, owner_id)):
                 tasks.append(task)
             else:
-                version = _VersionManagerFactory._build_manager()._get_current_version()
+                version = _VersionManagerFactory._build_manager()._get_latest_version()
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
                 task = Task(

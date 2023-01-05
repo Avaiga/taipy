@@ -17,9 +17,9 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from ._scheduler._dispatcher._job_dispatcher import _JobDispatcher
 from ._scheduler._scheduler import _Scheduler
 from ._scheduler._scheduler_factory import _SchedulerFactory
-from ._version._version_cli import version_cli
+from ._version._version_cli import _VersioningCLI
 from ._version._version_manager_factory import _VersionManagerFactory
-from .exceptions.exceptions import VersionAlreadyExists
+from .exceptions.exceptions import VersionConflictWithPythonConfig
 from .taipy import clean_all_entities_by_version
 
 
@@ -41,9 +41,8 @@ class Core:
         """
         Start a Core service. This method is blocking.
         """
-        cli_args = version_cli(standalone_mode=False)
-        if cli_args == 0:  # run --help command
-            exit()
+        _VersioningCLI._create_parser()
+        cli_args = _VersioningCLI._parse_arguments()
 
         self.__setup_versioning_module(*cli_args)
 
@@ -51,35 +50,40 @@ class Core:
             self._dispatcher = dispatcher
 
     def __setup_versioning_module(self, mode, _version_number, _override):
-        if mode == "experiment":
-            if _version_number:
-                curren_version_number = _version_number
-            else:
-                curren_version_number = str(uuid.uuid4())
-
-            override = _override
-            if override:
-                clean_all_entities_by_version(curren_version_number)
-
-        elif mode == "development":
+        if mode == "development":
             curren_version_number = _VersionManagerFactory._build_manager()._get_development_version()
-            _VersionManagerFactory._build_manager()._set_development_version(curren_version_number)
-            override = True
 
             clean_all_entities_by_version(curren_version_number)
             _TaipyLogger._get_logger().info(
                 f"Development mode: Clean all entities with version {curren_version_number}"
             )
 
+            _VersionManagerFactory._build_manager()._set_development_version(curren_version_number)
+
+        elif mode == "experiment":
+            if _version_number:
+                curren_version_number = _version_number
+            else:
+                curren_version_number = str(uuid.uuid4())
+            override = _override
+
+            try:
+                _VersionManagerFactory._build_manager()._set_experiment_version(curren_version_number, override)
+            except VersionConflictWithPythonConfig as e:
+                raise SystemExit(e.message)
+
         elif mode == "production":
-            curren_version_number = mode
-            override = True
+            if _version_number:
+                curren_version_number = _version_number
+            else:
+                curren_version_number = _VersionManagerFactory._build_manager()._get_latest_version()
+            override = _override
+
+            try:
+                _VersionManagerFactory._build_manager()._set_production_version(curren_version_number, override)
+            except VersionConflictWithPythonConfig as e:
+                raise SystemExit(e.message)
 
         else:
             _TaipyLogger._get_logger().error("Undefined execution mode.")
             return
-
-        try:
-            _VersionManagerFactory._build_manager()._set_current_version(curren_version_number, override)
-        except VersionAlreadyExists as e:
-            raise SystemExit(e)
