@@ -483,7 +483,7 @@ def clean_all_entities_by_version(version_number):
     try:
         version_number = version_manager._replace_version_number(version_number)
     except NonExistingVersion as e:
-        raise SystemExit(e)
+        raise SystemExit(e.message)
 
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
     _ScenarioManagerFactory._build_manager()._delete_by_version(version_number)
