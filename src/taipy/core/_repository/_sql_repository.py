@@ -23,13 +23,13 @@ from taipy.config.config import Config
 
 from ..exceptions.exceptions import MissingRequiredProperty, ModelNotFound
 from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
-from ._sql_model import Base, _TaipyModel
+from ._sql_model import Base, _TaipyModel, _TaipyVersion
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
 
 
-class _SQLRepository(_AbstractRepository[ModelType, Entity]):
+class _BaseSQLRepository(_AbstractRepository[ModelType, Entity]):
     @abstractmethod
     def _to_model(self, obj):
         """
@@ -44,19 +44,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         """
         ...
 
-    def __init__(
-        self,
-        model: Type[ModelType],
-        model_name: str,
-        to_model_fct: Callable,
-        from_model_fct: Callable,
-    ):
+    def __init__(self):
         properties = Config.global_config.repository_properties
-        self.model = model
-        self.model_name = model_name
-        self._to_model = to_model_fct  # type: ignore
-        self._from_model = from_model_fct  # type: ignore
-
         try:
             # More sql databases can be easily added in the future
             self.engine = create_engine(
@@ -72,15 +61,32 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         except KeyError:
             raise MissingRequiredProperty("Missing property db_location")
 
+
+class _SQLRepository(_BaseSQLRepository):
+    def __init__(
+        self,
+        model: Type[ModelType],
+        model_name: str,
+        to_model_fct: Callable,
+        from_model_fct: Callable,
+    ):
+
+        self.model = model
+        self.model_name = model_name
+        self._to_model = to_model_fct  # type: ignore
+        self._from_model = from_model_fct  # type: ignore
+        self._table = _TaipyModel
+        super().__init__()
+
     def load(self, model_id: str) -> Entity:
-        entry = self.session.query(_TaipyModel).filter_by(model_id=model_id).first()
+        entry = self.session.query(self._table).filter_by(model_id=model_id).first()
         if entry is None:
             raise ModelNotFound(self.model, model_id)  # type: ignore
         return self.__to_entity(entry)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
         try:
-            entries = self.session.query(_TaipyModel).filter_by(model_name=self.model_name)
+            entries = self.session.query(self._table).filter_by(model_name=self.model_name)
             return [self.__to_entity(e) for e in entries]
         except NoResultFound:
             return []
@@ -88,9 +94,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Entity]:
         try:
             entries = (
-                self.session.query(_TaipyModel)
+                self.session.query(self._table)
                 .filter_by(model_name=self.model_name)
-                .filter(_TaipyModel.document.contains(by))
+                .filter(self._table.document.contains(by))
             )
             return [self.__to_entity(e) for e in entries]
         except NoResultFound:
@@ -98,31 +104,31 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _save(self, entity: Entity):
         model = self._to_model(entity)
-        entry = self.session.query(_TaipyModel).filter_by(model_id=model.id).first()
+        entry = self.session.query(self._table).filter_by(model_id=model.id).first()
         if entry:
             self.__update_entry(entry, model)
             return
         self.__insert_model(model)
 
     def _delete(self, model_id: str):
-        number_of_deleted_entries = self.session.query(_TaipyModel).filter_by(model_id=model_id).delete()
+        number_of_deleted_entries = self.session.query(self._table).filter_by(model_id=model_id).delete()
         if not number_of_deleted_entries:
             raise ModelNotFound(str(self.model.__name__), model_id)
         self.session.commit()
 
     def _delete_all(self):
-        self.session.query(_TaipyModel).filter_by(model_name=self.model_name).delete()
+        self.session.query(self._table).filter_by(model_name=self.model_name).delete()
         self.session.commit()
 
     def _delete_many(self, ids: Iterable[str]):
-        self.session.execute(delete(_TaipyModel).where(_TaipyModel.model_id.in_(ids)))
+        self.session.execute(delete(self._table).where(self._table.model_id.in_(ids)))
         self.session.commit()
 
     def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Entity]:
         entry = (
-            self.session.query(_TaipyModel)
+            self.session.query(self._table)
             .filter_by(model_name=self.model_name)
-            .filter(_TaipyModel.document.contains(f'"{attribute}": "{value}"'))
+            .filter(self._table.document.contains(f'"{attribute}": "{value}"'))
         ).first()
         if not entry:
             return None
@@ -130,7 +136,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
         entities = iter(self.__get_entities_by_config_and_owner(config_id, owner_id))
-        return self.__to_entity(next(entities, None))
+        return self.__to_entity(next(entities, None))  # type: ignore
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
@@ -152,24 +158,24 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     ):
         if owner_id:
             query = (
-                self.session.query(_TaipyModel)
+                self.session.query(self._table)
                 .filter_by(model_name=self.model_name)
-                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
-                .filter(_TaipyModel.document.contains(f'"owner_id": "{owner_id}"'))
+                .filter(self._table.document.contains(f'"config_id": "{config_id}"'))
+                .filter(self._table.document.contains(f'"owner_id": "{owner_id}"'))
             )
         else:
             query = (
-                self.session.query(_TaipyModel)
+                self.session.query(self._table)
                 .filter_by(model_name=self.model_name)
-                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
-                .filter(_TaipyModel.document.contains('"owner_id": null'))
+                .filter(self._table.document.contains(f'"config_id": "{config_id}"'))
+                .filter(self._table.document.contains('"owner_id": null'))
             )
         if only_first:
             return query.first()
         return query.all()
 
     def __insert_model(self, model: ModelType):
-        entry = _TaipyModel(
+        entry = self._table(
             model_id=model.id,  # type: ignore
             model_name=self.model_name,
             document=json.dumps(
@@ -213,9 +219,93 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
         export_path = export_dir / f"{entity_id}.json"
 
-        entry = self.session.query(_TaipyModel).filter_by(model_id=entity_id).first()
+        entry = self.session.query(self._table).filter_by(model_id=entity_id).first()
         if entry is None:
             raise ModelNotFound(self.model, entity_id)  # type: ignore
 
         with open(export_path, "w", encoding="utf-8") as export_file:
             export_file.write(entry.document)
+
+
+class _SQLVersionBaseRepository(_BaseSQLRepository):
+    def __init__(
+        self,
+        model: Type[ModelType],
+        to_model_fct: Callable,
+        from_model_fct: Callable,
+    ):
+
+        self.model = model
+        self._to_model = to_model_fct  # type: ignore
+        self._from_model = from_model_fct  # type: ignore
+        self._table = _TaipyVersion
+        super().__init__()
+
+    def load(self, id: str) -> Entity:
+        entry = self.session.query(self._table).filter_by(id=id).first()
+        if entry is None:
+            raise ModelNotFound(self.model, id)  # type: ignore
+        return self.__to_entity(entry)
+
+    def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
+        try:
+            entries = self.session.query(self._table).all()
+            return [self.__to_entity(e) for e in entries]
+        except NoResultFound:
+            return []
+
+    def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Entity]:
+        try:
+            entries = self.session.query(self._table).filter(self._table.config.contains(by))
+            return [self.__to_entity(e) for e in entries]
+        except NoResultFound:
+            return []
+
+    def _save(self, entity: Entity):
+        model = self._to_model(entity)
+        entry = self.session.query(self._table).filter_by(id=model.id).first()
+        if entry:
+            self.__update_entry(entry, model)
+            return
+        self.__insert_model(model)
+
+    def _delete(self, id: str):
+        number_of_deleted_entries = self.session.query(self._table).filter_by(id=id).delete()
+        if not number_of_deleted_entries:
+            raise ModelNotFound(str(self.model.__name__), id)
+        self.session.commit()
+
+    def _delete_all(self):
+        self.session.query(self._table).all().delete()
+        self.session.commit()
+
+    def _delete_many(self, ids: Iterable[str]):
+        self.session.execute(delete(self._table).where(self._table.id.in_(ids)))
+        self.session.commit()
+
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Entity]:
+        entry = (
+            self.session.query(self._table).filter(self._table.config.contains(f'"{attribute}": "{value}"'))
+        ).first()
+        if not entry:
+            return None
+        return self.__to_entity(entry)
+
+    def __insert_model(self, model: ModelType):
+        entry = self._table(
+            id=model.id, config=Config._to_json(model.config), creation_date=model.creation_date  # type: ignore
+        )
+        self.session.add(entry)
+        self.session.commit()
+
+    def __update_entry(self, entry, model):
+        entry.config = Config._to_json(model.config)
+        self.session.commit()
+
+    def __to_entity(self, entry: _TaipyVersion) -> Entity:
+        return self.__model_to_entity(entry.config) if entry else None
+
+    def __model_to_entity(self, file_content):
+        data = json.loads(file_content, cls=_CustomDecoder)
+        model = self.model.from_dict(data)  # type: ignore
+        return self._from_model(model)

@@ -10,9 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 
+from datetime import datetime
 from typing import Union
 
-from sqlalchemy import Column, Integer, Text
+from sqlalchemy import Boolean, Column, Integer, Text
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -42,7 +43,23 @@ class _TaipyVersion(Base):  # type: ignore
 
     id = Column(Text, primary_key=True)
     config = Column(Text)
+    creation_date = Column(Text)
+    is_production = Column(Boolean)
+    is_development = Column(Boolean)
+    is_latest = Column(Boolean)
 
-    def __int__(self, id: str, config: Json):
+    def __int__(
+        self,
+        id: str,
+        config: Json,
+        creation_date: str,
+        is_production: bool = False,
+        is_development: bool = False,
+        is_latest: bool = False,
+    ):
         self.id = id
         self.config = config
+        self.creation_date = creation_date
+        self.is_production = is_production
+        self.is_development = is_development
+        self.latest = is_latest
