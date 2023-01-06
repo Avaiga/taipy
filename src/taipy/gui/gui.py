@@ -1565,11 +1565,19 @@ class Gui:
         ]
         self._flask_blueprint.append(extension_bp)
 
-        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
+        _conf_webapp_path = pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
+        _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
+        if _conf_webapp_path:
+            if _conf_webapp_path.is_dir():
+                _webapp_path = str(_conf_webapp_path.resolve())
+                warnings.warn(f"Now using webapp_path: '{_conf_webapp_path}'.")
+            else:
+                warnings.warn(f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'.")
+
         self._flask_blueprint.append(
             self._server._get_default_blueprint(
-                static_folder=f"{_absolute_path}{os.path.sep}webapp",
-                template_folder=f"{_absolute_path}{os.path.sep}webapp",
+                static_folder=_webapp_path,
+                template_folder=_webapp_path,
                 title=self._get_config("title", "Taipy App"),
                 favicon=self._get_config("favicon", "/favicon.png"),
                 root_margin=self._get_config("margin", None),

@@ -42,5 +42,6 @@ default_config: Config = {
     "use_arrow": False,
     "use_reloader": False,
     "watermark": "Taipy inside",
+    "webapp_path": None,
     "port": 5000,
 }
