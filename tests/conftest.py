@@ -284,6 +284,7 @@ def close_sql_database_session_connection():
     _TaskRepositoryFactory._build_repository().repo.session.close_all()
     _JobRepositoryFactory._build_repository().repo.session.close_all()
     _CycleRepositoryFactory._build_repository().repo.session.close_all()
+    _VersionRepositoryFactory._build_repository().repo.session.close_all()
 
 
 def init_config():
