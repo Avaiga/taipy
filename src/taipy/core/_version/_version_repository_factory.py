@@ -11,12 +11,18 @@
 
 from typing import Any, Union
 
+from taipy.config import Config
+
 from .._repository._repository_factory import _RepositoryFactory
 from ..common._utils import _load_fct
 from ._version_fs_repository import _VersionFSRepository
+from ._version_sql_repository import _VersionSQLRepository
 
 
 class _VersionRepositoryFactory(_RepositoryFactory):
+
+    _REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
+
     @classmethod
     def _build_repository(cls) -> Union[_VersionFSRepository, Any]:  # type: ignore
         if cls._using_enterprise():
@@ -24,4 +30,4 @@ class _VersionRepositoryFactory(_RepositoryFactory):
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_repository_factory", "_VersionRepositoryFactory"
             )
             return factory._build_repository()  # type: ignore
-        return _VersionFSRepository()
+        return cls._REPOSITORY_MAP.get(Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default"))()  # type: ignore
