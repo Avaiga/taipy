@@ -175,3 +175,7 @@ class _VersionManager(_Manager[_Version]):
             return version.id
 
         raise NonExistingVersion(version_number)
+
+    @classmethod
+    def _delete_entities_of_multiple_types(cls, _entity_ids):
+        return NotImplementedError
