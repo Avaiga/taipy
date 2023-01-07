@@ -12,6 +12,7 @@
 import uuid
 from typing import Optional
 
+from taipy.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._scheduler._dispatcher._job_dispatcher import _JobDispatcher
@@ -48,6 +49,21 @@ class Core:
 
         if dispatcher := _SchedulerFactory._build_dispatcher(force_restart=force_restart):
             self._dispatcher = dispatcher
+
+        if Config.job_config.is_development:
+            _Scheduler._check_and_execute_jobs_if_development_mode()
+
+    def stop(self):
+        """
+        Stop the Core service.
+
+        This function stops the dispatcher and unblock the Config for update.
+        """
+        Config.unblock_update()
+
+        if self._dispatcher:
+            self._dispatcher = _SchedulerFactory._remove_dispatcher()
+            _TaipyLogger._get_logger().info("Core service has been stopped.")
 
     def __setup_versioning_module(self, mode, _version_number, _override):
         if mode == "development":

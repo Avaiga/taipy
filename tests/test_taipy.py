@@ -19,6 +19,7 @@ import pytest
 
 import src.taipy.core.taipy as tp
 from src.taipy.core import Core
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
@@ -84,6 +85,16 @@ class TestTaipy:
         with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mck:
             tp.submit(task, True, True, 60)
             mck.assert_called_once_with(task, force=True, wait=True, timeout=60)
+
+    def test_warning_no_core_service_running(self, scenario):
+        _SchedulerFactory._remove_dispatcher()
+
+        with pytest.warns(ResourceWarning) as warning:
+            with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit"):
+                tp.submit(scenario)
+
+        assert len(warning) == 1
+        assert warning[0].message.args[0] == "The Core service is NOT running"
 
     def test_get_tasks(self):
         with mock.patch("src.taipy.core.task._task_manager._TaskManager._get_all") as mck:
@@ -251,8 +262,10 @@ class TestTaipy:
         pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
         scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
 
+        Core().run()
+
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        tp.submit(scenario_1, wait=True)
+        tp.submit(scenario_1)
 
         with pytest.raises(ConfigurationUpdateBlocked):
             Config.configure_scenario("block_scenario", pipeline_cfg_1)

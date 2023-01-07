@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from importlib import util
 from typing import Optional, Type
 
@@ -26,6 +27,7 @@ class _SchedulerFactory:
     _TAIPY_ENTERPRISE_CORE_SCHEDULER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._scheduler"
     _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._dispatcher"
     __STANDADLONE_JOB_DISPATCHER_TYPE = "_StandaloneJobDispatcher"
+
     _scheduler: Optional[_Scheduler] = None
     _dispatcher: Optional[_JobDispatcher] = None
 
@@ -53,6 +55,17 @@ class _SchedulerFactory:
             return cls.__build_development_job_dispatcher()
         else:
             raise ModeNotAvailable(f"Job mode {Config.job_config.mode} is not available.")
+
+    @classmethod
+    def _remove_dispatcher(cls) -> Optional[_JobDispatcher]:
+        if isinstance(cls._dispatcher, _StandaloneJobDispatcher) and not isinstance(
+            cls._dispatcher, _DevelopmentJobDispatcher
+        ):
+            cls._dispatcher.stop()
+
+        cls._dispatcher = None
+
+        return cls._dispatcher
 
     @classmethod
     def __build_standalone_job_dispatcher(cls, force_restart=False) -> Optional[_JobDispatcher]:

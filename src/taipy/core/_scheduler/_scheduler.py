@@ -77,7 +77,7 @@ class _Scheduler(_AbstractScheduler):
                     res.append(cls._submit_task(task, submit_id, callbacks=callbacks, force=force))
 
         if Config.job_config.is_development:
-            cls.__check_and_execute_jobs_if_development_mode()
+            cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
                 cls.__wait_until_job_finished(res, timeout=timeout)
@@ -109,7 +109,7 @@ class _Scheduler(_AbstractScheduler):
             job = cls._submit_task(task, submit_id, callbacks, force)
 
         if Config.job_config.is_development:
-            cls.__check_and_execute_jobs_if_development_mode()
+            cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
                 cls.__wait_until_job_finished(job, timeout=timeout)
@@ -308,8 +308,9 @@ class _Scheduler(_AbstractScheduler):
                     job.abandoned()
 
     @staticmethod
-    def __check_and_execute_jobs_if_development_mode():
+    def _check_and_execute_jobs_if_development_mode():
 
         from ._scheduler_factory import _SchedulerFactory
 
-        _SchedulerFactory._build_dispatcher()._execute_jobs_synchronously()
+        if dispatcher := _SchedulerFactory._dispatcher:
+            dispatcher._execute_jobs_synchronously()

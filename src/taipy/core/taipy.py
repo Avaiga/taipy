@@ -19,6 +19,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._version._version_manager_factory import _VersionManagerFactory
 from .common._entity import _Entity
+from .common._warnings import _warn_no_core_service
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from .config.pipeline_config import PipelineConfig
 from .config.scenario_config import ScenarioConfig
@@ -58,6 +59,7 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
         return _DataManagerFactory._build_manager()._set(entity)
 
 
+@_warn_no_core_service()
 def submit(
     entity: Union[Scenario, Pipeline, Task],
     force: bool = False,
