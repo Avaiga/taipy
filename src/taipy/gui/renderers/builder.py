@@ -544,6 +544,32 @@ class _Builder:
                         col_desc["style"] = value
                 else:
                     warnings.warn(f"{self.__element_name} style[{k}] is not in the list of displayed columns")
+            if tooltip := self.__attributes.get("tooltip"):
+                if callable(tooltip):
+                    value = self.__hashes.get("tooltip")
+                elif isinstance(tooltip, str):
+                    value = tooltip.strip()
+                else:
+                    value = None
+                if value in col_types.keys():
+                    warnings.warn(f"{self.__element_name} tooltip={value} cannot be a column's name")
+                elif value:
+                    self.set_attribute("tooltip", value)
+            tooltips = self.get_name_indexed_property("tooltip")
+            for k, v in tooltips.items():  # pragma: no cover
+                if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
+                    if callable(v):
+                        value = self.__hashes.get(f"tooltip[{k}]")
+                    elif isinstance(v, str):
+                        value = v.strip()
+                    else:
+                        value = None
+                    if value in col_types.keys():
+                        warnings.warn(f"{self.__element_name} tooltip[{k}]={value} cannot be a column's name")
+                    elif value:
+                        col_desc["tooltip"] = value
+                else:
+                    warnings.warn(f"{self.__element_name} tooltip[{k}] is not in the list of displayed columns")
             self.__attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
         return self

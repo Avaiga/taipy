@@ -550,7 +550,8 @@ export const createRequestTableUpdateAction = (
     sort?: string,
     aggregates?: string[],
     applies?: Record<string, unknown>,
-    styles?: Record<string, unknown>,
+    styles?: Record<string, string>,
+    tooltips?: Record<string, string>,
     handleNan?: boolean,
     filters?: Array<FilterDesc>
 ): TaipyAction =>
@@ -562,6 +563,7 @@ export const createRequestTableUpdateAction = (
         aggregates: aggregates,
         applies: applies,
         styles: styles,
+        tooltips: tooltips,
         handlenan: handleNan,
         filters: filters,
     });
@@ -577,7 +579,8 @@ export const createRequestInfiniteTableUpdateAction = (
     sort?: string,
     aggregates?: string[],
     applies?: Record<string, unknown>,
-    styles?: Record<string, unknown>,
+    styles?: Record<string, string>,
+    tooltips?: Record<string, string>,
     handleNan?: boolean,
     filters?: Array<FilterDesc>
 ): TaipyAction =>
@@ -590,6 +593,7 @@ export const createRequestInfiniteTableUpdateAction = (
         aggregates: aggregates,
         applies: applies,
         styles: styles,
+        tooltips: tooltips,
         handlenan: handleNan,
         filters: filters,
     });

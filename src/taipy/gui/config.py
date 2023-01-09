@@ -58,6 +58,7 @@ ConfigParameter = t.Literal[
     "use_arrow",
     "use_reloader",
     "watermark",
+    "webapp_path",
     "port",
 ]
 
@@ -93,6 +94,7 @@ Config = t.TypedDict(
         "use_arrow": bool,
         "use_reloader": bool,
         "watermark": t.Optional[str],
+        "webapp_path": t.Optional[str],
         "port": int,
     },
     total=False,
@@ -167,6 +169,10 @@ class _Config(object):
             config["use_reloader"] = False
         if args.ngrok_token:
             config["ngrok_token"] = args.ngrok_token
+        if args.webapp_path:
+            config["webapp_path"] = args.webapp_path
+        elif os.environ.get("TAIPY_GUI_WEBAPP_PATH"):
+            config["webapp_path"] = os.environ.get("TAIPY_GUI_WEBAPP_PATH")
 
     def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         config = self.config
