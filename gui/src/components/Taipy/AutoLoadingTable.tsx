@@ -59,6 +59,7 @@ import {
     DEFAULT_SIZE,
     OnRowSelection,
     getRowIndex,
+    getTooltip,
 } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -116,7 +117,7 @@ const Row = ({
             {colsOrder.map((col, cidx) => (
                 <EditableCell
                     key={"val" + index + "-" + cidx}
-                    className={getClassName(rows[index], columns[col].style)}
+                    className={getClassName(rows[index], columns[col].style, col)}
                     colDesc={columns[col]}
                     value={rows[index][col]}
                     formatConfig={formatConfig}
@@ -126,6 +127,7 @@ const Row = ({
                     onSelection={onRowSelection}
                     nanValue={columns[col].nanValue || nanValue}
                     tableCellProps={cellProps[cidx]}
+                    tooltip={getTooltip(rows[index], columns[col].tooltip, col)}
                 />
             ))}
         </TableRow>
@@ -233,7 +235,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns, styles, handleNan, filter] = useMemo(() => {
+    const [colsOrder, columns, styles, tooltips, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (props.columns) {
             try {
@@ -249,29 +251,38 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     if (typeof col.notEditable != "boolean") {
                         col.notEditable = !editable;
                     }
+                    if (col.tooltip === undefined) {
+                        col.tooltip = props.tooltip;
+                    }
                 });
                 addDeleteColumn(
                     (active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
                     columns
                 );
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
-                const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
+                const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (columns[col].style) {
-                        pv[columns[col].dfid] = columns[col].style;
+                        pv.styles = pv.styles || {};
+                        pv.styles[columns[col].dfid] = columns[col].style as string;
                     }
                     hNan = hNan || !!columns[col].nanValue;
+                    if (columns[col].tooltip) {
+                        pv.tooltips = pv.tooltips || {};
+                        pv.tooltips[columns[col].dfid] = columns[col].tooltip as string;
+                    }
                     return pv;
                 }, {});
                 if (props.lineStyle) {
-                    styles[LINE_STYLE] = props.lineStyle;
+                    styTt.styles = styTt.styles || {};
+                    styTt.styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, columns, styles, hNan, filter];
+                return [colsOrder, columns, styTt.styles, styTt.tooltips, hNan, filter];
             } catch (e) {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[], {}, {}, hNan, false];
-    }, [active, editable, onAdd, onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
+        return [[], {} as Record<string, ColumnDesc>, {} as Record<string, string>, {} as Record<string, string>, hNan, false];
+    }, [active, editable, onAdd, onDelete, props.columns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -331,13 +342,14 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         aggregates,
                         applies,
                         styles,
+                        tooltips,
                         handleNan,
                         appliedFilters
                     )
                 );
             });
         },
-        [aggregates, styles, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, appliedFilters, dispatch]
+        [aggregates, styles, tooltips, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, appliedFilters, dispatch]
     );
 
     const onAddRowClick = useCallback(

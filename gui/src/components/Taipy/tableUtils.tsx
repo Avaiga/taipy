@@ -47,6 +47,9 @@ export interface ColumnDesc {
     /** The name of the column that holds the CSS classname to
      *  apply to the cells. */
     style?: string;
+    /** The name of the column that holds the tooltip to
+     *  show on the cells. */
+    tooltip?: string;
     /** The value that would replace a NaN value. */
     nanValue?: string;
     /** The TimeZone identifier used if the type is `date`. */
@@ -98,6 +101,8 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     editable?: boolean;
     defaultEditable?: boolean;
     lineStyle?: string;
+    tooltip?: string;
+    cellTooltip?: string;
     nanValue?: string;
     filter?: boolean;
     size?: "small" | "medium";
@@ -148,6 +153,7 @@ interface EditableCellProps {
     onSelection?: OnRowSelection;
     nanValue?: string;
     className?: string;
+    tooltip?: string;
     tableCellProps?: Partial<TableCellProps>;
 }
 
@@ -218,8 +224,11 @@ export const addDeleteColumn = (nbToRender: number, columns: Record<string, Colu
     return columns;
 };
 
-export const getClassName = (row: Record<string, unknown>, style?: string) =>
-    style ? (row[style] as string) : undefined;
+export const getClassName = (row: Record<string, unknown>, style?: string, col?: string) =>
+    style ? ((col && row[`tps__${col}__${style}`]) || row[style]) as string : undefined;
+
+export const getTooltip = (row: Record<string, unknown>, tooltip?: string, col?: string) =>
+    tooltip ? ((col && row[`tpt__${col}__${tooltip}`]) || row[tooltip]) as string : undefined;
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
@@ -234,6 +243,7 @@ export const EditableCell = (props: EditableCellProps) => {
         onSelection,
         nanValue,
         className,
+        tooltip,
         tableCellProps = {},
     } = props;
     const [val, setVal] = useState(value);
@@ -318,7 +328,7 @@ export const EditableCell = (props: EditableCellProps) => {
     }, [onSelection, rowIndex]);
 
     return (
-        <TableCell {...getCellProps(colDesc, tableCellProps)} className={className}>
+        <TableCell {...getCellProps(colDesc, tableCellProps)} className={className} title={tooltip}>
             {edit ? (
                 colDesc.type?.startsWith("bool") ? (
                     <Box sx={cellBoxSx}>

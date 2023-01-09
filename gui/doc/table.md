@@ -28,7 +28,7 @@ variable _data_ (all columns will be displayed), you can use the following conte
         ```
         <|{data}|table|>
         ```
-  
+
     === "HTML"
 
         ```html
@@ -44,7 +44,7 @@ variable _data_ (all columns will be displayed), you can use the following conte
         ```
         <|{data}|table|columns=Col 1;Col 2;Col 3|page_size=10|page_size_options=10;30;100|date_format=eee dd MMM yyyy|not allow_all_rows|show_all=No|auto_loading=False|width=100vw|height=100vw|selected={selection}|>
         ```
-  
+
     === "HTML"
 
         ```html
@@ -77,7 +77,7 @@ The value of this property, which is a string, can be:
         ```
         <|{data}|table|group_by[Group column]|apply[Apply column]=count|>
         ```
-  
+
     === "HTML"
 
         ```html
@@ -95,16 +95,17 @@ specific cells.
 The signature of this function depends on which `style` property you use:
 
    - `style`: this applies to entire rows.
-     The given function expects three parameters:
+     The given function expects three optional parameters:
      - _state_: the current state
      - _index_: the index of the row in this table
-     - _row_ (optional): all the values for this row
+     - _row_: all the values for this row
    - `style[_column_name_]`: this applies to a specific cell.
-     The given function expects four parameters:
+     The given function expects five optional parameters:
      - _state_: the current state
      - _value_: the value of the cell
-     - _index_ (optional): the index of the row of this cell
-     - _column_name_ (optional): the name of the column for this cell
+     - _index_: the index of the row in this table
+     - _row_: all the values for this row
+     - _column_name_: the name of the column for this cell
 
 Based on these parameters, the function must return a string that defines a CSS class name that will
 be added to the CSS classes for this table row or this specific cell.
@@ -118,7 +119,7 @@ You can then add the definition of this class in your CSS file.
         ```
         <|{data}|table|style={lambda state, idx, row: "red-row" if idx % 2 == 0 else "blue-row"}|>
         ```
-  
+
     === "HTML"
 
         ```html
@@ -135,3 +136,33 @@ Css definition
 }
 ```
 
+### Cell Tooltip
+
+You can specify a tooltip for specific table cells.
+
+When Taipy creates the cells, it can add a specific tooltip that you would have set as the
+return value of the function set to the `tooltip` or `tooltip[_column_name_]` property .
+
+The signature of this function expects five optional parameters:
+     - _state_: the current state
+     - _value_: the value of the cell
+     - _index_: the index of the row in this table
+     - _row_: all the values for this row
+     - _column_name_: the name of the column for this cell
+
+Based on these parameters, the function must return a string that defines a tooltip that will
+be added to the cell.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{data}|table|tooltip={lambda state, val, idx: "some tooltip" if idx % 2 == 0 else "some other tooltip"}|>
+        ```
+
+    === "HTML"
+
+        ```html
+        <taipy:table data="{data}" tooltip="{lambda state, idx, col: 'some tooltip' if idx % 2 == 0 else 'some other tooltip'}" />
+        ```

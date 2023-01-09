@@ -41,7 +41,7 @@ class _PandasDataAccessor(_DataAccessor):
         return [t.__name__ for t in _PandasDataAccessor.__types]  # type: ignore
 
     @staticmethod
-    def __style_function(
+    def __user_function(
         row: pd.Series, gui: Gui, column_name: t.Optional[str], user_function: t.Callable, function_name: str
     ) -> str:  # pragma: no cover
         args = []
@@ -53,7 +53,7 @@ class _PandasDataAccessor(_DataAccessor):
         try:
             return str(gui._call_function_with_state(user_function, args))
         except Exception as e:
-            warnings.warn(f"Exception raised when calling user style function {function_name}\n{e}")
+            warnings.warn(f"Exception raised when calling user function {function_name}\n{e}")
         return ""
 
     def __is_date_column(self, data: pd.DataFrame, col_name: str) -> bool:
@@ -61,7 +61,7 @@ class _PandasDataAccessor(_DataAccessor):
         return len(col_types[col_types.astype(str).str.startswith("datetime")]) > 0  # type: ignore
 
     def __build_transferred_cols(
-        self, gui: Gui, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
+        self, gui: Gui, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None, tooltips: t.Optional[t.Dict[str, str]] = None
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
             col_types = data.dtypes[data.dtypes.index.astype(str).isin(payload_cols)]
@@ -74,13 +74,25 @@ class _PandasDataAccessor(_DataAccessor):
             data = data.copy()
             is_copied = True
             for k, v in styles.items():
-                applied = False
+                col_applied = False
                 func = gui._get_user_function(v)
                 if callable(func):
-                    applied = self.__apply_user_function(gui, func, k if k in cols else None, v, data)
-                if not applied:
+                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, data, "tps__")
+                if not col_applied:
                     data[v] = v
-                cols.append(v)
+                cols.append(col_applied or v)
+        if tooltips:
+            # copy the df so that we don't "mess" with the user's data
+            if not is_copied:
+                # copy the df so that we don't "mess" with the user's data
+                data = data.copy()
+            is_copied = True
+            for k, v in tooltips.items():
+                col_applied = False
+                func = gui._get_user_function(v)
+                if callable(func):
+                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, data, "tpt__")
+                cols.append(col_applied or v)
         # deal with dates
         datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()  # type: ignore
         if len(datecols) != 0:
@@ -109,18 +121,18 @@ class _PandasDataAccessor(_DataAccessor):
         return data
 
     def __apply_user_function(
-        self, gui: Gui, user_function: t.Callable, column_name: t.Optional[str], function_name: str, data: pd.DataFrame
+        self, gui: Gui, user_function: t.Callable, column_name: t.Optional[str], function_name: str, data: pd.DataFrame, prefix: t.Optional[str]
     ):
-        arg_count = user_function.__code__.co_argcount
-        if arg_count > 1:
-            data[function_name] = data.apply(
-                _PandasDataAccessor.__style_function,
+        try:
+            new_col_name = f"{prefix}{column_name}__{function_name}" if column_name else function_name
+            data[new_col_name] = data.apply(
+                _PandasDataAccessor.__user_function,
                 axis=1,
                 args=(gui, column_name, user_function, function_name),
             )
-            return True
-        else:
-            warnings.warn(f"Style function {function_name} should take at least a value as second argument")
+            return new_col_name
+        except Exception as e:
+            warnings.warn(f"Exception raised when applying user function {function_name}.\n{e}")
         return False
 
     def __format_data(
@@ -271,7 +283,7 @@ class _PandasDataAccessor(_DataAccessor):
                     new_indexes = slice(start, end + 1)  # type: ignore
             else:
                 new_indexes = slice(start, end + 1)  # type: ignore
-            value = self.__build_transferred_cols(gui, columns, value.iloc[new_indexes], styles=payload.get("styles"))
+            value = self.__build_transferred_cols(gui, columns, value.iloc[new_indexes], styles=payload.get("styles"), tooltips=payload.get("tooltips"))
             dictret = self.__format_data(
                 value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
             )

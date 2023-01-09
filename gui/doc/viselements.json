@@ -900,6 +900,16 @@
             "doc": "Allows the styling of table cells.\nSee <a href=\"#styling\">below</a> for details."
           },
           {
+            "name": "tooltip",
+            "type": "str",
+            "doc": "The name of the function that will calculate the cell tooltips.\nSee <a href=\"#cell%20tooltip\">below</a> for details."
+          },
+          {
+            "name": "tooltip[<i>col_name</i>]",
+            "type": "str",
+            "doc": "The name of the function that will calculate the cell tooltips.\nSee <a href=\"#cell%20tooltip\">below</a> for details."
+          },
+          {
             "name": "width",
             "type": "str|int|float",
             "default_value": "\"100vw\"",
