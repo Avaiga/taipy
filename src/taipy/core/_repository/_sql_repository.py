@@ -62,7 +62,21 @@ class _BaseSQLRepository(_AbstractRepository[ModelType, Entity]):
             raise MissingRequiredProperty("Missing property db_location")
 
 
-class _SQLRepository(_BaseSQLRepository):
+class _TaipyModelTable(_BaseSQLRepository):
+    @abstractmethod
+    def _to_model(self, obj):
+        """
+        Converts the object to be saved to its model.
+        """
+        ...
+
+    @abstractmethod
+    def _from_model(self, model):
+        """
+        Converts a model to its functional object.
+        """
+        ...
+
     def __init__(
         self,
         model: Type[ModelType],
@@ -227,7 +241,21 @@ class _SQLRepository(_BaseSQLRepository):
             export_file.write(entry.document)
 
 
-class _SQLVersionBaseRepository(_BaseSQLRepository):
+class _TaipyVersionTable(_BaseSQLRepository):
+    @abstractmethod
+    def _to_model(self, obj):
+        """
+        Converts the object to be saved to its model.
+        """
+        ...
+
+    @abstractmethod
+    def _from_model(self, model):
+        """
+        Converts a model to its functional object.
+        """
+        ...
+
     def __init__(
         self,
         model: Type[ModelType],
@@ -276,7 +304,7 @@ class _SQLVersionBaseRepository(_BaseSQLRepository):
         self.session.commit()
 
     def _delete_all(self):
-        self.session.query(self._table).all().delete()
+        self.session.query(self._table).delete()
         self.session.commit()
 
     def _delete_many(self, ids: Iterable[str]):
@@ -309,3 +337,121 @@ class _SQLVersionBaseRepository(_BaseSQLRepository):
         data = json.loads(file_content, cls=_CustomDecoder)
         model = self.model.from_dict(data)  # type: ignore
         return self._from_model(model)
+
+    def _set_latest_version(self, version_number):
+        version = self.load(version_number)
+        version.is_latest = True
+
+        if old_latest := self.session.query(self._table).filter_by(is_latest=True).first():
+            old_latest.is_latest = False
+        self.session.commit()
+
+    def _get_latest_version(self):
+        if latest := self.session.query(self._table).filter_by(is_latest=True).first():
+            return latest.id
+        return ""
+
+    def _set_development_version(self, version_number):
+        version = self.load(version_number)
+        version.is_development = True
+
+        if old_development := self.session.query(self._table).filter_by(is_development=True).first():
+            old_development.is_development = False
+
+        self._set_latest_version(version_number)
+
+        self.session.commit()
+
+    def _get_development_version(self):
+        if development := self.session.query(self._table).filter_by(is_development=True).first():
+            return development.id
+        return ""
+
+    def _set_production_version(self, version_number):
+        version = self.load(version_number)
+        version.is_production = True
+
+        self._set_latest_version(version_number)
+
+        self.session.commit()
+
+    def _get_production_version(self):
+        if productions := self.session.query(self._table).filter_by(is_production=True).all():
+            return [p.id for p in productions]
+        return []
+
+    def _delete_production_version(self, version_number):
+        version = self.load(version_number)
+        version.is_production = False
+
+        self.session.commit()
+
+
+class _SQLRepository(_BaseSQLRepository):
+    def __init__(
+        self,
+        model: Type[ModelType],
+        model_name: str,
+        to_model_fct: Callable,
+        from_model_fct: Callable,
+    ):
+        self._table = (
+            _TaipyVersionTable(model, to_model_fct, from_model_fct)
+            if model_name == "version"
+            else _TaipyModelTable(model, model_name, to_model_fct, from_model_fct)
+        )
+        super().__init__()
+
+    def load(self, model_id: str) -> Entity:
+        return self._table.load(model_id)
+
+    def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
+        return self._table._load_all(version_number)
+
+    def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Entity]:
+        return self._table._load_all_by(by, version_number)
+
+    def _save(self, entity: Entity):
+        self._table._save(entity)
+
+    def _delete(self, model_id: str):
+        self._table._delete(model_id)
+
+    def _delete_all(self):
+        self._table._delete_all()
+
+    def _delete_many(self, ids: Iterable[str]):
+        self._table._delete_many(ids)
+
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Entity]:
+        return self._table._search(attribute, value, version_number)
+
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
+        self._table._export(entity_id, folder_path)
+
+    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
+        return self._table._get_by_config_and_owner_id(config_id, owner_id)
+
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
+        return self._table._get_by_configs_and_owner_ids(configs_and_owner_ids)
+
+    def _set_latest_version(self, version_number):
+        self._table._set_latest_version(version_number)
+
+    def _get_latest_version(self):
+        return self._table._get_latest_version()
+
+    def _set_development_version(self, version_number):
+        self._table._set_development_version(version_number)
+
+    def _get_development_version(self):
+        return self._table._get_development_version()
+
+    def _set_production_version(self, version_number):
+        self._table._set_production_version(version_number)
+
+    def _get_production_version(self):
+        return self._table._get_production_version()
+
+    def _delete_production_version(self, version_number):
+        self._table._delete_production_version(version_number)
