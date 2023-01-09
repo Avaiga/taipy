@@ -596,11 +596,12 @@ class _Builder:
         for prop in _Chart_iprops:
             values = trace[prop.value]
             if isinstance(values, (list, tuple)) and len(values):
+                prop_name = prop.name[1:] if prop.name[0] == "_" else prop.name
                 for idx, val in enumerate(values):
                     if idx == 0:
                         trace[prop.value] = val
                     if val is not None:
-                        indexed_prop = f"{prop.name}[{idx + 1}]"
+                        indexed_prop = f"{prop_name}[{idx + 1}]"
                         if self.__attributes.get(indexed_prop) is None:
                             self.__attributes[indexed_prop] = val
         # marker selected_marker options
