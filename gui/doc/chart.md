@@ -9,25 +9,27 @@ exposes the Plotly components through the `chart` control and heavily depends on
 the underlying implementation.
 
 The core principles of how to create charts in Taipy are explained in the
-[Basic concepts](charts/basics.md) page.
+[Basic concepts](charts/basics.md) section.
+
+# Chart types catalog
 
 Because there are so many different ways of representing data, we have sorted
 the chart types supported by Taipy by application category:
 
 <style>
-.h2 {
+.h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.h2 a {
+.h3 a {
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
   display: flex;
   align-items: center;
 }
-.h2 a svg{
+.h3 a svg {
     fill: #FE462B;
     max-height: 100%;
     width: 1.125em;
@@ -68,7 +70,7 @@ the chart types supported by Taipy by application category:
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    font-size: 14px;
+    font-size: 16px;
 }
 .list a svg {
     fill: var(--md-typeset-a-color);
@@ -83,7 +85,7 @@ the chart types supported by Taipy by application category:
     </symbol>
 </svg>
 
-<h2 class="h2">Basic charts</h2>
+<h3 class="h3">Basic charts</h3>
 <ul class="list">
     <li><a href="../charts/line">
         <span>Line charts<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
@@ -100,11 +102,6 @@ the chart types supported by Taipy by application category:
         <img src="../charts/home-bar-d.png"  class="visible-dark" />
         <img src="../charts/home-bar-l.png"  class="visible-light" />
       </a></li>
-    <li><a href="../charts/pie">
-        <span>Pie charts<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
-        <img src="../charts/home-pie-d.png"  class="visible-dark" />
-        <img src="../charts/home-pie-l.png"  class="visible-light" />
-      </a></li>
     <li><a href="../charts/bubble">
         <span>Bubble charts<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
         <img src="../charts/home-bubble-d.png"  class="visible-dark" />
@@ -115,11 +112,16 @@ the chart types supported by Taipy by application category:
         <img src="../charts/home-filled-area-d.png"  class="visible-dark" />
         <img src="../charts/home-filled-area-l.png"  class="visible-light" />
       </a></li>
+    <li><a href="../charts/pie">
+        <span>Pie charts<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
+        <img src="../charts/home-pie-d.png"  class="visible-dark" />
+        <img src="../charts/home-pie-l.png"  class="visible-light" />
+      </a></li>
     <!-- Sunburst charts - sunburst -->
     <!-- Sankey diagram  - sankey   -->
 </ul>
 
-<h2 class="h2">Statistical charts</h2>
+<h3 class="h3">Statistical charts</h3>
 <ul class="list">
     <li><a href="../charts/histogram">
         <span>Histograms<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
@@ -137,7 +139,7 @@ the chart types supported by Taipy by application category:
         <img src="../charts/home-error-bar-l.png"  class="visible-light" />
       </a></li>
     <li><a href="../charts/continuous-error">
-        <span>Continuous error bars<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
+        <span>Continuous error<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
         <img src="../charts/home-continuous-error-d.png"  class="visible-dark" />
         <img src="../charts/home-continuous-error-l.png"  class="visible-light" />
       </a></li>
@@ -152,7 +154,7 @@ the chart types supported by Taipy by application category:
     <!-- Contour plots - contour -->
 </ul>
 
-<h2 class="h2">Scientific charts</h2>
+<h3 class="h3">Scientific charts</h3>
 <ul class="list">
     <li><a href="../charts/polar">
         <span>Polar charts<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
@@ -166,7 +168,7 @@ the chart types supported by Taipy by application category:
       </a></li>
 </ul>
 
-<h2 class="h2">Financial charts</h2>
+<h3 class="h3">Financial charts</h3>
 <ul class="list">
     <li><a href="../charts/candlestick">
         <span>Candlestick charts<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
@@ -180,7 +182,7 @@ the chart types supported by Taipy by application category:
       </a></li>
 </ul>
 
-<h2 class="h2">Maps</h2>
+<h3 class="h3">Maps</h3>
 <ul class="list">
     <li><a href="../charts/chart-map">
         <span>Charts on maps<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><use xlink:href="#rarrow"/></svg></span>
@@ -199,6 +201,8 @@ the chart types supported by Taipy by application category:
       </a></li>
     <!-- Choropleth maps - choropleth-map -->
 </ul>
+
+# Description
 
 A chart control can hold several traces, that can display individual data sets.<br/>
 To indicate properties for a given trace, you will use the indexed properties
@@ -252,17 +256,20 @@ Supported types for the *data* property types are:
 
 ## Usage
 
+Here is a list of several sub-sections that you can check to get more details on a specific
+areas covered by the chart control:
+
 - [Basic concepts](charts/basics.md)
 - [Line charts](charts/line.md)
 - [Scatter charts](charts/scatter.md)
 - [Bar charts](charts/bar.md)
-- [Pie charts](charts/pie.md)
 - [Bubble charts](charts/bubble.md)
 - [Filled areas](charts/filled-area.md)
+- [Pie charts](charts/pie.md)
 - [Histograms](charts/histogram.md)
 - [Heatmaps](charts/heatmap.md)
 - [Error bars](charts/error-bar.md)
-- [Continuous error bars](charts/continuous-error.md)
+- [Continuous error](charts/continuous-error.md)
 - [Box plots](charts/box-plot.md)
 - [Polar charts](charts/polar.md)
 - [Radar charts](charts/radar.md)
@@ -272,4 +279,4 @@ Supported types for the *data* property types are:
 - [Areas on maps](charts/map.md)
 - [Density maps](charts/map.md)
 - [Gantt charts](charts/gantt.md)
-- [Other features](charts/others.md)
+- [Other chart types](charts/others.md)
