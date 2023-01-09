@@ -132,7 +132,7 @@ class _PandasDataAccessor(_DataAccessor):
             )
             return new_col_name
         except Exception as e:
-            warnings.warn(f"Exception raised when applying user function {function_name}.\n{e}")
+            warnings.warn(f"Exception raised when invoking user function {function_name}.\n{e}")
         return False
 
     def __format_data(

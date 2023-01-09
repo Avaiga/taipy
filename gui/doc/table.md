@@ -141,7 +141,7 @@ Css definition
 You can specify a tooltip for specific table cells.
 
 When Taipy creates the cells, it can add a specific tooltip that you would have set as the
-return value of the function set to the `tooltip` or `tooltip[_column_name_]` property .
+return value of the function set to the _tooltip_ or _tooltip[column_name]_ property .
 
 The signature of this function expects five optional parameters:
      - _state_: the current state
@@ -150,8 +150,8 @@ The signature of this function expects five optional parameters:
      - _row_: all the values for this row
      - _column_name_: the name of the column for this cell
 
-Based on these parameters, the function must return a string that defines a tooltip that will
-be added to the cell.
+Based on these parameters, the function must return a string that defines a tooltip that is
+used as the cell's tooltip text.
 
 !!! example "Page content"
 

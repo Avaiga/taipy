@@ -902,12 +902,12 @@
           {
             "name": "tooltip",
             "type": "str",
-            "doc": "The name of the function that will calculate the cell tooltips.\nSee <a href=\"#cell%20tooltip\">below</a> for details."
+            "doc": "The name of the function that must return a tooltip text for a cell.\nSee <a href=\"#cell%20tooltip\">below</a> for details."
           },
           {
             "name": "tooltip[<i>col_name</i>]",
             "type": "str",
-            "doc": "The name of the function that will calculate the cell tooltips.\nSee <a href=\"#cell%20tooltip\">below</a> for details."
+            "doc": "The name of the function that must return a tooltip text for a cell.\nSee <a href=\"#cell%20tooltip\">below</a> for details."
           },
           {
             "name": "width",
