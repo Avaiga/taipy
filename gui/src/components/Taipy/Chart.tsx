@@ -93,12 +93,9 @@ const darkTemplate = {
             {
                 "marker": {
                     "line": {
-                        "color": "rgb(17,17,17)",
-                        "width": 0.5
+                        "color": "rgb(17,17,17)"
                     },
                     "pattern": {
-                        "fillmode": "overlay",
-                        "size": 10,
                         "solidity": 0.2
                     }
                 },
@@ -115,12 +112,9 @@ const darkTemplate = {
                 },
                 "marker": {
                     "line": {
-                        "color": "rgb(17,17,17)",
-                        "width": 0.5
+                        "color": "rgb(17,17,17)"
                     },
                     "pattern": {
-                        "fillmode": "overlay",
-                        "size": 10,
                         "solidity": 0.2
                     }
                 },
@@ -146,30 +140,8 @@ const darkTemplate = {
                 "type": "carpet"
             }
         ],
-        "choropleth": [
-            {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
-                "type": "choropleth"
-            }
-        ],
-        "contourcarpet": [
-            {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
-                "type": "contourcarpet"
-            }
-        ],
         "contour": [
             {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
                 "colorscale": [
                     [
                         0.0,
@@ -217,10 +189,6 @@ const darkTemplate = {
         ],
         "heatmapgl": [
             {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
                 "colorscale": [
                     [
                         0.0,
@@ -268,10 +236,6 @@ const darkTemplate = {
         ],
         "heatmap": [
             {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
                 "colorscale": [
                     [
                         0.0,
@@ -319,10 +283,6 @@ const darkTemplate = {
         ],
         "histogram2dcontour": [
             {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
                 "colorscale": [
                     [
                         0.0,
@@ -370,10 +330,6 @@ const darkTemplate = {
         ],
         "histogram2d": [
             {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
                 "colorscale": [
                     [
                         0.0,
@@ -423,120 +379,10 @@ const darkTemplate = {
             {
                 "marker": {
                     "pattern": {
-                        "fillmode": "overlay",
-                        "size": 10,
                         "solidity": 0.2
                     }
                 },
                 "type": "histogram"
-            }
-        ],
-        "mesh3d": [
-            {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
-                "type": "mesh3d"
-            }
-        ],
-        "parcoords": [
-            {
-                "line": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "type": "parcoords"
-            }
-        ],
-        "pie": [
-            {
-                "automargin": true,
-                "type": "pie"
-            }
-        ],
-        "scatter3d": [
-            {
-                "line": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "marker": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "type": "scatter3d"
-            }
-        ],
-        "scattercarpet": [
-            {
-                "marker": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "type": "scattercarpet"
-            }
-        ],
-        "scattergeo": [
-            {
-                "marker": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "type": "scattergeo"
-            }
-        ],
-        "scattergl": [
-            {
-                "marker": {
-                    "line": {
-                        "color": "#283442"
-                    }
-                },
-                "type": "scattergl"
-            }
-        ],
-        "scattermapbox": [
-            {
-                "marker": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "type": "scattermapbox"
-            }
-        ],
-        "scatterpolargl": [
-            {
-                "marker": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "type": "scatterpolargl"
-            }
-        ],
-        "scatterpolar": [
-            {
-                "marker": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
-                    }
-                },
-                "type": "scatterpolar"
             }
         ],
         "scatter": [
@@ -549,23 +395,18 @@ const darkTemplate = {
                 "type": "scatter"
             }
         ],
-        "scatterternary": [
+        "scattergl": [
             {
                 "marker": {
-                    "colorbar": {
-                        "outlinewidth": 0,
-                        "ticks": ""
+                    "line": {
+                        "color": "#283442"
                     }
                 },
-                "type": "scatterternary"
+                "type": "scattergl"
             }
         ],
         "surface": [
             {
-                "colorbar": {
-                    "outlinewidth": 0,
-                    "ticks": ""
-                },
                 "colorscale": [
                     [
                         0.0,
@@ -635,16 +476,7 @@ const darkTemplate = {
     },
     "layout": {
         "annotationdefaults": {
-            "arrowcolor": "#f2f5fa",
-            "arrowhead": 0,
-            "arrowwidth": 1
-        },
-        "autotypenumbers": "strict",
-        "coloraxis": {
-            "colorbar": {
-                "outlinewidth": 0,
-                "ticks": ""
-            }
+            "arrowcolor": "#f2f5fa"
         },
         "colorscale": {
             "diverging": [
@@ -797,14 +629,8 @@ const darkTemplate = {
             "bgcolor": "rgb(17,17,17)",
             "lakecolor": "rgb(17,17,17)",
             "landcolor": "rgb(17,17,17)",
-            "showlakes": true,
-            "showland": true,
             "subunitcolor": "#506784"
         },
-        "hoverlabel": {
-            "align": "left"
-        },
-        "hovermode": "closest",
         "mapbox": {
             "style": "dark"
         },
@@ -813,42 +639,32 @@ const darkTemplate = {
         "polar": {
             "angularaxis": {
                 "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "ticks": ""
+                "linecolor": "#506784"
             },
             "bgcolor": "rgb(17,17,17)",
             "radialaxis": {
                 "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "ticks": ""
+                "linecolor": "#506784"
             }
         },
         "scene": {
             "xaxis": {
                 "backgroundcolor": "rgb(17,17,17)",
                 "gridcolor": "#506784",
-                "gridwidth": 2,
                 "linecolor": "#506784",
-                "showbackground": true,
-                "ticks": "",
                 "zerolinecolor": "#C8D4E3"
             },
             "yaxis": {
                 "backgroundcolor": "rgb(17,17,17)",
                 "gridcolor": "#506784",
-                "gridwidth": 2,
                 "linecolor": "#506784",
-                "showbackground": true,
-                "ticks": "",
                 "zerolinecolor": "#C8D4E3"
             },
             "zaxis": {
                 "backgroundcolor": "rgb(17,17,17)",
                 "gridcolor": "#506784",
-                "gridwidth": 2,
                 "linecolor": "#506784",
                 "showbackground": true,
-                "ticks": "",
                 "zerolinecolor": "#C8D4E3"
             }
         },
@@ -859,56 +675,37 @@ const darkTemplate = {
         },
         "sliderdefaults": {
             "bgcolor": "#C8D4E3",
-            "bordercolor": "rgb(17,17,17)",
-            "borderwidth": 1,
-            "tickwidth": 0
+            "bordercolor": "rgb(17,17,17)"
         },
         "ternary": {
             "aaxis": {
                 "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "ticks": ""
+                "linecolor": "#506784"
             },
             "baxis": {
                 "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "ticks": ""
+                "linecolor": "#506784"
             },
             "bgcolor": "rgb(17,17,17)",
             "caxis": {
                 "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "ticks": ""
+                "linecolor": "#506784"
             }
         },
-        "title": {
-            "x": 0.05
-        },
         "updatemenudefaults": {
-            "bgcolor": "#506784",
-            "borderwidth": 0
+            "bgcolor": "#506784"
         },
         "xaxis": {
-            "automargin": true,
             "gridcolor": "#283442",
             "linecolor": "#506784",
-            "ticks": "",
-            "title": {
-                "standoff": 15
-            },
-            "zerolinecolor": "#283442",
-            "zerolinewidth": 2
+            "tickcolor": "#506784",
+            "zerolinecolor": "#283442"
         },
         "yaxis": {
-            "automargin": true,
             "gridcolor": "#283442",
             "linecolor": "#506784",
-            "ticks": "",
-            "title": {
-                "standoff": 15
-            },
-            "zerolinecolor": "#283442",
-            "zerolinewidth": 2
+            "tickcolor": "#506784",
+            "zerolinecolor": "#283442"
         }
     }
 };
