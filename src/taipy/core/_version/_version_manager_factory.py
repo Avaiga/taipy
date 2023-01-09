@@ -21,6 +21,6 @@ class _VersionManagerFactory(_ManagerFactory):
     @classmethod
     def _build_manager(cls) -> Type[_VersionManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".version._version_manager", "_VersionManager")  # type: ignore
+            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager", "_VersionManager")  # type: ignore
         _VersionManager._repository = _VersionRepositoryFactory._build_repository()  # type: ignore
         return _VersionManager

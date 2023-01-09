@@ -10,49 +10,32 @@
 # specific language governing permissions and limitations under the License.
 
 import json
-from datetime import datetime
-from typing import List, Optional
+from typing import List
 
-from taipy.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .._repository._filesystem_repository import _FileSystemRepository
 from ..exceptions.exceptions import VersionIsNotProductionVersion
-from ._version import _Version
 from ._version_model import _VersionModel
+from ._version_repository import _VersionRepository
 
 
-class _VersionFSRepository(_FileSystemRepository):
-    _LATEST_VERSION_KEY = "latest_version"
-    _DEVELOPMENT_VERSION_KEY = "development_version"
-    _PRODUCTION_VERSION_KEY = "production_version"
-
+class _VersionFSRepository(_VersionRepository):
     def __init__(self):
-        super().__init__(_VersionModel, "version", self._to_model, self._from_model)
+        super().__init__(model=_VersionModel, dir_name="version")
+
+    @property
+    def dir_path(self):
+        return super().repository.dir_path
 
     @property
     def _version_file_path(self):
-        return self.dir_path / "version.json"
+        return super().repository._storage_folder / "version.json"
 
-    def _to_model(self, version: _Version):
-        return _VersionModel(
-            id=version.id, config=Config._to_json(version.config), creation_date=version.creation_date.isoformat()
-        )
+    def _delete_all(self):
+        super()._delete_all()
 
-    def _from_model(self, model):
-        version = _Version(id=model.id, config=Config._from_json(model.config))
-        version.creation_date = datetime.fromisoformat(model.creation_date)
-        return version
-
-    def _load_all(self, version_number: Optional[str] = "all") -> List[_Version]:
-        """Only load the json file that has "id" property.
-
-        The "version.json" does not have the "id" property.
-        """
-        return self._load_all_by(by="id", version_number=version_number)
-
-    def _load_all_by(self, by, version_number: Optional[str] = "all"):
-        return super()._load_all_by(by, version_number)
+        if self._version_file_path.exists():
+            self._version_file_path.unlink()
 
     def _set_latest_version(self, version_number):
         if self._version_file_path.exists():
@@ -77,7 +60,7 @@ class _VersionFSRepository(_FileSystemRepository):
             )
         )
 
-    def _get_latest_version(self):
+    def _get_latest_version(self) -> str:
         with open(self._version_file_path, "r") as f:
             file_content = json.load(f)
 
@@ -107,7 +90,7 @@ class _VersionFSRepository(_FileSystemRepository):
             )
         )
 
-    def _get_development_version(self):
+    def _get_development_version(self) -> str:
         with open(self._version_file_path, "r") as f:
             file_content = json.load(f)
 
@@ -140,7 +123,7 @@ class _VersionFSRepository(_FileSystemRepository):
             )
         )
 
-    def _get_production_version(self):
+    def _get_production_version(self) -> List[str]:
         with open(self._version_file_path, "r") as f:
             file_content = json.load(f)
 

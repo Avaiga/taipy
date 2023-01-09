@@ -90,7 +90,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_development_version(cls) -> str:
         try:
             return cls._repository._get_development_version()
-        except FileNotFoundError:
+        except:
             return cls._set_development_version(str(uuid.uuid4()))
 
     @classmethod
@@ -113,7 +113,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_latest_version(cls) -> str:
         try:
             return cls._repository._get_latest_version()
-        except FileNotFoundError:
+        except:
             # If there is no version in the system yet, create a new version as development version
             # This set the default versioning behavior on Jupyter notebook to Development mode
             return cls._set_development_version(str(uuid.uuid4()))
@@ -145,7 +145,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_production_version(cls) -> List[str]:
         try:
             return cls._repository._get_production_version()
-        except FileNotFoundError:
+        except:
             return []
 
     @classmethod
@@ -175,3 +175,7 @@ class _VersionManager(_Manager[_Version]):
             return version.id
 
         raise NonExistingVersion(version_number)
+
+    @classmethod
+    def _delete_entities_of_multiple_types(cls, _entity_ids):
+        return NotImplementedError
