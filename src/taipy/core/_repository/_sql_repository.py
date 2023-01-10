@@ -21,7 +21,7 @@ from sqlalchemy.pool import StaticPool
 
 from taipy.config.config import Config
 
-from ..exceptions.exceptions import MissingRequiredProperty, ModelNotFound
+from ..exceptions.exceptions import MissingRequiredProperty, ModelNotFound, VersionIsNotProductionVersion
 from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
 from ._sql_model import Base, _TaipyModel, _TaipyVersion
 
@@ -99,20 +99,23 @@ class _TaipyModelTable(_BaseSQLRepository):
         return self.__to_entity(entry)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
+
         try:
-            entries = self.session.query(self._table).filter_by(model_name=self.model_name)
-            return [self.__to_entity(e) for e in entries]
+            query = self.session.query(self._table).filter_by(model_name=self.model_name)
+            query = self.__filter_by_version(query, version_number)
+            return [self.__to_entity(e) for e in query.all()]
         except NoResultFound:
             return []
 
     def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Entity]:
         try:
-            entries = (
+            query = (
                 self.session.query(self._table)
                 .filter_by(model_name=self.model_name)
                 .filter(self._table.document.contains(by))
             )
-            return [self.__to_entity(e) for e in entries]
+            query = self.__filter_by_version(query, version_number)
+            return [self.__to_entity(e) for e in query.all()]
         except NoResultFound:
             return []
 
@@ -130,6 +133,11 @@ class _TaipyModelTable(_BaseSQLRepository):
             raise ModelNotFound(str(self.model.__name__), model_id)
         self.session.commit()
 
+    def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
+        entries = self._search(attribute, value, version_number)
+        if entries:
+            self._delete_many([e.id for e in entries])
+
     def _delete_all(self):
         self.session.query(self._table).filter_by(model_name=self.model_name).delete()
         self.session.commit()
@@ -139,11 +147,13 @@ class _TaipyModelTable(_BaseSQLRepository):
         self.session.commit()
 
     def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Entity]:
-        entry = (
+        query = (
             self.session.query(self._table)
             .filter_by(model_name=self.model_name)
             .filter(self._table.document.contains(f'"{attribute}": "{value}"'))
-        ).first()
+        )
+        query = self.__filter_by_version(query, version_number)
+        entry = query.first()
         if not entry:
             return None
         return self.__to_entity(entry)
@@ -216,6 +226,15 @@ class _TaipyModelTable(_BaseSQLRepository):
     def __to_entity(self, entry: _TaipyModel) -> Entity:
         return self.__model_to_entity(entry.document) if entry else None
 
+    def __filter_by_version(self, query, version_number):
+        from .._version._version_manager_factory import _VersionManagerFactory
+
+        version_number = _VersionManagerFactory._build_manager()._replace_version_number(version_number)
+
+        if version_number:
+            query = query.filter(self._table.document.contains(f'"version": "{version_number}"'))
+        return query
+
     def __model_to_entity(self, file_content):
         data = json.loads(file_content, cls=_CustomDecoder)
         model = self.model.from_dict(data)  # type: ignore
@@ -270,7 +289,7 @@ class _TaipyVersionTable(_BaseSQLRepository):
         super().__init__()
 
     def load(self, id: str) -> Entity:
-        entry = self.session.query(self._table).filter_by(id=id).first()
+        entry = self.__get_by_id(id)
         if entry is None:
             raise ModelNotFound(self.model, id)  # type: ignore
         return self.__to_entity(entry)
@@ -303,6 +322,10 @@ class _TaipyVersionTable(_BaseSQLRepository):
             raise ModelNotFound(str(self.model.__name__), id)
         self.session.commit()
 
+    def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
+        entries = self._search(attribute, value, version_number)
+        self._delete_many([e.id for e in entries])
+
     def _delete_all(self):
         self.session.query(self._table).delete()
         self.session.commit()
@@ -320,9 +343,7 @@ class _TaipyVersionTable(_BaseSQLRepository):
         return self.__to_entity(entry)
 
     def __insert_model(self, model: ModelType):
-        entry = self._table(
-            id=model.id, config=Config._to_json(model.config), creation_date=model.creation_date  # type: ignore
-        )
+        entry = self._table(id=model.id, config=model.config, creation_date=model.creation_date)  # type: ignore
         self.session.add(entry)
         self.session.commit()
 
@@ -331,19 +352,24 @@ class _TaipyVersionTable(_BaseSQLRepository):
         self.session.commit()
 
     def __to_entity(self, entry: _TaipyVersion) -> Entity:
-        return self.__model_to_entity(entry.config) if entry else None
+        return self._from_model(entry)
+        # return self.__model_to_entity(entry.config) if entry else None
 
     def __model_to_entity(self, file_content):
         data = json.loads(file_content, cls=_CustomDecoder)
         model = self.model.from_dict(data)  # type: ignore
         return self._from_model(model)
 
-    def _set_latest_version(self, version_number):
-        version = self.load(version_number)
-        version.is_latest = True
+    def __get_by_id(self, id):
+        return self.session.query(self._table).filter_by(id=id).first()
 
+    def _set_latest_version(self, version_number):
         if old_latest := self.session.query(self._table).filter_by(is_latest=True).first():
             old_latest.is_latest = False
+
+        version = self.__get_by_id(version_number)
+        version.is_latest = True
+
         self.session.commit()
 
     def _get_latest_version(self):
@@ -352,11 +378,11 @@ class _TaipyVersionTable(_BaseSQLRepository):
         return ""
 
     def _set_development_version(self, version_number):
-        version = self.load(version_number)
-        version.is_development = True
-
         if old_development := self.session.query(self._table).filter_by(is_development=True).first():
             old_development.is_development = False
+
+        version = self.__get_by_id(version_number)
+        version.is_development = True
 
         self._set_latest_version(version_number)
 
@@ -365,10 +391,10 @@ class _TaipyVersionTable(_BaseSQLRepository):
     def _get_development_version(self):
         if development := self.session.query(self._table).filter_by(is_development=True).first():
             return development.id
-        return ""
+        raise ModelNotFound
 
     def _set_production_version(self, version_number):
-        version = self.load(version_number)
+        version = self.__get_by_id(version_number)
         version.is_production = True
 
         self._set_latest_version(version_number)
@@ -381,7 +407,9 @@ class _TaipyVersionTable(_BaseSQLRepository):
         return []
 
     def _delete_production_version(self, version_number):
-        version = self.load(version_number)
+        version = self.__get_by_id(version_number)
+        if not version:
+            raise VersionIsNotProductionVersion(f"Version {version_number} is not a production version.")
         version.is_production = False
 
         self.session.commit()
@@ -416,6 +444,9 @@ class _SQLRepository(_BaseSQLRepository):
 
     def _delete(self, model_id: str):
         self._table._delete(model_id)
+
+    def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
+        self._table._delete_by(attribute, value, version_number)
 
     def _delete_all(self):
         self._table._delete_all()
