@@ -53,13 +53,10 @@ class _TaipyVersion(Base):  # type: ignore
         id: str,
         config: Json,
         creation_date: str,
-        is_production: bool = False,
-        is_development: bool = False,
-        is_latest: bool = False,
     ):
         self.id = id
         self.config = config
         self.creation_date = creation_date
-        self.is_production = is_production
-        self.is_development = is_development
-        self.latest = is_latest
+        self.is_production = False
+        self.is_development = False
+        self.latest = False

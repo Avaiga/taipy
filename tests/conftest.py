@@ -17,6 +17,7 @@ from queue import Queue
 
 import pandas as pd
 import pytest
+from sqlalchemy import create_engine
 
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
@@ -447,3 +448,8 @@ def check_repositories_are_empty():
         return False
 
     return True
+
+
+@pytest.fixture
+def sql_engine():
+    return create_engine("sqlite:///:memory:")

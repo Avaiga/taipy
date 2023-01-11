@@ -303,7 +303,7 @@ class _TaipyVersionTable(_BaseSQLRepository):
 
     def _load_all_by(self, by, version_number: Optional[str] = None) -> List[Entity]:
         try:
-            entries = self.session.query(self._table).filter(self._table.config.contains(by))
+            entries = self.session.query(self._table).filter(self._table.config.contains(by)).all()
             return [self.__to_entity(e) for e in entries]
         except NoResultFound:
             return []
@@ -408,7 +408,8 @@ class _TaipyVersionTable(_BaseSQLRepository):
 
     def _delete_production_version(self, version_number):
         version = self.__get_by_id(version_number)
-        if not version:
+
+        if not version or not version.is_production:
             raise VersionIsNotProductionVersion(f"Version {version_number} is not a production version.")
         version.is_production = False
 
