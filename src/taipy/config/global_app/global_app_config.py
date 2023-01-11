@@ -44,7 +44,7 @@ class GlobalAppConfig:
     _REPOSITORY_TYPE_KEY = "repository_type"
     _DEFAULT_REPOSITORY_TYPE = "filesystem"
     _REPOSITORY_PROPERTIES_KEY = "repository_properties"
-    _DEFAULT_REPOSITORY_PROPERTIES = dict()
+    _DEFAULT_REPOSITORY_PROPERTIES: Dict = dict()
 
     def __init__(
         self,

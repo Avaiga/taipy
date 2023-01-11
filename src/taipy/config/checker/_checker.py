@@ -16,8 +16,9 @@ from .issue_collector import IssueCollector
 
 
 class _Checker:
-    """holds the various checkers to perform on the config."""
-    _checkers: List[_ConfigChecker] = [_GlobalConfigChecker]
+    """Holds the various checkers to perform on the config."""
+
+    _checkers: List[_ConfigChecker] = [_GlobalConfigChecker]  # type: ignore
 
     @classmethod
     def _check(cls, _applied_config):

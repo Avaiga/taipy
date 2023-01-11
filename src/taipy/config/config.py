@@ -194,8 +194,8 @@ class Config:
                     def_sections[default_section.id] = default_section
             else:
                 cls._default_config._sections[default_section.name] = {default_section.id: default_section}
-        cls._serializer._section_class[default_section.name] = default_section.__class__
-        cls.__json_serializer._section_class[default_section.name] = default_section.__class__
+        cls._serializer._section_class[default_section.name] = default_section.__class__  # type: ignore
+        cls.__json_serializer._section_class[default_section.name] = default_section.__class__  # type: ignore
         cls.__compile_configs()
 
     @classmethod

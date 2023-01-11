@@ -65,7 +65,7 @@ def test_section_registration_and_usage():
     assert Config.sections[SectionForTest.name]["default"] is not None
     assert Config.sections[SectionForTest.name]["default"].attribute == "default_attribute"
     assert Config.sections[SectionForTest.name]["default"].prop == "default_prop"
-    assert Config.sections[SectionForTest.name]["default"].foo == None
+    assert Config.sections[SectionForTest.name]["default"].foo is None
 
     myFirstSection = Config.configure_section_for_tests(id="first", attribute="my_attribute", prop="my_prop", foo="bar")
     assert Config.sections is not None
@@ -75,7 +75,7 @@ def test_section_registration_and_usage():
     assert Config.sections[SectionForTest.name]["default"] is not None
     assert Config.sections[SectionForTest.name]["default"].attribute == "default_attribute"
     assert Config.sections[SectionForTest.name]["default"].prop == "default_prop"
-    assert Config.sections[SectionForTest.name]["default"].foo == None
+    assert Config.sections[SectionForTest.name]["default"].foo is None
     assert Config.sections[SectionForTest.name]["first"] is not None
     assert Config.sections[SectionForTest.name]["first"].attribute == "my_attribute"
     assert Config.sections[SectionForTest.name]["first"].prop == "my_prop"
@@ -92,7 +92,7 @@ def test_section_registration_and_usage():
     assert Config.sections[SectionForTest.name]["default"] is not None
     assert Config.sections[SectionForTest.name]["default"].attribute == "default_attribute"
     assert Config.sections[SectionForTest.name]["default"].prop == "default_prop"
-    assert Config.sections[SectionForTest.name]["default"].foo == None
+    assert Config.sections[SectionForTest.name]["default"].foo is None
     assert Config.sections[SectionForTest.name]["first"] is not None
     assert Config.sections[SectionForTest.name]["first"].attribute == "my_attribute"
     assert Config.sections[SectionForTest.name]["first"].prop == "my_prop"
@@ -116,7 +116,7 @@ def test_section_registration_and_usage():
     assert Config.sections[SectionForTest.name]["default"] is not None
     assert Config.sections[SectionForTest.name]["default"].attribute == "default_attribute"
     assert Config.sections[SectionForTest.name]["default"].prop == "default_prop"
-    assert Config.sections[SectionForTest.name]["default"].foo == None
+    assert Config.sections[SectionForTest.name]["default"].foo is None
     assert Config.sections[SectionForTest.name]["first"] is not None
     assert Config.sections[SectionForTest.name]["first"].attribute == "my_attribute"
     assert Config.sections[SectionForTest.name]["first"].prop == "my_prop"
@@ -143,12 +143,10 @@ def test_block_registration():
     Config.block_update()
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        myNewUniqueSection = Config.configure_unique_section_for_tests(
-            attribute="my_new_unique_attribute", prop="my_new_unique_prop"
-        )
+        Config.configure_unique_section_for_tests(attribute="my_new_unique_attribute", prop="my_new_unique_prop")
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        myNewSection = Config.configure_section_for_tests(id="new", attribute="my_attribute", prop="my_prop", foo="bar")
+        Config.configure_section_for_tests(id="new", attribute="my_attribute", prop="my_prop", foo="bar")
 
     with pytest.raises(ConfigurationUpdateBlocked):
         myUniqueSection.attribute = "foo"
