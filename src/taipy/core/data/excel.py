@@ -294,13 +294,12 @@ class ExcelDataNode(DataNode):
         if isinstance(data, Dict) and all(
             [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
         ):
-            writer = pd.ExcelWriter(self._path)
-            for key in data.keys():
-                if isinstance(data[key], np.ndarray):
-                    pd.DataFrame(data[key]).to_excel(writer, key, index=False)
-                else:
-                    data[key].to_excel(writer, key, index=False)
-            writer.save()
+            with pd.ExcelWriter(self._path) as writer:
+                for key in data.keys():
+                    if isinstance(data[key], np.ndarray):
+                        pd.DataFrame(data[key]).to_excel(writer, key, index=False)
+                    else:
+                        data[key].to_excel(writer, key, index=False)
         elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
             data.to_excel(self._path, index=False)
         else:
