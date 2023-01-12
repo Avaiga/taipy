@@ -22,7 +22,7 @@ class _AbstractScheduler:
     @classmethod
     @abstractmethod
     def initialize(cls):
-        return NotImplementedError
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -34,7 +34,7 @@ class _AbstractScheduler:
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
     ) -> List[Job]:
-        return NotImplementedError
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -47,9 +47,9 @@ class _AbstractScheduler:
         wait=False,
         timeout: Optional[Union[float, int]] = None,
     ) -> Job:
-        return NotImplementedError
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def cancel_job(cls, job):
-        return NotImplementedError
+        raise NotImplementedError

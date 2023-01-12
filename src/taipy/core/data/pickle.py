@@ -139,7 +139,6 @@ class PickleDataNode(DataNode):
             pickle.dump(data, pf)
 
     def __build_path(self):
-
         from taipy.config.config import Config
 
         dir_path = pathlib.Path(Config.global_config.storage_folder) / "pickles"

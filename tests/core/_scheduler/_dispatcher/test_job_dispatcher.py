@@ -17,6 +17,8 @@ from time import sleep
 from unittest import mock
 from unittest.mock import MagicMock
 
+from pytest import raises
+
 from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
@@ -46,9 +48,13 @@ def test_build_development_job_dispatcher():
     assert isinstance(dispatcher, _DevelopmentJobDispatcher)
     assert dispatcher._nb_available_workers == 1
 
-    assert dispatcher.start() == NotImplementedError
+    with raises(NotImplementedError):
+        assert dispatcher.start()
+
     assert dispatcher.is_running()
-    assert dispatcher.stop() == NotImplementedError
+
+    with raises(NotImplementedError):
+        dispatcher.stop()
 
 
 def test_build_standalone_job_dispatcher():

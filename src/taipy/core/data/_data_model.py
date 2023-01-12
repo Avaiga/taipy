@@ -20,7 +20,6 @@ from ..common.alias import JobId
 
 @dataclass
 class _DataNodeModel:
-
     id: str
     config_id: str
     scope: Scope

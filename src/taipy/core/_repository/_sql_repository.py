@@ -159,8 +159,9 @@ class _TaipyModelTable(_BaseSQLRepository):
         return self.__to_entity(entry)
 
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
-        entities = iter(self.__get_entities_by_config_and_owner(config_id, owner_id))
-        return self.__to_entity(next(entities, None))  # type: ignore
+        entity = self.__get_entities_by_config_and_owner(config_id, owner_id)
+        return self.__to_entity(entity)
+
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
@@ -169,7 +170,7 @@ class _TaipyModelTable(_BaseSQLRepository):
         configs_and_owner_ids = set(configs_and_owner_ids)
 
         for config, owner in configs_and_owner_ids:
-            entry = self.__get_entities_by_config_and_owner(config.id, owner, only_first=True)
+            entry = self.__get_entities_by_config_and_owner(config.id, owner)
             if entry:
                 entity = self.__to_entity(entry)
                 key = config, owner
@@ -177,9 +178,7 @@ class _TaipyModelTable(_BaseSQLRepository):
 
         return res
 
-    def __get_entities_by_config_and_owner(
-        self, config_id: str, owner_id: Optional[str] = "", only_first: bool = False, version_number: Optional[str] = None
-    ):
+    def __get_entities_by_config_and_owner(self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None) -> _TaipyModel:
         if owner_id:
             query = (
                 self.session.query(self._table)
@@ -194,12 +193,8 @@ class _TaipyModelTable(_BaseSQLRepository):
                 .filter(self._table.document.contains(f'"config_id": "{config_id}"'))
                 .filter(self._table.document.contains('"owner_id": null'))
             )
-        
         query = self.__filter_by_version(query, version_number)
-        
-        if only_first:
-            return query.first()
-        return query.all()
+        return query.first()
 
     def __insert_model(self, model: ModelType):
         entry = self._table(
