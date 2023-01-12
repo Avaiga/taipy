@@ -178,7 +178,7 @@ class _TaipyModelTable(_BaseSQLRepository):
         return res
 
     def __get_entities_by_config_and_owner(
-        self, config_id: str, owner_id: Optional[str] = "", only_first: bool = False
+        self, config_id: str, owner_id: Optional[str] = "", only_first: bool = False, version_number: Optional[str] = None
     ):
         if owner_id:
             query = (
@@ -194,6 +194,9 @@ class _TaipyModelTable(_BaseSQLRepository):
                 .filter(self._table.document.contains(f'"config_id": "{config_id}"'))
                 .filter(self._table.document.contains('"owner_id": null'))
             )
+        
+        query = self.__filter_by_version(query, version_number)
+        
         if only_first:
             return query.first()
         return query.all()
