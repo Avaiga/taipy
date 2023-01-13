@@ -473,10 +473,10 @@ def test_task_scheduler_create_synchronous_dispatcher():
 
 
 def test_task_scheduler_create_standalone_dispatcher():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=42)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=3)
     _SchedulerFactory._build_dispatcher()
     assert isinstance(_SchedulerFactory._dispatcher._executor, ProcessPoolExecutor)
-    assert _SchedulerFactory._dispatcher._nb_available_workers == 42
+    assert _SchedulerFactory._dispatcher._nb_available_workers == 3
 
 
 def modified_config_task(n):

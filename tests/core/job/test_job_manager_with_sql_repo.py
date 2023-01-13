@@ -183,7 +183,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
             _JobManager._delete(job)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
-    assert_true_after_time(job.is_completed, time=600)
+    assert_true_after_time(job.is_completed)
     _JobManager._delete(job)
 
 
@@ -211,7 +211,7 @@ def _create_task(function, nb_outputs=1, name=None):
     output_dn_configs = [
         Config.configure_data_node(f"output{i}", scope=Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
     ]
-    _DataManager._bulk_get_or_create([cfg for cfg in output_dn_configs])
+    _DataManager._bulk_get_or_create({cfg for cfg in output_dn_configs})
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     task_config = Config.configure_task(
         name,
