@@ -265,7 +265,7 @@ class TestDataManager:
             owner_id=None,
             parent_ids={"task_id_1"},
             last_edit_date=None,
-            job_ids=[],
+            edits=[],
             edit_in_progress=False,
             properties={"foo": "bar"},
         )

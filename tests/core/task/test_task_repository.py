@@ -13,7 +13,7 @@ import datetime
 
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
+from src.taipy.core.common.alias import DataNodeId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
@@ -32,7 +32,7 @@ data_node = CSVDataNode(
     "owner_id",
     {"task_id"},
     datetime.datetime(1985, 10, 14, 2, 30, 0),
-    [JobId("job_id")],
+    [dict(timestamp=datetime.datetime(1985, 10, 14, 2, 30, 0), job_id="job_id")],
     "latest",
     False,
     None,

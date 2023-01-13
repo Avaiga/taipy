@@ -30,6 +30,7 @@ class TestDataModel:
                 "write_fct_name": "write_fct_name",
                 "write_fct_module": "write_fct_module",
                 "job_ids": [],
+                "edits": [],
                 "version": "latest",
                 "cacheable": False,
                 "validity_days": 1,
@@ -72,3 +73,42 @@ class TestDataModel:
         assert model.edit_in_progress is True
         assert model.last_edit_date == "2020-01-02T00:00:00"
         assert model.owner_id == "owner_id"
+
+    def test_migrate_job_ids(self):
+        legacy_data_model_dict = {
+            "id": "id",
+            "config_id": "config_id",
+            "scope": repr(Scope.PIPELINE),
+            "storage_type": "pickle",
+            "name": "name",
+            "parent_id": "parent_id",
+            "owner_id": "owner_id",
+            "parent_ids": ["parent_id"],
+            "last_edit_date": "2020-01-02T00:00:00",
+            "last_edition_date": "2020-01-01T00:00:00",
+            "read_fct_name": "read_fct_name",
+            "read_fct_module": "read_fct_module",
+            "write_fct_name": "write_fct_name",
+            "write_fct_module": "write_fct_module",
+            "job_ids": ["job_1", "job_2", "job_3"],  # Legacy models have only job_ids
+            "version": "latest",
+            "cacheable": False,
+            "validity_days": 1,
+            "validity_seconds": 1,
+            "edit_in_progress": True,
+            "edition_in_progress": False,
+            "data_node_properties": {},
+        }
+
+        data_model = _DataNodeModel.from_dict(legacy_data_model_dict)
+
+        assert len(data_model.edits) == 3
+
+        assert data_model.edits[0].get("job_id") == "job_1"
+        assert data_model.edits[0].get("timestamp") is not None
+
+        assert data_model.edits[1].get("job_id") == "job_2"
+        assert data_model.edits[1].get("timestamp") is not None
+
+        assert data_model.edits[2].get("job_id") == "job_3"
+        assert data_model.edits[2].get("timestamp") is not None

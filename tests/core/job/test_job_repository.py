@@ -38,7 +38,7 @@ data_node = CSVDataNode(
     "owner_id",
     "task_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
-    [JobId("job_id")],
+    [dict(timestamp=datetime.datetime(1985, 10, 14, 2, 30, 0), job_id="job_id")],
     "latest",
     False,
     None,

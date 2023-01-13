@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common.alias import DataNodeId, JobId
+from ..common.alias import DataNodeId, Edit
 from ..exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 from .data_node import DataNode
 
@@ -35,8 +35,8 @@ class GenericDataNode(DataNode):
             `None`.
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
-        job_ids (List[str]): The ordered list of jobs that have written this data node.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided, the latest version is used.
+        edits (List[Edit^]): The ordered list of edits for that job.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data node is
@@ -66,7 +66,7 @@ class GenericDataNode(DataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        job_ids: List[JobId] = None,
+        edits: List[Edit] = None,
         version: str = None,
         cacheable: bool = False,
         validity_period: Optional[timedelta] = None,
@@ -88,7 +88,7 @@ class GenericDataNode(DataNode):
             owner_id,
             parent_ids,
             last_edit_date,
-            job_ids,
+            edits,
             version or _VersionManagerFactory._build_manager()._get_latest_version(),
             cacheable,
             validity_period,
