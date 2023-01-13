@@ -259,33 +259,15 @@ def tmp_sqlite(tmpdir_factory):
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_repository():
-    if Config.global_config.repository_type == "sql":
-        close_sql_database_session_connection()
-        init_managers()
+    from sqlalchemy.orm import close_all_sessions
+
+    close_all_sessions()
     init_config()
     init_scheduler()
     init_managers()
     init_config()
 
     yield
-
-    if Config.global_config.repository_type == "sql":
-        close_sql_database_session_connection()
-        init_managers()
-    init_config()
-    init_scheduler()
-    init_managers()
-    init_config()
-
-
-def close_sql_database_session_connection():
-    _ScenarioRepositoryFactory._build_repository().repo.session.close_all()
-    _PipelineRepositoryFactory._build_repository().repo.session.close_all()
-    _DataRepositoryFactory._build_repository().repo.session.close_all()
-    _TaskRepositoryFactory._build_repository().repo.session.close_all()
-    _JobRepositoryFactory._build_repository().repo.session.close_all()
-    _CycleRepositoryFactory._build_repository().repo.session.close_all()
-    _VersionRepositoryFactory._build_repository().repo.session.close_all()
 
 
 def init_config():
@@ -370,84 +352,6 @@ def init_scheduler():
     _SchedulerFactory._build_dispatcher()
     _SchedulerFactory._scheduler.jobs_to_run = Queue()
     _SchedulerFactory._scheduler.blocked_jobs = []
-
-
-def check_repositories_are(repo_type="default"):
-    cycle_repository = _CycleRepositoryFactory._build_repository()
-    expected_cycle_repository = _CycleRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
-    if type(cycle_repository) != type(expected_cycle_repository):
-        return False
-
-    scenario_repository = _ScenarioRepositoryFactory._build_repository()
-    expected_scenario_repository = _ScenarioRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
-    if type(scenario_repository) != type(expected_scenario_repository):
-        return False
-
-    pipeline_repository = _PipelineRepositoryFactory._build_repository()
-    expected_pipeline_repository = _PipelineRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
-    if type(pipeline_repository) != type(expected_pipeline_repository):
-        return False
-
-    task_repository = _TaskRepositoryFactory._build_repository()
-    expected_task_repository = _TaskRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
-    if type(task_repository) != type(expected_task_repository):
-        return False
-
-    job_repository = _JobRepositoryFactory._build_repository()
-    expected_job_repository = _JobRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
-    if type(job_repository) != type(expected_job_repository):
-        return False
-
-    data_repository = _DataRepositoryFactory._build_repository()
-    expected_data_repository = _DataRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
-    if type(data_repository) != type(expected_data_repository):
-        return False
-
-    version_repository = _VersionRepositoryFactory._build_repository()
-    expected_version_repository = _VersionRepositoryFactory._REPOSITORY_MAP.get(repo_type)()
-    if type(version_repository) != type(expected_version_repository):
-        return False
-
-    return True
-
-
-def check_repositories_are_empty():
-    cycle_repository = _CycleRepositoryFactory._build_repository()
-    cycles = cycle_repository._load_all()
-    if len(cycles) != 0:
-        return False
-
-    scenario_repository = _ScenarioRepositoryFactory._build_repository()
-    scenarios = scenario_repository._load_all()
-    if len(scenarios) != 0:
-        return False
-
-    pipeline_repository = _PipelineRepositoryFactory._build_repository()
-    pipelines = pipeline_repository._load_all()
-    if len(pipelines) != 0:
-        return False
-
-    task_repository = _TaskRepositoryFactory._build_repository()
-    tasks = task_repository._load_all()
-    if len(tasks) != 0:
-        return False
-
-    job_repository = _JobRepositoryFactory._build_repository()
-    jobs = job_repository._load_all()
-    if len(jobs) != 0:
-        return False
-
-    data_repository = _DataRepositoryFactory._build_repository()
-    data_nodes = data_repository._load_all()
-    if len(data_nodes) != 0:
-        return False
-
-    version_repository = _VersionRepositoryFactory._build_repository()
-    version = version_repository._load_all()
-    if len(version) != 0:
-        return False
-
-    return True
 
 
 @pytest.fixture
