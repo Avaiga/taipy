@@ -79,6 +79,7 @@ class _Chart_iprops(Enum):
     locations = 27
     values = 28
     labels = 29
+    decimator = 30
 
 
 class _Builder:
@@ -374,12 +375,6 @@ class _Builder:
                 warnings.warn(f" {self.__control_type}.{name}: {strattr} is not a function")
         return self.set_attribute(_to_camel_case(name), strattr) if strattr else self
 
-    def __set_decimator_attribute(self, attr_name: str):
-        strattr = self.__attributes.get(attr_name)
-        cls = self.__gui._get_user_instance(class_name=str(strattr), class_type=PropertyType.decimator.value)
-        if isinstance(cls, PropertyType.decimator.value):
-            self.__set_string_attribute(attr_name, strattr)
-
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
         attr = self.__attributes.get(name, default_value)
         if attr is None:
@@ -611,6 +606,7 @@ class _Builder:
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
+            decimator_copied = False
             while len([x for x in indexed_trace if x]):
                 axis.append(
                     _Builder.__CHART_AXIS.get(
@@ -622,6 +618,10 @@ class _Builder:
                 self.__check_dict(
                     indexed_trace, (_Chart_iprops.marker, _Chart_iprops.selected_marker, _Chart_iprops.options)
                 )
+                if trace[_Chart_iprops.decimator.value] and not indexed_trace[_Chart_iprops.decimator.value]:
+                    # copy the decimator only once
+                    indexed_trace[_Chart_iprops.decimator.value] = trace[_Chart_iprops.decimator.value]
+                    trace[_Chart_iprops.decimator.value] = None
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
                 idx += 1
                 indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
@@ -661,6 +661,16 @@ class _Builder:
 
         # Validate the column names
         columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
+
+        # Manage Decimator
+        decimators = []
+        for t in traces:
+            if t[_Chart_iprops.decimator.value]:
+                cls = self.__gui._get_user_instance(class_name=str(t[_Chart_iprops.decimator.value]), class_type=PropertyType.decimator.value)
+                if isinstance(cls, PropertyType.decimator.value):
+                    decimators.append(str(t[_Chart_iprops.decimator.value]))
+                    continue
+            decimators.append(None)
 
         # set default columns if not defined
         icols = [
@@ -726,8 +736,10 @@ class _Builder:
                 "textAnchors": [tr[_Chart_iprops.text_anchor.value] for tr in traces],
                 "options": [tr[_Chart_iprops.options.value] for tr in traces],
                 "axisNames": [[e.name for e in ax] for ax in used_axis],
-                "addIndex": [tr[_Chart_iprops.type.value] not in _Builder.__CHART_NO_INDEX for tr in traces]
+                "addIndex": [tr[_Chart_iprops.type.value] not in _Builder.__CHART_NO_INDEX for tr in traces],
             }
+            if len([d for d in decimators if d]):
+                ret_dict.update(decimators=decimators);
 
             self.__set_json_attribute("config", ret_dict)
             self._set_chart_selected(max=len(traces))
@@ -1086,8 +1098,6 @@ class _Builder:
                     self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(attr, 2, False), True, update_main=False)
                 else:
                     self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == PropertyType.decimator:
-                self.__set_decimator_attribute(attr_name=attr[0])
             elif var_type == PropertyType.data:
                 self.__set_dynamic_property_without_default(attr[0], var_type)
             elif var_type == PropertyType.lov:
