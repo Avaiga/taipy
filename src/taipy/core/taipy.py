@@ -432,11 +432,6 @@ def create_scenario(
     Returns:
         The new scenario.
     """
-    if (
-        latest_version_number := _VersionManagerFactory._build_manager()._get_latest_version()
-    ) == _VersionManagerFactory._build_manager()._get_development_version():
-        clean_all_entities_by_version(latest_version_number)
-        _VersionManagerFactory._build_manager()._set_development_version(latest_version_number)
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
 
@@ -448,11 +443,6 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     Returns:
         The new pipeline.
     """
-    if (
-        latest_version_number := _VersionManagerFactory._build_manager()._get_latest_version()
-    ) == _VersionManagerFactory._build_manager()._get_development_version():
-        clean_all_entities_by_version(latest_version_number)
-        _VersionManagerFactory._build_manager()._set_development_version(latest_version_number)
     return _PipelineManagerFactory._build_manager()._get_or_create(config)
 
 
