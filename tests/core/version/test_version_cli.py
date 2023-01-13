@@ -278,10 +278,10 @@ def test_override_experiment_version():
 
     core = Core()
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
         core.run()
     ver_1 = _VersionManager._get_latest_version()
-    assert ver_1 == "2.1"
+    assert ver_1 == "1.0"
     # When create new experiment version, a development version entity is also created as a placeholder
     assert len(_VersionManager._get_all()) == 2  # 2 version include 1 experiment 1 development
 
@@ -301,15 +301,67 @@ def test_override_experiment_version():
 
     # Without --override parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1"]):
+        with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
             core.run()
 
     # With --override parameter
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1", "--override"]):
+    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0", "--override"]):
         core.run()
     ver_2 = _VersionManager._get_latest_version()
-    assert ver_2 == "2.1"
+    assert ver_2 == "1.0"
     assert len(_VersionManager._get_all()) == 2  # 2 version include 1 experiment 1 development
+
+    # All entities from previous submit should be saved
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+    assert len(_DataManager._get_all()) == 4
+    assert len(_TaskManager._get_all()) == 2
+    assert len(_PipelineManager._get_all()) == 2
+    assert len(_ScenarioManager._get_all()) == 2
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 2
+
+
+def test_override_production_version():
+    scenario_config = config_scenario()
+
+    core = Core()
+
+    with patch("sys.argv", ["prog", "--production", "--version-number", "1.0"]):
+        core.run()
+    ver_1 = _VersionManager._get_latest_version()
+    production_versions = _VersionManager._get_production_version()
+    assert ver_1 == "1.0"
+    assert production_versions == ["1.0"]
+    # When create new production version, a development version entity is also created as a placeholder
+    assert len(_VersionManager._get_all()) == 2  # 2 version include 1 production 1 development
+
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+    assert len(_DataManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 1
+
+    # Update Config singleton to simulate conflict Config between versions
+    Config.unblock_update()
+    Config.configure_global_app(clean_entities_enabled=True)
+
+    # Without --override parameter, a SystemExit will be raised
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "--production", "--version-number", "1.0"]):
+            core.run()
+
+    # With --override parameter
+    with patch("sys.argv", ["prog", "--production", "--version-number", "1.0", "--override"]):
+        core.run()
+    ver_2 = _VersionManager._get_latest_version()
+    assert ver_2 == "1.0"
+    assert len(_VersionManager._get_all()) == 2  # 2 version include 1 production 1 development
 
     # All entities from previous submit should be saved
     scenario = _ScenarioManager._create(scenario_config)

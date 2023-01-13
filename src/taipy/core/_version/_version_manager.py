@@ -124,6 +124,9 @@ class _VersionManager(_Manager[_Version]):
 
         # Check if all previous production versions are compatible with current Python Config
         for production_version in production_versions:
+            if production_version == version_number:
+                continue
+
             if version := cls._get(production_version):
                 config_diff = _ConfigComparator._compare(version.config, Config._applied_config)
                 if config_diff["added_items"] or config_diff["removed_items"] or config_diff["modified_items"]:
