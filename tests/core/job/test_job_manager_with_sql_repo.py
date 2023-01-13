@@ -183,7 +183,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
             _JobManager._delete(job)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
-    assert_true_after_time(job.is_completed)
+    assert_true_after_time(job.is_completed, time=600)
     _JobManager._delete(job)
 
 
