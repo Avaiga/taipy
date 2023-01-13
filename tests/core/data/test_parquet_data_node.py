@@ -289,7 +289,8 @@ class TestParquetDataNode:
         dn.write(df)
         df.to_parquet(path=temp_file_2_path, compression=comp3, engine=engine)
         with open(temp_file_2_path, "rb") as tf:
-            assert pathlib.Path(temp_file_path).open("rb").read() == tf.read()
+            with pathlib.Path(temp_file_path).open("rb") as f:
+                assert f.read() == tf.read()
 
         # 3 and 2
         comp2 = "gzip"
@@ -306,7 +307,8 @@ class TestParquetDataNode:
         dn.write(df)
         df.to_parquet(path=temp_file_2_path, compression=comp2, engine=engine)
         with open(temp_file_2_path, "rb") as tf:
-            assert pathlib.Path(temp_file_path).open("rb").read() == tf.read()
+            with pathlib.Path(temp_file_path).open("rb") as f:
+                assert f.read() == tf.read()
 
         # 3, 2 and 1
         comp1 = "brotli"
@@ -323,7 +325,8 @@ class TestParquetDataNode:
         dn.write_with_kwargs(df, compression=comp1)
         df.to_parquet(path=temp_file_2_path, compression=comp1, engine=engine)
         with open(temp_file_2_path, "rb") as tf:
-            assert pathlib.Path(temp_file_path).open("rb").read() == tf.read()
+            with pathlib.Path(temp_file_path).open("rb") as f:
+                assert f.read() == tf.read()
 
         ## Read
         df.to_parquet(temp_file_path, engine=engine)

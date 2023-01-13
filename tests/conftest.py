@@ -21,7 +21,6 @@ from sqlalchemy import create_engine
 
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core._version._version_repository_factory import _VersionRepositoryFactory
 from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from src.taipy.core.config import (
     DataNodeConfig,
@@ -37,23 +36,17 @@ from src.taipy.core.config import (
 )
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
-from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
 from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
-from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario._scenario_model import _ScenarioModel
-from src.taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
 from taipy.config._toml_serializer import _TomlSerializer
@@ -112,7 +105,8 @@ def excel_file_with_multi_sheet(tmpdir_factory) -> str:
 def pickle_file_path(tmpdir_factory) -> str:
     data = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
     fn = tmpdir_factory.mktemp("data").join("df.p")
-    pickle.dump(data, open(str(fn), "wb"))
+    with open(str(fn), "wb") as f:
+        pickle.dump(data, f)
     return fn.strpath
 
 
