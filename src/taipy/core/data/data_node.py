@@ -30,7 +30,7 @@ from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
-from ..common.alias import DataNodeId, JobId
+from ..common.alias import DataNodeId, JobId, Edit
 from ..exceptions.exceptions import NoData
 from ._filter import _FilterDataNode
 from .operator import JoinOperator, Operator
@@ -59,8 +59,8 @@ class DataNode(_Entity):
             `None`.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
-        job_ids (List[str]): The ordered list of jobs that have written this data node.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided, the latest version is used.
+        edits (List[Edit^]): The list of Edits (an alias for dict) containing medata about each edition of that node.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
@@ -86,7 +86,7 @@ class DataNode(_Entity):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        job_ids: List[JobId] = None,
+        edits: List[Edit] = None,
         version: str = None,
         cacheable: bool = False,
         validity_period: Optional[timedelta] = None,
@@ -101,11 +101,13 @@ class DataNode(_Entity):
         self._last_edit_date = last_edit_date
         self._name = name or self.id
         self._edit_in_progress = edit_in_progress
-        self._job_ids = _ListAttributes(self, job_ids or list())
-
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+
         self._cacheable = cacheable
         self._validity_period = validity_period
+
+        # Track edits
+        self._edits = edits or list()
 
         self._properties = _Properties(self, **kwargs)
 
@@ -135,6 +137,17 @@ class DataNode(_Entity):
     @_self_reload(_MANAGER_NAME)
     def parent_ids(self):
         return self._parent_ids
+
+    @property
+    @_self_reload(_MANAGER_NAME)
+    def edits(self):
+        return self._edits
+
+    def get_last_edit(self):
+        """Get last edit of this node, or None"""
+        if self._edits:
+            return self._edits[-1]
+        return None
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -244,12 +257,7 @@ class DataNode(_Entity):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def job_ids(self):
-        return self._job_ids
-
-    @job_ids.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def job_ids(self, val):
-        self._job_ids = _ListAttributes(self, val)
+        return [edit.get("job_id") for edit in self.edits if edit.get("job_id")]
 
     @property  # type: ignore
     def properties(self):
@@ -315,21 +323,31 @@ class DataNode(_Entity):
             )
             return None
 
-    def write(self, data, job_id: Optional[JobId] = None):
+    def write(self, data, job_id: Optional[JobId] = None, **kwargs):
         """Write some data to this data node.
 
         Parameters:
             data (Any): The data to write to this data node.
             job_id (JobId^): An optional identifier of the writer.
+            **kwargs: Extra information to attach to the edit document corresponding to this write. 
         """
         from ._data_manager_factory import _DataManagerFactory
 
         self._write(data)
-        self.last_edit_date = datetime.now()  # type: ignore
-        if job_id:
-            self._job_ids.append(job_id)
+        self._track_edit(job_id=job_id, **kwargs)
         self.unlock_edit()
         _DataManagerFactory._build_manager()._set(self)
+
+    def _track_edit(self, **options):
+        """Add Edit tracking information to this data node."""
+        edit = {}
+        for k, v in options.items():
+            if v is not None:
+                edit[k] = v
+        if "timestamp" not in edit:
+            edit["timestamp"] = datetime.now()
+        self.last_edit_date = edit.get("timestamp")
+        self._edits.append(edit)
 
     def lock_edit(self):
         """Lock the edit of this data node.

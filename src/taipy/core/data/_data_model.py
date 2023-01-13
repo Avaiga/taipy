@@ -11,11 +11,22 @@
 
 import dataclasses
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
 from taipy.config.common.scope import Scope
 
-from ..common.alias import JobId
+from ..common.alias import Edit
+
+
+def _to_edits(job_ids: Optional[List[str]]) -> List[Edit]:
+    """Migrate a list of job IDs to a list of Edits."""
+    if not job_ids:
+        return []
+    # We can't guess what is the timestamp corresponding to a modification from its job_id...
+    # So let's use the current time...
+    timestamp = datetime.now()
+    return [dict(timestamp=timestamp, job_id=job_id) for job_id in job_ids]
 
 
 @dataclass
@@ -28,7 +39,7 @@ class _DataNodeModel:
     owner_id: Optional[str]
     parent_ids: List[str]
     last_edit_date: Optional[str]
-    job_ids: List[JobId]
+    edits: List[Edit]
     version: str
     cacheable: bool
     validity_days: Optional[float]
@@ -50,7 +61,7 @@ class _DataNodeModel:
             owner_id=data.get("owner_id", data.get("parent_id")),
             parent_ids=data["parent_ids"],
             last_edit_date=data.get("last_edit_date", data.get("last_edition_date")),
-            job_ids=data["job_ids"],
+            edits=data.get("edits", _to_edits(data.get("job_ids"))),
             version=data["version"],
             cacheable=data["cacheable"],
             validity_days=data["validity_days"],

@@ -23,7 +23,7 @@ from sqlalchemy import create_engine, text
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common.alias import DataNodeId, JobId
+from ..common.alias import DataNodeId, Edit
 from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty, UnknownDatabaseEngine
 from .data_node import DataNode
 
@@ -85,7 +85,7 @@ class _AbstractSQLDataNode(DataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        job_ids: List[JobId] = None,
+        edits: List[Edit] = None,
         version: str = None,
         cacheable: bool = False,
         validity_period: Optional[timedelta] = None,
@@ -108,7 +108,7 @@ class _AbstractSQLDataNode(DataNode):
             owner_id,
             parent_ids,
             last_edit_date,
-            job_ids,
+            edits,
             version or _VersionManagerFactory._build_manager()._get_latest_version(),
             cacheable,
             validity_period,
