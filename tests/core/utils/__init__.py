@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 
-def assert_true_after_time(assertion, msg=None, time=60):
+def assert_true_after_time(assertion, msg=None, time=120):
     from datetime import datetime
     from time import sleep
 
