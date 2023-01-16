@@ -148,7 +148,12 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
+    m = multiprocessing.Manager()
+    lock = m.Lock()
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    task = Task("task_config_1", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished")
     _SchedulerFactory._build_dispatcher()
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
@@ -165,11 +170,13 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 def test_force_deleting_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-
-    task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
-
+    m = multiprocessing.Manager()
+    lock = m.Lock()
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    task = Task("task_config_1", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="force_deleting_unfinished_job")
     _SchedulerFactory._build_dispatcher()
-
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
         assert_true_after_time(job.is_running)
@@ -182,7 +189,7 @@ def test_force_deleting_unfinished_job():
 def test_cancel_single_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
 
-    task = _create_task(inner_lock_multiply, name="cancel_single_job")
+    task = _create_task(multiply, name="cancel_single_job")
 
     _SchedulerFactory._build_dispatcher()
 
@@ -206,7 +213,7 @@ def test_cancel_single_job():
 def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
 
-    task = _create_task(inner_lock_multiply, name="cancel_single_job")
+    task = _create_task(multiply, name="test_cancel_canceled_abandoned_failed_jobs")
 
     _SchedulerFactory._build_dispatcher()
 
@@ -242,8 +249,7 @@ def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
 @mock.patch("src.taipy.core.job.job.Job.canceled")
 def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
-
-    task = _create_task(inner_lock_multiply, name="cancel_single_job")
+    task = _create_task(multiply, name="cancel_single_job")
 
     _SchedulerFactory._build_dispatcher()
 
@@ -276,7 +282,12 @@ def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
 def test_cancel_single_running_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
-    task = _create_task(inner_lock_multiply, name="cancel_single_job")
+    m = multiprocessing.Manager()
+    lock = m.Lock()
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    task = Task("task_config_1", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="cancel_single_job")
 
     _SchedulerFactory._build_dispatcher()
 
@@ -289,7 +300,7 @@ def test_cancel_single_running_job():
         assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 1)
         assert_true_after_time(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 1)
         assert_true_after_time(job.is_running)
-        _JobManager._cancel(job.id)
+        _JobManager._cancel(job)
         assert_true_after_time(job.is_running)
     assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 0)
     assert_true_after_time(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
@@ -370,12 +381,12 @@ def _create_task(function, nb_outputs=1, name=None):
     output_dn_configs = [
         Config.configure_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
     ]
-    _DataManager._bulk_get_or_create([cfg for cfg in output_dn_configs])
+    _DataManager._bulk_get_or_create({cfg for cfg in output_dn_configs})
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     task_config = Config.configure_task(
-        name,
-        function,
-        [input1_dn_config, input2_dn_config],
-        output_dn_configs,
+        id=name,
+        function=function,
+        input=[input1_dn_config, input2_dn_config],
+        output=output_dn_configs,
     )
     return _TaskManager._bulk_get_or_create([task_config])[0]

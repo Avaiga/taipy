@@ -12,14 +12,17 @@
 import multiprocessing
 import random
 import string
+from functools import partial
 from time import sleep
 
 import pytest
 
+from src.taipy.core import Task
 from src.taipy.core._scheduler._dispatcher._job_dispatcher import _JobDispatcher
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import JobId
 from src.taipy.core.config.job_config import JobConfig
+from src.taipy.core.data import InMemoryDataNode
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.exceptions.exceptions import JobNotDeletedException
@@ -38,7 +41,7 @@ def multiply(nb1: float, nb2: float):
 
 def lock_multiply(lock, nb1: float, nb2: float):
     with lock:
-        return multiply(1 or nb1, 2 or nb2)
+        return multiply(nb1 or 1, nb2 or 2)
 
 
 def init_managers():
@@ -156,22 +159,17 @@ def test_delete_job():
     assert _JobManager._get(job_1.id) is None
 
 
-m = multiprocessing.Manager()
-lock = m.Lock()
-
-
-def inner_lock_multiply(nb1: float, nb2: float):
-    with lock:
-        return multiply(1 or nb1, 2 or nb2)
-
-
 def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     Config.configure_global_app(repository_type="sql")
     init_managers()
 
-    task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
-
+    m = multiprocessing.Manager()
+    lock = m.Lock()
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    task = Task("task_cfg", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished")
     _SchedulerFactory._build_dispatcher()
 
     with lock:
@@ -192,12 +190,17 @@ def test_force_deleting_unfinished_job():
     Config.configure_global_app(repository_type="sql")
     init_managers()
 
-    task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
+    m = multiprocessing.Manager()
+    lock = m.Lock()
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    task_1 = Task("task_config_1", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="delete_force_unfinished_job")
 
     _SchedulerFactory._build_dispatcher()
 
     with lock:
-        job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+        job = _SchedulerFactory._scheduler.submit_task(task_1, "submit_id")
         assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
@@ -214,9 +217,9 @@ def _create_task(function, nb_outputs=1, name=None):
     _DataManager._bulk_get_or_create({cfg for cfg in output_dn_configs})
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     task_config = Config.configure_task(
-        name,
-        function,
-        [input1_dn_config, input2_dn_config],
-        output_dn_configs,
+        id=name,
+        function=function,
+        input=[input1_dn_config, input2_dn_config],
+        output=output_dn_configs,
     )
     return _TaskManager._bulk_get_or_create([task_config])[0]
