@@ -20,7 +20,6 @@ from ._cycle_sql_repository import _CycleSQLRepository
 
 
 class _CycleRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _CycleFSRepository, "sql": _CycleSQLRepository}
 
     @classmethod

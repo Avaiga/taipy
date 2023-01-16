@@ -280,7 +280,7 @@ class TestParquetDataNode:
         temp_file_2_path = str(tmpdir_factory.mktemp("data").join("temp_2.parquet"))
         df = default_data_frame.copy(deep=True)
 
-        ## Write
+        # Write
         # 3
         comp3 = "snappy"
         dn = ParquetDataNode(
@@ -328,7 +328,7 @@ class TestParquetDataNode:
             with pathlib.Path(temp_file_path).open("rb") as f:
                 assert f.read() == tf.read()
 
-        ## Read
+        # Read
         df.to_parquet(temp_file_path, engine=engine)
         # 2
         cols2 = ["a", "b"]

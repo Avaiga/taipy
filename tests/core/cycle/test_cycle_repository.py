@@ -36,7 +36,6 @@ def test_from_and_to_model(cycle, cycle_model):
 
 
 def test_get_primary(tmpdir, cycle, current_datetime):
-
     cycle_repository = _CycleRepositoryFactory._build_repository()
     cycle_repository.base_path = tmpdir
 

@@ -55,7 +55,6 @@ class _PipelineManager(_Manager[Pipeline]):
         params: Optional[List[Any]] = None,
         pipeline: Optional[Pipeline] = None,
     ):
-
         if pipeline is None:
             pipelines = cls._get_all()
             for pln in pipelines:

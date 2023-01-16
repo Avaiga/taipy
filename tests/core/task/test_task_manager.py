@@ -248,7 +248,6 @@ def test_set_and_get_task():
 
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
-
     embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
     embedded_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
     embedded_3 = Config.configure_data_node("a_dn_3", "in_memory", scope=Scope.PIPELINE)

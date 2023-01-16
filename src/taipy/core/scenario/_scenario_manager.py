@@ -42,7 +42,6 @@ from .scenario import Scenario
 
 
 class _ScenarioManager(_Manager[Scenario]):
-
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
     _repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Scenario.__name__

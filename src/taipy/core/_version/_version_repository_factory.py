@@ -20,7 +20,6 @@ from ._version_sql_repository import _VersionSQLRepository
 
 
 class _VersionRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
 
     @classmethod

@@ -20,7 +20,6 @@ from ._task_sql_repository import _TaskSQLRepository
 
 
 class _TaskRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _TaskFSRepository, "sql": _TaskSQLRepository}
 
     @classmethod

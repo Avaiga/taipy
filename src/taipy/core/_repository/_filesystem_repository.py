@@ -209,9 +209,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                 file_content = f.read()
 
             if by or by_version:
-                if (
-                    all(criteria in file_content for criteria in by if criteria) and
-                    any(version in file_content for version in by_version)
+                if all(criteria in file_content for criteria in by if criteria) and any(
+                    version in file_content for version in by_version
                 ):
                     return self.__model_to_entity(file_content)
                 else:

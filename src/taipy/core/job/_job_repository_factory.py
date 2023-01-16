@@ -20,7 +20,6 @@ from ._job_sql_repository import _JobSQLRepository
 
 
 class _JobRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _JobFSRepository, "sql": _JobSQLRepository}
 
     @classmethod

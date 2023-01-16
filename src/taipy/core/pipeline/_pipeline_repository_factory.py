@@ -20,7 +20,6 @@ from ._pipeline_sql_repository import _PipelineSQLRepository
 
 
 class _PipelineRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _PipelineFSRepository, "sql": _PipelineSQLRepository}
 
     @classmethod

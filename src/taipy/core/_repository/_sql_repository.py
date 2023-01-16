@@ -84,7 +84,6 @@ class _TaipyModelTable(_BaseSQLRepository):
         to_model_fct: Callable,
         from_model_fct: Callable,
     ):
-
         self.model = model
         self.model_name = model_name
         self._to_model = to_model_fct  # type: ignore
@@ -99,7 +98,6 @@ class _TaipyModelTable(_BaseSQLRepository):
         return self.__to_entity(entry)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
-
         try:
             query = self.session.query(self._table).filter_by(model_name=self.model_name)
             query = self.__filter_by_version(query, version_number)
@@ -162,7 +160,6 @@ class _TaipyModelTable(_BaseSQLRepository):
         entity = self.__get_entities_by_config_and_owner(config_id, owner_id)
         return self.__to_entity(entity)
 
-
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
@@ -178,7 +175,9 @@ class _TaipyModelTable(_BaseSQLRepository):
 
         return res
 
-    def __get_entities_by_config_and_owner(self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None) -> _TaipyModel:
+    def __get_entities_by_config_and_owner(
+        self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None
+    ) -> _TaipyModel:
         if owner_id:
             query = (
                 self.session.query(self._table)
@@ -279,7 +278,6 @@ class _TaipyVersionTable(_BaseSQLRepository):
         to_model_fct: Callable,
         from_model_fct: Callable,
     ):
-
         self.model = model
         self._to_model = to_model_fct  # type: ignore
         self._from_model = from_model_fct  # type: ignore

@@ -20,7 +20,6 @@ from ._data_sql_repository import _DataSQLRepository
 
 
 class _DataRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _DataFSRepository, "sql": _DataSQLRepository}
 
     @classmethod

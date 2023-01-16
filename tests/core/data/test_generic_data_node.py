@@ -49,7 +49,6 @@ class TestGenericDataNode:
     data = [i for i in range(10)]
 
     def test_create(self):
-
         dn = GenericDataNode(
             "foo_bar", Scope.PIPELINE, name="super name", properties={"read_fct": read_fct, "write_fct": write_fct}
         )
@@ -108,7 +107,6 @@ class TestGenericDataNode:
             GenericDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={"write_fct": None})
 
     def test_read_write_generic_datanode(self):
-
         generic_dn = GenericDataNode("foo", Scope.PIPELINE, properties={"read_fct": read_fct, "write_fct": write_fct})
 
         assert generic_dn.read() == self.data

@@ -309,7 +309,6 @@ class _Scheduler(_AbstractScheduler):
 
     @staticmethod
     def _check_and_execute_jobs_if_development_mode():
-
         from ._scheduler_factory import _SchedulerFactory
 
         if dispatcher := _SchedulerFactory._dispatcher:

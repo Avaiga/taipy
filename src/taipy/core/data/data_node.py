@@ -30,7 +30,7 @@ from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
-from ..common.alias import DataNodeId, JobId, Edit
+from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import NoData
 from ._filter import _FilterDataNode
 from .operator import JoinOperator, Operator
@@ -329,7 +329,7 @@ class DataNode(_Entity):
         Parameters:
             data (Any): The data to write to this data node.
             job_id (JobId^): An optional identifier of the writer.
-            **kwargs: Extra information to attach to the edit document corresponding to this write. 
+            **kwargs: Extra information to attach to the edit document corresponding to this write.
         """
         from ._data_manager_factory import _DataManagerFactory
 
