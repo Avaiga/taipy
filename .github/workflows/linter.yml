@@ -20,3 +20,4 @@ jobs:
         with:
           use-pylint: false
           extra-black-options: "--line-length=120"
+          extra-pycodestyle-options: "--max-line-length=120"
