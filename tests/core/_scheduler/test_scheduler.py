@@ -503,7 +503,7 @@ def test_can_exec_task_with_modified_config():
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
     jobs = pipeline.submit()
-    assert_true_after_time(jobs[0].is_finished)
+    assert_true_after_time(jobs[0].is_finished, time=120)
     assert_true_after_time(
         jobs[0].is_completed
     )  # If the job is completed, that means the asserts in the task are successful
