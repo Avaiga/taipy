@@ -109,7 +109,7 @@ class _Builder:
         "bar": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.base),
         "pie": (_Chart_iprops.values, _Chart_iprops.labels),
         "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
-        "funnelarea": (_Chart_iprops.values, )
+        "funnelarea": (_Chart_iprops.values,),
     }
     __CHART_DEFAULT_AXIS: t.Iterable[_Chart_iprops] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
     __CHART_MARKER_TO_COLS: t.Iterable[str] = ("color", "size", "symbol", "opacity")
@@ -606,7 +606,6 @@ class _Builder:
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
-            decimator_copied = False
             while len([x for x in indexed_trace if x]):
                 axis.append(
                     _Builder.__CHART_AXIS.get(
@@ -664,11 +663,13 @@ class _Builder:
 
         # Manage Decimator
         decimators = []
-        for t in traces:
-            if t[_Chart_iprops.decimator.value]:
-                cls = self.__gui._get_user_instance(class_name=str(t[_Chart_iprops.decimator.value]), class_type=PropertyType.decimator.value)
+        for tr in traces:
+            if tr[_Chart_iprops.decimator.value]:
+                cls = self.__gui._get_user_instance(
+                    class_name=str(tr[_Chart_iprops.decimator.value]), class_type=PropertyType.decimator.value
+                )
                 if isinstance(cls, PropertyType.decimator.value):
-                    decimators.append(str(t[_Chart_iprops.decimator.value]))
+                    decimators.append(str(tr[_Chart_iprops.decimator.value]))
                     continue
             decimators.append(None)
 
@@ -739,7 +740,7 @@ class _Builder:
                 "addIndex": [tr[_Chart_iprops.type.value] not in _Builder.__CHART_NO_INDEX for tr in traces],
             }
             if len([d for d in decimators if d]):
-                ret_dict.update(decimators=decimators);
+                ret_dict.update(decimators=decimators)
 
             self.__set_json_attribute("config", ret_dict)
             self._set_chart_selected(max=len(traces))
