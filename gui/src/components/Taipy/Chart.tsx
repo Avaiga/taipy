@@ -60,7 +60,6 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     testId?: string;
     render?: boolean;
     defaultRender?: boolean;
-    decimator?: string;
     template?: string;
     template_Dark_?: string;
     template_Light_?: string;
@@ -85,6 +84,7 @@ interface ChartConfig {
     options: Record<string, unknown>[];
     axisNames: Array<string[]>;
     addIndex: Array<boolean>;
+    decimators?: string[];
 }
 
 const darkTemplate = {
@@ -753,30 +753,32 @@ const getValueFromCol = (values: TraceValueType | undefined, col: string): (stri
     return [];
 };
 
-const getAxis = (traces: string[][], columns: Record<string, ColumnDesc>, axis: number) => {
-    if (traces.length > 0 && traces[0].length > axis && traces[0][axis] && columns[traces[0][axis]])
-        return columns[traces[0][axis]].dfid;
+const getAxis = (traces: string[][], idx: number, columns: Record<string, ColumnDesc>, axis: number) => {
+    if (traces.length > idx && traces[idx].length > axis && traces[idx][axis] && columns[traces[idx][axis]])
+        return columns[traces[idx][axis]].dfid;
     return undefined;
 };
 
-const getDecimatorPayload = (
-    decimator: string | undefined,
+const getDecimatorsPayload = (
+    decimators: string[] | undefined,
     plotDiv: HTMLDivElement | null,
     modes: string[],
     columns: Record<string, ColumnDesc>,
     traces: string[][],
     relayoutData?: PlotRelayoutEvent
 ) => {
-    return decimator
+    return decimators
         ? {
               width: plotDiv?.clientWidth,
               height: plotDiv?.clientHeight,
-              xAxis: getAxis(traces, columns, 0),
-              yAxis: getAxis(traces, columns, 1),
-              zAxis: getAxis(traces, columns, 2),
-              decimator: decimator,
+              decimators: decimators.map((d, i) => d ? {
+                decimator: d,
+                xAxis: getAxis(traces, i, columns, 0),
+                yAxis: getAxis(traces, i, columns, 1),
+                zAxis: getAxis(traces, i, columns, 2),
+                chartMode: modes[i]
+              } : undefined),
               relayoutData: relayoutData,
-              chartMode: modes[0],
           }
         : undefined;
 };
@@ -796,7 +798,6 @@ const Chart = (props: ChartProp) => {
         data = {},
         onRangeChange,
         propagate = true,
-        decimator,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [selected, setSelected] = useState<number[][]>([]);
@@ -877,19 +878,19 @@ const Chart = (props: ChartProp) => {
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "");
+            dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
             dispatch(
                 createRequestChartUpdateAction(
                     updateVarName,
                     id,
                     backCols,
                     dataKey.current,
-                    getDecimatorPayload(decimator, plotRef.current, config.modes, config.columns, config.traces)
+                    getDecimatorsPayload(config.decimators, plotRef.current, config.modes, config.columns, config.traces)
                 )
             );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, config.traces, config.modes, updateVarName, id, decimator]);
+    }, [refresh, dispatch, config.columns, config.traces, config.modes, config.decimators, updateVarName, id]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
@@ -1037,20 +1038,20 @@ const Chart = (props: ChartProp) => {
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
             onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
-            if (decimator && !config.types.includes("scatter3d")) {
+            if (config.decimators && !config.types.includes("scatter3d")) {
                 const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
                 const eventDataKey = Object.keys(eventData)
                     .map((v) => v + "=" + eventData[v as keyof typeof eventData])
                     .join("-");
-                dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "") + "--" + eventDataKey;
+                dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
                 dispatch(
                     createRequestChartUpdateAction(
                         updateVarName,
                         id,
                         backCols,
                         dataKey.current,
-                        getDecimatorPayload(
-                            decimator,
+                        getDecimatorsPayload(
+                            config.decimators,
                             plotRef.current,
                             config.modes,
                             config.columns,
@@ -1069,8 +1070,8 @@ const Chart = (props: ChartProp) => {
             config.columns,
             config.traces,
             config.types,
+            config.decimators,
             updateVarName,
-            decimator,
         ]
     );
 

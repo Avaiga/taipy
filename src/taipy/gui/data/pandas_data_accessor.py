@@ -290,35 +290,35 @@ class _PandasDataAccessor(_DataAccessor):
         else:
             ret_payload["alldata"] = True
             decimator_payload: t.Dict[str, t.Any] = payload.get("decimatorPayload", {})
-            decimator = decimator_payload.get("decimator")
-            decimator_instance = (
-                gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
-            )
-            if isinstance(decimator_instance, PropertyType.decimator.value):
-                x_column, y_column, z_column = (
-                    decimator_payload.get("xAxis", ""),
-                    decimator_payload.get("yAxis", ""),
-                    decimator_payload.get("zAxis", ""),
-                )
-                chart_mode = decimator_payload.get("chartMode", [])
-                if decimator_instance._zoom and "relayoutData" in decimator_payload and not z_column:
-                    relayoutData = decimator_payload.get("relayoutData", {})
-                    x0 = relayoutData.get("xaxis.range[0]")
-                    x1 = relayoutData.get("xaxis.range[1]")
-                    y0 = relayoutData.get("yaxis.range[0]")
-                    y1 = relayoutData.get("yaxis.range[1]")
+            decimators = decimator_payload.get("decimators", [])
+            nb_rows_max = decimator_payload.get("width")
+            for decimator_pl in decimators:
+                decimator = decimator_pl.get("decimator")
+                decimator_instance = gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
+                if isinstance(decimator_instance, PropertyType.decimator.value):
+                    x_column, y_column, z_column = (
+                        decimator_pl.get("xAxis", ""),
+                        decimator_pl.get("yAxis", ""),
+                        decimator_pl.get("zAxis", ""),
+                    )
+                    chart_mode = decimator_pl.get("chartMode", "")
+                    if decimator_instance._zoom and "relayoutData" in decimator_payload and not z_column:
+                        relayoutData = decimator_payload.get("relayoutData", {})
+                        x0 = relayoutData.get("xaxis.range[0]")
+                        x1 = relayoutData.get("xaxis.range[1]")
+                        y0 = relayoutData.get("yaxis.range[0]")
+                        y1 = relayoutData.get("yaxis.range[1]")
 
-                    value = _df_relayout(value, x_column, y_column, chart_mode, x0, x1, y0, y1)
+                        value = _df_relayout(value, x_column, y_column, chart_mode, x0, x1, y0, y1)
 
-                nb_rows_max = decimator_payload.get("width")
-                if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max, chart_mode):
-                    try:
-                        value = _df_data_filter(
-                            value, x_column, y_column, z_column, decimator=decimator_instance, payload=decimator_payload
-                        )
-                        gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
-                    except Exception as e:
-                        warnings.warn(f"Limit rows error for dataframe: {e}")
+                    if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max, chart_mode):
+                        try:
+                            value = _df_data_filter(
+                                value, x_column, y_column, z_column, decimator=decimator_instance, payload=decimator_payload
+                            )
+                            gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
+                        except Exception as e:
+                            warnings.warn(f"Limit rows error with {decimator} for dataframe: {e}")
             value = self.__build_transferred_cols(gui, columns, value)
             dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret
