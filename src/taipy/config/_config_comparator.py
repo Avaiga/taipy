@@ -11,7 +11,6 @@
 
 import json
 import re
-from typing import Dict, List, Tuple
 
 from deepdiff import DeepDiff
 
@@ -20,82 +19,114 @@ from ._config import _Config
 from .config import Config
 
 
-class _ConfigComparator:
-    @classmethod
-    def _compare(cls, old_conf: _Config, new_conf: _Config) -> Dict[str, List[Tuple[Tuple[str]]]]:
-        """Compare between 2 _Config object to check for compatibility.
+class _ConfigComparator(dict):
+    """Compare between 2 _Config object to check for compatibility.
 
-        Return a dictionary with the following format:
-        {
-            "item_added": [
-                ((entity_name_1, entity_id_1, attribute_1), added_object_1),
-                ((entity_name_2, entity_id_2, attribute_2), added_object_2),
-            ],
-            "item_changed": [
-                ((entity_name_1, entity_id_1, attribute_1), (old_value_1, new_value_1)),
-                ((entity_name_2, entity_id_2, attribute_2), (old_value_2, new_value_2)),
-            ],
-            "item_removed": [
-                ((entity_name_1, entity_id_1, attribute_1), removed_object_1),
-                ((entity_name_2, entity_id_2, attribute_2), removed_object_2),
-            ],
-        }
-        """
-        old_conf_json = json.loads(Config._to_json(old_conf))  # type: ignore
-        new_conf_json = json.loads(Config._to_json(new_conf))  # type: ignore
+    Return a dictionary with the following format:
+    ```python
+    {
+        "added_items": [
+            ((entity_name_1, entity_id_1, attribute_1), added_object_1),
+            ((entity_name_2, entity_id_2, attribute_2), added_object_2),
+        ],
+        "removed_items": [
+            ((entity_name_1, entity_id_1, attribute_1), removed_object_1),
+            ((entity_name_2, entity_id_2, attribute_2), removed_object_2),
+        ],
+        "modified_items": [
+            ((entity_name_1, entity_id_1, attribute_1), (old_value_1, new_value_1)),
+            ((entity_name_2, entity_id_2, attribute_2), (old_value_2, new_value_2)),
+        ],
+    }
+    ```
+    """
 
-        deepdiff_result = DeepDiff(old_conf_json, new_conf_json)
+    def __init__(self, old_conf: _Config, new_conf: _Config):
+        super().__init__()
 
-        config_diff: Dict[str, List] = {
-            "added_items": [],
-            "removed_items": [],
-            "modified_items": [],
-        }
+        self.old_conf_json = json.loads(Config._to_json(old_conf))  # type: ignore
+        self.new_conf_json = json.loads(Config._to_json(new_conf))  # type: ignore
 
-        if dictionary_item_added := deepdiff_result.get("dictionary_item_added"):
+        self.deepdiff_result = DeepDiff(self.old_conf_json, self.new_conf_json)
+
+        self.__setitem__("added_items", [])
+        self.__setitem__("removed_items", [])
+        self.__setitem__("modified_items", [])
+
+        self._check_added_items()
+
+        self._check_removed_items()
+
+        self._check_modified_items()
+
+        # Sort by entity name
+        self["added_items"].sort(key=lambda x: x[0][0])
+        self["removed_items"].sort(key=lambda x: x[0][0])
+        self["modified_items"].sort(key=lambda x: x[0][0])
+
+    def _check_added_items(self):
+        if dictionary_item_added := self.deepdiff_result.get("dictionary_item_added"):
             for item_added in dictionary_item_added:
-                entity_name, entity_id, attribute = cls.__get_changed_entity_attribute(item_added)
+                entity_name, entity_id, attribute = self.__get_changed_entity_attribute(item_added)
 
                 if attribute:
-                    value_added = new_conf_json[entity_name][entity_id][attribute]
+                    value_added = self.new_conf_json[entity_name][entity_id][attribute]
                 else:
-                    value_added = new_conf_json[entity_name][entity_id]
+                    value_added = self.new_conf_json[entity_name][entity_id]
 
-                entity_name = cls.__rename_global_node_name(entity_name)
+                entity_name = self.__rename_global_node_name(entity_name)
 
-                config_diff["added_items"].append(((entity_name, entity_id, attribute), (value_added)))
+                self["added_items"].append(((entity_name, entity_id, attribute), (value_added)))
 
-        if dictionary_item_removed := deepdiff_result.get("dictionary_item_removed"):
+    def _check_removed_items(self):
+        if dictionary_item_removed := self.deepdiff_result.get("dictionary_item_removed"):
             for item_removed in dictionary_item_removed:
-                entity_name, entity_id, attribute = cls.__get_changed_entity_attribute(item_removed)
+                entity_name, entity_id, attribute = self.__get_changed_entity_attribute(item_removed)
 
                 if attribute:
-                    value_removed = old_conf_json[entity_name][entity_id][attribute]
+                    value_removed = self.old_conf_json[entity_name][entity_id][attribute]
                 else:
-                    value_removed = old_conf_json[entity_name][entity_id]
+                    value_removed = self.old_conf_json[entity_name][entity_id]
 
-                entity_name = cls.__rename_global_node_name(entity_name)
+                entity_name = self.__rename_global_node_name(entity_name)
 
-                config_diff["removed_items"].append(((entity_name, entity_id, attribute), (value_removed)))
+                self["removed_items"].append(((entity_name, entity_id, attribute), (value_removed)))
 
-        if values_changed := deepdiff_result.get("values_changed"):
+    def _check_modified_items(self):
+        if values_changed := self.deepdiff_result.get("values_changed"):
             for item_changed, value_changed in values_changed.items():
-                entity_name, entity_id, attribute = cls.__get_changed_entity_attribute(item_changed)
-                entity_name = cls.__rename_global_node_name(entity_name)
+                entity_name, entity_id, attribute = self.__get_changed_entity_attribute(item_changed)
+                entity_name = self.__rename_global_node_name(entity_name)
 
-                config_diff["modified_items"].append(
+                self["modified_items"].append(
                     ((entity_name, entity_id, attribute), (value_changed["old_value"], value_changed["new_value"]))
                 )
 
-        # Sort by entity name
-        config_diff["added_items"].sort(key=lambda x: x[0][0])
-        config_diff["removed_items"].sort(key=lambda x: x[0][0])
-        config_diff["modified_items"].sort(key=lambda x: x[0][0])
+        # Iterable item added will be considered a modified item
+        if iterable_item_added := self.deepdiff_result.get("iterable_item_added"):
+            self.__check_modified_iterable(iterable_item_added)
 
-        return config_diff
+        # Iterable item removed will be considered a modified item
+        if iterable_item_removed := self.deepdiff_result.get("iterable_item_removed"):
+            self.__check_modified_iterable(iterable_item_removed)
 
-    @classmethod
-    def __get_changed_entity_attribute(cls, attribute_bracket_notation):
+    def __check_modified_iterable(self, iterable_items):
+        for item in iterable_items:
+            entity_name, entity_id, attribute = self.__get_changed_entity_attribute(item)
+
+            if attribute:
+                new_value = self.new_conf_json[entity_name][entity_id][attribute]
+                old_value = self.old_conf_json[entity_name][entity_id][attribute]
+            else:
+                new_value = self.new_conf_json[entity_name][entity_id]
+                old_value = self.old_conf_json[entity_name][entity_id]
+
+            entity_name = self.__rename_global_node_name(entity_name)
+
+            if not ((entity_name, entity_id, attribute), (old_value, new_value)) in self["modified_items"]:
+                self["modified_items"].append(((entity_name, entity_id, attribute), (old_value, new_value)))
+
+    def __get_changed_entity_attribute(self, attribute_bracket_notation):
         """Split the entity name, entity id (if exists), and the attribute name from JSON bracket notation."""
         try:
             entity_name, entity_id, attribute = re.findall(r"\[\'(.*?)\'\]", attribute_bracket_notation)
@@ -105,8 +136,7 @@ class _ConfigComparator:
 
         return entity_name, entity_id, attribute
 
-    @classmethod
-    def __rename_global_node_name(cls, node_name):
+    def __rename_global_node_name(self, node_name):
         if node_name == _BaseSerializer._GLOBAL_NODE_NAME:
             return "Global Configuration"
         return node_name
