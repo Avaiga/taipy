@@ -12,7 +12,7 @@
 import dataclasses
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, cast
 
 from taipy.config.common.scope import Scope
 
@@ -26,7 +26,7 @@ def _to_edits(job_ids: Optional[List[str]]) -> List[Edit]:
     # We can't guess what is the timestamp corresponding to a modification from its job_id...
     # So let's use the current time...
     timestamp = datetime.now()
-    return [dict(timestamp=timestamp, job_id=job_id) for job_id in job_ids]
+    return [cast(Edit, dict(timestamp=timestamp, job_id=job_id)) for job_id in job_ids]
 
 
 @dataclass

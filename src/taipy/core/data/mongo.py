@@ -117,7 +117,7 @@ class MongoCollectionDataNode(DataNode):
             db_password=properties.get("db_password", ""),
             db_extra_args=properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
         )
-        self.collection = mongo_client[properties.get("db_name")][properties.get("collection_name")]
+        self.collection = mongo_client[properties.get("db_name", "")][properties.get("collection_name", "")]
 
         self.custom_document = properties[self.__CUSTOM_DOCUMENT_PROPERTY]
 

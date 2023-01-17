@@ -139,7 +139,7 @@ class DataNode(_Entity):
     def parent_ids(self):
         return self._parent_ids
 
-    @property
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def edits(self):
         return self._edits
