@@ -215,7 +215,7 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
 
-        ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1, "alldata": True, "decimatorPayload" : { "decimators": [{"decimator": "a_decimator"}], "width": 100}}, _DataFormat.JSON)
+        ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1, "alldata": True, "decimatorPayload" : { "decimators": [{"decimator": "a_decimator", "chartMode": "markers"}], "width": 100}}, _DataFormat.JSON)
         assert ret_data
         value = ret_data["value"]
         assert value
