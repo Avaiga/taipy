@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import NewType, Any, Dict
+from typing import Any, Dict, NewType
 
 PipelineId = NewType("PipelineId", str)
 PipelineId.__doc__ = """Type that holds a `Pipeline^` identifier."""

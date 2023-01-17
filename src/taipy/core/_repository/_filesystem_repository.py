@@ -151,7 +151,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                 files,
             )
             corresponding_entities = filter(
-                lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id, entities  # type: ignore
+                lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id,
+                entities,  # type: ignore
             )
             return next(corresponding_entities, None)  # type: ignore
         except FileNotFoundError:

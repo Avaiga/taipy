@@ -21,7 +21,7 @@ from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
-from ..common.alias import DataNodeId, JobId, Edit
+from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 from .data_node import DataNode
 
@@ -39,7 +39,8 @@ class CSVDataNode(DataNode):
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided,
+            the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
@@ -137,7 +138,8 @@ class CSVDataNode(DataNode):
     def _check_exposed_type(self, exposed_type):
         if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
             raise InvalidExposedType(
-                f"Invalid string exposed type {exposed_type}. Supported values are {', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
+                f"Invalid string exposed type {exposed_type}. Supported values are "
+                f"{', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
             )
 
     def _read(self):

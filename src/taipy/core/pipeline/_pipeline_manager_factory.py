@@ -21,6 +21,8 @@ class _PipelineManagerFactory(_ManagerFactory):
     @classmethod
     def _build_manager(cls) -> Type[_PipelineManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager", "_PipelineManager")  # type: ignore
+            return _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager", "_PipelineManager"
+            )  # type: ignore
         _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()  # type: ignore
         return _PipelineManager

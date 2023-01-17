@@ -21,6 +21,8 @@ class _CycleManagerFactory(_ManagerFactory):
     @classmethod
     def _build_manager(cls) -> Type[_CycleManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager")  # type: ignore
+            return _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager"
+            )  # type: ignore
         _CycleManager._repository = _CycleRepositoryFactory._build_repository()
         return _CycleManager

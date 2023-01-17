@@ -252,7 +252,10 @@ class VersionConflictWithPythonConfig(Exception):
 
             for diff in added_items:
                 ((entity_name, entity_id, attribute), added_object) = diff
-                message += f"\t{entity_name} {dq}{entity_id}{dq} {f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} added: {added_object}\n"
+                message += (
+                    f"\t{entity_name} {dq}{entity_id}{dq} "
+                    f"{f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} added: {added_object}\n"
+                )
 
             message += "\n"
 
@@ -261,7 +264,10 @@ class VersionConflictWithPythonConfig(Exception):
 
             for diff in removed_items:
                 ((entity_name, entity_id, attribute), removed_object) = diff
-                message += f"\t{entity_name} {dq}{entity_id}{dq} {f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} removed\n"
+                message += (
+                    f"\t{entity_name} {dq}{entity_id}{dq} "
+                    f"{f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} removed\n"
+                )
 
             message += "\n"
 
@@ -270,7 +276,10 @@ class VersionConflictWithPythonConfig(Exception):
 
             for diff in modified_items:
                 ((entity_name, entity_id, attribute), (old_value, new_value)) = diff
-                message += f"\t{entity_name} {dq}{entity_id}{dq} {f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} modified: "
+                message += (
+                    f"\t{entity_name} {dq}{entity_id}{dq} "
+                    f"{f'has attribute {dq}{attribute}{dq}' if attribute else 'was'} modified: "
+                )
                 message += f"{old_value} -> {new_value}\n"
 
             message += "\n"

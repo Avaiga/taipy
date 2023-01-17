@@ -29,4 +29,6 @@ class _DataRepositoryFactory(_RepositoryFactory):
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_repository_factory", "_DataRepositoryFactory"
             )
             return factory._build_repository()  # type: ignore
-        return cls._REPOSITORY_MAP.get(Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default"))()  # type: ignore
+        return cls._REPOSITORY_MAP.get(
+            Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default")
+        )()  # type: ignore
