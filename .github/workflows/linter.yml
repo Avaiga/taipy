@@ -21,3 +21,4 @@ jobs:
           use-pylint: false
           extra-black-options: "--line-length=120"
           extra-pycodestyle-options: "--max-line-length=120"
+          extra-mypy-options: "--ignore-missing-imports --implicit-optional"
