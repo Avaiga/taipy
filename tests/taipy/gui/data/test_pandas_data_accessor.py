@@ -11,12 +11,16 @@
 
 from datetime import datetime
 from importlib import util
+import inspect
 
 import pandas  # type: ignore
+
+from flask import g
 
 from taipy.gui import Gui
 from taipy.gui.data.data_format import _DataFormat
 from taipy.gui.data.pandas_data_accessor import _PandasDataAccessor
+from taipy.gui.data.decimator import ScatterDecimator
 
 
 def test_simple_data(gui: Gui, helpers, small_dataframe):
@@ -191,3 +195,29 @@ def test_filter_by_date(gui: Gui, helpers, small_dataframe):
     }
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 1
+
+def test_decimator(gui: Gui, helpers, small_dataframe):
+    a_decimator = ScatterDecimator()
+
+    accessor = _PandasDataAccessor()
+    pd = pandas.DataFrame(data=small_dataframe)
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", "<|Hello {a_decimator}|button|id={btn_id}|>")
+    gui.run(run_server=False)
+    flask_client = gui._server.test_client()
+
+    cid = helpers.create_scope_and_get_sid(gui)
+    # Get the jsx once so that the page will be evaluated -> variable will be registered
+    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        g.client_id = cid
+
+        ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1, "alldata": True, "decimatorPayload" : { "decimators": [{"decimator": "a_decimator"}], "width": 100}}, _DataFormat.JSON)
+        assert ret_data
+        value = ret_data["value"]
+        assert value
+        data = value["data"]
+        assert len(data) == 2
