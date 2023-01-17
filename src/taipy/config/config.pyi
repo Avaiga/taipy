@@ -21,6 +21,15 @@ from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
 
+from taipy.core.config import (
+    DataNodeConfig,
+    JobConfig,
+    TaskConfig,
+    PipelineConfig,
+    ScenarioConfig,
+    Frequency,
+)
+
 class Config:
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
@@ -131,7 +140,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new data node configuration.
         Parameters:
             id (str): The unique identifier of the new data node configuration.
@@ -155,7 +164,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure the default values for data node configurations.
         This function creates the _default data node configuration_ object,
         where all data node configuration objects will find their default
@@ -181,7 +190,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new CSV data node configuration.
         Parameters:
             id (str): The unique identifier of the new CSV data node configuration.
@@ -205,7 +214,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new JSON data node configuration.
         Parameters:
             id (str): The unique identifier of the new JSON data node configuration.
@@ -232,7 +241,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new Parquet data node configuration.
         Parameters:
             id (str): The unique identifier of the new Parquet data node configuration.
@@ -270,7 +279,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new SQL table data node configuration.
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
@@ -311,7 +320,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new SQL data node configuration.
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
@@ -350,7 +359,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new Mongo collection data node configuration.
         Parameters:
             id (str): The unique identifier of the new Mongo collection data node configuration.
@@ -379,7 +388,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new _in_memory_ data node configuration.
         Parameters:
             id (str): The unique identifier of the new in_memory data node configuration.
@@ -400,7 +409,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new pickle data node configuration.
         Parameters:
             id (str): The unique identifier of the new pickle data node configuration.
@@ -424,7 +433,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new Excel data node configuration.
         Parameters:
             id (str): The unique identifier of the new Excel data node configuration.
@@ -451,7 +460,7 @@ class Config:
         scope: Scope = ...,
         cacheable: bool = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> DataNodeConfig:
         """Configure a new generic data node configuration.
         Parameters:
             id (str): The unique identifier of the new generic data node configuration.
@@ -477,7 +486,7 @@ class Config:
         nb_of_workers: Union[int, str] = ...,
         max_nb_of_workers: Union[int, str] = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> JobConfig:
         """Configure job execution.
         Parameters:
             mode (Optional[str]): The job execution mode.
@@ -493,7 +502,7 @@ class Config:
             `JobConfig^`: The job execution configuration.
         """
     @staticmethod
-    def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]):  # type: ignore
+    def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]) -> PipelineConfig:  # type: ignore
         """Configure a new pipeline configuration.
         Parameters:
             id (str): The unique identifier of the new pipeline configuration.
@@ -506,7 +515,7 @@ class Config:
             `PipelineConfig^`: The new pipeline configuration.
         """
     @staticmethod
-    def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]):  # type: ignore
+    def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]) -> PipelineConfig:  # type: ignore
         """Configure the default values for pipeline configurations.
         This function creates the _default pipeline configuration_ object,
         where all pipeline configuration objects will find their default
@@ -527,7 +536,7 @@ class Config:
         frequency: Optional[Frequency] = ...,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> ScenarioConfig:
         """Configure a new scenario configuration.
         Parameters:
             id (str): The unique identifier of the new scenario configuration.
@@ -555,7 +564,7 @@ class Config:
         frequency: Optional[Frequency] = ...,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> ScenarioConfig:
         """Configure the default values for scenario configurations.
         This function creates the _default scenario configuration_ object,
         where all scenario configuration objects will find their default
@@ -587,7 +596,7 @@ class Config:
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = ...,
         pipeline_id: Optional[str] = ...,
         **properties: Dict[str, Any],
-    ):
+    ) -> ScenarioConfig:
         """Configure a new scenario configuration made of a single new pipeline configuration.
         A new pipeline configuration is created as well. If _pipeline_id_ is not provided,
         the new pipeline configuration identifier is set to the scenario configuration identifier
@@ -621,7 +630,7 @@ class Config:
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
         **properties: Dict[str, Any],
-    ):
+    ) -> TaskConfig:
         """Configure a new task configuration.
         Parameters:
             id (str): The unique identifier of this task configuration.
@@ -643,7 +652,7 @@ class Config:
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
         **properties: Dict[str, Any],
-    ):
+    ) -> TaskConfig:
         """Configure the default values for task configurations.
         This function creates the _default task configuration_ object,
         where all task configuration objects will find their default
