@@ -483,7 +483,7 @@ def test_list_version():
     assert "Development" in version_list[5] and "latest" not in version_list[5]
 
 
-def test_compare_config_between_versions():
+def test_modify_config_properties_without_override():
     scenario_config = config_scenario()
 
     core = Core()
@@ -502,15 +502,20 @@ def test_compare_config_between_versions():
             scenario = _ScenarioManager._create(scenario_config_2)
             _ScenarioManager._submit(scenario)
     error_message = str(e.value)
+
     assert 'DATA_NODE "d3" was added' in error_message
-    assert 'DATA_NODE "d1" was removed' in error_message
-    assert 'PIPELINE "my_pipeline_2" was removed' in error_message
+
+    assert 'DATA_NODE "d0" was removed' in error_message
+
     assert 'DATA_NODE "d2" has attribute "default_path" modified' in error_message
     assert 'Global Configuration "root_folder" was modified' in error_message
     assert 'Global Configuration "clean_entities_enabled" was modified' in error_message
     assert 'Global Configuration "repository_type" was modified' in error_message
     assert 'JOB "mode" was modified' in error_message
     assert 'JOB "max_nb_of_workers" was modified' in error_message
+    assert 'PIPELINE "my_pipeline" has attribute "tasks" modified' in error_message
+    assert 'SCENARIO "my_scenario" has attribute "frequency" modified' in error_message
+    assert 'SCENARIO "my_scenario" has attribute "pipelines" modified' in error_message
     assert 'TASK "my_task" has attribute "inputs" modified' in error_message
     assert 'TASK "my_task" has attribute "function" modified' in error_message
     assert 'TASK "my_task" has attribute "outputs" modified' in error_message
@@ -526,20 +531,20 @@ def twice(a):
 
 
 def config_scenario():
+    Config.configure_data_node(id="d0", storage_type="csv")
     data_node_1_config = Config.configure_data_node(
         id="d1", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
     )
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice, data_node_1_config, data_node_2_config)
     pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
-    pipeline_config_2 = Config.configure_pipeline("my_pipeline_2", task_config)
     scenario_config = Config.configure_scenario("my_scenario", pipeline_config, frequency=Frequency.DAILY)
 
     return scenario_config
 
 
-def triple(a):
-    return a * 3
+def double_twice(a):
+    return a * 2, a * 2
 
 
 def config_scenario_2():
@@ -552,14 +557,26 @@ def config_scenario_2():
         repository_properties={"foo": "bar"},
     )
     Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
+    data_node_1_config = Config.configure_data_node(
+        id="d1", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+    )
+    # Modify properties of "d2"
     data_node_2_config = Config.configure_data_node(
         id="d2", storage_type="csv", default_path="bar.csv", has_header=False, exposed_type="numpy"
     )
+    # Add new data node "d3"
     data_node_3_config = Config.configure_data_node(
         id="d3", storage_type="csv", default_path="baz.csv", has_header=False, exposed_type="numpy"
     )
-    task_config = Config.configure_task("my_task", triple, data_node_2_config, data_node_3_config)
-    pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
-    scenario_config = Config.configure_scenario("my_scenario", pipeline_config, frequency=Frequency.DAILY)
+    # Modify properties of "my_task", including the function and outputs list
+    task_config = Config.configure_task(
+        "my_task", double_twice, data_node_3_config, [data_node_1_config, data_node_2_config]
+    )
+    # Modify properties of "my_pipeline", where tasks is now a list
+    pipeline_config = Config.configure_pipeline("my_pipeline", [task_config, task_config])
+    # Modify properties of "my_scenario", where pipelines is now a list
+    scenario_config = Config.configure_scenario(
+        "my_scenario", [pipeline_config, pipeline_config], frequency=Frequency.MONTHLY
+    )
 
     return scenario_config
