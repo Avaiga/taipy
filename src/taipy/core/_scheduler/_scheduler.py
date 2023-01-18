@@ -64,9 +64,9 @@ class _Scheduler(_AbstractScheduler):
              force (bool) : Enforce execution of the pipeline's tasks even if their output data
                 nodes are cached.
              wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in
-             asynchronous mode.
+                asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
-             before returning.
+                before returning.
         Returns:
             The created Jobs.
         """
@@ -103,9 +103,9 @@ class _Scheduler(_AbstractScheduler):
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
              wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous
-             mode.
+                mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished
-             before returning.
+                before returning.
         Returns:
             The created `Job^`.
         """

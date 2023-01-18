@@ -45,7 +45,7 @@ class Pipeline(_Entity):
         owner_id (str):  The identifier of the owner (scenario_id, cycle_id) or None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent scenarios.
         version (str): The string indicates the application version of the pipeline to instantiate. If not provided,
-        the latest version is used.
+            the latest version is used.
     """
 
     _ID_PREFIX = "PIPELINE"
@@ -290,9 +290,9 @@ class Pipeline(_Entity):
                 change.
             force (bool): Force execution even if the data nodes are in cache.
             wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in asynchronous
-            mode.
+                mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before
-            returning.
+                returning.
 
         """
         from ._pipeline_manager_factory import _PipelineManagerFactory

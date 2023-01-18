@@ -51,7 +51,7 @@ class Scenario(_Entity):
         subscribers (Set[Callable]): The set of callbacks to be called on `Job^`'s status change.
         tags (Set[str]): The list of scenario's tags.
         version (str): The string indicates the application version of the scenario to instantiate. If not provided,
-        the latest version is used.
+            the latest version is used.
     """
 
     _ID_PREFIX = "SCENARIO"
@@ -283,9 +283,9 @@ class Scenario(_Entity):
         Parameters:
             force (bool): Force execution even if the data nodes are in cache.
             wait (bool): Wait for the scheduled jobs created from the scenario submission to be finished in
-            asynchronous mode.
+                asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
-            before returning.
+                before returning.
         """
         from ... import core as tp
 

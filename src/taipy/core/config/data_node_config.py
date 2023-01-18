@@ -430,8 +430,7 @@ class DataNodeConfig(Section):
             read_kwargs (Optional[Dict]): Additional parameters passed to the `pandas.read_parquet` method.
             write_kwargs (Optional[Dict]): Additional parameters passed to the `pandas.DataFrame.write_parquet` method.
                 The parameters in "read_kwargs" and "write_kwargs" have a **higher precedence** than the top-level
-                parameters which are also
-                passed to Pandas.
+                parameters which are also passed to Pandas.
             scope (Scope^): The scope of the Parquet data node configuration. The default value
                 is `Scope.SCENARIO`.
             cacheable (bool): If True, indicates that the Parquet data node is cacheable. The default value is _False_.
@@ -560,7 +559,7 @@ class DataNodeConfig(Section):
             scope (Scope^): The scope of the in_memory data node configuration. The default
                 value is `Scope.SCENARIO`.
             cacheable (bool): If True, indicates that the in_memory data node is cacheable. The default value is
-            _False_.
+                _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
@@ -636,7 +635,7 @@ class DataNodeConfig(Section):
             db_name (str): The database name.
             db_host (str): The database host. The default value is _"localhost"_.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
-            _"postgresql"_.
+                _"postgresql"_.
             db_driver (str): The database driver. The default value is
                 _"ODBC Driver 17 for SQL Server"_.
             db_port (int): The database port. The default value is 1433.
@@ -647,7 +646,7 @@ class DataNodeConfig(Section):
             scope (Scope^): The scope of the SQL data node configuration. The default value is
                 `Scope.SCENARIO`.
             cacheable (bool): If True, indicates that the SQL table data node is cacheable. The default value is
-            _False_.
+                _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
@@ -699,7 +698,7 @@ class DataNodeConfig(Section):
             db_password (str): The database password.
             db_name (str): The database name.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
-            _"postgresql"_.
+                _"postgresql"_.
             db_port (int): The database port. The default value is 1433.
             db_host (str): The database host. The default value is _"localhost"_.
             db_driver (str): The database driver. The default value is
@@ -708,7 +707,7 @@ class DataNodeConfig(Section):
                 connection string.
             read_query (str): The SQL query string used to read the data from the database.
             write_query_builder (Callable): A callback function that takes the data as an input parameter and returns a
-            list of SQL queries.
+                list of SQL queries.
             exposed_type: The exposed type of the data read from SQL query. The default value is `pandas`.
             scope (Scope^): The scope of the SQL data node configuration. The default value is
                 `Scope.SCENARIO`.
@@ -761,15 +760,15 @@ class DataNodeConfig(Section):
             db_name (str): The database name.
             collection_name (str): The collection in the database to read from and to write the data to.
             custom_document (Any): The custom document class to store, encode, and decode data when reading and writing
-            to a Mongo collection.
-                The custom_document can have optional `decode` method to decode data in the Mongo collection to a custom
-                 object, and `encode` method to encode the object's properties to the Mongo collection when writing.
+                to a Mongo collection. The custom_document can have optional `decode` method to decode data in the
+                Mongo collection to a custom object, and `encode` method to encode the object's properties to the
+                Mongo collection when writing.
             db_username (str): The database username.
             db_password (str): The database password.
             db_host (str): The database host. The default value is _"localhost"_.
             db_port (int): The database port. The default value is 27017.
             db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection
-            string.
+                string.
             scope (Scope^): The scope of the Mongo collection data node configuration. The default value is
                 `Scope.SCENARIO`.
             cacheable (bool): If True, indicates that the SQL data node is cacheable. The default value is _False_.
