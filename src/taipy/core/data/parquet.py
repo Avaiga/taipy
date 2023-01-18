@@ -20,7 +20,7 @@ from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
-from ..common.alias import DataNodeId, JobId, Edit
+from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import (
     InvalidExposedType,
     MissingRequiredProperty,
@@ -43,7 +43,8 @@ class ParquetDataNode(DataNode):
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided,
+            the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
@@ -61,9 +62,10 @@ class ParquetDataNode(DataNode):
             - _"compression"_ `(Optional[str])`: Name of the compression to use. Use None for no compression.
                 `{'snappy', 'gzip', 'brotli', None}`, default `'snappy'`.\n
             - _"read_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.read_parquet_ method.\n
-            - _"write_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.DataFrame.write_parquet_ method.
-                The parameters in _"read_kwargs"_ and _"write_kwargs"_ have a **higher precedence** than the top-level parameters which
-                are also passed to Pandas.\n
+            - _"write_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.DataFrame.write_parquet_
+                method.
+                The parameters in _"read_kwargs"_ and _"write_kwargs"_ have a **higher precedence** than the top-level
+                parameters which are also passed to Pandas.\n
     """
 
     __STORAGE_TYPE = "parquet"
@@ -109,7 +111,8 @@ class ParquetDataNode(DataNode):
             properties[self.__ENGINE_PROPERTY] = "pyarrow"
         if properties[self.__ENGINE_PROPERTY] not in self.__VALID_PARQUET_ENGINES:
             raise UnknownParquetEngine(
-                f"Invalid parquet engine: {properties[self.__ENGINE_PROPERTY]}. Supported engines are {', '.join(self.__VALID_PARQUET_ENGINES)}"
+                f"Invalid parquet engine: {properties[self.__ENGINE_PROPERTY]}. "
+                f"Supported engines are {', '.join(self.__VALID_PARQUET_ENGINES)}"
             )
 
         if self.__COMPRESSION_PROPERTY not in properties.keys():
@@ -119,7 +122,8 @@ class ParquetDataNode(DataNode):
             and properties[self.__COMPRESSION_PROPERTY] not in self.__VALID_COMPRESSION_ALGORITHMS
         ):
             raise UnknownCompressionAlgorithm(
-                f"Unsupported compression algorithm: {properties[self.__COMPRESSION_PROPERTY]}. Supported algorithms are {', '.join(self.__VALID_COMPRESSION_ALGORITHMS)}"
+                f"Unsupported compression algorithm: {properties[self.__COMPRESSION_PROPERTY]}. "
+                f"Supported algorithms are {', '.join(self.__VALID_COMPRESSION_ALGORITHMS)}"
             )
 
         if self.__READ_KWARGS_PROPERTY not in properties.keys():
@@ -173,7 +177,8 @@ class ParquetDataNode(DataNode):
     def _check_exposed_type(self, exposed_type):
         if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
             raise InvalidExposedType(
-                f"Invalid string exposed type {exposed_type}. Supported values are {', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
+                f"Invalid string exposed type {exposed_type}. Supported values are "
+                f"{', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
             )
 
     def _read(self):

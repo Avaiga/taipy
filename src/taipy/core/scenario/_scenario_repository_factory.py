@@ -20,7 +20,6 @@ from ._scenario_sql_repository import _ScenarioSQLRepository
 
 
 class _ScenarioRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _ScenarioFSRepository, "sql": _ScenarioSQLRepository}
 
     @classmethod
@@ -31,4 +30,6 @@ class _ScenarioRepositoryFactory(_RepositoryFactory):
                 "_ScenarioRepositoryFactory",
             )
             return factory._build_repository()  # type: ignore
-        return cls._REPOSITORY_MAP.get(Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default"))()  # type: ignore
+        return cls._REPOSITORY_MAP.get(
+            Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default")
+        )()  # type: ignore

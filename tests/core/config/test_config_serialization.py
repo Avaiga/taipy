@@ -182,16 +182,16 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[DataNodeConfig.name]["default"] is not None
     assert Config.sections[DataNodeConfig.name]["default"].storage_type == "pickle"
     assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
-    assert Config.sections[DataNodeConfig.name]["default"].cacheable == False
+    assert Config.sections[DataNodeConfig.name]["default"].cacheable is False
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].storage_type == "csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].scope == Scope.GLOBAL
-    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].cacheable == False
-    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header == True
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].cacheable is False
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].storage_type == "json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].scope == Scope.SCENARIO
-    assert Config.sections[DataNodeConfig.name]["test_json_dn"].cacheable == False
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].cacheable is False
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
@@ -201,7 +201,7 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[TaskConfig.name]["default"] is not None
     assert Config.sections[TaskConfig.name]["default"].inputs == []
     assert Config.sections[TaskConfig.name]["default"].outputs == []
-    assert Config.sections[TaskConfig.name]["default"].function == None
+    assert Config.sections[TaskConfig.name]["default"].function is None
     assert [inp.id for inp in Config.sections[TaskConfig.name]["test_task"].inputs] == [
         Config.sections[DataNodeConfig.name]["test_csv_dn"].id
     ]
@@ -343,16 +343,16 @@ def test_read_write_json_configuration_file():
     assert Config.sections[DataNodeConfig.name]["default"] is not None
     assert Config.sections[DataNodeConfig.name]["default"].storage_type == "pickle"
     assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
-    assert Config.sections[DataNodeConfig.name]["default"].cacheable == False
+    assert Config.sections[DataNodeConfig.name]["default"].cacheable is False
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].storage_type == "csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].scope == Scope.GLOBAL
-    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].cacheable == False
-    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header == True
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].cacheable is False
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].storage_type == "json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].scope == Scope.SCENARIO
-    assert Config.sections[DataNodeConfig.name]["test_json_dn"].cacheable == False
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].cacheable is False
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
@@ -362,7 +362,7 @@ def test_read_write_json_configuration_file():
     assert Config.sections[TaskConfig.name]["default"] is not None
     assert Config.sections[TaskConfig.name]["default"].inputs == []
     assert Config.sections[TaskConfig.name]["default"].outputs == []
-    assert Config.sections[TaskConfig.name]["default"].function == None
+    assert Config.sections[TaskConfig.name]["default"].function is None
     assert [inp.id for inp in Config.sections[TaskConfig.name]["test_task"].inputs] == [
         Config.sections[DataNodeConfig.name]["test_csv_dn"].id
     ]

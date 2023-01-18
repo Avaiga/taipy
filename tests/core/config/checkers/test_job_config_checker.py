@@ -17,7 +17,6 @@ from taipy.config.config import Config
 
 class TestJobConfigChecker:
     def test_check_standalone_mode(self):
-
         collector = IssueCollector()
         config = Config._python_config
         _JobConfigChecker(config, collector)._check()

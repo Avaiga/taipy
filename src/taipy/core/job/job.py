@@ -48,7 +48,8 @@ class Job(_Entity):
         status (Status^): The current status of this job.
         creation_date (datetime): The date of this job's creation.
         stacktrace (List[str]): The list of stacktraces of the exceptions raised during the execution.
-        version (str): The string indicates the application version of the job to instantiate. If not provided, the latest version is used.
+        version (str): The string indicates the application version of the job to instantiate. If not provided,
+            the latest version is used.
     """
 
     _MANAGER_NAME = "job"

@@ -39,9 +39,8 @@ class _VersioningCLI:
             action="store_true",
             default=True,
             help="""
-                When execute Taipy application in `development` mode, all entities from the previous development version will
-                be deleted before running new Taipy application.
-                This is the default behavior.
+                When execute Taipy application in `development` mode, all entities from the previous development version
+                will be deleted before running new Taipy application. This is the default behavior.
             """,
         )
         mode_group.add_argument(
@@ -50,9 +49,9 @@ class _VersioningCLI:
             const="",
             metavar="VERSION",
             help="""
-                When execute Taipy application in `experiment` mode, the current Taipy application is saved to a new version.
-                If version name already exists, check for compatibility with current Python Config and run the application.
-                Without being specified, the version number will be a random string.
+                When execute Taipy application in `experiment` mode, the current Taipy application is saved to a new
+                version. If version name already exists, check for compatibility with current Python Config and run the
+                application. Without being specified, the version number will be a random string.
             """,
         )
         mode_group.add_argument(
@@ -61,8 +60,9 @@ class _VersioningCLI:
             const="",
             metavar="VERSION",
             help="""
-                When execute in `production` mode, the current version is used in production. All production versions should
-                have the same configuration and share all entities. Without being specified, the latest version is used.
+                When execute in `production` mode, the current version is used in production. All production versions
+                should have the same configuration and share all entities. Without being specified, the latest version
+                is used.
             """,
         )
 
@@ -82,7 +82,8 @@ class _VersioningCLI:
             "--delete-production-version",
             "-dp",
             metavar="VERSION",
-            help="Delete a Taipy version from production by version number. The version is still kept as an experiment version.",
+            help="Delete a Taipy version from production by version number. The version is still kept as an experiment "
+            "version.",
         )
 
     @classmethod

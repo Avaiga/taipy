@@ -29,7 +29,6 @@ def test_job_config():
 
 
 def test_nb_of_workers_deprecated():
-
     with pytest.warns(DeprecationWarning):
         _ = Config.configure_job_executions(mode="standalone", nb_of_workers=2)
         assert Config.job_config.max_nb_of_workers == 2

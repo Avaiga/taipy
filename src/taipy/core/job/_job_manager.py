@@ -22,7 +22,6 @@ from .job import Job
 
 
 class _JobManager(_Manager[Job]):
-
     _repository = _JobRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Job.__name__
     _ID_PREFIX = "JOB_"

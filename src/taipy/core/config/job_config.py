@@ -119,7 +119,7 @@ class JobConfig(UniqueSection):
 
     @classmethod
     def get_default_config(cls, mode: str) -> Dict[str, Any]:
-        if cls.is_standalone:
+        if cls.is_standalone:  # type: ignore
             return {"max_nb_of_workers": 1}
         if cls.is_development:
             return {}

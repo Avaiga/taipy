@@ -41,7 +41,7 @@ class _JobDispatcher(threading.Thread):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.scheduler = scheduler
-        self.lock = self.scheduler.lock
+        self.lock = self.scheduler.lock  # type: ignore
         Config.block_update()
 
     def start(self):
@@ -63,7 +63,7 @@ class _JobDispatcher(threading.Thread):
                     with self.lock:
                         job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
-            except:  # In case the last job of the queue has been removed.
+            except:  # In case the last job of the queue has been removed.  # noqa: E722
                 pass
 
     def _can_execute(self) -> bool:
@@ -86,7 +86,7 @@ class _JobDispatcher(threading.Thread):
             with self.lock:
                 try:
                     job = self.scheduler.jobs_to_run.get()
-                except:  # In case the last job of the queue has been removed.
+                except:  # In case the last job of the queue has been removed.  # noqa: E722
                     self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
             self._execute_job(job)
 

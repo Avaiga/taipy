@@ -20,14 +20,16 @@ from ._cycle_sql_repository import _CycleSQLRepository
 
 
 class _CycleRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _CycleFSRepository, "sql": _CycleSQLRepository}
 
     @classmethod
     def _build_repository(cls) -> Union[_CycleFSRepository, Any]:  # type: ignore
         if cls._using_enterprise():
             factory = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_repository_factory", "_CycleRepositoryFactory"
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_repository_factory",
+                "_CycleRepositoryFactory",
             )
             return factory._build_repository()  # type: ignore
-        return cls._REPOSITORY_MAP.get(Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default"))()  # type: ignore
+        return cls._REPOSITORY_MAP.get(
+            Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default")
+        )()  # type: ignore

@@ -71,7 +71,6 @@ class FakeMultiSheetExcelCustomDataNode(DataNode):
 
 class TestFilterDataNode:
     def test_get_item(self, default_data_frame):
-
         # get item for DataFrame data_type
         default_data_frame[1] = [100, 100]
         df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)

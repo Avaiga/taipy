@@ -31,7 +31,6 @@ class TestRepositoriesStorage:
         ],
     )
     def test_save_and_fetch_model(self, mock_repo, params):
-
         r = mock_repo(**params)
         m = MockObj("uuid", "foo")
         r._save(m)
@@ -47,7 +46,6 @@ class TestRepositoriesStorage:
         ],
     )
     def test_get_all(self, mock_repo, params):
-
         objs = []
         r = mock_repo(**params)
         r._delete_all()
@@ -94,7 +92,6 @@ class TestRepositoriesStorage:
         ],
     )
     def test_delete_many(self, mock_repo, params):
-
         r = mock_repo(**params)
         r._delete_all()
 

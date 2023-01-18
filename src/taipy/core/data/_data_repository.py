@@ -94,14 +94,16 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
                         for v in properties[self._EXPOSED_TYPE_KEY]
                     ]
                 else:
-                    properties[
-                        self._EXPOSED_TYPE_KEY
-                    ] = f"{properties[self._EXPOSED_TYPE_KEY].__module__}.{properties[self._EXPOSED_TYPE_KEY].__qualname__}"
+                    properties[self._EXPOSED_TYPE_KEY] = (
+                        f"{properties[self._EXPOSED_TYPE_KEY].__module__}."
+                        f"{properties[self._EXPOSED_TYPE_KEY].__qualname__}"
+                    )
 
         if self._CUSTOM_DOCUMENT_KEY in properties.keys():
-            properties[
-                self._CUSTOM_DOCUMENT_KEY
-            ] = f"{properties[self._CUSTOM_DOCUMENT_KEY].__module__}.{properties[self._CUSTOM_DOCUMENT_KEY].__qualname__}"
+            properties[self._CUSTOM_DOCUMENT_KEY] = (
+                f"{properties[self._CUSTOM_DOCUMENT_KEY].__module__}."
+                f"{properties[self._CUSTOM_DOCUMENT_KEY].__qualname__}"
+            )
 
         return _DataNodeModel(
             data_node.id,

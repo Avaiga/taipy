@@ -22,7 +22,6 @@ from ._scheduler import _Scheduler
 
 
 class _SchedulerFactory:
-
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
     _TAIPY_ENTERPRISE_CORE_SCHEDULER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._scheduler"
     _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._dispatcher"

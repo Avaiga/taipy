@@ -25,7 +25,6 @@ from .pickle import PickleDataNode
 
 
 class _DataManager(_Manager[DataNode]):
-
     __DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
     _repository = _DataRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = DataNode.__name__

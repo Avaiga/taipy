@@ -75,7 +75,8 @@ def submit(
         entity (Union[Scenario^, Pipeline^, Task^]): The entity to submit.
         force (bool): If True, the execution is forced even if the data nodes are in cache.
         wait (bool): Wait for the scheduled jobs created from the submission to be finished in asynchronous mode.
-        timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before returning.
+        timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before
+            returning.
 
     """
     if isinstance(entity, Scenario):
@@ -133,7 +134,8 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
 
     - If a `CycleId^` is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
     - If a `ScenarioId^` is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
-    If the scenario is primary, it can only be deleted if it is the only scenario in the cycle. In that case, its cycle is also deleted.
+    - If the scenario is primary, it can only be deleted if it is the only scenario in the cycle. In that case, its
+        cycle is also deleted.
     - If a `PipelineId^` is provided, the nested tasks, data nodes, and jobs are deleted.
     - If a `TaskId^` is provided, the nested data nodes, and jobs are deleted.
 

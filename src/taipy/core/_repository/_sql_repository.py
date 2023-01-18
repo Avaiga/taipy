@@ -62,7 +62,7 @@ class _BaseSQLRepository(_AbstractRepository[ModelType, Entity]):
             raise MissingRequiredProperty("Missing property db_location")
 
 
-class _TaipyModelTable(_BaseSQLRepository):
+class _TaipyModelTable(_BaseSQLRepository[ModelType, Entity]):
     @abstractmethod
     def _to_model(self, obj):
         """
@@ -84,7 +84,6 @@ class _TaipyModelTable(_BaseSQLRepository):
         to_model_fct: Callable,
         from_model_fct: Callable,
     ):
-
         self.model = model
         self.model_name = model_name
         self._to_model = to_model_fct  # type: ignore
@@ -99,7 +98,6 @@ class _TaipyModelTable(_BaseSQLRepository):
         return self.__to_entity(entry)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
-
         try:
             query = self.session.query(self._table).filter_by(model_name=self.model_name)
             query = self.__filter_by_version(query, version_number)
@@ -136,7 +134,7 @@ class _TaipyModelTable(_BaseSQLRepository):
     def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
         entries = self._search(attribute, value, version_number)
         if entries:
-            self._delete_many([e.id for e in entries])
+            self._delete_many([e.id for e in entries])  # type: ignore
 
     def _delete_all(self):
         self.session.query(self._table).filter_by(model_name=self.model_name).delete()
@@ -162,7 +160,6 @@ class _TaipyModelTable(_BaseSQLRepository):
         entity = self.__get_entities_by_config_and_owner(config_id, owner_id)
         return self.__to_entity(entity)
 
-
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
@@ -178,7 +175,9 @@ class _TaipyModelTable(_BaseSQLRepository):
 
         return res
 
-    def __get_entities_by_config_and_owner(self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None) -> _TaipyModel:
+    def __get_entities_by_config_and_owner(
+        self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None
+    ) -> _TaipyModel:
         if owner_id:
             query = (
                 self.session.query(self._table)
@@ -258,7 +257,7 @@ class _TaipyModelTable(_BaseSQLRepository):
             export_file.write(entry.document)
 
 
-class _TaipyVersionTable(_BaseSQLRepository):
+class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
     @abstractmethod
     def _to_model(self, obj):
         """
@@ -279,7 +278,6 @@ class _TaipyVersionTable(_BaseSQLRepository):
         to_model_fct: Callable,
         from_model_fct: Callable,
     ):
-
         self.model = model
         self._to_model = to_model_fct  # type: ignore
         self._from_model = from_model_fct  # type: ignore
@@ -322,7 +320,7 @@ class _TaipyVersionTable(_BaseSQLRepository):
 
     def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
         entries = self._search(attribute, value, version_number)
-        self._delete_many([e.id for e in entries])
+        self._delete_many([e.id for e in entries])  # type: ignore
 
     def _delete_all(self):
         self.session.query(self._table).delete()
@@ -422,14 +420,14 @@ class _SQLRepository(_BaseSQLRepository):
         to_model_fct: Callable,
         from_model_fct: Callable,
     ):
-        self._table = (
-            _TaipyVersionTable(model, to_model_fct, from_model_fct)
+        self._table: _BaseSQLRepository = (
+            _TaipyVersionTable(model, to_model_fct, from_model_fct)  # type: ignore
             if model_name == "version"
-            else _TaipyModelTable(model, model_name, to_model_fct, from_model_fct)
+            else _TaipyModelTable(model, model_name, to_model_fct, from_model_fct)  # type: ignore
         )
         super().__init__()
 
-    def load(self, model_id: str) -> Entity:
+    def load(self, model_id: str) -> Entity:  # type: ignore
         return self._table.load(model_id)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
@@ -445,7 +443,7 @@ class _SQLRepository(_BaseSQLRepository):
         self._table._delete(model_id)
 
     def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
-        self._table._delete_by(attribute, value, version_number)
+        self._table._delete_by(attribute, value, version_number)  # type: ignore
 
     def _delete_all(self):
         self._table._delete_all()
@@ -460,7 +458,7 @@ class _SQLRepository(_BaseSQLRepository):
         self._table._export(entity_id, folder_path)
 
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
-        return self._table._get_by_config_and_owner_id(config_id, owner_id)
+        return self._table._get_by_config_and_owner_id(config_id, owner_id)  # type: ignore
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         return self._table._get_by_configs_and_owner_ids(configs_and_owner_ids)

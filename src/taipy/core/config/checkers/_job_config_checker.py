@@ -36,5 +36,6 @@ class _JobConfigChecker(_ConfigChecker):
                     self._error(
                         DataNodeConfig._STORAGE_TYPE_KEY,
                         data_node_config.storage_type,
-                        f"DataNode {cfg_id}: In-memory storage type can ONLY be used in {JobConfig._DEVELOPMENT_MODE} mode",
+                        f"DataNode {cfg_id}: In-memory storage type can ONLY be used in "
+                        f"{JobConfig._DEVELOPMENT_MODE} mode",
                     )

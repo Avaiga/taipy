@@ -37,7 +37,8 @@ class MongoCollectionDataNode(DataNode):
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided,
+            the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
@@ -49,12 +50,14 @@ class MongoCollectionDataNode(DataNode):
 
             - _"db_name"_ `(str)`: The database name.\n
             - _"collection_name"_ `(str)`: The collection in the database to read from and to write the data to.\n
-            - _"custom_document"_ `(Any)`: The custom document class to store, encode, and decode data when reading and writing to a Mongo collection.\n
+            - _"custom_document"_ `(Any)`: The custom document class to store, encode, and decode data when reading and
+                writing to a Mongo collection.\n
             - _"db_username"_ `(str)`: The database username.\n
             - _"db_password"_ `(str)`: The database password.\n
             - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.\n
             - _"db_port"_ `(int)`: The database port. The default value is 27017.\n
-            - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database connection string.\n
+            - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database
+                connection string.\n
     """
 
     __STORAGE_TYPE = "mongo_collection"
@@ -114,7 +117,7 @@ class MongoCollectionDataNode(DataNode):
             db_password=properties.get("db_password", ""),
             db_extra_args=properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
         )
-        self.collection = mongo_client[properties.get("db_name")][properties.get("collection_name")]
+        self.collection = mongo_client[properties.get("db_name", "")][properties.get("collection_name", "")]
 
         self.custom_document = properties[self.__CUSTOM_DOCUMENT_PROPERTY]
 
@@ -208,7 +211,8 @@ def _connect_mongodb(
         db_port (int): the database port.
         db_username (str): the database username.
         db_password (str): the database password.
-        db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection string.
+        db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection
+            string.
 
     Returns:
         pymongo.MongoClient

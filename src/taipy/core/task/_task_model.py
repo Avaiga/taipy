@@ -16,7 +16,6 @@ from typing import Any, Dict, List, Optional
 
 @dataclass
 class _TaskModel:
-
     id: str
     owner_id: Optional[str]
     parent_ids: List[str]

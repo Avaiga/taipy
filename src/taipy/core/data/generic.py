@@ -36,7 +36,8 @@ class GenericDataNode(DataNode):
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided,
+            the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data node is

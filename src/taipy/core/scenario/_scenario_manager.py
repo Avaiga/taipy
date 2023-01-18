@@ -42,7 +42,6 @@ from .scenario import Scenario
 
 
 class _ScenarioManager(_Manager[Scenario]):
-
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
     _repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Scenario.__name__
@@ -231,7 +230,8 @@ class _ScenarioManager(_Manager[Scenario]):
         if scenario.is_primary:
             if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
                 raise DeletingPrimaryScenario(
-                    f"Scenario {scenario.id}, which has config id {scenario.config_id}, is primary and there are other scenarios in the same cycle."
+                    f"Scenario {scenario.id}, which has config id {scenario.config_id}, is primary and there are "
+                    f"other scenarios in the same cycle. "
                 )
             _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
         super()._delete(scenario_id)
@@ -275,7 +275,8 @@ class _ScenarioManager(_Manager[Scenario]):
         if scenario.is_primary:
             if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
                 raise DeletingPrimaryScenario(
-                    f"Scenario {scenario.id}, which has config id {scenario.config_id}, is primary and there are other scenarios in the same cycle."
+                    f"Scenario {scenario.id}, which has config id {scenario.config_id}, is primary and there are "
+                    f"other scenarios in the same cycle. "
                 )
             _CycleManagerFactory._build_manager()._hard_delete(scenario.cycle.id)
             return

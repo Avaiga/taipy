@@ -90,19 +90,21 @@ class _VersionManager(_Manager[_Version]):
     def _get_development_version(cls) -> str:
         try:
             return cls._repository._get_development_version()
-        except:
+        except:  # noqa: E722
             return cls._set_development_version(str(uuid.uuid4()))
 
     @classmethod
     def _set_experiment_version(cls, version_number: str, override: bool) -> str:
         if version_number == cls._get_development_version():
             raise SystemExit(
-                f"Version number {version_number} is already a development version. Please choose a different version number for experiment mode."
+                f"Version number {version_number} is already a development version. Please choose a different version "
+                f"number for experiment mode. "
             )
 
         if version_number in cls._get_production_version():
             raise SystemExit(
-                f"Version number {version_number} is already a production version. Please choose a different version number for experiment mode."
+                f"Version number {version_number} is already a production version. Please choose a different version "
+                f"number for experiment mode. "
             )
 
         cls._get_or_create(version_number, override)
@@ -113,7 +115,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_latest_version(cls) -> str:
         try:
             return cls._repository._get_latest_version()
-        except:
+        except:  # noqa: E722
             # If there is no version in the system yet, create a new version as development version
             # This set the default versioning behavior on Jupyter notebook to Development mode
             return cls._set_development_version(str(uuid.uuid4()))
@@ -148,7 +150,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_production_version(cls) -> List[str]:
         try:
             return cls._repository._get_production_version()
-        except:
+        except:  # noqa: E722
             return []
 
     @classmethod

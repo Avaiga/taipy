@@ -151,7 +151,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                 files,
             )
             corresponding_entities = filter(
-                lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id, entities  # type: ignore
+                lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id,  # type: ignore
+                entities,
             )
             return next(corresponding_entities, None)  # type: ignore
         except FileNotFoundError:
@@ -209,9 +210,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                 file_content = f.read()
 
             if by or by_version:
-                if (
-                    all(criteria in file_content for criteria in by if criteria) and
-                    any(version in file_content for version in by_version)
+                if all(criteria in file_content for criteria in by if criteria) and any(
+                    version in file_content for version in by_version
                 ):
                     return self.__model_to_entity(file_content)
                 else:

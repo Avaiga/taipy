@@ -20,7 +20,6 @@ from ._version_sql_repository import _VersionSQLRepository
 
 
 class _VersionRepositoryFactory(_RepositoryFactory):
-
     _REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
 
     @classmethod
@@ -30,4 +29,6 @@ class _VersionRepositoryFactory(_RepositoryFactory):
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_repository_factory", "_VersionRepositoryFactory"
             )
             return factory._build_repository()  # type: ignore
-        return cls._REPOSITORY_MAP.get(Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default"))()  # type: ignore
+        return cls._REPOSITORY_MAP.get(
+            Config.global_config.repository_type, cls._REPOSITORY_MAP.get("default")
+        )()  # type: ignore

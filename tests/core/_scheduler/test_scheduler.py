@@ -164,7 +164,8 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
 
     stdout = caplog.text
     expected_outputs = [
-        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong path : {input_dn.path}"
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
         for input_dn in input_dns
     ]
     assert all([expected_output in stdout for expected_output in expected_outputs])

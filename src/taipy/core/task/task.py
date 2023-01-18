@@ -38,7 +38,8 @@ class Task(_Entity):
         id (str): The unique identifier of the task.
         owner_id (str):  The identifier of the owner (pipeline_id, scenario_id, cycle_id) or None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent pipelines.
-        version (str): The string indicates the application version of the task to instantiate. If not provided, the latest version is used.
+        version (str): The string indicates the application version of the task to instantiate. If not provided, the
+            latest version is used.
     """
 
     _ID_PREFIX = "TASK"
@@ -160,8 +161,10 @@ class Task(_Entity):
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
-            wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous mode.
-            timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before returning.
+            wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous
+                mode.
+            timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before
+                returning.
         """
         from ._task_manager_factory import _TaskManagerFactory
 

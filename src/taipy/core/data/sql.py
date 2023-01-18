@@ -34,7 +34,8 @@ class SQLDataNode(_AbstractSQLDataNode):
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The ordered list of edits for that job.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided, the current version is used.
+        version (str): The string indicates the application version of the data node to instantiate. If not provided,
+            the current version is used.
         cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
@@ -48,13 +49,16 @@ class SQLDataNode(_AbstractSQLDataNode):
             - _"db_username"_ `(str)`: The database username.
             - _"db_password"_ `(str)`: The database password.
             - _"db_name"_ `(str)`: The database name.
-            - _"db_engine"_ `(str)`: The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or _"postgresql"_.
+            - _"db_engine"_ `(str)`: The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
+                _"postgresql"_.
             - _"db_port"_ `(int)`: The database port. The default value is 1433.
             - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.
             - _"db_driver"_ `(str)`: The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
-            - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database connection string.
+            - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database
+                connection string.
             - _"read_query"_ `(str)`: The SQL query string used to read the data from the database.
-            - _"write_query_builder"_ `(Callable)`: A callback function that takes the data as an input parameter and returns a list of SQL queries.
+            - _"write_query_builder"_ `(Callable)`: A callback function that takes the data as an input parameter and
+                returns a list of SQL queries.
             - _"exposed_type"_: The exposed type of the data read from SQL query. The default value is `pandas`.
     """
 

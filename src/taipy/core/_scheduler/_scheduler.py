@@ -63,8 +63,10 @@ class _Scheduler(_AbstractScheduler):
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : Enforce execution of the pipeline's tasks even if their output data
                 nodes are cached.
-             wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in asynchronous mode.
-             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before returning.
+             wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in
+                asynchronous mode.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
+                before returning.
         Returns:
             The created Jobs.
         """
@@ -100,8 +102,10 @@ class _Scheduler(_AbstractScheduler):
              submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
-             wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous mode.
-             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished before returning.
+             wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous
+                mode.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished
+                before returning.
         Returns:
             The created `Job^`.
         """
@@ -193,7 +197,8 @@ class _Scheduler(_AbstractScheduler):
                     ParquetDataNode.storage_type(),
                 ]:
                     cls.__logger.warning(
-                        f"{dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong path : {dn.path}"
+                        f"{dn.id} cannot be read because it has never been written. Hint: The data node may refer to "
+                        f"a wrong path : {dn.path} "
                     )
                 else:
                     cls.__logger.warning(f"{dn.id} cannot be read because it has never been written.")
@@ -309,7 +314,6 @@ class _Scheduler(_AbstractScheduler):
 
     @staticmethod
     def _check_and_execute_jobs_if_development_mode():
-
         from ._scheduler_factory import _SchedulerFactory
 
         if dispatcher := _SchedulerFactory._dispatcher:
