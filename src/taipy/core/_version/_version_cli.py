@@ -83,7 +83,7 @@ class _VersioningCLI:
             "-dp",
             metavar="VERSION",
             help="Delete a Taipy version from production by version number. The version is still kept as an experiment "
-                 "version.",
+            "version.",
         )
 
     @classmethod
