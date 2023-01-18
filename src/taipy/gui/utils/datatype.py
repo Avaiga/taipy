@@ -11,6 +11,14 @@
 
 import re
 
+import pandas as pd
+
 
 def _get_data_type(value):
-    return re.match(r"^<class '(.*?)'>", str(type(value))).group(1)
+    if pd.api.types.is_bool_dtype(value):
+        return "bool"
+    elif pd.api.types.is_integer_dtype(value):
+        return "int"
+    elif pd.api.types.is_float_dtype(value):
+        return "float"
+    return re.match(r"^<class '(.*\.)?(.*?)(\d\d)?'>", str(type(value))).group(2)

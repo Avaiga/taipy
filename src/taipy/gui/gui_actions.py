@@ -291,7 +291,7 @@ def invoke_long_callback(
                 this_gui,
                 str(state_id),
                 user_status_function,
-                [status] + list(user_status_function_args) + [function_result],
+                [status] + list(user_status_function_args) + [function_result],  # type: ignore
                 str(module_context),
             )
         if e:
