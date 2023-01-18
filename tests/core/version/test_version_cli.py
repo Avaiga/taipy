@@ -44,7 +44,7 @@ def test_version_cli_return_value():
     _VersioningCLI._create_parser()
     mode, version_number, override = _VersioningCLI._parse_arguments()
     assert mode == "development"
-    assert version_number is None
+    assert version_number == ""
     assert not override
 
     # Test Dev mode
@@ -60,16 +60,16 @@ def test_version_cli_return_value():
     with patch("sys.argv", ["prog", "--experiment"]):
         mode, version_number, override = _VersioningCLI._parse_arguments()
     assert mode == "experiment"
-    assert version_number is None
+    assert version_number == ""
     assert not override
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.1"]):
         mode, version_number, override = _VersioningCLI._parse_arguments()
     assert mode == "experiment"
     assert version_number == "2.1"
     assert not override
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1", "--override"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.1", "--override"]):
         mode, version_number, override = _VersioningCLI._parse_arguments()
     assert mode == "experiment"
     assert version_number == "2.1"
@@ -79,7 +79,7 @@ def test_version_cli_return_value():
     with patch("sys.argv", ["prog", "--production"]):
         mode, version_number, override = _VersioningCLI._parse_arguments()
     assert mode == "production"
-    assert version_number is None
+    assert version_number == ""
     assert not override
 
 
@@ -192,7 +192,7 @@ def test_version_number_when_switching_mode():
     assert ver_3 != ver_dev
     assert len(_VersionManager._get_all()) == 2
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.1"]):
         core.run()
     ver_4 = _VersionManager._get_latest_version()
     assert ver_4 == "2.1"
@@ -216,7 +216,7 @@ def test_version_number_when_switching_mode():
     assert len(_VersionManager._get_all()) == 4
 
     # When run with production mode, the "2.1" version is used as production
-    with patch("sys.argv", ["prog", "--production", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--production", "2.1"]):
         core.run()
     ver_7 = _VersionManager._get_latest_version()
     production_versions = _VersionManager._get_production_version()
@@ -255,7 +255,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
 
-    with patch("sys.argv", ["prog", "--production", "--version-number", "2.0"]):
+    with patch("sys.argv", ["prog", "--production", "2.0"]):
         core.run()
     production_ver_2 = _VersionManager._get_latest_version()
     assert _VersionManager._get_production_version() == [production_ver_1, production_ver_2]
@@ -278,7 +278,7 @@ def test_override_experiment_version():
 
     core = Core()
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core.run()
     ver_1 = _VersionManager._get_latest_version()
     assert ver_1 == "1.0"
@@ -301,11 +301,11 @@ def test_override_experiment_version():
 
     # Without --override parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
+        with patch("sys.argv", ["prog", "--experiment", "1.0"]):
             core.run()
 
     # With --override parameter
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0", "--override"]):
+    with patch("sys.argv", ["prog", "--experiment", "1.0", "--override"]):
         core.run()
     ver_2 = _VersionManager._get_latest_version()
     assert ver_2 == "1.0"
@@ -328,7 +328,7 @@ def test_override_production_version():
 
     core = Core()
 
-    with patch("sys.argv", ["prog", "--production", "--version-number", "1.0"]):
+    with patch("sys.argv", ["prog", "--production", "1.0"]):
         core.run()
     ver_1 = _VersionManager._get_latest_version()
     production_versions = _VersionManager._get_production_version()
@@ -353,11 +353,11 @@ def test_override_production_version():
 
     # Without --override parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "--production", "--version-number", "1.0"]):
+        with patch("sys.argv", ["prog", "--production", "1.0"]):
             core.run()
 
     # With --override parameter
-    with patch("sys.argv", ["prog", "--production", "--version-number", "1.0", "--override"]):
+    with patch("sys.argv", ["prog", "--production", "1.0", "--override"]):
         core.run()
     ver_2 = _VersionManager._get_latest_version()
     assert ver_2 == "1.0"
@@ -385,30 +385,30 @@ def test_delete_version():
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario)
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core.run()
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario)
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "1.1"]):
         core.run()
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario)
 
-    with patch("sys.argv", ["prog", "--production", "--version-number", "1.1"]):
+    with patch("sys.argv", ["prog", "--production", "1.1"]):
         core.run()
 
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.0"]):
-        core.run()
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
-
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.0"]):
         core.run()
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario)
 
-    with patch("sys.argv", ["prog", "--production", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.1"]):
+        core.run()
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+    with patch("sys.argv", ["prog", "--production", "2.1"]):
         core.run()
 
     all_versions = [version.id for version in _VersionManager._get_all()]
@@ -451,26 +451,26 @@ def test_list_version():
     with patch("sys.argv", ["prog", "--development"]):
         core.run()
     sleep(0.05)
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core.run()
     sleep(0.05)
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "1.1"]):
         core.run()
     sleep(0.05)
-    with patch("sys.argv", ["prog", "--production", "--version-number", "1.1"]):
+    with patch("sys.argv", ["prog", "--production", "1.1"]):
         core.run()
     sleep(0.05)
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.0"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.0"]):
         core.run()
     sleep(0.05)
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--experiment", "2.1"]):
         core.run()
     sleep(0.05)
-    with patch("sys.argv", ["prog", "--production", "--version-number", "2.1"]):
+    with patch("sys.argv", ["prog", "--production", "2.1"]):
         core.run()
 
     with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--list-version"]):
+        with patch("sys.argv", ["prog", "--list-versions"]):
             core.run()
 
     version_list = str(e.value).strip().split("\n")
@@ -487,7 +487,7 @@ def test_modify_config_properties_without_override():
     scenario_config = config_scenario()
 
     core = Core()
-    with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         core.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
@@ -497,7 +497,7 @@ def test_modify_config_properties_without_override():
     scenario_config_2 = config_scenario_2()
 
     with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--experiment", "--version-number", "1.0"]):
+        with patch("sys.argv", ["prog", "--experiment", "1.0"]):
             core.run()
             scenario = _ScenarioManager._create(scenario_config_2)
             _ScenarioManager._submit(scenario)

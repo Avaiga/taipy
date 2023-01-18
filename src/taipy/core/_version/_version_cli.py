@@ -46,49 +46,50 @@ class _VersioningCLI:
         )
         mode_group.add_argument(
             "--experiment",
-            action="store_true",
+            nargs="?",
+            const="",
+            metavar="VERSION",
             help="""
-                When execute Taipy application in `experiment` mode, the current Taipy application is saved to a new version
-                defined by "--version-number". If version already exists, check for compatibility with current Python Config
-                and run the application.
+                When execute Taipy application in `experiment` mode, the current Taipy application is saved to a new version.
+                If version name already exists, check for compatibility with current Python Config and run the application.
+                Without being specified, the version number will be a random string.
             """,
         )
         mode_group.add_argument(
             "--production",
-            action="store_true",
+            nargs="?",
+            const="",
+            metavar="VERSION",
             help="""
-                When execute in `production` mode, the current version or the version defined by "--version-number" is used in
-                production. All production versions should have the same configuration and share all entities.
+                When execute in `production` mode, the current version is used in production. All production versions should
+                have the same configuration and share all entities. Without being specified, the latest version is used.
             """,
         )
 
         core_parser.add_argument(
-            "--version-number",
-            default=None,
-            help="The version number when execute in `experiment` mode. If not provided, a random version number is used.",
-        )
-        core_parser.add_argument(
             "--override",
             "-o",
             action="store_true",
-            help='Override the version specified by "--version-number" if existed. Default to False.',
+            help="Override the version if existed. Default to False.",
         )
         core_parser.add_argument(
-            "--list-version", "-l", action="store_true", help="List all existing versions of the Taipy application."
+            "--list-versions", "-l", action="store_true", help="List all existing versions of the Taipy application."
         )
-        core_parser.add_argument("--delete-version", "-d", default=None, help="Delete a version by version number.")
+        core_parser.add_argument(
+            "--delete-version", "-d", metavar="VERSION", help="Delete a Taipy version by version number."
+        )
         core_parser.add_argument(
             "--delete-production-version",
             "-dp",
-            default=None,
-            help="Delete a version from production by version number. The version is still kept as an experiment version.",
+            metavar="VERSION",
+            help="Delete a Taipy version from production by version number. The version is still kept as an experiment version.",
         )
 
     @classmethod
     def _parse_arguments(cls):
         args = _Argparser._parse()
 
-        if args.list_version:
+        if args.list_versions:
             list_version_message = f"\n{'Version number':<36}   {'Mode':<20}   {'Creation date':<20}\n"
 
             latest_version_number = _VersionManagerFactory._build_manager()._get_latest_version()
@@ -134,9 +135,12 @@ class _VersioningCLI:
 
         if args.development:
             mode = "development"
-        if args.experiment:
+            version_number = ""
+        if args.experiment is not None:
+            version_number = args.experiment
             mode = "experiment"
-        if args.production:
+        if args.production is not None:
+            version_number = args.production
             mode = "production"
 
-        return mode, args.version_number, args.override
+        return mode, version_number, args.override
