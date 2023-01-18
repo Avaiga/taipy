@@ -35,15 +35,15 @@ describe("Field Component", () => {
     it("displays a date with format", async () => {
         const myDate = new Date();
         myDate.setMonth(1, 1);
-        const {getByText} = render(<Field defaultValue="titi" value={myDate.toISOString()} dataType="datetime.datetime" format="MM/dd" /> );
-        const elt = getByText("02/01");
+        const {getByText} = render(<Field defaultValue="titi" value={myDate.toISOString()} dataType="datetime" format="MM/dd" /> );
+        getByText("02/01");
     })
     it("displays a int with format", async () => {
         const {getByText} = render(<Field defaultValue="titi" value={12} dataType="int" format="%.2f" /> );
-        const elt = getByText("12.00");
+        getByText("12.00");
     })
     it("displays a float with format", async () => {
         const {getByText} = render(<Field defaultValue="titi" value={12.1} dataType="float" format="float is %.0f" /> );
-        const elt = getByText("float is 12");
+        getByText("float is 12");
     })
 });

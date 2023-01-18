@@ -57,7 +57,7 @@ export const getNumberString = (value: number, numberformat: string | undefined,
             ? sprintf(numberformat || formatConf.number, value)
             : value.toLocaleString();
     } catch (e) {
-        console.info("getNumberString: " + (e as Error).message || e);
+        console.warn("getNumberString: " + (e as Error).message || e);
         return (
             (typeof value === "number" && value.toLocaleString()) ||
             (typeof value === "string" && (value as string)) ||
@@ -71,6 +71,8 @@ export const getTypeFromDf = (dataType?: string) => {
         case "datetime.datetime":
         case "datetime.date":
         case "datetime.time":
+        case "date":
+        case "time":
         case "datetime":
             return "date";
         case "int":
@@ -93,6 +95,9 @@ export const formatWSValue = (
         case "datetime.datetime":
         case "datetime.date":
         case "datetime.time":
+        case "datetime":
+        case "date":
+        case "time":
             try {
                 return getDateTimeString(value.toString(), dataFormat, formatConf);
             } catch (e) {

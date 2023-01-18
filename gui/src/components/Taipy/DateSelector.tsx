@@ -112,7 +112,7 @@ const DateSelector = (props: DateSelectorProps) => {
                         )
                     ) : (
                         <Field
-                            dataType="datetime.datetime"
+                            dataType="datetime"
                             defaultValue={props.defaultDate}
                             value={props.date}
                             format={props.format}

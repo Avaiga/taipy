@@ -16,11 +16,11 @@ import { FormatConfig } from "../context/taipyReducers";
 
 import { getNumberString } from "./index";
 
-let myInfo: jest.Mock;
+let myWarn: jest.Mock;
 
 beforeEach(() => {
-    myInfo = jest.fn();
-    console.info = myInfo;
+    myWarn = jest.fn();
+    console.warn = myWarn;
 })
 
 const getFormatConfig = (numberFormat?: string): FormatConfig => ({timeZone: "", dateTime: "", number: numberFormat || "", forceTZ: false})
@@ -46,26 +46,26 @@ describe("getNumberString", () => {
     });
     it("returns for string", async () => {
         expect(getNumberString("null" as unknown as number, "", getFormatConfig("%.1f"))).toBe("null");
-        expect(myInfo).toHaveBeenCalledWith("getNumberString: [sprintf] expecting number but found string")
+        expect(myWarn).toHaveBeenCalledWith("getNumberString: [sprintf] expecting number but found string")
     });
     it("returns for object", async () => {
         expect(getNumberString({t: 1} as unknown as number, "", getFormatConfig("%.1f"))).toBe("");
-        expect(myInfo).toHaveBeenCalledWith("getNumberString: [sprintf] expecting number but found object")
+        expect(myWarn).toHaveBeenCalledWith("getNumberString: [sprintf] expecting number but found object")
     });
     it("returns for bad format", async () => {
         expect(getNumberString(1, "%.f", getFormatConfig())).toBe("1");
-        expect(myInfo).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
+        expect(myWarn).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
     });
     it("returns for null", async () => {
         expect(getNumberString(null as unknown as number, "%2.f", getFormatConfig("%.1f"))).toBe("");
-        expect(myInfo).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
+        expect(myWarn).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
     });
     it("returns for undefined", async () => {
         expect(getNumberString(undefined as unknown as number, "%2.f", getFormatConfig("%.1f"))).toBe("");
-        expect(myInfo).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
+        expect(myWarn).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
     });
     it("returns for NaN", async () => {
         expect(getNumberString(NaN, "%2.f", getFormatConfig("%.1f"))).toBe("NaN");
-        expect(myInfo).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
+        expect(myWarn).toHaveBeenCalledWith("getNumberString: [sprintf] unexpected placeholder")
     });
 });
