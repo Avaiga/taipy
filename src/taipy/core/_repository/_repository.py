@@ -163,7 +163,8 @@ def _str_to_timedelta(timedelta_str: str) -> timedelta:
     if not parts:
         raise TypeError("Can not deserialize string into timedelta")
     time_params = {name: float(param) for name, param in parts.groupdict().items() if param}
-    return timedelta(**time_params)
+    # mypy has an issue with dynamic keyword parameters, hence the type ignore on the line bellow.
+    return timedelta(**time_params)  # type: ignore
 
 
 class _CustomEncoder(json.JSONEncoder):
