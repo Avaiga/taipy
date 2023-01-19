@@ -27,7 +27,6 @@ from taipy.core.config import (
     TaskConfig,
     PipelineConfig,
     ScenarioConfig,
-    Frequency,
 )
 
 class Config:

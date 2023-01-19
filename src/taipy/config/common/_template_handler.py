@@ -12,7 +12,7 @@
 import os
 import re
 from collections import UserDict
-from datetime import datetime
+from datetime import datetime, timedelta
 from importlib import import_module
 from operator import attrgetter
 from pydoc import locate
@@ -99,6 +99,26 @@ class _TemplateHandler:
             return datetime.fromisoformat(val)
         except ValueError:
             raise InconsistentEnvVariableError(f"{val} is not a valid datetime.")
+
+    @staticmethod
+    def _to_timedelta(val: str) -> timedelta:
+        """
+        Parse a time string e.g. (2h13m) into a timedelta object.
+
+        :param timedelta_str: A string identifying a duration.  (eg. 2h13m)
+        :return datetime.timedelta: A datetime.timedelta object
+        """
+        regex = re.compile(
+            r"^((?P<days>[\.\d]+?)d)? *"
+            r"((?P<hours>[\.\d]+?)h)? *"
+            r"((?P<minutes>[\.\d]+?)m)? *"
+            r"((?P<seconds>[\.\d]+?)s)?$"
+        )
+        parts = regex.match(val)
+        if not parts:
+            raise InconsistentEnvVariableError(f"{val} is not a valid timedelta.")
+        time_params = {name: float(param) for name, param in parts.groupdict().items() if param}
+        return timedelta(**time_params)  # type: ignore
 
     @staticmethod
     def _to_scope(val: str) -> Scope:
