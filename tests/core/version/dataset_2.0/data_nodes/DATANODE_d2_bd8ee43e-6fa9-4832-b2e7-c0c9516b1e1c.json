@@ -1,0 +1,24 @@
+{
+"id": "DATANODE_d2_bd8ee43e-6fa9-4832-b2e7-c0c9516b1e1c",
+"config_id": "d2",
+"scope": "<Scope.SCENARIO: 2>",
+"storage_type": "csv",
+"name": "DATANODE_d2_bd8ee43e-6fa9-4832-b2e7-c0c9516b1e1c",
+"owner_id": "SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1",
+"parent_ids": [
+"TASK_my_task_53cf9993-047f-4220-9c03-e28fa250f6b3"
+],
+"last_edit_date": null,
+"edits": [],
+"cacheable": false,
+"validity_days": null,
+"validity_seconds": null,
+"edit_in_progress": false,
+"data_node_properties": {
+"default_path": "foo.csv",
+"has_header": true,
+"path": "foo.csv",
+"exposed_type": "pandas",
+"custom_prop": "foo"
+}
+}

@@ -1,0 +1,20 @@
+{
+"id": "DATANODE_d1_3d65c33b-b188-4402-8d2c-3b26d98b9a9e",
+"config_id": "d1",
+"scope": "<Scope.SCENARIO: 2>",
+"storage_type": "in_memory",
+"name": "DATANODE_d1_3d65c33b-b188-4402-8d2c-3b26d98b9a9e",
+"owner_id": "SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1",
+"parent_ids": [
+"TASK_my_task_53cf9993-047f-4220-9c03-e28fa250f6b3"
+],
+"last_edit_date": "2023-01-18T17:28:05.302529",
+"edits": [],
+"cacheable": false,
+"validity_days": null,
+"validity_seconds": null,
+"edit_in_progress": false,
+"data_node_properties": {
+"custom_prop": "foo"
+}
+}

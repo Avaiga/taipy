@@ -13,6 +13,7 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
+from .._version._utils import _version_migration
 from ..common.alias import JobId
 from .status import Status
 
@@ -43,5 +44,5 @@ class _JobModel:
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
             stacktrace=data["stacktrace"],
-            version=data["version"],
+            version=data["version"] if "version" in data.keys() else _version_migration(),
         )

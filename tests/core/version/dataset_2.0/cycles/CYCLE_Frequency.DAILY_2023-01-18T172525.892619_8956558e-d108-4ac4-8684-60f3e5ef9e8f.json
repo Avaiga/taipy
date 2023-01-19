@@ -1,0 +1,11 @@
+{
+"id": "CYCLE_Frequency.DAILY_2023-01-18T172525.892619_8956558e-d108-4ac4-8684-60f3e5ef9e8f",
+"name": "Frequency.DAILY_2023-01-18T17:25:25.892619",
+"frequency": "<Frequency.DAILY: 1>",
+"properties": {
+"display_name": "2023-01-18T00:00:00"
+},
+"creation_date": "2023-01-18T17:25:25.892619",
+"start_date": "2023-01-18T00:00:00",
+"end_date": "2023-01-18T23:59:59.999999"
+}

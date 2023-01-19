@@ -13,6 +13,7 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from .._version._utils import _version_migration
 from ..common.alias import PipelineId, TaskId
 
 
@@ -40,5 +41,5 @@ class _PipelineModel:
             properties=data["properties"],
             tasks=data["tasks"],
             subscribers=data["subscribers"],
-            version=data["version"],
+            version=data["version"] if "version" in data.keys() else _version_migration(),
         )

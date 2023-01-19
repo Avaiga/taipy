@@ -235,7 +235,17 @@ class _TaipyModelTable(_BaseSQLRepository[ModelType, Entity]):
     def __model_to_entity(self, file_content):
         data = json.loads(file_content, cls=_CustomDecoder)
         model = self.model.from_dict(data)  # type: ignore
-        return self._from_model(model)
+        entity = self._from_model(model)
+        # Add version attribute on old entities. Used to migrate from <=2.0 to >=2.1 version.
+        # To be removed on later versions
+        if not data.get("version") and hasattr(entity, "version"):
+            self._save(entity)
+            from taipy.logger._taipy_logger import _TaipyLogger
+
+            _TaipyLogger._get_logger().warning(
+                f"Entity {entity.id} has automatically been assigned to version named " f"{entity.version}"
+            )
+        return entity
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         if isinstance(folder_path, str):
@@ -354,7 +364,17 @@ class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
     def __model_to_entity(self, file_content):
         data = json.loads(file_content, cls=_CustomDecoder)
         model = self.model.from_dict(data)  # type: ignore
-        return self._from_model(model)
+        entity = self._from_model(model)
+        # Add version attribute on old entities. Used to migrate from <=2.0 to >=2.1 version.
+        # To be removed on later versions
+        if not data.get("version") and hasattr(entity, "version"):
+            self._save(entity)
+            from taipy.logger._taipy_logger import _TaipyLogger
+
+            _TaipyLogger._get_logger().warning(
+                f"Entity {entity.id} has automatically been assigned to version named " f"{entity.version}"
+            )
+        return entity
 
     def __get_by_id(self, id):
         return self.session.query(self._table).filter_by(id=id).first()
