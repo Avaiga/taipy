@@ -124,6 +124,7 @@ class Config:
         Returns:
             The global application configuration.
         """
+
     @classmethod
     def check(cls) -> IssueCollector:
         """Check configuration.
@@ -133,12 +134,19 @@ class Config:
         Returns:
             Collector containing the info, warning and error issues.
         """
+
+    @_Classproperty
+    def data_nodes(cls) -> Dict[str, DataNodeConfig]:
+        """Return all data node configurations grouped by id in a dictionary.
+
+        `Config.data_nodes()` is an alias for `Config.sections["DATA_NODE"]`
+        """
+
     @staticmethod
     def configure_data_node(
         id: str,
         storage_type: str = ...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new data node configuration.
@@ -152,17 +160,16 @@ class Config:
             scope (Scope^): The scope of the data node configuration. The default value is
                 `Scope.SCENARIO` (or the one specified in
                 `(Config.)configure_default_data_node()^`).
-            cacheable (bool): If True, indicates that the data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new data node configuration.
         """
+
     @staticmethod
     def configure_default_data_node(
         storage_type: str,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure the default values for data node configurations.
@@ -175,12 +182,12 @@ class Config:
                 _"sql"_, _"mongo_collection"_, _"in_memory"_, _"json"_, _"parquet"_ or _"generic"_.
             scope (Scope^): The default scope for all data node configurations.
                 The default value is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The default data node configuration.
         """
+
     @staticmethod
     def configure_csv_data_node(
         id: str,
@@ -188,7 +195,6 @@ class Config:
         has_header: bool = ...,
         exposed_type=...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new CSV data node configuration.
@@ -199,12 +205,12 @@ class Config:
             exposed_type: The exposed type of the data read from CSV file. The default value is `pandas`.
             scope (Scope^): The scope of the CSV data node configuration. The default value
                 is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the CSV data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new CSV data node configuration.
         """
+
     @staticmethod
     def configure_json_data_node(
         id: str,
@@ -212,7 +218,6 @@ class Config:
         encoder: json.JSONEncoder = ...,
         decoder: json.JSONDecoder = ...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new JSON data node configuration.
@@ -223,12 +228,12 @@ class Config:
             decoder (json.JSONDecoder): The JSON decoder used to read data from the JSON file.
             scope (Scope^): The scope of the JSON data node configuration. The default value
                 is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the JSON data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new JSON data node configuration.
         """
+
     @staticmethod
     def configure_parquet_data_node(
         id: str,
@@ -239,7 +244,6 @@ class Config:
         read_kwargs: Dict = ...,
         write_kwargs: Dict = ...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new Parquet data node configuration.
@@ -257,12 +261,12 @@ class Config:
                 passed to Pandas.
             scope (Scope^): The scope of the Parquet data node configuration. The default value
                 is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the Parquet data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new Parquet data node configuration.
         """
+
     @staticmethod
     def configure_sql_table_data_node(
         id: str,
@@ -277,7 +281,6 @@ class Config:
         db_extra_args: Dict[str, Any] = ...,
         exposed_type=...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new SQL table data node configuration.
@@ -297,12 +300,12 @@ class Config:
             exposed_type: The exposed type of the data read from SQL query. The default value is `pandas`.
             scope (Scope^): The scope of the SQL data node configuration. The default value is
                 `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the SQL table data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new SQL data node configuration.
         """
+
     @staticmethod
     def configure_sql_data_node(
         id: str,
@@ -318,7 +321,6 @@ class Config:
         write_query_builder: Callable = ...,
         exposed_type=...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new SQL data node configuration.
@@ -339,12 +341,12 @@ class Config:
             exposed_type: The exposed type of the data read from SQL query. The default value is `pandas`.
             scope (Scope^): The scope of the SQL data node configuration. The default value is
                 `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the SQL data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new SQL data node configuration.
         """
+
     @staticmethod
     def configure_mongo_collection_data_node(
         id: str,
@@ -357,7 +359,6 @@ class Config:
         db_port: int = ...,
         db_extra_args: Dict[str, Any] = ...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new Mongo collection data node configuration.
@@ -375,18 +376,17 @@ class Config:
             db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection string.
             scope (Scope^): The scope of the Mongo collection data node configuration. The default value is
                 `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the SQL data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new Mongo collection data node configuration.
         """
+
     @staticmethod
     def configure_in_memory_data_node(
         id: str,
         default_data: Optional[Any] = ...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new _in_memory_ data node configuration.
@@ -396,18 +396,17 @@ class Config:
                 this in_memory data node configuration.
             scope (Scope^): The scope of the in_memory data node configuration. The default
                 value is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the in_memory data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new _in_memory_ data node configuration.
         """
+
     @staticmethod
     def configure_pickle_data_node(
         id: str,
         default_data: Optional[Any] = ...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new pickle data node configuration.
@@ -417,12 +416,12 @@ class Config:
                 this pickle data node configuration.
             scope (Scope^): The scope of the pickle data node configuration. The default value
                 is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the pickle data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new pickle data node configuration.
         """
+
     @staticmethod
     def configure_excel_data_node(
         id: str,
@@ -431,7 +430,6 @@ class Config:
         sheet_name: Union[List[str], str] = ...,
         exposed_type=...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new Excel data node configuration.
@@ -444,12 +442,12 @@ class Config:
             exposed_type: The exposed type of the data read from Excel file. The default value is `pandas`.
             scope (Scope^): The scope of the Excel data node configuration. The default
                 value is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the Excel data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new CSV data node configuration.
         """
+
     @staticmethod
     def configure_generic_data_node(
         id: str,
@@ -458,7 +456,6 @@ class Config:
         read_fct_params: List = ...,
         write_fct_params: List = ...,
         scope: Scope = ...,
-        cacheable: bool = ...,
         **properties: Dict[str, Any],
     ) -> DataNodeConfig:
         """Configure a new generic data node configuration.
@@ -474,12 +471,16 @@ class Config:
                 to write the data.
             scope (Optional[Scope^]): The scope of the Generic data node configuration.
                 The default value is `Scope.SCENARIO`.
-            cacheable (bool): If True, indicates that the generic data node is cacheable. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new Generic data node configuration.
         """
+
+    @_Classproperty
+    def job_config(cls) -> JobConfig:
+        """Return the job execution configuration `JobConfig^`."""
+
     @staticmethod
     def configure_job_executions(
         mode: str = ...,
@@ -501,6 +502,14 @@ class Config:
         Returns:
             `JobConfig^`: The job execution configuration.
         """
+
+    @_Classproperty
+    def pipelines(cls) -> Dict[str, PipelineConfig]:
+        """Return all pipeline configurations grouped by id in a dictionary.
+
+        `Config.pipelines()` is an alias for `Config.sections["PIPELINE"]`
+        """
+
     @staticmethod
     def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]) -> PipelineConfig:  # type: ignore
         """Configure a new pipeline configuration.
@@ -514,6 +523,7 @@ class Config:
         Returns:
             `PipelineConfig^`: The new pipeline configuration.
         """
+
     @staticmethod
     def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties: Dict[str, Any]) -> PipelineConfig:  # type: ignore
         """Configure the default values for pipeline configurations.
@@ -529,6 +539,14 @@ class Config:
         Returns:
             `PipelineConfig^`: The default pipeline configuration.
         """
+
+    @_Classproperty
+    def scenarios(cls) -> Dict[str, ScenarioConfig]:
+        """Return all scenario configurations grouped by id in a dictionary.
+
+        `Config.scenarios()` is an alias for `Config.sections["SCENARIO"]`
+        """
+
     @staticmethod
     def configure_scenario(
         id: str,
@@ -558,6 +576,7 @@ class Config:
         Returns:
             `ScenarioConfig^`: The new scenario configuration.
         """
+
     @staticmethod
     def configure_default_scenario(
         pipeline_configs: List[PipelineConfig],  # type: ignore
@@ -588,6 +607,7 @@ class Config:
         Returns:
             `ScenarioConfig^`: The default scenario configuration.
         """
+
     @staticmethod
     def configure_scenario_from_tasks(
         id: str,
@@ -623,12 +643,21 @@ class Config:
         Returns:
             `ScenarioConfig^`: The new scenario configuration.
         """
+
+    @_Classproperty
+    def tasks(cls) -> Dict[str, TaskConfig]:
+        """Return all task configurations grouped by id in a dictionary.
+
+        `Config.tasks()` is an alias for `Config.sections["TASK"]`
+        """
+
     @staticmethod
     def configure_task(
         id: str,
         function: Callable,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
+        skippable: Optional[bool] = ...,  # type: ignore
         **properties: Dict[str, Any],
     ) -> TaskConfig:
         """Configure a new task configuration.
@@ -641,16 +670,20 @@ class Config:
             output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
                 function output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
+            skippable (bool): If True, indicates that the task can be skipped if no change has
+                been made on inputs. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `TaskConfig^`: The new task configuration.
         """
+
     @staticmethod
     def configure_default_task(
         function: Callable,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = ...,  # type: ignore
+        skippable: Optional[bool] = ...,  # type: ignore
         **properties: Dict[str, Any],
     ) -> TaskConfig:
         """Configure the default values for task configurations.
@@ -665,6 +698,8 @@ class Config:
             output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
                 output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
+            skippable (bool): If True, indicates that the task can be skipped if no change has
+                been made on inputs. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
