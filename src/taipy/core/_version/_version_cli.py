@@ -67,17 +67,26 @@ class _VersioningCLI:
         )
 
         core_parser.add_argument(
-            "--override",
-            "-o",
+            "--force",
+            "-f",
             action="store_true",
-            help="Override the version if existed. Default to False.",
+            help="Force override the configuration of the version if existed. Default to False.",
         )
+
+        core_parser.add_argument(
+            "--clean-entities",
+            action="store_true",
+            help="Clean all current version entities before running the application. Default to False.",
+        )
+
         core_parser.add_argument(
             "--list-versions", "-l", action="store_true", help="List all existing versions of the Taipy application."
         )
+
         core_parser.add_argument(
             "--delete-version", "-d", metavar="VERSION", help="Delete a Taipy version by version number."
         )
+
         core_parser.add_argument(
             "--delete-production-version",
             "-dp",
@@ -144,4 +153,4 @@ class _VersioningCLI:
             version_number = args.production
             mode = "production"
 
-        return mode, version_number, args.override
+        return mode, version_number, args.force, args.clean_entities

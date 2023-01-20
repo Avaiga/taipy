@@ -284,7 +284,7 @@ class VersionConflictWithPythonConfig(Exception):
 
             message += "\n"
 
-        message += "To override these changes, run your application with --override option."
+        message += "To override these changes, run your application with --force option."
 
         self.message = message
 

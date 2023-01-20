@@ -42,45 +42,55 @@ def reset_configuration_singleton():
 def test_version_cli_return_value():
     # Test default cli values
     _VersioningCLI._create_parser()
-    mode, version_number, override = _VersioningCLI._parse_arguments()
+    mode, version_number, force, clean_entities = _VersioningCLI._parse_arguments()
     assert mode == "development"
     assert version_number == ""
-    assert not override
+    assert not force
 
     # Test Dev mode
     with patch("sys.argv", ["prog", "--development"]):
-        mode, _, _ = _VersioningCLI._parse_arguments()
+        mode, _, _, _ = _VersioningCLI._parse_arguments()
     assert mode == "development"
 
     with patch("sys.argv", ["prog", "-dev"]):
-        mode, _, _ = _VersioningCLI._parse_arguments()
+        mode, _, _, _ = _VersioningCLI._parse_arguments()
     assert mode == "development"
 
     # Test Experiment mode
     with patch("sys.argv", ["prog", "--experiment"]):
-        mode, version_number, override = _VersioningCLI._parse_arguments()
+        mode, version_number, force, clean_entities = _VersioningCLI._parse_arguments()
     assert mode == "experiment"
     assert version_number == ""
-    assert not override
+    assert not force
+    assert not clean_entities
 
     with patch("sys.argv", ["prog", "--experiment", "2.1"]):
-        mode, version_number, override = _VersioningCLI._parse_arguments()
+        mode, version_number, force, clean_entities = _VersioningCLI._parse_arguments()
     assert mode == "experiment"
     assert version_number == "2.1"
-    assert not override
+    assert not force
+    assert not clean_entities
 
-    with patch("sys.argv", ["prog", "--experiment", "2.1", "--override"]):
-        mode, version_number, override = _VersioningCLI._parse_arguments()
+    with patch("sys.argv", ["prog", "--experiment", "2.1", "--force"]):
+        mode, version_number, force, clean_entities = _VersioningCLI._parse_arguments()
     assert mode == "experiment"
     assert version_number == "2.1"
-    assert override
+    assert force
+    assert not clean_entities
+
+    with patch("sys.argv", ["prog", "--experiment", "2.1", "--clean-entities"]):
+        mode, version_number, force, clean_entities = _VersioningCLI._parse_arguments()
+    assert mode == "experiment"
+    assert version_number == "2.1"
+    assert not force
+    assert clean_entities
 
     # Test Production mode
     with patch("sys.argv", ["prog", "--production"]):
-        mode, version_number, override = _VersioningCLI._parse_arguments()
+        mode, version_number, force, clean_entities = _VersioningCLI._parse_arguments()
     assert mode == "production"
     assert version_number == ""
-    assert not override
+    assert not force
 
 
 def test_dev_mode_clean_all_entities_of_the_latest_version():
@@ -273,7 +283,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
     assert len(_JobManager._get_all()) == 2
 
 
-def test_override_experiment_version():
+def test_force_override_experiment_version():
     scenario_config = config_scenario()
 
     core = Core()
@@ -299,13 +309,13 @@ def test_override_experiment_version():
     Config.unblock_update()
     Config.configure_global_app(clean_entities_enabled=True)
 
-    # Without --override parameter, a SystemExit will be raised
+    # Without --force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "--experiment", "1.0"]):
             core.run()
 
-    # With --override parameter
-    with patch("sys.argv", ["prog", "--experiment", "1.0", "--override"]):
+    # With --force parameter
+    with patch("sys.argv", ["prog", "--experiment", "1.0", "--force"]):
         core.run()
     ver_2 = _VersionManager._get_latest_version()
     assert ver_2 == "1.0"
@@ -323,7 +333,7 @@ def test_override_experiment_version():
     assert len(_JobManager._get_all()) == 2
 
 
-def test_override_production_version():
+def test_force_override_production_version():
     scenario_config = config_scenario()
 
     core = Core()
@@ -351,13 +361,13 @@ def test_override_production_version():
     Config.unblock_update()
     Config.configure_global_app(clean_entities_enabled=True)
 
-    # Without --override parameter, a SystemExit will be raised
+    # Without --force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "--production", "1.0"]):
             core.run()
 
-    # With --override parameter
-    with patch("sys.argv", ["prog", "--production", "1.0", "--override"]):
+    # With --force parameter
+    with patch("sys.argv", ["prog", "--production", "1.0", "--force"]):
         core.run()
     ver_2 = _VersionManager._get_latest_version()
     assert ver_2 == "1.0"
@@ -373,6 +383,72 @@ def test_override_production_version():
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
+
+
+def test_clean_experiment_version():
+    scenario_config = config_scenario()
+
+    core = Core()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        core.run()
+
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+    assert len(_DataManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 1
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0", "--clean-entities"]):
+        core.run()
+
+    # All entities from previous submit should be cleaned and re-created
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+    assert len(_DataManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 1
+
+
+def test_clean_production_version():
+    scenario_config = config_scenario()
+
+    core = Core()
+
+    with patch("sys.argv", ["prog", "--production", "1.0"]):
+        core.run()
+
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+    assert len(_DataManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 1
+
+    with patch("sys.argv", ["prog", "--production", "1.0", "--clean-entities"]):
+        core.run()
+
+    # All entities from previous submit should be cleaned and re-created
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+    assert len(_DataManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 1
 
 
 def test_delete_version():
@@ -483,7 +559,7 @@ def test_list_version():
     assert "Development" in version_list[5] and "latest" not in version_list[5]
 
 
-def test_modify_config_properties_without_override():
+def test_modify_config_properties_without_force():
     scenario_config = config_scenario()
 
     core = Core()

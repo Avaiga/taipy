@@ -65,41 +65,39 @@ class Core:
             self._dispatcher = _SchedulerFactory._remove_dispatcher()
             _TaipyLogger._get_logger().info("Core service has been stopped.")
 
-    def __setup_versioning_module(self, mode, _version_number, _override):
+    def __setup_versioning_module(self, mode, _version_number, force, clean_entities):
         if mode == "development":
-            curren_version_number = _VersionManagerFactory._build_manager()._get_development_version()
+            current_version_number = _VersionManagerFactory._build_manager()._get_development_version()
 
-            clean_all_entities_by_version(curren_version_number)
-            _TaipyLogger._get_logger().info(
-                f"Development mode: Clean all entities with version {curren_version_number}"
-            )
+            clean_all_entities_by_version(current_version_number)
+            _TaipyLogger._get_logger().info(f"Development mode: Clean all entities of version {current_version_number}")
 
-            _VersionManagerFactory._build_manager()._set_development_version(curren_version_number)
+            _VersionManagerFactory._build_manager()._set_development_version(current_version_number)
 
-        elif mode == "experiment":
+        elif mode in ["experiment", "production"]:
+            default_version_number = {
+                "experiment": str(uuid.uuid4()),
+                "production": _VersionManagerFactory._build_manager()._get_latest_version(),
+            }
+
+            version_setter = {
+                "experiment": _VersionManagerFactory._build_manager()._set_experiment_version,
+                "production": _VersionManagerFactory._build_manager()._set_production_version,
+            }
+
             if _version_number:
-                curren_version_number = _version_number
+                current_version_number = _version_number
             else:
-                curren_version_number = str(uuid.uuid4())
-            override = _override
+                current_version_number = default_version_number[mode]
+
+            if clean_entities:
+                clean_all_entities_by_version(current_version_number)
+                _TaipyLogger._get_logger().info(f"Clean all entities of version {current_version_number}")
 
             try:
-                _VersionManagerFactory._build_manager()._set_experiment_version(curren_version_number, override)
-            except VersionConflictWithPythonConfig as e:
-                raise SystemExit(e.message)
-
-        elif mode == "production":
-            if _version_number:
-                curren_version_number = _version_number
-            else:
-                curren_version_number = _VersionManagerFactory._build_manager()._get_latest_version()
-            override = _override
-
-            try:
-                _VersionManagerFactory._build_manager()._set_production_version(curren_version_number, override)
+                version_setter[mode](current_version_number, force)
             except VersionConflictWithPythonConfig as e:
                 raise SystemExit(e.message)
 
         else:
-            _TaipyLogger._get_logger().error("Undefined execution mode.")
-            return
+            raise SystemExit(f"Undefined execution mode: {mode}.")

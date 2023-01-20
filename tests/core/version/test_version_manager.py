@@ -22,7 +22,7 @@ def test_save_and_get_version_entity(tmpdir):
 
     version = _Version(id="foo", config=Config._applied_config)
 
-    _VersionManager._get_or_create(id="foo", override=False)
+    _VersionManager._get_or_create(id="foo", force=False)
 
     version_1 = _VersionManager._get(version.id)
     assert version_1.id == version.id
