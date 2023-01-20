@@ -298,18 +298,18 @@ class DataNodeConfig(Section):
     @staticmethod
     def _configure(
         id: str,
-        storage_type: str = _DEFAULT_STORAGE_TYPE,
+        storage_type: Optional[str] = None,
         scope: Scope = _DEFAULT_SCOPE,
         **properties,
     ):
         """Configure a new data node configuration.
         Parameters:
             id (str): The unique identifier of the new data node configuration.
-            storage_type (str): The data node configuration storage type. The possible values
-                are _"pickle"_ (which the default value, unless it has been overloaded by the
+            storage_type (str or None): The data node configuration storage type. The possible values
+                are _None_ (which is the default value of _"pickle"_, unless it has been overloaded by the
                 _storage_type_ value set in the default data node configuration
-                (see `(Config.)configure_default_data_node()^`)), _"csv"_, _"excel"_, _"sql_table"_, _"sql"_, _"json"_,
-                _"parquet"_, _"mongo_collection"_, _"in_memory"_, or _"generic"_.
+                (see `(Config.)configure_default_data_node()^`)), _"pickle"_, _"csv"_, _"excel"_, _"sql_table"_,
+                _"sql"_, _"json"_, _"parquet"_, _"mongo_collection"_, _"in_memory"_, or _"generic"_.
             scope (Scope^): The scope of the data node configuration. The default value is
                 `Scope.SCENARIO` (or the one specified in
                 `(Config.)configure_default_data_node()^`).
