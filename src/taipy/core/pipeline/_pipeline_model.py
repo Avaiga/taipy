@@ -37,7 +37,7 @@ class _PipelineModel:
             id=data["id"],
             config_id=data["config_id"],
             owner_id=data.get("owner_id", data.get("parent_id")),
-            parent_ids=data["parent_ids"],
+            parent_ids=data.get("parent_ids", []),
             properties=data["properties"],
             tasks=data["tasks"],
             subscribers=data["subscribers"],

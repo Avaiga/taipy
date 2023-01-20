@@ -70,7 +70,6 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn.id).is_ready_for_reading
         assert _DataManager._get(csv_dn.id).is_ready_for_reading == csv_dn.is_ready_for_reading
-        assert not _DataManager._get(csv_dn.id).cacheable
         assert len(_DataManager._get(csv_dn.id).properties) == 3
         assert _DataManager._get(csv_dn.id).properties.get("path") == "bar"
         assert _DataManager._get(csv_dn.id).properties.get("has_header") is True
@@ -93,7 +92,6 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn).is_ready_for_reading
         assert _DataManager._get(csv_dn).is_ready_for_reading == csv_dn.is_ready_for_reading
-        assert not _DataManager._get(csv_dn.id).cacheable
         assert len(_DataManager._get(csv_dn).properties) == 3
         assert _DataManager._get(csv_dn).properties.get("path") == "bar"
         assert _DataManager._get(csv_dn).properties.get("has_header") is True
@@ -107,12 +105,7 @@ class TestDataManager:
         # - an owner id
         # - some default data
         in_memory_dn_config = Config.configure_data_node(
-            id="baz",
-            storage_type="in_memory",
-            scope=Scope.SCENARIO,
-            default_data="qux",
-            other_data="foo",
-            cacheable=True,
+            id="baz", storage_type="in_memory", scope=Scope.SCENARIO, default_data="qux", other_data="foo"
         )
         in_mem_dn = _DataManager._create_and_set(in_memory_dn_config, "Scenario_id", {"task_id"})
 
@@ -135,7 +128,6 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn.id).job_ids == in_mem_dn.job_ids
         assert _DataManager._get(in_mem_dn.id).is_ready_for_reading
         assert _DataManager._get(in_mem_dn.id).is_ready_for_reading == in_mem_dn.is_ready_for_reading
-        assert _DataManager._get(in_mem_dn.id).cacheable
         assert len(_DataManager._get(in_mem_dn.id).properties) == 1
         assert _DataManager._get(in_mem_dn.id).properties.get("other_data") == "foo"
         assert _DataManager._get(in_mem_dn.id).properties == in_mem_dn.properties
@@ -156,7 +148,6 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn).job_ids == in_mem_dn.job_ids
         assert _DataManager._get(in_mem_dn).is_ready_for_reading
         assert _DataManager._get(in_mem_dn).is_ready_for_reading == in_mem_dn.is_ready_for_reading
-        assert _DataManager._get(in_mem_dn.id).cacheable
         assert len(_DataManager._get(in_mem_dn).properties) == 1
         assert _DataManager._get(in_mem_dn).properties.get("other_data") == "foo"
         assert _DataManager._get(in_mem_dn).properties == in_mem_dn.properties
@@ -189,7 +180,6 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn.id).job_ids == pickle_dn.job_ids
         assert not _DataManager._get(pickle_dn.id).is_ready_for_reading
         assert _DataManager._get(pickle_dn.id).is_ready_for_reading == pickle_dn.is_ready_for_reading
-        assert not _DataManager._get(pickle_dn.id).cacheable
         assert len(_DataManager._get(pickle_dn.id).properties) == 1
         assert _DataManager._get(pickle_dn.id).properties == pickle_dn.properties
 
@@ -209,7 +199,6 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn).job_ids == pickle_dn.job_ids
         assert not _DataManager._get(pickle_dn).is_ready_for_reading
         assert _DataManager._get(pickle_dn).is_ready_for_reading == pickle_dn.is_ready_for_reading
-        assert not _DataManager._get(pickle_dn.id).cacheable
         assert len(_DataManager._get(pickle_dn).properties) == 1
         assert _DataManager._get(pickle_dn).properties == pickle_dn.properties
 

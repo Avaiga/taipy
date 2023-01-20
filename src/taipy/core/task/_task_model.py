@@ -27,6 +27,8 @@ class _TaskModel:
     function_module: str
     output_ids: List[str]
     version: str
+    skippable: bool
+    properties: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Any]:
         return dataclasses.asdict(self)
@@ -36,11 +38,13 @@ class _TaskModel:
         return _TaskModel(
             id=data["id"],
             owner_id=data.get("owner_id", data.get("parent_id")),
-            parent_ids=data["parent_ids"],
+            parent_ids=data.get("parent_ids", []),
             config_id=data["config_id"],
             input_ids=data["input_ids"],
             function_name=data["function_name"],
             function_module=data["function_module"],
             output_ids=data["output_ids"],
             version=data["version"] if "version" in data.keys() else _version_migration(),
+            skippable=data.get("skippable", False),
+            properties=data.get("properties", {}),
         )

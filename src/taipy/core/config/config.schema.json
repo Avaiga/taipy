@@ -42,15 +42,6 @@
             ],
             "default": "pickle"
           },
-          "cacheable": {
-            "description": "A boolean value as a string: one of [False:bool, True:bool]",
-            "type": "string",
-            "enum": [
-              "False:bool",
-              "True:bool"
-            ],
-            "default": "False:bool"
-          },
           "default_path": {
             "description": "storage_type: pickle, csv, excel, json, parquet specific.",
             "type": "string"
@@ -107,7 +98,7 @@
           },
           "db_extra_args": {
             "description": "storage_type: sql, sql_table, mongo_collection specific. The default value of db_extra_args is None",
-            "type": "object"
+            "type": "array"
           },
           "table_name": {
             "description": "storage_type: sql_table specific.",
@@ -119,7 +110,8 @@
           },
           "write_query_builder": {
             "description": "storage_type: sql specific. A callable function that takes in the data as an input parameter and returns a list of SQL queries to be executed when the write data node method is called.",
-            "type": "string"
+            "type": "string",
+            "taipy_function": true
           },
           "collection_name ": {
             "description": "storage_type: mongo_collection specific.",
@@ -127,15 +119,18 @@
           },
           "custom_document": {
             "description": "storage_type: mongo_collection specific.",
-            "type": "string"
+            "type": "string",
+            "taipy_class": true
           },
           "read_fct": {
             "description": "storage_type: generic specific.",
-            "type": "string"
+            "type": "string",
+            "taipy_function": true
           },
           "write_fct": {
             "description": "storage_type: generic specific.",
-            "type": "string"
+            "type": "string",
+            "taipy_function": true
           },
           "read_fct_params": {
             "description": "storage_type: generic specific.",
@@ -147,11 +142,13 @@
           },
           "encoder": {
             "description": "storage_type: json specific.",
-            "type": "string"
+            "type": "string",
+            "taipy_class": true
           },
           "decoder": {
             "description": "storage_type: json specific.",
-            "type": "string"
+            "type": "string",
+            "taipy_class": true
           },
           "compression": {
             "description": "storage_type: parquet specific. The name of the compression to use, default is None for no compression",
@@ -290,8 +287,18 @@
             "uniqueItems": true
           },
           "function": {
-            "description": "",
-            "type": "string"
+            "description": "The function of the task.",
+            "type": "string",
+            "taipy_function": true
+          },
+          "skippable": {
+            "description": "A boolean value. True if the task can be skipped if the inputs have been updated since last run.",
+            "type": "string",
+            "enum": [
+              "False:bool",
+              "True:bool"
+            ],
+            "default": "False:bool"
           }
         }
       }
@@ -344,9 +351,10 @@
           },
           "comparators": {
             "description": "The list of functions used to compare scenarios. A comparator function is attached to a scenario's data node configuration. During the scenario comparison, each comparator is applied to all the data nodes instantiated from the data node configuration attached to the comparator.",
-            "type": "object",
+            "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "taipy_function": true
             }
           }
         }

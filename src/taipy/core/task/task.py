@@ -17,7 +17,8 @@ from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
-from ..common._reload import _self_reload, _self_setter
+from ..common._properties import _Properties
+from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
 from ..common.alias import TaskId
 from ..data.data_node import DataNode
@@ -56,6 +57,8 @@ class Task(_Entity):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         version: str = None,
+        skippable: bool = False,
+        **properties,
     ):
         self.config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
@@ -65,6 +68,23 @@ class Task(_Entity):
         self.__output = {dn.config_id: dn for dn in output or []}
         self._function = function
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+        self._skippable = skippable
+        self._properties = _Properties(self, **properties)
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def skippable(self):
+        return self._skippable
+
+    @skippable.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def skippable(self, val):
+        self._skippable = val
+
+    @property  # type: ignore
+    def properties(self):
+        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        return self._properties
 
     @property  # type: ignore
     def parent_id(self):
@@ -130,6 +150,8 @@ class Task(_Entity):
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:
             return self.output[protected_attribute_name]
+        if protected_attribute_name in self._properties:
+            return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
 
     @property

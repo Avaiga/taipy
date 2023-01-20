@@ -11,7 +11,6 @@
 
 from typing import Callable, List, Optional, Type, Union
 
-from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
@@ -84,8 +83,10 @@ class _TaskManager(_Manager[Task]):
                 tasks.append(task)
             else:
                 version = _VersionManagerFactory._build_manager()._get_latest_version()
+                props = task_config._properties.copy()
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
+                skippable = task_config.skippable
                 task = Task(
                     str(task_config.id),  # type: ignore
                     task_config.function,
@@ -94,6 +95,8 @@ class _TaskManager(_Manager[Task]):
                     owner_id=owner_id,
                     parent_ids=set(),
                     version=version,
+                    skippable=skippable,
+                    **props,
                 )
                 for dn in set(inputs + outputs):
                     dn._parent_ids.update([task.id])

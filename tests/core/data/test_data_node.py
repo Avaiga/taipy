@@ -210,77 +210,53 @@ class TestDataNode:
         assert dn.is_ready_for_reading
         assert dn.job_ids == [job_id]
 
-    def test_is_in_cache_no_validity_period_cacheable_false(self):
+    def test_is_up_to_date_no_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "owner_id")
-        assert not dn._is_in_cache
+        assert not dn.is_up_to_date
 
         # test has been writen
         dn.write("My data")
-        assert dn._is_in_cache is False
+        assert dn.is_up_to_date
 
-    def test_is_in_cache_no_validity_period_cacheable_true(self):
-        # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", None, cacheable=True)
-        assert dn._is_in_cache is False
-
-        # test has been writen
-        dn.write("My data")
-        assert dn._is_in_cache is True
-
-    def test_is_in_cache_with_30_min_validity_period_cacheable_false(self):
+    def test_is_up_to_date_with_30_min_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode(
             "foo", Scope.PIPELINE, DataNodeId("id"), "name", "owner_id", validity_period=timedelta(minutes=30)
         )
-        assert dn._is_in_cache is False
+        assert dn.is_up_to_date is False
 
         # Has been writen less than 30 minutes ago
         dn.write("My data")
-        assert dn._is_in_cache is False
+        assert dn.is_up_to_date is True
 
         # Has been writen more than 30 minutes ago
-        dn._last_edition_date = datetime.now() + timedelta(days=-1)
-        _DataManager._set(dn)
-        assert dn._is_in_cache is False
+        dn.last_edit_date = datetime.now() + timedelta(days=-1)
+        assert dn.is_up_to_date is False
 
-    def test_is_in_cache_with_30_min_validity_period_cacheable_true(self):
+    def test_is_up_to_date_with_5_days_validity_period(self):
         # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, cacheable=True, validity_period=timedelta(minutes=30))
-        assert dn._is_in_cache is False
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, validity_period=timedelta(days=5))
+        assert dn.is_up_to_date is False
 
         # Has been writen less than 30 minutes ago
         dn.write("My data")
-        assert dn._is_in_cache is True
-
-        # Has been writen more than 30 minutes ago
-        dn._last_edit_date = datetime.now() - timedelta(days=1)
-        _DataManager()._set(dn)
-        assert dn._is_in_cache is False
-
-    def test_is_in_cache_with_5_days_validity_period_cacheable_true(self):
-        # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, cacheable=True, validity_period=timedelta(days=5))
-        assert dn._is_in_cache is False
-
-        # Has been writen less than 30 minutes ago
-        dn.write("My data")
-        assert dn._is_in_cache is True
+        assert dn.is_up_to_date is True
 
         # Has been writen more than 30 minutes ago
         dn._last_edit_date = datetime.now() - timedelta(days=6)
         _DataManager()._set(dn)
-        assert dn._is_in_cache is False
+        assert dn.is_up_to_date is False
 
-    def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
+    def test_do_not_recompute_data_node_up_to_date_but_continue_pipeline_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
         a = Config.configure_data_node("A", "pickle", default_data="A")
-        b = Config.configure_data_node("B", "pickle", cacheable=True)
+        b = Config.configure_data_node("B", "pickle")
         c = Config.configure_data_node("C", "pickle")
         d = Config.configure_data_node("D", "pickle")
 
-        task_a_b = Config.configure_task("task_a_b", funct_a_b, input=a, output=b)
+        task_a_b = Config.configure_task("task_a_b", funct_a_b, input=a, output=b, skippable=True)
         task_b_c = Config.configure_task("task_b_c", funct_b_c, input=b, output=c)
         task_b_d = Config.configure_task("task_b_d", funct_b_d, input=b, output=d)
         pipeline_c = Config.configure_pipeline("pipeline_c", [task_a_b, task_b_c])
@@ -481,7 +457,6 @@ class TestDataNode:
             parent_ids=None,
             last_edit_date=current_datetime,
             edits=[dict(job_id="a_job_id")],
-            cacheable=False,
             edit_in_progress=False,
             validity_period=None,
         )
@@ -526,12 +501,7 @@ class TestDataNode:
         assert dn_1.edition_in_progress
         assert dn_2.edition_in_progress
 
-        assert not dn_1.cacheable
-        dn_1.cacheable = True
-        assert dn_1.cacheable
-        assert dn_2.cacheable
         time_period = timedelta(1)
-
         assert dn_1.validity_period is None
         dn_1.validity_period = time_period
         assert dn_1.validity_period == time_period
@@ -554,7 +524,6 @@ class TestDataNode:
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
-            assert dn.cacheable
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 1
             assert dn._is_in_context
@@ -565,7 +534,6 @@ class TestDataNode:
             dn.last_edition_date = new_datetime_2
             dn.name = "abc"
             dn.edition_in_progress = False
-            dn.cacheable = False
             dn.validity_period = None
 
             assert dn.config_id == "foo"
@@ -574,7 +542,6 @@ class TestDataNode:
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
-            assert dn.cacheable
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 1
 
@@ -584,7 +551,6 @@ class TestDataNode:
         assert dn_1.last_edition_date == new_datetime_2
         assert dn_1.name == "abc"
         assert not dn_1.edition_in_progress
-        assert not dn_1.cacheable
         assert dn_1.validity_period is None
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
@@ -642,6 +608,12 @@ class TestDataNode:
 
         assert dn.owner_id == dn.parent_id
         assert dn.owner_id == "owner_id_2"
+
+    def test_cacheable_deprecated(self):
+        dn = FakeDataNode("foo")
+        with pytest.warns(DeprecationWarning):
+            dn.cacheable
+        assert dn.cacheable is True
 
     def test_data_node_with_env_variable_value_not_stored(self):
         dn_config = Config.configure_data_node("A", prop="ENV[FOO]")

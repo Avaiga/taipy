@@ -40,7 +40,6 @@ data_node = CSVDataNode(
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [dict(timestamp=datetime.datetime(1985, 10, 14, 2, 30, 0), job_id="job_id")],
     "latest",
-    False,
     None,
     False,
     {"path": "/path", "has_header": True},

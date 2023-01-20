@@ -26,7 +26,6 @@ from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
-from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
@@ -62,8 +61,7 @@ class DataNode(_Entity):
         edits (List[Edit^]): The list of Edits (an alias for dict) containing medata about each edition of that node.
         version (str): The string indicates the application version of the data node to instantiate. If not provided,
             the current version is used.
-        cacheable (bool): True if this data node is cacheable. False otherwise.
-        validity_period (Optional[timedelta]): The validity period of a cacheable data node.
+        validity_period (Optional[timedelta]): The validity period of a data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
             always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
@@ -89,7 +87,6 @@ class DataNode(_Entity):
         last_edit_date: Optional[datetime] = None,
         edits: List[Edit] = None,
         version: str = None,
-        cacheable: bool = False,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
         **kwargs,
@@ -103,8 +100,6 @@ class DataNode(_Entity):
         self._name = name or self.id
         self._edit_in_progress = edit_in_progress
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
-
-        self._cacheable = cacheable
         self._validity_period = validity_period
 
         # Track edits
@@ -223,14 +218,13 @@ class DataNode(_Entity):
         return self._version
 
     @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
     def cacheable(self):
-        return self._cacheable
+        _warn_deprecated("cacheable", suggest="the skippable feature")
+        return True
 
     @cacheable.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
     def cacheable(self, val):
-        self._cacheable = val
+        _warn_deprecated("cacheable", suggest="the skippable feature")
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -515,14 +509,12 @@ class DataNode(_Entity):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def _is_in_cache(self):
-        if not self._cacheable:
-            return False
+    def is_up_to_date(self):
         if not self._last_edit_date:
             # Never been written so it is not up-to-date
             return False
         if not self._validity_period:
-            # No validity period and cacheable so it is up-to-date
+            # No validity period and has already been written, so it is up-to-date
             return True
         if datetime.now() > self.expiration_date:
             # expiration_date has been passed

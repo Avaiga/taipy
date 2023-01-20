@@ -36,8 +36,7 @@ class SQLDataNode(_AbstractSQLDataNode):
         edits (List[Edit^]): The ordered list of edits for that job.
         version (str): The string indicates the application version of the data node to instantiate. If not provided,
             the current version is used.
-        cacheable (bool): True if this data node is cacheable. False otherwise.
-        validity_period (Optional[timedelta]): The validity period of a cacheable data node.
+        validity_period (Optional[timedelta]): The validity period of a data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
             always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
@@ -77,7 +76,6 @@ class SQLDataNode(_AbstractSQLDataNode):
         last_edit_date: Optional[datetime] = None,
         edits: List[Edit] = None,
         version: str = None,
-        cacheable: bool = False,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
         properties: Dict = None,
@@ -99,7 +97,6 @@ class SQLDataNode(_AbstractSQLDataNode):
             last_edit_date,
             edits,
             version or _VersionManagerFactory._build_manager()._get_latest_version(),
-            cacheable,
             validity_period,
             edit_in_progress,
             properties=properties,

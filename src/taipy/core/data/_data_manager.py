@@ -81,7 +81,6 @@ class _DataManager(_Manager[DataNode]):
                 owner_id=owner_id,
                 parent_ids=parent_ids,
                 version=version,
-                cacheable=data_node_config.cacheable,
                 validity_period=validity_period,
                 properties=props,
             )

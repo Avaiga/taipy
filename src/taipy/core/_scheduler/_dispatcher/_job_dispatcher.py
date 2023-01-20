@@ -11,7 +11,6 @@
 
 import threading
 from abc import abstractmethod
-from multiprocessing import Lock
 from typing import Any, Dict, List
 
 from taipy.config._toml_serializer import _TomlSerializer
@@ -100,10 +99,12 @@ class _JobDispatcher(threading.Thread):
         Returns:
              True if the task needs to run. False otherwise.
         """
+        if not task.skippable:
+            return True
         data_manager = _DataManagerFactory._build_manager()
         if len(task.output) == 0:
             return True
-        are_outputs_in_cache = all(data_manager._get(dn.id)._is_in_cache for dn in task.output.values())
+        are_outputs_in_cache = all(data_manager._get(dn.id).is_up_to_date for dn in task.output.values())
         if not are_outputs_in_cache:
             return True
         if len(task.input) == 0:

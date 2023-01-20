@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 
-from datetime import datetime
 from typing import Union
 
 from sqlalchemy import Boolean, Column, Integer, Text

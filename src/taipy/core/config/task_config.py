@@ -17,6 +17,7 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.config import Config
 from taipy.config.section import Section
 
+from ..common._warnings import _warn_deprecated
 from .data_node_config import DataNodeConfig
 
 
@@ -26,13 +27,15 @@ class TaskConfig(Section):
 
     Attributes:
         id (str): Identifier of the task config. Must be a valid Python variable name.
-        inputs (Union[DataNodeConfig, List[DataNodeConfig]]): The optional list of `DataNodeConfig^` inputs. The
+        inputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of `DataNodeConfig^` inputs. The
             default value is [].
-        outputs (Union[DataNodeConfig, List[DataNodeConfig]]): The optional list of `DataNodeConfig^` outputs. The
+        outputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of `DataNodeConfig^` outputs. The
             default value is [].
+        skippable (bool): If True, indicates that the task can be skipped if no change has been made on inputs. The
+            default value is _False_.
         function (Callable): User function taking as inputs some parameters compatible with the exposed types
-            (exposed_type field) of the input data nodes and returning results compatible with the exposed types
-            (exposed_type field) of the outputs list. The default value is None.
+            (_exposed_type_ field) of the input data nodes and returning results compatible with the exposed types
+            (_exposed_type_ field) of the outputs list. The default value is None.
         **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
@@ -41,6 +44,7 @@ class TaskConfig(Section):
     _INPUT_KEY = "inputs"
     _FUNCTION = "function"
     _OUTPUT_KEY = "outputs"
+    _IS_SKIPPABLE_KEY = "skippable"
 
     def __init__(
         self,
@@ -48,6 +52,7 @@ class TaskConfig(Section):
         function,
         inputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
         outputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
+        skippable: Optional[bool] = False,
         **properties,
     ):
         if inputs:
@@ -56,8 +61,13 @@ class TaskConfig(Section):
             self._inputs = []
         if outputs:
             self._outputs = [outputs] if isinstance(outputs, DataNodeConfig) else copy(outputs)
+            outputs_all_cacheable = all(output.cacheable for output in self._outputs)
+            if not skippable and outputs_all_cacheable:
+                _warn_deprecated("cacheable", suggest="the skippable feature")
+                skippable = True
         else:
             self._outputs = []
+        self._skippable = skippable
         self.function = function
         super().__init__(id, **properties)
 
@@ -83,15 +93,20 @@ class TaskConfig(Section):
     def outputs(self) -> List[DataNodeConfig]:
         return list(self._outputs)
 
+    @property
+    def skippable(self):
+        return _tpl._replace_templates(self._skippable)
+
     @classmethod
     def default_config(cls):
-        return TaskConfig(cls._DEFAULT_KEY, None, [], [])
+        return TaskConfig(cls._DEFAULT_KEY, None, [], [], False)
 
     def _to_dict(self):
         return {
             self._INPUT_KEY: self._inputs,
             self._FUNCTION: self.function,
             self._OUTPUT_KEY: self._outputs,
+            self._IS_SKIPPABLE_KEY: self._skippable,
             **self._properties,
         }
 
@@ -106,7 +121,8 @@ class TaskConfig(Section):
         outputs = []
         if outputs_as_str := as_dict.pop(cls._OUTPUT_KEY, None):
             outputs = [dn_configs[ds_id] for ds_id in outputs_as_str if ds_id in dn_configs]
-        return TaskConfig(id=id, function=funct, inputs=inputs, outputs=outputs, **as_dict)
+        skippable = as_dict.pop(cls._IS_SKIPPABLE_KEY, False)
+        return TaskConfig(id=id, function=funct, inputs=inputs, outputs=outputs, skippable=skippable, **as_dict)
 
     def _update(self, as_dict, default_section=None):
         self._inputs = as_dict.pop(self._INPUT_KEY, self._inputs)
@@ -118,6 +134,7 @@ class TaskConfig(Section):
         function = as_dict.pop(self._FUNCTION, None)
         if function is not None and type(function) is not str:
             self.function = function
+        self._skippable = as_dict.pop(self._IS_SKIPPABLE_KEY, self._skippable)
         self._properties.update(as_dict)
         if default_section:
             self._properties = {**default_section.properties, **self._properties}
@@ -128,6 +145,7 @@ class TaskConfig(Section):
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        skippable: Optional[bool] = False,
         **properties,
     ):
         """Configure a new task configuration.
@@ -141,12 +159,14 @@ class TaskConfig(Section):
             output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
                 function output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
+            skippable (bool): If True, indicates that the task can be skipped if no change has
+                been made on inputs. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `TaskConfig^`: The new task configuration.
         """
-        section = TaskConfig(id, function, input, output, **properties)
+        section = TaskConfig(id, function, input, output, skippable, **properties)
         Config._register(section)
         return Config.sections[TaskConfig.name][id]
 
@@ -155,6 +175,7 @@ class TaskConfig(Section):
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        skippable: Optional[bool] = False,
         **properties,
     ):
         """Configure the default values for task configurations.
@@ -171,11 +192,13 @@ class TaskConfig(Section):
             output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
                 output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
+            skippable (bool): If True, indicates that the task can be skipped if no change has
+                been made on inputs. The default value is _False_.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `TaskConfig^`: The default task configuration.
         """
-        section = TaskConfig(_Config.DEFAULT_KEY, function, input, output, **properties)
+        section = TaskConfig(_Config.DEFAULT_KEY, function, input, output, skippable, **properties)
         Config._register(section)
         return Config.sections[TaskConfig.name][_Config.DEFAULT_KEY]
