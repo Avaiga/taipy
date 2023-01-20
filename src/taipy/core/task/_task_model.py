@@ -16,6 +16,25 @@ from typing import Any, Dict, List, Optional
 from .._version._utils import _version_migration
 
 
+def _skippable(task_id, output_ids) -> bool:
+    """Compute skippable attribute on old entities. Used to migrate from <=2.0 to >=2.1 version."""
+    from ..data._data_manager_factory import _DataManagerFactory
+
+    manager = _DataManagerFactory._build_manager()
+    if len(output_ids) == 0:
+        return False
+    for output_id in output_ids:
+        output = manager._get(output_id)
+        if not output:
+            return False
+        if not output.cacheable:
+            return False
+    from taipy.logger._taipy_logger import _TaipyLogger
+
+    _TaipyLogger._get_logger().warning(f"Task {task_id} has automatically been set to skippable.")
+    return True
+
+
 @dataclass
 class _TaskModel:
     id: str
@@ -45,6 +64,6 @@ class _TaskModel:
             function_module=data["function_module"],
             output_ids=data["output_ids"],
             version=data["version"] if "version" in data.keys() else _version_migration(),
-            skippable=data.get("skippable", False),
-            properties=data.get("properties", {}),
+            skippable=data["skippable"] if "skippable" in data.keys() else _skippable(data["id"], data["output_ids"]),
+            properties=data["properties"] if "properties" in data.keys() else {},
         )

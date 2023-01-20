@@ -28,7 +28,7 @@ from taipy.config.exceptions.exceptions import InvalidConfigurationId
 def test_create_pipeline():
     input = InMemoryDataNode("foo", Scope.PIPELINE)
     output = InMemoryDataNode("bar", Scope.PIPELINE)
-    task = Task("baz", print, [input], [output], TaskId("task_id"))
+    task = Task("baz", {}, print, [input], [output], TaskId("task_id"))
 
     pipeline = Pipeline("name_1", {"description": "description"}, [task])
     assert pipeline.id is not None
@@ -47,7 +47,7 @@ def test_create_pipeline():
 
     input_1 = InMemoryDataNode("input", Scope.SCENARIO)
     output_1 = InMemoryDataNode("output", Scope.SCENARIO)
-    task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
+    task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
     pipeline_1 = Pipeline(
         "name_1", {"description": "description"}, [task_1], owner_id="owner_id", parent_ids={"scenario_id"}
     )
@@ -102,19 +102,19 @@ def test_check_consistency():
 
     input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
     output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
-    task_2 = Task("foo", print, [input_2], [output_2], TaskId("task_id_2"))
+    task_2 = Task("foo", {}, print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2])
     assert pipeline_2._is_consistent()
 
     data_node_3 = InMemoryDataNode("foo", Scope.PIPELINE)
-    task_3 = Task("foo", print, [data_node_3], [data_node_3], TaskId("task_id_3"))
+    task_3 = Task("foo", {}, print, [data_node_3], [data_node_3], TaskId("task_id_3"))
     pipeline_3 = Pipeline("name_3", {}, [task_3])
     assert not pipeline_3._is_consistent()  # Not a dag
 
     input_4 = InMemoryDataNode("foo", Scope.PIPELINE)
     output_4 = InMemoryDataNode("foo", Scope.PIPELINE)
-    task_4_1 = Task("foo", print, [input_4], [output_4], TaskId("task_id_4_1"))
-    task_4_2 = Task("bar", print, [output_4], [input_4], TaskId("task_id_4_2"))
+    task_4_1 = Task("foo", {}, print, [input_4], [output_4], TaskId("task_id_4_1"))
+    task_4_2 = Task("bar", {}, print, [output_4], [input_4], TaskId("task_id_4_2"))
     pipeline_4 = Pipeline("name_4", {}, [task_4_1, task_4_2])
     assert not pipeline_4._is_consistent()  # Not a Dag
 
@@ -123,8 +123,8 @@ def test_check_consistency():
 
     input_5 = DataNode("foo", Scope.PIPELINE, "input_id_5")
     output_5 = DataNode("foo", Scope.PIPELINE, "output_id_5")
-    task_5_1 = Task("foo", print, [input_5], [output_5], TaskId("task_id_5_1"))
-    task_5_2 = Task("bar", print, [output_5], [FakeDataNode()], TaskId("task_id_5_2"))
+    task_5_1 = Task("foo", {}, print, [input_5], [output_5], TaskId("task_id_5_1"))
+    task_5_2 = Task("bar", {}, print, [output_5], [FakeDataNode()], TaskId("task_id_5_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_5_1, task_5_2])
     assert not pipeline_2._is_consistent()
 
@@ -139,14 +139,15 @@ def test_get_sorted_tasks():
     data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1, data_node_2],
         [data_node_3, data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", print, [data_node_3], [data_node_5], TaskId("t2"))
-    task_3 = Task("waldo", print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
-    task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     pipeline = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     # s1 ---             ---> s3 ---> t2 ---> s5 ----
     #       |           |                           |
@@ -163,14 +164,15 @@ def test_get_sorted_tasks():
     data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1, data_node_2],
         [data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", print, None, [data_node_5], TaskId("t2"))
-    task_3 = Task("waldo", print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
-    task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_2 = Task("garply", {}, print, None, [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     pipeline = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     # s1 ---      t2 ---> s5 ------
     #       |                     |
@@ -187,14 +189,15 @@ def test_get_sorted_tasks():
     data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1, data_node_2],
         [data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", print, [data_node_6], [data_node_5], TaskId("t2"))
-    task_3 = Task("waldo", print, [data_node_5, data_node_4], id=TaskId("t3"))
-    task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     pipeline = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     # s1 ---      s6 ---> t2 ---> s5
     #       |                     |
@@ -211,14 +214,15 @@ def test_get_sorted_tasks():
     data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1, data_node_2],
         [data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", print, output=[data_node_5], id=TaskId("t2"))
-    task_3 = Task("waldo", print, [data_node_5, data_node_4], None, id=TaskId("t3"))
-    task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_2 = Task("garply", {}, print, output=[data_node_5], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     pipeline = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     # s1 ---              t2 ---> s5
     #       |                     |
@@ -237,15 +241,16 @@ def test_get_sorted_tasks():
 
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1, data_node_2],
         [data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", print, output=[data_node_5], id=TaskId("t2"))
-    task_3 = Task("waldo", print, [data_node_4], None, id=TaskId("t3"))
-    task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
-    task_5 = Task("bob", print, [data_node_8], None, TaskId("t5"))
+    task_2 = Task("garply", {}, print, output=[data_node_5], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_8], None, TaskId("t5"))
     pipeline = Pipeline("plugh", {}, [task_5, task_4, task_2, task_1, task_3], PipelineId("p1"))
     # s1 ---
     #       |

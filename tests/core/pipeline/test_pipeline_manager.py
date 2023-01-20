@@ -44,7 +44,7 @@ def test_set_and_get_pipeline():
     pipeline_id_2 = PipelineId("id2")
     input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
     output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
-    task_2 = Task("task", print, [input_2], [output_2], TaskId("task_id_2"))
+    task_2 = Task("task", {}, print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 
     pipeline_3_with_same_id = Pipeline("name_3", {}, [], pipeline_id_1)
@@ -130,14 +130,15 @@ def test_submit():
     data_node_7 = InMemoryDataNode("corge", Scope.PIPELINE, "s7")
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1, data_node_2],
         [data_node_3, data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", print, [data_node_3], [data_node_5], TaskId("t2"))
-    task_3 = Task("waldo", print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
-    task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     pipeline = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
 
     class MockScheduler(_Scheduler):
@@ -230,7 +231,7 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     _SchedulerFactory._build_dispatcher()
 
     # test no input and no output Task
-    task_no_input_no_output = Task("task_no_input_no_output", mock_function_no_input_no_output)
+    task_no_input_no_output = Task("task_no_input_no_output", {}, mock_function_no_input_no_output)
     pipeline_1 = Pipeline("my_pipeline", {}, [task_no_input_no_output])
 
     _TaskManager._set(task_no_input_no_output)
@@ -243,7 +244,7 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     # test one input and no output Task
     data_node_input = InMemoryDataNode("input_dn", Scope.PIPELINE, properties={"default_data": 2})
     task_one_input_no_output = Task(
-        "task_one_input_no_output", mock_function_one_input_no_output, input=[data_node_input]
+        "task_one_input_no_output", {}, mock_function_one_input_no_output, input=[data_node_input]
     )
     pipeline_2 = Pipeline("my_pipeline_2", {}, [task_one_input_no_output])
 
@@ -260,7 +261,7 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     # test no input and one output Task
     data_node_output = InMemoryDataNode("output_dn", Scope.PIPELINE, properties={"default_data": None})
     task_no_input_one_output = Task(
-        "task_no_input_one_output", mock_function_no_input_one_output, output=[data_node_output]
+        "task_no_input_one_output", {}, mock_function_no_input_one_output, output=[data_node_output]
     )
     pipeline_3 = Pipeline("my_pipeline_3", {}, [task_no_input_one_output])
 

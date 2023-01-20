@@ -75,8 +75,8 @@ def test_create_scenario(cycle, current_datetime):
     input_2 = InMemoryDataNode("input_2", Scope.SCENARIO)
     output_1 = InMemoryDataNode("output_1", Scope.SCENARIO)
     output_2 = InMemoryDataNode("output_2", Scope.SCENARIO)
-    task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
-    task_2 = Task("task_2", print, [input_2], [output_2], TaskId("task_id_2"))
+    task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
+    task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
 
     pipeline_2 = Pipeline("pipeline_2", {"description": "description"}, [task_1], owner_id="owner_id")
     pipeline_3 = Pipeline("pipeline_3", {"description": "description"}, [task_2], owner_id="owner_id")

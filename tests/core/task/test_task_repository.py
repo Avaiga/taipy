@@ -40,7 +40,15 @@ data_node = CSVDataNode(
 )
 
 task = Task(
-    "config_id", print, [data_node], [], TaskId("id"), owner_id="owner_id", parent_ids={"parent_id"}, version="latest"
+    "config_id",
+    {},
+    print,
+    [data_node],
+    [],
+    TaskId("id"),
+    owner_id="owner_id",
+    parent_ids={"parent_id"},
+    version="latest",
 )
 
 task_model = _TaskModel(

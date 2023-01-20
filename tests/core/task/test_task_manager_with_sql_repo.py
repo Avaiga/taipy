@@ -206,10 +206,10 @@ def test_set_and_get_task():
     init_managers()
 
     task_id_1 = TaskId("id1")
-    first_task = Task("name_1", print, [], [], task_id_1)
+    first_task = Task("name_1", {}, print, [], [], task_id_1)
     task_id_2 = TaskId("id2")
-    second_task = Task("name_2", print, [], [], task_id_2)
-    third_task_with_same_id_as_first_task = Task("name_is_not_1_anymore", print, [], [], task_id_1)
+    second_task = Task("name_2", {}, print, [], [], task_id_2)
+    third_task_with_same_id_as_first_task = Task("name_is_not_1_anymore", {}, print, [], [], task_id_1)
 
     # No task at initialization
 
@@ -321,6 +321,7 @@ def test_submit_task():
     data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1],
         [data_node_2],

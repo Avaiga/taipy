@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
+from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
@@ -50,6 +51,7 @@ class Task(_Entity):
     def __init__(
         self,
         config_id: str,
+        properties: Dict[str, Any],
         function,
         input: Optional[Iterable[DataNode]] = None,
         output: Optional[Iterable[DataNode]] = None,
@@ -58,7 +60,6 @@ class Task(_Entity):
         parent_ids: Optional[Set[str]] = None,
         version: str = None,
         skippable: bool = False,
-        **properties,
     ):
         self.config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
@@ -146,12 +147,12 @@ class Task(_Entity):
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
+        if protected_attribute_name in self._properties:
+            return _tpl._replace_templates(self._properties[protected_attribute_name])
         if protected_attribute_name in self.input:
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:
             return self.output[protected_attribute_name]
-        if protected_attribute_name in self._properties:
-            return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
 
     @property

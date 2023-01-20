@@ -85,6 +85,7 @@ def test_can_execute_2_workers():
 
     task = Task(
         config_id="name",
+        properties={},
         input=[],
         function=partial(execute, lock),
         output=output,
@@ -110,7 +111,7 @@ def test_can_execute_synchronous():
     _SchedulerFactory._build_dispatcher()
 
     task_id = TaskId("task_id1")
-    task = Task(config_id="name", input=[], function=print, output=[], id=task_id)
+    task = Task(config_id="name", properties={}, input=[], function=print, output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task, "submit_id")
 
@@ -127,7 +128,7 @@ def test_exception_in_user_function():
 
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
-    task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
+    task = Task(config_id="name", properties={}, input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task, "submit_id")
 
     dispatcher = _SchedulerFactory._dispatcher
@@ -147,7 +148,7 @@ def test_exception_in_writing_data():
     output.config_id = "my_raising_datanode"
     output._is_in_cache = False
     output.write.side_effect = ValueError()
-    task = Task(config_id="name", input=[], function=print, output=[output], id=task_id)
+    task = Task(config_id="name", properties={}, input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task, "submit_id")
 
     dispatcher = _SchedulerFactory._dispatcher

@@ -54,6 +54,10 @@ class _DataNodeModel:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
+        dn_properties = data["data_node_properties"]
+        # Used for compatibility between <=2.0 to >=2.1 versions.
+        if data.get("cacheable"):
+            dn_properties["cacheable"] = True
         return _DataNodeModel(
             id=data["id"],
             config_id=data["config_id"],
@@ -68,5 +72,5 @@ class _DataNodeModel:
             validity_days=data["validity_days"],
             validity_seconds=data["validity_seconds"],
             edit_in_progress=bool(data.get("edit_in_progress", data.get("edition_in_progress", False))),
-            data_node_properties=data["data_node_properties"],
+            data_node_properties=dn_properties,
         )

@@ -124,7 +124,7 @@ class DataNode(_Entity):
         self.owner_id = val
 
     def get_parents(self):
-        """Get parents of the Data Node entity"""
+        """Get all parents of the data node"""
         from ... import core as tp
 
         return tp.get_parents(self)
@@ -132,6 +132,7 @@ class DataNode(_Entity):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def parent_ids(self):
+        """List of parent ids of the data node"""
         return self._parent_ids
 
     @property  # type: ignore
@@ -140,7 +141,7 @@ class DataNode(_Entity):
         return self._edits
 
     def get_last_edit(self):
-        """Get last edit of this node, or None"""
+        """Get last `Edit^` of the data node, or None"""
         if self._edits:
             return self._edits[-1]
         return None
@@ -220,7 +221,7 @@ class DataNode(_Entity):
     @property  # type: ignore
     def cacheable(self):
         _warn_deprecated("cacheable", suggest="the skippable feature")
-        return True
+        return self.properties.get("cacheable", True)
 
     @cacheable.setter  # type: ignore
     def cacheable(self, val):

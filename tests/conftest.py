@@ -172,7 +172,7 @@ def data_node():
 @pytest.fixture(scope="function")
 def task(data_node):
     dn = InMemoryDataNode("dn_config_id", Scope.PIPELINE, version="random_version_number")
-    return Task("task_config_id", print, [data_node], [dn])
+    return Task("task_config_id", {}, print, [data_node], [dn])
 
 
 @pytest.fixture(scope="function")

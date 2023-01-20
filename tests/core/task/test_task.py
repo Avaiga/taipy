@@ -47,16 +47,16 @@ def input_config():
 
 def test_create_task():
     name = "name_1"
-    task = Task(name, print, [], [])
+    task = Task(name, {}, print, [], [])
     assert f"TASK_{name}_" in task.id
     assert task.config_id == "name_1"
 
     with pytest.raises(InvalidConfigurationId):
-        Task("foo bar", print, [], [])
+        Task("foo bar", {}, print, [], [])
 
     path = "my/csv/path"
     foo_dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
-    task = Task("name_1", print, [foo_dn], [])
+    task = Task("name_1", {}, print, [foo_dn], [])
     assert task.config_id == "name_1"
     assert task.id is not None
     assert task.owner_id is None
@@ -66,12 +66,12 @@ def test_create_task():
     with pytest.raises(AttributeError):
         task.bar
 
-    task = Task("name_1", print, [foo_dn], [], parent_ids={"parent_id"})
+    task = Task("name_1", {}, print, [foo_dn], [], parent_ids={"parent_id"})
     assert task.parent_ids == {"parent_id"}
 
     path = "my/csv/path"
     abc_dn = InMemoryDataNode("name_1ea", Scope.SCENARIO, properties={"path": path})
-    task = Task("name_1ea", print, [abc_dn], [], owner_id="owner_id", parent_ids={"parent_id_1", "parent_id_2"})
+    task = Task("name_1ea", {}, print, [abc_dn], [], owner_id="owner_id", parent_ids={"parent_id_1", "parent_id_2"})
     assert task.config_id == "name_1ea"
     assert task.id is not None
     assert task.owner_id == "owner_id"
@@ -83,7 +83,7 @@ def test_create_task():
 
 
 def test_parent_id_deprecated():
-    task = Task("foo", print, owner_id="owner_id")
+    task = Task("foo", {}, print, owner_id="owner_id")
 
     with pytest.warns(DeprecationWarning):
         task.parent_id
@@ -97,7 +97,7 @@ def test_parent_id_deprecated():
 
 
 def test_can_not_change_task_output(output):
-    task = Task("name_1", print, output=output)
+    task = Task("name_1", {}, print, output=output)
 
     with pytest.raises(Exception):
         task.output = {}
@@ -108,7 +108,7 @@ def test_can_not_change_task_output(output):
 
 
 def test_can_not_change_task_input(input):
-    task = Task("name_1", print, input=input)
+    task = Task("name_1", {}, print, input=input)
 
     with pytest.raises(Exception):
         task.input = {}
@@ -156,7 +156,7 @@ def mock_func():
 
 
 def test_auto_set_and_reload(data_node):
-    task_1 = Task(config_id="foo", function=print, input=None, output=None, owner_id=None)
+    task_1 = Task(config_id="foo", properties={}, function=print, input=None, output=None, owner_id=None)
 
     _DataManager._set(data_node)
     _TaskManager._set(task_1)

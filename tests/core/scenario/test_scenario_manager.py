@@ -58,7 +58,7 @@ def test_set_and_get_scenario(cycle):
     input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
     output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
     task_name = "task"
-    task_2 = Task(task_name, print, [input_2], [output_2], TaskId("task_id_2"))
+    task_2 = Task(task_name, {}, print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"
     pipeline_2 = Pipeline(pipeline_name_2, {}, [task_2], PipelineId("pipeline_id_2"))
     scenario_id_2 = ScenarioId("scenario_id_2")
@@ -894,15 +894,16 @@ def test_submit():
     data_node_8 = InMemoryDataNode("fum", Scope.PIPELINE, "s8")
     task_1 = Task(
         "grault",
+        {},
         print,
         [data_node_1, data_node_2],
         [data_node_3, data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", print, [data_node_3], [data_node_5], TaskId("t2"))
-    task_3 = Task("waldo", print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
-    task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
-    task_5 = Task("thud", print, [data_node_6], [data_node_8], TaskId("t5"))
+    task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("thud", {}, print, [data_node_6], [data_node_8], TaskId("t5"))
     pipeline_1 = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     pipeline_2 = Pipeline("xyzzy", {}, [task_5], PipelineId("p2"))
 

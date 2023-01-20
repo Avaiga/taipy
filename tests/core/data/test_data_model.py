@@ -42,6 +42,7 @@ class TestDataModel:
         assert model.edit_in_progress is False
         assert model.last_edit_date == "2020-01-01T00:00:00"
         assert model.owner_id == "owner_id"
+        assert model.data_node_properties.get("cacheable") is None
 
     def test_override_deprecated_properties(self):
         model = _DataNodeModel.from_dict(
@@ -62,7 +63,7 @@ class TestDataModel:
                 "write_fct_module": "write_fct_module",
                 "job_ids": [],
                 "version": "latest",
-                "cacheable": False,
+                "cacheable": True,
                 "validity_days": 1,
                 "validity_seconds": 1,
                 "edit_in_progress": True,
@@ -73,6 +74,7 @@ class TestDataModel:
         assert model.edit_in_progress is True
         assert model.last_edit_date == "2020-01-02T00:00:00"
         assert model.owner_id == "owner_id"
+        assert model.data_node_properties.get("cacheable") is True
 
     def test_migrate_job_ids(self):
         legacy_data_model_dict = {
@@ -92,7 +94,6 @@ class TestDataModel:
             "write_fct_module": "write_fct_module",
             "job_ids": ["job_1", "job_2", "job_3"],  # Legacy models have only job_ids
             "version": "latest",
-            "cacheable": False,
             "validity_days": 1,
             "validity_seconds": 1,
             "edit_in_progress": True,

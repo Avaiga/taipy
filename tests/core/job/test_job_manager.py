@@ -153,7 +153,9 @@ def test_raise_when_trying_to_delete_unfinished_job():
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
-    task = Task("task_config_1", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished")
+    task = Task(
+        "task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished"
+    )
     _SchedulerFactory._build_dispatcher()
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
@@ -175,7 +177,9 @@ def test_force_deleting_unfinished_job():
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
-    task = Task("task_config_1", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="force_deleting_unfinished_job")
+    task = Task(
+        "task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="force_deleting_unfinished_job"
+    )
     _SchedulerFactory._build_dispatcher()
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
@@ -287,7 +291,7 @@ def test_cancel_single_running_job():
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
-    task = Task("task_config_1", partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="cancel_single_job")
+    task = Task("task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="cancel_single_job")
 
     _SchedulerFactory._build_dispatcher()
 
@@ -317,9 +321,9 @@ def test_cancel_subsequent_jobs():
     dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
     dn_3 = InMemoryDataNode("dn_config_3", Scope.PIPELINE, properties={"default_data": 3})
     dn_4 = InMemoryDataNode("dn_config_4", Scope.PIPELINE, properties={"default_data": 4})
-    task_1 = Task("task_config_1", partial(lock_multiply, lock_0), [dn_1, dn_2], [dn_3], id="task_1")
-    task_2 = Task("task_config_2", multiply, [dn_1, dn_3], [dn_4], id="task_2")
-    task_3 = Task("task_config_3", print, [dn_4], id="task_3")
+    task_1 = Task("task_config_1", {}, partial(lock_multiply, lock_0), [dn_1, dn_2], [dn_3], id="task_1")
+    task_2 = Task("task_config_2", {}, multiply, [dn_1, dn_3], [dn_4], id="task_2")
+    task_3 = Task("task_config_3", {}, print, [dn_4], id="task_3")
 
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)
