@@ -104,3 +104,13 @@ def test_default_configuration():
     _test_default_scenario_config(ScenarioConfig.default_config())
     assert len(default_config._sections[ScenarioConfig.name]) == 1
     assert len(Config.scenarios) == 1
+
+
+def test_configure_default_data_node():
+    data_node1 = Config.configure_data_node(id="input_data1")
+    assert data_node1.storage_type == "pickle"
+
+    Config.configure_default_data_node("in_memory")
+
+    data_node2 = Config.configure_data_node(id="input_data2")
+    assert data_node2.storage_type == "in_memory"
