@@ -17,7 +17,7 @@ import pytest
 
 import src.taipy.core as tp
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-from src.taipy.core.common.alias import DataNodeId, Edit, JobId
+from src.taipy.core.common.alias import DataNodeId, JobId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._filter import _FilterDataNode
@@ -609,8 +609,14 @@ class TestDataNode:
         assert dn.owner_id == dn.parent_id
         assert dn.owner_id == "owner_id_2"
 
-    def test_cacheable_deprecated(self):
+    def test_cacheable_deprecated_false(self):
         dn = FakeDataNode("foo")
+        with pytest.warns(DeprecationWarning):
+            dn.cacheable
+        assert dn.cacheable is False
+
+    def test_cacheable_deprecated_true(self):
+        dn = FakeDataNode("foo", properties={"cacheable": True})
         with pytest.warns(DeprecationWarning):
             dn.cacheable
         assert dn.cacheable is True

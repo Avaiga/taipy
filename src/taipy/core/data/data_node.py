@@ -221,7 +221,7 @@ class DataNode(_Entity):
     @property  # type: ignore
     def cacheable(self):
         _warn_deprecated("cacheable", suggest="the skippable feature")
-        return self.properties.get("cacheable", True)
+        return self.properties.get("cacheable", False)
 
     @cacheable.setter  # type: ignore
     def cacheable(self, val):
