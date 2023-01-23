@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ChangeEvent, useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import Fab from "@mui/material/Fab";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from "@mui/material/Tooltip";
@@ -42,7 +42,6 @@ const defaultSx = { minWidth: "0px" };
 
 const FileSelector = (props: FileSelectorProps) => {
     const {
-        id,
         onAction,
         defaultLabel = "",
         updateVarName = "",
@@ -57,6 +56,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const [progress, setProgress] = useState(0);
     const { state, dispatch } = useContext(TaipyContext);
     const fabRef = useRef<HTMLElement>(null);
+    const id = useMemo(() => props.id || `${Date.now()}.${Math.random()}` , [props.id]);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -66,7 +66,7 @@ const FileSelector = (props: FileSelectorProps) => {
         (files: FileList | undefined | null, evt: Event | ChangeEvent) => {
             evt.stopPropagation();
             evt.preventDefault();
-            if (files) {
+            if (files?.length) {
                 setUpload(true);
                 uploadFile(updateVarName, files, setProgress, state.id).then(
                     (value) => {
