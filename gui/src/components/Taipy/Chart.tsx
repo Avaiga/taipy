@@ -27,7 +27,6 @@ import {
     Layout,
     PlotMarker,
     PlotRelayoutEvent,
-    PlotMouseEvent,
     PlotSelectionEvent,
     ScatterLine,
 } from "plotly.js";
