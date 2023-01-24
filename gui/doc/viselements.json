@@ -391,7 +391,7 @@
           },
           {
             "name": "selected",
-            "type": "dynamic(list[int]|str)",
+            "type": "indexed(dynamic(list[int]|str))",
             "doc": "List of the selected point indices."
           },
           {
