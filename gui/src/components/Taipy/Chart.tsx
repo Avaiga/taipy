@@ -87,6 +87,429 @@ interface ChartConfig {
     decimators?: string[];
 }
 
+export type TraceValueType = Record<string, (string | number)[]>;
+
+const defaultStyle = { position: "relative", display: "inline-block" };
+
+const indexedData = /^(\d+)\/(.*)/;
+
+const getColNameFromIndexed = (colName: string): string => {
+    const reRes = indexedData.exec(colName);
+    if (reRes && reRes.length > 2) {
+        return reRes[2] || colName;
+    }
+    return colName;
+};
+
+const getValue = <T,>(
+    values: TraceValueType | undefined,
+    arr: T[],
+    idx: number,
+    returnUndefined = false
+): (string | number)[] | undefined => {
+    const value = getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
+    if (!returnUndefined || value.length) {
+        return value;
+    }
+    return undefined;
+};
+
+const getValueFromCol = (values: TraceValueType | undefined, col: string): (string | number)[] => {
+    if (values) {
+        if (col) {
+            if (Array.isArray(values)) {
+                const reRes = indexedData.exec(col);
+                if (reRes && reRes.length > 2) {
+                    return values[parseInt(reRes[1], 10) || 0][reRes[2] || col] || [];
+                }
+            } else {
+                return values[col] || [];
+            }
+        }
+    }
+    return [];
+};
+
+const getAxis = (traces: string[][], idx: number, columns: Record<string, ColumnDesc>, axis: number) => {
+    if (traces.length > idx && traces[idx].length > axis && traces[idx][axis] && columns[traces[idx][axis]])
+        return columns[traces[idx][axis]].dfid;
+    return undefined;
+};
+
+const getDecimatorsPayload = (
+    decimators: string[] | undefined,
+    plotDiv: HTMLDivElement | null,
+    modes: string[],
+    columns: Record<string, ColumnDesc>,
+    traces: string[][],
+    relayoutData?: PlotRelayoutEvent
+) => {
+    return decimators
+        ? {
+              width: plotDiv?.clientWidth,
+              height: plotDiv?.clientHeight,
+              decimators: decimators.map((d, i) => d ? {
+                decimator: d,
+                xAxis: getAxis(traces, i, columns, 0),
+                yAxis: getAxis(traces, i, columns, 1),
+                zAxis: getAxis(traces, i, columns, 2),
+                chartMode: modes[i]
+              } : undefined),
+              relayoutData: relayoutData,
+          }
+        : undefined;
+};
+
+const selectedPropRe = /selected(\d+)/;
+
+const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
+
+const Chart = (props: ChartProp) => {
+    const {
+        title = "",
+        width = "100%",
+        height,
+        updateVarName,
+        updateVars,
+        id,
+        data = {},
+        onRangeChange,
+        propagate = true,
+    } = props;
+    const { dispatch } = useContext(TaipyContext);
+    const [selected, setSelected] = useState<number[][]>([]);
+    const plotRef = useRef<HTMLDivElement>(null);
+    const dataKey = useRef("default");
+    const theme = useTheme();
+
+    const refresh = data === null;
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+
+    // get props.selected[i] values
+    useEffect(() => {
+        setSelected((sel) => {
+            Object.keys(props).forEach((key) => {
+                const res = selectedPropRe.exec(key);
+                if (res && res.length == 2) {
+                    const idx = parseInt(res[1], 10);
+                    let val = (props as unknown as Record<string, number[]>)[key];
+                    if (val !== undefined) {
+                        if (typeof val === "string") {
+                            try {
+                                val = JSON.parse(val) as number[];
+                            } catch (e) {
+                                // too bad
+                                val = [];
+                            }
+                        }
+                        if (!Array.isArray(val)) {
+                            val = [];
+                        }
+                        if (
+                            idx >= sel.length ||
+                            val.length !== sel[idx].length ||
+                            val.some((v, i) => sel[idx][i] != v)
+                        ) {
+                            sel = sel.concat();
+                            sel[idx] = val;
+                        }
+                    }
+                }
+            });
+            return sel;
+        });
+    }, [props]);
+
+    const config = useMemo(() => {
+        if (props.config) {
+            try {
+                return JSON.parse(props.config) as ChartConfig;
+            } catch (e) {
+                console.info(`Error while parsing Chart.config\n${(e as Error).message || e}`);
+            }
+        }
+        return {
+            columns: {} as Record<string, ColumnDesc>,
+            labels: [],
+            modes: [],
+            types: [],
+            traces: [],
+            xaxis: [],
+            yaxis: [],
+            markers: [],
+            selectedMarkers: [],
+            orientations: [],
+            names: [],
+            lines: [],
+            texts: [],
+            textAnchors: [],
+            options: [],
+            axisNames: [],
+            addIndex: [],
+        } as ChartConfig;
+    }, [props.config]);
+
+    useEffect(() => {
+        if (refresh || !data[dataKey.current]) {
+            const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
+            dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
+            dispatch(
+                createRequestChartUpdateAction(
+                    updateVarName,
+                    id,
+                    backCols,
+                    dataKey.current,
+                    getDecimatorsPayload(config.decimators, plotRef.current, config.modes, config.columns, config.traces)
+                )
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [refresh, dispatch, config.columns, config.traces, config.modes, config.decimators, updateVarName, id]);
+
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
+
+    const layout = useMemo(() => {
+        let playout = {} as Layout;
+        if (props.layout) {
+            try {
+                playout = JSON.parse(props.layout);
+            } catch (e) {
+                console.info(`Error while parsing Chart.layout\n${(e as Error).message || e}`);
+            }
+        }
+        let template = undefined;
+        try {
+            const tpl = props.template && JSON.parse(props.template);
+            const tplTheme = theme.palette.mode === "dark" ? (props.template_Dark_ ? JSON.parse(props.template_Dark_) : darkTemplate) : props.template_Light_ && JSON.parse(props.template_Light_);
+            template = tpl ? tplTheme ? {...tpl, ...tplTheme} : tpl : tplTheme ? tplTheme : undefined;
+        } catch (e) {
+            console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
+        }
+        if (template) {
+            playout.template = template;
+        }
+        return {
+            ...playout,
+            title: title || playout.title,
+            xaxis: {
+                title:
+                    config.traces.length && config.traces[0].length && config.traces[0][0]
+                        ? getColNameFromIndexed(config.columns[config.traces[0][0]].dfid)
+                        : undefined,
+                ...playout.xaxis,
+            },
+            yaxis: {
+                title:
+                    config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
+                        ? getColNameFromIndexed(config.columns[config.traces[0][1]].dfid)
+                        : undefined,
+                ...playout.yaxis,
+            },
+            clickmode: "event+select",
+        } as Layout;
+    }, [theme.palette.mode, title, config.columns, config.traces, props.layout, props.template, props.template_Dark_, props.template_Light_]);
+
+    const style = useMemo(
+        () =>
+            height === undefined
+                ? ({ ...defaultStyle, width: width } as CSSProperties)
+                : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
+        [width, height]
+    );
+    const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
+
+    const dataPl = useMemo(() => {
+        const datum = data && data[dataKey.current];
+        return config.traces.map((trace, idx) => {
+            const ret = {
+                ...getArrayValue(config.options, idx, {}),
+                type: config.types[idx],
+                mode: config.modes[idx],
+                name:
+                    getArrayValue(config.names, idx) ||
+                    (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
+            } as Record<string, unknown>;
+                ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
+                MARKER_TO_COL.forEach(prop => {
+                    const val = (ret.marker as Record<string, unknown>)[prop];
+                    if (val !== undefined && typeof val === "string") {
+                        const arr = getValueFromCol(datum, val as string);
+                        if (arr.length) {
+                            (ret.marker as Record<string, unknown>)[prop] = arr;
+                        }
+                    }
+                });
+                const xs = getValue(datum, trace, 0) || [];
+                const ys = getValue(datum, trace, 1) || [];
+                const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
+                const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
+                const baseY = addIndex ? xs : ys;
+                const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : [] as string[];
+                if (baseX.length) {
+                    if (axisNames.length > 0 ) {
+                        ret[axisNames[0]] = baseX;
+                    } else {
+                        ret.x = baseX;
+                    }
+                }
+                if (baseY.length) {
+                    if (axisNames.length > 1) {
+                        ret[axisNames[1]] = baseY;
+                    } else {
+                        ret.y = baseY;
+                    }
+                }
+                const baseZ = getValue(datum, trace, 2, true);
+                if (baseZ) {
+                    if (axisNames.length > 2) {
+                        ret[axisNames[2]] = baseZ;
+                    } else {
+                        ret.z = baseZ;
+                    }
+                }
+                for (let i = 3; i < axisNames.length; i++) {
+                    ret[axisNames[i]] = getValue(datum, trace, i, true);
+                }
+                ret.text = getValue(datum, config.texts, idx, true);
+                ret.xaxis = config.xaxis[idx];
+                ret.yaxis = config.yaxis[idx];
+                ret.hovertext = getValue(datum, config.labels, idx, true);
+                const selPoints = getArrayValue(selected, idx, []);
+                if (selPoints?.length) {
+                    ret.selectedpoints = selPoints;
+                }
+                ret.orientation = getArrayValue(config.orientations, idx);
+                ret.line = getArrayValue(config.lines, idx);
+                ret.textposition = getArrayValue(config.textAnchors, idx);
+            const selectedMarker = getArrayValue(config.selectedMarkers, idx);
+            if (selectedMarker) {
+                ret.selected = { marker: selectedMarker };
+            }
+            return ret as Data;
+        });
+    }, [data, config, selected]);
+
+    const plotConfig = useMemo(() => {
+        let plconf = {};
+        if (props.plotConfig) {
+            try {
+                plconf = JSON.parse(props.plotConfig);
+            } catch (e) {
+                console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
+            }
+            if (typeof plconf !== "object" || plconf === null || Array.isArray(plconf)) {
+                console.info("Error Chart.plot_config is not a dictionnary");
+                plconf = {};
+            }
+        }
+        if (active) {
+            return plconf;
+        } else {
+            return { ...plconf, staticPlot: true };
+        }
+    }, [active, props.plotConfig]);
+
+    const onRelayout = useCallback(
+        (eventData: PlotRelayoutEvent) => {
+            onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
+            if (config.decimators && !config.types.includes("scatter3d")) {
+                const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
+                const eventDataKey = Object.keys(eventData)
+                    .map((v) => v + "=" + eventData[v as keyof typeof eventData])
+                    .join("-");
+                dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
+                dispatch(
+                    createRequestChartUpdateAction(
+                        updateVarName,
+                        id,
+                        backCols,
+                        dataKey.current,
+                        getDecimatorsPayload(
+                            config.decimators,
+                            plotRef.current,
+                            config.modes,
+                            config.columns,
+                            config.traces,
+                            eventData
+                        )
+                    )
+                );
+            }
+        },
+        [
+            dispatch,
+            onRangeChange,
+            id,
+            config.modes,
+            config.columns,
+            config.traces,
+            config.types,
+            config.decimators,
+            updateVarName,
+        ]
+    );
+
+    const onAfterPlot = useCallback(() => {
+        // Manage loading Animation ... One day
+    }, []);
+
+    const getRealIndex = useCallback(
+        (index: number) => (data[dataKey.current].tp_index ? (data[dataKey.current].tp_index[index] as number) : index),
+        [data]
+    );
+
+    const onSelect = useCallback(
+        (evt?: PlotSelectionEvent) => {
+            if (updateVars) {
+                const traces = (evt?.points || []).reduce((tr, pt) => {
+                    tr[pt.curveNumber] = tr[pt.curveNumber] || [];
+                    tr[pt.curveNumber].push(getRealIndex(pt.pointIndex));
+                    return tr;
+                }, [] as number[][]);
+                if (traces.length) {
+                    traces.forEach((tr, idx) => {
+                        const upvar = getUpdateVar(updateVars, `selected${idx}`);
+                        if (upvar && tr && tr.length) {
+                            dispatch(createSendUpdateAction(upvar, tr, props.onChange, propagate));
+                        }
+                    });
+                } else if (config.traces.length === 1) {
+                    const upvar = getUpdateVar(updateVars, 'selected0');
+                    if (upvar) {
+                        dispatch(createSendUpdateAction(upvar, [], props.onChange, propagate));
+                    }
+                }
+            }
+        },
+        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length]
+    );
+
+    return render ? (
+        <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
+            <Tooltip title={hover || ""}>
+                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
+                    <Plot
+                        data={dataPl}
+                        layout={layout}
+                        style={style}
+                        onRelayout={onRelayout}
+                        onAfterPlot={onAfterPlot}
+                        onSelected={onSelect}
+                        onDeselect={onSelect}
+                        config={plotConfig}
+                    />
+                </Suspense>
+            </Tooltip>
+        </Box>
+    ) : null;
+};
+
+export default Chart;
+
+
 const darkTemplate = {
     "data": {
         "barpolar": [
@@ -709,423 +1132,3 @@ const darkTemplate = {
         }
     }
 };
-
-export type TraceValueType = Record<string, (string | number)[]>;
-
-const defaultStyle = { position: "relative", display: "inline-block" };
-
-const indexedData = /^(\d+)\/(.*)/;
-
-const getColNameFromIndexed = (colName: string): string => {
-    const reRes = indexedData.exec(colName);
-    if (reRes && reRes.length > 2) {
-        return reRes[2] || colName;
-    }
-    return colName;
-};
-
-const getValue = <T,>(
-    values: TraceValueType | undefined,
-    arr: T[],
-    idx: number,
-    returnUndefined = false
-): (string | number)[] | undefined => {
-    const value = getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
-    if (!returnUndefined || value.length) {
-        return value;
-    }
-    return undefined;
-};
-
-const getValueFromCol = (values: TraceValueType | undefined, col: string): (string | number)[] => {
-    if (values) {
-        if (col) {
-            if (Array.isArray(values)) {
-                const reRes = indexedData.exec(col);
-                if (reRes && reRes.length > 2) {
-                    return values[parseInt(reRes[1], 10) || 0][reRes[2] || col] || [];
-                }
-            } else {
-                return values[col] || [];
-            }
-        }
-    }
-    return [];
-};
-
-const getAxis = (traces: string[][], idx: number, columns: Record<string, ColumnDesc>, axis: number) => {
-    if (traces.length > idx && traces[idx].length > axis && traces[idx][axis] && columns[traces[idx][axis]])
-        return columns[traces[idx][axis]].dfid;
-    return undefined;
-};
-
-const getDecimatorsPayload = (
-    decimators: string[] | undefined,
-    plotDiv: HTMLDivElement | null,
-    modes: string[],
-    columns: Record<string, ColumnDesc>,
-    traces: string[][],
-    relayoutData?: PlotRelayoutEvent
-) => {
-    return decimators
-        ? {
-              width: plotDiv?.clientWidth,
-              height: plotDiv?.clientHeight,
-              decimators: decimators.map((d, i) => d ? {
-                decimator: d,
-                xAxis: getAxis(traces, i, columns, 0),
-                yAxis: getAxis(traces, i, columns, 1),
-                zAxis: getAxis(traces, i, columns, 2),
-                chartMode: modes[i]
-              } : undefined),
-              relayoutData: relayoutData,
-          }
-        : undefined;
-};
-
-const selectedPropRe = /selected(\d+)/;
-
-const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
-
-const Chart = (props: ChartProp) => {
-    const {
-        title = "",
-        width = "100%",
-        height,
-        updateVarName,
-        updateVars,
-        id,
-        data = {},
-        onRangeChange,
-        propagate = true,
-    } = props;
-    const { dispatch } = useContext(TaipyContext);
-    const [selected, setSelected] = useState<number[][]>([]);
-    const plotRef = useRef<HTMLDivElement>(null);
-    const dataKey = useRef("default");
-    const theme = useTheme();
-
-    const refresh = data === null;
-    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
-    const active = useDynamicProperty(props.active, props.defaultActive, true);
-    const render = useDynamicProperty(props.render, props.defaultRender, true);
-    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-
-    // get props.selected[i] values
-    useEffect(() => {
-        setSelected((sel) => {
-            Object.keys(props).forEach((key) => {
-                const res = selectedPropRe.exec(key);
-                if (res && res.length == 2) {
-                    const idx = parseInt(res[1], 10);
-                    let val = (props as unknown as Record<string, number[]>)[key];
-                    if (val !== undefined) {
-                        if (typeof val === "string") {
-                            try {
-                                val = JSON.parse(val) as number[];
-                            } catch (e) {
-                                // too bad
-                                val = [];
-                            }
-                        }
-                        if (!Array.isArray(val)) {
-                            val = [];
-                        }
-                        if (
-                            idx >= sel.length ||
-                            val.length !== sel[idx].length ||
-                            val.some((v, i) => sel[idx][i] != v)
-                        ) {
-                            sel = sel.concat();
-                            sel[idx] = val;
-                        }
-                    }
-                }
-            });
-            return sel;
-        });
-    }, [props]);
-
-    const config = useMemo(() => {
-        if (props.config) {
-            try {
-                return JSON.parse(props.config) as ChartConfig;
-            } catch (e) {
-                console.info(`Error while parsing Chart.config\n${(e as Error).message || e}`);
-            }
-        }
-        return {
-            columns: {} as Record<string, ColumnDesc>,
-            labels: [],
-            modes: [],
-            types: [],
-            traces: [],
-            xaxis: [],
-            yaxis: [],
-            markers: [],
-            selectedMarkers: [],
-            orientations: [],
-            names: [],
-            lines: [],
-            texts: [],
-            textAnchors: [],
-            options: [],
-            axisNames: [],
-            addIndex: [],
-        } as ChartConfig;
-    }, [props.config]);
-
-    useEffect(() => {
-        if (refresh || !data[dataKey.current]) {
-            const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
-            dispatch(
-                createRequestChartUpdateAction(
-                    updateVarName,
-                    id,
-                    backCols,
-                    dataKey.current,
-                    getDecimatorsPayload(config.decimators, plotRef.current, config.modes, config.columns, config.traces)
-                )
-            );
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, config.traces, config.modes, config.decimators, updateVarName, id]);
-
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
-
-    const layout = useMemo(() => {
-        let playout = {} as Layout;
-        if (props.layout) {
-            try {
-                playout = JSON.parse(props.layout);
-            } catch (e) {
-                console.info(`Error while parsing Chart.layout\n${(e as Error).message || e}`);
-            }
-        }
-        let template = undefined;
-        try {
-            const tpl = props.template && JSON.parse(props.template);
-            const tplTheme = theme.palette.mode === "dark" ? (props.template_Dark_ ? JSON.parse(props.template_Dark_) : darkTemplate) : props.template_Light_ && JSON.parse(props.template_Light_);
-            template = tpl ? tplTheme ? {...tpl, ...tplTheme} : tpl : tplTheme ? tplTheme : undefined;
-        } catch (e) {
-            console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
-        }
-        if (template) {
-            playout.template = template;
-        }
-        return {
-            ...playout,
-            title: title || playout.title,
-            xaxis: {
-                title:
-                    config.traces.length && config.traces[0].length && config.traces[0][0]
-                        ? getColNameFromIndexed(config.columns[config.traces[0][0]].dfid)
-                        : undefined,
-                ...playout.xaxis,
-            },
-            yaxis: {
-                title:
-                    config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
-                        ? getColNameFromIndexed(config.columns[config.traces[0][1]].dfid)
-                        : undefined,
-                ...playout.yaxis,
-            },
-            clickmode: "event+select",
-        } as Layout;
-    }, [theme.palette.mode, title, config.columns, config.traces, props.layout, props.template, props.template_Dark_, props.template_Light_]);
-
-    const style = useMemo(
-        () =>
-            height === undefined
-                ? ({ ...defaultStyle, width: width } as CSSProperties)
-                : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [width, height]
-    );
-    const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
-
-    const dataPl = useMemo(() => {
-        const datum = data && data[dataKey.current];
-        return config.traces.map((trace, idx) => {
-            const ret = {
-                ...getArrayValue(config.options, idx, {}),
-                type: config.types[idx],
-                mode: config.modes[idx],
-                name:
-                    getArrayValue(config.names, idx) ||
-                    (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
-            } as Record<string, unknown>;
-                ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
-                MARKER_TO_COL.forEach(prop => {
-                    const val = (ret.marker as Record<string, unknown>)[prop];
-                    if (val !== undefined && typeof val === "string") {
-                        const arr = getValueFromCol(datum, val as string);
-                        if (arr.length) {
-                            (ret.marker as Record<string, unknown>)[prop] = arr;
-                        }
-                    }
-                });
-                const xs = getValue(datum, trace, 0) || [];
-                const ys = getValue(datum, trace, 1) || [];
-                const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
-                const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
-                const baseY = addIndex ? xs : ys;
-                const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : [] as string[];
-                if (baseX.length) {
-                    if (axisNames.length > 0 ) {
-                        ret[axisNames[0]] = baseX;
-                    } else {
-                        ret.x = baseX;
-                    }
-                }
-                if (baseY.length) {
-                    if (axisNames.length > 1) {
-                        ret[axisNames[1]] = baseY;
-                    } else {
-                        ret.y = baseY;
-                    }
-                }
-                const baseZ = getValue(datum, trace, 2, true);
-                if (baseZ) {
-                    if (axisNames.length > 2) {
-                        ret[axisNames[2]] = baseZ;
-                    } else {
-                        ret.z = baseZ;
-                    }
-                }
-                for (let i = 3; i < axisNames.length; i++) {
-                    ret[axisNames[i]] = getValue(datum, trace, i, true);
-                }
-                ret.text = getValue(datum, config.texts, idx, true);
-                ret.xaxis = config.xaxis[idx];
-                ret.yaxis = config.yaxis[idx];
-                ret.hovertext = getValue(datum, config.labels, idx, true);
-                const selPoints = getArrayValue(selected, idx, []);
-                if (selPoints?.length) {
-                    ret.selectedpoints = selPoints;
-                }
-                ret.orientation = getArrayValue(config.orientations, idx);
-                ret.line = getArrayValue(config.lines, idx);
-                ret.textposition = getArrayValue(config.textAnchors, idx);
-            const selectedMarker = getArrayValue(config.selectedMarkers, idx);
-            if (selectedMarker) {
-                ret.selected = { marker: selectedMarker };
-            }
-            return ret as Data;
-        });
-    }, [data, config, selected]);
-
-    const plotConfig = useMemo(() => {
-        let plconf = {};
-        if (props.plotConfig) {
-            try {
-                plconf = JSON.parse(props.plotConfig);
-            } catch (e) {
-                console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
-            }
-            if (typeof plconf !== "object" || plconf === null || Array.isArray(plconf)) {
-                console.info("Error Chart.plot_config is not a dictionnary");
-                plconf = {};
-            }
-        }
-        if (active) {
-            return plconf;
-        } else {
-            return { ...plconf, staticPlot: true };
-        }
-    }, [active, props.plotConfig]);
-
-    const onRelayout = useCallback(
-        (eventData: PlotRelayoutEvent) => {
-            onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
-            if (config.decimators && !config.types.includes("scatter3d")) {
-                const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-                const eventDataKey = Object.keys(eventData)
-                    .map((v) => v + "=" + eventData[v as keyof typeof eventData])
-                    .join("-");
-                dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
-                dispatch(
-                    createRequestChartUpdateAction(
-                        updateVarName,
-                        id,
-                        backCols,
-                        dataKey.current,
-                        getDecimatorsPayload(
-                            config.decimators,
-                            plotRef.current,
-                            config.modes,
-                            config.columns,
-                            config.traces,
-                            eventData
-                        )
-                    )
-                );
-            }
-        },
-        [
-            dispatch,
-            onRangeChange,
-            id,
-            config.modes,
-            config.columns,
-            config.traces,
-            config.types,
-            config.decimators,
-            updateVarName,
-        ]
-    );
-
-    const onAfterPlot = useCallback(() => {
-        // Manage loading Animation ... One day
-    }, []);
-
-    const getRealIndex = useCallback(
-        (index: number) => (data[dataKey.current].tp_index ? (data[dataKey.current].tp_index[index] as number) : index),
-        [data]
-    );
-
-    const onSelect = useCallback(
-        (evt?: PlotMouseEvent | PlotSelectionEvent) => {
-            if ((evt as unknown as Record<string, unknown>).event === undefined) {
-                return;
-            }
-            const points = evt?.points || [];
-            if (points.length && updateVars) {
-                const traces = points.reduce((tr, pt) => {
-                    tr[pt.curveNumber] = tr[pt.curveNumber] || [];
-                    tr[pt.curveNumber].push(getRealIndex(pt.pointIndex));
-                    return tr;
-                }, [] as number[][]);
-                traces.forEach((tr, idx) => {
-                    const upvar = getUpdateVar(updateVars, `selected${idx}`);
-                    if (upvar && tr && tr.length) {
-                        dispatch(createSendUpdateAction(upvar, tr, props.onChange, propagate));
-                    }
-                });
-            }
-        },
-        [getRealIndex, dispatch, updateVars, propagate, props.onChange]
-    );
-
-    return render ? (
-        <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
-            <Tooltip title={hover || ""}>
-                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    <Plot
-                        data={dataPl}
-                        layout={layout}
-                        style={style}
-                        onRelayout={onRelayout}
-                        onAfterPlot={onAfterPlot}
-                        onSelected={onSelect}
-                        onDeselect={onSelect}
-                        onClick={onSelect}
-                        config={plotConfig}
-                    />
-                </Suspense>
-            </Tooltip>
-        </Box>
-    ) : null;
-};
-
-export default Chart;
