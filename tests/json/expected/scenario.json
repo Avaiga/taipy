@@ -9,5 +9,6 @@
     "primary_scenario": true,
     "subscribers": [],
     "tags": [],
-    "cycle": "CYCLE_Frequency.DAILY_2022-03-31T215052.349698_4dfea10a-605f-4d02-91cd-cc8c43cd7d2f"
+    "cycle": "CYCLE_Frequency.DAILY_2022-03-31T215052.349698_4dfea10a-605f-4d02-91cd-cc8c43cd7d2f",
+    "version": "1.0"
 }

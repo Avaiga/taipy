@@ -13,5 +13,6 @@
     "edit_in_progress": false,
     "cacheable": false,
     "data_node_properties": {
-    }
+    },
+    "version": "1.0"
 }

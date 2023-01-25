@@ -10,5 +10,6 @@
             "fct_module": "taipy.core._scheduler._scheduler"
         }
     ],
-    "stacktrace": []
+    "stacktrace": [],
+    "version": "1.0"
 }
