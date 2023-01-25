@@ -253,7 +253,7 @@ const Chart = (props: ChartProp) => {
 
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
-            const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
+            const backCols = Object.values(config.columns).map((col) => col.dfid);
             dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
             dispatch(
                 createRequestChartUpdateAction(
@@ -413,29 +413,31 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
-            onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
-            if (config.decimators && !config.types.includes("scatter3d")) {
-                const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-                const eventDataKey = Object.keys(eventData)
-                    .map((v) => v + "=" + eventData[v as keyof typeof eventData])
-                    .join("-");
-                dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
-                dispatch(
-                    createRequestChartUpdateAction(
-                        updateVarName,
-                        id,
-                        backCols,
-                        dataKey.current,
-                        getDecimatorsPayload(
-                            config.decimators,
-                            plotRef.current,
-                            config.modes,
-                            config.columns,
-                            config.traces,
-                            eventData
+            if (Object.keys(eventData).some(k => k.startsWith("xaxis."))) {
+                onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
+                if (config.decimators && !config.types.includes("scatter3d")) {
+                    const backCols = Object.values(config.columns).map((col) => col.dfid);
+                    const eventDataKey = Object.entries(eventData)
+                        .map(([k, v]) => `${k}=${v}`)
+                        .join("-");
+                    dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
+                    dispatch(
+                        createRequestChartUpdateAction(
+                            updateVarName,
+                            id,
+                            backCols,
+                            dataKey.current,
+                            getDecimatorsPayload(
+                                config.decimators,
+                                plotRef.current,
+                                config.modes,
+                                config.columns,
+                                config.traces,
+                                eventData
+                            )
                         )
-                    )
-                );
+                    );
+                }
             }
         },
         [
