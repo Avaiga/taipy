@@ -165,11 +165,12 @@ def __default_task():
         properties={"default_data": "In memory Data Source"},
     )
     return Task(
-        "foo",
-        print,
-        [input_ds],
-        [output_ds],
-        None,
+        config_id="foo",
+        properties={},
+        function=print,
+        input=[input_ds],
+        output=[output_ds],
+        id=None,
     )
 
 
