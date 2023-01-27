@@ -12,13 +12,19 @@
 # specific language governing permissions and limitations under the License.
 
 """The setup script."""
+import json
+import os
 
 from setuptools import find_namespace_packages, find_packages, setup
 
-from src.taipy.core.version import _get_version
-
 with open("README.md") as readme_file:
     readme = readme_file.read()
+
+with open(f"src{os.sep}taipy{os.sep}core{os.sep}version.json") as version_file:
+    version = json.load(version_file)
+    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+    if vext := version.get("ext"):
+        version_string = f"{version_string}.{vext}"
 
 requirements = [
     "pyarrow>=10.0.1,<11.0",
@@ -66,7 +72,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
-    version=_get_version(),
+    version=version_string,
     zip_safe=False,
     extras_require=extras_require,
 )
