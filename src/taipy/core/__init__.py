@@ -37,7 +37,8 @@ in the following [function](./#functions) section. In particular, the most used 
     [running services](../../../manuals/running_services/) page of the user manual for more details.
 
 """
-
+import json
+import os
 
 from ._core import Core
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
@@ -82,6 +83,11 @@ from .taipy import (
     untag,
 )
 from .task.task import Task
-from .version import _get_version
 
-__version__ = _get_version()
+with open(f"src{os.sep}taipy{os.sep}core{os.sep}version.json") as version_file:
+    version = json.load(version_file)
+    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+    if vext := version.get("ext"):
+        version_string = f"{version_string}.{vext}"
+
+__version__ = version_string

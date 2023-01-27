@@ -11,10 +11,6 @@
 
 from importlib.util import find_spec
 
-from src.taipy.core.version import _get_version
-
-__version__ = _get_version()
-
 if find_spec("taipy"):
     if find_spec("taipy.config"):
         from taipy.config import Config, Frequency, Scope
