@@ -26,7 +26,7 @@ jobs:
         run: |
           echo """
           import json, sys, os
-          with open(f\"src{os.sep}taipy{os.sep}gui{os.sep}version.json\") as version_file:
+          with open(f\"src{os.sep}taipy{os.sep}core{os.sep}version.json\") as version_file:
             version_o = json.load(version_file)
           version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
           if vext := version_o.get(\"ext\"):
@@ -89,7 +89,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        python-versions: ['3.8','3.9','3.10']
+        python-versions: ['3.8','3.9','3.10', '3.11']
         os: [ubuntu-latest,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
