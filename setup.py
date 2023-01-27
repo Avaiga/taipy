@@ -69,6 +69,7 @@ setup(
     name="taipy-core",
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
+    include_package_data=True,
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
