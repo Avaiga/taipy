@@ -64,7 +64,7 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(any)",
+            "type": "dynamic(Any)",
             "default_value": "None",
             "doc": "The value represented by this control."
           },
@@ -107,7 +107,7 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(any)",
+            "type": "dynamic(Any)",
             "doc": "The numerical value represented by this control."
           },
           {
@@ -260,8 +260,8 @@
             "name": "data",
             "default_property": true,
             "required": true,
-            "type": "any",
-            "doc": "The data object bound to this chart control."
+            "type": "dynamic(Any)",
+            "doc": "The data object bound to this chart control.<br/>See the section on the <a href=\"#the-data-property\"><i>data</i> property</a> below for details."
           },
           {
             "name": "type",
@@ -369,7 +369,7 @@
           {
             "name": "on_range_change",
             "type": "Callback",
-            "doc": "Callback function called when the visible part of the x axis changes.\nThe function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">plotly</a>.</li>\n</ul>",
+            "doc": "Callback function called when the visible part of the x axis changes.\nThe function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">plotly</a>.</li>\n</ul>",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
 
           },
@@ -406,32 +406,32 @@
           },
           {
             "name": "marker",
-            "type": "indexed(dict[str, any])",
+            "type": "indexed(dict[str, Any])",
             "doc": "The type of markers used for the indicated trace.\nSee <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.\nColor, opacity, size and symbol can be column name."
           },
           {
             "name": "line",
-            "type": "indexed(str|dict[str, any])",
+            "type": "indexed(str|dict[str, Any])",
             "doc": "The configuration of the line used for the indicated trace.\nSee <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-line\">line</a> for details.\nIf the value is a string, it must be a dash type or pattern (see <a href=\"https://plotly.com/python/reference/scatter/#scatter-line-dash\">dash style of lines</a> for details)."
           },
           {
             "name": "selected_marker",
-            "type": "indexed(dict[str, any])",
+            "type": "indexed(dict[str, Any])",
             "doc": "The type of markers used for selected points in the indicated trace.\nSee <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-selected-marker\">selected marker for details."
           },
           {
             "name": "layout",
-            "type": "dict[str, any]",
+            "type": "dict[str, Any]",
             "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
           },
           {
             "name": "plot_config",
-            "type": "dict[str, any]",
+            "type": "dict[str, Any]",
             "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/configuration-options/\"> configuration options object</a>."
           },
           {
             "name": "options",
-            "type": "indexed(dict[str, any])",
+            "type": "indexed(dict[str, Any])",
             "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/\">data object where dynamic data will be overridden.</a>."
           },
           {
@@ -634,7 +634,7 @@
           {
             "name": "display",
             "default_property": true,
-            "type": "dynamic(any)",
+            "type": "dynamic(Any)",
             "doc": "The label to be displayed.\nThis can be formatted if it is a numerical value."
           },
           {
@@ -691,7 +691,7 @@
           {
             "name": "lov",
             "default_property": true,
-            "type": "dynamic(str|List[str|Icon|any])",
+            "type": "dynamic(str|List[str|Icon|Any])",
             "doc": "The list of menu option values."
           },
           {
@@ -822,7 +822,7 @@
             "name": "data",
             "default_property": true,
             "required": true,
-            "type": "any",
+            "type": "Any",
             "doc": "The data to be represented in this table."
           },
           {
@@ -965,7 +965,7 @@
           {
             "name": "on_edit",
             "type": "Callback",
-            "doc": "The name of a function that is to be triggered when a cell edition is validated.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value as entered by the user.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot edit cells.",
+            "doc": "The name of a function that is to be triggered when a cell edition is validated.<br/>\nAll parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (Any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value as entered by the user.</li>\n</ul>\n</li>\n</ul>\nIf this property is not set, the user cannot edit cells.",
             "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
@@ -1221,12 +1221,12 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(any)",
+            "type": "dynamic(Any)",
             "doc": "Bound to the selection value."
           },
           {
             "name": "lov",
-            "type": "dict[str, any]",
+            "type": "dict[str, Any]",
             "doc": "The list of values. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
           },
           {
@@ -1257,7 +1257,7 @@
           {
             "name": "on_change",
             "type": "Callback",
-            "doc": "The name of a function that is triggered when the value is updated.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>",
+            "doc": "The name of a function that is triggered when the value is updated.<br/>\nThe parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (Any): the new value.</li>\n</ul>",
             "signature": [["state", "State"], ["var_name", "str"], ["value", ""]]
           }
         ]
@@ -1333,7 +1333,7 @@
           },
           {
             "name": "properties",
-            "type": "dict[str, any]",
+            "type": "dict[str, Any]",
             "doc": "Bound to a dictionary that contains additional properties for this element."
           },
           {
