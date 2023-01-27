@@ -8,12 +8,12 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 import json
+import os
 
 
 def _get_version():
-    with open("version.json") as version_file:
+    with open(f"src{os.sep}taipy{os.sep}core{os.sep}version.json") as version_file:
         version = json.load(version_file)
         version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
         if vext := version.get("ext"):
