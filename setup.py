@@ -8,19 +8,26 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+import json
+import os
 
 from setuptools import find_namespace_packages, find_packages, setup
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
+with open(f"src{os.sep}taipy{os.sep}rest{os.sep}version.json") as version_file:
+    version = json.load(version_file)
+    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+    if vext := version.get("ext"):
+        version_string = f"{version_string}.{vext}"
 
 setup(
     author="Avaiga",
     name="taipy-rest",
     keywords="taipy-rest",
     python_requires=">=3.8",
-    version="2.1.0.dev",
+    version=version_string,
     author_email="dev@taipy.io",
     packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.rest"]),
     package_dir={"": "src"},

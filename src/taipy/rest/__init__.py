@@ -22,3 +22,6 @@ Please refer to [REST API](../../reference_rest/) page to get the exhaustive lis
 
 
 from .rest import Rest
+from .version import _get_version
+
+__version__ = _get_version()
