@@ -64,6 +64,7 @@ setup(
     name="taipy",
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src") + find_packages(include=["taipy"]),
+    include_package_data=True,
     test_suite="tests",
     url="https://github.com/avaiga/taipy",
     version=version_string,
