@@ -29,6 +29,9 @@ from .config import Config
 from .global_app.global_app_config import GlobalAppConfig
 from .common.scope import Scope
 from .common.frequency import Frequency
+from .version import _get_version
+
+__version__ = _get_version()
 
 
 def _config_doc(func):
