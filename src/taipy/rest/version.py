@@ -9,17 +9,14 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from marshmallow import Schema, fields
+import json
+import os
 
 
-class CycleSchema(Schema):
-    name = fields.String()
-    frequency = fields.String()
-    properties = fields.Dict()
-    creation_date = fields.String()
-    start_date = fields.String()
-    end_date = fields.String()
-
-
-class CycleResponseSchema(CycleSchema):
-    id = fields.String()
+def _get_version():
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}version.json") as version_file:
+        version = json.load(version_file)
+        version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+        if vext := version.get("ext"):
+            version_string = f"{version_string}.{vext}"
+    return version_string
