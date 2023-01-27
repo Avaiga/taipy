@@ -10,9 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 from importlib.util import find_spec
-from .version import _get_version
-
-__version__ = _get_version()
 
 if find_spec('taipy'):
     if find_spec("taipy.config"):

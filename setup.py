@@ -13,18 +13,10 @@
 
 """The setup script."""
 
-import json
-import os
 from setuptools import find_packages, find_namespace_packages, setup
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
-
-with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
-    version = json.load(version_file)
-    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
-    if vext := version.get("ext"):
-        version_string = f"{version_string}.{vext}"
 
 requirements = [
     "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
@@ -66,7 +58,7 @@ setup(
     packages=find_namespace_packages(where="src") + find_packages(include=["taipy"]),
     test_suite="tests",
     url="https://github.com/avaiga/taipy",
-    version=version_string,
+    version="2.1.0.dev",
     zip_safe=False,
     extras_require=extras_require,
 )
