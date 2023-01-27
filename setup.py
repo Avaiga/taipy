@@ -31,6 +31,7 @@ setup(
     author_email="dev@taipy.io",
     packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.rest"]),
     package_dir={"": "src"},
+    include_package_data=True,
     long_description=readme,
     long_description_content_type="text/markdown",
     description="Library to expose taipy-core REST APIs.",
