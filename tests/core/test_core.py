@@ -17,10 +17,15 @@ from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.config.exceptions.exceptions import ConfigurationIssueError, ConfigurationUpdateBlocked
 
 
 class TestCore:
+    def test_run_core_trigger_config_check(self):
+        Config.configure_data_node(id="d0", storage_type="toto")
+        with pytest.raises(ConfigurationIssueError):
+            Core().run()
+
     def test_run_core_as_a_service_development_mode(self):
         _SchedulerFactory._dispatcher = None
 

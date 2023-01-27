@@ -36,22 +36,19 @@ class Core:
         """
         Initialize a Core service.
         """
+        _VersioningCLI._create_parser()
+        self.cli_args = _VersioningCLI._parse_arguments()
         self._scheduler = _SchedulerFactory._build_scheduler()
 
     def run(self, force_restart=False):
         """
-        Start a Core service. This method is blocking.
+        Start a Core service.
+
+        This function check the configuration, start a dispatcher and lock the Config.
         """
-        _VersioningCLI._create_parser()
-        cli_args = _VersioningCLI._parse_arguments()
-
-        self.__setup_versioning_module(*cli_args)
-
-        if dispatcher := _SchedulerFactory._build_dispatcher(force_restart=force_restart):
-            self._dispatcher = dispatcher
-
-        if Config.job_config.is_development:
-            _Scheduler._check_and_execute_jobs_if_development_mode()
+        self.__check_config()
+        self.__manage_version(*self.cli_args)
+        self.__start_dispatcher(force_restart)
 
     def stop(self):
         """
@@ -65,7 +62,11 @@ class Core:
             self._dispatcher = _SchedulerFactory._remove_dispatcher()
             _TaipyLogger._get_logger().info("Core service has been stopped.")
 
-    def __setup_versioning_module(self, mode, _version_number, force, clean_entities):
+    def __check_config(self):
+        Config.check()
+        Config.block_update()
+
+    def __manage_version(self, mode, _version_number, force, clean_entities):
         if mode == "development":
             current_version_number = _VersionManagerFactory._build_manager()._get_development_version()
 
@@ -101,3 +102,10 @@ class Core:
 
         else:
             raise SystemExit(f"Undefined execution mode: {mode}.")
+
+    def __start_dispatcher(self, force_restart):
+        if dispatcher := _SchedulerFactory._build_dispatcher(force_restart=force_restart):
+            self._dispatcher = dispatcher
+
+        if Config.job_config.is_development:
+            _Scheduler._check_and_execute_jobs_if_development_mode()
