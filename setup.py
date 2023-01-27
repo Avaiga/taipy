@@ -15,6 +15,8 @@
 
 from setuptools import find_namespace_packages, find_packages, setup
 
+from src.taipy.core.version import _get_version
+
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
@@ -64,7 +66,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
-    version="2.1.0.dev",
+    version=_get_version(),
     zip_safe=False,
     extras_require=extras_require,
 )

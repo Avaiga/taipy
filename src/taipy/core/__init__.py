@@ -82,3 +82,6 @@ from .taipy import (
     untag,
 )
 from .task.task import Task
+from .version import _get_version
+
+__version__ = _get_version()

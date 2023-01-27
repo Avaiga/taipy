@@ -24,7 +24,17 @@ jobs:
 
       - name: Ensure package version is properly set
         run: |
-          echo 'version="${{ github.event.inputs.version }}"' | grep -f - setup.py
+          echo """
+          import json, sys, os
+          with open(f\"src{os.sep}taipy{os.sep}gui{os.sep}version.json\") as version_file:
+            version_o = json.load(version_file)
+          version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
+          if vext := version_o.get(\"ext\"):
+            version = f'{version}.{vext}'
+          if version != sys.argv[1]:
+            raise ValueError(f\"Invalid version {version} / {sys.argv[1]}\")
+          """ > /tmp/check1.py
+          python /tmp/check1.py "${{ github.event.inputs.version }}"
 
       - name: Validate branch name
         run: |
