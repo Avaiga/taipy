@@ -33,6 +33,7 @@ class Task(_Entity):
 
     Attributes:
         config_id (str): The identifier of the `TaskConfig^`.
+        properties (dict[str, Any]): A dictionary of additional properties.
         function (callable): The python function to execute. The _function_ must take as parameter the
             data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
         input (Union[DataNode^, List[DataNode^]]): The list of inputs.
@@ -42,6 +43,9 @@ class Task(_Entity):
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent pipelines.
         version (str): The string indicates the application version of the task to instantiate. If not provided, the
             latest version is used.
+        skippable (bool): If True, indicates that the task can be skipped if no change has been made on inputs. The
+            default value is _False_.
+
     """
 
     _ID_PREFIX = "TASK"
@@ -89,22 +93,18 @@ class Task(_Entity):
 
     @property  # type: ignore
     def parent_id(self):
-        """
-        Deprecated. Use owner_id instead.
-        """
+        """Deprecated. Use owner_id instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
         return self.owner_id
 
     @parent_id.setter  # type: ignore
     def parent_id(self, val):
-        """
-        Deprecated. Use owner_id instead.
-        """
+        """Deprecated. Use owner_id instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
         self.owner_id = val
 
     def get_parents(self):
-        """Get parents of the task entity"""
+        """Get parents of the task."""
         from ... import core as tp
 
         return tp.get_parents(self)

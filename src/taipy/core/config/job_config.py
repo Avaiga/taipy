@@ -25,8 +25,8 @@ class JobConfig(UniqueSection):
     Configuration fields related to the jobs' executions.
 
     Parameters:
-        mode (str): The Taipy operating mode. By default, the "standalone" mode is set. A "development" mode is also
-            available for testing and debugging the executions of jobs.
+        mode (str): The Taipy operating mode. By default, the "development" mode is set for testing and debugging the
+            executions of jobs. A "standalone" mode is also available.
         **properties (dict[str, Any]): A dictionary of additional properties.
     """
 

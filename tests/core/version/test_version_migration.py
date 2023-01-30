@@ -17,7 +17,7 @@ from unittest.mock import patch
 from src.taipy.core import Core, taipy
 from src.taipy.core._repository import _CustomDecoder
 from src.taipy.core._version._version_manager import _VersionManager
-from taipy import Config, Frequency
+from taipy.config import Config, Frequency
 
 
 def test_experiment_mode_converts_old_entities_to_latest_version():

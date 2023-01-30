@@ -12,7 +12,7 @@
 import os
 from unittest import mock
 
-from taipy import Scope
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
