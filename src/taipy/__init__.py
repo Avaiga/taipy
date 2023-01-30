@@ -11,7 +11,7 @@
 
 from importlib.util import find_spec
 
-if find_spec("taipy"):
+if find_spec('taipy'):
     if find_spec("taipy.config"):
         from taipy.config import Config
         from taipy.config import Scope
@@ -21,6 +21,7 @@ if find_spec("taipy"):
         from taipy.core.taipy import (
             cancel_job,
             clean_all_entities,
+            clean_all_entities_by_version,
             compare_scenarios,
             create_pipeline,
             create_scenario,
@@ -59,16 +60,16 @@ if find_spec("taipy"):
         from taipy.core.scenario.scenario import Scenario
         from taipy.core.task.task import Task
 
-    if find_spec("taipy.gui"):
+    if find_spec('taipy.gui'):
         from taipy.gui import Gui
 
-        if find_spec("taipy.enterprise") and find_spec("taipy.enterprise.gui"):
+        if find_spec('taipy.enterprise') and find_spec('taipy.enterprise.gui'):
             from taipy.enterprise.gui import _init_gui_enterprise
 
             _init_gui_enterprise(Gui)
 
-    if find_spec("taipy.rest"):
+    if find_spec('taipy.rest'):
         from taipy.rest import Rest
 
-    if find_spec("taipy._run"):
+    if find_spec('taipy._run'):
         from taipy._run import _run as run
