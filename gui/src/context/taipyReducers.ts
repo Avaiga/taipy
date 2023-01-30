@@ -323,7 +323,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return { ...state, locations: action.payload.value as Record<string, string> };
         case Types.SetAlert:
             const alertAction = action as unknown as TaipyAlertAction;
-            if (alertAction.atype) {
+            if (alertAction) {
                 return {
                     ...state,
                     alert: {
@@ -673,8 +673,8 @@ export const createTimeZoneAction = (timeZone: string, fromBackend = false): Tai
 });
 
 const getAlertType = (aType: string) => {
-    aType = aType.trim() || "i";
-    aType = aType.substr(0, 1).toLowerCase();
+    aType = aType.trim();
+    aType = aType && aType.charAt(0).toLowerCase();
     switch (aType) {
         case "e":
             return "error";
@@ -682,9 +682,10 @@ const getAlertType = (aType: string) => {
             return "warning";
         case "s":
             return "success";
-        default:
+        case "i":
             return "info";
     }
+    return aType;
 };
 
 export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({

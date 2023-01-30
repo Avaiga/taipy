@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { SnackbarKey, useSnackbar, VariantType } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -24,6 +24,7 @@ interface AlertProps {
 
 const Alert = (props: AlertProps) => {
     const { alert } = props;
+    const lastKey = useRef<SnackbarKey>("");
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     const resetAlert = useCallback(
@@ -54,14 +55,21 @@ const Alert = (props: AlertProps) => {
 
     useEffect(() => {
         if (alert) {
-            enqueueSnackbar(alert.message, {
-                variant: alert.atype as VariantType,
-                action: notifAction,
-                autoHideDuration: alert.duration,
-            });
-            alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
+            if (alert.atype === "") {
+                if (lastKey.current) {
+                    closeSnackbar(lastKey.current);
+                    lastKey.current = "";
+                }
+            } else {
+                lastKey.current = enqueueSnackbar(alert.message, {
+                    variant: alert.atype as VariantType,
+                    action: notifAction,
+                    autoHideDuration: alert.duration,
+                });
+                alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
+            }
         }
-    }, [alert, enqueueSnackbar, notifAction, faviconUrl]);
+    }, [alert, enqueueSnackbar, closeSnackbar, notifAction, faviconUrl]);
 
     useEffect(() => {
         alert?.system && window.Notification && Notification.requestPermission();

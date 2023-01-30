@@ -736,9 +736,15 @@
       "navbar",
       {
         "inherits": [
-          "lovComp",
-          "active",
-          "shared"
+            "active",
+            "shared"
+          ],
+          "properties": [
+            {
+                "name": "lov",
+                "type": "dict[str, Any]",
+                "doc": "The list of pages. The keys should be page id and start with \"/\", the values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+            }
         ]
       }
     ],
