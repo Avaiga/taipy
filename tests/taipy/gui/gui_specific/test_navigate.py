@@ -52,3 +52,36 @@ def test_navigate_to_no_route(gui: Gui, helpers):
         ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "navigate_to"})
         # assert for received message (message that would be sent to the frontend client)
         assert not ws_client.get_received()
+
+
+def test_on_navigate_to_inexistant(gui: Gui, helpers):
+    def on_navigate(state: State, page: str):
+        return "test2" if page == "test" else page
+
+    with warnings.catch_warnings(record=True) as records:
+        gui._set_frame(inspect.currentframe())
+        gui.add_page("test", Markdown("#This is a page"))
+        gui.run(run_server=False)
+        client = gui._server.test_client()
+        # Get the jsx once so that the page will be evaluated -> variable will be registered
+        sid = helpers.create_scope_and_get_sid(gui)
+        client.get(f"/taipy-jsx/test?client_id={sid}")
+        assert len(records) == 1
+        text = records[0].message.args[0] if isinstance(records[0].message, Warning) else records[0].message
+        assert text == 'Cannot navigate to "test2": unknown page.'
+
+
+def test_on_navigate_to_existant(gui: Gui, helpers):
+    def on_navigate(state: State, page: str):
+        return "test2" if page == "test1" else page
+
+    with warnings.catch_warnings(record=True):
+        gui._set_frame(inspect.currentframe())
+        gui.add_page("test1", Markdown("#This is a page test1"))
+        gui.add_page("test2", Markdown("#This is a page test2"))
+        gui.run(run_server=False)
+        client = gui._server.test_client()
+        # Get the jsx once so that the page will be evaluated -> variable will be registered
+        sid = helpers.create_scope_and_get_sid(gui)
+        content = client.get(f"/taipy-jsx/test1?client_id={sid}")
+        assert content.status_code == 302

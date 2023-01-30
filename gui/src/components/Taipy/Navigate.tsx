@@ -21,7 +21,7 @@ interface NavigateProps {
 }
 
 const Navigate = ({ to }: NavigateProps) => {
-    const { dispatch} =useContext(TaipyContext);
+    const { dispatch} = useContext(TaipyContext);
 
     useEffect(() => {
         to && dispatch(createNavigateAction())

@@ -1331,8 +1331,9 @@ class Gui:
         to = to or Gui.__root_page_name
         if to not in self._config.routes:
             warnings.warn(f'Cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
-            return
+            return False
         self.__send_ws_navigate(to)
+        return True
 
     def __init_route(self):
         self.__set_client_id_in_context()
@@ -1369,8 +1370,12 @@ class Gui:
         if hasattr(self, "on_navigate") and callable(self.on_navigate):
             try:
                 nav_page = self.on_navigate(self.__get_state(), page_name)
-                if not isinstance(nav_page, str):
-                    warnings.warn(f"on_navigate() returned a invalid page name '{nav_page}'.")
+                if nav_page != page_name:
+                    if isinstance(nav_page, str):
+                        if self._navigate(nav_page):
+                            return ("Root page cannot be re-routed by on_navigate().", 302)
+                    else:
+                        warnings.warn(f"on_navigate() returned an invalid page name '{nav_page}'.")
                     nav_page = page_name
             except Exception as e:
                 if not self._call_on_exception("on_navigate", e):
@@ -1565,14 +1570,18 @@ class Gui:
         ]
         self._flask_blueprint.append(extension_bp)
 
-        _conf_webapp_path = pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
+        _conf_webapp_path = (
+            pathlib.Path(self._get_config("webapp_path", None)) if self._get_config("webapp_path", None) else None
+        )
         _webapp_path = str((pathlib.Path(__file__).parent / "webapp").resolve())
         if _conf_webapp_path:
             if _conf_webapp_path.is_dir():
                 _webapp_path = str(_conf_webapp_path.resolve())
                 warnings.warn(f"Now using webapp_path: '{_conf_webapp_path}'.")
             else:
-                warnings.warn(f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'.")
+                warnings.warn(
+                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."
+                )
 
         self._flask_blueprint.append(
             self._server._get_default_blueprint(

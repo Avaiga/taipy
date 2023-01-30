@@ -87,7 +87,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 }
                 dispatch(createModuleContextAction(result.data.context));
             })
-            .catch((error) => setJSX(`<h1>No data fetched from backend from ${path}</h1><br></br>${error}`));
+            .catch((error) => setJSX(`<h1>${error.response?.data || `No data fetched from backend from ${path === "/TaiPy_root_page" ? "/" : path}`}</h1><br></br>${error}`));
         }
     }, [path, state.id, dispatch, partial, fromBlock]);
 
