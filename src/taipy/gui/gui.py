@@ -1373,9 +1373,9 @@ class Gui:
                 if nav_page != page_name:
                     if isinstance(nav_page, str):
                         if self._navigate(nav_page):
-                            return ("Root page cannot be re-routed by on_navigate", 302)
+                            return ("Root page cannot be re-routed by on_navigate().", 302)
                     else:
-                        warnings.warn(f"on_navigate() returned a invalid page name '{nav_page}'.")
+                        warnings.warn(f"on_navigate() returned an invalid page name '{nav_page}'.")
                     nav_page = page_name
             except Exception as e:
                 if not self._call_on_exception("on_navigate", e):

@@ -674,16 +674,18 @@ export const createTimeZoneAction = (timeZone: string, fromBackend = false): Tai
 
 const getAlertType = (aType: string) => {
     aType = aType.trim();
-    aType = aType && aType.charAt(0).toLowerCase();
-    switch (aType) {
-        case "e":
-            return "error";
-        case "w":
-            return "warning";
-        case "s":
-            return "success";
-        case "i":
-            return "info";
+    if (aType) {
+        aType = aType.charAt(0).toLowerCase();
+        switch (aType) {
+            case "e":
+                return "error";
+            case "w":
+                return "warning";
+            case "s":
+                return "success";
+            default:
+                return "info";
+        }
     }
     return aType;
 };
