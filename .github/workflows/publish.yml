@@ -26,7 +26,7 @@ jobs:
         run: |
           echo """
           import json, sys, os
-          with open(f\"src{os.sep}taipy{os.sep}config{os.sep}version.json\") as version_file:
+          with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
               version_o = json.load(version_file)
           version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
           if vext := version_o.get(\"ext\"):
@@ -39,13 +39,11 @@ jobs:
       - name: Validate branch name
         run: |
           echo """
-          import re, sys
-          setup = open('setup.py').read()
-          x = re.search(r'version=\"(\d+)\.(\d+)\.(\d+)(?:\.([a-zA-Z0-9_]+))?\"', setup)
-          if not x:
-              raise ValueError('Invalid version expression')
-          if f'release/{x.group(1)}.{x.group(2)}' != sys.argv[1]:
-              raise ValueError('Branch name mismatch')
+          import json, sys, os
+          with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
+              version = json.load(version_file)
+          if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
+              raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
           """ > /tmp/check.py
           python /tmp/check.py "${{ steps.extract_branch.outputs.branch }}"
 
