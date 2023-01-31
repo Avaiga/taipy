@@ -22,17 +22,26 @@ if t.TYPE_CHECKING:
 
 
 class Decimator(ABC):
-    """Decimate chart data.
-
-    TODO
+    """Base class for decimating chart data.
+    
+    *Decimating* is the term used to name the process of reducing the number of
+    data points displayed in charts while retaining the overall shape of the traces.
+    `Decimator` is a base class that does decimation on data sets.
+    
+    Taipy GUI comes out-of-the-box with several implementation of this class for
+    different use cases.
     """
 
     _CHART_MODES: t.List[str] = []
 
     def __init__(self, threshold: t.Optional[int], zoom: t.Optional[bool]) -> None:
-        """Initialize a new Decimator.
+        """Initialize a new `Decimator`.
 
-        TODO
+        Arguments:
+            threshold (Optional[int]): The minimum amount of data points before the
+                decimator class is applied.
+            zoom (Optional[bool]): set to True to reapply the decimation
+                when zoom or re-layout events are triggered.
         """
         super().__init__()
         self.threshold = threshold
@@ -51,16 +60,23 @@ class Decimator(ABC):
 
     @abstractmethod
     def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
-        """Decimate function for decimator.
+        """Decimate function.
 
-        This function is executed when the appropriate conditions are met.
-        TODO: Further explanation
+        This method is executed when the appropriate conditions specified in the
+        constructor are met. This function implements the algorithm that determines
+        which data points are kept or dropped.
 
         Arguments:
-            data (numpy.array): A 2-dimensional array....
+            data (numpy.array): An array containing all the data points represented as
+                tuples.
+            payload (Dict[str, any]): additional information on charts that is provided
+                at runtime.
 
         Returns:
-            A Boolean mask array for the original data.
+            An array of Boolean mask values. The array should set True or False for each
+                of its indexes where True indicates that the corresponding data point
+                from *data* should be preserved, or False requires that this
+                data point be dropped.
         """
         return NotImplementedError  # type: ignore
 

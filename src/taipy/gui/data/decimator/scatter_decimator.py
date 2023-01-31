@@ -17,16 +17,37 @@ from ..utils import Decimator
 
 
 class ScatterDecimator(Decimator):
+    """A decimator designed for scatter charts.
+    
+    This algorithm fits the data points into a grid. If multiple points are in the same grid
+    cell, depending on the chart configuration, some points are removed to reduce the number
+    points being displayed.
+
+    This class can only be used with scatter charts.
+    """
 
     _CHART_MODES = ["markers"]
 
     def __init__(
         self,
         binning_ratio: t.Optional[float] = None,
-        max_overlap_points: t.Optional[np.uint8] = None,
+        max_overlap_points: t.Optional[int] = None,
         threshold: t.Optional[int] = None,
         zoom: t.Optional[bool] = True,
     ):
+        """Initialize a new `ScatterDecimator`.
+
+        Arguments:
+            binning_ratio (Optional[float]): the size of the data grid for the algorithm.
+                The higher the value, the smaller the grid size.
+            max_overlap_points (Optional(int)): the maximum number of points for a single cell
+                within the data grid within the algorithm. This dictates how dense a single
+                grid cell can be.
+            threshold (Optional[int]): The minimum amount of data points before the
+                decimation is applied.
+            zoom (Optional[bool]): set to True to reapply the decimation
+                when zoom or re-layout events are triggered.
+        """
         super().__init__(threshold, zoom)
         binning_ratio = binning_ratio if binning_ratio is not None else 1
         self._binning_ratio = binning_ratio if binning_ratio > 0 else 1
@@ -57,7 +78,7 @@ class ScatterDecimator(Decimator):
             min_z, max_z = np.amin(z_col), np.amax(z_col)
             min_max_z_diff = max_z - min_z
             z_grid_map = np.rint((z_col - min_z) * grid_z / min_max_z_diff).astype(int)
-        grid = np.empty(grid_shape, dtype=np.uint8)
+        grid = np.empty(grid_shape, dtype=int)
         grid.fill(0)
         if z_grid_map is not None:
             for i in np.arange(n_rows):
