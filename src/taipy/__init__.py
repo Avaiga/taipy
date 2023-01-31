@@ -24,7 +24,6 @@ if find_spec("taipy"):
         from taipy.core.job.status import Status
         from taipy.core.pipeline.pipeline import Pipeline
         from taipy.core.scenario.scenario import Scenario
-        from taipy.core.task.task import Task
         from taipy.core.taipy import (
             cancel_job,
             clean_all_entities,
@@ -57,6 +56,7 @@ if find_spec("taipy"):
             unsubscribe_scenario,
             untag,
         )
+        from taipy.core.task.task import Task
 
     if find_spec("taipy.gui"):
         from taipy.gui import Gui
