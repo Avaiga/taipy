@@ -40,7 +40,7 @@ jobs:
         run: |
           echo """
           import json, sys, os
-          with open(f\"src{os.sep}taipy{os.sep}gui{os.sep}version.json\") as version_file:
+          with open(f\"src{os.sep}taipy{os.sep}config{os.sep}version.json\") as version_file:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
               raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
