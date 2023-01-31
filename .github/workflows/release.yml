@@ -49,7 +49,7 @@ jobs:
           with open(f\"src{os.sep}taipy{os.sep}gui{os.sep}version.json\") as version_file:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
-              raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}'')
+              raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
           """ > /tmp/check.py
           python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
 
