@@ -27,8 +27,8 @@ with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
-    "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
-    "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
+    "taipy-gui>=2.1,<2.2",
+    "taipy-rest>=2.1,<2.2",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -55,7 +55,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    description="A 360° open-source platform from Python pilots to production-ready web apps.",
+    description="The Python application builder. Turns Data and AI algorithms into full web apps in no time.",
     install_requires=requirements,
     license="Apache License 2.0",
     long_description=readme,
