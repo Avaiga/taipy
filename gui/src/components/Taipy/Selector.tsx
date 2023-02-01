@@ -15,6 +15,7 @@ import React, { useState, useContext, useCallback, useEffect, useMemo, CSSProper
 import { Theme, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
+import FormLabel from "@mui/material/FormLabel";
 import InputLabel from "@mui/material/InputLabel";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -22,7 +23,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import Avatar from "@mui/material/Avatar";
 import MenuItem from "@mui/material/MenuItem";
@@ -35,7 +35,6 @@ import { doNotPropagateEvent, getUpdateVar } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import {
-    boxSx,
     ItemProps,
     LovImage,
     paperBaseSx,
@@ -115,10 +114,16 @@ const Selector = (props: SelTreeProps) => {
 
     const lovList = useLovListMemo(lov, defaultLov);
     const listSx = useMemo(() => ({ ...treeSelBaseSx, maxWidth: width }), [width]);
-    const paperSx = useMemo(
-        () => (height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height }),
-        [height]
-    );
+    const paperSx = useMemo(() => {
+        let sx = paperBaseSx;
+        if (height !== undefined) {
+            sx = { ...sx, maxHeight: height };
+        }
+        if (width !== undefined) {
+            // sx = { ...sx, maxWidth: width };
+        }
+        return sx;
+    }, [height, width]);
     const controlSx = useMemo(() => ({ m: 1, width: width }), [width]);
 
     useEffect(() => {
@@ -278,20 +283,21 @@ const Selector = (props: SelTreeProps) => {
             </Tooltip>
         </FormControl>
     ) : (
-        <Box id={id} sx={boxSx} className={className}>
+        <FormControl id={id} sx={controlSx} className={className}>
+            {props.label ? <FormLabel>{props.label}</FormLabel> : null}
             <Tooltip title={hover || ""}>
                 <Paper sx={paperSx}>
-                    <Box>
-                        {filter && (
-                            <TextField
+                    {filter && (
+                        <Box>
+                            <OutlinedInput
                                 margin="dense"
                                 placeholder="Search field"
                                 value={searchValue}
                                 onChange={handleInput}
                                 disabled={!active}
                             />
-                        )}
-                    </Box>
+                        </Box>
+                    )}
                     <List sx={listSx}>
                         {lovList
                             .filter((elt) => showItem(elt, searchValue))
@@ -319,7 +325,7 @@ const Selector = (props: SelTreeProps) => {
                     </List>
                 </Paper>
             </Tooltip>
-        </Box>
+        </FormControl>
     );
 };
 
