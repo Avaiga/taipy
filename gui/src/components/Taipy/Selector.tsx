@@ -283,7 +283,7 @@ const Selector = (props: SelTreeProps) => {
             </Tooltip>
         </FormControl>
     ) : (
-        <FormControl sx={controlSx} className={className}>
+        <FormControl id={id} sx={controlSx} className={className}>
             {props.label ? <FormLabel>{props.label}</FormLabel> : null}
             <Tooltip title={hover || ""}>
                 <Paper sx={paperSx}>
@@ -298,7 +298,7 @@ const Selector = (props: SelTreeProps) => {
                             />
                         </Box>
                     )}
-                    <List id={id} sx={listSx}>
+                    <List sx={listSx}>
                         {lovList
                             .filter((elt) => showItem(elt, searchValue))
                             .map((elt) =>
