@@ -13,16 +13,8 @@ from taipy.config.common._argparser import _Argparser
 
 from ..exceptions.exceptions import VersionIsNotProductionVersion
 from ..taipy import clean_all_entities_by_version
+from ._bcolor import _Bcolors
 from ._version_manager_factory import _VersionManagerFactory
-
-
-class bcolors:
-    PURPLE = "\033[95m"
-    BLUE = "\033[94m"
-    CYAN = "\033[96m"
-    GREEN = "\033[92m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
 
 
 class _VersioningCLI:
@@ -109,24 +101,30 @@ class _VersioningCLI:
             versions = _VersionManagerFactory._build_manager()._get_all()
             versions.sort(key=lambda x: x.creation_date, reverse=True)
 
+            bold = False
             for version in versions:
                 if version.id == development_version_number:
-                    list_version_message += bcolors.GREEN
+                    list_version_message += _Bcolors.GREEN
                     mode = "Development"
                 elif version.id in production_version_numbers:
-                    list_version_message += bcolors.PURPLE
+                    list_version_message += _Bcolors.PURPLE
                     mode = "Production"
                 else:
-                    list_version_message += bcolors.BLUE
+                    list_version_message += _Bcolors.BLUE
                     mode = "Experiment"
 
                 if version.id == latest_version_number:
-                    list_version_message += bcolors.BOLD
+                    list_version_message += _Bcolors.BOLD
+                    bold = True
                     mode += " (latest)"
 
                 list_version_message += (
                     f"{(version.id):<36}   {mode:<20}   {version.creation_date.strftime('%Y-%m-%d %H:%M:%S'):<20}\n"
                 )
+                list_version_message += _Bcolors.END
+
+                if bold:
+                    list_version_message += _Bcolors.END
 
             raise SystemExit(list_version_message)
 
