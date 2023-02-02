@@ -51,7 +51,7 @@ class _VersionManager(_Manager[_Version]):
             config_diff = _ConfigComparator(version.config, Config._applied_config)
             if config_diff["added_items"] or config_diff["removed_items"] or config_diff["modified_items"]:
                 _TaipyLogger._get_logger().warning(
-                    f"The Configuration of version {id} is conflict with the current Python Config."
+                    f"The Configuration of version {id} is conflicted with the current Python Config."
                 )
 
                 if force:
@@ -133,7 +133,8 @@ class _VersionManager(_Manager[_Version]):
                 config_diff = _ConfigComparator(version.config, Config._applied_config)
                 if config_diff["added_items"] or config_diff["removed_items"] or config_diff["modified_items"]:
                     _TaipyLogger._get_logger().error(
-                        f"The Configuration of version {production_version} is conflict with the current Python Config."
+                        f"The Configuration of version {production_version} is conflicted with the current Python"
+                        " Config."
                     )
                     raise VersionConflictWithPythonConfig(config_diff)
             else:

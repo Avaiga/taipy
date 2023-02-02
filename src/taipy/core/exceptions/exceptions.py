@@ -241,7 +241,7 @@ class InvalidExportPath(Exception):
 
 
 class VersionConflictWithPythonConfig(Exception):
-    """Raised if the Config of the requested version is conflict with the current Python Config."""
+    """Raised if the Config of the requested version is conflicted with the current Python Config."""
 
     def __init__(self, config_diff):
         message = ""
