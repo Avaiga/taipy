@@ -2,7 +2,7 @@
 name: Feature improvement
 about: Feature improvements add extra functionality to an existing feature.
 title: ''
-labels: enhancement
+labels: "\U0001F4C8 Improvement"
 assignees: ''
 
 ---
