@@ -100,7 +100,7 @@
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-tsdoc": "^0.2.16",
-    "eslint-webpack-plugin": "^3.1.0",
+    "eslint-webpack-plugin": "^4.0.0",
     "generate-json-webpack-plugin": "^2.0.0",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^8.0.1",
