@@ -305,7 +305,7 @@ class DataNodeConfig(Section):
         """Configure a new data node configuration.
         Parameters:
             id (str): The unique identifier of the new data node configuration.
-            storage_type (str or None): The data node configuration storage type. The possible values
+            storage_type (Optional[str]): The data node configuration storage type. The possible values
                 are _None_ (which is the default value of _"pickle"_, unless it has been overloaded by the
                 _storage_type_ value set in the default data node configuration
                 (see `(Config.)configure_default_data_node()^`)), _"pickle"_, _"csv"_, _"excel"_, _"sql_table"_,
