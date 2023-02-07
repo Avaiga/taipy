@@ -12,7 +12,9 @@
 import os
 from typing import Dict, Iterable, Optional, Set, Union
 
+from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
+from taipy.config.config import Config
 
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
@@ -75,7 +77,13 @@ class _DataManager(_Manager[DataNode]):
             version = _VersionManagerFactory._build_manager()._get_latest_version()
             props = data_node_config._properties.copy()
             validity_period = props.pop("validity_period", None)
-            return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
+
+            if data_node_config.storage_type:
+                storage_type = data_node_config.storage_type
+            else:
+                storage_type = Config.sections[DataNodeConfig.name][_Config.DEFAULT_KEY].storage_type
+
+            return cls.__DATA_NODE_CLASS_MAP[storage_type](  # type: ignore
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 owner_id=owner_id,
