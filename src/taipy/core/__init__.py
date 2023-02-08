@@ -42,7 +42,7 @@ import json
 import os
 
 from ._core import Core
-from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
+from .common.alias import CycleId, DataNodeId, Edit, JobId, PipelineId, ScenarioId, TaskId
 from .common.default_custom_document import DefaultCustomDocument
 from .cycle.cycle import Cycle
 from .data.data_node import DataNode

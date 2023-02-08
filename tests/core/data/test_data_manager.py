@@ -23,6 +23,7 @@ from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def file_exists(file_path: str) -> bool:
@@ -451,3 +452,77 @@ class TestDataManager:
 
         _DataManager._delete_all()
         assert not file_exists(generated_pickle_dn_3.path)
+
+    def test_create_dn_from_loaded_config_no_storage_type(self):
+        file_config = NamedTemporaryFile(
+            """
+            [TAIPY]
+
+            [DATA_NODE.input]
+            scope = "SCENARIO:SCOPE"
+            default_data = "21:int"
+
+            [DATA_NODE.output]
+            storage_type = "in_memory"
+            scope = "SCENARIO:SCOPE"
+
+            [TASK.double]
+            inputs = [ "input:SECTION",]
+            function = "math.sqrt:function"
+            outputs = [ "output:SECTION",]
+            skippable = "False:bool"
+
+            [PIPELINE.my_pipeline]
+            tasks = [ "double:SECTION",]
+
+            [SCENARIO.my_scenario]
+            pipelines = [ "my_pipeline:SECTION",]
+
+            [SCENARIO.my_scenario.comparators]
+            """
+        )
+        from src.taipy import core as tp
+
+        Config.load(file_config.filename)
+        scenario = tp.create_scenario(Config.scenarios["my_scenario"])
+
+        assert isinstance(scenario.input, PickleDataNode)
+        assert isinstance(scenario.output, InMemoryDataNode)
+
+    def test_create_dn_from_loaded_config_modified_default_config(self):
+        file_config = NamedTemporaryFile(
+            """
+            [TAIPY]
+
+            [DATA_NODE.input]
+            scope = "SCENARIO:SCOPE"
+            default_path="fake/path.csv"
+            default_data = "21:int"
+
+            [DATA_NODE.output]
+            storage_type = "in_memory"
+            scope = "SCENARIO:SCOPE"
+
+            [TASK.double]
+            inputs = [ "input:SECTION",]
+            function = "math.sqrt:function"
+            outputs = [ "output:SECTION",]
+            skippable = "False:bool"
+
+            [PIPELINE.my_pipeline]
+            tasks = [ "double:SECTION",]
+
+            [SCENARIO.my_scenario]
+            pipelines = [ "my_pipeline:SECTION",]
+
+            [SCENARIO.my_scenario.comparators]
+            """
+        )
+        from src.taipy import core as tp
+
+        Config.load(file_config.filename)
+        Config.configure_default_data_node(storage_type="csv")
+        scenario = tp.create_scenario(Config.scenarios["my_scenario"])
+
+        assert isinstance(scenario.input, CSVDataNode)
+        assert isinstance(scenario.output, InMemoryDataNode)
