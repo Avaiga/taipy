@@ -456,15 +456,6 @@ class TestDataManager:
     def test_create_dn_when_config_storage_type_none(self):
 
         file_config = NamedTemporaryFile(
-            # """
-            # [TAIPY]
-            # [DATA_NODE.input]
-            # scope = "SCENARIO:SCOPE"
-            # default_data = "21:int"
-            # [DATA_NODE.output]
-            # scope = "SCENARIO:SCOPE"
-            # """
-            # )
             """
             [TAIPY]
 
