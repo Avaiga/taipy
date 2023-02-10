@@ -109,6 +109,7 @@ class _Config(object):
 
     def __init__(self):
         self.pages: t.List[_Page] = []
+        self.root_page: t.Optional[_Page] = None
         self.routes: t.List[str] = []
         self.partials: t.List[Partial] = []
         self.partial_routes: t.List[str] = []

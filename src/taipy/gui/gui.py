@@ -506,6 +506,14 @@ class Gui:
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
+        # #583: allow module resolution for var_name in current_context root_page context
+        if (
+            module_name
+            and self._config.root_page
+            and self._config.root_page._renderer
+            and self._config.root_page._renderer._get_module_name() == module_name
+        ):
+            return f"{var_name_decode}.{suffix_var_name}" if suffix_var_name else var_name_decode, module_name
         if module_name == current_context:
             var_name = var_name_decode
         else:
@@ -1096,6 +1104,9 @@ class Gui:
         # Append page to _config
         self._config.pages.append(new_page)
         self._config.routes.append(name)
+        # set root page
+        if name == Gui.__root_page_name:
+            self._config.root_page = new_page
         # Update locals context
         self.__locals_context.add(page._get_module_name(), page._get_locals())
         # Update variable directory
