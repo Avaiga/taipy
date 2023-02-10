@@ -2,7 +2,7 @@
 name: New feature
 about: Suggest a new feature for the product
 title: ''
-labels: ''
+labels: "✨New feature"
 assignees: ''
 
 ---
