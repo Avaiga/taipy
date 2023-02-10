@@ -293,57 +293,57 @@
           {
             "name": "lon",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>longitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/#scattergeo-lon)."
+            "doc": "Column name for the <i>longitude</i> value. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lon\">Plotly Map traces</a>."
           },
           {
             "name": "lat",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>latitude</i> value. Cf. [Plotly Map Traces](https://plotly.com/javascript/reference/scattergeo/#scattergeo-lat)."
+            "doc": "Column name for the <i>latitude</i> value. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lat\">Plotly Map traces</a>."
           },
           {
             "name": "r",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>r</i> value. Cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
+            "doc": "Column name for the <i>r</i> value. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
           },
           {
             "name": "theta",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>theta</i> value. Cf. [Ploty Polar Charts](https://plotly.com/javascript/polar-chart/)."
+            "doc": "Column name for the <i>theta</i> value. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
           },
           {
             "name": "high",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>high</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-high)."
+            "doc": "Column name for the <i>high</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-high\">Plotly Candlestick charts</a>."
           },
           {
             "name": "low",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>low</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-low)."
+            "doc": "Column name for the <i>low</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-low\">Ploty Candlestick charts</a>."
           },
           {
             "name": "open",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>open</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-open)."
+            "doc": "Column name for the <i>open</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-open\">Plotly Candlestick charts</a>."
           },
           {
             "name": "close",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>close</i> value. Cf. [Ploty Candlestick](https://plotly.com/javascript/reference/candlestick/#candlestick-close)."
+            "doc": "Column name for the <i>close</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-close\">Plotly Candlestick charts</a>."
           },
           {
             "name": "locations",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>locations</i> value. Cf. [Ploty Choropleth Map](https://plotly.com/javascript/choropleth-maps/)."
+            "doc": "Column name for the <i>locations</i> value. See <a href=\"https://plotly.com/javascript/choropleth-maps/\">Plotly Choropleth maps</a>."
           },
           {
             "name": "values",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>values</i> value. Cf. [Ploty Pie](https://plotly.com/javascript/reference/pie/#pie-values) or [Ploty FunnelArea](https://plotly.com/javascript/reference/funnelarea/#funnelarea-values)."
+            "doc": "Column name for the <i>values</i> value. See <a href=\"https://plotly.com/javascript/reference/pie/#pie-values\">Plotly Pie charts</a> or <a href=\"https://plotly.com/javascript/reference/funnelarea/#funnelarea-values\">Plotly Funnel Area charts</a>."
           },
           {
             "name": "labels",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>labels</i> value. Cf. [Ploty Pie](https://plotly.com/javascript/reference/pie/#pie-labels)."
+            "doc": "Column name for the <i>labels</i> value. See <a href=\"https://plotly.com/javascript/reference/pie/#pie-labels\">Plotly Pie charts</a>."
           },
           {
             "name": "text",
@@ -369,7 +369,7 @@
           {
             "name": "on_range_change",
             "type": "Callback",
-            "doc": "Callback function called when the visible part of the x axis changes.\nThe function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">plotly</a>.</li>\n</ul>",
+            "doc": "Callback function called when the visible part of the x axis changes.\nThe function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
 
           },
@@ -468,17 +468,17 @@
           {
             "name": "template",
             "type": "dict",
-            "doc": "The plotly layout [template](https://plotly.com/javascript/layout-template/)."
+            "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a>."
           },
           {
             "name": "template[dark]",
             "type": "dict",
-            "doc": "The plotly layout template applied over the base template when theme is dark."
+            "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is dark."
           },
           {
             "name": "template[light]",
             "type": "dict",
-            "doc": "The plotly layout template applied over the base template when theme is not dark."
+            "doc": "The Plotly layout <a href=\"https://plotly.com/javascript/layout-template/\">template</a> applied over the base template when theme is not dark."
           },
           {
             "name": "decimator",
@@ -1058,19 +1058,19 @@
             "name": "expanded",
             "type": "dynamic(bool|str[])",
             "default_value": "True",
-            "doc": "if boolean value False: only one node can be expanded at one given level else it should be an array of the ids that need to be expanded"
+            "doc": "If Boolean and False, only one node can be expanded at one given level. Otherwise this should be set to an array of the node identifiers that need to be expanded."
           },
           {
             "name": "multiple",
             "type": "bool",
             "default_value": "False",
-            "doc": "If True, the user can select multiple items by holding the Ctrl key while clicking on items."
+            "doc": "If True, the user can select multiple items by holding the <code>Ctrl</code> key while clicking on items."
           },
           {
             "name": "select_leafs_only",
             "type": "bool",
             "default_value": "False",
-            "doc": "If True, the user can only select leaf nodes"
+            "doc": "If True, the user can only select leaf nodes."
           },
           {
             "name": "row_height",
@@ -1311,7 +1311,7 @@
             "name": "change_delay",
             "type": "int",
             "default_value": "<i>App config</i>",
-            "doc": "Minimum time between triggering two <i>on_change</i> calls.\nThe default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300ms."
+            "doc": "Minimum time between triggering two calls to the <i>on_change</i> callback.\nThe default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300 ms."
           },
           {
             "name": "on_action",
