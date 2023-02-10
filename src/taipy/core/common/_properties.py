@@ -13,16 +13,16 @@ from collections import UserDict
 
 
 class _Properties(UserDict):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, entity_owner, **kwargs):
         super().__init__(**kwargs)
-        self.parent = parent
+        self._entity_owner = entity_owner
 
     def __setitem__(self, key, value):
         super(_Properties, self).__setitem__(key, value)
         from ... import core as tp
 
-        if hasattr(self, "parent"):
-            tp.set(self.parent)
+        if hasattr(self, "_entity_owner"):
+            tp.set(self._entity_owner)
 
     def __getitem__(self, key):
         from taipy.config.common._template_handler import _TemplateHandler as _tpl
