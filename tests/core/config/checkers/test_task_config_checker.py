@@ -39,6 +39,24 @@ class TestTaskConfigChecker:
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
+    def test_check_if_entity_property_key_used_is_predefined(self):
+        collector = IssueCollector()
+        config = Config._default_config
+        _TaskConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+        config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
+        config._sections[TaskConfig.name]["new"]._properties["_entity_owner"] = None
+        collector = IssueCollector()
+        _TaskConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 2
+
+        config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
+        config._sections[TaskConfig.name]["new"]._properties["_entity_owner"] = "entity_owner"
+        collector = IssueCollector()
+        _TaskConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 2
+
     def test_check_inputs(self):
         config = Config._default_config
         collector = IssueCollector()

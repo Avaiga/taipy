@@ -26,6 +26,7 @@ class _ScenarioConfigChecker(_ConfigChecker):
         scenario_configs = self._config._sections[ScenarioConfig.name]
         for scenario_config_id, scenario_config in scenario_configs.items():
             if scenario_config_id != _Config.DEFAULT_KEY:
+                self._check_if_entity_property_key_used_is_predefined(scenario_config)
                 self._check_existing_config_id(scenario_config)
                 self._check_frequency(scenario_config_id, scenario_config)
                 self._check_pipelines(scenario_config_id, scenario_config)

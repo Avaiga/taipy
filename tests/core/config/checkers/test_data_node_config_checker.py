@@ -42,6 +42,24 @@ class TestDataNodeConfigChecker:
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
 
+    def test_check_if_entity_property_key_used_is_predefined(self):
+        collector = IssueCollector()
+        config = Config._default_config
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
+        config._sections[DataNodeConfig.name]["new"]._properties["_entity_owner"] = None
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 1
+
+        config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
+        config._sections[DataNodeConfig.name]["new"]._properties["_entity_owner"] = "entity_owner"
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 1
+
     def test_check_storage_type(self):
         collector = IssueCollector()
         config = Config._default_config

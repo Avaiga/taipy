@@ -39,6 +39,24 @@ class TestPipelineConfigChecker:
         assert len(collector.errors) == 0
         assert len(collector.warnings) == 1
 
+    def test_check_if_entity_property_key_used_is_predefined(self):
+        collector = IssueCollector()
+        config = Config._default_config
+        _PipelineConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+        config._sections[PipelineConfig.name]["new"] = copy(config._sections[PipelineConfig.name]["default"])
+        config._sections[PipelineConfig.name]["new"]._properties["_entity_owner"] = None
+        collector = IssueCollector()
+        _PipelineConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 1
+
+        config._sections[PipelineConfig.name]["new"] = copy(config._sections[PipelineConfig.name]["default"])
+        config._sections[PipelineConfig.name]["new"]._properties["_entity_owner"] = "entity_owner"
+        collector = IssueCollector()
+        _PipelineConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 1
+
     def test_check_task(self):
         collector = IssueCollector()
         config = Config._default_config
