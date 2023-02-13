@@ -59,3 +59,12 @@ class _ConfigChecker:
                 config.id,
                 f"config_id of {config.__name__} {config.id} is empty.",
             )
+
+    def _check_if_entity_property_key_used_is_predefined(self, config):
+        for key in config._properties.keys():
+            if key in self._PREDEFINED_PROPERTIES_KEYS:
+                self._error(
+                    "properties",
+                    config.id,
+                    f"properties of {config.__name__} {config.id} cannot have {key} as its property."
+                )
