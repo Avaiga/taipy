@@ -24,14 +24,15 @@ else:
     from typing import TypeGuard
 
 
-def _run(*apps: t.Union[Gui, Rest, Core], **kwargs) -> t.Optional[t.Union[Gui, Rest, Core, Flask]]:
+def _run(*apps: t.Union[Gui, Rest, Core], **kwargs) -> t.Optional[Flask]:
     """Run one or multiple Taipy services.
 
     A Taipy service is an instance of a class that runs code as a Web application.
 
     Parameters:
         *args (Union[`Gui^`, `Rest^`, `Core^`]): Services to run, as separate arguments.
-            If several services are provided, all the services run simultaneously. If this is empty or set to None, this method does nothing.
+            If several services are provided, all the services run simultaneously.
+            If this is empty or set to None, this method does nothing.
         **kwargs: Other parameters to provide to the services.
     """
 
@@ -63,11 +64,11 @@ def _run(*apps: t.Union[Gui, Rest, Core], **kwargs) -> t.Optional[t.Union[Gui, R
         return app.run(**kwargs)
 
 
-TObj = t.TypeVar("TObj", bound=t.Union[Gui, Core, Rest])
+_TObj = t.TypeVar("_TObj", bound=t.Union[Gui, Core, Rest])
 
 
-def __typing_get(tup_obj: t.Tuple[t.Union[Gui, Core, Rest], ...], type_: t.Type[TObj]) -> t.Optional[TObj]:
-    def filter_isinstance(tl: t.Union[Gui, Core, Rest]) -> TypeGuard[TObj]:
+def __typing_get(tup_obj: t.Tuple[t.Union[Gui, Core, Rest], ...], type_: t.Type[_TObj]) -> t.Optional[_TObj]:
+    def filter_isinstance(tl: t.Union[Gui, Core, Rest]) -> TypeGuard[_TObj]:
         return isinstance(tl, type_)
 
     return next(filter(filter_isinstance, tup_obj), None)
