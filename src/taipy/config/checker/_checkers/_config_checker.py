@@ -17,6 +17,9 @@ from ..issue_collector import IssueCollector
 
 
 class _ConfigChecker:
+    
+    _PREDEFINED_PROPERTIES_KEYS = ["_entity_owner"]
+    
     def __init__(self, config: _Config, collector):
         self._collector = collector
         self._config = config
