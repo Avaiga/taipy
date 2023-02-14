@@ -11,6 +11,8 @@
 
 from src.taipy.config.config import Config
 from src.taipy.config.global_app.global_app_config import GlobalAppConfig
+from src.taipy.config.section import Section
+from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 
 
@@ -36,3 +38,15 @@ def test_default_configuration():
     _test_default_global_app_config(default_config._global_config)
     _test_default_global_app_config(Config.global_config)
     _test_default_global_app_config(GlobalAppConfig().default_config())
+
+
+def test_register_default_configuration():
+    Config._register_default(SectionForTest(Section._DEFAULT_KEY, "default_attribute", prop1="prop1"))
+
+    # Replace the first default section
+    Config._register_default(SectionForTest(Section._DEFAULT_KEY, "default_attribute", prop2="prop2"))
+
+    default_section = Config.sections[SectionForTest.name][Section._DEFAULT_KEY]
+    assert len(default_section.properties) == 1
+    assert default_section.prop2 == "prop2"
+    assert default_section.prop1 is None
