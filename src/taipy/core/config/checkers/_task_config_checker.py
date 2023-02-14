@@ -26,6 +26,7 @@ class _TaskConfigChecker(_ConfigChecker):
         for task_config_id, task_config in task_configs.items():
             if task_config_id != _Config.DEFAULT_KEY:
                 self._check_existing_config_id(task_config)
+                self._check_if_entity_property_key_used_is_predefined(task_config)
                 self._check_existing_function(task_config_id, task_config)
                 self._check_inputs(task_config_id, task_config)
                 self._check_outputs(task_config_id, task_config)

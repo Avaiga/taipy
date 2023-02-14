@@ -25,6 +25,7 @@ class _PipelineConfigChecker(_ConfigChecker):
         pipeline_configs = self._config._sections[PipelineConfig.name]
         for pipeline_config_id, pipeline_config in pipeline_configs.items():
             if pipeline_config_id != _Config.DEFAULT_KEY:
+                self._check_if_entity_property_key_used_is_predefined(pipeline_config)
                 self._check_existing_config_id(pipeline_config)
                 self._check_tasks(pipeline_config_id, pipeline_config)
         return self._collector

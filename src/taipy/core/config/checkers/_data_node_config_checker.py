@@ -27,6 +27,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
         data_node_configs: Dict[str, DataNodeConfig] = self._config._sections[DataNodeConfig.name]
         for data_node_config_id, data_node_config in data_node_configs.items():
             self._check_existing_config_id(data_node_config)
+            self._check_if_entity_property_key_used_is_predefined(data_node_config)
             self._check_storage_type(data_node_config_id, data_node_config)
             self._check_scope(data_node_config_id, data_node_config)
             self._check_required_properties(data_node_config_id, data_node_config)
