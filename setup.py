@@ -29,7 +29,7 @@ with open(f"src{os.sep}taipy{os.sep}core{os.sep}version.json") as version_file:
 requirements = [
     "pyarrow>=10.0.1,<11.0",
     "networkx>=2.6,<3.0",
-    "openpyxl>=3.0.7,<4.0",
+    "openpyxl<3.1.0",
     "modin[dask]>=0.16.2,<1.0",
     "pymongo>=4.2.0,<5.0",
     "sqlalchemy>=1.4,<2.0",
