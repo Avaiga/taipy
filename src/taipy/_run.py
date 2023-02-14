@@ -30,8 +30,8 @@ def _run(*apps: t.Union[Gui, Rest, Core], **kwargs) -> t.Optional[Flask]:
     A Taipy service is an instance of a class that runs code as a Web application.
 
     Parameters:
-        *args (Union[`Gui^`, `Rest^`, `Core^`]): Services to run, as separate arguments.
-            If several services are provided, all the services run simultaneously.
+        *args (Union[`Gui^`, `Rest^`, `Core^`]): Services to run, as separate arguments.<br/>
+            If several services are provided, all the services run simultaneously.<br/>
             If this is empty or set to None, this method does nothing.
         **kwargs: Other parameters to provide to the services.
     """
