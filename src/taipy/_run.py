@@ -72,4 +72,7 @@ if sys.version_info >= (3, 10):
         return next(filter(filter_isinstance, apps), None)
 else:
     def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
+        print(f"__get_app. apps={apps}, type_={type_}")
+        r = next(filter(lambda a: isinstance(type(a), type_), apps), None)
+        print(f"  => {r}")
         return next(filter(lambda a: isinstance(type(a), type_), apps), None)
