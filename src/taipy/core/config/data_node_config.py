@@ -38,8 +38,8 @@ class DataNodeConfig(Section):
             "in_memory".
             The default value is "pickle".
             Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
-        scope (Scope^):  The `Scope^` of the data nodes instantiated from the data node config. The default value is
-            SCENARIO.
+        scope (Optional[Scope^]): The optional `Scope^` of the data nodes instantiated from the data node config.
+            The default value is SCENARIO.
         **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
@@ -96,16 +96,18 @@ class DataNodeConfig(Section):
     # In memory
     _OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY = "default_data"
     # SQL
-    _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY = "exposed_type"
     _REQUIRED_DB_USERNAME_SQL_PROPERTY = "db_username"
     _REQUIRED_DB_PASSWORD_SQL_PROPERTY = "db_password"
     _REQUIRED_DB_NAME_SQL_PROPERTY = "db_name"
     _REQUIRED_DB_ENGINE_SQL_PROPERTY = "db_engine"
     _REQUIRED_DB_ENGINE_SQLITE = "sqlite"
-    _REQUIRED_DB_ENGINE_MSSQL = "mssql"
+    _OPTIONAL_PORT_SQL_PROPERTY = "db_port"
+    _OPTIONAL_HOST_SQL_PROPERTY = "db_host"
+    _OPTIONAL_DRIVER_SQL_PROPERTY = "db_driver"
     _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY = "db_extra_args"
+    _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY = "exposed_type"
     # SQL_TABLE
-    _REQUIRED_TABLE_NAME_PROPERTY = "table_name"
+    _REQUIRED_TABLE_NAME_SQL_TABLE_PROPERTY = "table_name"
     # SQL
     _REQUIRED_READ_QUERY_SQL_PROPERTY = "read_query"
     _REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY = "write_query_builder"
@@ -113,21 +115,25 @@ class DataNodeConfig(Section):
     _REQUIRED_DB_NAME_MONGO_PROPERTY = "db_name"
     _REQUIRED_COLLECTION_NAME_MONGO_PROPERTY = "collection_name"
     _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY = "custom_document"
-    _OPTIONAL_DB_USERNAME_MONGO_PROPERTY = "db_username"
-    _OPTIONAL_DB_PASSWORD_MONGO_PROPERTY = "db_password"
+    _OPTIONAL_USERNAME_MONGO_PROPERTY = "db_username"
+    _OPTIONAL_PASSWORD_MONGO_PROPERTY = "db_password"
+    _OPTIONAL_HOST_MONGO_PROPERTY = "db_host"
+    _OPTIONAL_PORT_MONGO_PROPERTY = "db_port"
     _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY = "db_extra_args"
     # Pickle
     _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY = "default_path"
     _OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY = "default_data"
     # JSON
     _OPTIONAL_ENCODER_JSON_PROPERTY = "encoder"
-    _OPTIONAL_DECODER_TYPE_JSON_PROPERTY = "decoder"
-    _REQUIRED_DEFAULT_PATH_JSON_PROPERTY = "default_path"
+    _OPTIONAL_DECODER_JSON_PROPERTY = "decoder"
+    _OPTIONAL_DEFAULT_PATH_JSON_PROPERTY = "default_path"
     # Parquet
     _OPTIONAL_EXPOSED_TYPE_PARQUET_PROPERTY = "exposed_type"
     _OPTIONAL_DEFAULT_PATH_PARQUET_PROPERTY = "default_path"
-    _OPTIONAL_COLUMNS_PARQUET_PROPERTY = "columns"
+    _OPTIONAL_ENGINE_PARQUET_PROPERTY = "engine"
     _OPTIONAL_COMPRESSION_PARQUET_PROPERTY = "compression"
+    _OPTIONAL_READ_KWARGS_PARQUET_PROPERTY = "read_kwargs"
+    _OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY = "write_kwargs"
 
     _REQUIRED_PROPERTIES: Dict[str, List] = {
         _STORAGE_TYPE_VALUE_PICKLE: [],
@@ -136,7 +142,7 @@ class DataNodeConfig(Section):
             _REQUIRED_DB_PASSWORD_SQL_PROPERTY,
             _REQUIRED_DB_NAME_SQL_PROPERTY,
             _REQUIRED_DB_ENGINE_SQL_PROPERTY,
-            _REQUIRED_TABLE_NAME_PROPERTY,
+            _REQUIRED_TABLE_NAME_SQL_TABLE_PROPERTY,
         ],
         _STORAGE_TYPE_VALUE_SQL: [
             _REQUIRED_DB_USERNAME_SQL_PROPERTY,
@@ -157,49 +163,72 @@ class DataNodeConfig(Section):
             _REQUIRED_READ_FUNCTION_GENERIC_PROPERTY,
             _REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY,
         ],
-        _STORAGE_TYPE_VALUE_JSON: [_REQUIRED_DEFAULT_PATH_JSON_PROPERTY],
+        _STORAGE_TYPE_VALUE_JSON: [],
         _STORAGE_TYPE_VALUE_PARQUET: [],
     }
 
     _OPTIONAL_PROPERTIES = {
-        _STORAGE_TYPE_VALUE_GENERIC: [
-            _OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY,
-            _OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY,
-        ],
-        _STORAGE_TYPE_VALUE_CSV: [
-            _OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY,
-            _OPTIONAL_DEFAULT_PATH_CSV_PROPERTY,
-            _OPTIONAL_HAS_HEADER_CSV_PROPERTY,
-        ],
-        _STORAGE_TYPE_VALUE_EXCEL: [
-            _OPTIONAL_EXPOSED_TYPE_EXCEL_PROPERTY,
-            _OPTIONAL_DEFAULT_PATH_EXCEL_PROPERTY,
-            _OPTIONAL_HAS_HEADER_EXCEL_PROPERTY,
-            _OPTIONAL_SHEET_NAME_EXCEL_PROPERTY,
-        ],
-        _STORAGE_TYPE_VALUE_IN_MEMORY: [_OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY],
-        _STORAGE_TYPE_VALUE_SQL_TABLE: [_OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY, _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY],
-        _STORAGE_TYPE_VALUE_SQL: [_OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY, _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY],
-        _STORAGE_TYPE_VALUE_MONGO_COLLECTION: [
-            _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY,
-            _OPTIONAL_DB_USERNAME_MONGO_PROPERTY,
-            _OPTIONAL_DB_PASSWORD_MONGO_PROPERTY,
-            _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY,
-        ],
-        _STORAGE_TYPE_VALUE_PICKLE: [_OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY, _OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY],
-        _STORAGE_TYPE_VALUE_JSON: [_OPTIONAL_ENCODER_JSON_PROPERTY, _OPTIONAL_DECODER_TYPE_JSON_PROPERTY],
-        _STORAGE_TYPE_VALUE_PARQUET: [
-            _OPTIONAL_EXPOSED_TYPE_PARQUET_PROPERTY,
-            _OPTIONAL_DEFAULT_PATH_PARQUET_PROPERTY,
-            _OPTIONAL_COLUMNS_PARQUET_PROPERTY,
-            _OPTIONAL_COMPRESSION_PARQUET_PROPERTY,
-        ],
+        _STORAGE_TYPE_VALUE_GENERIC: {
+            _OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY: None,
+            _OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY: None,
+        },
+        _STORAGE_TYPE_VALUE_CSV: {
+            _OPTIONAL_DEFAULT_PATH_CSV_PROPERTY: None,
+            _OPTIONAL_HAS_HEADER_CSV_PROPERTY: True,
+            _OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+        },
+        _STORAGE_TYPE_VALUE_EXCEL: {
+            _OPTIONAL_DEFAULT_PATH_EXCEL_PROPERTY: None,
+            _OPTIONAL_HAS_HEADER_EXCEL_PROPERTY: True,
+            _OPTIONAL_SHEET_NAME_EXCEL_PROPERTY: None,
+            _OPTIONAL_EXPOSED_TYPE_EXCEL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+        },
+        _STORAGE_TYPE_VALUE_IN_MEMORY: {_OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY: None},
+        _STORAGE_TYPE_VALUE_SQL_TABLE: {
+            _OPTIONAL_HOST_SQL_PROPERTY: "localhost",
+            _OPTIONAL_PORT_SQL_PROPERTY: 1433,
+            _OPTIONAL_DRIVER_SQL_PROPERTY: "ODBC Driver 17 for SQL Server",
+            _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+            _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY: None,
+        },
+        _STORAGE_TYPE_VALUE_SQL: {
+            _OPTIONAL_HOST_SQL_PROPERTY: "localhost",
+            _OPTIONAL_PORT_SQL_PROPERTY: 1433,
+            _OPTIONAL_DRIVER_SQL_PROPERTY: "ODBC Driver 17 for SQL Server",
+            _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+            _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY: None,
+        },
+        _STORAGE_TYPE_VALUE_MONGO_COLLECTION: {
+            _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY: DefaultCustomDocument,
+            _OPTIONAL_USERNAME_MONGO_PROPERTY: "",
+            _OPTIONAL_PASSWORD_MONGO_PROPERTY: "",
+            _OPTIONAL_HOST_MONGO_PROPERTY: "localhost",
+            _OPTIONAL_PORT_MONGO_PROPERTY: 27017,
+            _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY: None,
+        },
+        _STORAGE_TYPE_VALUE_PICKLE: {
+            _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY: None,
+            _OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY: None,
+        },
+        _STORAGE_TYPE_VALUE_JSON: {
+            _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY: None,
+            _OPTIONAL_ENCODER_JSON_PROPERTY: None,
+            _OPTIONAL_DECODER_JSON_PROPERTY: None,
+        },
+        _STORAGE_TYPE_VALUE_PARQUET: {
+            _OPTIONAL_DEFAULT_PATH_PARQUET_PROPERTY: None,
+            _OPTIONAL_ENGINE_PARQUET_PROPERTY: "pyarrow",
+            _OPTIONAL_COMPRESSION_PARQUET_PROPERTY: "snappy",
+            _OPTIONAL_READ_KWARGS_PARQUET_PROPERTY: None,
+            _OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY: None,
+            _OPTIONAL_EXPOSED_TYPE_PARQUET_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+        },
     }
 
     _SCOPE_KEY = "scope"
     _DEFAULT_SCOPE = Scope.SCENARIO
 
-    def __init__(self, id: str, storage_type: str = None, scope: Scope = None, **properties):
+    def __init__(self, id: str, storage_type: Optional[str] = None, scope: Scope = None, **properties):
         self._storage_type = storage_type
         self._scope = scope
         super().__init__(id, **properties)
@@ -267,15 +296,26 @@ class DataNodeConfig(Section):
         self._storage_type = as_dict.pop(self._STORAGE_TYPE_KEY, self._storage_type)
         if self._storage_type is None and default_section:
             self._storage_type = default_section.storage_type
+
         self._scope = as_dict.pop(self._SCOPE_KEY, self._scope)
         if self._scope is None and default_section:
-            self._scope = default_section.scope
+            if default_section.scope and self._storage_type == default_section.storage_type:
+                self._scope = default_section.scope
+            else:
+                self._scope = self._DEFAULT_SCOPE
+
         self._properties.update(as_dict)
-        if default_section:
+        if default_section and self._storage_type == default_section.storage_type:
             self._properties = {**default_section.properties, **self._properties}
 
+        # Assign default value to optional properties if not defined by user
+        if self._OPTIONAL_PROPERTIES.get(self._storage_type):
+            for optional_property, default_value in self._OPTIONAL_PROPERTIES[self._storage_type].items():
+                if default_value is not None and self._properties.get(optional_property) is None:
+                    self._properties[optional_property] = default_value
+
     @staticmethod
-    def _configure_default(storage_type: str, scope: Scope = _DEFAULT_SCOPE, **properties):
+    def _configure_default(storage_type: str, scope: Optional[Scope] = None, **properties):
         """Configure the default values for data node configurations.
         This function creates the _default data node configuration_ object,
         where all data node configuration objects will find their default
@@ -284,7 +324,7 @@ class DataNodeConfig(Section):
             storage_type (str): The default storage type for all data node configurations.
                 The possible values are _"pickle"_ (the default value), _"csv"_, _"excel"_,
                 _"sql"_, _"mongo_collection"_, _"in_memory"_, _"json"_, _"parquet"_ or _"generic"_.
-            scope (Scope^): The default scope for all data node configurations.
+            scope (Optional[Scope^]): The default scope for all data node configurations.
                 The default value is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
@@ -292,14 +332,15 @@ class DataNodeConfig(Section):
             `DataNodeConfig^`: The default data node configuration.
         """
         section = DataNodeConfig(_Config.DEFAULT_KEY, storage_type, scope, **properties)
-        Config._register(section)
+        Config._register_default(section)
         return Config.sections[DataNodeConfig.name][_Config.DEFAULT_KEY]
 
-    @staticmethod
+    @classmethod
     def _configure(
+        cls,
         id: str,
         storage_type: Optional[str] = None,
-        scope: Scope = _DEFAULT_SCOPE,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new data node configuration.
@@ -310,7 +351,7 @@ class DataNodeConfig(Section):
                 _storage_type_ value set in the default data node configuration
                 (see `(Config.)configure_default_data_node()^`)), _"pickle"_, _"csv"_, _"excel"_, _"sql_table"_,
                 _"sql"_, _"json"_, _"parquet"_, _"mongo_collection"_, _"in_memory"_, or _"generic"_.
-            scope (Scope^): The scope of the data node configuration. The default value is
+            scope (Optional[Scope^]): The scope of the data node configuration. The default value is
                 `Scope.SCENARIO` (or the one specified in
                 `(Config.)configure_default_data_node()^`).
             **properties (Dict[str, Any]): A keyworded variable length list of additional
@@ -318,214 +359,224 @@ class DataNodeConfig(Section):
         Returns:
             `DataNodeConfig^`: The new data node configuration.
         """
-        section = DataNodeConfig(id, storage_type, scope, **properties)
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
+        configuration_map: Dict[str, Callable] = {
+            cls._STORAGE_TYPE_VALUE_PICKLE: cls._configure_pickle,
+            cls._STORAGE_TYPE_VALUE_SQL_TABLE: cls._configure_sql_table,
+            cls._STORAGE_TYPE_VALUE_SQL: cls._configure_sql,
+            cls._STORAGE_TYPE_VALUE_MONGO_COLLECTION: cls._configure_mongo_collection,
+            cls._STORAGE_TYPE_VALUE_CSV: cls._configure_csv,
+            cls._STORAGE_TYPE_VALUE_EXCEL: cls._configure_excel,
+            cls._STORAGE_TYPE_VALUE_IN_MEMORY: cls._configure_in_memory,
+            cls._STORAGE_TYPE_VALUE_GENERIC: cls._configure_generic,
+            cls._STORAGE_TYPE_VALUE_JSON: cls._configure_json,
+            cls._STORAGE_TYPE_VALUE_PARQUET: cls._configure_parquet,
+        }
 
-    @staticmethod
+        if storage_type in cls._ALL_STORAGE_TYPES:
+            return configuration_map[storage_type](id=id, scope=scope, **properties)
+
+        return cls.__configure(id, storage_type, scope, **properties)
+
+    @classmethod
     def _configure_csv(
+        cls,
         id: str,
-        default_path: str = None,
-        has_header: bool = True,
-        exposed_type=_DEFAULT_EXPOSED_TYPE,
-        scope=_DEFAULT_SCOPE,
+        default_path: Optional[str] = None,
+        has_header: Optional[bool] = None,
+        exposed_type: Optional[str] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new CSV data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new CSV data node configuration.
-            default_path (str): The default path of the CSV file.
-            has_header (bool): If True, indicates that the CSV file has a header.
-            exposed_type: The exposed type of the data read from CSV file. The default value is `pandas`.
-            scope (Scope^): The scope of the CSV data node configuration. The default value
+            default_path (Optional[str]): The default path of the CSV file.
+            has_header (Optional[bool]): If True, indicates that the CSV file has a header.
+            exposed_type (Optional[str]): The exposed type of the data read from CSV file.
+                The default value is `pandas`.
+            scope (Optional[Scope^]): The scope of the CSV data node configuration. The default value
                 is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new CSV data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_CSV,
-            scope=scope,
-            default_path=default_path,
-            has_header=has_header,
-            exposed_type=exposed_type,
-            **properties,
-        )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
+        if default_path is not None:
+            properties[cls._OPTIONAL_DEFAULT_PATH_CSV_PROPERTY] = default_path
+        if has_header is not None:
+            properties[cls._OPTIONAL_HAS_HEADER_CSV_PROPERTY] = has_header
+        if exposed_type is not None:
+            properties[cls._OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY] = exposed_type
 
-    @staticmethod
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_CSV, scope, **properties)
+
+    @classmethod
     def _configure_json(
+        cls,
         id: str,
-        default_path: str = None,
-        encoder: json.JSONEncoder = None,
-        decoder: json.JSONDecoder = None,
-        scope=_DEFAULT_SCOPE,
+        default_path: Optional[str] = None,
+        encoder: Optional[json.JSONEncoder] = None,
+        decoder: Optional[json.JSONDecoder] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new JSON data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new JSON data node configuration.
-            default_path (str): The default path of the JSON file.
-            encoder (json.JSONEncoder): The JSON encoder used to write data into the JSON file.
-            decoder (json.JSONDecoder): The JSON decoder used to read data from the JSON file.
-            scope (Scope^): The scope of the JSON data node configuration. The default value
+            default_path (Optional[str]): The default path of the JSON file.
+            encoder (Optional[json.JSONEncoder]): The JSON encoder used to write data into the JSON file.
+            decoder (Optional[json.JSONDecoder]): The JSON decoder used to read data from the JSON file.
+            scope (Optional[Scope^]): The scope of the JSON data node configuration. The default value
                 is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new JSON data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_JSON,
-            scope=scope,
-            default_path=default_path,
-            encoder=encoder,
-            decoder=decoder,
-            **properties,
-        )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
+        if default_path is not None:
+            properties[cls._OPTIONAL_DEFAULT_PATH_JSON_PROPERTY] = default_path
+        if encoder is not None:
+            properties[cls._OPTIONAL_ENCODER_JSON_PROPERTY] = encoder
+        if decoder is not None:
+            properties[cls._OPTIONAL_DECODER_JSON_PROPERTY] = decoder
 
-    @staticmethod
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_JSON, scope, **properties)
+
+    @classmethod
     def _configure_parquet(
+        cls,
         id: str,
-        default_path: str = None,
-        exposed_type=_DEFAULT_EXPOSED_TYPE,
-        engine: Optional[str] = "pyarrow",
-        compression: Optional[str] = "snappy",
-        read_kwargs: Dict = dict(),
-        write_kwargs: Dict = dict(),
-        scope=_DEFAULT_SCOPE,
+        default_path: Optional[str] = None,
+        engine: Optional[str] = None,
+        compression: Optional[str] = None,
+        read_kwargs: Optional[Dict] = None,
+        write_kwargs: Optional[Dict] = None,
+        exposed_type: Optional[str] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new Parquet data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new Parquet data node configuration.
-            default_path (str): The default path of the Parquet file.
-            exposed_type: The exposed type of the data read from Parquet file. The default value is `pandas`.
+            default_path (Optional[str]): The default path of the Parquet file.
             engine (Optional[str]): Parquet library to use. Possible values are _"fastparquet"_ or _"pyarrow"_.
                 The default value is _"pyarrow"_.
-            compression (Optional[str]): Name of the compression to use. Use None for no compression.
-                `{'snappy', 'gzip', 'brotli', None}`, default `'snappy'`.
+            compression (Optional[str]): Name of the compression to use. Possible values are _"snappy"_, _"gzip"_,
+                _"brotli"_, or _"none"_ (no compression). The default value is _"snappy"_.
             read_kwargs (Optional[Dict]): Additional parameters passed to the `pandas.read_parquet` method.
             write_kwargs (Optional[Dict]): Additional parameters passed to the `pandas.DataFrame.write_parquet` method.
                 The parameters in "read_kwargs" and "write_kwargs" have a **higher precedence** than the top-level
                 parameters which are also passed to Pandas.
-            scope (Scope^): The scope of the Parquet data node configuration. The default value
+            exposed_type (Optional[str]): The exposed type of the data read from Parquet file.
+                The default value is `pandas`.
+            scope (Optional[Scope^]): The scope of the Parquet data node configuration. The default value
                 is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
         Returns:
             `DataNodeConfig^`: The new Parquet data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_PARQUET,
-            scope=scope,
-            default_path=default_path,
-            engine=engine,
-            compression=compression,
-            read_kwargs=read_kwargs,
-            write_kwargs=write_kwargs,
-            exposed_type=exposed_type,
-            **properties,
-        )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
+        if default_path is not None:
+            properties[cls._OPTIONAL_DEFAULT_PATH_PARQUET_PROPERTY] = default_path
+        if engine is not None:
+            properties[cls._OPTIONAL_ENGINE_PARQUET_PROPERTY] = engine
+        if compression is not None:
+            properties[cls._OPTIONAL_COMPRESSION_PARQUET_PROPERTY] = compression
+        if read_kwargs is not None:
+            properties[cls._OPTIONAL_READ_KWARGS_PARQUET_PROPERTY] = read_kwargs
+        if write_kwargs is not None:
+            properties[cls._OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY] = write_kwargs
+        if exposed_type is not None:
+            properties[cls._OPTIONAL_EXPOSED_TYPE_PARQUET_PROPERTY] = exposed_type
 
-    @staticmethod
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_PARQUET, scope, **properties)
+
+    @classmethod
     def _configure_excel(
+        cls,
         id: str,
-        default_path: str = None,
-        has_header: bool = True,
-        sheet_name: Union[List[str], str] = None,
-        exposed_type=_DEFAULT_EXPOSED_TYPE,
-        scope: Scope = _DEFAULT_SCOPE,
+        default_path: Optional[str] = None,
+        has_header: Optional[bool] = None,
+        sheet_name: Optional[Union[List[str], str]] = None,
+        exposed_type: Optional[str] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new Excel data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new Excel data node configuration.
-            default_path (str): The path of the Excel file.
-            has_header (bool): If True, indicates that the Excel file has a header.
-            sheet_name (Union[List[str], str]): The list of sheet names to be used. This
-                can be a unique name.
-            exposed_type: The exposed type of the data read from Excel file. The default value is `pandas`.
-            scope (Scope^): The scope of the Excel data node configuration. The default
-                value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            default_path (Optional[str]): The path of the Excel file.
+            has_header (Optional[bool]): If True, indicates that the Excel file has a header.
+            sheet_name (Optional[Union[List[str], str]]): The list of sheet names to be used.
+                This can be a unique name.
+            exposed_type (Optional[str]): The exposed type of the data read from Excel file.
+                The default value is `pandas`.
+            scope (Optional[Scope^]): The scope of the Excel data node configuration.
+                The default value is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
         Returns:
-            `DataNodeConfig^`: The new CSV data node configuration.
+            `DataNodeConfig^`: The new Excel data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_EXCEL,
-            scope=scope,
-            default_path=default_path,
-            has_header=has_header,
-            sheet_name=sheet_name,
-            exposed_type=exposed_type,
-            **properties,
-        )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
+        if default_path is not None:
+            properties[cls._OPTIONAL_DEFAULT_PATH_EXCEL_PROPERTY] = default_path
+        if has_header is not None:
+            properties[cls._OPTIONAL_HAS_HEADER_EXCEL_PROPERTY] = has_header
+        if sheet_name is not None:
+            properties[cls._OPTIONAL_SHEET_NAME_EXCEL_PROPERTY] = sheet_name
+        if exposed_type is not None:
+            properties[cls._OPTIONAL_EXPOSED_TYPE_EXCEL_PROPERTY] = exposed_type
 
-    @staticmethod
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_EXCEL, scope, **properties)
+
+    @classmethod
     def _configure_generic(
+        cls,
         id: str,
-        read_fct: Callable = None,
-        write_fct: Callable = None,
-        read_fct_params: List = None,
-        write_fct_params: List = None,
-        scope: Scope = _DEFAULT_SCOPE,
+        read_fct: Callable,
+        write_fct: Callable,
+        read_fct_params: Optional[List] = None,
+        write_fct_params: Optional[List] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new generic data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new generic data node configuration.
-            read_fct (Optional[Callable]): The Python function called to read the data.
-            write_fct (Optional[Callable]): The Python function called to write the data.
-                The provided function must have at least one parameter that receives the data
-                to be written.
-            read_fct_params (Optional[List]): The parameters that are passed to _read_fct_
-                to read the data.
-            write_fct_params (Optional[List]): The parameters that are passed to _write_fct_
-                to write the data.
+            read_fct (Callable): The Python function called to read the data.
+            write_fct (Callable): The Python function called to write the data.
+                The provided function must have at least one parameter that receives the data to be written.
+            read_fct_params (Optional[List]): The parameters that are passed to _read_fct_ to read the data.
+            write_fct_params (Optional[List]): The parameters that are passed to _write_fct_ to write the data.
             scope (Optional[Scope^]): The scope of the Generic data node configuration.
                 The default value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
         Returns:
             `DataNodeConfig^`: The new Generic data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC,
-            scope=scope,
-            read_fct=read_fct,
-            write_fct=write_fct,
-            read_fct_params=read_fct_params,
-            write_fct_params=write_fct_params,
-            **properties,
+        properties.update(
+            {
+                cls._REQUIRED_READ_FUNCTION_GENERIC_PROPERTY: read_fct,
+                cls._REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY: write_fct,
+            }
         )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
 
-    @staticmethod
+        if read_fct_params is not None:
+            properties[cls._OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY] = read_fct_params
+        if write_fct_params is not None:
+            properties[cls._OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY] = write_fct_params
+
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC, scope, **properties)
+
+    @classmethod
     def _configure_in_memory(
+        cls,
         id: str,
         default_data: Optional[Any] = None,
-        scope: Scope = _DEFAULT_SCOPE,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new _in_memory_ data node configuration.
@@ -534,67 +585,61 @@ class DataNodeConfig(Section):
             id (str): The unique identifier of the new in_memory data node configuration.
             default_data (Optional[Any]): The default data of the data nodes instantiated from
                 this in_memory data node configuration.
-            scope (Scope^): The scope of the in_memory data node configuration. The default
+            scope (Optional[Scope^]): The scope of the in_memory data node configuration. The default
                 value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
         Returns:
             `DataNodeConfig^`: The new _in_memory_ data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_IN_MEMORY,
-            scope=scope,
-            default_data=default_data,
-            **properties,
-        )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
+        if default_data is not None:
+            properties[cls._OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY] = default_data
 
-    @staticmethod
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_IN_MEMORY, scope, **properties)
+
+    @classmethod
     def _configure_pickle(
+        cls,
         id: str,
+        default_path: Optional[str] = None,
         default_data: Optional[Any] = None,
-        scope: Scope = _DEFAULT_SCOPE,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new pickle data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new pickle data node configuration.
+            default_path (Optional[str]): The path of the pickle file.
             default_data (Optional[Any]): The default data of the data nodes instantiated from
                 this pickle data node configuration.
-            scope (Scope^): The scope of the pickle data node configuration. The default value
+            scope (Optional[Scope^]): The scope of the pickle data node configuration. The default value
                 is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
         Returns:
             `DataNodeConfig^`: The new pickle data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_PICKLE,
-            scope=scope,
-            default_data=default_data,
-            **properties,
-        )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
+        if default_path is not None:
+            properties[cls._OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY] = default_path
+        if default_data is not None:
+            properties[cls._OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY] = default_data
 
-    @staticmethod
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_PICKLE, scope, **properties)
+
+    @classmethod
     def _configure_sql_table(
+        cls,
         id: str,
         db_username: str,
         db_password: str,
         db_name: str,
         db_engine: str,
-        table_name: str = None,
-        db_port: int = 1433,
-        db_host: str = "localhost",
-        db_driver: str = "ODBC Driver 17 for SQL Server",
-        db_extra_args: Dict[str, Any] = None,
-        exposed_type=_EXPOSED_TYPE_PANDAS,
-        scope: Scope = _DEFAULT_SCOPE,
+        table_name: str,
+        db_host: Optional[str] = None,
+        db_port: Optional[int] = None,
+        db_driver: Optional[str] = None,
+        db_extra_args: Optional[Dict[str, Any]] = None,
+        exposed_type: Optional[str] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new SQL table data node configuration.
@@ -604,57 +649,63 @@ class DataNodeConfig(Section):
             db_username (str): The database username.
             db_password (str): The database password.
             db_name (str): The database name.
-            db_host (str): The database host. The default value is _"localhost"_.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
+            table_name (str): The name of the SQL table.
+            db_host (str): The database host. The default value is _"localhost"_.
+            db_port (int): The database port. The default value is 1433.
             db_driver (str): The database driver. The default value is
                 _"ODBC Driver 17 for SQL Server"_.
-            db_port (int): The database port. The default value is 1433.
-            db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database
+            db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
                 connection string.
-            table_name (str): The name of the SQL table.
-            exposed_type: The exposed type of the data read from SQL query. The default value is `pandas`.
-            scope (Scope^): The scope of the SQL data node configuration. The default value is
+            exposed_type (Optional[str]): The exposed type of the data read from SQL table.
+                The default value is `pandas`.
+            scope (Optional[Scope^]): The scope of the SQL data node configuration. The default value is
                 `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new SQL data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_SQL_TABLE,
-            scope=scope,
-            db_username=db_username,
-            db_password=db_password,
-            db_name=db_name,
-            db_host=db_host,
-            db_engine=db_engine,
-            db_driver=db_driver,
-            db_port=db_port,
-            db_extra_args=db_extra_args,
-            table_name=table_name,
-            exposed_type=exposed_type,
-            **properties,
+        properties.update(
+            {
+                cls._REQUIRED_DB_USERNAME_SQL_PROPERTY: db_username,
+                cls._REQUIRED_DB_PASSWORD_SQL_PROPERTY: db_password,
+                cls._REQUIRED_DB_NAME_SQL_PROPERTY: db_name,
+                cls._REQUIRED_DB_ENGINE_SQL_PROPERTY: db_engine,
+                cls._REQUIRED_TABLE_NAME_SQL_TABLE_PROPERTY: table_name,
+            }
         )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
 
-    @staticmethod
+        if db_host is not None:
+            properties[cls._OPTIONAL_HOST_SQL_PROPERTY] = db_host
+        if db_port is not None:
+            properties[cls._OPTIONAL_PORT_SQL_PROPERTY] = db_port
+        if db_driver is not None:
+            properties[cls._OPTIONAL_DRIVER_SQL_PROPERTY] = db_driver
+        if db_extra_args is not None:
+            properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_args
+        if exposed_type is not None:
+            properties[cls._OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY] = exposed_type
+
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_SQL_TABLE, scope, **properties)
+
+    @classmethod
     def _configure_sql(
+        cls,
         id: str,
         db_username: str,
         db_password: str,
         db_name: str,
         db_engine: str,
-        db_port: int = 1433,
-        db_host: str = "localhost",
-        db_driver: str = "ODBC Driver 17 for SQL Server",
-        db_extra_args: Dict[str, Any] = None,
-        read_query: str = None,
-        write_query_builder: Callable = None,
-        exposed_type=_DEFAULT_EXPOSED_TYPE,
-        scope: Scope = _DEFAULT_SCOPE,
+        read_query: str,
+        write_query_builder: Callable,
+        db_host: Optional[str] = None,
+        db_port: Optional[int] = None,
+        db_driver: Optional[str] = None,
+        db_extra_args: Optional[Dict[str, Any]] = None,
+        exposed_type: Optional[str] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new SQL data node configuration.
@@ -666,55 +717,59 @@ class DataNodeConfig(Section):
             db_name (str): The database name.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
-            db_port (int): The database port. The default value is 1433.
-            db_host (str): The database host. The default value is _"localhost"_.
-            db_driver (str): The database driver. The default value is
-                _"ODBC Driver 17 for SQL Server"_.
-            db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database
-                connection string.
             read_query (str): The SQL query string used to read the data from the database.
-            write_query_builder (Callable): A callback function that takes the data as an input parameter and returns a
-                list of SQL queries.
-            exposed_type: The exposed type of the data read from SQL query. The default value is `pandas`.
-            scope (Scope^): The scope of the SQL data node configuration. The default value is
-                `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            write_query_builder (Callable): A callback function that takes the data as an input parameter
+                and returns a list of SQL queries.
+            db_host (str): The database host. The default value is _"localhost"_.
+            db_port (int): The database port. The default value is 1433.
+            db_driver (str): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
+                connection string.
+            exposed_type (Optional[str]): The exposed type of the data read from SQL query.
+                The default value is `pandas`.
+            scope (Optional[Scope^]): The scope of the SQL data node configuration.
+                The default value is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
         Returns:
             `DataNodeConfig^`: The new SQL data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_SQL,
-            scope=scope,
-            db_username=db_username,
-            db_password=db_password,
-            db_name=db_name,
-            db_host=db_host,
-            db_engine=db_engine,
-            db_driver=db_driver,
-            read_query=read_query,
-            write_query_builder=write_query_builder,
-            db_port=db_port,
-            db_extra_args=db_extra_args,
-            exposed_type=exposed_type,
-            **properties,
+        properties.update(
+            {
+                cls._REQUIRED_DB_USERNAME_SQL_PROPERTY: db_username,
+                cls._REQUIRED_DB_PASSWORD_SQL_PROPERTY: db_password,
+                cls._REQUIRED_DB_NAME_SQL_PROPERTY: db_name,
+                cls._REQUIRED_DB_ENGINE_SQL_PROPERTY: db_engine,
+                cls._REQUIRED_READ_QUERY_SQL_PROPERTY: read_query,
+                cls._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY: write_query_builder,
+            }
         )
-        Config._register(section)
-        return Config.sections[DataNodeConfig.name][id]
 
-    @staticmethod
+        if db_host is not None:
+            properties[cls._OPTIONAL_HOST_SQL_PROPERTY] = db_host
+        if db_port is not None:
+            properties[cls._OPTIONAL_PORT_SQL_PROPERTY] = db_port
+        if db_driver is not None:
+            properties[cls._OPTIONAL_DRIVER_SQL_PROPERTY] = db_driver
+        if db_extra_args is not None:
+            properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_args
+        if exposed_type is not None:
+            properties[cls._OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY] = exposed_type
+
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_SQL, scope, **properties)
+
+    @classmethod
     def _configure_mongo_collection(
+        cls,
         id: str,
         db_name: str,
         collection_name: str,
-        custom_document: Any = DefaultCustomDocument,
-        db_username: str = "",
-        db_password: str = "",
-        db_host: str = "localhost",
-        db_port: int = 27017,
-        db_extra_args: Dict[str, Any] = {},
-        scope: Scope = _DEFAULT_SCOPE,
+        custom_document: Optional[Any] = None,
+        db_username: Optional[str] = None,
+        db_password: Optional[str] = None,
+        db_host: Optional[str] = None,
+        db_port: Optional[int] = None,
+        db_extra_args: Optional[Dict[str, Any]] = None,
+        scope: Optional[Scope] = None,
         **properties,
     ):
         """Configure a new Mongo collection data node configuration.
@@ -723,36 +778,52 @@ class DataNodeConfig(Section):
             id (str): The unique identifier of the new Mongo collection data node configuration.
             db_name (str): The database name.
             collection_name (str): The collection in the database to read from and to write the data to.
-            custom_document (Any): The custom document class to store, encode, and decode data when reading and writing
-                to a Mongo collection. The custom_document can have optional `decode` method to decode data in the
-                Mongo collection to a custom object, and `encode` method to encode the object's properties to the
-                Mongo collection when writing.
-            db_username (str): The database username.
-            db_password (str): The database password.
-            db_host (str): The database host. The default value is _"localhost"_.
-            db_port (int): The database port. The default value is 27017.
-            db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection
-                string.
-            scope (Scope^): The scope of the Mongo collection data node configuration. The default value is
-                `Scope.SCENARIO`.
+            custom_document (Optional[Any]): The custom document class to store, encode, and decode data when reading
+                and writing to a Mongo collection. The custom_document can have optional `decode` method to decode data
+                in the Mongo collection to a custom object, and `encode` method to encode the object's properties to
+                the Mongo collection when writing.
+            db_username (Optional[str]): The database username.
+            db_password (Optional[str]): The database password.
+            db_host (Optional[str]): The database host. The default value is _"localhost"_.
+            db_port (Optional[int]): The database port. The default value is 27017.
+            db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into
+                database connection string.
+            scope (Optional[Scope^]): The scope of the Mongo collection data node configuration.
+                The default value is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:
             `DataNodeConfig^`: The new Mongo collection data node configuration.
         """
-        section = DataNodeConfig(
-            id,
-            DataNodeConfig._STORAGE_TYPE_VALUE_MONGO_COLLECTION,
-            scope=scope,
-            db_username=db_username,
-            db_password=db_password,
-            db_name=db_name,
-            collection_name=collection_name,
-            custom_document=custom_document,
-            db_host=db_host,
-            db_port=db_port,
-            db_extra_args=db_extra_args,
-            **properties,
+        properties.update(
+            {
+                cls._REQUIRED_DB_NAME_MONGO_PROPERTY: db_name,
+                cls._REQUIRED_COLLECTION_NAME_MONGO_PROPERTY: collection_name,
+            }
         )
+
+        if custom_document is not None:
+            properties[cls._OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY] = custom_document
+        if db_username is not None:
+            properties[cls._OPTIONAL_USERNAME_MONGO_PROPERTY] = db_username
+        if db_password is not None:
+            properties[cls._OPTIONAL_PASSWORD_MONGO_PROPERTY] = db_password
+        if db_host is not None:
+            properties[cls._OPTIONAL_HOST_MONGO_PROPERTY] = db_host
+        if db_port is not None:
+            properties[cls._OPTIONAL_PORT_MONGO_PROPERTY] = db_port
+        if db_extra_args is not None:
+            properties[cls._OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY] = db_extra_args
+
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_MONGO_COLLECTION, scope, **properties)
+
+    @staticmethod
+    def __configure(
+        id: str,
+        storage_type: Optional[str] = None,
+        scope: Optional[Scope] = None,
+        **properties,
+    ):
+        section = DataNodeConfig(id, storage_type, scope, **properties)
         Config._register(section)
         return Config.sections[DataNodeConfig.name][id]

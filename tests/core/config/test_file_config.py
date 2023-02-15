@@ -33,7 +33,6 @@ max_nb_of_workers = "2:int"
 
 [DATA_NODE.default]
 storage_type = "in_memory"
-scope = "SCENARIO:SCOPE"
 custom = "default_custom_prop"
 
 [DATA_NODE.dn1]
@@ -45,7 +44,6 @@ default_data = "dn1"
 [DATA_NODE.dn2]
 storage_type = "ENV[FOO]"
 scope = "SCENARIO:SCOPE"
-custom = "default_custom_prop"
 foo = "bar"
 default_data = "dn2"
 baz = "ENV[QUX]"
@@ -104,6 +102,7 @@ owner = "Raymond Kopa"
             quux="ENV[QUUZ]:bool",
             corge=("grault", "ENV[GARPLY]", "ENV[WALDO]:int", 3.0),
         )
+        assert dn2_cfg_v2.scope == Scope.SCENARIO
         t1_cfg_v2 = Config.configure_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
         p1_cfg_v2 = Config.configure_pipeline("p1", t1_cfg_v2, cron="daily")
         Config.configure_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")

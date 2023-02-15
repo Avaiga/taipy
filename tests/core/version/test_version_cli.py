@@ -24,19 +24,11 @@ from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.task._task_manager import _TaskManager
-from taipy.config._config import _Config
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
-
-def reset_configuration_singleton():
-    Config.unblock_update()
-    Config._default_config = _Config._default_config()
-    Config._python_config = _Config()
-    Config._file_config = None
-    Config._env_file_config = None
-    Config._applied_config = _Config._default_config()
+from ...conftest import init_config
 
 
 def test_version_cli_return_value():
@@ -549,7 +541,7 @@ def test_modify_config_properties_without_force():
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
 
-    reset_configuration_singleton()
+    init_config()
 
     scenario_config_2 = config_scenario_2()
 
@@ -576,10 +568,9 @@ def test_modify_config_properties_without_force():
     assert 'TASK "my_task" has attribute "inputs" modified' in error_message
     assert 'TASK "my_task" has attribute "function" modified' in error_message
     assert 'TASK "my_task" has attribute "outputs" modified' in error_message
+    assert 'DATA_NODE "d2" has attribute "has_header" modified' in error_message
+    assert 'DATA_NODE "d2" has attribute "exposed_type" modified' in error_message
 
-    # TODO: These should not in ["added_items"] since it is a default value that was changed. It should be fixed soon.
-    assert 'DATA_NODE "d2" has attribute "has_header" added' in error_message
-    assert 'DATA_NODE "d2" has attribute "exposed_type" added' in error_message
     assert 'Global Configuration "repository_properties" was added' in error_message
 
 
@@ -588,7 +579,7 @@ def twice(a):
 
 
 def config_scenario():
-    Config.configure_data_node(id="d0", storage_type="csv")
+    Config.configure_data_node(id="d0")
     data_node_1_config = Config.configure_data_node(
         id="d1", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
     )

@@ -58,8 +58,8 @@ class ParquetDataNode(DataNode):
             - _"exposed_type"_: The exposed type of the data read from Parquet file. The default value is `pandas`.\n
             - _"engine"_ `(Optional[str])`: Parquet library to use. Possible values are _"fastparquet"_ or _"pyarrow"_.
                 The default value is _"pyarrow"_.
-            - _"compression"_ `(Optional[str])`: Name of the compression to use. Use None for no compression.
-                `{'snappy', 'gzip', 'brotli', None}`, default `'snappy'`.\n
+            - _"compression"_ `(Optional[str])`: Name of the compression to use. Possible values are _"snappy"_,
+                _"gzip"_, _"brotli"_, or _"none"_ (no compression). The default value is _"snappy"_.\n
             - _"read_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.read_parquet_ method.\n
             - _"write_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.DataFrame.write_parquet_
                 method.
@@ -78,7 +78,7 @@ class ParquetDataNode(DataNode):
     __ENGINE_PROPERTY = "engine"
     __VALID_PARQUET_ENGINES = ["pyarrow", "fastparquet"]
     __COMPRESSION_PROPERTY = "compression"
-    __VALID_COMPRESSION_ALGORITHMS = ["snappy", "gzip", "brotli"]
+    __VALID_COMPRESSION_ALGORITHMS = ["snappy", "gzip", "brotli", "none"]
     __READ_KWARGS_PROPERTY = "read_kwargs"
     __WRITE_KWARGS_PROPERTY = "write_kwargs"
     _REQUIRED_PROPERTIES: List[str] = []
@@ -115,6 +115,8 @@ class ParquetDataNode(DataNode):
 
         if self.__COMPRESSION_PROPERTY not in properties.keys():
             properties[self.__COMPRESSION_PROPERTY] = "snappy"
+        if properties[self.__COMPRESSION_PROPERTY] == "none":
+            properties[self.__COMPRESSION_PROPERTY] = None
         if (
             properties[self.__COMPRESSION_PROPERTY]
             and properties[self.__COMPRESSION_PROPERTY] not in self.__VALID_COMPRESSION_ALGORITHMS

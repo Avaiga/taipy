@@ -86,6 +86,16 @@ class TestDataNodeConfigChecker:
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
 
+        config._sections[DataNodeConfig.name]["default"].storage_type = "json"
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["default"].storage_type = "parquet"
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
         config._sections[DataNodeConfig.name]["default"].storage_type = "in_memory"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
@@ -106,10 +116,10 @@ class TestDataNodeConfigChecker:
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 6
 
-        config._sections[DataNodeConfig.name]["default"].storage_type = "json"
+        config._sections[DataNodeConfig.name]["default"].storage_type = "mongo_collection"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 2
 
     def test_check_scope(self):
         config = Config._default_config

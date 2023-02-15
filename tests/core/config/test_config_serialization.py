@@ -113,9 +113,9 @@ scope = "SCENARIO:SCOPE"
 [DATA_NODE.test_csv_dn]
 storage_type = "csv"
 scope = "GLOBAL:SCOPE"
-has_header = "True:bool"
-exposed_type = "tests.core.config.test_config_serialization.CustomClass:class"
 path = "./test.csv"
+exposed_type = "tests.core.config.test_config_serialization.CustomClass:class"
+has_header = "True:bool"
 
 [DATA_NODE.test_json_dn]
 storage_type = "json"
@@ -250,10 +250,9 @@ def test_read_write_json_configuration_file():
 "test_csv_dn": {
 "storage_type": "csv",
 "scope": "GLOBAL:SCOPE",
-"default_path": null,
-"has_header": "True:bool",
+"path": "./test.csv",
 "exposed_type": "tests.core.config.test_config_serialization.CustomClass:class",
-"path": "./test.csv"
+"has_header": "True:bool"
 },
 "test_json_dn": {
 "storage_type": "json",
