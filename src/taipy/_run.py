@@ -67,11 +67,11 @@ def _run(*apps: t.List[_AppType], **kwargs) -> t.Optional[Flask]:
 if sys.version_info >= (3, 10):
     _TObj = t.TypeVar("_TObj", bound=_AppType)
 
-    def __typing_get(apps: t.Tuple[_AppType, ...], type: t.Type[_TObj]) -> t.Optional[_AppType]:
+    def __typing_get(apps: t.Tuple[_AppType, ...], type_: t.Type[_TObj]) -> t.Optional[_AppType]:
         def filter_isinstance(tl: _AppType) -> TypeGuard[_TObj]:
-            return isinstance(tl, type)
+            return isinstance(tl, type_)
 
         return next(filter(filter_isinstance, apps), None)
 else:
-    def __typing_get(apps: tuple[_AppType], type: t.Type[_AppType]) -> t.Optional[_AppType]:
-        return next(filter(lambda a: isinstance(type(a), type), apps), None)
+    def __typing_get(apps: tuple[_AppType], type_: t.Type[_AppType]) -> t.Optional[_AppType]:
+        return next(filter(lambda a: isinstance(type(a), type_), apps), None)
