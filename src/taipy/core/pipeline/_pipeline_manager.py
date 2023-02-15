@@ -12,13 +12,13 @@
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
-from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity_ids import _EntityIds
 from ..common.alias import CycleId, PipelineId, ScenarioId
+from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.pipeline_config import PipelineConfig
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
@@ -129,6 +129,7 @@ class _PipelineManager(_Manager[Pipeline]):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
+        check_inputs_are_ready: bool = True,
     ):
         callbacks = callbacks or []
         pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
@@ -136,6 +137,8 @@ class _PipelineManager(_Manager[Pipeline]):
         if pipeline is None:
             raise NonExistingPipeline(pipeline_id)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
+        if check_inputs_are_ready:
+            _warn_if_inputs_not_ready(pipeline._get_inputs())
         return (
             _TaskManagerFactory._build_manager()
             ._scheduler()

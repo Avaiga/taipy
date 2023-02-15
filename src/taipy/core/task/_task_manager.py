@@ -19,6 +19,7 @@ from .._scheduler._scheduler_factory import _SchedulerFactory
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity_ids import _EntityIds
 from ..common.alias import CycleId, PipelineId, ScenarioId, TaskId
+from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.task_config import TaskConfig
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
@@ -133,9 +134,12 @@ class _TaskManager(_Manager[Task]):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
+        check_inputs_are_ready: bool = True,
     ):
         task_id = task.id if isinstance(task, Task) else task
         task = cls._get(task_id)
         if task is None:
             raise NonExistingTask(task_id)
+        if check_inputs_are_ready:
+            _warn_if_inputs_not_ready(task.input.values())
         return cls._scheduler().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)

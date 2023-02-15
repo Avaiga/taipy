@@ -14,8 +14,9 @@ from unittest import mock
 
 import pytest
 
+from src.taipy.core import DataNode
 from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.common.alias import ScenarioId, TaskId
+from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
@@ -282,10 +283,10 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
 
 
 def test_submit_scenario():
-    with mock.patch("src.taipy.core.submit") as mock_submit:
+    with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mock_submit:
         scenario = Scenario("foo", [], {})
-        scenario.submit(False)
-        mock_submit.assert_called_once_with(scenario, False, False, None)
+        scenario.submit(force=False)
+        mock_submit.assert_called_once_with(scenario, None, False, False, None)
 
 
 def test_subscribe_scenario():
@@ -314,3 +315,108 @@ def test_remove_tag_scenario():
         scenario = Scenario("foo", [], {})
         scenario.remove_tag("tag")
         mock_remove_tag.assert_called_once_with(scenario, "tag")
+
+
+def test_get_inputs():
+    data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
+    data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
+    data_node_3 = DataNode("baz", Scope.PIPELINE, "s3")
+    data_node_4 = DataNode("qux", Scope.PIPELINE, "s4")
+    data_node_5 = DataNode("quux", Scope.PIPELINE, "s5")
+    data_node_6 = DataNode("quuz", Scope.PIPELINE, "s6")
+    data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_3, data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    scenario = Scenario("scenario", [pipeline_1, pipeline_2], {}, ScenarioId("s1"))
+    # s1 ---             ---> s3 ---> t2 ---> s5 ----
+    #       |           |                           |
+    #       |---> t1 ---|      -------------------------> t3 ---> s6
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    assert pipeline_1._get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_2._get_inputs() == {data_node_4, data_node_5}
+    assert scenario._get_inputs() == {data_node_1, data_node_2}
+
+    data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
+    data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
+    data_node_4 = DataNode("qux", Scope.PIPELINE, "s4")
+    data_node_5 = DataNode("quux", Scope.PIPELINE, "s5")
+    data_node_6 = DataNode("quuz", Scope.PIPELINE, "s6")
+    data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, None, [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    scenario = Scenario("scenario", [pipeline_1, pipeline_2], {}, ScenarioId("s1"))
+    # s1 ---      t2 ---> s5 ------
+    #       |                     |
+    #       |---> t1 ---|      -----> t3 ---> s6
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    assert pipeline_1._get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_2._get_inputs() == {data_node_4, data_node_5}
+    assert scenario._get_inputs() == {data_node_1, data_node_2}
+
+    data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
+    data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
+    data_node_4 = DataNode("qux", Scope.PIPELINE, "s4")
+    data_node_5 = DataNode("quux", Scope.PIPELINE, "s5")
+    data_node_6 = DataNode("quuz", Scope.PIPELINE, "s6")
+    data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
+    data_node_8 = DataNode("d8", Scope.PIPELINE, "s8")
+    data_node_9 = DataNode("d9", Scope.PIPELINE, "s9")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
+    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    pipeline_3 = Pipeline("thud", {}, [task_5, task_6], PipelineId("p3"))
+    scenario = Scenario("scenario", [pipeline_1, pipeline_2, pipeline_3], {}, ScenarioId("s1"))
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    #                                              |
+    # s8 -------> t5 -------> s9 ------------------
+    assert pipeline_1._get_inputs() == {data_node_1, data_node_2, data_node_6}
+    assert pipeline_2._get_inputs() == {data_node_4, data_node_5}
+    assert pipeline_3._get_inputs() == {data_node_7, data_node_8}
+    assert scenario._get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
+
+    data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
+    data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
+    data_node_4 = DataNode("qux", Scope.PIPELINE, "s4")
+    data_node_5 = DataNode("quux", Scope.PIPELINE, "s5")
+    data_node_6 = DataNode("quuz", Scope.PIPELINE, "s6")
+    data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
+    data_node_8 = DataNode("hugh", Scope.PIPELINE, "s8")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, output=[data_node_5], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4, data_node_6], [data_node_7], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_8], None, TaskId("t5"))
+    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    pipeline_3 = Pipeline("p3", {}, [task_5], PipelineId("p3"))
+    scenario = Scenario("scenario", [pipeline_1, pipeline_2, pipeline_3], {}, ScenarioId("sc1"))
+    # s1 ---
+    #       |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    # t2 ---> s5                   |
+    # s8 ---> t5              s6 --|
+    assert pipeline_1._get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_2._get_inputs() == {data_node_4, data_node_6}
+    assert pipeline_3._get_inputs() == {data_node_8}
+    assert scenario._get_inputs() == {data_node_1, data_node_2, data_node_8, data_node_6}

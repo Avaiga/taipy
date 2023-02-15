@@ -25,6 +25,7 @@ from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.task._task_manager import _TaskManager
@@ -999,3 +1000,64 @@ def test_data_node_creation_scenario():
     assert pipeline_1.my_global_input_2.id == pipeline_2.my_global_input_2.id
     assert pipeline_1.my_inter.id == pipeline_2.my_inter.id
     assert pipeline_1.my_output.id == pipeline_2.my_output.id
+
+
+def my_print(a, b):
+    print(a + b)
+
+
+def test_submit_task_with_input_dn_wrong_file_path(caplog):
+    csv_dn_cfg = Config.configure_csv_data_node("wrong_csv_file_path", default_path="wrong_path.csv")
+    pickle_dn_cfg = Config.configure_pickle_data_node("wrong_pickle_file_path", default_path="wrong_path.pickle")
+    parquet_dn_cfg = Config.configure_parquet_data_node("wrong_parquet_file_path", default_path="wrong_path.parquet")
+    json_dn_cfg = Config.configure_parquet_data_node("wrong_json_file_path", default_path="wrong_path.json")
+    task_cfg = Config.configure_task("task", my_print, [csv_dn_cfg, pickle_dn_cfg], parquet_dn_cfg)
+    task_2_cfg = Config.configure_task("task2", my_print, [csv_dn_cfg, parquet_dn_cfg], json_dn_cfg)
+    pipeline_cfg = Config.configure_pipeline("pipeline", [task_cfg, task_2_cfg])
+    pip_manager = _PipelineManagerFactory._build_manager()
+    pipeline = pip_manager._get_or_create(pipeline_cfg)
+    pip_manager._submit(pipeline)
+
+    stdout = caplog.text
+    expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in pipeline._get_inputs()
+    ]
+    not_expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in pipeline.data_nodes.values()
+        if input_dn not in pipeline._get_inputs()
+    ]
+    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+
+
+def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
+    csv_dn_cfg = Config.configure_csv_data_node("wrong_csv_file_path", default_path="wrong_path.csv")
+    pickle_dn_cfg = Config.configure_pickle_data_node("wrong_pickle_file_path", default_data="value")
+    parquet_dn_cfg = Config.configure_parquet_data_node("wrong_parquet_file_path", default_path="wrong_path.parquet")
+    json_dn_cfg = Config.configure_parquet_data_node("wrong_json_file_path", default_path="wrong_path.json")
+    task_cfg = Config.configure_task("task", my_print, [csv_dn_cfg, pickle_dn_cfg], parquet_dn_cfg)
+    task_2_cfg = Config.configure_task("task2", my_print, [csv_dn_cfg, parquet_dn_cfg], json_dn_cfg)
+    pipeline_cfg = Config.configure_pipeline("pipeline", [task_cfg, task_2_cfg])
+    pip_manager = _PipelineManagerFactory._build_manager()
+    pipeline = pip_manager._get_or_create(pipeline_cfg)
+    pip_manager._submit(pipeline)
+
+    stdout = caplog.text
+    expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in pipeline._get_inputs()
+        if input_dn.config_id == "wrong_csv_file_path"
+    ]
+    not_expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in pipeline.data_nodes.values()
+        if input_dn.config_id != "wrong_csv_file_path"
+    ]
+    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all([expected_output not in stdout for expected_output in not_expected_outputs])

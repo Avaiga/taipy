@@ -21,7 +21,6 @@ from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..common.alias import JobId
-from ..data import CSVDataNode, DataNode, ExcelDataNode, JSONDataNode, ParquetDataNode, PickleDataNode
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
@@ -182,29 +181,9 @@ class _Scheduler(_AbstractScheduler):
         Returns:
              True if one of its input data nodes is blocked.
         """
-
-        data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
+        input_data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
         data_manager = _DataManagerFactory._build_manager()
-
-        def get_dn_is_ready_for_reading(dn: DataNode):
-            dn = data_manager._get(dn.id)
-            if dn.is_ready_for_reading is False and not dn._last_edit_date:
-                if dn.storage_type() in [
-                    CSVDataNode.storage_type(),
-                    ExcelDataNode.storage_type(),
-                    JSONDataNode.storage_type(),
-                    PickleDataNode.storage_type(),
-                    ParquetDataNode.storage_type(),
-                ]:
-                    cls.__logger.warning(
-                        f"{dn.id} cannot be read because it has never been written. Hint: The data node may refer to "
-                        f"a wrong path : {dn.path} "
-                    )
-                else:
-                    cls.__logger.warning(f"{dn.id} cannot be read because it has never been written.")
-            return dn.is_ready_for_reading
-
-        return any(not get_dn_is_ready_for_reading(dn) for dn in data_nodes)
+        return any(not data_manager._get(dn.id).is_ready_for_reading for dn in input_data_nodes)
 
     @staticmethod
     def _unlock_edit_on_jobs_outputs(jobs: Union[Job, List[Job], Set[Job]]):

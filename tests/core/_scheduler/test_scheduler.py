@@ -146,31 +146,6 @@ def test_submit_task_that_return_multiple_outputs():
     )
 
 
-def test_submit_task_with_input_dn_wrong_file_path(caplog):
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    csv_dn_cfg = Config.configure_csv_data_node("wrong_csv_file_path", default_path="wrong_path.csv")
-    excel_dn_cfg = Config.configure_excel_data_node("wrong_excel_file_path", default_path="wrong_path.xlsx")
-    json_dn_cfg = Config.configure_json_data_node("wrong_json_file_path", default_path="wrong_path.json")
-    pickle_dn_cfg = Config.configure_pickle_data_node("wrong_pickle_file_path", default_path="wrong_path.pickle")
-    parquet_dn_cfg = Config.configure_parquet_data_node("wrong_parquet_file_path", default_path="wrong_path.parquet")
-    input_dn_cfgs = [csv_dn_cfg, excel_dn_cfg, json_dn_cfg, pickle_dn_cfg, parquet_dn_cfg]
-
-    _SchedulerFactory._build_dispatcher()
-    input_dns = [_DataManager._bulk_get_or_create([input_dn_cfg])[input_dn_cfg] for input_dn_cfg in input_dn_cfgs]
-    tasks = [Task(f"task_cfg_{i}", {}, print, input=[input_dn]) for i, input_dn in enumerate(input_dns)]
-
-    jobs = [_Scheduler.submit_task(task) for task in tasks]
-    assert all(job.is_blocked() for job in jobs)
-
-    stdout = caplog.text
-    expected_outputs = [
-        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
-        f"path : {input_dn.path} "
-        for input_dn in input_dns
-    ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-
-
 def test_submit_task_returns_single_iterable_output():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 

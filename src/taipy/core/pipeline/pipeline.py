@@ -24,6 +24,7 @@ from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
+from ..common._submittable import _Submittable
 from ..common._utils import _Subscriber
 from ..common._warnings import _warn_deprecated
 from ..common.alias import PipelineId, TaskId
@@ -33,7 +34,7 @@ from ..job.job import Job
 from ..task.task import Task
 
 
-class Pipeline(_Entity):
+class Pipeline(_Entity, _Submittable):
     """List of `Task^`s and additional attributes representing a set of data processing
     elements connected as a direct acyclic graph.
 
@@ -63,16 +64,66 @@ class Pipeline(_Entity):
         subscribers: List[_Subscriber] = None,
         version: str = None,
     ):
+        super().__init__(subscribers)
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
+        self._tasks = tasks
         self.owner_id = owner_id
         self._parent_ids = parent_ids or set()
+        self._properties = _Properties(self, **properties)
+        self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+
+    @staticmethod
+    def _new_id(config_id: str) -> PipelineId:
+        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
+
+    def __getstate__(self):
+        return self.id
+
+    def __setstate__(self, id):
+        from ... import core as tp
+
+        p = tp.get(id)
+        self.__dict__ = p.__dict__
+
+    def __hash__(self):
+        return hash(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __getattr__(self, attribute_name):
+        protected_attribute_name = _validate_id(attribute_name)
+        if protected_attribute_name in self._properties:
+            return _tpl._replace_templates(self._properties[protected_attribute_name])
+        tasks = self._get_tasks()
+        if protected_attribute_name in tasks:
+            return tasks[protected_attribute_name]
+        for task in tasks.values():
+            if protected_attribute_name in task.input:
+                return task.input[protected_attribute_name]
+            if protected_attribute_name in task.output:
+                return task.output[protected_attribute_name]
+        raise AttributeError(f"{attribute_name} is not an attribute of pipeline {self.id}")
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def tasks(self):
+        return self._get_tasks()
+
+    @tasks.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def tasks(self, tasks: Union[List[TaskId], List[Task]]):
         self._tasks = tasks
 
-        self._subscribers = _ListAttributes(self, subscribers or list())
-        self._properties = _Properties(self, **properties)
-
-        self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+    @property
+    def data_nodes(self) -> Dict[str, DataNode]:
+        data_nodes = {}
+        list_data_nodes = [task.data_nodes for task in self._get_tasks().values()]
+        for data_node in list_data_nodes:
+            for k, v in data_node.items():
+                data_nodes[k] = v
+        return data_nodes
 
     @property  # type: ignore
     def parent_id(self):
@@ -95,47 +146,6 @@ class Pipeline(_Entity):
     def parent_ids(self):
         return self._parent_ids
 
-    def __getstate__(self):
-        return self.id
-
-    def __setstate__(self, id):
-        import taipy.core as tp
-
-        p = tp.get(id)
-        self.__dict__ = p.__dict__
-
-    def __hash__(self):
-        return hash(self.id)
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def tasks(self):
-        return self._get_tasks()
-
-    @tasks.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def tasks(self, tasks: Union[List[TaskId], List[Task]]):
-        self._tasks = tasks
-
-    @property
-    def data_nodes(self) -> Dict[str, DataNode]:
-        data_nodes = {}
-        list_data_nodes = [task.data_nodes for task in self._get_tasks().values()]
-        for data_node in list_data_nodes:
-            for k, v in data_node.items():
-                data_nodes[k] = v
-        return data_nodes
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def subscribers(self):
-        return self._subscribers
-
-    @subscribers.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def subscribers(self, val):
-        self._subscribers = val or set()
-
     @property  # type: ignore
     def version(self):
         return self._version
@@ -145,29 +155,8 @@ class Pipeline(_Entity):
         self._properties = _reload("pipeline", self)._properties
         return self._properties
 
-    def __eq__(self, other):
-        return self.id == other.id
-
-    @staticmethod
-    def _new_id(config_id: str) -> PipelineId:
-        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
-
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
-        tasks = self._get_tasks()
-        if protected_attribute_name in tasks:
-            return tasks[protected_attribute_name]
-        for task in tasks.values():
-            if protected_attribute_name in task.input:
-                return task.input[protected_attribute_name]
-            if protected_attribute_name in task.output:
-                return task.output[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of pipeline {self.id}")
-
     def _is_consistent(self) -> bool:
-        dag = self.__build_dag()
+        dag = self._build_dag()
         if not nx.is_directed_acyclic_graph(dag):
             return False
         is_data_node = True
@@ -180,21 +169,7 @@ class Pipeline(_Entity):
             is_data_node = not is_data_node
         return True
 
-    def __build_dag(self):
-        graph = nx.DiGraph()
-        tasks = self._get_tasks()
-        for task in tasks.values():
-            if has_input := task.input:
-                for predecessor in task.input.values():
-                    graph.add_edges_from([(predecessor, task)])
-            if has_output := task.output:
-                for successor in task.output.values():
-                    graph.add_edges_from([(task, successor)])
-            if not has_input and not has_output:
-                graph.add_node(task)
-        return graph
-
-    def _get_tasks(self):
+    def _get_tasks(self) -> Dict[str, Task]:
         from ..task._task_manager_factory import _TaskManagerFactory
 
         tasks = {}
@@ -217,21 +192,8 @@ class Pipeline(_Entity):
     def subscribers(self, val):
         self._subscribers = _ListAttributes(self, val)
 
-    def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
-        params = [] if params is None else params
-        self._subscribers.append(_Subscriber(callback=callback, params=params))
-
-    def _remove_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
-        if params is not None:
-            self._subscribers.remove(_Subscriber(callback, params))
-        else:
-            elem = [x for x in self._subscribers if x.callback == callback]
-            if not elem:
-                raise ValueError
-            self._subscribers.remove(elem[0])
-
     def _get_sorted_tasks(self) -> List[List[Task]]:
-        dag = self.__build_dag()
+        dag = self._build_dag()
         remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
         dag.remove_nodes_from(remove)
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))

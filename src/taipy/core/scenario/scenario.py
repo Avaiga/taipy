@@ -24,17 +24,20 @@ from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
+from ..common._submittable import _Submittable
 from ..common._utils import _Subscriber
 from ..common.alias import PipelineId, ScenarioId
 from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
-from ..exceptions.exceptions import NonExistingPipeline
+from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
+from ..task._task_manager_factory import _TaskManagerFactory
+from ..task.task import Task
 
 
-class Scenario(_Entity):
+class Scenario(_Entity, _Submittable):
     """Instance of a Business case to solve.
 
     A scenario holds a list of pipelines (instances of `Pipeline^` class) to submit for execution
@@ -71,17 +74,21 @@ class Scenario(_Entity):
         tags: Set[str] = None,
         version: str = None,
     ):
+        super().__init__(subscribers)
         self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
         self._pipelines = pipelines
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
-        self._subscribers = _ListAttributes(self, subscribers or list())
         self._primary_scenario = is_primary
         self._tags = tags or set()
+        self._properties = _Properties(self, **properties)
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
-        self._properties = _Properties(self, **properties)
+    @staticmethod
+    def _new_id(config_id: str) -> ScenarioId:
+        """Generate a unique scenario identifier."""
+        return ScenarioId(Scenario.__SEPARATOR.join([Scenario._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
 
     def __getstate__(self):
         return self.id
@@ -95,6 +102,27 @@ class Scenario(_Entity):
     def __hash__(self):
         return hash(self.id)
 
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __getattr__(self, attribute_name):
+        protected_attribute_name = _validate_id(attribute_name)
+        if protected_attribute_name in self._properties:
+            return _tpl._replace_templates(self._properties[protected_attribute_name])
+        pipelines = self.pipelines
+        if protected_attribute_name in pipelines:
+            return pipelines[protected_attribute_name]
+        for pipeline in pipelines.values():
+            tasks = pipeline.tasks
+            if protected_attribute_name in tasks:
+                return tasks[protected_attribute_name]
+            for task in tasks.values():
+                if protected_attribute_name in task.input:
+                    return task.input[protected_attribute_name]
+                if protected_attribute_name in task.output:
+                    return task.output[protected_attribute_name]
+        raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
+
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def pipelines(self):
@@ -104,6 +132,22 @@ class Scenario(_Entity):
     @_self_setter(_MANAGER_NAME)
     def pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
         self._pipelines = pipelines
+
+    @property
+    def tasks(self) -> Dict[str, Task]:
+        task_manager = _TaskManagerFactory._build_manager()
+        tasks = {}
+        list_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
+        for task in list_tasks:
+            for k, v in task.items():
+                t = task_manager._get(v, v)
+                if not isinstance(t, Task):
+                    raise NonExistingTask(v)
+                tasks[k] = v
+        return tasks
+
+    def _get_tasks(self) -> Dict[str, Task]:
+        return self.tasks
 
     @property
     def data_nodes(self) -> Dict[str, DataNode]:
@@ -183,40 +227,6 @@ class Scenario(_Entity):
     def name(self, val):
         self._properties["name"] = val
 
-    def __eq__(self, other):
-        return self.id == other.id
-
-    @staticmethod
-    def _new_id(config_id: str) -> ScenarioId:
-        """Generate a unique scenario identifier."""
-        return ScenarioId(Scenario.__SEPARATOR.join([Scenario._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
-
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
-        pipelines = self.pipelines
-        if protected_attribute_name in pipelines:
-            return pipelines[protected_attribute_name]
-        for pipeline in pipelines.values():
-            tasks = pipeline.tasks
-            if protected_attribute_name in tasks:
-                return tasks[protected_attribute_name]
-            for task in tasks.values():
-                if protected_attribute_name in task.input:
-                    return task.input[protected_attribute_name]
-                if protected_attribute_name in task.output:
-                    return task.output[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
-
-    def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
-        params = [] if params is None else params
-        self._subscribers.append(_Subscriber(callback=callback, params=params))
-
-    def _add_tag(self, tag: str):
-        self._tags = _reload("scenario", self)._tags
-        self._tags.add(tag)
-
     def has_tag(self, tag: str) -> bool:
         """Indicate if the scenario has a given tag.
 
@@ -227,14 +237,9 @@ class Scenario(_Entity):
         """
         return tag in self.tags
 
-    def _remove_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
-        if params is not None:
-            self._subscribers.remove(_Subscriber(callback, params))
-        else:
-            elem = [x for x in self._subscribers if x.callback == callback]
-            if not elem:
-                raise ValueError
-            self._subscribers.remove(elem[0])
+    def _add_tag(self, tag: str):
+        self._tags = _reload("scenario", self)._tags
+        self._tags.add(tag)
 
     def _remove_tag(self, tag: str):
         self._tags = _reload("scenario", self)._tags
@@ -267,6 +272,7 @@ class Scenario(_Entity):
 
         Parameters:
             callback (Callable[[Scenario^, Job^], None]): The callable function to unsubscribe.
+            params (Optional[List[Any]]): The parameters to be passed to the _callback_.
 
         Note:
             The function will continue to be called for ongoing jobs.
@@ -275,21 +281,29 @@ class Scenario(_Entity):
 
         return tp.unsubscribe_scenario(callback, params, self)
 
-    def submit(self, force: bool = False, wait: bool = False, timeout: Optional[Union[float, int]] = None):
+    def submit(
+        self,
+        callbacks: Optional[List[Callable]] = None,
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
+    ):
         """Submit this scenario for execution.
 
         All the `Task^`s of the scenario will be submitted for execution.
 
         Parameters:
+            callbacks (List[Callable]): The list of callable functions to be called on status
+                change.
             force (bool): Force execution even if the data nodes are in cache.
             wait (bool): Wait for the scheduled jobs created from the scenario submission to be finished in
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
         """
-        from ... import core as tp
+        from ._scenario_manager_factory import _ScenarioManagerFactory
 
-        return tp.submit(self, force, wait, timeout)
+        return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
 
     def export(
         self,

@@ -13,12 +13,14 @@ import uuid
 
 import pytest
 
+from src.taipy.core import taipy
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core.common.alias import TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -340,6 +342,60 @@ def test_submit_task():
     _TaskManager._submit(task_1)
     assert len(MockScheduler.submit_ids) == 3
     assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
+
+
+def my_print(a, b):
+    print(a + b)
+
+
+def test_submit_task_with_input_dn_wrong_file_path(caplog):
+    csv_dn_cfg = Config.configure_csv_data_node("wrong_csv_file_path", default_path="wrong_path.csv")
+    pickle_dn_cfg = Config.configure_pickle_data_node("wrong_pickle_file_path", default_path="wrong_path.pickle")
+    parquet_dn_cfg = Config.configure_parquet_data_node("wrong_parquet_file_path", default_path="wrong_path.parquet")
+    task_cfg = Config.configure_task("task", my_print, [csv_dn_cfg, pickle_dn_cfg], parquet_dn_cfg)
+    task_manager = _TaskManagerFactory._build_manager()
+    tasks = task_manager._bulk_get_or_create([task_cfg])
+    task = tasks[0]
+    taipy.submit(task)
+
+    stdout = caplog.text
+    expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in task.input.values()
+    ]
+    not_expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in task.output.values()
+    ]
+    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+
+
+def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
+    csv_dn_cfg = Config.configure_csv_data_node("wrong_csv_file_path", default_path="wrong_path.csv")
+    pickle_dn_cfg = Config.configure_pickle_data_node("pickle_file_path", default_data="value")
+    parquet_dn_cfg = Config.configure_parquet_data_node("wrong_parquet_file_path", default_path="wrong_path.parquet")
+    task_cfg = Config.configure_task("task", my_print, [csv_dn_cfg, pickle_dn_cfg], parquet_dn_cfg)
+    task_manager = _TaskManagerFactory._build_manager()
+    tasks = task_manager._bulk_get_or_create([task_cfg])
+    task = tasks[0]
+    taipy.submit(task)
+
+    stdout = caplog.text
+    expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in [task.input["wrong_csv_file_path"]]
+    ]
+    not_expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in [task.input["pickle_file_path"], task.output["wrong_parquet_file_path"]]
+    ]
+    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
 
 
 def _create_task_from_config(task_config, *args, **kwargs):

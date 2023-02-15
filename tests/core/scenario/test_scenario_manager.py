@@ -38,6 +38,7 @@ from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
@@ -973,6 +974,69 @@ def test_submit():
     assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
 
     _TaskManager._scheduler = _SchedulerFactory._build_scheduler
+
+
+def my_print(a, b):
+    print(a + b)
+
+
+def test_submit_task_with_input_dn_wrong_file_path(caplog):
+    csv_dn_cfg = Config.configure_csv_data_node("wrong_csv_file_path", default_path="wrong_path.csv")
+    pickle_dn_cfg = Config.configure_pickle_data_node("wrong_pickle_file_path", default_path="wrong_path.pickle")
+    parquet_dn_cfg = Config.configure_parquet_data_node("wrong_parquet_file_path", default_path="wrong_path.parquet")
+    json_dn_cfg = Config.configure_parquet_data_node("wrong_json_file_path", default_path="wrong_path.json")
+    task_cfg = Config.configure_task("task", my_print, [csv_dn_cfg, pickle_dn_cfg], parquet_dn_cfg)
+    task_2_cfg = Config.configure_task("task2", my_print, [csv_dn_cfg, parquet_dn_cfg], json_dn_cfg)
+    pipeline_cfg = Config.configure_pipeline("pipeline", [task_cfg, task_2_cfg])
+    scenario_cfg = Config.configure_scenario("scenario", [pipeline_cfg])
+    sc_manager = _ScenarioManagerFactory._build_manager()
+    scenario = sc_manager._create(scenario_cfg)
+    sc_manager._submit(scenario)
+
+    stdout = caplog.text
+    expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in scenario._get_inputs()
+    ]
+    not_expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in scenario.data_nodes.values()
+        if input_dn not in scenario._get_inputs()
+    ]
+    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+
+
+def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
+    csv_dn_cfg = Config.configure_csv_data_node("wrong_csv_file_path", default_path="wrong_path.csv")
+    pickle_dn_cfg = Config.configure_pickle_data_node("wrong_pickle_file_path", default_data="value")
+    parquet_dn_cfg = Config.configure_parquet_data_node("wrong_parquet_file_path", default_path="wrong_path.parquet")
+    json_dn_cfg = Config.configure_parquet_data_node("wrong_json_file_path", default_path="wrong_path.json")
+    task_cfg = Config.configure_task("task", my_print, [csv_dn_cfg, pickle_dn_cfg], parquet_dn_cfg)
+    task_2_cfg = Config.configure_task("task2", my_print, [csv_dn_cfg, parquet_dn_cfg], json_dn_cfg)
+    pipeline_cfg = Config.configure_pipeline("pipeline", [task_cfg, task_2_cfg])
+    scenario_cfg = Config.configure_scenario("scenario", [pipeline_cfg])
+    sce_manager = _ScenarioManagerFactory._build_manager()
+    scenario = sce_manager._create(scenario_cfg)
+    sce_manager._submit(scenario)
+
+    stdout = caplog.text
+    expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in scenario._get_inputs()
+        if input_dn.config_id == "wrong_csv_file_path"
+    ]
+    not_expected_outputs = [
+        f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
+        f"path : {input_dn.path} "
+        for input_dn in scenario.data_nodes.values()
+        if input_dn.config_id != "wrong_csv_file_path"
+    ]
+    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
 
 
 def subtraction(n1, n2):

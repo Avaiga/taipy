@@ -19,6 +19,7 @@ from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity_ids import _EntityIds
 from ..common.alias import ScenarioId
+from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
@@ -136,19 +137,24 @@ class _ScenarioManager(_Manager[Scenario]):
     def _submit(
         cls,
         scenario: Union[Scenario, ScenarioId],
+        callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
+        check_inputs_are_ready: bool = True,
     ):
         scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
         scenario = cls._get(scenario_id)
         if scenario is None:
             raise NonExistingScenario(scenario_id)
-        callbacks = cls.__get_status_notifier_callbacks(scenario)
+        callbacks = callbacks or []
+        callbacks = cls.__get_status_notifier_callbacks(scenario) + callbacks
+        if check_inputs_are_ready:
+            _warn_if_inputs_not_ready(scenario._get_inputs())
         jobs_in_pipelines = {}
         for pipeline in scenario.pipelines.values():
             jobs_in_pipelines[pipeline.id] = _PipelineManagerFactory._build_manager()._submit(
-                pipeline, callbacks=callbacks, force=force, wait=wait, timeout=timeout
+                pipeline, callbacks=callbacks, force=force, wait=wait, timeout=timeout, check_inputs_are_ready=False
             )
         return jobs_in_pipelines
 
