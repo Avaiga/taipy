@@ -36,9 +36,9 @@ def _run(*apps: t.List[_AppType], **kwargs) -> t.Optional[Flask]:
         **kwargs: Other parameters to provide to the services.
     """
 
-    gui = __typing_get(apps, Gui)
-    rest = __typing_get(apps, Rest)
-    core = __typing_get(apps, Core)
+    gui = __get_app(apps, Gui)
+    rest = __get_app(apps, Rest)
+    core = __get_app(apps, Core)
 
     if gui and core:
         from taipy.core._version._version_cli import _VersioningCLI
@@ -65,12 +65,11 @@ def _run(*apps: t.List[_AppType], **kwargs) -> t.Optional[Flask]:
 
 
 if sys.version_info >= (3, 10):
-
-    def __typing_get(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
+    def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
         def filter_isinstance(tl: _AppType) -> TypeGuard[_AppTypeT]:
             return isinstance(tl, type_)
 
         return next(filter(filter_isinstance, apps), None)
 else:
-    def __typing_get(apps: tuple[_AppType], type_: _AppTypeT) -> t.Optional[_AppType]:
+    def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
         return next(filter(lambda a: isinstance(type(a), type_), apps), None)
