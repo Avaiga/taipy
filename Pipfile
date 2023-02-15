@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 taipy-gui = {git="https://git@github.com/Avaiga/taipy-gui.git@develop"}
 taipy-rest = {git="https://git@github.com/Avaiga/taipy-rest.git@develop"}
-typing-extensions = {version=">4.1.0", markers="python_version < '3.10'"}
 tox = "*"
 
 [dev-packages]

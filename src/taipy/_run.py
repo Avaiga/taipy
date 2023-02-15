@@ -18,13 +18,14 @@ from taipy.gui import Gui
 from taipy.rest import Rest
 from taipy.core import Core
 
-if sys.version_info < (3, 10):
-    from typing_extensions import TypeGuard
-else:
+if sys.version_info >= (3, 10):
     from typing import TypeGuard
 
+_AppType = t.Union[Gui, Rest, Core]
+_AppTypeT = t.TypeVar("_AppTypeT", Gui, Rest, Core)
 
-def _run(*apps: t.Union[Gui, Rest, Core], **kwargs) -> t.Optional[Flask]:
+
+def _run(*apps: t.List[_AppType], **kwargs) -> t.Optional[Flask]:
     """Run one or multiple Taipy services.
 
     A Taipy service is an instance of a class that runs code as a Web application.
@@ -36,9 +37,9 @@ def _run(*apps: t.Union[Gui, Rest, Core], **kwargs) -> t.Optional[Flask]:
         **kwargs: Other parameters to provide to the services.
     """
 
-    gui = __typing_get(apps, Gui)
-    rest = __typing_get(apps, Rest)
-    core = __typing_get(apps, Core)
+    gui = __get_app(apps, Gui)
+    rest = __get_app(apps, Rest)
+    core = __get_app(apps, Core)
 
     if gui and core:
         from taipy.core._version._version_cli import _VersioningCLI
@@ -60,15 +61,16 @@ def _run(*apps: t.Union[Gui, Rest, Core], **kwargs) -> t.Optional[Flask]:
         return gui.run(**kwargs)
     else:
         app = rest or gui
-        assert app is not None  # for pyright typing
+        assert app is not None  # Avoid pyright typing error
         return app.run(**kwargs)
 
 
-_TObj = t.TypeVar("_TObj", bound=t.Union[Gui, Core, Rest])
+if sys.version_info >= (3, 10):
+    def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
+        def filter_isinstance(tl: _AppType) -> TypeGuard[_AppTypeT]:
+            return isinstance(tl, type_)
 
-
-def __typing_get(tup_obj: t.Tuple[t.Union[Gui, Core, Rest], ...], type_: t.Type[_TObj]) -> t.Optional[_TObj]:
-    def filter_isinstance(tl: t.Union[Gui, Core, Rest]) -> TypeGuard[_TObj]:
-        return isinstance(tl, type_)
-
-    return next(filter(filter_isinstance, tup_obj), None)
+        return next(filter(filter_isinstance, apps), None)
+else:
+    def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
+        return next(filter(lambda a: isinstance(a, type_), apps), None)
