@@ -103,6 +103,7 @@ class _VariableDirectory:
 
 
 _MODULE_NAME_MAP: t.List[str] = []
+_RE_HAS_TPMDL = re.compile(r".*_TPMDL_.*")
 _RE_TPMDL_DECODE = re.compile(r"(.*?)_TPMDL_(\d+)$")
 
 

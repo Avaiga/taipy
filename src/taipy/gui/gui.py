@@ -81,7 +81,7 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
+from .utils._variable_directory import _RE_HAS_TPMDL, _VariableDirectory
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 from .renderers.utils import _get_columns_dict
 
@@ -1305,7 +1305,7 @@ class Gui:
         return encoded_var_name
 
     def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
-        if not _RE_TPMDL_DECODE.match(var_name):
+        if not _RE_HAS_TPMDL.match(var_name):
             var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)
