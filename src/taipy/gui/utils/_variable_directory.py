@@ -103,7 +103,7 @@ class _VariableDirectory:
 
 
 _MODULE_NAME_MAP: t.List[str] = []
-_RE_TPMDL_DECODE = re.compile(r"(.*?)_TPMDL_(.*)")
+_RE_TPMDL_DECODE = re.compile(r"(.*?)_TPMDL_(\d+)$")
 
 
 def _variable_encode(var_name: str, module_name: t.Optional[str]):

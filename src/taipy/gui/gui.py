@@ -83,6 +83,7 @@ from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
+from .renderers.utils import _get_columns_dict
 
 
 class Gui:
@@ -168,6 +169,8 @@ class Gui:
     __CONTENT_ROOT = "/taipy-content/"
     __UPLOAD_URL = "/taipy-uploads"
     _EXTENSION_ROOT = "/taipy-extension/"
+    __SELF_VAR = "__gui"
+    __JSON_DO_NOT_UPDATE = "Taipy: Do not update"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -497,12 +500,12 @@ class Gui:
         if var_name.startswith(_HOLDER_PREFIX):
             for hp in _HOLDER_PREFIXES:
                 if var_name.startswith(hp):
-                    var_name = var_name[len(hp) :]
+                    var_name = var_name[len(hp):]
                     break
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
-            suffix_var_name = var_name[first_dot_index + 1 :]
+            suffix_var_name = var_name[first_dot_index + 1:]
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
@@ -957,7 +960,35 @@ class Gui:
     def _is_expression(self, expr: str) -> bool:
         return self.__evaluator._is_expression(expr)
 
+    # make components resettable
+
+    def _calculate_table_columns(self, reset: bool, reset_hash: t.Optional[str],
+                                    data: t.Any, data_hash: str,
+                                    columns: t.Any, columns_hash: t.Optional[str],
+                                    date_format: str, number_format: str) -> t.Tuple[t.Dict[str, t.Dict[str, t.Any]], t.Dict[str, str], t.Optional[str]]:
+        col_types = self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
+        columns_str = columns if isinstance(columns, str) else ""
+        columns = _get_columns_dict(data, columns, col_types, date_format, number_format)
+        expr_hash: t.Optional[str] = None
+        if data_hash and (reset_hash or reset):
+            empty_str = '""'
+            columns_var_name = self.__get_real_var_name(columns_hash)[0] if columns_hash else empty_str
+            reset_var_name = self.__get_real_var_name(reset_hash)[0] if reset_hash else empty_str
+            expr_hash = self._evaluate_expr(
+                "{"+f"{Gui.__SELF_VAR}._calculate_table_columns_eval({reset}, {reset_var_name}, {self.__get_real_var_name(data_hash)[0]}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format}', '{number_format or ''}')" + "}")
+        return columns, col_types, expr_hash
+
+    def _calculate_table_columns_eval(self, reset: bool, reset_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
+        try:
+            reset = reset_val if isinstance(reset_val, bool) else reset
+            if reset:
+                return json.dumps(_get_columns_dict(data, columns_val if columns_val else columns, self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)), date_format, number_format))
+        except Exception as e:
+            warnings.warn(f"Exception while calculating dynamic table columns {e}")
+        return Gui.__JSON_DO_NOT_UPDATE
+
     # Proxy methods for Adapter
+
     def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter._add_for_type(type_name, adapter)
 
@@ -1717,8 +1748,9 @@ class Gui:
         self.__bind_default_function()
 
         # base global ctx is TaipyHolder classes + script modules and callables
-        glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
+        glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
+        glob_ctx.update({Gui.__SELF_VAR: self})
         self.__evaluator = _Evaluator(glob_ctx)
 
         self.__register_blueprint()

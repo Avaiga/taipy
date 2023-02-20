@@ -42,6 +42,38 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
 };
 
 /**
+ * A React hook to manage a dynamic json property.
+ *
+ * A dynamic scalar property  is defined by a default property and a bound property.
+ * @typeParam T - The dynamic property type.
+ * @param value - The bound value.
+ * @param defaultValue - The default value.
+ * @param defaultStatic - The default static value.
+ * @returns The latest updated value.
+ */
+export const useDynamicJsonProperty = <T>(value: string | T, defaultValue: string, defaultStatic: T): T => {
+    return useMemo(() => {
+        if (value !== undefined) {
+            if (typeof value === "string") {
+                try {
+                    return JSON.parse(value);
+                } catch (e) {
+                    console.warn("useDynamicJsonProperty: value", e);
+                }
+            }
+        }
+        if (defaultValue !== undefined) {
+            try {
+                return JSON.parse(defaultValue);
+            } catch (e) {
+                console.warn("useDynamicJsonProperty: defaultValue", e);
+            }
+        }
+        return defaultStatic;
+    }, [value, defaultValue, defaultStatic]);
+};
+
+/**
  * A React hook that requests an update for every dynamic property of the element.
  * @param dispatch - The React dispatcher associated to `TaipyContext`.
  * @param id - The identifier of the element.

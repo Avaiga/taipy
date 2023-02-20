@@ -27,6 +27,10 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
 
 
+def _get_column_desc(columns: t.Dict[str, t.Any], key: str) -> t.Dict[str, t.Any]:
+    return next((x for x in columns.values() if x.get("dfid") == key), None)
+
+
 def _get_columns_dict(  # noqa: C901
     value: t.Any,
     columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDict],
@@ -45,9 +49,10 @@ def _get_columns_dict(  # noqa: C901
         idx = 0
         for col in columns:
             if col not in col_types_keys:
-                warnings.warn(
-                    f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"'
-                )
+                if col:
+                    warnings.warn(
+                        f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"'
+                    )
             else:
                 coldict[col] = {"index": idx}
                 idx += 1
@@ -97,12 +102,6 @@ def _get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
     if re_res := __RE_INDEXED_DATA.search(col_name):
         return col_name if str(idx) == re_res.group(1) else None
     return col_name
-
-
-def _get_idx_from_col(col_name) -> int:
-    if re_res := __RE_INDEXED_DATA.search(col_name):
-        return int(re_res.group(1))
-    return 0
 
 
 def _to_camel_case(value: str, upcase_first=False) -> str:

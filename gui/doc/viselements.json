@@ -997,6 +997,12 @@
             "type": "str",
             "default_value": "\"small\"",
             "doc": "The size of the rows, valid values are \"small\" and \"medium\"."
+          },
+          {
+            "name": "reset",
+            "type": "dynamic(bool)",
+            "default_value": "False",
+            "doc": "Allows dynamic columns refresh if set to True."
           }
         ]
       }

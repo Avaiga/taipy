@@ -90,7 +90,8 @@ export type TableValueType = Record<string, Record<string, any>>;
 
 export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps {
     data?: TableValueType;
-    columns: string;
+    columns?: string;
+    defaultColumns: string;
     height?: string;
     width?: string;
     pageSize?: number;

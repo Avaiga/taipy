@@ -101,35 +101,35 @@ const tableColumns = JSON.stringify({ Entity: { dfid: "Entity" } });
 
 describe("AutoLoadingTable Component", () => {
     it("renders", async () => {
-        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} />);
+        const { getByText } = render(<AutoLoadingTable data={undefined} defaultColumns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.tagName).toBe("DIV");
     });
     it("displays the right info for class", async () => {
         const { getByText } = render(
-            <AutoLoadingTable data={undefined} columns={tableColumns} className="taipy-table" />
+            <AutoLoadingTable data={undefined} defaultColumns={tableColumns} className="taipy-table" />
         );
         const elt = getByText("Entity").closest("table");
         expect(elt).toHaveClass("taipy-table");
     });
     it("is disabled", async () => {
-        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={false} />);
+        const { getByText } = render(<AutoLoadingTable data={undefined} defaultColumns={tableColumns} active={false} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).toHaveClass("Mui-disabled");
     });
     it("is enabled by default", async () => {
-        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} />);
+        const { getByText } = render(<AutoLoadingTable data={undefined} defaultColumns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByText, getAllByTestId } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={true} />);
+        const { getByText, getAllByTestId } = render(<AutoLoadingTable data={undefined} defaultColumns={tableColumns} active={true} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
         expect(getAllByTestId("ArrowDownwardIcon").length).toBeGreaterThan(0);
     });
     it("hides sort icons when not active", async () => {
-        const { queryByTestId } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={false} />);
+        const { queryByTestId } = render(<AutoLoadingTable data={undefined} defaultColumns={tableColumns} active={false} />);
         expect(queryByTestId("ArrowDownwardIcon")).toBeNull();
     });
     // keep getting undefined Error from jest, it seems to be linked to the setTimeout that makes the code run after the end of the test :-(
@@ -141,7 +141,7 @@ describe("AutoLoadingTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <AutoLoadingTable data={undefined} columns={tableColumns} />
+                <AutoLoadingTable data={undefined} defaultColumns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elt = getByText("Entity");
@@ -174,7 +174,7 @@ describe("AutoLoadingTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <AutoLoadingTable id="table" data={undefined} columns={tableColumns} updateVars="varname=varname" />
+                <AutoLoadingTable id="table" data={undefined} defaultColumns={tableColumns} updateVars="varname=varname" />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -191,7 +191,7 @@ describe("AutoLoadingTable Component", () => {
                 <AutoLoadingTable
                     id="table"
                     data={state.data.table as undefined}
-                    columns={tableColumns}
+                    defaultColumns={tableColumns}
                     defaultKey={valueKey}
                     pageSize={2}
                     updateVars="varname=varname"
@@ -205,7 +205,7 @@ describe("AutoLoadingTable Component", () => {
                     id="table"
                     data={newState.data.table as TableValueType}
                     defaultKey={valueKey}
-                    columns={tableColumns}
+                    defaultColumns={tableColumns}
                     pageSize={2}
                     updateVars="varname=varname"
                 />
@@ -221,7 +221,7 @@ describe("AutoLoadingTable Component", () => {
         const selected = [2, 4, 6];
         const { getAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <AutoLoadingTable data={undefined} columns={tableColumns} pageSize={2} />
+                <AutoLoadingTable data={undefined} defaultColumns={tableColumns} pageSize={2} />
             </TaipyContext.Provider>
         );
         rerender(
@@ -230,7 +230,7 @@ describe("AutoLoadingTable Component", () => {
                     selected={selected}
                     data={tableValue as TableValueType}
                     defaultKey={valueKey}
-                    columns={tableColumns}
+                    defaultColumns={tableColumns}
                     pageSize={2}
                 />
             </TaipyContext.Provider>
