@@ -464,7 +464,7 @@ class _Builder:
             else:
                 warnings.warn(f"{self.__element_name} {name}[{k}] is not in the list of displayed columns")
 
-    def _get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None) -> '_Builder':
+    def _get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None) -> '_Builder': # noqa: C901
         columns, col_types, reset_fn_hash = self.__gui._calculate_table_columns(_is_boolean_true(t.cast(bool, self.__attributes.get("reset", False))), self.__hashes.get("reset"),
             self.__attributes.get("data"), self.__hashes.get("data", ""),
             self.__attributes.get("columns", {}), self.__hashes.get("columns"),
