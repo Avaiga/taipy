@@ -32,7 +32,8 @@ with all its dependencies.
 The development version of Taipy GUI is updated daily with changes from the
 Taipy R&D and external contributors that we praise for their input.
 
-This development version of Taipy GUI can be installed using _pip_ and _git_:
+The development version of Taipy GUI can be installed using _pip_ and _git_:
+
 ```console
 $ pip install git+https://git@github.com/Avaiga/taipy-gui
 ```
@@ -82,7 +83,7 @@ $ cd ..
 # Current directory is the repository's root directory
 ```
 
-This creates the directory `src/taipy/gui/webapp` in the root directory of the repository,
+This creates the directory `src/taipy/gui/webapp` in the root directory of the repository
 where the frontend code for Taipy GUI is split into a set of JavaScript bundles.
 
 ### Debugging the JavaScript bundle
