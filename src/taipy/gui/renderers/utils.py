@@ -27,7 +27,7 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
 
 
-def _get_column_desc(columns: t.Dict[str, t.Any], key: str) -> t.Dict[str, t.Any]:
+def _get_column_desc(columns: t.Dict[str, t.Any], key: str) -> t.Optional[t.Dict[str, t.Any]]:
     return next((x for x in columns.values() if x.get("dfid") == key), None)
 
 
