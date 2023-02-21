@@ -465,12 +465,12 @@ class _Builder:
                 warnings.warn(f"{self.__element_name} {name}[{k}] is not in the list of displayed columns")
 
     def _get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None) -> '_Builder': # noqa: C901
-        columns, col_types, reset_fn_hash = self.__gui._calculate_table_columns(_is_boolean_true(t.cast(bool, self.__attributes.get("reset", False))), self.__hashes.get("reset"),
+        columns, col_types, rebuild_fn_hash = self.__gui._calculate_table_columns(_is_boolean_true(t.cast(bool, self.__attributes.get("rebuild", False))), self.__hashes.get("rebuild"),
             self.__attributes.get("data"), self.__hashes.get("data", ""),
             self.__attributes.get("columns", {}), self.__hashes.get("columns"),
             _add_to_dict_and_get(self.__attributes, "date_format", date_format), _add_to_dict_and_get(self.__attributes, "number_format", number_format))
-        if reset_fn_hash:
-            self.__set_react_attribute("columns", reset_fn_hash)
+        if rebuild_fn_hash:
+            self.__set_react_attribute("columns", rebuild_fn_hash)
         if columns is not None:
             self.__update_col_desc_from_indexed(columns, "nan_value")
             self.__update_col_desc_from_indexed(columns, "width")
@@ -654,7 +654,7 @@ class _Builder:
                         opt_cols.add(val)
 
         # Validate the column names
-        columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
+        col_dict = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
 
         # Manage Decimator
         decimators = []
@@ -670,7 +670,7 @@ class _Builder:
 
         # set default columns if not defined
         icols = [
-            [c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in columns.keys()] if c2] for i in range(len(traces))
+            [c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in col_dict.keys()] if c2] for i in range(len(traces))
         ]
 
         for i, tr in enumerate(traces):
@@ -683,9 +683,9 @@ class _Builder:
                         for j, v in enumerate(tr)
                     )
 
-        if columns is not None:
-            self.__attributes["columns"] = columns
-            reverse_cols = {str(cd.get("dfid")): c for c, cd in columns.items()}
+        if col_dict is not None:
+            self.__attributes["columns"] = col_dict
+            reverse_cols = {str(cd.get("dfid")): c for c, cd in col_dict.items()}
 
             # List used axis
             used_axis = [
@@ -693,7 +693,7 @@ class _Builder:
             ]
 
             ret_dict = {
-                "columns": columns,
+                "columns": col_dict,
                 "labels": [
                     reverse_cols.get(tr[_Chart_iprops.label.value], (tr[_Chart_iprops.label.value] or ""))
                     for tr in traces

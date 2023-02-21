@@ -81,7 +81,7 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils._variable_directory import _RE_HAS_TPMDL, _VariableDirectory
+from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 from .renderers.utils import _get_columns_dict
 
@@ -962,29 +962,30 @@ class Gui:
 
     # make components resettable
 
-    def _calculate_table_columns(self, reset: bool, reset_hash: t.Optional[str],
+    def _calculate_table_columns(self, rebuild: bool, rebuild_hash: t.Optional[str],
                                     data: t.Any, data_hash: str,
                                     columns: t.Any, columns_hash: t.Optional[str],
                                     date_format: str, number_format: str) -> t.Tuple[t.Dict[str, t.Dict[str, t.Any]], t.Dict[str, str], t.Optional[str]]:
         col_types = self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
         columns_str = columns if isinstance(columns, str) else ""
-        columns = _get_columns_dict(data, columns, col_types, date_format, number_format)
+        col_dict = _get_columns_dict(data, columns, col_types, date_format, number_format)
         expr_hash: t.Optional[str] = None
-        if data_hash and (reset_hash or reset):
+        if data_hash and (rebuild_hash or rebuild):
             empty_str = '""'
+            data_var_name = self.__get_real_var_name(data_hash)[0]
             columns_var_name = self.__get_real_var_name(columns_hash)[0] if columns_hash else empty_str
-            reset_var_name = self.__get_real_var_name(reset_hash)[0] if reset_hash else empty_str
+            rebuild_var_name = self.__get_real_var_name(rebuild_hash)[0] if rebuild_hash else empty_str
             expr_hash = self._evaluate_expr(
-                "{"+f"{Gui.__SELF_VAR}._calculate_table_columns_eval({reset}, {reset_var_name}, {self.__get_real_var_name(data_hash)[0]}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format}', '{number_format or ''}')" + "}")
-        return columns, col_types, expr_hash
+                "{"+f"{Gui.__SELF_VAR}._tbl_cols({rebuild}, {rebuild_var_name}, {data_var_name}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format or ''}', '{number_format or ''}')" + "}")
+        return col_dict, col_types, expr_hash
 
-    def _calculate_table_columns_eval(self, reset: bool, reset_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
+    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
         try:
-            reset = reset_val if isinstance(reset_val, bool) else reset
-            if reset:
+            rebuild = rebuild_val if isinstance(rebuild_val, bool) else rebuild
+            if rebuild:
                 return json.dumps(_get_columns_dict(data, columns_val if columns_val else columns, self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)), date_format, number_format))
         except Exception as e: # pragma: no cover
-            warnings.warn(f"Exception while calculating dynamic table columns {e}")
+            warnings.warn(f"Exception while rebuilding table columns {e}")
         return Gui.__JSON_DO_NOT_UPDATE
 
     # Proxy methods for Adapter
@@ -1305,7 +1306,7 @@ class Gui:
         return encoded_var_name
 
     def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
-        if not _RE_HAS_TPMDL.match(var_name):
+        if _MODULE_ID not in var_name:
             var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)

@@ -103,8 +103,8 @@ class _VariableDirectory:
 
 
 _MODULE_NAME_MAP: t.List[str] = []
-_RE_HAS_TPMDL = re.compile(r".*_TPMDL_.*")
-_RE_TPMDL_DECODE = re.compile(r"(.*?)_TPMDL_(\d+)$")
+_MODULE_ID = "_TPMDL_"
+_RE_TPMDL_DECODE = re.compile(r"(.*?)" + _MODULE_ID + "(\d+)$")
 
 
 def _variable_encode(var_name: str, module_name: t.Optional[str]):
@@ -112,7 +112,7 @@ def _variable_encode(var_name: str, module_name: t.Optional[str]):
         return var_name
     if module_name not in _MODULE_NAME_MAP:
         _MODULE_NAME_MAP.append(module_name)
-    return f"{var_name}_TPMDL_{_MODULE_NAME_MAP.index(module_name)}"
+    return f"{var_name}{_MODULE_ID}{_MODULE_NAME_MAP.index(module_name)}"
 
 
 def _variable_decode(var_name: str):
