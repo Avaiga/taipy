@@ -72,5 +72,6 @@ Want to be part of the _Taipy Core_ community? Check out our [`CODE_OF_CONDUCT.m
 - `LICENSE`: The Apache 2.0 License.
 - `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies.
 - `README.md`: Current file.
+- `contributors.txt`: The list of contributors.
 - `setup.py`: The setup script managing building, distributing, and installing _taipy-core_.
 - `tox.ini`: Contains test scenarios to be run.
