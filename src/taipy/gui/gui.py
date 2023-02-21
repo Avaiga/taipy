@@ -81,8 +81,9 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
+from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
+from .renderers.utils import _get_columns_dict
 
 
 class Gui:
@@ -168,6 +169,8 @@ class Gui:
     __CONTENT_ROOT = "/taipy-content/"
     __UPLOAD_URL = "/taipy-uploads"
     _EXTENSION_ROOT = "/taipy-extension/"
+    __SELF_VAR = "__gui"
+    __JSON_DO_NOT_UPDATE = "Taipy: Do not update"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -273,7 +276,7 @@ class Gui:
             gui_file = pathlib.Path(__file__ or ".").resolve()
             with open(gui_file.parent / "version.json") as version_file:
                 self.__version = json.load(version_file)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             warnings.warn(f"Cannot retrieve version.json file:\n{e}")
             self.__version = {}
 
@@ -321,7 +324,7 @@ class Gui:
                 Gui.__extensions[library.get_name()] = [library]
             else:
                 libs.append(library)
-        else:
+        else:  # pragma: no cover
             warnings.warn(f"add_library argument should be a subclass of ElementLibrary instead of '{type(library)}'")
 
     def __get_content_accessor(self):
@@ -425,7 +428,7 @@ class Gui:
             elif msg_type == _WsType.CLIENT_ID.value:
                 self._bindings()._get_or_create_scope(message.get("payload", ""))
             self._reset_locals_context()
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
     def __front_end_update(
@@ -497,12 +500,12 @@ class Gui:
         if var_name.startswith(_HOLDER_PREFIX):
             for hp in _HOLDER_PREFIXES:
                 if var_name.startswith(hp):
-                    var_name = var_name[len(hp) :]
+                    var_name = var_name[len(hp):]
                     break
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
-            suffix_var_name = var_name[first_dot_index + 1 :]
+            suffix_var_name = var_name[first_dot_index + 1:]
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
@@ -525,14 +528,14 @@ class Gui:
                     var_name = k
                     _found = True
                     break
-            if not _found:
+            if not _found: # pragma: no cover
                 raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
         return f"{var_name}.{suffix_var_name}" if suffix_var_name else var_name, current_context
 
     def _call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         try:
             var_name, current_context = self.__get_real_var_name(var_name)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             warnings.warn(f"{e}")
             return
         on_change_fn = self._get_user_function(on_change) if on_change else None
@@ -551,7 +554,7 @@ class Gui:
                 if argcount > 3:
                     args[3] = current_context
                 on_change_fn(*args)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 if not self._call_on_exception(on_change or "on_change", e):
                     warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception:\n{e}")
 
@@ -605,7 +608,7 @@ class Gui:
             )
             try:
                 base_json.update(json.loads(template.read_text()))
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
         return {"gui": base_json}
 
@@ -645,7 +648,7 @@ class Gui:
                             for nb in range(part + 1):
                                 with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
                                     grouped_file.write(part_file.read())
-                    except EnvironmentError as ee:
+                    except EnvironmentError as ee:  # pragma: no cover
                         warnings.warn(f"cannot group file after chunk upload:\n{ee}")
                         return
                 # notify the file is uploaded
@@ -723,7 +726,7 @@ class Gui:
                             ret_payload = lib.get_data(lib_name, payload, user_var_name, newvalue)
                             if ret_payload:
                                 break
-                        except Exception as e:
+                        except Exception as e: # pragma: no cover
                             warnings.warn(
                                 f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)':\n{e}"
                             )
@@ -748,7 +751,7 @@ class Gui:
                 if ack_id := self._get_ack_id():
                     self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
                     time.sleep(0.001)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
         else:
             grouping_message.append(payload)
@@ -841,9 +844,9 @@ class Gui:
     def __exit__(self, exc_type, exc_value, traceback):
         try:
             self.__send_messages()
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             warnings.warn(f"Exception raised while sending messages:\n{e}")
-        if exc_value:
+        if exc_value: # pragma: no cover
             warnings.warn(f"An {exc_type or 'Exception'} was raised: {exc_value}")
         return True
 
@@ -882,7 +885,7 @@ class Gui:
                 action_function=self._get_user_function(action), id=id, payload=payload, action=action
             ):
                 return
-            else:
+            else: # pragma: no cover
                 warnings.warn(f"on_action: '{action}' is not a valid function")
         if hasattr(self, "on_action"):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
@@ -910,7 +913,7 @@ class Gui:
                     args[3] = payload
                 action_function(*args)
                 return True
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 if not self._call_on_exception(action_function.__name__, e):
                     warnings.warn(f"on_action: Exception raised in function '{action_function.__name__}':\n{e}")
         return False
@@ -933,7 +936,7 @@ class Gui:
                 if module_context is not None:
                     self._set_locals_context(module_context)
                 return self._call_function_with_state(user_callback, args)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             if not self._call_on_exception(user_callback.__name__, e):
                 warnings.warn(f"invoke_callback: Exception raised in function '{user_callback.__name__}'.\n{e}")
         return None
@@ -957,7 +960,36 @@ class Gui:
     def _is_expression(self, expr: str) -> bool:
         return self.__evaluator._is_expression(expr)
 
+    # make components resettable
+
+    def _calculate_table_columns(self, rebuild: bool, rebuild_hash: t.Optional[str],
+                                    data: t.Any, data_hash: str,
+                                    columns: t.Any, columns_hash: t.Optional[str],
+                                    date_format: str, number_format: str) -> t.Tuple[t.Dict[str, t.Dict[str, t.Any]], t.Dict[str, str], t.Optional[str]]:
+        col_types = self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
+        columns_str = columns if isinstance(columns, str) else ""
+        col_dict = _get_columns_dict(data, columns, col_types, date_format, number_format)
+        expr_hash: t.Optional[str] = None
+        if data_hash and (rebuild_hash or rebuild):
+            empty_str = '""'
+            data_var_name = self.__get_real_var_name(data_hash)[0]
+            columns_var_name = self.__get_real_var_name(columns_hash)[0] if columns_hash else empty_str
+            rebuild_var_name = self.__get_real_var_name(rebuild_hash)[0] if rebuild_hash else empty_str
+            expr_hash = self._evaluate_expr(
+                "{"+f"{Gui.__SELF_VAR}._tbl_cols({rebuild}, {rebuild_var_name}, {data_var_name}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format or ''}', '{number_format or ''}')" + "}")
+        return col_dict, col_types, expr_hash
+
+    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
+        try:
+            rebuild = rebuild_val if isinstance(rebuild_val, bool) else rebuild
+            if rebuild:
+                return json.dumps(_get_columns_dict(data, columns_val if columns_val else columns, self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)), date_format, number_format))
+        except Exception as e: # pragma: no cover
+            warnings.warn(f"Exception while rebuilding table columns {e}")
+        return Gui.__JSON_DO_NOT_UPDATE
+
     # Proxy methods for Adapter
+
     def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter._add_for_type(type_name, adapter)
 
@@ -1078,21 +1110,21 @@ class Gui:
         page must have a unique name.
         """
         # Validate name
-        if name is None:
+        if name is None: # pragma: no cover
             raise Exception("name is required for add_page() function.")
-        if not Gui.__RE_PAGE_NAME.match(name):
+        if not Gui.__RE_PAGE_NAME.match(name): # pragma: no cover
             raise SyntaxError(
                 f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'
             )
-        if name.startswith("/"):
+        if name.startswith("/"): # pragma: no cover
             raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character.')
-        if name in self._config.routes:
+        if name in self._config.routes: # pragma: no cover
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
 
             page = Markdown(page, frame=None)
-        elif not isinstance(page, Page):
+        elif not isinstance(page, Page): # pragma: no cover
             raise Exception(
                 f'Parameter "page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}.'
             )
@@ -1188,11 +1220,11 @@ class Gui:
                 self._root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
             folder_path = folder_name if os.path.isabs(folder_name) else os.path.join(self._root_dir, folder_name)
             folder_name = os.path.basename(folder_path)
-            if not os.path.isdir(folder_path):
+            if not os.path.isdir(folder_path): # pragma: no cover
                 raise RuntimeError(f"Path {folder_path} is not a valid directory")
-            if folder_name in self.__directory_name_of_pages:
+            if folder_name in self.__directory_name_of_pages: # pragma: no cover
                 raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique")
-            if folder_name in Gui.__reserved_routes:
+            if folder_name in Gui.__reserved_routes: # pragma: no cover
                 raise Exception(f"Invalid directory. Directory {folder_name} is a reserved route")
             self.__directory_name_of_pages.append(folder_name)
             self.__add_pages_in_folder(folder_name, folder_path)
@@ -1223,13 +1255,13 @@ class Gui:
         """
         new_partial = Partial()
         # Validate name
-        if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes:
+        if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes: # pragma: no cover
             warnings.warn(f'Partial name "{new_partial._route}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
 
             page = Markdown(page, frame=None)
-        elif not isinstance(page, Page):
+        elif not isinstance(page, Page): # pragma: no cover
             raise Exception(f'Partial name "{new_partial._route}" has an invalid Page.')
         new_partial._renderer = page
         # Append partial to _config
@@ -1274,7 +1306,7 @@ class Gui:
         return encoded_var_name
 
     def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
-        if not _RE_TPMDL_DECODE.match(var_name):
+        if _MODULE_ID not in var_name:
             var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)
@@ -1283,7 +1315,7 @@ class Gui:
 
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
-        if func is not None and not callable(func):
+        if func is not None and not callable(func): # pragma: no cover
             warnings.warn(
                 f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script."
             )
@@ -1293,7 +1325,7 @@ class Gui:
         if func is not None:
             if callable(func):
                 setattr(self, name, func)
-            else:
+            else: # pragma: no cover
                 warnings.warn(f"{name}: {func} should be a function.")
 
     def load_config(self, config: Config) -> None:
@@ -1352,7 +1384,7 @@ class Gui:
             _setscopeattr(self, Gui.__ON_INIT_NAME, True)
             try:
                 self._call_function_with_state(self.on_init, [])
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 if not self._call_on_exception("on_init", e):
                     warnings.warn(f"Exception raised in on_init.\n{e}")
         return self._render_route()
@@ -1361,7 +1393,7 @@ class Gui:
         if hasattr(self, "on_exception") and callable(self.on_exception):
             try:
                 self.on_exception(self.__get_state(), str(function_name), exception)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 warnings.warn(f"Exception raised in on_exception.\n{e}")
             return True
         return False
@@ -1370,7 +1402,7 @@ class Gui:
         if hasattr(self, "on_status") and callable(self.on_status):
             try:
                 return self.on_status(self.__get_state())
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 if not self._call_on_exception("on_status", e):
                     warnings.warn(f"Exception raised in on_status.\n{e}")
         return None
@@ -1388,7 +1420,7 @@ class Gui:
                     else:
                         warnings.warn(f"on_navigate() returned an invalid page name '{nav_page}'.")
                     nav_page = page_name
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 if not self._call_on_exception("on_navigate", e):
                     warnings.warn(f"Exception raised in on_navigate.\n{e}")
         page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
@@ -1470,7 +1502,7 @@ class Gui:
         return self._server.get_flask()
 
     def _set_frame(self, frame: FrameType):
-        if not isinstance(frame, FrameType):
+        if not isinstance(frame, FrameType): # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
@@ -1589,7 +1621,7 @@ class Gui:
             if _conf_webapp_path.is_dir():
                 _webapp_path = str(_conf_webapp_path.resolve())
                 warnings.warn(f"Now using webapp_path: '{_conf_webapp_path}'.")
-            else:
+            else: # pragma: no cover
                 warnings.warn(
                     f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."
                 )
@@ -1717,8 +1749,9 @@ class Gui:
         self.__bind_default_function()
 
         # base global ctx is TaipyHolder classes + script modules and callables
-        glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
+        glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
+        glob_ctx.update({Gui.__SELF_VAR: self})
         self.__evaluator = _Evaluator(glob_ctx)
 
         self.__register_blueprint()

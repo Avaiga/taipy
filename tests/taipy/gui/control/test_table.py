@@ -18,7 +18,7 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
     md_string = "<|{csvdata}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|>"
     expected_list = [
         "<Table",
-        'columns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',
         'height="80vh"',
         'width="100vw"',
         'pageSizeOptions="[10, 30, 100]"',
@@ -26,6 +26,24 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
         "selected={[]}",
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
+def test_table_reset_md(gui: Gui, helpers, csvdata):
+    md_string = "<|{csvdata}|table|rebuild|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|>"
+    expected_list = [
+        "<Table",
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',
+        'height="80vh"',
+        'width="100vw"',
+        'pageSizeOptions="[10, 30, 100]"',
+        "pageSize={10.0}",
+        "selected={[]}",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
+        "columns={tp_TpExPr_gui_tbl_cols_True_csvdata_tpec_TpExPr_csvdata_TPMDL_0_Day_Entity_Code_Daily_hospital_occupancy_eee_dd_MMM_yyyy_TPMDL_0_0}"
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
@@ -53,7 +71,7 @@ def test_table_md_2(gui: Gui, helpers, csvdata):
         "allowAllRows={true}",
         "autoLoading={true}",
         "editable={false}",
-        'columns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;&#x7D;}"',
         'height="60vh"',
         'width="60vw"',
         'pageSizeOptions="[10, 50, 100, 500]"',
@@ -70,7 +88,7 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
     html_string = '<taipy:table data="{csvdata}" page_size="10" page_size_options="10;30;100" columns="Day;Entity;Code;Daily hospital occupancy" date_format="eee dd MMM yyyy" />'
     expected_list = [
         "<Table",
-        'columns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',
         'height="80vh"',
         'width="100vw"',
         'pageSizeOptions="[10, 30, 100]"',
@@ -105,7 +123,7 @@ def test_table_html_2(gui: Gui, helpers, csvdata):
         "allowAllRows={true}",
         "autoLoading={true}",
         "showAll={true}",
-        'columns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;&#x7D;}"',
         'height="60vh"',
         'width="60vw"',
         'pageSizeOptions="[10, 50, 100, 500]"',

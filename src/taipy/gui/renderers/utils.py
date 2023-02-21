@@ -27,6 +27,23 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
 
 
+def _get_column_desc(columns: t.Dict[str, t.Any], key: str) -> t.Optional[t.Dict[str, t.Any]]:
+    return next((x for x in columns.values() if x.get("dfid") == key), None)
+
+
+def _get_columns_dict_from_list(col_list: t.Union[t.List[str], t.Tuple[str]], col_types_keys: t.List[str], value: t.Any):
+    col_dict = {}
+    idx = 0
+    for col in col_list:
+        if col in col_types_keys:
+            col_dict[col] = {"index": idx}
+            idx += 1
+        elif col:
+            warnings.warn(
+                f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"')
+    return col_dict
+
+
 def _get_columns_dict(  # noqa: C901
     value: t.Any,
     columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDict],
@@ -38,56 +55,50 @@ def _get_columns_dict(  # noqa: C901
     if col_types is None:
         return None
     col_types_keys = [str(c) for c in col_types.keys()]
+    col_dict: t.Optional[dict] = None
     if isinstance(columns, str):
-        columns = [s.strip() for s in columns.split(";")]
-    if isinstance(columns, (list, tuple)):
-        coldict = {}
-        idx = 0
-        for col in columns:
-            if col not in col_types_keys:
-                warnings.warn(
-                    f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"'
-                )
-            else:
-                coldict[col] = {"index": idx}
-                idx += 1
-        if opt_columns is not None:
-            for col in opt_columns:
-                if col in col_types_keys:
-                    coldict[col] = {"index": idx}
-                    idx += 1
-        columns = coldict
-    if isinstance(columns, _MapDict):
-        columns = columns._dict
-    if not isinstance(columns, dict):
+        col_dict = _get_columns_dict_from_list(
+            [s.strip() for s in columns.split(";")], col_types_keys, value)
+    elif isinstance(columns, (list, tuple)):
+        col_dict = _get_columns_dict_from_list(columns, col_types_keys, value)
+    elif isinstance(columns, _MapDict):
+        col_dict = columns._dict.copy()
+    elif isinstance(columns, dict):
+        col_dict = columns.copy()
+    if not isinstance(col_dict, dict):
         warnings.warn("Error: columns attributes should be a string, list, tuple or dict")
-        columns = {}
-    if len(columns) == 0:
-        idx = 0
+        col_dict = {}
+    nb_cols = len(col_dict)
+    if nb_cols == 0:
         for col in col_types_keys:
-            columns[col] = {"index": idx}
-            idx += 1
+            col_dict[col] = {"index": nb_cols}
+            nb_cols += 1
     else:
-        columns = {str(k): v for k, v in columns.items()}
+        col_dict = {str(k): v for k, v in col_dict.items()}
+        if opt_columns:
+            for col in opt_columns:
+                if col in col_types_keys and col not in col_dict:
+                    col_dict[col] = {"index": nb_cols}
+                    nb_cols += 1
     idx = 0
     for col, ctype in col_types.items():
         col = str(col)
-        if col in columns.keys():
+        if col in col_dict:
             re_type = _RE_PD_TYPE.match(ctype)
             grps = re_type.groups() if re_type else ()
             ctype = grps[0] if grps else ctype
-            columns[col]["type"] = ctype
-            columns[col]["dfid"] = col
+            col_dict[col]["type"] = ctype
+            col_dict[col]["dfid"] = col
             if len(grps) > 4 and grps[4]:
-                columns[col]["tz"] = grps[4]
-            idx = _add_to_dict_and_get(columns[col], "index", idx) + 1
+                col_dict[col]["tz"] = grps[4]
+            idx = _add_to_dict_and_get(col_dict[col], "index", idx) + 1
             if ctype == "datetime":
                 if date_format:
-                    _add_to_dict_and_get(columns[col], "format", date_format)
-                columns[_get_date_col_str_name(col_types.keys(), col)] = columns.pop(col)  # type: ignore
+                    _add_to_dict_and_get(col_dict[col], "format", date_format)
+                col_dict[_get_date_col_str_name(col_types.keys(), col)] = col_dict.pop(col)  # type: ignore
             elif number_format and ctype in NumberTypes:
-                _add_to_dict_and_get(columns[col], "format", number_format)
-    return columns
+                _add_to_dict_and_get(col_dict[col], "format", number_format)
+    return col_dict
 
 
 __RE_INDEXED_DATA = re.compile(r"^(\d+)\/(.*)")
@@ -97,12 +108,6 @@ def _get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
     if re_res := __RE_INDEXED_DATA.search(col_name):
         return col_name if str(idx) == re_res.group(1) else None
     return col_name
-
-
-def _get_idx_from_col(col_name) -> int:
-    if re_res := __RE_INDEXED_DATA.search(col_name):
-        return int(re_res.group(1))
-    return 0
 
 
 def _to_camel_case(value: str, upcase_first=False) -> str:

@@ -38,8 +38,8 @@ from .json import _TaipyJsonEncoder
 from .utils import (
     _add_to_dict_and_get,
     _get_col_from_indexed,
+    _get_column_desc,
     _get_columns_dict,
-    _get_idx_from_col,
     _get_tuple_val,
     _to_camel_case,
 )
@@ -464,44 +464,40 @@ class _Builder:
             else:
                 warnings.warn(f"{self.__element_name} {name}[{k}] is not in the list of displayed columns")
 
-    def _get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):  # noqa: C901
-        data = self.__attributes.get("data")
-        data_hash = self.__hashes.get("data", "")
-        col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
-        columns = _get_columns_dict(
-            data,
-            _add_to_dict_and_get(self.__attributes, "columns", {}),
-            col_types,
-            _add_to_dict_and_get(self.__attributes, "date_format", date_format),
-            _add_to_dict_and_get(self.__attributes, "number_format", number_format),
-        )
+    def _get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None) -> '_Builder': # noqa: C901
+        columns, col_types, rebuild_fn_hash = self.__gui._calculate_table_columns(_is_boolean_true(t.cast(bool, self.__attributes.get("rebuild", False))), self.__hashes.get("rebuild"),
+            self.__attributes.get("data"), self.__hashes.get("data", ""),
+            self.__attributes.get("columns", {}), self.__hashes.get("columns"),
+            _add_to_dict_and_get(self.__attributes, "date_format", date_format), _add_to_dict_and_get(self.__attributes, "number_format", number_format))
+        if rebuild_fn_hash:
+            self.__set_react_attribute("columns", rebuild_fn_hash)
         if columns is not None:
             self.__update_col_desc_from_indexed(columns, "nan_value")
             self.__update_col_desc_from_indexed(columns, "width")
             filters = self.get_name_indexed_property("filter")
             for k, v in filters.items():
                 if _is_boolean_true(v):
-                    if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
+                    if col_desc := _get_column_desc(columns, k):
                         col_desc["filter"] = True
                     else:
                         warnings.warn(f"{self.__element_name} filter[{k}] is not in the list of displayed columns")
             editables = self.get_name_indexed_property("editable")
             for k, v in editables.items():
                 if _is_boolean(v):
-                    if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
+                    if col_desc := _get_column_desc(columns, k):
                         col_desc["notEditable"] = not _is_boolean_true(v)
                     else:
                         warnings.warn(f"{self.__element_name} editable[{k}] is not in the list of displayed columns")
             group_by = self.get_name_indexed_property("group_by")
             for k, v in group_by.items():
                 if _is_boolean_true(v):
-                    if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
+                    if col_desc := _get_column_desc(columns, k):
                         col_desc["groupBy"] = True
                     else:
                         warnings.warn(f"{self.__element_name} group_by[{k}] is not in the list of displayed columns")
             apply = self.get_name_indexed_property("apply")
             for k, v in apply.items():  # pragma: no cover
-                if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
+                if col_desc := _get_column_desc(columns, k):
                     if callable(v):
                         value = self.__hashes.get(f"apply[{k}]")
                     elif isinstance(v, str):
@@ -526,7 +522,7 @@ class _Builder:
                     self.set_attribute("lineStyle", value)
             styles = self.get_name_indexed_property("style")
             for k, v in styles.items():  # pragma: no cover
-                if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
+                if col_desc := _get_column_desc(columns, k):
                     if callable(v):
                         value = self.__hashes.get(f"style[{k}]")
                     elif isinstance(v, str):
@@ -552,7 +548,7 @@ class _Builder:
                     self.set_attribute("tooltip", value)
             tooltips = self.get_name_indexed_property("tooltip")
             for k, v in tooltips.items():  # pragma: no cover
-                if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
+                if col_desc := _get_column_desc(columns, k):
                     if callable(v):
                         value = self.__hashes.get(f"tooltip[{k}]")
                     elif isinstance(v, str):
@@ -565,8 +561,7 @@ class _Builder:
                         col_desc["tooltip"] = value
                 else:
                     warnings.warn(f"{self.__element_name} tooltip[{k}] is not in the list of displayed columns")
-            self.__attributes["columns"] = columns
-            self.__set_json_attribute("columns", columns)
+            self.__set_json_attribute("defaultColumns", columns)
         return self
 
     def __check_dict(self, values: t.List[t.Any], properties: t.Tuple[_Chart_iprops]) -> None:
@@ -659,7 +654,7 @@ class _Builder:
                         opt_cols.add(val)
 
         # Validate the column names
-        columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
+        col_dict = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
 
         # Manage Decimator
         decimators = []
@@ -675,7 +670,7 @@ class _Builder:
 
         # set default columns if not defined
         icols = [
-            [c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in columns.keys()] if c2] for i in range(len(traces))
+            [c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in col_dict.keys()] if c2] for i in range(len(traces))
         ]
 
         for i, tr in enumerate(traces):
@@ -688,9 +683,9 @@ class _Builder:
                         for j, v in enumerate(tr)
                     )
 
-        if columns is not None:
-            self.__attributes["columns"] = columns
-            reverse_cols = {str(cd.get("dfid")): c for c, cd in columns.items()}
+        if col_dict is not None:
+            self.__attributes["columns"] = col_dict
+            reverse_cols = {str(cd.get("dfid")): c for c, cd in col_dict.items()}
 
             # List used axis
             used_axis = [
@@ -698,7 +693,7 @@ class _Builder:
             ]
 
             ret_dict = {
-                "columns": columns,
+                "columns": col_dict,
                 "labels": [
                     reverse_cols.get(tr[_Chart_iprops.label.value], (tr[_Chart_iprops.label.value] or ""))
                     for tr in traces

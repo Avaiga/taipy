@@ -124,35 +124,35 @@ const editableColumns = JSON.stringify({
 
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
-        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} />);
+        const { getByText } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.tagName).toBe("DIV");
     });
     it("displays the right info for class", async () => {
         const { getByText } = render(
-            <PaginatedTable data={undefined} columns={tableColumns} className="taipy-table" />
+            <PaginatedTable data={undefined} defaultColumns={tableColumns} className="taipy-table" />
         );
         const elt = getByText("Entity").closest("table");
         expect(elt).toHaveClass("taipy-table");
     });
     it("is disabled", async () => {
-        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} active={false} />);
+        const { getByText } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} active={false} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).toHaveClass("Mui-disabled");
     });
     it("is enabled by default", async () => {
-        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} />);
+        const { getByText } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByText, getAllByTestId } = render(<PaginatedTable data={undefined} columns={tableColumns} active={true} />);
+        const { getByText, getAllByTestId } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} active={true} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
         expect(getAllByTestId("ArrowDownwardIcon").length).toBeGreaterThan(0);
     });
     it("Hides sort icons when not active", async () => {
-        const { queryByTestId } = render(<PaginatedTable data={undefined} columns={tableColumns} active={false} />);
+        const { queryByTestId } = render(<PaginatedTable data={undefined} defaultColumns={tableColumns} active={false} />);
         expect(queryByTestId("ArrowDownwardIcon")).toBeNull();
     });
     it("dispatch 2 well formed messages at first render", async () => {
@@ -160,7 +160,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable id="table" data={undefined} columns={tableColumns} updateVars="varname=varname" />
+                <PaginatedTable id="table" data={undefined} defaultColumns={tableColumns} updateVars="varname=varname" />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -193,7 +193,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} columns={tableColumns} />
+                <PaginatedTable data={undefined} defaultColumns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elt = getByText("Entity");
@@ -226,7 +226,7 @@ describe("PaginatedTable Component", () => {
                 <PaginatedTable
                     id="table"
                     data={state.data.table as undefined}
-                    columns={tableColumns}
+                    defaultColumns={tableColumns}
                     updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
@@ -237,7 +237,7 @@ describe("PaginatedTable Component", () => {
                 <PaginatedTable
                     id="table"
                     data={newState.data.table as TableValueType}
-                    columns={tableColumns}
+                    defaultColumns={tableColumns}
                     updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
@@ -269,13 +269,13 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} columns={tableColumns} />
+                <PaginatedTable data={undefined} defaultColumns={tableColumns} />
             </TaipyContext.Provider>
         );
 
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={tableValue as TableValueType} columns={tableColumns} />
+                <PaginatedTable data={tableValue as TableValueType} defaultColumns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elts = getAllByText("Austria");
@@ -288,12 +288,12 @@ describe("PaginatedTable Component", () => {
         const selected = [2, 4, 6];
         const { findAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} columns={tableColumns} />
+                <PaginatedTable data={undefined} defaultColumns={tableColumns} />
             </TaipyContext.Provider>
         );
         rerender(
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
-                <PaginatedTable selected={selected} data={tableValue as TableValueType} columns={tableColumns} />
+                <PaginatedTable selected={selected} data={tableValue as TableValueType} defaultColumns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elts = await waitFor(() => findAllByText("Austria"));
@@ -310,7 +310,7 @@ describe("PaginatedTable Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getAllByTestId, queryAllByTestId, rerender } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <PaginatedTable data={undefined} columns={editableColumns} onEdit="onEdit" showAll={true} />
+                    <PaginatedTable data={undefined} defaultColumns={editableColumns} onEdit="onEdit" showAll={true} />
                 </TaipyContext.Provider>
             );
 
@@ -318,7 +318,7 @@ describe("PaginatedTable Component", () => {
                 <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                     <PaginatedTable
                         data={editableValue as TableValueType}
-                        columns={editableColumns}
+                        defaultColumns={editableColumns}
                         onEdit="onEdit"
                         showAll={true}
                     />
@@ -335,7 +335,7 @@ describe("PaginatedTable Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getByTestId, queryAllByTestId, getAllByTestId, rerender } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <PaginatedTable data={undefined} columns={editableColumns} onEdit="onEdit" showAll={true} />
+                    <PaginatedTable data={undefined} defaultColumns={editableColumns} onEdit="onEdit" showAll={true} />
                 </TaipyContext.Provider>
             );
 
@@ -343,7 +343,7 @@ describe("PaginatedTable Component", () => {
                 <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                     <PaginatedTable
                         data={editableValue as TableValueType}
-                        columns={editableColumns}
+                        defaultColumns={editableColumns}
                         onEdit="onEdit"
                         showAll={true}
                     />
@@ -432,7 +432,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByTestId } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} columns={editableColumns} showAll={true} onAdd="onAdd" />
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAdd="onAdd" />
             </TaipyContext.Provider>
         );
 
@@ -454,7 +454,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getAllByTestId, getByTestId, queryAllByTestId, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} columns={editableColumns} showAll={true} onDelete="onDelete" />
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onDelete="onDelete" />
             </TaipyContext.Provider>
         );
 
@@ -462,7 +462,7 @@ describe("PaginatedTable Component", () => {
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                 <PaginatedTable
                     data={editableValue as TableValueType}
-                    columns={editableColumns}
+                    defaultColumns={editableColumns}
                     showAll={true}
                     onDelete="onDelete"
                 />
@@ -514,7 +514,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable data={undefined} columns={editableColumns} showAll={true} onAction="onSelect" />
+                <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAction="onSelect" />
             </TaipyContext.Provider>
         );
 
@@ -522,7 +522,7 @@ describe("PaginatedTable Component", () => {
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                 <PaginatedTable
                     data={editableValue as TableValueType}
-                    columns={editableColumns}
+                    defaultColumns={editableColumns}
                     showAll={true}
                     onAction="onSelect"
                 />

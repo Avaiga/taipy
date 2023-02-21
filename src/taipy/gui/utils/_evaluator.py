@@ -53,11 +53,11 @@ class _Evaluator:
         self.__hash_to_expr: t.Dict[str, str] = {}
         # key = variable name of the expression, key = list of related expressions
         # ex: {x + y}
-        # "x_TPMDL_module1": ["{x + y}"],
-        # "y_TPMDL_module1": ["{x + y}"],
+        # "x_TPMDL_0": ["{x + y}"],
+        # "y_TPMDL_0": ["{x + y}"],
         self.__var_to_expr_list: t.Dict[str, t.List[str]] = {}
         # key = expression, value = list of related variables
-        # "{x + y}": {"x": "x_TPMDL_module1", "y": "y_TPMDL_module1"}
+        # "{x + y}": {"x": "x_TPMDL_", "y": "y_TPMDL_0"}
         self.__expr_to_var_map: t.Dict[str, t.Dict[str, str]] = {}
         # instead of binding everywhere the types
         self.__global_ctx = default_bindings

@@ -61,7 +61,7 @@ import {
     getRowIndex,
     getTooltip,
 } from "./tableUtils";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 
 interface RowData {
@@ -181,6 +181,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, {} as Record<string, ColumnDesc>);
 
     useEffect(() => {
         if (props.data && page.current.key && props.data[page.current.key] !== undefined) {
@@ -237,13 +238,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
 
     const [colsOrder, columns, styles, tooltips, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;
-        if (props.columns) {
+        if (baseColumns) {
             try {
-                const columns = (
-                    typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns
-                ) as Record<string, ColumnDesc>;
                 let filter = false;
-                Object.values(columns).forEach((col) => {
+                Object.values(baseColumns).forEach((col) => {
                     if (typeof col.filter != "boolean") {
                         col.filter = !!props.filter;
                     }
@@ -257,18 +255,18 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 });
                 addDeleteColumn(
                     (active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
-                    columns
+                    baseColumns
                 );
-                const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
+                const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
-                    if (columns[col].style) {
+                    if (baseColumns[col].style) {
                         pv.styles = pv.styles || {};
-                        pv.styles[columns[col].dfid] = columns[col].style as string;
+                        pv.styles[baseColumns[col].dfid] = baseColumns[col].style as string;
                     }
-                    hNan = hNan || !!columns[col].nanValue;
-                    if (columns[col].tooltip) {
+                    hNan = hNan || !!baseColumns[col].nanValue;
+                    if (baseColumns[col].tooltip) {
                         pv.tooltips = pv.tooltips || {};
-                        pv.tooltips[columns[col].dfid] = columns[col].tooltip as string;
+                        pv.tooltips[baseColumns[col].dfid] = baseColumns[col].tooltip as string;
                     }
                     return pv;
                 }, {});
@@ -276,13 +274,13 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     styTt.styles = styTt.styles || {};
                     styTt.styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, columns, styTt.styles, styTt.tooltips, hNan, filter];
+                return [colsOrder, baseColumns, styTt.styles, styTt.tooltips, hNan, filter];
             } catch (e) {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
         }
         return [[], {} as Record<string, ColumnDesc>, {} as Record<string, string>, {} as Record<string, string>, hNan, false];
-    }, [active, editable, onAdd, onDelete, props.columns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
+    }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
