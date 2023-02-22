@@ -1,0 +1,10 @@
+:root{
+  --spacing1: 1rem;
+  --spacing-half: calc(var(--spacing1) * 0.5); 
+  --spacing2: calc(var(--spacing1) * 2);
+  --spacing3: calc(var(--spacing1) * 3);
+  --spacing4: calc(var(--spacing1) * 4);
+  --spacing5: calc(var(--spacing1) * 5);
+  --spacing6: calc(var(--spacing1) * 6);
+}
+

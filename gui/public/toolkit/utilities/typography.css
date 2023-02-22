@@ -1,0 +1,23 @@
+/**************************************************************
+
+                   TYPOGRAPHY UTILITIES
+
+***************************************************************/
+
+.text_weight300 { font-weight: 300 !important; }
+.text_weight400 { font-weight: 400 !important; }
+.text_weight500 { font-weight: 500 !important; }
+.text_weight600 { font-weight: 600 !important; }
+.text_weight700 { font-weight: 700 !important; }
+.text_weight800 { font-weight: 800 !important; }
+.text_weight900 { font-weight: 900 !important; }
+
+.text_left { text-align: left !important; }
+.text_center { text-align: center !important; }
+.text_right { text-align: right !important; }
+
+.text_uppercase { text-transform: uppercase !important; }
+.text_no_transform { text-transform: none !important; }
+
+.text_underline { text-decoration: underline !important; }
+.text_no_underline { text-decoration: none !important; }

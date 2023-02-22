@@ -1,0 +1,24 @@
+/**************************************************************
+
+                   CARD
+
+***************************************************************/
+
+.card{
+  border-radius: var(--border-radius);
+  background-color: var(--color-paper);
+  box-shadow: var(--box-shadow);
+}
+
+/* As charts are treated as images, they are always displayed on white background, even in dark mode */
+.taipy-chart{
+  border-radius: var(--border-radius);
+  background-color: white;
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+}
+
+.card .taipy-chart{
+  border-radius: 0;
+  box-shadow: none;
+}

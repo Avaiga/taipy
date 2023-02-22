@@ -1,0 +1,33 @@
+/**************************************************************
+
+                   TAIPY TOGGLE
+
+***************************************************************/
+
+/*************************************************
+              OVERRIDES / NORMALIZATION
+**************************************************/
+
+.taipy-toggle {
+  display: inline-flex;
+  z-index: 10;
+}
+.taipy-toggle .MuiToggleButtonGroup-root[aria-label='Theme mode'] {
+  background-color: var(--color-background);
+}
+
+/*************************************************
+              MODIFIER CLASSES
+**************************************************/
+
+/* relative : Reset the theme toggle position to fit page flow */
+.taipy-toggle.relative{
+  position: relative;
+  top: auto;
+  left: auto;
+}
+
+/* nolabel : remove toggle label */
+.taipy-toggle.nolabel .MuiTypography-root{
+  display: none;
+}

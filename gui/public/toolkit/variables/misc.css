@@ -1,0 +1,18 @@
+/**************************************************************
+
+                   MISC PROPERTIES
+
+***************************************************************/
+
+:root {
+
+  /***** CUSTOM SCROLLBAR *****/
+
+  --custom-scrollbar-width: 8px;
+  --custom-scrollbar-thumb-color: var(--color-primary);
+  --custom-scrollbar-rail-color: transparent;
+
+  /***** TRANSITIONS *****/
+
+  --transition-duration: 300ms;
+}

@@ -1,0 +1,17 @@
+/**************************************************************
+
+                   COLOR UTILITIES
+
+***************************************************************/
+
+.color_primary { color: var(--color-primary) !important; }
+.color_secondary { color: var(--color-secondary) !important; }
+.color_error { color: var(--color-error) !important; }
+.color_warning { color: var(--color-warning) !important; }
+.color_success { color: var(--color-success) !important; }
+
+.bg_primary { background-color: var(--color-primary) !important; }
+.bg_secondary { background-color: var(--color-secondary) !important; }
+.bg_error { background-color: var(--color-error) !important; }
+.bg_warning { background-color: var(--color-warning) !important; }
+.bg_success { background-color: var(--color-success) !important; }

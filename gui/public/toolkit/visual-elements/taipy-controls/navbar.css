@@ -1,0 +1,18 @@
+/**************************************************************
+
+                   TAIPY NAVBAR
+
+***************************************************************/
+
+/*************************************************
+              MODIFIER CLASSES
+**************************************************/
+
+/* fullheight : give the tabs the full height of their container (example : the header bar) */
+.taipy-navbar.fullheight,
+.taipy-navbar.fullheight .MuiTabs-root,
+.taipy-navbar.fullheight .MuiTabs-scroller,
+.taipy-navbar.fullheight .MuiTabs-flexContainer,
+.taipy-navbar.fullheight .MuiTab-root{
+  height: 100%;
+}

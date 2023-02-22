@@ -1,0 +1,17 @@
+/**************************************************************
+
+                   HEADER
+
+***************************************************************/
+
+.header{
+  background-color: var(--color-paper);
+  box-shadow: var(--box-shadow);
+}
+
+.header.sticky{
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}

@@ -1,0 +1,19 @@
+/**************************************************************
+
+                   MISCELLANEOUS UTILITIES
+
+***************************************************************/
+
+/***** Visibility *****/
+
+.d-none { display: none !important; }
+.d-flex { display: flex !important; }
+.d-block { display: block !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+
+/***** Opacity *****/
+
+.transparent { opacity: 0 !important; }
+.half-transparent { opacity: 0.5 !important; }
+.opaque { opacity: 1 !important; }
