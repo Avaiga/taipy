@@ -43,7 +43,7 @@ def test_table_reset_md(gui: Gui, helpers, csvdata):
         "selected={[]}",
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
-        "columns={tp_TpExPr_gui_tbl_cols_True_csvdata_tpec_TpExPr_csvdata_TPMDL_0_Day_Entity_Code_Daily_hospital_occupancy_eee_dd_MMM_yyyy_TPMDL_0_0}"
+        "columns={tp_TpExPr_gui_tbl_cols_True_False_None_csvdata_tpec_TpExPr_csvdata_TPMDL_0_Day_Entity_Code_Daily_hospital_occupancy_eee_dd_MMM_yyyy_TPMDL_0_0}"
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
