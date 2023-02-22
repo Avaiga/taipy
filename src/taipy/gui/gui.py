@@ -976,17 +976,16 @@ class Gui:
         rebuild_val = _TaipyBool(rebuild, rebuild_hash).get() if rebuild_hash else _is_boolean_true(t.cast(bool, rebuild))
         expr_hash: t.Optional[str] = None
         if data_hash and (rebuild_hash or rebuild_val):
-            empty_str = '""'
             data_var_name = self.__get_real_var_name(data_hash)[0]
-            columns_var_name = self.__get_real_var_name(columns_hash)[0] if columns_hash else empty_str
+            columns_var_name = self.__get_real_var_name(columns_hash)[0] if columns_hash else '""'
             rebuild_var_name = self.__get_real_var_name(rebuild_hash)[0] if rebuild_hash else 'None'
             expr_hash = self._evaluate_expr(
-                "{"+f"{Gui.__SELF_VAR}._tbl_cols({rebuild_val}, {rebuild_var_name}, {data_var_name}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format or ''}', '{number_format or ''}')" + "}")
+                "{"+f"{Gui.__SELF_VAR}._tbl_cols({rebuild_val}, {bool(rebuild_hash)}, {rebuild_var_name}, {data_var_name}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format or ''}', '{number_format or ''}')" + "}")
         return col_dict, col_types, expr_hash
 
-    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
+    def _tbl_cols(self, rebuild: bool, is_rebuild_var: bool, rebuild_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
         try:
-            rebuild = rebuild if rebuild_val is None else _TaipyBool(rebuild_val, '').get()
+            rebuild = _TaipyBool(rebuild_val, '').get() if is_rebuild_var else rebuild
             if rebuild:
                 return json.dumps(_get_columns_dict(data, columns_val if columns_val else columns, self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)), date_format, number_format))
         except Exception as e: # pragma: no cover
