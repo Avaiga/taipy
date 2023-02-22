@@ -44,7 +44,7 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
 /**
  * A React hook to manage a dynamic json property.
  *
- * A dynamic scalar property  is defined by a default property and a bound property.
+ * A dynamic json property  is defined by a default property and a bound property.
  * @typeParam T - The dynamic property type.
  * @param value - The bound value.
  * @param defaultValue - The default value.
@@ -52,16 +52,7 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
  * @returns The latest updated value.
  */
 export const useDynamicJsonProperty = <T>(value: string | T, defaultValue: string, defaultStatic: T): T => {
-    return useMemo(() => {
-        if (value !== undefined) {
-            if (typeof value === "string") {
-                try {
-                    return JSON.parse(value);
-                } catch (e) {
-                    console.warn("useDynamicJsonProperty: value", e);
-                }
-            }
-        }
+    const defaultJson = useMemo(() => {
         if (defaultValue !== undefined) {
             try {
                 return JSON.parse(defaultValue);
@@ -70,7 +61,21 @@ export const useDynamicJsonProperty = <T>(value: string | T, defaultValue: strin
             }
         }
         return defaultStatic;
-    }, [value, defaultValue, defaultStatic]);
+    }, [defaultValue, defaultStatic]);
+    return useMemo(() => {
+        if (value && typeof value === "string") {
+            try {
+                const json = JSON.parse(value);
+                Object.keys(json).filter(key => key in defaultJson).forEach((key) => {
+                    json[key] = {...defaultJson[key], ...json[key]};
+                });
+                return json;
+            } catch (e) {
+                console.warn("useDynamicJsonProperty: value", e);
+            }
+        }
+        return defaultJson;
+    }, [value, defaultJson]);
 };
 
 /**
