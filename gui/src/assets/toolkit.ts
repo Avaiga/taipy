@@ -2,30 +2,30 @@ export const toolkitTheme = {
     palette: {
         // Primary and secondary colors
         primary: {
-            main: window.taipyConfig.toolkit?.colorPrimary,
+            main: window.taipyConfig?.toolkit?.colorPrimary,
         },
         secondary: {
-            main: window.taipyConfig.toolkit?.colorSecondary,
+            main: window.taipyConfig?.toolkit?.colorSecondary,
         },
         error: {
-            main: window.taipyConfig.toolkit?.colorError,
+            main: window.taipyConfig?.toolkit?.colorError,
         },
         warning: {
-            main: window.taipyConfig.toolkit?.colorWarning,
+            main: window.taipyConfig?.toolkit?.colorWarning,
         },
         success: {
-            main: window.taipyConfig.toolkit?.colorSuccess,
+            main: window.taipyConfig?.toolkit?.colorSuccess,
         },
     },
     typography: {
         // Custom font
-        fontFamily: window.taipyConfig.toolkit?.fontFamily,
+        fontFamily: window.taipyConfig?.toolkit?.fontFamily,
         h6: {
             fontSize: "1rem",
         },
     },
     shape: {
-        borderRadius: window.taipyConfig.toolkit?.borderRadius,
+        borderRadius: window.taipyConfig?.toolkit?.borderRadius,
     },
     // Components normalization
     components: {
@@ -79,7 +79,7 @@ export const toolkitTheme = {
                     display: "flex",
                 },
                 input: {
-                    height: window.taipyConfig.toolkit?.inputButtonHeight,
+                    height: window.taipyConfig?.toolkit?.inputButtonHeight,
                     boxSizing: "border-box",
 
                     ".MuiInputBase-root &": {
@@ -94,8 +94,8 @@ export const toolkitTheme = {
                 select: {
                     display: "flex",
                     alignItems: "center",
-                    height: window.taipyConfig.toolkit?.inputButtonHeight,
-                    lineHeight: window.taipyConfig.toolkit?.inputButtonHeight,
+                    height: window.taipyConfig?.toolkit?.inputButtonHeight,
+                    lineHeight: window.taipyConfig?.toolkit?.inputButtonHeight,
                     boxSizing: "border-box",
 
                     "&.MuiInputBase-input": {
@@ -110,7 +110,7 @@ export const toolkitTheme = {
             styleOverrides: {
                 root: {
                     height: "auto",
-                    minHeight: window.taipyConfig.toolkit?.inputButtonHeight,
+                    minHeight: window.taipyConfig?.toolkit?.inputButtonHeight,
                 },
             },
         },
@@ -119,17 +119,17 @@ export const toolkitTheme = {
             styleOverrides: {
                 root: {
                     ".taipy-file-download &, .taipy-file-selector &": {
-                        height: window.taipyConfig.toolkit?.inputButtonHeight,
+                        height: window.taipyConfig?.toolkit?.inputButtonHeight,
                         paddingLeft: "1em",
                         paddingRight: "1em",
                         gap: "0.5em",
                         backgroundColor: "transparent",
                         borderWidth: 1,
-                        borderColor: window.taipyConfig.toolkit?.colorPrimary,
+                        borderColor: window.taipyConfig?.toolkit?.colorPrimary,
                         borderStyle: "solid",
-                        borderRadius: window.taipyConfig.toolkit?.borderRadius,
+                        borderRadius: window.taipyConfig?.toolkit?.borderRadius,
                         boxShadow: "none",
-                        color: window.taipyConfig.toolkit?.colorPrimary,
+                        color: window.taipyConfig?.toolkit?.colorPrimary,
                         zIndex: "auto",
                     },
                 },
@@ -185,9 +185,9 @@ export const toolkitTheme = {
                         // Use success and error color for heat gradient
                         background:
                             "linear-gradient(90deg, " +
-                            window.taipyConfig.toolkit?.colorError +
+                            window.taipyConfig?.toolkit?.colorError +
                             " 0%, " +
-                            window.taipyConfig.toolkit?.colorSuccess +
+                            window.taipyConfig?.toolkit?.colorSuccess +
                             " 100%)",
                     },
                 },
@@ -211,9 +211,9 @@ export const toolkitModeThemes = {
         palette: {
             background: {
                 // Main background
-                default: window.taipyConfig.toolkit?.colorBackgroundLight,
+                default: window.taipyConfig?.toolkit?.colorBackgroundLight,
                 // Cards background
-                paper: window.taipyConfig.toolkit?.colorPaperLight,
+                paper: window.taipyConfig?.toolkit?.colorPaperLight,
             },
         },
         components: {
@@ -222,7 +222,7 @@ export const toolkitModeThemes = {
                 styleOverrides: {
                     thumb: {
                         ".Mui-disabled &::before": {
-                            backgroundColor: window.taipyConfig.toolkit?.colorPaperLight,
+                            backgroundColor: window.taipyConfig?.toolkit?.colorPaperLight,
                         },
                     },
                 },
@@ -233,9 +233,9 @@ export const toolkitModeThemes = {
         palette: {
             background: {
                 // Main background
-                default: window.taipyConfig.toolkit?.colorBackgroundDark,
+                default: window.taipyConfig?.toolkit?.colorBackgroundDark,
                 // Cards background
-                paper: window.taipyConfig.toolkit?.colorPaperDark,
+                paper: window.taipyConfig?.toolkit?.colorPaperDark,
             },
         },
         components: {
@@ -244,7 +244,7 @@ export const toolkitModeThemes = {
                 styleOverrides: {
                     thumb: {
                         ".Mui-disabled &::before": {
-                            backgroundColor: window.taipyConfig.toolkit?.colorPaperDark,
+                            backgroundColor: window.taipyConfig?.toolkit?.colorPaperDark,
                         },
                     },
                 },
