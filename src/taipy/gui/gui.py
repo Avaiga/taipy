@@ -409,7 +409,6 @@ class Gui:
         try:
             self.__set_client_id_in_context(message.get("client_id"))
             self._set_locals_context(message.get("module_context") or None)
-            self._set_ack_id(message.get("ack_id"))
             if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
@@ -428,6 +427,7 @@ class Gui:
             elif msg_type == _WsType.CLIENT_ID.value:
                 self._bindings()._get_or_create_scope(message.get("payload", ""))
             self._reset_locals_context()
+            self.__send_ack(message.get("ack_id"))
         except Exception as e: # pragma: no cover
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
@@ -748,13 +748,19 @@ class Gui:
                     to=self.__get_ws_receiver(),
                 )
                 time.sleep(0.001)
-                if ack_id := self._get_ack_id():
-                    self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
-                    time.sleep(0.001)
             except Exception as e: # pragma: no cover
                 warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
         else:
             grouping_message.append(payload)
+
+    def __send_ack(self, ack_id: t.Optional[str]) -> None:
+        if ack_id:
+            try:
+                self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
+                time.sleep(0.001)
+            except Exception as e: # pragma: no cover
+                warnings.warn(f"Exception raised in Web Socket communication (send ack) in '{self.__frame.f_code.co_name}':\n{e}")
+
 
     def _send_ws_id(self, id: str) -> None:
         self.__send_ws(
@@ -1056,12 +1062,6 @@ class Gui:
 
     def _reset_locals_context(self) -> None:
         self.__locals_context.reset_locals_context()
-
-    def _set_ack_id(self, ack_id: t.Optional[str]) -> None:
-        setattr(g, "ack_id", ack_id)
-
-    def _get_ack_id(self) -> t.Optional[str]:
-        return getattr(g, "ack_id", None)
 
     @staticmethod
     def _get_root_page_name():

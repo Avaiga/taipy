@@ -361,8 +361,8 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             storeClientId(id);
             return { ...state, id: id };
         case Types.Acknowledgement:
-            const ackActionId = (action as unknown as TaipyAckAction).id;
-            return { ...state, ackList: state.ackList.filter(v => v !== ackActionId)}
+            const ackList = state.ackList.filter((v) => v !== (action as unknown as TaipyAckAction).id);
+            return ackList.length < state.ackList.length ? { ...state, ackList} : state;
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {

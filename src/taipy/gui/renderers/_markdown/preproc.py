@@ -188,6 +188,8 @@ class _Preprocessor(MdPreprocessor):
                 elif val:
                     prop_value = val
                 properties.append(self._make_prop_pair(prop_name, prop_value))
+            elif len(fragment) > 1 and fragment[0] == "{" and fragment[-1] == "}":
+                properties.append(self._make_prop_pair(fragment[1:-1], fragment))
             else:
                 warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
 
