@@ -95,12 +95,12 @@ class _DataNodeConfigChecker(_ConfigChecker):
             for prop_key in properties_to_check:
                 if data_node_config.properties and prop_key in data_node_config.properties:
                     prop_value = data_node_config.properties[prop_key]
-                    if not isinstance(prop_value, tuple):  # type: ignore
+                    if not isinstance(prop_value, list):  # type: ignore
                         self._error(
                             prop_key,
                             prop_value,
                             f"`{prop_key}` field of DataNode"
-                            f" `{data_node_config_id}` must be populated with a Tuple value.",
+                            f" `{data_node_config_id}` must be populated with a List value.",
                         )
 
     def _check_generic_read_write_fct(self, data_node_config_id: str, data_node_config: DataNodeConfig):
