@@ -1532,15 +1532,15 @@ class Gui:
                         for n, e in lib.get_elements().items()
                         if isinstance(e, Element) and not e._is_server_only()
                     ]
-        if self._get_config("toolkit", False):
-            config["toolkit"] = {_to_camel_case(k): v for k, v in self._get_config("toolkit_config", {}).items()}
+        if self._get_config("stylekit", False):
+            config["stylekit"] = {_to_camel_case(k): v for k, v in self._get_config("stylekit_variables", {}).items()}
         return config
 
     def __get_css_vars(self) -> str:
         css_vars = []
-        if self._get_config("toolkit", False):
-            toolkit = self._get_config("toolkit_config", {})
-            for k,v in toolkit.items():
+        if self._get_config("stylekit", False):
+            stylekit = self._get_config("stylekit_variables", {})
+            for k,v in stylekit.items():
                 css_vars.append(f'--{k.replace("_", "-")}:{_get_css_var_value(v)};')
         return " ".join(css_vars)
 
@@ -1625,8 +1625,8 @@ class Gui:
             for lib in libs
             for s in (lib.get_styles() or [])
         ]
-        if self._get_config("toolkit", False):
-            styles.append("/toolkit/toolkit.css")
+        if self._get_config("stylekit", False):
+            styles.append("/stylekit/stylekit.css")
         styles.append(f"/{self._css_file}")
 
         self._flask_blueprint.append(extension_bp)

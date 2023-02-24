@@ -38,8 +38,8 @@ default_config: Config = {
     "theme": None,
     "time_zone": None,
     "title": None,
-    "toolkit": False,
-    "toolkit_config" : {
+    "stylekit": False,
+    "stylekit_variables" : {
         # Primary and secondary colors
         "color_primary": "#ff462b",
         "color_secondary": "#283282",

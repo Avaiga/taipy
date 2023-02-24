@@ -1,0 +1,254 @@
+export const stylekitTheme = {
+    palette: {
+        // Primary and secondary colors
+        primary: {
+            main: window.taipyConfig?.stylekit?.colorPrimary,
+        },
+        secondary: {
+            main: window.taipyConfig?.stylekit?.colorSecondary,
+        },
+        error: {
+            main: window.taipyConfig?.stylekit?.colorError,
+        },
+        warning: {
+            main: window.taipyConfig?.stylekit?.colorWarning,
+        },
+        success: {
+            main: window.taipyConfig?.stylekit?.colorSuccess,
+        },
+    },
+    typography: {
+        // Custom font
+        fontFamily: window.taipyConfig?.stylekit?.fontFamily,
+        h6: {
+            fontSize: "1rem",
+        },
+    },
+    shape: {
+        borderRadius: window.taipyConfig?.stylekit?.borderRadius,
+    },
+    // Components normalization
+    components: {
+        // Form control
+        MuiFormControl: {
+            styleOverrides: {
+                root: {
+                    // Fill the available width
+                    display: "flex",
+
+                    "&.taipy-selector": {
+                        marginLeft: 0,
+                        marginRight: 0,
+                    },
+
+                    ".taipy-tree &": {
+                        marginBottom: "1rem",
+                        paddingLeft: "1rem",
+                        paddingRight: "1rem",
+                    },
+
+                    // Removing vertical margins if placed in a layout to avoid y-alignment issues
+                    ".taipy-layout > .taipy-part > .md-para > &": {
+                        "&:first-child": {
+                            marginTop: 0,
+                        },
+                        "&:last-child": {
+                            marginBottom: 0,
+                        },
+                    },
+                },
+            },
+        },
+        // Form label
+        MuiInputLabel: {
+            styleOverrides: {
+                outlined: {
+                    zIndex: "0",
+                    // Properly position floating label on Y axis (second translate value) as the input height changes
+                    "&:not(.MuiInputLabel-shrink)": {
+                        transform: "translate(14px, 12px) scale(1)",
+                    },
+                },
+            },
+        },
+        // Form input
+        MuiInputBase: {
+            styleOverrides: {
+                root: {
+                    // Fill the available width
+                    display: "flex",
+                },
+                input: {
+                    height: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    boxSizing: "border-box",
+
+                    ".MuiInputBase-root &": {
+                        paddingTop: 4,
+                        paddingBottom: 4,
+                    },
+                },
+            },
+        },
+        MuiSelect: {
+            styleOverrides: {
+                select: {
+                    display: "flex",
+                    alignItems: "center",
+                    height: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    lineHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    boxSizing: "border-box",
+
+                    "&.MuiInputBase-input": {
+                        paddingTop: 0,
+                        paddingBottom: 0,
+                    },
+                },
+            },
+        },
+        // Button
+        MuiButtonBase: {
+            styleOverrides: {
+                root: {
+                    height: "auto",
+                    minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                },
+            },
+        },
+        // Floating action button
+        MuiFab: {
+            styleOverrides: {
+                root: {
+                    ".taipy-file-download &, .taipy-file-selector &": {
+                        height: window.taipyConfig?.stylekit?.inputButtonHeight,
+                        paddingLeft: "1em",
+                        paddingRight: "1em",
+                        gap: "0.5em",
+                        backgroundColor: "transparent",
+                        borderWidth: 1,
+                        borderColor: window.taipyConfig?.stylekit?.colorPrimary,
+                        borderStyle: "solid",
+                        borderRadius: window.taipyConfig?.stylekit?.borderRadius,
+                        boxShadow: "none",
+                        color: window.taipyConfig?.stylekit?.colorPrimary,
+                        zIndex: "auto",
+                    },
+                },
+            },
+        },
+        // Toggle button group
+        MuiToggleButtonGroup: {
+            styleOverrides: {
+                root: {
+                    verticalAlign: "middle",
+                },
+            },
+        },
+        // Mui paper
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    ".taipy-tree &": {
+                        overflow: "hidden",
+                        paddingTop: "1rem",
+                        paddingBottom: "1rem",
+                    },
+                },
+            },
+        },
+        // Mui list
+        MuiList: {
+            styleOverrides: {
+                root: {
+                    ".taipy-selector .MuiPaper-root &": {
+                        maxWidth: "100%",
+                        backgroundColor: "transparent",
+                    },
+                },
+            },
+        },
+        // Mui treeview
+        MuiTreeView: {
+            styleOverrides: {
+                root: {
+                    ".taipy-tree .MuiPaper-root &": {
+                        maxWidth: "100%",
+                        backgroundColor: "transparent",
+                    },
+                },
+            },
+        },
+        // Mui slider
+        MuiSlider: {
+            styleOverrides: {
+                rail: {
+                    ".taipy-indicator &": {
+                        // Use success and error color for heat gradient
+                        background:
+                            "linear-gradient(90deg, " +
+                            window.taipyConfig?.stylekit?.colorError +
+                            " 0%, " +
+                            window.taipyConfig?.stylekit?.colorSuccess +
+                            " 100%)",
+                    },
+                },
+            },
+        },
+        // Mui table
+        MuiTable: {
+            styleOverrides: {
+                root: {
+                    "& .MuiTableCell-root": {
+                        textAlign: "left",
+                    },
+                },
+            },
+        },
+    },
+};
+
+export const stylekitModeThemes = {
+    light: {
+        palette: {
+            background: {
+                // Main background
+                default: window.taipyConfig?.stylekit?.colorBackgroundLight,
+                // Cards background
+                paper: window.taipyConfig?.stylekit?.colorPaperLight,
+            },
+        },
+        components: {
+            // Give MuiSlider disabled thumb a fill color matching the theme
+            MuiSlider: {
+                styleOverrides: {
+                    thumb: {
+                        ".Mui-disabled &::before": {
+                            backgroundColor: window.taipyConfig?.stylekit?.colorPaperLight,
+                        },
+                    },
+                },
+            },
+        },
+    },
+    dark: {
+        palette: {
+            background: {
+                // Main background
+                default: window.taipyConfig?.stylekit?.colorBackgroundDark,
+                // Cards background
+                paper: window.taipyConfig?.stylekit?.colorPaperDark,
+            },
+        },
+        components: {
+            // Give MuiSlider disabled thumb a fill color matching the theme
+            MuiSlider: {
+                styleOverrides: {
+                    thumb: {
+                        ".Mui-disabled &::before": {
+                            backgroundColor: window.taipyConfig?.stylekit?.colorPaperDark,
+                        },
+                    },
+                },
+            },
+        },
+    },
+};

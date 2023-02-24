@@ -22,7 +22,7 @@ import { TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { FilterDesc } from "../components/Taipy/TableFilter";
-import { toolkitModeThemes, toolkitTheme } from "../assets/toolkit";
+import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 
 enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -156,8 +156,8 @@ export interface FormatConfig {
 }
 
 const getUserTheme = (mode: PaletteMode) => {
-    const tkTheme = (window.taipyConfig?.toolkit && toolkitTheme) || {};
-    const tkModeTheme = (window.taipyConfig?.toolkit && toolkitModeThemes[mode]) || {};
+    const tkTheme = (window.taipyConfig?.stylekit && stylekitTheme) || {};
+    const tkModeTheme = (window.taipyConfig?.stylekit && stylekitModeThemes[mode]) || {};
     const userTheme = window.taipyConfig?.themes?.base || {};
     const modeTheme = (window.taipyConfig?.themes && window.taipyConfig.themes[mode]) || {};
     return createTheme(
