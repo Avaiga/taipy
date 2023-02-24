@@ -206,6 +206,13 @@ export const stylekitTheme = {
                 },
             },
         },
+        MuiSwitch: {
+            styleOverrides: {
+                switchBase: {
+                    minHeight: "unset",
+                },
+            }
+        },
         // Mui table
         MuiTable: {
             styleOverrides: {
