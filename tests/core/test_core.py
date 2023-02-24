@@ -17,14 +17,20 @@ from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationIssueError, ConfigurationUpdateBlocked
+from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 class TestCore:
-    def test_run_core_trigger_config_check(self):
+    def test_run_core_trigger_config_check(self, caplog):
         Config.configure_data_node(id="d0", storage_type="toto")
-        with pytest.raises(ConfigurationIssueError):
+        with pytest.raises(SystemExit):
             Core().run()
+        expected_error_message = (
+            "`storage_type` field of DataNodeConfig `d0` must be either csv, sql_table,"
+            " sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory."
+            ' Current value of property `storage_type` is "toto".'
+        )
+        assert expected_error_message in caplog.text
 
     def test_run_core_as_a_service_development_mode(self):
         _SchedulerFactory._dispatcher = None

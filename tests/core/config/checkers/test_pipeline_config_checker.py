@@ -11,7 +11,8 @@
 
 from copy import copy
 
-from src.taipy.core.config.checkers._pipeline_config_checker import _PipelineConfigChecker
+import pytest
+
 from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.task_config import TaskConfig
 from taipy.config.checker.issue_collector import IssueCollector
@@ -19,70 +20,97 @@ from taipy.config.config import Config
 
 
 class TestPipelineConfigChecker:
-    def test_check_config_id(self):
-        collector = IssueCollector()
+    def test_check_config_id(self, caplog):
         config = Config._default_config
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[PipelineConfig.name]["new"] = copy(config._sections[PipelineConfig.name]["default"])
         config._sections[PipelineConfig.name]["new"].id = None
-        collector = IssueCollector()
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert "config_id of PipelineConfig `None` is empty" in caplog.text
+        assert len(Config._collector.warnings) == 1
+        assert "tasks field of PipelineConfig `new` is empty." in caplog.text
+
+        caplog.clear()
 
         config._sections[PipelineConfig.name]["new"].id = "new"
-        collector = IssueCollector()
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
+        assert "tasks field of PipelineConfig `new` is empty." in caplog.text
 
-    def test_check_if_entity_property_key_used_is_predefined(self):
-        collector = IssueCollector()
+    def test_check_if_entity_property_key_used_is_predefined(self, caplog):
+        Config._collector = IssueCollector()
         config = Config._default_config
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
+        Config.check()
+        assert len(Config._collector.errors) == 0
 
         config._sections[PipelineConfig.name]["new"] = copy(config._sections[PipelineConfig.name]["default"])
         config._sections[PipelineConfig.name]["new"]._properties["_entity_owner"] = None
-        collector = IssueCollector()
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert "Properties of PipelineConfig `default` cannot have `_entity_owner` as its property." in caplog.text
 
         config._sections[PipelineConfig.name]["new"] = copy(config._sections[PipelineConfig.name]["default"])
         config._sections[PipelineConfig.name]["new"]._properties["_entity_owner"] = "entity_owner"
-        collector = IssueCollector()
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "Properties of PipelineConfig `default` cannot have `_entity_owner` as its property."
+            ' Current value of property `_entity_owner` is "entity_owner".'
+        )
+        assert expected_error_message in caplog.text
 
-    def test_check_task(self):
-        collector = IssueCollector()
+    def test_check_task(self, caplog):
+        Config._collector = IssueCollector()
         config = Config._default_config
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[PipelineConfig.name]["new"] = copy(config._sections[PipelineConfig.name]["default"])
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
+        assert "tasks field of PipelineConfig `new` is empty." in caplog.text
 
         config._sections[PipelineConfig.name]["new"]._tasks = [TaskConfig("bar", None)]
-        collector = IssueCollector()
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[PipelineConfig.name]["new"]._tasks = "bar"
-        collector = IssueCollector()
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 0
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert len(Config._collector.warnings) == 0
+        expected_error_message = (
+            "tasks field of PipelineConfig `new` must be populated with a list of TaskConfig"
+            ' objects. Current value of property `tasks` is "bar".'
+        )
+        assert expected_error_message in caplog.text
 
         config._sections[PipelineConfig.name]["new"]._tasks = ["bar"]
-        collector = IssueCollector()
-        _PipelineConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 0
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert len(Config._collector.warnings) == 0
+        expected_error_message = (
+            "tasks field of PipelineConfig `new` must be populated with a list of TaskConfig"
+            " objects. Current value of property `tasks` is ['bar']."
+        )
+        assert expected_error_message in caplog.text

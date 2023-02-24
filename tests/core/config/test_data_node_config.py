@@ -20,10 +20,10 @@ from src.taipy.core.config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationIssueError, ConfigurationUpdateBlocked
+from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
-def test_data_node_config_check():
+def test_data_node_config_check(caplog):
     data_node_config = Config.configure_data_node("data_nodes1", "pickle")
     assert list(Config.data_nodes) == [DataNodeConfig._DEFAULT_KEY, data_node_config.id]
 
@@ -38,13 +38,24 @@ def test_data_node_config_check():
         data_node3_config.id,
     ]
 
-    with pytest.raises(ConfigurationIssueError):
+    with pytest.raises(SystemExit):
         Config.configure_data_node("data_nodes", storage_type="bar")
         Config.check()
+    expected_error_message = (
+        "`storage_type` field of DataNodeConfig `data_nodes` must be either csv, sql_table,"
+        " sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory. Current"
+        ' value of property `storage_type` is "bar".'
+    )
+    assert expected_error_message in caplog.text
 
-    with pytest.raises(ConfigurationIssueError):
+    with pytest.raises(SystemExit):
         Config.configure_data_node("data_nodes", scope="bar")
         Config.check()
+    expected_error_message = (
+        "`scope` field of DataNodeConfig `data_nodes` must be populated with a Scope value."
+        ' Current value of property `scope` is "bar".'
+    )
+    assert expected_error_message in caplog.text
 
     with pytest.raises(TypeError):
         Config.configure_data_node("data_nodes", storage_type="sql")

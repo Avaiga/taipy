@@ -31,7 +31,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_storage_type(data_node_config_id, data_node_config)
             self._check_scope(data_node_config_id, data_node_config)
             self._check_required_properties(data_node_config_id, data_node_config)
-            self._check_generic_read_write_fct(data_node_config_id, data_node_config)
+            self._check_callable(data_node_config_id, data_node_config)
             self._check_generic_read_write_fct_params(data_node_config_id, data_node_config)
             self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
@@ -41,8 +41,8 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._error(
                 data_node_config._STORAGE_TYPE_KEY,
                 data_node_config.storage_type,
-                f"`{data_node_config._STORAGE_TYPE_KEY}` field of DataNode `{data_node_config_id}` must be either csv, "
-                f"sql_table, sql, mongo_collection, pickle, excel, generic, json, parquet or in_memory.",
+                f"`{data_node_config._STORAGE_TYPE_KEY}` field of DataNodeConfig `{data_node_config_id}` must be"
+                f" either csv, sql_table, sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory.",
             )
 
     def _check_scope(self, data_node_config_id: str, data_node_config: DataNodeConfig):
@@ -50,8 +50,8 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._error(
                 data_node_config._SCOPE_KEY,
                 data_node_config.scope,
-                f"`{data_node_config._SCOPE_KEY}` field of DataNode `{data_node_config_id}` must be populated with a "
-                f"Scope value.",
+                f"`{data_node_config._SCOPE_KEY}` field of DataNodeConfig `{data_node_config_id}` must be"
+                f" populated with a Scope value.",
             )
 
     def _check_required_properties(self, data_node_config_id: str, data_node_config: DataNodeConfig):
@@ -79,12 +79,20 @@ class _DataNodeConfigChecker(_ConfigChecker):
                                 ]
                 for required_property in required_properties:
                     if not data_node_config.properties or required_property not in data_node_config.properties:
-                        self._error(
-                            "properties",
-                            required_property,
-                            f"`{data_node_config_id}` DataNode is missing the required "
-                            f"property `{required_property}` for type `{storage_type}`",
-                        )
+                        if data_node_config_id == DataNodeConfig._DEFAULT_KEY:
+                            self._warning(
+                                required_property,
+                                None,
+                                f"DataNodeConfig `{data_node_config_id}` is missing the required "
+                                f"property `{required_property}` for type `{storage_type}`.",
+                            )
+                        else:
+                            self._error(
+                                required_property,
+                                None,
+                                f"DataNodeConfig `{data_node_config_id}` is missing the required "
+                                f"property `{required_property}` for type `{storage_type}`.",
+                            )
 
     def _check_generic_read_write_fct_params(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC:
@@ -95,27 +103,34 @@ class _DataNodeConfigChecker(_ConfigChecker):
             for prop_key in properties_to_check:
                 if data_node_config.properties and prop_key in data_node_config.properties:
                     prop_value = data_node_config.properties[prop_key]
-                    if not isinstance(prop_value, list):  # type: ignore
+                    if not isinstance(prop_value, list):
                         self._error(
                             prop_key,
                             prop_value,
-                            f"`{prop_key}` field of DataNode"
+                            f"`{prop_key}` field of DataNodeConfig"
                             f" `{data_node_config_id}` must be populated with a List value.",
                         )
 
-    def _check_generic_read_write_fct(self, data_node_config_id: str, data_node_config: DataNodeConfig):
-        if data_node_config.storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC:
-            properties_to_check = [
+    def _check_callable(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+        properties_to_check = {
+            DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC: [
                 DataNodeConfig._REQUIRED_READ_FUNCTION_GENERIC_PROPERTY,
                 DataNodeConfig._REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY,
-            ]
-            for prop_key in properties_to_check:
+            ],
+            DataNodeConfig._STORAGE_TYPE_VALUE_SQL: [
+                DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
+            ],
+        }
+
+        if data_node_config.storage_type in properties_to_check.keys():
+            for prop_key in properties_to_check[data_node_config.storage_type]:
                 prop_value = data_node_config.properties.get(prop_key) if data_node_config.properties else None
                 if prop_value and not callable(prop_value):
                     self._error(
                         prop_key,
                         prop_value,
-                        f"`{prop_key}` of DataNode `{data_node_config_id}` must be populated with a Callable function.",
+                        f"`{prop_key}` of DataNodeConfig `{data_node_config_id}` must be"
+                        f" populated with a Callable function.",
                     )
 
     def _check_exposed_type(self, data_node_config_id: str, data_node_config: DataNodeConfig):
@@ -125,6 +140,6 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._error(
                 data_node_config._EXPOSED_TYPE_KEY,
                 data_node_config.exposed_type,
-                f"The `{data_node_config._EXPOSED_TYPE_KEY}` of the DataNodeConfig `{data_node_config_id}` "
-                f'must be either "pandas", "modin", "numpy" or a custom type.',
+                f"The `{data_node_config._EXPOSED_TYPE_KEY}` of DataNodeConfig `{data_node_config_id}` "
+                f'must be either "pandas", "modin", "numpy", or a custom type.',
             )

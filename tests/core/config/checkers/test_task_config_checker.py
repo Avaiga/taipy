@@ -11,156 +11,227 @@
 
 from copy import copy
 
+import pytest
+
 from src.taipy.core.config import TaskConfig
-from src.taipy.core.config.checkers._task_config_checker import _TaskConfigChecker
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
 
 
 class TestTaskConfigChecker:
-    def test_check_config_id(self):
+    def test_check_config_id(self, caplog):
         config = Config._default_config
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
         config._sections[TaskConfig.name]["new"].id = None
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 2
-        assert len(collector.warnings) == 2
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 2
+        assert "config_id of TaskConfig `None` is empty" in caplog.text
+        assert "function field of TaskConfig `new` is empty" in caplog.text
+        assert len(Config._collector.warnings) == 2
+        assert "inputs field of TaskConfig `new` is empty." in caplog.text
+        assert "outputs field of TaskConfig `new` is empty." in caplog.text
+
+        caplog.clear()
 
         config._sections[TaskConfig.name]["new"].id = "new"
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 2
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert len(Config._collector.warnings) == 2
 
-    def test_check_if_entity_property_key_used_is_predefined(self):
-        collector = IssueCollector()
+    def test_check_if_entity_property_key_used_is_predefined(self, caplog):
+        Config._collector = IssueCollector()
         config = Config._default_config
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
+        Config.check()
+        assert len(Config._collector.errors) == 0
 
         config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
         config._sections[TaskConfig.name]["new"]._properties["_entity_owner"] = None
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 2
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 2
+        assert "function field of TaskConfig `new` is empty" in caplog.text
+        assert "Properties of TaskConfig `default` cannot have `_entity_owner` as its property." in caplog.text
+
+        caplog.clear()
 
         config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
         config._sections[TaskConfig.name]["new"]._properties["_entity_owner"] = "entity_owner"
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 2
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 2
+        assert "function field of TaskConfig `new` is empty" in caplog.text
+        expected_error_message = (
+            "Properties of TaskConfig `default` cannot have `_entity_owner` as its property."
+            ' Current value of property `_entity_owner` is "entity_owner".'
+        )
+        assert expected_error_message in caplog.text
 
-    def test_check_inputs(self):
+    def test_check_inputs(self, caplog):
         config = Config._default_config
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[TaskConfig.name]["new"] = config._sections[TaskConfig.name]["default"]
         config._sections[TaskConfig.name]["new"].id, config._sections[TaskConfig.name]["new"].function = "new", print
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 2
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 2
+        assert "inputs field of TaskConfig `new` is empty." in caplog.text
+        assert "outputs field of TaskConfig `new` is empty." in caplog.text
 
         config._sections[TaskConfig.name]["new"]._inputs = "bar"
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "inputs field of TaskConfig `new` must be populated with a list of DataNodeConfig"
+            " objects. Current value of property `inputs` is ['b', 'a', 'r']."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
 
         config._sections[TaskConfig.name]["new"]._inputs = ["bar"]
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "inputs field of TaskConfig `new` must be populated with a list of DataNodeConfig"
+            " objects. Current value of property `inputs` is ['bar']."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
 
         config._sections[TaskConfig.name]["new"]._inputs = [DataNodeConfig("bar")]
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
 
-        config._sections[TaskConfig.name]["new"]._inputs = [DataNodeConfig("bar"), "bar"]
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
+        config._sections[TaskConfig.name]["new"]._inputs = ["bar", DataNodeConfig("bar")]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "inputs field of TaskConfig `new` must be populated with a list of"
+            " DataNodeConfig objects. Current value of property `inputs` is"
+            " ['bar', <src.taipy.core.config.data_node_config.DataNodeConfig object at"
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
 
-    def test_check_outputs(self):
+    def test_check_outputs(self, caplog):
         config = Config._default_config
 
         config._sections[TaskConfig.name]["default"]._outputs = "bar"
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[TaskConfig.name]["new"] = config._sections[TaskConfig.name]["default"]
         config._sections[TaskConfig.name]["new"].id, config._sections[TaskConfig.name]["new"].function = "new", print
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "outputs field of TaskConfig `new` must be populated with a list of DataNodeConfig"
+            " objects. Current value of property `outputs` is ['b', 'a', 'r']."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
 
         config._sections[TaskConfig.name]["new"]._outputs = ["bar"]
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "outputs field of TaskConfig `new` must be populated with a list of DataNodeConfig"
+            " objects. Current value of property `outputs` is ['bar']."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
 
         config._sections[TaskConfig.name]["new"]._outputs = [DataNodeConfig("bar")]
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
 
-        config._sections[TaskConfig.name]["new"]._outputs = [DataNodeConfig("bar"), "bar"]
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
+        config._sections[TaskConfig.name]["new"]._outputs = ["bar", DataNodeConfig("bar")]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "outputs field of TaskConfig `new` must be populated with a list of"
+            " DataNodeConfig objects. Current value of property `outputs` is"
+            " ['bar', <src.taipy.core.config.data_node_config.DataNodeConfig object at"
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
 
-    def test_check_function(self):
+    def test_check_function(self, caplog):
         def mock_func():
             pass
 
         config = Config._default_config
 
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
         config._sections[TaskConfig.name]["new"].id = "new"
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 2
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert "function field of TaskConfig `new` is empty." in caplog.text
+        assert len(Config._collector.warnings) == 2
 
         config._sections[TaskConfig.name]["new"].function = None
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 2
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert "function field of TaskConfig `new` is empty." in caplog.text
+        assert len(Config._collector.warnings) == 2
 
         config._sections[TaskConfig.name]["new"].function = "bar"
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 2
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "function field of TaskConfig `new` must be populated with Callable value."
+            ' Current value of property `function` is "bar".'
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 2
 
         config._sections[TaskConfig.name]["new"].function = mock_func
-        collector = IssueCollector()
-        _TaskConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 2
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 2

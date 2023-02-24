@@ -549,8 +549,10 @@ class DataNodeConfig(Section):
             read_fct (Callable): The Python function called to read the data.
             write_fct (Callable): The Python function called to write the data.
                 The provided function must have at least one parameter that receives the data to be written.
-            read_fct_params (Optional[List]): The parameters that are passed to _read_fct_ to read the data.
-            write_fct_params (Optional[List]): The parameters that are passed to _write_fct_ to write the data.
+            read_fct_params (Optional[List]): The list of parameters that are passed to the _read_fct_
+                to read data.
+            write_fct_params (Optional[List]): The list of parameters that are passed to the _write_fct_
+                to write the data.
             scope (Optional[Scope^]): The scope of the Generic data node configuration.
                 The default value is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
@@ -652,9 +654,9 @@ class DataNodeConfig(Section):
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             table_name (str): The name of the SQL table.
-            db_host (str): The database host. The default value is _"localhost"_.
-            db_port (int): The database port. The default value is 1433.
-            db_driver (str): The database driver. The default value is
+            db_host (Optional[str]): The database host. The default value is _"localhost"_.
+            db_port (Optional[int]): The database port. The default value is 1433.
+            db_driver (Optional[str]): The database driver. The default value is
                 _"ODBC Driver 17 for SQL Server"_.
             db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
                 connection string.
@@ -720,9 +722,9 @@ class DataNodeConfig(Section):
             read_query (str): The SQL query string used to read the data from the database.
             write_query_builder (Callable): A callback function that takes the data as an input parameter
                 and returns a list of SQL queries.
-            db_host (str): The database host. The default value is _"localhost"_.
-            db_port (int): The database port. The default value is 1433.
-            db_driver (str): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            db_host (Optional[str]): The database host. The default value is _"localhost"_.
+            db_port (Optional[int]): The database port. The default value is 1433.
+            db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
             db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
                 connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL query.

@@ -47,8 +47,8 @@ class _ScenarioConfigChecker(_ConfigChecker):
             self._error(
                 scenario_config._FREQUENCY_KEY,
                 scenario_config.frequency,
-                f"{scenario_config._FREQUENCY_KEY} field of Scenario {scenario_config_id} must be populated with a "
-                f"Frequency value.",
+                f"{scenario_config._FREQUENCY_KEY} field of ScenarioConfig `{scenario_config_id}` must be"
+                f" populated with a Frequency value.",
             )
 
     def _check_comparators(self, scenario_config_id: str, scenario_config: ScenarioConfig):
@@ -56,5 +56,5 @@ class _ScenarioConfigChecker(_ConfigChecker):
             self._info(
                 scenario_config._COMPARATOR_KEY,
                 scenario_config.comparators,
-                f"No scenario {scenario_config._COMPARATOR_KEY} defined for scenario {scenario_config_id}",
+                f"No scenario {scenario_config._COMPARATOR_KEY} defined for ScenarioConfig `{scenario_config_id}`.",
             )

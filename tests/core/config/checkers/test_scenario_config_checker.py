@@ -11,8 +11,9 @@
 
 from copy import copy
 
+import pytest
+
 from src.taipy.core.config import ScenarioConfig
-from src.taipy.core.config.checkers._scenario_config_checker import _ScenarioConfigChecker
 from src.taipy.core.config.pipeline_config import PipelineConfig
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
@@ -20,137 +21,186 @@ from taipy.config.config import Config
 
 
 class TestScenarioConfigChecker:
-    def test_check_config_id(self):
-        collector = IssueCollector()
+    def test_check_config_id(self, caplog):
+        Config._collector = IssueCollector()
         config = Config._default_config
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 0
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
         config._sections[ScenarioConfig.name]["new"].id = None
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert "config_id of ScenarioConfig `None` is empty" in caplog.text
+        assert len(Config._collector.warnings) == 1
+        assert "pipelines field of ScenarioConfig `new` is empty." in caplog.text
+        assert len(Config._collector.infos) == 1
+        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
+
+        caplog.clear()
 
         config._sections[ScenarioConfig.name]["new"].id = "new"
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
+        assert "pipelines field of ScenarioConfig `new` is empty." in caplog.text
+        assert len(Config._collector.infos) == 1
+        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
 
-    def test_check_if_entity_property_key_used_is_predefined(self):
-        collector = IssueCollector()
+    def test_check_if_entity_property_key_used_is_predefined(self, caplog):
+        Config._collector = IssueCollector()
         config = Config._default_config
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
+        Config.check()
+        assert len(Config._collector.errors) == 0
 
         config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
         config._sections[ScenarioConfig.name]["new"]._properties["_entity_owner"] = None
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        assert "Properties of ScenarioConfig `default` cannot have `_entity_owner` as its property." in caplog.text
 
         config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
         config._sections[ScenarioConfig.name]["new"]._properties["_entity_owner"] = "entity_owner"
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "Properties of ScenarioConfig `default` cannot have `_entity_owner` as its property."
+            ' Current value of property `_entity_owner` is "entity_owner".'
+        )
+        assert expected_error_message in caplog.text
 
-    def test_check_pipelines(self):
-        collector = IssueCollector()
+    def test_check_pipelines(self, caplog):
+        Config._collector = IssueCollector()
         config = Config._default_config
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 0
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 1
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
+        assert "pipelines field of ScenarioConfig `new` is empty." in caplog.text
+        assert len(Config._collector.infos) == 1
+        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
 
         config._sections[ScenarioConfig.name]["new"]._pipelines = "bar"
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "pipelines field of ScenarioConfig `new` must be populated with a list of"
+            ' PipelineConfig objects. Current value of property `pipelines` is "bar".'
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
 
         config._sections[ScenarioConfig.name]["new"]._pipelines = ["bar"]
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "pipelines field of ScenarioConfig `new` must be populated with a list of"
+            " PipelineConfig objects. Current value of property `pipelines` is ['bar']."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
 
         config._sections[ScenarioConfig.name]["new"]._pipelines = ["bar", PipelineConfig("bar")]
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "pipelines field of ScenarioConfig `new` must be populated with a list of"
+            " PipelineConfig objects. Current value of property `pipelines` is"
+            " ['bar', <src.taipy.core.config.pipeline_config.PipelineConfig object at"
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
 
         config._sections[ScenarioConfig.name]["new"]._pipelines = [PipelineConfig("bar")]
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
 
-    def test_check_frequency(self):
+    def test_check_frequency(self, caplog):
         config = Config._default_config
 
         config._sections[ScenarioConfig.name]["default"].frequency = "bar"
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 1
+        with pytest.raises(SystemExit):
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "frequency field of ScenarioConfig `new` must be populated with a Frequency value."
+            ' Current value of property `frequency` is "bar".'
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 1
 
         config._sections[ScenarioConfig.name]["new"].frequency = 1
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "frequency field of ScenarioConfig `new` must be populated with a Frequency value."
+            " Current value of property `frequency` is 1."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 1
 
         config._sections[ScenarioConfig.name]["new"].frequency = Frequency.DAILY
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 1
 
-    def test_check_comparators(self):
+    def test_check_comparators(self, caplog):
         config = Config._default_config
 
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 0
-        assert len(collector.infos) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 1
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 1
 
         config._sections[ScenarioConfig.name]["new"].comparators = {"bar": "abc"}
-        collector = IssueCollector()
-        _ScenarioConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
-        assert len(collector.warnings) == 1
-        assert len(collector.infos) == 0
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 0
