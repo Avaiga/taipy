@@ -10,11 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 from ..._config import _Config
-from ._config_checker import _ConfigChecker
-from ..issue_collector import IssueCollector
-from ...global_app.global_app_config import GlobalAppConfig
-from ...exceptions.exceptions import InconsistentEnvVariableError
 from ...common._template_handler import _TemplateHandler as tpl
+from ...exceptions.exceptions import InconsistentEnvVariableError
+from ...global_app.global_app_config import GlobalAppConfig
+from ..issue_collector import IssueCollector
+from ._config_checker import _ConfigChecker
 
 
 class _GlobalConfigChecker(_ConfigChecker):
@@ -44,5 +44,6 @@ class _GlobalConfigChecker(_ConfigChecker):
         self._error(
             global_config._CLEAN_ENTITIES_ENABLED_KEY,
             value,
-            f"{global_config._CLEAN_ENTITIES_ENABLED_KEY} field must be populated with a boolean value.",
+            f"`{global_config._CLEAN_ENTITIES_ENABLED_KEY}` field of GlobalAppConfig "
+            "must be populated with a boolean value.",
         )

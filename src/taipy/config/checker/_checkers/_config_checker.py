@@ -17,9 +17,9 @@ from ..issue_collector import IssueCollector
 
 
 class _ConfigChecker:
-    
+
     _PREDEFINED_PROPERTIES_KEYS = ["_entity_owner"]
-    
+
     def __init__(self, config: _Config, collector):
         self._collector = collector
         self._config = config
@@ -42,7 +42,7 @@ class _ConfigChecker:
             self._warning(
                 config_key,
                 config_value,
-                f"{config_key} field of {parent_config_class.__name__} {config_id} is empty.",
+                f"{config_key} field of {parent_config_class.__name__} `{config_id}` is empty.",
             )
         else:
             if not (
@@ -51,7 +51,7 @@ class _ConfigChecker:
                 self._error(
                     config_key,
                     config_value,
-                    f"{config_key} field of {parent_config_class.__name__} {config_id} must be populated with a list "
+                    f"{config_key} field of {parent_config_class.__name__} `{config_id}` must be populated with a list "
                     f"of {child_config_class.__name__} objects.",
                 )
 
@@ -60,14 +60,14 @@ class _ConfigChecker:
             self._error(
                 "config_id",
                 config.id,
-                f"config_id of {config.__name__} {config.id} is empty.",
+                f"config_id of {config.__class__.__name__} `{config.id}` is empty.",
             )
 
     def _check_if_entity_property_key_used_is_predefined(self, config):
-        for key in config._properties.keys():
+        for key, value in config._properties.items():
             if key in self._PREDEFINED_PROPERTIES_KEYS:
                 self._error(
-                    "properties",
-                    config.id,
-                    f"properties of {config.__name__} {config.id} cannot have {key} as its property."
+                    key,
+                    value,
+                    f"Properties of {config.__class__.__name__} `{config.id}` cannot have `{key}` as its property.",
                 )

@@ -20,7 +20,6 @@ from .checker._checker import _Checker
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
 from .common._config_blocker import _ConfigBlocker
-from .exceptions.exceptions import ConfigurationIssueError
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
@@ -244,7 +243,7 @@ class Config:
         for issue in config._collector._errors:
             cls.__logger.error(str(issue))
         if len(config._collector._errors) != 0:
-            raise ConfigurationIssueError("Configuration issues found.")
+            raise SystemExit("Configuration errors found. Please check the error log for more information.")
 
     @classmethod
     def _to_json(cls, _config: _Config) -> str:

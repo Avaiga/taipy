@@ -31,3 +31,12 @@ class Issue:
     value: Any
     message: str
     tag: Optional[str]
+
+    def __str__(self) -> str:
+        message = self.message
+
+        if self.value:
+            current_value_str = f'"{self.value}"' if isinstance(self.value, str) else f"{self.value}"
+            message += f" Current value of property `{self.field}` is {current_value_str}."
+
+        return message
