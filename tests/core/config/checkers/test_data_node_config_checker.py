@@ -11,8 +11,6 @@
 
 from copy import copy
 
-import pytest
-
 from src.taipy.core.config.checkers._data_node_config_checker import _DataNodeConfigChecker
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from taipy.config import Config
@@ -317,13 +315,13 @@ class TestDataNodeConfigChecker:
         }
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._sections[DataNodeConfig.name]["default"].storage_type = "generic"
         config._sections[DataNodeConfig.name]["default"].properties = {
             "write_fct": print,
             "read_fct": print,
-            "write_fct_params": tuple("foo"),
+            "write_fct_params": list("foo"),
         }
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
@@ -337,13 +335,13 @@ class TestDataNodeConfigChecker:
         }
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._sections[DataNodeConfig.name]["default"].storage_type = "generic"
         config._sections[DataNodeConfig.name]["default"].properties = {
             "write_fct": print,
             "read_fct": print,
-            "read_fct_params": tuple("foo"),
+            "read_fct_params": list("foo"),
         }
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
@@ -358,7 +356,7 @@ class TestDataNodeConfigChecker:
         }
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
+        assert len(collector.errors) == 2
 
     def test_check_exposed_types(self):
         config = Config._default_config
