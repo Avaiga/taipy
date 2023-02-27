@@ -68,7 +68,7 @@ def small_dataframe():
 def gui(helpers):
     from taipy.gui import Gui
 
-    gui = Gui()
+    gui = Gui(stylekit=False)
     yield gui
     # Delete Gui instance and state of some classes after each test
     gui.stop()
