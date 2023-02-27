@@ -12,7 +12,6 @@
  */
 
 /* Variables */
-/* @import 'variables/colors.css'; */
 @import 'variables/spacing.css';
 @import 'variables/typography.css';
 @import 'variables/shapes.css';
@@ -24,17 +23,17 @@
 @import 'base/base.css';
 @import 'base/fontfaces.css';
 
-/* Taipy controls */
-@import 'visual-elements/taipy-controls/button.css';
-@import 'visual-elements/taipy-controls/date.css';
-@import 'visual-elements/taipy-controls/expandable.css';
-@import 'visual-elements/taipy-controls/image.css';
-@import 'visual-elements/taipy-controls/navbar.css';
-@import 'visual-elements/taipy-controls/slider.css';
-@import 'visual-elements/taipy-controls/toggle.css';
+/* Controls */
+@import 'controls/button.css';
+@import 'controls/date.css';
+@import 'controls/expandable.css';
+@import 'controls/image.css';
+@import 'controls/navbar.css';
+@import 'controls/slider.css';
+@import 'controls/toggle.css';
 
-/* Taipy blocks */
-@import 'visual-elements/taipy-blocks/layout.css';
+/* Blocks */
+@import 'blocks/layout.css';
 
 /* Additional CSS components */
 @import 'components/container.css';
@@ -45,7 +44,6 @@
 /* Utilities */
 @import 'utilities/colors.css';
 @import 'utilities/typography.css';
-/* @import 'utilities/layout.css'; */
 @import 'utilities/spacing.css';
 @import 'utilities/misc.css';
 

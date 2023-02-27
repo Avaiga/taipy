@@ -244,8 +244,9 @@ class Gui:
         self._flask = flask
         if css_file is None:
             script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
-            css_file = f'{script_file.stem or "Taipy"}.css'
-        self._css_file = css_file
+            if script_file.with_suffix(".css").exists():
+                css_file = f'{script_file.stem or "Taipy"}.css'
+        self.__css_file = css_file
 
         self._config = _Config()
         self.__content_accessor = None
@@ -1627,7 +1628,8 @@ class Gui:
         ]
         if self._get_config("stylekit", False):
             styles.append("/stylekit/stylekit.css")
-        styles.append(f"/{self._css_file}")
+        if self.__css_file:
+            styles.append(f"/{self.__css_file}")
 
         self._flask_blueprint.append(extension_bp)
 
