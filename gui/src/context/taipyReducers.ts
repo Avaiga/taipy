@@ -15,13 +15,14 @@ import { Dispatch } from "react";
 import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { io, Socket } from "socket.io-client";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import merge from "lodash/merge";
 
 import { TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { FilterDesc } from "../components/Taipy/TableFilter";
+import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 
 enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -43,7 +44,7 @@ enum Types {
     DownloadFile = "DOWNLOAD_FILE",
     Partial = "PARTIAL",
     ModuleContext = "MODULE_CONTEXT",
-    Acknowledgement = "ACKNOWLEDGEMENT"
+    Acknowledgement = "ACKNOWLEDGEMENT",
 }
 
 /**
@@ -87,7 +88,7 @@ export interface AlertMessage {
     duration: number;
 }
 
- interface TaipyAction extends NamePayload, TaipyBaseAction {
+interface TaipyAction extends NamePayload, TaipyBaseAction {
     propagate?: boolean;
 }
 
@@ -155,10 +156,12 @@ export interface FormatConfig {
 }
 
 const getUserTheme = (mode: PaletteMode) => {
+    const tkTheme = (window.taipyConfig?.stylekit && stylekitTheme) || {};
+    const tkModeTheme = (window.taipyConfig?.stylekit && stylekitModeThemes[mode]) || {};
     const userTheme = window.taipyConfig?.themes?.base || {};
     const modeTheme = (window.taipyConfig?.themes && window.taipyConfig.themes[mode]) || {};
     return createTheme(
-        merge(userTheme, modeTheme, {
+        merge(tkTheme, tkModeTheme, userTheme, modeTheme, {
             palette: {
                 mode: mode,
             },
@@ -447,8 +450,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             ackId = sendWsMessage(state.socket, "RU", action.name, action.payload, state.id, state.moduleContext);
             break;
     }
-    if (ackId)
-        return { ...state, ackList: [...state.ackList, ackId] };
+    if (ackId) return { ...state, ackList: [...state.ackList, ackId] };
     return state;
 };
 
@@ -526,7 +528,7 @@ export const createRequestChartUpdateAction = (
     id: string | undefined,
     columns: string[],
     pageKey: string,
-    decimatorPayload: unknown | undefined,
+    decimatorPayload: unknown | undefined
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -617,7 +619,7 @@ export const createRequestInfiniteTableUpdateAction = (
  * @param library - The name of the {@link extension} library.
  * @returns The action fed to the reducer.
  */
- export const createRequestDataUpdateAction = (
+export const createRequestDataUpdateAction = (
     name: string | undefined,
     id: string | undefined,
     columns: string[],
@@ -765,7 +767,7 @@ const sendWsMessage = (
     moduleContext = "",
     propagate = true
 ): string => {
-    const ackId = uuidv4()
+    const ackId = uuidv4();
     const msg: WsMessage = {
         type: type,
         name: name,

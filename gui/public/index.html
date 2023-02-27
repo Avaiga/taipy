@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="{{css_vars}}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,7 +25,6 @@
     {% for css in styles %}
       <link rel="stylesheet" href="{{css}}" />
     {% endfor %}
-    <link rel="stylesheet" href="{{app_css}}" />
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"{%- if root_margin -%} style="margin:{{root_margin}};"{% endif %}></div>
     {%- if watermark -%}<span class="taipy-watermark" style="position:fixed;bottom:1em;opacity:0.4;color:gray;left:50%;transform:translateX(-50%);font-size:0.7em;">{{watermark}}</span>{% endif %}

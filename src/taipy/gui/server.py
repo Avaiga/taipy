@@ -51,13 +51,11 @@ class _Server:
         self,
         gui: Gui,
         flask: t.Optional[Flask] = None,
-        css_file: str = "",
         path_mapping: t.Optional[dict] = {},
         async_mode: t.Optional[str] = None,
     ):
         self._gui = gui
         self._flask = Flask("Taipy") if flask is None else flask
-        self.css_file = css_file
         if "SECRET_KEY" not in self._flask.config or not self._flask.config["SECRET_KEY"]:
             self._flask.config["SECRET_KEY"] = "TaIpY"
         # set json encoder (for Taipy specific types)
@@ -111,6 +109,7 @@ class _Server:
         version: str,
         client_config: t.Dict[str, t.Any],
         watermark: t.Optional[str],
+        css_vars: str
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
@@ -121,7 +120,6 @@ class _Server:
             if path == "" or path == "index.html" or "." not in path:
                 return render_template(
                     "index.html",
-                    app_css=f"/{self.css_file}.css",
                     title=title,
                     favicon=favicon,
                     root_margin=root_margin,
@@ -130,6 +128,7 @@ class _Server:
                     scripts=scripts,
                     styles=styles,
                     version=version,
+                    css_vars=css_vars
                 )
             if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))

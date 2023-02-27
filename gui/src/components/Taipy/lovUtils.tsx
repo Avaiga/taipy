@@ -74,9 +74,7 @@ const getLovItem = (elt: LoVElt | string, tree = false): LovItem => {
     return it;
 };
 
-export const boxSx = { width: "100%" } as CSSProperties;
 export const paperBaseSx = { width: "100%", mb: 2, display: "grid", gridTemplateRows: "auto 1fr" } as CSSProperties;
-export const treeSelBaseSx = { width: "100%", bgcolor: "background.paper", overflowY: "auto" } as CSSProperties;
 
 /**
  * A React hook that returns a LoV list from the LoV default value and the LoV bound value.

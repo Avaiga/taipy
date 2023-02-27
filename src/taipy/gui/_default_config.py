@@ -38,6 +38,40 @@ default_config: Config = {
     "theme": None,
     "time_zone": None,
     "title": None,
+    "stylekit": True,
+    "stylekit_variables" : {
+        # Primary and secondary colors
+        "color_primary": "#ff462b",
+        "color_secondary": "#283282",
+
+        # Contextual color
+        "color_error": "#FF595E",
+        "color_warning": "#FAA916",
+        "color_success": "#96E6B3",
+
+        # Background and elevation color for LIGHT MODE
+        "color_background_light": "#f1f1f1",
+        "color_paper_light": "#ffffff",
+
+        # Background and elevation color for DARK MODE
+        "color_background_dark": "#051924",
+        "color_paper_dark": "#072636",
+
+        # DEFINING FONTS
+
+        # Set main font family
+        "font_family": "Lato, Arial, sans-serif",
+
+        # DEFINING SHAPES
+
+        # Base border radius
+        "border_radius": 8,
+
+        # DEFINING MUI COMPONENTS STYLES
+
+        # Matching input and button height
+        "input_button_height": 48
+    },
     "upload_folder": None,
     "use_arrow": False,
     "use_reloader": False,

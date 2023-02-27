@@ -22,10 +22,36 @@ declare global {
             themes: Record<string, Record<string, unknown>>;
             timeZone: string;
             extensions: Record<string, string[]>;
+            stylekit?: StyleKitVars;
         };
         taipyVersion: string;
         [key: string]: unknown;
     }
+}
+
+interface StyleKitVars {
+    // Primary and secondary colors
+    colorPrimary: string;
+    colorSecondary: string;
+    // Contextual color
+    colorError: string;
+    colorWarning: string;
+    colorSuccess: string;
+    // Background and elevation color for LIGHT MODE
+    colorBackgroundLight: string;
+    colorPaperLight: string;
+    // Background and elevation color for DARK MODE
+    colorBackgroundDark: string;
+    colorPaperDark: string;
+    // DEFINING FONTS
+    // Set main font family
+    fontFamily: string;
+    // DEFINING SHAPES
+    // Base border radius
+    borderRadius: number;
+    // DEFINING MUI COMPONENTS STYLES
+    // Matching input and button height
+    inputButtonHeight: number;
 }
 
 // return client server timeZone offset in minutes

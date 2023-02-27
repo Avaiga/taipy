@@ -53,6 +53,7 @@ from .renderers import _EmptyPage
 from .renderers._markdown import _TaipyMarkdownExtension
 from .renderers.factory import _Factory
 from .renderers.json import _TaipyJsonEncoder
+from .renderers.utils import _get_columns_dict, _to_camel_case
 from .server import _Server
 from .state import State
 from .types import _WsType
@@ -62,6 +63,7 @@ from .utils import (
     _get_client_var_name,
     _get_module_name_from_frame,
     _get_non_existent_file_path,
+    _get_css_var_value,
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
@@ -85,7 +87,6 @@ from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
-from .renderers.utils import _get_columns_dict
 
 
 class Gui:
@@ -243,8 +244,9 @@ class Gui:
         self._flask = flask
         if css_file is None:
             script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
-            css_file = script_file.stem or "Taipy"
-        self._css_file = css_file
+            if script_file.with_suffix(".css").exists():
+                css_file = f'{script_file.stem or "Taipy"}.css'
+        self.__css_file = css_file
 
         self._config = _Config()
         self.__content_accessor = None
@@ -1531,7 +1533,18 @@ class Gui:
                         for n, e in lib.get_elements().items()
                         if isinstance(e, Element) and not e._is_server_only()
                     ]
+        if self._get_config("stylekit", False):
+            config["stylekit"] = {_to_camel_case(k): v for k, v in self._get_config("stylekit_variables", {}).items()}
         return config
+
+    def __get_css_vars(self) -> str:
+        css_vars = []
+        if self._get_config("stylekit", False):
+            stylekit = self._get_config("stylekit_variables", {})
+            for k,v in stylekit.items():
+                css_vars.append(f'--{k.replace("_", "-")}:{_get_css_var_value(v)};')
+        return " ".join(css_vars)
+
 
     def __init_server(self):
         app_config = self._config.config
@@ -1541,7 +1554,6 @@ class Gui:
                 self,
                 path_mapping=self._path_mapping,
                 flask=self._flask,
-                css_file=self._css_file,
                 async_mode=app_config["async_mode"],
             )
 
@@ -1553,7 +1565,6 @@ class Gui:
                 self,
                 path_mapping=self._path_mapping,
                 flask=self._flask,
-                css_file=self._css_file,
                 async_mode=app_config["async_mode"],
             )
             self._bindings()._new_scopes()
@@ -1615,6 +1626,11 @@ class Gui:
             for lib in libs
             for s in (lib.get_styles() or [])
         ]
+        if self._get_config("stylekit", False):
+            styles.append("/stylekit/stylekit.css")
+        if self.__css_file:
+            styles.append(f"/{self.__css_file}")
+
         self._flask_blueprint.append(extension_bp)
 
         _conf_webapp_path = (
@@ -1642,6 +1658,7 @@ class Gui:
                 version=self.__get_version(),
                 client_config=self.__get_client_config(),
                 watermark=self._get_config("watermark", None),
+                css_vars=self.__get_css_vars(),
             )
         )
 

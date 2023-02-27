@@ -41,7 +41,6 @@ import {
     SelTreeProps,
     showItem,
     SingleItem,
-    treeSelBaseSx,
     useLovListMemo,
 } from "./lovUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
@@ -97,7 +96,7 @@ const Selector = (props: SelTreeProps) => {
         propagate = true,
         lov,
         updateVars = "",
-        width = 360,
+        width = "100%",
         height,
         valueById,
     } = props;
@@ -113,7 +112,7 @@ const Selector = (props: SelTreeProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars, updateVarName);
 
     const lovList = useLovListMemo(lov, defaultLov);
-    const listSx = useMemo(() => ({ ...treeSelBaseSx, maxWidth: width }), [width]);
+    const listSx = useMemo(() => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }), [width]);
     const paperSx = useMemo(() => {
         let sx = paperBaseSx;
         if (height !== undefined) {
@@ -124,7 +123,7 @@ const Selector = (props: SelTreeProps) => {
         }
         return sx;
     }, [height, width]);
-    const controlSx = useMemo(() => ({ m: 1, width: width }), [width]);
+    const controlSx = useMemo(() => ({ my: 1, mx: 0, width: width , display: "flex"}), [width]);
 
     useEffect(() => {
         if (value !== undefined && value !== null) {

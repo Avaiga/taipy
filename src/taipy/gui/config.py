@@ -54,6 +54,8 @@ ConfigParameter = t.Literal[
     "theme",
     "time_zone",
     "title",
+    "stylekit",
+    "stylekit_variables",
     "upload_folder",
     "use_arrow",
     "use_reloader",
@@ -90,6 +92,8 @@ Config = t.TypedDict(
         "theme": t.Optional[t.Dict[str, t.Any]],
         "time_zone": t.Optional[str],
         "title": t.Optional[str],
+        "stylekit": bool,
+        "stylekit_variables": t.Dict[str, t.Any],
         "upload_folder": t.Optional[str],
         "use_arrow": bool,
         "use_reloader": bool,
@@ -183,7 +187,10 @@ class _Config(object):
             key = key.lower()
             if value is not None and key in config:
                 try:
-                    config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
+                    if isinstance(value, dict) and isinstance(config[key], dict):
+                        config[key].update(value)
+                    else:
+                        config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
                 except Exception as e:
                     warnings.warn(
                         f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"

@@ -42,6 +42,8 @@ const boxSx = {
     },
 } as CSSProperties;
 
+const groupSx = {verticalAlign: "middle"};
+
 const ThemeToggle = (props: ThemeToggleProps) => {
     const { id, label = "Mode", style = {}, active = true } = props;
     const { state, dispatch } = useContext(TaipyContext);
@@ -70,6 +72,7 @@ const ThemeToggle = (props: ThemeToggleProps) => {
                 onChange={changeMode}
                 aria-label="Theme mode"
                 disabled={!active}
+                sx={groupSx}
             >
                 <ToggleButton value="light" aria-label="light" title="Light">
                     <WbSunny />
