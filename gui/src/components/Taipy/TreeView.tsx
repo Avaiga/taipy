@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useContext, useCallback, useEffect, useMemo, SyntheticEvent, HTMLAttributes, forwardRef, Ref } from "react";
+import React, { useState, useContext, useCallback, useEffect, useMemo, SyntheticEvent, HTMLAttributes, forwardRef, Ref, CSSProperties } from "react";
 import Box from "@mui/material/Box";
 import MuiTreeView from "@mui/lab/TreeView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -25,13 +25,11 @@ import Typography from "@mui/material/Typography";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import {
-    boxSx,
     isLovParent,
     LovImage,
     paperBaseSx,
     SelTreeProps,
     showItem,
-    treeSelBaseSx,
     useLovListMemo,
 } from "./lovUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
@@ -114,6 +112,9 @@ const renderTree = (lov: LovItem[], active: boolean, searchValue: string, select
     });
 };
 
+const boxSx = { width: "100%" } as CSSProperties;
+const textFieldSx = {mb: 1, px: 1, display: "flex"};
+
 interface TreeViewProps extends SelTreeProps {
     defaultExpanded?: string | boolean;
     expanded?: string[] | boolean;
@@ -133,7 +134,7 @@ const TreeView = (props: TreeViewProps) => {
         propagate = true,
         lov,
         updateVars = "",
-        width = 360,
+        width = "100%",
         height,
         valueById,
         selectLeafsOnly = false,
@@ -153,9 +154,12 @@ const TreeView = (props: TreeViewProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars, updateVarName);
 
     const lovList = useLovListMemo(lov, defaultLov, true);
-    const treeSx = useMemo(() => ({ ...treeSelBaseSx, maxWidth: width }), [width]);
+    const treeSx = useMemo(() => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }), [width]);
     const paperSx = useMemo(
-        () => (height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height }),
+        () => {
+            const sx = height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height }
+            return {...sx, overflow: "hidden", py: 1};
+        },
         [height]
     );
 
@@ -283,6 +287,7 @@ const TreeView = (props: TreeViewProps) => {
                                 value={searchValue}
                                 onChange={handleInput}
                                 disabled={!active}
+                                sx={textFieldSx}
                             />
                         )}
                     </Box>

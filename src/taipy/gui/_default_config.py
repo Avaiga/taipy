@@ -38,7 +38,7 @@ default_config: Config = {
     "theme": None,
     "time_zone": None,
     "title": None,
-    "stylekit": False,
+    "stylekit": True,
     "stylekit_variables" : {
         # Primary and secondary colors
         "color_primary": "#ff462b",

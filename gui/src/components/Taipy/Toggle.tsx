@@ -26,6 +26,8 @@ import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { getUpdateVar } from "./utils";
 import { Icon, IconAvatar } from "../../utils/icon";
 
+const groupSx = {verticalAlign: "middle"};
+
 interface ToggleProps extends LovProps<string> {
     style?: CSSProperties;
     label?: string;
@@ -87,6 +89,7 @@ const Toggle = (props: ToggleProps) => {
                     exclusive
                     onChange={changeValue}
                     disabled={!active}
+                    sx={groupSx}
                 >
                     {lovList &&
                         lovList.map((v) => (

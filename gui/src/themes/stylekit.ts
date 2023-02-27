@@ -49,24 +49,13 @@ export const stylekitTheme = {
                     // Fill the available width
                     display: "flex",
 
-                    "&.taipy-selector": {
-                        marginLeft: 0,
-                        marginRight: 0,
-                    },
-
-                    ".taipy-tree &": {
-                        marginBottom: "1rem",
-                        paddingLeft: "1rem",
-                        paddingRight: "1rem",
-                    },
-
                     // Removing vertical margins if placed in a layout to avoid y-alignment issues
                     ".taipy-layout > .taipy-part > .md-para > &": {
                         "&:first-child": {
-                            marginTop: 0,
+                            mt: 0,
                         },
                         "&:last-child": {
-                            marginBottom: 0,
+                            mb: 0,
                         },
                     },
                 },
@@ -96,8 +85,7 @@ export const stylekitTheme = {
                     boxSizing: "border-box",
 
                     ".MuiInputBase-root &": {
-                        paddingTop: 4,
-                        paddingBottom: 4,
+                        py: 4
                     },
                 },
             },
@@ -112,8 +100,7 @@ export const stylekitTheme = {
                     boxSizing: "border-box",
 
                     "&.MuiInputBase-input": {
-                        paddingTop: 0,
-                        paddingBottom: 0,
+                        py: 0
                     },
                 },
             },
@@ -133,8 +120,7 @@ export const stylekitTheme = {
                 root: {
                     ".taipy-file-download &, .taipy-file-selector &": {
                         height: window.taipyConfig?.stylekit?.inputButtonHeight,
-                        paddingLeft: "1em",
-                        paddingRight: "1em",
+                        px: 1,
                         gap: "0.5em",
                         backgroundColor: "transparent",
                         borderWidth: 1,
@@ -144,48 +130,6 @@ export const stylekitTheme = {
                         boxShadow: "none",
                         color: window.taipyConfig?.stylekit?.colorPrimary,
                         zIndex: "auto",
-                    },
-                },
-            },
-        },
-        // Toggle button group
-        MuiToggleButtonGroup: {
-            styleOverrides: {
-                root: {
-                    verticalAlign: "middle",
-                },
-            },
-        },
-        // Mui paper
-        MuiPaper: {
-            styleOverrides: {
-                root: {
-                    ".taipy-tree &": {
-                        overflow: "hidden",
-                        paddingTop: "1rem",
-                        paddingBottom: "1rem",
-                    },
-                },
-            },
-        },
-        // Mui list
-        MuiList: {
-            styleOverrides: {
-                root: {
-                    ".taipy-selector .MuiPaper-root &": {
-                        maxWidth: "100%",
-                        backgroundColor: "transparent",
-                    },
-                },
-            },
-        },
-        // Mui treeview
-        MuiTreeView: {
-            styleOverrides: {
-                root: {
-                    ".taipy-tree .MuiPaper-root &": {
-                        maxWidth: "100%",
-                        backgroundColor: "transparent",
                     },
                 },
             },
