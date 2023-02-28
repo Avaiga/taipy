@@ -114,26 +114,6 @@ export const stylekitTheme = {
                 },
             },
         },
-        // Floating action button
-        MuiFab: {
-            styleOverrides: {
-                root: {
-                    ".taipy-file-download &, .taipy-file-selector &": {
-                        height: window.taipyConfig?.stylekit?.inputButtonHeight,
-                        px: 1,
-                        gap: "0.5em",
-                        backgroundColor: "transparent",
-                        borderWidth: 1,
-                        borderColor: window.taipyConfig?.stylekit?.colorPrimary,
-                        borderStyle: "solid",
-                        borderRadius: window.taipyConfig?.stylekit?.borderRadius,
-                        boxShadow: "none",
-                        color: window.taipyConfig?.stylekit?.colorPrimary,
-                        zIndex: "auto",
-                    },
-                },
-            },
-        },
         // Mui slider
         MuiSlider: {
             styleOverrides: {

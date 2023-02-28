@@ -12,7 +12,7 @@
  */
 
 import React, { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import Fab from "@mui/material/Fab";
+import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from "@mui/material/Tooltip";
 import UploadFile from "@mui/icons-material/UploadFile";
@@ -42,6 +42,7 @@ const defaultSx = { minWidth: "0px" };
 
 const FileSelector = (props: FileSelectorProps) => {
     const {
+        id,
         onAction,
         defaultLabel = "",
         updateVarName = "",
@@ -55,8 +56,8 @@ const FileSelector = (props: FileSelectorProps) => {
     const [upload, setUpload] = useState(false);
     const [progress, setProgress] = useState(0);
     const { state, dispatch } = useContext(TaipyContext);
-    const fabRef = useRef<HTMLElement>(null);
-    const id = useMemo(() => props.id || `${Date.now()}.${Math.random()}` , [props.id]);
+    const butRef = useRef<HTMLElement>(null);
+    const inputId = useMemo(() => (id || `tp-${Date.now()}-${Math.random()}`) + "-upload-file", [id]);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -109,9 +110,11 @@ const FileSelector = (props: FileSelectorProps) => {
 
     const handleDragOverWithLabel = useCallback(
         (evt: DragEvent) => {
+            console.log(evt);
+            const target = evt.currentTarget as HTMLElement;
             setDropSx((sx) =>
-                sx.minWidth === defaultSx.minWidth
-                    ? { minWidth: (evt.currentTarget as HTMLElement).clientWidth + "px" }
+                sx.minWidth === defaultSx.minWidth && target
+                    ? { minWidth: target.clientWidth + "px" }
                     : sx
             );
             setDropLabel(dropMessage);
@@ -121,27 +124,27 @@ const FileSelector = (props: FileSelectorProps) => {
     );
 
     useEffect(() => {
-        const fabElt = fabRef.current;
+        const butElt = butRef.current;
         const thisHandleDrop = handleDrop;
-        if (fabElt) {
-            fabElt.addEventListener("dragover", handleDragOverWithLabel);
-            fabElt.addEventListener("dragleave", handleDragLeave);
-            fabElt.addEventListener("drop", thisHandleDrop);
+        if (butElt) {
+            butElt.addEventListener("dragover", handleDragOverWithLabel);
+            butElt.addEventListener("dragleave", handleDragLeave);
+            butElt.addEventListener("drop", thisHandleDrop);
         }
         return () => {
-            if (fabElt) {
-                fabElt.removeEventListener("dragover", handleDragOverWithLabel);
-                fabElt.removeEventListener("dragleave", handleDragLeave);
-                fabElt.removeEventListener("drop", thisHandleDrop);
+            if (butElt) {
+                butElt.removeEventListener("dragover", handleDragOverWithLabel);
+                butElt.removeEventListener("dragleave", handleDragLeave);
+                butElt.removeEventListener("drop", thisHandleDrop);
             }
         };
     }, [handleDrop, handleDragLeave, handleDragOverWithLabel]);
 
     return (
-        <label htmlFor={id + "upload-file"} className={className}>
+        <label htmlFor={inputId} className={className}>
             <input
                 style={noDisplayStyle}
-                id={id + "upload-file"}
+                id={inputId}
                 name="upload-file"
                 type="file"
                 accept={extensions}
@@ -149,18 +152,17 @@ const FileSelector = (props: FileSelectorProps) => {
                 onChange={handleChange}
             />
             <Tooltip title={hover || ""}>
-                <Fab
+                <Button
                     id={id}
-                    size="small"
                     component="span"
                     aria-label="upload"
-                    variant="extended"
+                    variant="outlined"
                     disabled={!active || upload}
-                    ref={fabRef}
                     sx={dropSx}
+                    ref={butRef}
                 >
                     <UploadFile /> {dropLabel || label || defaultLabel}
-                </Fab>
+                </Button>
             </Tooltip>
             {upload ? <LinearProgress value={progress} /> : null}
         </label>
