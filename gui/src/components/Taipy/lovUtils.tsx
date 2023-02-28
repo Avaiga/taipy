@@ -11,14 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useMemo, MouseEvent } from "react";
+import React, { CSSProperties, useMemo, MouseEvent, useRef, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Tooltip from "@mui/material/Tooltip";
-import {TypographyProps} from "@mui/material";
+import { TypographyProps } from "@mui/material";
+import { Theme, useTheme } from "@mui/system"
+import axios from "axios";
 
 import { TaipyActiveProps, TaipyChangeProps, TaipyLabelProps } from "./utils";
 import { getInitials } from "../../utils";
@@ -50,11 +52,7 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
  * - Its label (or icon) as a `stringIcon`;
  * - Potential child elements as an array of `LoVElt`s.
  */
-export type LoVElt = [
-    string,
-    stringIcon,
-    LoVElt[]?
-];
+export type LoVElt = [string, stringIcon, LoVElt[]?];
 
 /**
  * A series of LoV elements.
@@ -103,13 +101,57 @@ export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = 
         return [];
     }, [lov, defaultLov, tree]);
 
+const cardSx = { p: 0 } as CSSProperties;
+const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 
-const cardSx = { padding: 0 } as CSSProperties;
-export const LovImage = ({ item, disableTypo, height, titleTypographyProps }: { item: Icon, disableTypo?: boolean, height?: string, titleTypographyProps?: TypographyProps }) => {
-    const sx = useMemo(() => height ? {height: height, "& .MuiAvatar-img": { objectFit: "contain" }} : undefined, [height]);
+export const LovImage = ({
+    item,
+    disableTypo,
+    height,
+    titleTypographyProps,
+}: {
+    item: Icon;
+    disableTypo?: boolean;
+    height?: string;
+    titleTypographyProps?: TypographyProps;
+}) => {
+    const avtRef = useRef<HTMLDivElement>(null);
+    const sx = useMemo(
+        () => (height ? { ...avatarSx, height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : avatarSx),
+        [height]
+    );
+    const theme = useTheme();
+    const path = useMemo(
+        () => (theme.palette.mode === "dark" ? item.dark_path : item.light_path) || item.path,
+        [item.path, item.light_path, item.dark_path, theme.palette.mode]
+    );
+    const svg = useMemo(
+        () => ((item.svg === undefined && path.toLowerCase().endsWith(".svg")) || item.svg) && path,
+        [path, item.svg]
+    );
+
+    useEffect(() => {
+        svg && axios.get<string>(svg).then((response) => avtRef.current && (avtRef.current.innerHTML = response.data));
+    }, [svg]);
+
     return (
-    <CardHeader sx={cardSx} avatar={<Tooltip title={item.text}><Avatar alt={item.text} src={item.path} sx={sx} /></Tooltip>} title={item.text} disableTypography={disableTypo} titleTypographyProps={titleTypographyProps} />
-)};
+        <CardHeader
+            sx={cardSx}
+            avatar={
+                <Tooltip title={item.text}>
+                    {svg ? (
+                        <Avatar alt={item.text} sx={sx} ref={avtRef} />
+                    ) : (
+                        <Avatar alt={item.text} src={path} sx={sx} />
+                    )}
+                </Tooltip>
+            }
+            title={item.text}
+            disableTypography={disableTypo}
+            titleTypographyProps={titleTypographyProps}
+        />
+    );
+};
 
 export const showItem = (elt: LovItem, searchValue: string) => {
     return (
@@ -130,7 +172,15 @@ export interface ItemProps {
     titleTypographyProps?: TypographyProps;
 }
 
-export const SingleItem = ({ value, clickHandler, selectedValue, item, disabled, withAvatar = false, titleTypographyProps }: ItemProps) => (
+export const SingleItem = ({
+    value,
+    clickHandler,
+    selectedValue,
+    item,
+    disabled,
+    withAvatar = false,
+    titleTypographyProps,
+}: ItemProps) => (
     <ListItemButton
         onClick={clickHandler}
         data-id={value}
@@ -140,7 +190,16 @@ export const SingleItem = ({ value, clickHandler, selectedValue, item, disabled,
         {typeof item === "string" ? (
             withAvatar ? (
                 <ListItemAvatar>
-                    <CardHeader sx={cardSx} avatar={<Tooltip title={item}><Avatar>{getInitials(item)}</Avatar></Tooltip>} title={item} titleTypographyProps={titleTypographyProps} />
+                    <CardHeader
+                        sx={cardSx}
+                        avatar={
+                            <Tooltip title={item}>
+                                <Avatar sx={avatarSx}>{getInitials(item)}</Avatar>
+                            </Tooltip>
+                        }
+                        title={item}
+                        titleTypographyProps={titleTypographyProps}
+                    />
                 </ListItemAvatar>
             ) : (
                 <ListItemText primary={item} />
@@ -153,18 +212,18 @@ export const SingleItem = ({ value, clickHandler, selectedValue, item, disabled,
     </ListItemButton>
 );
 
-export const isLovParent = (lov: LovItem[] | undefined, id: string, childId: string, path:string[] = []): boolean => {
+export const isLovParent = (lov: LovItem[] | undefined, id: string, childId: string, path: string[] = []): boolean => {
     if (!lov) {
         return false;
     }
-    for(let i = 0; i < lov.length; i++) {
+    for (let i = 0; i < lov.length; i++) {
         if (lov[i].id === id && !(lov[i].children || []).length) {
             return false;
         } else if (lov[i].id === childId) {
             return path.includes(id);
         } else if (isLovParent(lov[i].children, id, childId, [...path, lov[i].id])) {
-             return true;
+            return true;
         }
     }
     return false;
-}
+};

@@ -21,7 +21,7 @@ import CardHeader from "@mui/material/CardHeader";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Box from "@mui/material/Box";
 import Tooltip from '@mui/material/Tooltip';
-import { Theme, useTheme } from "@mui/material";
+import { Theme, useTheme } from "@mui/system";
 
 import { SingleItem } from "./lovUtils";
 import { TaipyContext } from "../../context/taipyContext";

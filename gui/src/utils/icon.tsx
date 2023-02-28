@@ -22,6 +22,12 @@ export interface Icon {
     path: string;
     /** The text. */
     text: string;
+    /** is the path svg ? */
+    svg?: boolean;
+    /** light theme path */
+    light_path?: string;
+    /** dark theme path */
+    dark_path?: string;
 }
 
 /**

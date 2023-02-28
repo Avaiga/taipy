@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useContext,  useMemo } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import { styled, SxProps, Theme } from "@mui/material/styles";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
@@ -60,7 +60,7 @@ const ImageSrc = styled("span")({
     top: 0,
     bottom: 0,
     backgroundSize: "cover",
-    backgroundPosition: "center 40%",
+    backgroundPosition: "center",
 });
 
 const ImageSpan = styled("span")(({ theme }) => ({
@@ -129,25 +129,35 @@ const Image = (props: ImageProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <ImageButton
-                focusRipple={!!onAction}
-                style={style}
-                onClick={handleClick}
-                disabled={!active || !onAction}
-                className={className}
-                id={id}
-            >
-                <ImageSrc style={imgStyle} />
-                {onAction ? <ImageBackdrop className="MuiImageBackdrop-root" /> : null}
-                {label === undefined ? null : (
-                    <ImageSpan>
-                        <Typography component="span" variant="subtitle1" color="inherit" sx={imgSx} className={getSuffixedClassNames(className, "-label")}>
-                            {label}
-                            <ImageMarked className="MuiImageMarked-root" />
-                        </Typography>
-                    </ImageSpan>
-                )}
-            </ImageButton>
+            {onAction || label ? (
+                <ImageButton
+                    focusRipple={!!onAction}
+                    style={style}
+                    onClick={handleClick}
+                    disabled={!active || !onAction}
+                    className={className}
+                    id={id}
+                >
+                    <ImageSrc style={imgStyle} />
+                    {onAction ? <ImageBackdrop className="MuiImageBackdrop-root" /> : null}
+                    {label === undefined ? null : (
+                        <ImageSpan>
+                            <Typography
+                                component="span"
+                                variant="subtitle1"
+                                color="inherit"
+                                sx={imgSx}
+                                className={getSuffixedClassNames(className, "-label")}
+                            >
+                                {label}
+                                <ImageMarked className="MuiImageMarked-root" />
+                            </Typography>
+                        </ImageSpan>
+                    )}
+                </ImageButton>
+            ) : (
+                <img id={id} src={content} style={style} className={className} />
+            )}
         </Tooltip>
     );
 };
