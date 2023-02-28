@@ -35,9 +35,9 @@ export interface Icon {
     /** is the path svg ? */
     svg?: boolean;
     /** light theme path */
-    light_path?: string;
+    lightPath?: string;
     /** dark theme path */
-    dark_path?: string;
+    darkPath?: string;
 }
 /**
  * A string or an icon.

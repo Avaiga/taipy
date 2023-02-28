@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useMemo, MouseEvent, useRef, useEffect } from "react";
+import React, { CSSProperties, useMemo, MouseEvent } from "react";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -19,13 +19,12 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Tooltip from "@mui/material/Tooltip";
 import { TypographyProps } from "@mui/material";
-import { Theme, useTheme } from "@mui/system"
-import axios from "axios";
+import { SxProps } from "@mui/system";
 
 import { TaipyActiveProps, TaipyChangeProps, TaipyLabelProps } from "./utils";
 import { getInitials } from "../../utils";
 import { LovItem } from "../../utils/lov";
-import { stringIcon, Icon } from "../../utils/icon";
+import { stringIcon, Icon, IconAvatar, avatarSx } from "../../utils/icon";
 
 export interface SelTreeProps extends LovProps, TaipyLabelProps {
     filter?: boolean;
@@ -102,7 +101,6 @@ export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = 
     }, [lov, defaultLov, tree]);
 
 const cardSx = { p: 0 } as CSSProperties;
-const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 
 export const LovImage = ({
     item,
@@ -115,35 +113,16 @@ export const LovImage = ({
     height?: string;
     titleTypographyProps?: TypographyProps;
 }) => {
-    const avtRef = useRef<HTMLDivElement>(null);
     const sx = useMemo(
-        () => (height ? { ...avatarSx, height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : avatarSx),
+        () => (height ? { height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : undefined) as SxProps,
         [height]
     );
-    const theme = useTheme();
-    const path = useMemo(
-        () => (theme.palette.mode === "dark" ? item.dark_path : item.light_path) || item.path,
-        [item.path, item.light_path, item.dark_path, theme.palette.mode]
-    );
-    const svg = useMemo(
-        () => ((item.svg === undefined && path.toLowerCase().endsWith(".svg")) || item.svg) && path,
-        [path, item.svg]
-    );
-
-    useEffect(() => {
-        svg && axios.get<string>(svg).then((response) => avtRef.current && (avtRef.current.innerHTML = response.data));
-    }, [svg]);
-
     return (
         <CardHeader
             sx={cardSx}
             avatar={
                 <Tooltip title={item.text}>
-                    {svg ? (
-                        <Avatar alt={item.text} sx={sx} ref={avtRef} />
-                    ) : (
-                        <Avatar alt={item.text} src={path} sx={sx} />
-                    )}
+                    <IconAvatar img={item} sx={sx} />
                 </Tooltip>
             }
             title={item.text}

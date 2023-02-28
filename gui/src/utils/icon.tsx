@@ -11,8 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import axios from "axios";
 import Avatar from "@mui/material/Avatar";
+import { SxProps, useTheme, Theme } from "@mui/system";
 
 /**
  * An Icon representation.
@@ -25,9 +27,9 @@ export interface Icon {
     /** is the path svg ? */
     svg?: boolean;
     /** light theme path */
-    light_path?: string;
+    lightPath?: string;
     /** dark theme path */
-    dark_path?: string;
+    darkPath?: string;
 }
 
 /**
@@ -37,8 +39,33 @@ export type stringIcon = string | Icon;
 
 interface IconProps {
     id?: string;
-    img: Icon
+    img: Icon;
     className?: string;
+    sx?: SxProps;
 }
 
-export const IconAvatar = ({id, img, className}:IconProps) => <Avatar alt={img.text || id} src={img.path} className={className} />
+export const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
+
+export const IconAvatar = ({ id, img, className, sx }: IconProps) => {
+    const avtRef = useRef<HTMLDivElement>(null);
+    const theme = useTheme();
+    const path = useMemo(
+        () => (theme.palette.mode === "dark" ? img.darkPath : img.lightPath) || img.path,
+        [img.path, img.lightPath, img.darkPath, theme.palette.mode]
+    );
+    const svg = useMemo(
+        () => ((img.svg === undefined && path.toLowerCase().endsWith(".svg")) || img.svg) && path,
+        [path, img.svg]
+    );
+    const avtSx = useMemo(() => sx ? {...avatarSx, ...sx} : avatarSx, [sx]);
+
+    useEffect(() => {
+        svg && axios.get<string>(svg).then((response) => avtRef.current && (avtRef.current.innerHTML = response.data));
+    }, [svg]);
+
+    return svg ? (
+        <Avatar alt={img.text || id} className={className} ref={avtRef} sx={avtSx} />
+    ) : (
+        <Avatar alt={img.text || id} src={path} className={className} sx={avtSx} />
+    );
+};

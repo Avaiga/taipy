@@ -68,7 +68,7 @@ class Icon:
         if hasattr(self, "svg") and self.svg is not None:
             a_dict["svg"] = self.svg
         if hasattr(self, "light_path") and self.light_path is not None:
-            a_dict["light_path"] = self.light_path
+            a_dict["lightPath"] = self.light_path
         if hasattr(self, "dark_path") and self.dark_path is not None:
-            a_dict["dark_path"] = self.dark_path
+            a_dict["darkPath"] = self.dark_path
         return a_dict
