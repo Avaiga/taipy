@@ -74,13 +74,15 @@ def submit(
     Parameters:
         entity (Union[Scenario^, Pipeline^, Task^]): The entity to submit.
         force (bool): If True, the execution is forced even if the data nodes are in cache.
-        wait (bool): Wait for the scheduled jobs created from the submission to be finished in asynchronous mode.
-        timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before
-            returning.
+        wait (bool): Wait for the scheduled jobs created from the submission to be finished
+            in asynchronous mode.
+        timeout (Union[float, int]): The optional maximum number of seconds to wait
+            for the jobs to be finished before returning.
     Returns:
         The created `Job^` or a collection of the created `Job^` depends on the submitted entity.
 
-        - If a `Scenario^` is provided, it will return a dictionary with `PipelineId^` as the key and a list of `Job^` as its value.
+        - If a `Scenario^` is provided, it will return a dictionary with `PipelineId^` as the key and
+            a list of `Job^` as its value.
         - If a `Pipeline^` is provided, it will return a list of `Job^`.
         - If a `Task^` is provided, it will return a `Job^`.
     """
