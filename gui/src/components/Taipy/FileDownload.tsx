@@ -13,7 +13,7 @@
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 
-import Fab from "@mui/material/Fab";
+import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import FileDownloadIco from "@mui/icons-material/FileDownload";
 
@@ -44,6 +44,7 @@ const FileDownload = (props: FileDownloadProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const linkId = useMemo(() => (id || `tp-${Date.now()}-${Math.random()}`) + "-download-file", [id]);
 
     useEffect(() => {
         if (auto && aRef.current && active && render) {
@@ -75,21 +76,19 @@ const FileDownload = (props: FileDownloadProps) => {
     const aProps = useMemo(() => (bypassPreview ? {} : { target: "_blank", rel: "noreferrer" }), [bypassPreview]);
 
     return render ? (
-        <label htmlFor={id + "download-file"} className={className}>
-            <a style={noDisplayStyle} id={id + "download-file"} download={download} href={url} {...aProps} ref={aRef} />
+        <label htmlFor={linkId} className={className}>
+            <a style={noDisplayStyle} id={linkId} download={download} href={url} {...aProps} ref={aRef} />
             {auto ? null : (
                 <Tooltip title={hover || ""}>
-                    <Fab
+                    <Button
                         id={id}
-                        size="small"
-                        component="span"
+                        variant="outlined"
                         aria-label="download"
-                        variant="extended"
                         disabled={!active}
                         onClick={clickHandler}
                     >
                         <FileDownloadIco /> {label || defaultLabel}
-                    </Fab>
+                    </Button>
                 </Tooltip>
             )}
         </label>

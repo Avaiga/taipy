@@ -18,7 +18,7 @@ from importlib import util
 from pathlib import Path
 from sys import getsizeof
 
-from ..utils import _get_non_existent_file_path
+from ..utils import _get_non_existent_file_path, _variable_decode
 
 _has_magic_module = False
 
@@ -58,6 +58,15 @@ class _ContentAccessor:
                 warnings.warn(f"({path}) cannot read mime type.\n{e}")
         return None
 
+    def __get_display_name(self, var_name: str) -> str:
+        if not isinstance(var_name, str):
+            return var_name
+        if var_name.startswith("_tpC_"):
+            var_name = var_name[5:]
+        if var_name.startswith("tpec_"):
+            var_name = var_name[5:]
+        return _variable_decode(var_name)[0]
+
     def get_info(self, var_name: str, value: t.Any, image: bool) -> t.Union[str, t.Tuple[str], t.Any]:  # noqa: C901
         if value is None:
             return ""
@@ -73,23 +82,26 @@ class _ContentAccessor:
                     mime = magic.from_buffer(value, mime=True)
                     file_name = "TaiPyContent." + mime.split("/")[-1]
                 except Exception as e:
-                    warnings.warn(f"{var_name} ({type(value)}) cannot be typed.\n{e}")
+                    warnings.warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be typed.\n{e}")
             file_path = _get_non_existent_file_path(self.__temp_dir_path, file_name)
             try:
                 with open(file_path, "wb") as temp_file:
                     temp_file.write(value)
             except Exception as e:
-                warnings.warn(f"{var_name} ({type(value)}) cannot be written to file {file_path}.\n{e}")
+                warnings.warn(
+                    f"{self.__get_display_name(var_name)} ({type(value)}) cannot be written to file {file_path}.\n{e}")
             newvalue = file_path
         if isinstance(newvalue, (str, pathlib.Path)):
             path = pathlib.Path(newvalue) if isinstance(newvalue, str) else newvalue
             if not path.is_file():
+                if not str(path).startswith("http") and not str(path).startswith("/"):
+                    warnings.warn(f"{self.__get_display_name(var_name)} ({value}) file does not exist.")
                 return str(value)
             if image:
                 if not mime:
                     mime = self.__get_mime_from_file(path)
                 if mime and not mime.startswith("image"):
-                    warnings.warn(f"{var_name} ({path}) is not an image: {mime}")
+                    warnings.warn(f"{self.__get_display_name(var_name)} ({path}) is not an image: {mime}")
                     return f"Invalid content: {mime}"
             dir_path = path.resolve().parent
             url_path = self.get_path(dir_path)
@@ -102,10 +114,10 @@ class _ContentAccessor:
                 mime = magic.from_buffer(value, mime=True)
                 if not image or mime.startswith("image"):
                     return f"data:{mime};base64," + str(base64.b64encode(value), "utf-8")
-                warnings.warn(f"{var_name} ({type(value)}) is not an image: {mime}")
+                warnings.warn(f"{self.__get_display_name(var_name)} ({type(value)}) is not an image: {mime}")
                 return f"Invalid content: {mime}"
             except Exception as e:
-                warnings.warn(f"{var_name} ({type(value)}) cannot be base64 encoded.\n{e}")
+                warnings.warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be base64 encoded.\n{e}")
                 return "Cannot be base64 encoded"
         else:
             warnings.warn(
