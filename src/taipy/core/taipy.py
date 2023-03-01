@@ -84,7 +84,7 @@ def submit(
         - If a `Scenario^` is provided, it will return a dictionary with `PipelineId^` as the key and
             a list of `Job^` as its value.
         - If a `Pipeline^` is provided, it will return a list of `Job^`.
-        - If a `Task^` is provided, it will return a `Job^`.
+        - If a `Task^` is provided, it will return the created `Job^`.
     """
     if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
