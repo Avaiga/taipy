@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
@@ -30,21 +30,6 @@ interface ImageProps extends TaipyActiveProps {
     content?: string;
     defaultContent: string;
 }
-
-const labelSpanStyle = {
-    overflow: "hidden",
-    pointerEvents: "none",
-    position: "absolute",
-    zIndex: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    borderRadius: "inherit",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-} as CSSProperties;
 
 const Image = (props: ImageProps) => {
     const { id, onAction, width = 300, height } = props;
