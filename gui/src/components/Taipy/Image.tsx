@@ -11,16 +11,15 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useContext, useMemo } from "react";
-import { styled, SxProps, Theme } from "@mui/material/styles";
-import ButtonBase from "@mui/material/ButtonBase";
-import Typography from "@mui/material/Typography";
+import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import axios from "axios";
+import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { useClassNames, useDynamicProperty } from "../../utils/hooks";
-import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 
 interface ImageProps extends TaipyActiveProps {
     onAction?: string;
@@ -32,73 +31,25 @@ interface ImageProps extends TaipyActiveProps {
     defaultContent: string;
 }
 
-const ImageButton = styled(ButtonBase)(({ theme }) => ({
-    position: "relative",
-    height: 200,
-    [theme.breakpoints.down("sm")]: {
-        width: "100% !important", // Overrides inline-style
-        height: 100,
-    },
-    "&:hover, &.Mui-focusVisible": {
-        zIndex: 1,
-        "& .MuiImageBackdrop-root": {
-            opacity: 0.15,
-        },
-        "& .MuiImageMarked-root": {
-            opacity: 0,
-        },
-        "& .MuiTypography-root": {
-            border: "4px solid currentColor",
-        },
-    },
-}));
-
-const ImageSrc = styled("span")({
+const labelSpanStyle = {
+    overflow: "hidden",
+    pointerEvents: "none",
     position: "absolute",
-    left: 0,
-    right: 0,
+    zIndex: 0,
     top: 0,
-    bottom: 0,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-});
-
-const ImageSpan = styled("span")(({ theme }) => ({
-    position: "absolute",
-    left: 0,
     right: 0,
-    top: 0,
     bottom: 0,
+    left: 0,
+    borderRadius: "inherit",
     display: "flex",
-    alignItems: "center",
     justifyContent: "center",
-    color: theme.palette.common.white,
-}));
-
-const ImageBackdrop = styled("span")(({ theme }) => ({
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: theme.palette.common.black,
-    opacity: 0.4,
-    transition: theme.transitions.create("opacity"),
-}));
-
-const ImageMarked = styled("span")(({ theme }) => ({
-    height: 3,
-    width: 18,
-    backgroundColor: theme.palette.common.white,
-    position: "absolute",
-    bottom: -2,
-    left: "calc(50% - 9px)",
-    transition: theme.transitions.create("opacity"),
-}));
+    alignItems: "center",
+} as CSSProperties;
 
 const Image = (props: ImageProps) => {
     const { id, onAction, width = 300, height } = props;
     const { dispatch } = useContext(TaipyContext);
+    const divRef = useRef<HTMLDivElement>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -112,51 +63,48 @@ const Image = (props: ImageProps) => {
         }
     }, [id, onAction, dispatch]);
 
-    const style = useMemo(() => ({ width: width, height: height }), [width, height]);
+    const [svg, svgContent, inlineSvg] = useMemo(() => {
+        const p = (content || "").trim();
+        if (p.length > 3) {
+            const svgFile = p.substring(p.length - 4).toLowerCase() === ".svg";
+            const svgXml = p.substring(0, 4).toLowerCase() === "<svg";
+            return [svgFile && content, svgXml && content, svgFile || svgXml];
+        }
+        return [undefined, undefined, false];
+    }, [content]);
 
-    const imgStyle = useMemo(() => ({ backgroundImage: `url("${content}")` }), [content]);
-
-    const imgSx = useMemo(
-        () =>
-            ({
-                position: "relative",
-                p: 4,
-                pt: 2,
-                pb: (theme: Theme) => `calc(${theme.spacing(1)} + 6px)`,
-            } as SxProps<Theme>),
-        []
+    const style = useMemo(
+        () => ({ width: width, height: height, display: inlineSvg ? "inline-block" : undefined }),
+        [width, height, inlineSvg]
     );
+
+    useEffect(() => {
+        if (svg) {
+            axios.get<string>(svg).then((response) => divRef.current && (divRef.current.innerHTML = response.data));
+        } else if (svgContent && divRef.current) {
+            divRef.current.innerHTML = svgContent;
+        }
+    }, [svg, svgContent]);
 
     return (
         <Tooltip title={hover || ""}>
-            {onAction || label ? (
-                <ImageButton
-                    focusRipple={!!onAction}
-                    style={style}
-                    onClick={handleClick}
-                    disabled={!active || !onAction}
-                    className={className}
+            {onAction ? (
+                <Button
                     id={id}
+                    className={className}
+                    style={inlineSvg ? style : undefined}
+                    onClick={handleClick}
+                    aria-label={label}
+                    variant="outlined"
+                    disabled={!active}
                 >
-                    <ImageSrc style={imgStyle} />
-                    {onAction ? <ImageBackdrop className="MuiImageBackdrop-root" /> : null}
-                    {label === undefined ? null : (
-                        <ImageSpan>
-                            <Typography
-                                component="span"
-                                variant="subtitle1"
-                                color="inherit"
-                                sx={imgSx}
-                                className={getSuffixedClassNames(className, "-label")}
-                            >
-                                {label}
-                                <ImageMarked className="MuiImageMarked-root" />
-                            </Typography>
-                        </ImageSpan>
-                    )}
-                </ImageButton>
+                    {inlineSvg ? <div ref={divRef} /> : <img src={content} style={style} alt={label} />}
+                    {label ? <span style={labelSpanStyle}>{label}</span> : null}
+                </Button>
+            ) : inlineSvg ? (
+                <div id={id} className={className} style={style} ref={divRef} title={label}></div>
             ) : (
-                <img id={id} src={content} style={style} className={className} />
+                <img id={id} src={content} style={style} className={className} alt={label} />
             )}
         </Tooltip>
     );

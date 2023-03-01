@@ -24,8 +24,6 @@ export interface Icon {
     path: string;
     /** The text. */
     text: string;
-    /** is the path svg ? */
-    svg?: boolean;
     /** light theme path */
     lightPath?: string;
     /** dark theme path */
@@ -50,20 +48,33 @@ export const IconAvatar = ({ id, img, className, sx }: IconProps) => {
     const avtRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
     const path = useMemo(
-        () => (theme.palette.mode === "dark" ? img.darkPath : img.lightPath) || img.path,
+        () => (theme.palette.mode === "dark" ? img.darkPath : img.lightPath) || img.path || "",
         [img.path, img.lightPath, img.darkPath, theme.palette.mode]
     );
-    const svg = useMemo(
-        () => ((img.svg === undefined && path.toLowerCase().endsWith(".svg")) || img.svg) && path,
-        [path, img.svg]
-    );
-    const avtSx = useMemo(() => sx ? {...avatarSx, ...sx} : avatarSx, [sx]);
+    const [svg, svgContent, inlineSvg] = useMemo(() => {
+        const p = path.trim();
+        if (p.length > 3) {
+            const svgFile = p.substring(p.length - 4).toLowerCase() === ".svg";
+            const svgXml = p.substring(0, 4).toLowerCase() === "<svg";
+            return [
+                svgFile && path,
+                svgXml && path,
+                svgFile || svgXml
+            ];
+        }
+        return [undefined, undefined, false];
+    }, [path]);
+    const avtSx = useMemo(() => (sx ? { ...avatarSx, ...sx } : avatarSx), [sx]);
 
     useEffect(() => {
-        svg && axios.get<string>(svg).then((response) => avtRef.current && (avtRef.current.innerHTML = response.data));
-    }, [svg]);
+        if (svg) {
+            axios.get<string>(svg).then((response) => avtRef.current && (avtRef.current.innerHTML = response.data));
+        } else if (svgContent && avtRef.current) {
+            avtRef.current.innerHTML = svgContent;
+        }
+    }, [svg, svgContent]);
 
-    return svg ? (
+    return inlineSvg ? (
         <Avatar alt={img.text || id} className={className} ref={avtRef} sx={avtSx} />
     ) : (
         <Avatar alt={img.text || id} src={path} className={className} sx={avtSx} />

@@ -31,7 +31,7 @@ class Icon:
     def get_dict_or(value: t.Union[str, t.Any]) -> t.Union[str, dict]:
         return value._to_dict() if isinstance(value, Icon) else value
 
-    def __init__(self, path: str, text: t.Optional[str] = None, light_path: t.Optional[bool]= None, dark_path: t.Optional[bool]= None, svg: t.Optional[bool]= None) -> None:
+    def __init__(self, path: str, text: t.Optional[str] = None, light_path: t.Optional[bool]= None, dark_path: t.Optional[bool]= None) -> None:
         """Initialize a new Icon.
 
         Arguments:
@@ -44,16 +44,13 @@ class Icon:
                 of the `Gui^` constructor makes it possible to access a resource anywhere
                 on the server filesystem, as if it were located in a subdirectory of
                 the application directory.
-            text (Optional[str]): The text associated to the image. If _text_ is None,
+            text (Optional[str]): The text associated to the image. If *text* is None,
                 there is no text associated to this image.
-            light_path (Optional[str]): The path to the light theme image (fallback to _path_ if not defined).
-            dark_path (Optional[str]): The path to the dark theme image (fallback to _path_ if not defined).
-            svg (Optional[bool]): Indicates that the _path_ should be treated as an SVG resource (defaults to True if _path_ ends with .svg).
+            light_path (Optional[str]): The path to the light theme image (fallback to *path* if not defined).
+            dark_path (Optional[str]): The path to the dark theme image (fallback to *path* if not defined).
         """
         self.path = path
         self.text = text
-        if svg is not None:
-            self.svg = svg
         if light_path is not None:
             self.light_path = light_path
         if dark_path is not None:
@@ -65,8 +62,6 @@ class Icon:
         a_dict["path"] = self.path
         if self.text is not None:
             a_dict["text"] = self.text
-        if hasattr(self, "svg") and self.svg is not None:
-            a_dict["svg"] = self.svg
         if hasattr(self, "light_path") and self.light_path is not None:
             a_dict["lightPath"] = self.light_path
         if hasattr(self, "dark_path") and self.dark_path is not None:
