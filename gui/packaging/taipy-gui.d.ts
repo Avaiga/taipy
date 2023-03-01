@@ -32,6 +32,10 @@ export interface Icon {
     path: string;
     /** The text. */
     text: string;
+    /** light theme path */
+    lightPath?: string;
+    /** dark theme path */
+    darkPath?: string;
 }
 /**
  * A string or an icon.

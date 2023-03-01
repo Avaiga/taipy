@@ -14,7 +14,6 @@
 import React, { useCallback, useMemo } from "react";
 import Slider from "@mui/material/Slider";
 import Tooltip from "@mui/material/Tooltip";
-import { styled } from "@mui/material/styles";
 import { sprintf } from "sprintf-js";
 
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
@@ -56,9 +55,8 @@ const Indicator = (props: IndicatorProps) => {
         { value: 100, label: "" + max },
     ];
 
-    const TpSlider = useMemo(
-        () =>
-            styled(Slider)({
+    const sliderSx = useMemo(
+        () => ({
                 "&": {
                     width: horizontalOrientation ? width : undefined,
                     height: horizontalOrientation ? undefined : height,
@@ -98,7 +96,7 @@ const Indicator = (props: IndicatorProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <TpSlider
+            <Slider
                 id={props.id}
                 className={className}
                 min={0}
@@ -109,7 +107,8 @@ const Indicator = (props: IndicatorProps) => {
                 valueLabelFormat={getLabel}
                 marks={marks}
                 orientation={horizontalOrientation ? undefined : "vertical"}
-            ></TpSlider>
+                sx={sliderSx}
+            ></Slider>
         </Tooltip>
     );
 };
