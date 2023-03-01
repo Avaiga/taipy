@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { getByAltText, render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -38,10 +38,10 @@ describe("Image Component", () => {
         expect(elt).toHaveAttribute("src", "/url/toto.png");
     });
     it("displays the default label", async () => {
-        const { getByText } = render(
+        const { getByAltText } = render(
             <Image defaultContent="/url/toto.png" defaultLabel="titi" label={undefined as unknown as string} />
         );
-        getByText("titi");
+        getByAltText("titi");
     });
     it("is disabled", async () => {
         const { getByRole } = render(<Image defaultContent="/url/toto.png" active={false} onAction="tp" />);
@@ -58,10 +58,10 @@ describe("Image Component", () => {
         const elt = getByRole("button");
         expect(elt).not.toBeDisabled();
     });
-    it("is disabled when no action", async () => {
+    it("is an image when no action", async () => {
         const { getByRole } = render(<Image defaultContent="/url/toto.png" active={true} defaultLabel="toto" />);
-        const elt = getByRole("button");
-        expect(elt).toBeDisabled();
+        const elt = getByRole("img");
+        expect(elt).toBeInTheDocument();
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();

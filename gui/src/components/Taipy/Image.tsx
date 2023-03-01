@@ -87,7 +87,7 @@ const Image = (props: ImageProps) => {
     }, [svg, svgContent]);
 
     return (
-        <Tooltip title={hover || ""}>
+        <Tooltip title={hover || label}>
             {onAction ? (
                 <Button
                     id={id}
@@ -97,9 +97,9 @@ const Image = (props: ImageProps) => {
                     aria-label={label}
                     variant="outlined"
                     disabled={!active}
+                    title={label}
                 >
-                    {inlineSvg ? <div ref={divRef} /> : <img src={content} style={style} alt={label} />}
-                    {label ? <span style={labelSpanStyle}>{label}</span> : null}
+                    {inlineSvg ? <div ref={divRef}/> : <img src={content} style={style} alt={label} />}
                 </Button>
             ) : inlineSvg ? (
                 <div id={id} className={className} style={style} ref={divRef} title={label}></div>
