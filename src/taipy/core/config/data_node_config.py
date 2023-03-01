@@ -80,9 +80,9 @@ class DataNodeConfig(Section):
         _EXPOSED_TYPE_NUMPY,
     ]
     # Generic
-    _REQUIRED_READ_FUNCTION_GENERIC_PROPERTY = "read_fct"
+    _OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY = "read_fct"
     _OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY = "read_fct_params"
-    _REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY = "write_fct"
+    _OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY = "write_fct"
     _OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY = "write_fct_params"
     # CSV
     _OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY = "exposed_type"
@@ -159,16 +159,15 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_CSV: [],
         _STORAGE_TYPE_VALUE_EXCEL: [],
         _STORAGE_TYPE_VALUE_IN_MEMORY: [],
-        _STORAGE_TYPE_VALUE_GENERIC: [
-            _REQUIRED_READ_FUNCTION_GENERIC_PROPERTY,
-            _REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY,
-        ],
+        _STORAGE_TYPE_VALUE_GENERIC: [],
         _STORAGE_TYPE_VALUE_JSON: [],
         _STORAGE_TYPE_VALUE_PARQUET: [],
     }
 
     _OPTIONAL_PROPERTIES = {
         _STORAGE_TYPE_VALUE_GENERIC: {
+            _OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY: None,
+            _OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY: None,
             _OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY: None,
             _OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY: None,
         },
@@ -535,8 +534,8 @@ class DataNodeConfig(Section):
     def _configure_generic(
         cls,
         id: str,
-        read_fct: Callable,
-        write_fct: Callable,
+        read_fct: Optional[Callable] = None,
+        write_fct: Optional[Callable] = None,
         read_fct_params: Optional[List] = None,
         write_fct_params: Optional[List] = None,
         scope: Optional[Scope] = None,
@@ -546,8 +545,8 @@ class DataNodeConfig(Section):
 
         Parameters:
             id (str): The unique identifier of the new generic data node configuration.
-            read_fct (Callable): The Python function called to read the data.
-            write_fct (Callable): The Python function called to write the data.
+            read_fct (Optional[Callable]): The Python function called to read the data.
+            write_fct (Optional[Callable]): The Python function called to write the data.
                 The provided function must have at least one parameter that receives the data to be written.
             read_fct_params (Optional[List]): The list of parameters that are passed to the _read_fct_
                 to read data.
@@ -559,13 +558,16 @@ class DataNodeConfig(Section):
         Returns:
             `DataNodeConfig^`: The new Generic data node configuration.
         """
-        properties.update(
-            {
-                cls._REQUIRED_READ_FUNCTION_GENERIC_PROPERTY: read_fct,
-                cls._REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY: write_fct,
-            }
-        )
-
+        # properties.update(
+        #     {
+        #         cls._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY: read_fct,
+        #         cls._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY: write_fct,
+        #     }
+        # )
+        if read_fct is not None:
+            properties[cls._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY] = read_fct
+        if write_fct is not None:
+            properties[cls._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY] = write_fct
         if read_fct_params is not None:
             properties[cls._OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY] = read_fct_params
         if write_fct_params is not None:

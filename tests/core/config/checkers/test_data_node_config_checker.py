@@ -123,10 +123,9 @@ class TestDataNodeConfigChecker:
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 2
+        assert len(Config._collector.errors) == 1
         expected_error_messages = [
-            "DataNodeConfig `new` is missing the required property `read_fct` for type `generic`.",
-            "DataNodeConfig `new` is missing the required property `write_fct` for type `generic`.",
+            "Either `read_fct` field or `write_fct` field of DataNodeConfig `new` must be populated with a Callable function.",
         ]
         assert all(message in caplog.text for message in expected_error_messages)
 
@@ -293,21 +292,19 @@ class TestDataNodeConfigChecker:
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 2
+        assert len(Config._collector.errors) == 1
 
         config._sections[DataNodeConfig.name]["new"].storage_type = "generic"
         config._sections[DataNodeConfig.name]["new"].properties = {"read_fct": print}
-        with pytest.raises(SystemExit):
-            Config._collector = IssueCollector()
-            Config.check()
-        assert len(Config._collector.errors) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
 
         config._sections[DataNodeConfig.name]["new"].storage_type = "generic"
         config._sections[DataNodeConfig.name]["new"].properties = {"write_fct": print}
-        with pytest.raises(SystemExit):
-            Config._collector = IssueCollector()
-            Config.check()
-        assert len(Config._collector.errors) == 1
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
 
         config._sections[DataNodeConfig.name]["new"].storage_type = "generic"
         config._sections[DataNodeConfig.name]["new"].properties = {"write_fct": print, "read_fct": print}
@@ -329,13 +326,13 @@ class TestDataNodeConfigChecker:
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
-        assert len(Config._collector.warnings) == 2
+        assert len(Config._collector.warnings) == 0
 
         config._sections[DataNodeConfig.name]["new"].storage_type = "generic"
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 2
+        assert len(Config._collector.errors) == 1
 
     def test_check_callable_properties(self, caplog):
         config = Config._default_config
@@ -365,9 +362,8 @@ class TestDataNodeConfigChecker:
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 2
+        assert len(Config._collector.errors) == 1
         expected_error_messages = [
-            "DataNodeConfig `new` is missing the required property `read_fct` for type `generic`.",
             "`write_fct` of DataNodeConfig `new` must be populated with a Callable function. Current value"
             " of property `write_fct` is 12.",
         ]
@@ -378,9 +374,8 @@ class TestDataNodeConfigChecker:
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 2
+        assert len(Config._collector.errors) == 1
         expected_error_messages = [
-            "DataNodeConfig `new` is missing the required property `write_fct` for type `generic`.",
             "`read_fct` of DataNodeConfig `new` must be populated with a Callable function. Current value"
             " of property `read_fct` is 5.",
         ]
