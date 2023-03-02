@@ -85,14 +85,18 @@ class Element:
     ) -> None:
         """Initializes a new custom element declaration.
 
+        If *render_xhtml* is specified, then this is a static element, and
+        *react_component* is ignored.
+
         Arguments:
-            default_property (str): the default property for this element.
+            default_property (str): the name of the default property for this element.
             properties (List[ElementProperty]): The list of properties for this element.
-            react_component (Optional[str]): The name of the component to be created on the frontend
-                If not specified, it is set to a camel case version of `name` (one_name => OneName).
+            react_component (Optional[str]): The name of the component to be created on the front-end.<br/>
+                If not specified, it is set to a camel case version of the element's name
+                ("one_name" is transformed to "OneName").
             render_xhtml (Optional[callable[[dict[str, Any]], str]]): A function that receives a
-                dict containing the element's properties and their values
-                and that returns a valid XHTML string.
+                dictionary containing the element's properties and their values
+                and that must return a valid XHTML string.
         """
         self.default_attribute = default_property
         self.attributes = properties
@@ -183,55 +187,99 @@ class ElementLibrary(ABC):
     """
     A library of user-defined visual elements.
 
-    TODO
+    An element library can declare any number of custom visual elements.
+
+    In order to use those elements you must register the element library
+    using the function `Gui.add_library()^`.
+
+    An element library can mix *static* and *dynamic* elements.
     """
 
     @abstractmethod
     def get_elements(self) -> t.Dict[str, Element]:
         """
-        Returns the dict of all visual element declarations.
-        TODO
-        The default implementation returns an empty dict, indicating that this library contains
-        no custom visual elements.
+        Return the dictionary holding all visual element declarations.
+        
+        The key for each of this dictionary's entry is the name of the element,
+        and the value is an instance of `Element^`.
+
+        The default implementation returns an empty dictionary, indicating that this library
+        contains no custom visual elements.
         """
         return {}
 
     @abstractmethod
     def get_name(self) -> str:
         """
-        Returns the library name.
+        Return the library name.
 
-        TODO:
-        - What is this name used for?
-        - What if two libraries with the same same get added to the Gui?
+        This string is used for different purposes:
+
+        - It allows for finding the definition of visual elements when parsing the
+          page content.<br/>
+          Custom elements are defined with the fragment `<|<library_name>.<element_name>|>` in
+          Markdown pages, and with the tag `<<library_name>:<element_name>>` in HTML pages.
+
+        - In element libraries that hold elements with dynamic properties (where JavaScript)
+          is involved, the name of the JavaScript module that has the front-end code is
+          derived from this name, as described in `(ElementLibrary.)get_js_module_name()^`.
+
+        Returns:
+            The name of this element library. This must be a valid Python identifier.
+
+        !!! note "Element libraries with the same name"
+            You can add different libraries that have the same name.<br/>
+            This is useful in large projects where you want to split a potentially large number
+            of custom visual elements into different groups but still access them from your pages
+            using the same library name prefix.<br/>
+            In this situation, you will have to implement `(ElementLibrary.)get_js_module_name()^`
+            because each JavaScript module will have to have a unique name.
+
         """
         return NotImplementedError  # type: ignore
 
     def get_js_module_name(self) -> str:
         """
-        Returns the name of the Javascript module.
+        Return the name of the JavaScript module.
 
-        Typically, Javascript module names use camel case.
+        The JavaScript module is the JavaScript file that contains all the front-end
+        code for this element library. Typically, the name of JavaScript modules uses camel case.<br/>
+        This module name must be unique on the browser window scope: if your application uses
+        several custom element libraries, they must define a unique name for their JavaScript module.
 
-        This module name must be unique on the browser window scope.
+        The default implementation transforms the return value of `(ElementLibrary.)get_name()^` in
+        the following manner:
 
-        TODO
+        - The JavaScript module name is a camel case version of the element library name
+          (see `(ElementLibrary.)get_name()^`):
+            - If the library name is "library", the JavaScript module name defaults to "Library".
+            - If the library name is "myLibrary", the JavaScript module name defaults to "Mylibrary".
+        - If the element library name has underscore characters, each underscore-separated fragment is
+          considered as a distinct word:
+            - If the library name is "my_library", the JavaScript module name defaults to "MyLibrary".
+
         Returns:
-            The name of the Javascript module.<br/>
-            The default implementation returns camel case of `self.get_name()`.
+            The name of the JavaScript module for this element library.<br/>
+            The default implementation returns a camel case version of `self.get_name()`,
+            as described above.
         """
         return _to_camel_case(self.get_name(), True)
 
     def get_scripts(self) -> t.List[str]:
         """
-        Returns the list of resources names for the scripts.
-        If a resource name is an absolute URL it will be used as is, if it's not it will be
-        passed to get_resource to retrieve a local Path to the resource.
+        Return the list of the mandatory script file pathnames.
+
+        If a script file pathname is an absolute URL it will be used as is.<br/>
+        If it's not it will be passed to `(ElementLibrary.)get_resource()^` to retrieve a local
+        path to the resource.
 
         The default implementation returns an empty list, indicating that this library contains
-        no custom visual elements.
-        TODO: Clarify - this is wrong:
-            May be this should return some <lib_name>.js...
+        no custom visual elements with dynamic properties.
+
+        Returns:
+            A list of paths (relative to the element library Python implementation file or
+            absolute) to all JavaScript module files to be loaded on the front-end.<br/>
+            The default implementation returns an empty list.
         """
         return []
 
@@ -274,12 +322,12 @@ class ElementLibrary(ABC):
     def get_data(self, library_name: str, payload: t.Dict, var_name: str, value: t.Any) -> t.Optional[t.Dict]:
         """
         TODO
-        Called if implemented (ie returns a dict).
+        Called if implemented (i.e returns a dict).
 
         Arguments:
 
             library_name (str): The name of this library.
-            payload (dict): The payload send by the `createRequestDataUpdateAction()` frontend function.
+            payload (dict): The payload send by the `createRequestDataUpdateAction()` front-end function.
             var_name (str): The name of the variable holding the data.
             value (any): The current value of the variable identified by *var_name*.
         """

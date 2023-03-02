@@ -84,11 +84,11 @@ $ cd ..
 ```
 
 This creates the directory `src/taipy/gui/webapp` in the root directory of the repository
-where the frontend code for Taipy GUI is split into a set of JavaScript bundles.
+where the front-end code for Taipy GUI is split into a set of JavaScript bundles.
 
 ### Debugging the JavaScript bundle
 
-If you plan to modify the frontend code and need to debug the TypeScript
+If you plan to modify the front-end code and need to debug the TypeScript
 code, you must use the following:
 ```
 $ npm run build:dev

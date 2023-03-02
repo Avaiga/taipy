@@ -605,7 +605,7 @@ export const createRequestInfiniteTableUpdateAction = (
  *
  * This action will provoke the invocation of the `get_data()` method of the backend
  * library. That invocation generates an update of the elements holding the data named
- * *name* on the frontend.
+ * *name* on the front-end.
  * @param name - The name of the variable holding the requested data as received as
  *   a property.
  * @param id - The identifier of the visual element.

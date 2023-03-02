@@ -153,7 +153,7 @@ class _PandasDataAccessor(_DataAccessor):
         if start is not None:
             ret["start"] = start
         if data_extraction is not None:
-            ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on frontend
+            ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on front-end
         if data_format == _DataFormat.APACHE_ARROW:
             if not _has_arrow_module:
                 raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")

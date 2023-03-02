@@ -35,7 +35,7 @@ def test_download_file(gui: Gui, helpers):
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
     ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "do_something"})
-    # assert for received message (message that would be sent to the frontend client)
+    # assert for received message (message that would be sent to the front-end client)
     received_messages = ws_client.get_received()
     assert len(received_messages) == 1
     assert isinstance(received_messages[0], dict)

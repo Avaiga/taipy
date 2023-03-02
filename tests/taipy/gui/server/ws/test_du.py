@@ -52,7 +52,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
             },
         },
     )
-    # assert for received message (message that would be sent to the frontend client)
+    # assert for received message (message that would be sent to the front-end client)
     received_messages = ws_client.get_received()
     assert received_messages
     helpers.assert_outward_ws_message(

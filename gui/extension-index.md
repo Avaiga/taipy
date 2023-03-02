@@ -14,10 +14,10 @@ In all this JavaScript API documentation section, we will refer to the Python si
 of the application as the *backend*. This is where Python variables are stored and
 manipulated, and where callbacks are invoked.<br/>
 The client part, which usually is a tab in the browser of a user connected to the
-Taipy GUI application, is referred to as the *frontend*. The frontend of the application
+Taipy GUI application, is referred to as the *front-end*. The front-end of the application
 is it self an application, running on the end-user's user agent (the browser), and
 is responsible for creating the pages that the user can look at and interact with. The
-frontend application is able to receive messages from and send messages to the backend,
+front-end application is able to receive messages from and send messages to the backend,
 by means of the Extension API.
 
 ## Usage
@@ -43,10 +43,10 @@ import { ... } from "taipy-gui";
 ### Bound variables
 
 When a variable is bound by a visual element, a corresponding variable is created on
-the frontend.<br/>
-Backend and frontend variables may not have the same names. While the backend variable
+the front-end.<br/>
+Backend and front-end variables may not have the same names. While the backend variable
 has the name that the Python script has created it with, the equivalent to this variable
-on the frontend might have a different name, for technical reasons.
+on the front-end might have a different name, for technical reasons.
 
 Note that controls that hold dynamic properties have two generated properties called
 *updateVars* and *updateVarName*, that are used to ensure a proper update of variable changes. The function [getUpdateVar()](modules/#getupdatevar) uses that property.
@@ -57,7 +57,7 @@ of updating the render.
 
 ### Messaging
 
-In order for the frontend to notify the backend of a change or query data, an `Action`
+In order for the front-end to notify the backend of a change or query data, an `Action`
 must be created (using the `create*Action()` functions) and dispatched to the React
 context:
 

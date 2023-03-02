@@ -61,7 +61,7 @@ class _Server:
         # set json encoder (for Taipy specific types)
         self._flask.json_provider_class = _TaipyJsonProvider
         self._flask.json = self._flask.json_provider_class(self._flask)
-        # Add cors for frontend access
+        # Add cors for front-end access
         self._ws = SocketIO(
             self._flask, cors_allowed_origins="*", ping_timeout=10, ping_interval=5, json=json, async_mode=async_mode
         )

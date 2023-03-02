@@ -193,6 +193,7 @@ class Gui:
         css_file: t.Optional[str] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
+        libraries: t.Optional[t.List[ElementLibrary]] = None,
         flask: t.Optional[Flask] = None,
     ):
         """Initialize a new Gui instance.
@@ -217,7 +218,7 @@ class Gui:
                 file defining the `main` function, sitting next to this Python file,
                 with the `.css` extension.
             path_mapping (Optional[dict]): A dictionary that associates a URL prefix to
-                a path in the server file system.</br>
+                a path in the server file system.<br/>
                 If the assets of your application are located in _/home/me/app_assets_ and
                 you want to access them using only '_assets_' in your application, you can
                 set _path_mapping={"assets": "/home/me/app_assets"}_. If your application
@@ -228,8 +229,12 @@ class Gui:
             env_filename (Optional[str]): An optional file from which to load application
                 configuration variables (see the
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance) section
-                of the User Manual for details.)</br>
+                of the User Manual for details.)<br/>
                 The default value is "taipy.gui.env"
+            libraries (Optional[List[ElementLibrary]]): An optional list of extension library
+                instances that pages can reference.<br/>
+                Using this argument is equivalent to calling `(Gui.)add_library()^` for each
+                list's elements.
             flask (Optional[Flask]): An optional instance of a Flask application object.<br/>
                 If this argument is set, this `Gui` instance will use the value of this argument
                 as the underlying server. If omitted or set to None, this `Gui` will create its
@@ -307,9 +312,12 @@ class Gui:
             self.add_pages(pages)
         if env_filename is not None:
             self.__env_filename = env_filename
+        if libraries is not None:
+            for library in libraries:
+                Gui.add_library(library)
 
     @staticmethod
-    def add_library(library: ElementLibrary):
+    def add_library(library: ElementLibrary) -> None:
         """Add a custom visual element library.
 
         This application will be able to use custom visual elements defined in this library.
@@ -323,13 +331,17 @@ class Gui:
         """
         if isinstance(library, ElementLibrary):
             _Factory.set_library(library)
-            libs = Gui.__extensions.get(library.get_name())
-            if libs is None:
-                Gui.__extensions[library.get_name()] = [library]
+            library_name = library.get_name()
+            if library_name.isidentifier():
+                libs = Gui.__extensions.get(library_name)
+                if libs is None:
+                    Gui.__extensions[library_name] = [library]
+                else:
+                    libs.append(library)
             else:
-                libs.append(library)
+                raise NameError(f"ElementLibrary passed to add_library() has an invalid name: '{library_name}'")
         else:  # pragma: no cover
-            warnings.warn(f"add_library argument should be a subclass of ElementLibrary instead of '{type(library)}'")
+            raise RuntimeError(f"add_library() argument should be a subclass of ElementLibrary instead of '{type(library)}'")
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -1697,13 +1709,15 @@ class Gui:
                 Note that if you are running in an IPython notebook context, the Web
                 server is always run in a separate thread.
             async_mode (str): The asynchronous model to use for the Flask-SocketIO.
-                Valid values are:</br>
+                Valid values are:<br/>
 
+                - "gevent": Use a [gevent](https://www.gevent.org/servers.html) server.
                 - "threading": Use the Flask Development Server. This allows the application to use
                   the Flask reloader (the *use_reloader* option) and Debug mode (the *debug* option).
-                - "eventlet": Use eventlet server.
-                - "gevent": Use gevent server.
-                </br>The default value is "gevent"</br>
+                - "eventlet": Use an [*eventlet*](https://flask.palletsprojects.com/en/2.2.x/deploying/eventlet/)
+                  event-driven WSGI server.
+
+                The default value is "gevent"<br/>
                 Note that only the "threading" value provides support for the development reloader
                 functionality (*use_reloader* option). Any other value makes the *use_reloader* configuration parameter
                 ignored.<br/>

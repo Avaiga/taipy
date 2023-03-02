@@ -562,7 +562,7 @@ class _Factory:
     ) -> t.Optional[t.Union[t.Any, t.Tuple[str, str]]]:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
-        builded = None
+        built = None
         if builder is None:
             parts = name.split(".")
             if len(parts) > 0:
@@ -579,7 +579,7 @@ class _Factory:
                             if isinstance(element, Element):
                                 return element._call_builder(element_name, gui, all_properties, lib, is_html)
         else:
-            builded = builder(gui, name, all_properties)
-        if isinstance(builded, _Builder):
-            return builded._build_to_string() if is_html else builded.el
+            built = builder(gui, name, all_properties)
+        if isinstance(built, _Builder):
+            return built._build_to_string() if is_html else built.el
         return None

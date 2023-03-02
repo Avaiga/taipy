@@ -1,2 +1,3 @@
-# Include all files relevant to your custom library
-# include my_custom_lib/my_file
+# Include all files relevant to the extension library
+include example_library/front-end/dist/*
+

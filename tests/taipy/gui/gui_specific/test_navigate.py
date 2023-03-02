@@ -31,7 +31,7 @@ def test_navigate(gui: Gui, helpers):
         sid = helpers.create_scope_and_get_sid(gui)
         client.get(f"/taipy-jsx/test/?client_id={sid}")
         ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "navigate_to"})
-        # assert for received message (message that would be sent to the frontend client)
+        # assert for received message (message that would be sent to the front-end client)
         assert ws_client.get_received()
 
 
@@ -50,7 +50,7 @@ def test_navigate_to_no_route(gui: Gui, helpers):
         sid = helpers.create_scope_and_get_sid(gui)
         client.get(f"/taipy-jsx/test/?client_id={sid}")
         ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "navigate_to"})
-        # assert for received message (message that would be sent to the frontend client)
+        # assert for received message (message that would be sent to the front-end client)
         assert not ws_client.get_received()
 
 

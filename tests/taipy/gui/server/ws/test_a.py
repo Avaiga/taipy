@@ -40,7 +40,7 @@ def test_a_button_pressed(gui: Gui, helpers):
     ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "do_something"})
     assert gui._bindings()._get_all_scopes()[sid].text == "a random text"
     assert gui._bindings()._get_all_scopes()[sid].x == 20  # type: ignore
-    # assert for received message (message that would be sent to the frontend client)
+    # assert for received message (message that would be sent to the front-end client)
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_message(received_messages[0], "MU", "x", 20)
     helpers.assert_outward_ws_message(received_messages[1], "MU", "text", "a random text")

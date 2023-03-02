@@ -1,49 +1,41 @@
-# Taipy GUI Extension template
+# Taipy GUI Extension Library example
 
-This directory contains all the files needed to build, package and deploy a custom element
-library for Taipy GUI: all the files that are needed to create a library and its elements,
-as well as what is needed to build a standalone Python package that can be distributed.
+This directory contains all the files needed to build, package and deploy an example
+of a custom element library for Taipy GUI.
 
-The files provided in this directory implement a custom element library that contains a
-very basic dynamic custom element. Using this template, you can get started with the build
-process involving both Python and JavaScript source code.
+This example demonstrates several types of custom visual elements including static
+and dynamic elements, handling properties with different types.
 
 ## Directory structure
 
 - `README.md`: This file.
-- `demo.py`: A Python script that can be used to demonstrate the custom
-  element library.<br/>
+- `main.py`: A Python script that can be used to run a Taipy GUI application that
+  has pages using the example element library.<br/>
   See the [section on Testing the library](#testing-the-custom-element-library) for more
   information.
-- `setup.py`: A Python script that is used to package the extension library, if
-  needed.<br/>
+- `pyproject.toml`: The Python project settings file that can be used to package
+  the example library, if needed.<br/>
   See the [section on Packaging](#packaging) for more information.
-- `find_taipy_gui_dir.py`: Locates the absolute path of the installation directory for
-  Taipy GUI. This is used to customize the build of the JavaScript bundle.<br/>
-  See the [Building the JavaScript bundle](#building-the-javascript-bundle) section to
-  learn when this may be useful.
-- `Manifest.in`: The Python package manifest that lists the files to include or remove.
-  All files that are not Python source files and that you want integrated in your package should be listed.
-  See [Manifest.in](https://packaging.python.org/en/latest/guides/using-manifest-in/) for more information.
-- `Pipfile`: Lists the Python package dependencies used by [`pipenv`](https://pypi.org/project/pipenv/).
-- `my_custom_lib/`: The directory where the whole extension library is located.
-   - `__init__.py`: Makes the `my_custom_lib` a potential Python package.
-   - `my_library.py`: The source file where the custom library is declared.
-   - `webui/`: The directory that contains all the JavaScript source files and
+- `Manifest.in`: The Python package manifest that lists the files to include or remove.<br/>
+  All files that are not Python source files and that you want to be integrated into your package should
+  be listed. See [Manifest.in](https://packaging.python.org/en/latest/guides/using-manifest-in/) for
+  more information.
+- `example_library/`: The directory where the whole extension library example is located.
+   - `__init__.py`: Makes `example_library` a potential Python package.
+   - `example_library.py`: The source file where the custom library is declared.
+   - `front-end/`: The directory that contains all the JavaScript source files and
      build directions.
-      - `package.json`: JavaScript dependency file used by npm.<br/>
-        This file is updated when you manually install Taipy GUI.
+      - `package.json`: JavaScript dependency file used by `npm` to build the front-end part of
+        the extension library.
       - `webpack.config.js`: This file is used for building the JavaScript bundle that
         holds the Web components code that is used in the generated pages.
-      - `tsconfig.json`: We are using [TypeScript](https://www.typescriptlang.org/)
-        as a more productive language, compared to JavaScript, to create the Web
-        components that are rendered on the generated pages. The TypeScript
-        transpiler (the program that transforms TypeScript code to vanilla JavaScript)
-        needs this file to drive its execution.
+      - `tsconfig.json`: The configuration file for TypeScript transpilation.
       - `src/`: The source code for the Web components used by the custom elements.
          - `index.ts`: The entry point of the generated JavaScript module.
-         - `SimpleLabel.tsx`: A simple example of a React component that displays
-           the value of a property.
+         - `ColoredLabel.tsx`: A simple example of a React component that displays
+           the value of a property as a string where each consecutive character has
+           a different color.
+      - `scripts/`: A directory containing NodeJS scripts used by the build process.
    
 ## Building the custom library
 
@@ -51,179 +43,153 @@ This section explains how to build the custom extension library.
 
 ### Prerequisites
 
-To complete the build of the extension library, we need to following tools:
+To complete the build of the extension library, we need the following tools:
 
 - Python 3.8 or higher;
 - Taipy GUI 2.0 or higher;
-- [Node.js](https://nodejs.org/en/) 16.x or higher: a JavaScript runtime.<br/>
+- [Node.js](https://nodejs.org/en/) 18.0 or higher: a JavaScript runtime.<br/>
   This embeds [npm](https://www.npmjs.com/), the Node Package Manager.
 
-Installing Taipy GUI is usually done in a Python virtual environment.
+The build process needs that you set the environment variable `TAIPY_GUI_DIR` to the location of
+the Taipy GUI installation:
 
-Create a command prompt (shell) and set to current directory to the `my_custom_lib`
-sitting next to this README file.
+- If you build from a local copy (a clone, for example) of the
+  [`taipy-gui` repository](https://github.com/Avaiga/taipy-gui/),
+  this variable should be set to the path of the directory two levels above the directory where this
+  README file is located, then down to the "src" directory (i.e., the result of the Unix command
+  "``readlink -f `pwd`/../../src``").
+- If you are building this extension library example from an installation of Taipy GUI, you can
+  get that location issuing the command `pip show taipy-gui`.
 
-- If you are using `pipenv`:
-   ```sh
-   $ pipenv --python $PYTHON_VERSION
-   $ pipenv shell
-   $ pipenv install
-   ```
+You can check that the setting is correct by verifying that the directory
+"$TAIPY_GUI_DIR/taipy/gui/webapp" exists.
 
-- If you are not using `pipenv`:
-   ```sh
-   $ pip install virtualenv
-   $ python -m venv ./venv
-   $ source ./venv/bin/activate
-   $ pip install taipy-gui
-   ```
+A way to set this variable once and for all for your environment is to add the line:
+```
+TAIPY_GUI_DIR=<taipy_gui_installation_directory>
+```
+to the file `example_library/front-end/.env'. This file, if present, is read by the build process
+to initialize the environment variable.
 
-### Customize the build process
+### Notes on configuration 
 
-You will need to adapt some files in this template directory to match your specific
-needs. Here are the important settings that you must check:
+This example has all the important settings, ready to be built and used to run a Taipy GUI
+application using this extension or even to make it a regular Python package.
 
-- `my_custom_lib/webui/webpack.config.js`: This file is used to compile all the JavaScript
-  code into a single JavaScript bundle.<br/>
-  Here are the settings that you must check:
-  - `output.path` and `output.filename`: These indicate the location and the name of the
-    generated JavaScript bundle file.<br/>
-    If you want to change any of these parameters, you must make sure that the location
-    and filename that you have set are reflected in the list of mandatory scripts declared
-    by the element library code: in `my_custom_lib/my_library.py`, the method
-    `get_script()` must return an array where the path to this script is explicitly
-    indicated, relative to the element library source file.<br/>
-    A new setting of `output.path` must also be reflected in
-    `my_custom_lib/webui/tsonfig.js` (see below).
-    The default values are set to generate the file `myLibrary.js` in the `dist` directory
-    (located in the `webui` directory, where the bundle is built).
-  - `output.library.name`: Indicates the name of the JavaScript module that holds the code
-    for the generated library.</br>
-    It must be derived from the name of the element library (the value of the `get_name()`
-    method for the custom library in `my_custom_lib/my_library.py`): the name of the
-    JavaScript object should be a camel case version of the library name.<br/>
-    If `get_name()` returns `"the_name_of_the_library"` then this setting should be set
-    to `"TheNameOfTheLibrary"`.
-  - `plugins`: We must provide `webpack` with the path to a bundle, provided by Taipy GUI,
-    that holds all the dependencies that Taipy GUI depends on.<br/>
-    You must set the `manifest` argument to
-    `<TAIPY_GUI_DIR>/webapp/taipy-gui-deps-manifest.json` where `<TAIPY_GUI_DIR>` is the 
-    absolute path to the Taipy GUI installation directory, as returned by the script
-    `find_taipy_gui_dir.py`.
-- `my_custom_lib/webui/tsonfig.json`:
-   - `"outDir"`: Must be set to the value of `output.path` in
-     `my_custom_lib/webui/webpack.config.js`.
-   - `"include"`: Must have the item indicating where the TypeScript source files should
-     be located. The default is `"src"`, referencing `my_custom_lib/webui/src`.
+It is however important to understand the relationship between some of these settings so
+that if you reuse this code, you can change some values and know what the impact of these
+changes is.
 
-### Things to check
+- Extension Library directory: in this example, this is "example_library".<br/>
+  The name of the directory where all the Python and front-end code is stored.
 
-The previous section explained what to change and where.
-Another way of looking at things is to list the different settings that can be
-modified, and check that they all match:
+  - This is the name of the Python package to be imported by the Taipy GUI application
+    script.<br/>
+    This directory needs to hold a file called `__init__.py` so that Python recognizes this
+    directory as a valid Python package directory.
+  - This directory name must appear in the paths that are used in the implementation
+    of the method `get_scripts()` of the `ElementLibrary` subclass. This is how
+    Taipy GUI finds the JavaScript module to be loaded.
+  - It is the name of the Python package to be built, as indicated in the file
+    `pyproject.toml` where it appears as the value of the "name" key of the "project" table.
+  - It is part of the pathname to be included when building the Python package, in
+    the manifest file [`MANIFEST.in`](MANIFEST.in).
 
-- The element library name: set by overriding `ElementLibrary.get_name()`.<br/>
-  This is the prefix that is used in page description texts to find the visual
-  element to instantiate.
-- The JavaScript module name: Is specified in `webpack.config.js` (setting is
-  `output.library.name`).<br/>
-  By default, it is a camel case version of the element library name.<br/>
-  It can be specified otherwise by overriding `ElementLibrary.get_js_module_name()`.
-- The JavaScript bundle path name: Is specified in `webpack.config.js` (settings are
-  `output.filename` and `output.path`).<br/>
-  This is the path of the file that contains all the JavaScript parts of the library. It
-  must appear in the list returned by `ElementLibrary.get_scripts()`.
-- The element names: They are declared as keys to the dictionary returned by 
-  `ElementLibrary.get_elements()`.<br/>
-  They are used to find an element in a library when the page description text is
-  read.
-- The element component names: Are specified as the value of the `react_component`
-  argument to the `Element` constructor.<br/>
-  These component names must be exported with the exact same name from the JavaScript
-  bundle entry point.
+- Extension Library name: in this example, this is "example".<br/>
+  The name of the extension library.
+
+  - This name is used in the page definition texts, where in the Markdown syntax, an element
+    will be defined by the `<|example.<element_name>>` fragment.
+  - The name of the JavaScript module name, used as the value for `output.library.name` in
+    the [webpack configuration file](example_library/front-end/webpack.config.js), is
+    derived from this name if the method `get_js_module_name()` of the `ElementLibrary`
+    subclass is not overloaded: the JavaScript module name defaults to a camel case version
+    of the extension library name.
+
+- Front-end code directory: in this example, this is "front-end".<br/>
+  The name of the directory where all the front-end code is stored.<br/>
+
+  - This directory name must appear in the paths that are used in the implementation
+    of the method `get_scripts()` of the `ElementLibrary` subclass. This is how
+    Taipy GUI finds the JavaScript module to be loaded.
+  - It is part of the pathname to be included when building the Python package, in
+    the manifest file [`MANIFEST.in`](MANIFEST.in).
+
+- JavaScript bundle file name: in this example, this is "exampleLibrary.js".<br/>
+  The name of the file where the front-end code is compiled.<br/>
+
+  - It must appear in the list returned by `ElementLibrary.get_scripts()`.
+  - The filename is set as the value for `output.filename` in the
+    [webpack configuration file](example_library/front-end/webpack.config.js).
+  - It may appear as the filename of paths included in the manifest file
+    [`MANIFEST.in`](MANIFEST.in). In this example, the manifest file indicates
+    that all the files located in `example_library/front-end/dist` should be
+    packaged, so we don't need to explicitly refer to the bundle file name.
+
+  Note that the path to the file also relies on the output directory setting (the
+  value for `output.path`) in the
+  [webpack configuration file](example_library/front-end/webpack.config.js) and
+  appears also in [`MANIFEST.in`](MANIFEST.in)
+
+- The JavaScript module name: in this example, this is "Example".<br/>
+  The name of the JavaScript module.
+
+  - This is specified as the value for `output.library.name` in the
+    [webpack configuration file](example_library/front-end/webpack.config.js).
+  - It is defined by overloading `ElementLibrary.get_js_module_name()`. In this example,
+    we rely on the default implementation, which returns a camel case version of the element
+    library name (therefore "example" is transformed to "Example").
 
 ### Building the JavaScript bundle
 
-When all configuration files have been properly updated, we can build the
-JavaScript bundle:
+When all configuration files have been properly set (which is the case in this example) and
+the "TAIPY_GUI_DIR" variable is set, we can build the JavaScript module file:
 
-- Set your directory to `my_custom_lib/webui`
-- Install the Taipy GUI JavaScript bundle:<br/>
+- Set your directory to `example_library/front-end`
+- Install the Taipy GUI JavaScript bundle and the other dependencies:<br/>
   You must run the command:
   ```
-  npm i $TAIPY_GUI_DIR/webapp
+  npm install
   ```
-  (or `npm i %TAIPY_GUI_DIR%/webapp` on Windows machines)
-
-  where the variable TAIPY_GUI_DIR represents the absolute path to the installation
-  of Taipy GUI, on your filesystem. You can use the script `find_taipy_gui_dir.py`
-  that will find this location.
+  This command will fail with a message indicating that the Taipy GUI 'webapp' directory
+  could not be found if the "TAIPY_GUI_DIR" environment variable was not set properly.
 - You can now build the custom element library JavaScript bundle file:
   ```
   npm run build
   ```
-  This generates the bundle `myCustom.js` in the `dist` directory (if you have not changed
-  the `output` settings in `webpack.config.js`).
+  This generates the bundle `exampleLibrary.js` in the `dist` directory (if you have not
+  changed the `output` settings in `webpack.config.js`). This file contains the definition
+  for the `Example` JavaScript module.
 
-### Testing the custom element library
+## Testing the custom library
 
-If you now go back to the top directory, you will find the Python script `demo.py`
-that shows how to integrate the new element into a regular Taipy application.
+Next to this README file, you can find a Python script called `main.py` that
+creates a Taipy GUI application with a page that demonstrates the various
+elements defined by this extension library example.
 
 To execute this application, you can run:
-   ```bash
-   # With pipenv
-   pipenv run python demo.py
-    
-   # Without pipenv
-   python  demo.py
-   ```
+```sh
+python main.py
+```
+(prefixed by `pipenv run` if you are using `pipenv`)
 
-And see the custom label control in action.
+## Packaging the custom library
 
-### Packaging
+You can create an autonomous Python package for this extension library.
 
-You can create an autonomous Python package to distribute your Taipy GUI custom extension library.
-
-The following steps must be performed:
+The following two simple steps must be performed:
 
 - Install the build package:
-  - If you are using `pipenv`:
+  ```sh
+  pip install build
   ```
-  $ pipenv run pip install build
-  ```
-- If you are not using `pipenv`:
-  ```
-  $ pip install build
-  ```
-- Configure the file `setup.py` to match your settings:
-
-  - The `name` parameter must be set to the package name, which contains the Taipy GUI
-    Extension library.<br/>
-    Note that before you pick a name for your package, you should make sure that it has not
-    already being used. The name of the package is not related to the `import` directive
-    in your Python code.
-  - The `author` and `author_email` parameters should be set to the package author name
-    and email address.
-  - The `description` and `long_description` parameters should provide a description of
-    this package (short and long versions).
-  - The `keywords` parameter should hold relevant keywords exposed by Pypi.
-  - The `packages` parameter indicates which directories and files should be included in
-    this package.<br/>
-    If you have renamed the extension library root directory, you will need to update this,
-    replacing "my_custom_lib" with the name of the directory you have created.
-  - The `version` parameter should reflect the extension library version you are packaging.
-  - Check the `classifiers` and `license` parameters.
-
+  (prefixed by `pipenv run` if you are using `pipenv`)
 - Build the package:
-   ```bash
-   # With pipenv
-   pipenv run python -m build
-    
-   # Without pipenv
-   python -m build
-   ```
+  ```sh
+  python -m build
+  ```
+  (prefixed by `pipenv run` if you are using `pipenv`)
 
-This generates a Python package that can be uploaded to Pipy or shared with community
-members.
+This generates an autonomous Python package that contains both the back-end and the
+front-end code for the extension library.
 

@@ -75,7 +75,7 @@ Where:
     - build: in relation with the build process.
 - `<issueId>` is the processed issue identifier. The advantage of explicitly indicating the issue number is that in
   GitHub, a pull request page shows a direct link to the issue description.
-- `[IssueSummary]` is a short summary of the issue topic, not including spaces, using Camel case or lower-case,
+- `[IssueSummary]` is a short summary of the issue topic, not including spaces, using camel case or lower-case,
   dash-separated words. This summary, with its dash (‘-’) symbol prefix, is optional.
 
 
