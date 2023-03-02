@@ -32,7 +32,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_scope(data_node_config_id, data_node_config)
             self._check_required_properties(data_node_config_id, data_node_config)
             self._check_callable(data_node_config_id, data_node_config)
-            self._check_generic_read_write_fct_and_params(data_node_config_id, data_node_config)
+            self._check_generic_read_write_fct_and_args(data_node_config_id, data_node_config)
             self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
 
@@ -94,21 +94,21 @@ class _DataNodeConfigChecker(_ConfigChecker):
                                 f"property `{required_property}` for type `{storage_type}`.",
                             )
 
-    def _check_generic_read_write_fct_and_params(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+    def _check_generic_read_write_fct_and_args(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC:
             properties_to_check = [
-                DataNodeConfig._OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY,
-                DataNodeConfig._OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY,
+                DataNodeConfig._OPTIONAL_READ_FUNCTION_ARGS_GENERIC_PROPERTY,
+                DataNodeConfig._OPTIONAL_WRITE_FUNCTION_ARGS_GENERIC_PROPERTY,
             ]
             for prop_key in properties_to_check:
                 if data_node_config.properties and prop_key in data_node_config.properties:
                     prop_value = data_node_config.properties[prop_key]
-                    if not isinstance(prop_value, list):
+                    if not isinstance(prop_value, (list, tuple)):
                         self._error(
                             prop_key,
                             prop_value,
                             f"`{prop_key}` field of DataNodeConfig"
-                            f" `{data_node_config_id}` must be populated with a List value.",
+                            f" `{data_node_config_id}` must be populated with a List or a Tuple value.",
                         )
             if data_node_config_id != DataNodeConfig._DEFAULT_KEY:
                 properties_to_check_at_least_one = [
