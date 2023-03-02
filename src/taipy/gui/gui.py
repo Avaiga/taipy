@@ -676,7 +676,7 @@ class Gui:
         for k, v in values.items():
             if isinstance(v, _TaipyData) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
-            elif v == Gui.__DO_NOT_UPDATE_VALUE:
+            elif isinstance(v, str) and v == Gui.__DO_NOT_UPDATE_VALUE:
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)
