@@ -125,7 +125,8 @@ class TestDataNodeConfigChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_messages = [
-            "Either `read_fct` field or `write_fct` field of DataNodeConfig `new` must be populated with a Callable function.",
+            "Either `read_fct` field or `write_fct` field of DataNodeConfig `new` "
+            "must be populated with a Callable function.",
         ]
         assert all(message in caplog.text for message in expected_error_messages)
 
