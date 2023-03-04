@@ -188,23 +188,6 @@ class TestGenericDataNode:
         generic_dn.write(self.data)
         assert len(generic_dn.read()) == 12
 
-        generic_dn = GenericDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties={
-                "read_fct": read_fct_with_args,
-                "write_fct": write_fct_with_args,
-                "read_fct_args": tuple([1]),
-                "write_fct_args": tuple([2]),
-            },
-        )
-
-        assert all([a + 1 == b for a, b in zip(self.data, generic_dn.read())])
-        assert len(generic_dn.read()) == 12
-
-        generic_dn.write(self.data)
-        assert len(generic_dn.read()) == 14
-
         reset_data()
 
     def test_read_write_generic_datanode_with_non_list_arguments(self):

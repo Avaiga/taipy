@@ -436,7 +436,7 @@ class TestDataNodeConfigChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "`write_fct_args` field of DataNodeConfig `default` must be populated with a List or a Tuple value."
+            "`write_fct_args` field of DataNodeConfig `default` must be populated with a List value."
             ' Current value of property `write_fct_args` is "foo".'
         )
         assert expected_error_message in caplog.text
@@ -461,7 +461,7 @@ class TestDataNodeConfigChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "`read_fct_args` field of DataNodeConfig `default` must be populated with a List or a Tuple value."
+            "`read_fct_args` field of DataNodeConfig `default` must be populated with a List value."
             " Current value of property `read_fct_args` is 1."
         )
         assert expected_error_message in caplog.text

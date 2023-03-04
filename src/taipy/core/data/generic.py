@@ -113,7 +113,7 @@ class GenericDataNode(DataNode):
     def _read(self):
         if read_fct := self.properties[self._OPTIONAL_READ_FUNCTION_PROPERTY]:
             if read_fct_args := self.properties.get(self._READ_FUNCTION_ARGS_PROPERTY, None):
-                if not isinstance(read_fct_args, (list, tuple)):
+                if not isinstance(read_fct_args, list):
                     return read_fct(*[read_fct_args])
                 return read_fct(*read_fct_args)
             return read_fct()
@@ -122,7 +122,7 @@ class GenericDataNode(DataNode):
     def _write(self, data: Any):
         if write_fct := self.properties[self._OPTIONAL_WRITE_FUNCTION_PROPERTY]:
             if write_fct_args := self.properties.get(self._WRITE_FUNCTION_ARGS_PROPERTY, None):
-                if not isinstance(write_fct_args, (list, tuple)):
+                if not isinstance(write_fct_args, list):
                     return write_fct(data, *[write_fct_args])
                 return write_fct(data, *write_fct_args)
             return write_fct(data)
