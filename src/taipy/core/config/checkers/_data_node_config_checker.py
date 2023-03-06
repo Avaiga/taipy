@@ -122,7 +122,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 if not has_at_least_one:
                     self._error(
                         ", ".join(properties_to_check_at_least_one),
-                        "",
+                        None,
                         f"Either `{DataNodeConfig._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY}` field or "
                         f"`{DataNodeConfig._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY}` field of "
                         f"DataNodeConfig `{data_node_config_id}` must be populated with a Callable function.",
