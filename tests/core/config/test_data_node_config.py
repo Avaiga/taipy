@@ -60,7 +60,6 @@ def test_data_node_config_check(caplog):
     with pytest.raises(TypeError):
         Config.configure_data_node("data_nodes", storage_type="sql")
 
-    # with pytest.raises(TypeError):
     with pytest.raises(SystemExit):
         Config.configure_data_node("data_nodes", storage_type="generic")
         Config.check()
