@@ -51,17 +51,17 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
     def _to_model(self, data_node: DataNode):
         properties = data_node._properties.data.copy()
         if data_node.storage_type() == GenericDataNode.storage_type():
-            read_fct = data_node._properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY]
+            read_fct = data_node._properties.get(GenericDataNode._OPTIONAL_READ_FUNCTION_PROPERTY, None)
             properties[self._READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
             properties[self._READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
 
-            write_fct = data_node._properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY]
+            write_fct = data_node._properties.get(GenericDataNode._OPTIONAL_WRITE_FUNCTION_PROPERTY, None)
             properties[self._WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
             properties[self._WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
 
             del (
-                properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY],
-                properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY],
+                properties[GenericDataNode._OPTIONAL_READ_FUNCTION_PROPERTY],
+                properties[GenericDataNode._OPTIONAL_WRITE_FUNCTION_PROPERTY],
             )
 
         if data_node.storage_type() == JSONDataNode.storage_type():
@@ -125,20 +125,20 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
     def _from_model(self, model: _DataNodeModel):
         if model.storage_type == GenericDataNode.storage_type():
             if model.data_node_properties[self._READ_FCT_MODULE_KEY]:
-                model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = _load_fct(
+                model.data_node_properties[GenericDataNode._OPTIONAL_READ_FUNCTION_PROPERTY] = _load_fct(
                     model.data_node_properties[self._READ_FCT_MODULE_KEY],
                     model.data_node_properties[self._READ_FCT_NAME_KEY],
                 )
             else:
-                model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = None
+                model.data_node_properties[GenericDataNode._OPTIONAL_READ_FUNCTION_PROPERTY] = None
 
             if model.data_node_properties[self._WRITE_FCT_MODULE_KEY]:
-                model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = _load_fct(
+                model.data_node_properties[GenericDataNode._OPTIONAL_WRITE_FUNCTION_PROPERTY] = _load_fct(
                     model.data_node_properties[self._WRITE_FCT_MODULE_KEY],
                     model.data_node_properties[self._WRITE_FCT_NAME_KEY],
                 )
             else:
-                model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = None
+                model.data_node_properties[GenericDataNode._OPTIONAL_WRITE_FUNCTION_PROPERTY] = None
 
             del model.data_node_properties[self._READ_FCT_NAME_KEY]
             del model.data_node_properties[self._READ_FCT_MODULE_KEY]

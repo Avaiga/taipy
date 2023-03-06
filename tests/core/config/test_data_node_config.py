@@ -60,8 +60,15 @@ def test_data_node_config_check(caplog):
     with pytest.raises(TypeError):
         Config.configure_data_node("data_nodes", storage_type="sql")
 
-    with pytest.raises(TypeError):
+    with pytest.raises(SystemExit):
         Config.configure_data_node("data_nodes", storage_type="generic")
+        Config.check()
+    expected_error_message = (
+        "`storage_type` field of DataNodeConfig `data_nodes` must be either csv, sql_table,"
+        " sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory."
+        ' Current value of property `storage_type` is "bar".'
+    )
+    assert expected_error_message in caplog.text
 
 
 def test_data_node_count():
@@ -120,7 +127,7 @@ def test_data_node_with_env_variable_value():
         assert Config.data_nodes["data_node"]._storage_type == "ENV[FOO]"
 
 
-def test_data_node_with_env_variable_in_write_fct_params():
+def test_data_node_with_env_variable_in_write_fct_args():
     def read_fct():
         ...
 
@@ -133,12 +140,12 @@ def test_data_node_with_env_variable_in_write_fct_params():
             storage_type="generic",
             read_fct=read_fct,
             write_fct=write_fct,
-            write_fct_params=["ENV[FOO]", "my_param", "ENV[BAZ]"],
+            write_fct_args=["ENV[FOO]", "my_param", "ENV[BAZ]"],
         )
-        assert Config.data_nodes["data_node"].write_fct_params == ["bar", "my_param", "qux"]
+        assert Config.data_nodes["data_node"].write_fct_args == ["bar", "my_param", "qux"]
 
 
-def test_data_node_with_env_variable_in_read_fct_params():
+def test_data_node_with_env_variable_in_read_fct_args():
     def read_fct():
         ...
 
@@ -151,9 +158,9 @@ def test_data_node_with_env_variable_in_read_fct_params():
             storage_type="generic",
             read_fct=read_fct,
             write_fct=write_fct,
-            read_fct_params=["ENV[FOO]", "my_param", "ENV[BAZ]"],
+            read_fct_args=["ENV[FOO]", "my_param", "ENV[BAZ]"],
         )
-        assert Config.data_nodes["data_node"].read_fct_params == ["bar", "my_param", "qux"]
+        assert Config.data_nodes["data_node"].read_fct_args == ["bar", "my_param", "qux"]
 
 
 def test_block_datanode_config_update_in_development_mode():

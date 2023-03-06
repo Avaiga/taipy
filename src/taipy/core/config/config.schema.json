@@ -132,11 +132,11 @@
             "type": "string",
             "taipy_function": true
           },
-          "read_fct_params": {
+          "read_fct_args": {
             "description": "storage_type: generic specific.",
             "type": "array"
           },
-          "write_fct_params": {
+          "write_fct_args": {
             "description": "storage_type: generic specific.",
             "type": "array"
           },
