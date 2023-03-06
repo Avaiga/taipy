@@ -62,7 +62,7 @@ def _build_base_config_pyi(filename, base_pyi):
         base_pyi += "".join(lines[begin_line:end_line])
 
         if '"""' not in lines[end_line - 1]:
-            base_pyi += '\t\t""""""\n'
+            base_pyi += '\t\t""""""\n'.replace("\t", "    ")
         base_pyi += "\n"
 
     return base_pyi
