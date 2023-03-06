@@ -60,8 +60,15 @@ import {
     OnRowSelection,
     getRowIndex,
     getTooltip,
+    defaultColumns,
 } from "./tableUtils";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import {
+    useClassNames,
+    useDispatchRequestUpdateOnFirstRender,
+    useDynamicJsonProperty,
+    useDynamicProperty,
+    useFormatConfig,
+} from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 
 interface RowData {
@@ -122,7 +129,7 @@ const Row = ({
                     value={rows[index][col]}
                     formatConfig={formatConfig}
                     rowIndex={index}
-                    onValidation={!columns[col].notEditable ? onValidation: undefined}
+                    onValidation={!columns[col].notEditable ? onValidation : undefined}
                     onDeletion={onDeletion}
                     onSelection={onRowSelection}
                     nanValue={columns[col].nanValue || nanValue}
@@ -145,8 +152,12 @@ interface key2Rows {
     promises: Record<number, PromiseProps>;
 }
 
-const getRowHeight = (size = DEFAULT_SIZE) => size == DEFAULT_SIZE ? 37 : 54;
-const getCellSx = (width: string | number | undefined, size = DEFAULT_SIZE) => ({ width: width, height: 22, padding: size == DEFAULT_SIZE ? "7px": undefined });
+const getRowHeight = (size = DEFAULT_SIZE) => (size == DEFAULT_SIZE ? 37 : 54);
+const getCellSx = (width: string | number | undefined, size = DEFAULT_SIZE) => ({
+    width: width,
+    height: 22,
+    padding: size == DEFAULT_SIZE ? "7px" : undefined,
+});
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
     const {
@@ -181,7 +192,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, {} as Record<string, ColumnDesc>);
+    const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
     useEffect(() => {
         if (props.data && page.current.key && props.data[page.current.key] !== undefined) {
@@ -253,10 +264,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         col.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn(
-                    (active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
-                    baseColumns
-                );
+                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0), baseColumns);
                 const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (baseColumns[col].style) {
@@ -279,7 +287,14 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[], {} as Record<string, ColumnDesc>, {} as Record<string, string>, {} as Record<string, string>, hNan, false];
+        return [
+            [],
+            {} as Record<string, ColumnDesc>,
+            {} as Record<string, string>,
+            {} as Record<string, string>,
+            hNan,
+            false,
+        ];
     }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
@@ -313,7 +328,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                           return pv;
                       }, "-agg")
                     : "";
-                const cols = colsOrder.map((col) => columns[col].dfid).filter(c => c != EDIT_COL);
+                const cols = colsOrder.map((col) => columns[col].dfid).filter((c) => c != EDIT_COL);
                 const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}`;
                 page.current = {
                     key: key,
@@ -347,7 +362,20 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 );
             });
         },
-        [aggregates, styles, tooltips, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, appliedFilters, dispatch]
+        [
+            aggregates,
+            styles,
+            tooltips,
+            updateVarName,
+            orderBy,
+            order,
+            id,
+            colsOrder,
+            columns,
+            handleNan,
+            appliedFilters,
+            dispatch,
+        ]
     );
 
     const onAddRowClick = useCallback(

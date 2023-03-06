@@ -158,6 +158,8 @@ interface EditableCellProps {
     tableCellProps?: Partial<TableCellProps>;
 }
 
+export const defaultColumns = {} as Record<string, ColumnDesc>;
+
 export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
     cols[key1].index < cols[key2].index ? -1 : cols[key1].index > cols[key2].index ? 1 : 0;
 

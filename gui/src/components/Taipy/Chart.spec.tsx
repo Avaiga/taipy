@@ -94,29 +94,29 @@ const mapLayout = JSON.stringify({
 
 describe("Chart Component", () => {
     it("renders", async () => {
-        const { getByTestId } = render(<Chart data={chartValue} config={chartConfig} testId="test" />);
+        const { getByTestId } = render(<Chart data={chartValue} defaultConfig={chartConfig} testId="test" />);
         const elt = getByTestId("test");
         expect(elt.tagName).toBe("DIV");
     });
     it("displays the right info for class", async () => {
         const { getByTestId } = render(
-            <Chart data={chartValue} config={chartConfig} testId="test" className="taipy-chart" />
+            <Chart data={chartValue} defaultConfig={chartConfig} testId="test" className="taipy-chart" />
         );
         const elt = getByTestId("test");
         expect(elt).toHaveClass("taipy-chart");
     });
     xit("is disabled", async () => {
-        const { getByTestId } = render(<Chart data={chartValue} config={chartConfig} testId="test" active={false} />);
+        const { getByTestId } = render(<Chart data={chartValue} defaultConfig={chartConfig} testId="test" active={false} />);
         const elt = getByTestId("test ");
         expect(elt).toHaveClass("Mui-disabled");
     });
     xit("is enabled by default", async () => {
-        const { getByText } = render(<Chart data={undefined} config={chartConfig} />);
+        const { getByText } = render(<Chart data={undefined} defaultConfig={chartConfig} />);
         const elt = getByText("Entity");
         expect(elt).not.toHaveClass("Mui-disabled");
     });
     xit("is enabled by active", async () => {
-        const { getByText } = render(<Chart data={undefined} config={chartConfig} active={true} />);
+        const { getByText } = render(<Chart data={undefined} defaultConfig={chartConfig} active={true} />);
         const elt = getByText("Entity");
         expect(elt).not.toHaveClass("Mui-disabled");
     });
@@ -126,7 +126,7 @@ describe("Chart Component", () => {
         const selProps = { selected0: JSON.stringify([2, 4, 6]) };
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chart id="chart" data={undefined} config={chartConfig} updateVars="varname=varname" {...selProps} />
+                <Chart id="chart" data={undefined} defaultConfig={chartConfig} updateVars="varname=varname" {...selProps} />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -151,7 +151,7 @@ describe("Chart Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByTestId } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chart data={undefined} config={chartConfig} testId="test" />
+                <Chart data={undefined} defaultConfig={chartConfig} testId="test" />
             </TaipyContext.Provider>
         );
         const elt = getByTestId("test");
@@ -178,7 +178,7 @@ describe("Chart Component", () => {
                 <Chart
                     id="table"
                     data={state.data.table as undefined}
-                    config={chartConfig}
+                    defaultConfig={chartConfig}
                     updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
@@ -189,7 +189,7 @@ describe("Chart Component", () => {
                 <Chart
                     id="table"
                     data={newState.data.table as Record<string, TraceValueType>}
-                    config={chartConfig}
+                    defaultConfig={chartConfig}
                     updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
@@ -212,16 +212,16 @@ describe("Chart Component", () => {
     });
     xit("displays the received data", async () => {
         const { getAllByText, rerender } = render(
-            <Chart data={undefined} config={chartConfig} updateVars="varname=varname" />
+            <Chart data={undefined} defaultConfig={chartConfig} updateVars="varname=varname" />
         );
-        rerender(<Chart data={chartValue} config={chartConfig} updateVars="varname=varname" />);
+        rerender(<Chart data={chartValue} defaultConfig={chartConfig} updateVars="varname=varname" />);
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");
     });
     describe("Chart Component as Map", () => {
         xit("renders", async () => {
-            const { getByTestId } = render(<Chart data={mapValue} config={mapConfig} layout={mapLayout} testId="test" />);
+            const { getByTestId } = render(<Chart data={mapValue} defaultConfig={mapConfig} layout={mapLayout} testId="test" />);
             await waitFor(() => expect(getByTestId("test")))
             const elt = getByTestId("test");
             expect(elt.tagName).toBe("DIV");

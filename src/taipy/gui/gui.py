@@ -24,7 +24,7 @@ import typing as t
 import warnings
 from importlib import util
 from types import FrameType
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 import __main__
 import markdown as md_lib
@@ -53,7 +53,7 @@ from .renderers import _EmptyPage
 from .renderers._markdown import _TaipyMarkdownExtension
 from .renderers.factory import _Factory
 from .renderers.json import _TaipyJsonEncoder
-from .renderers.utils import _get_columns_dict, _to_camel_case
+from .renderers.utils import _get_columns_dict
 from .server import _Server
 from .state import State
 from .types import _WsType
@@ -67,14 +67,13 @@ from .utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
-    _is_boolean_true,
     _is_in_notebook,
     _LocalsContext,
     _MapDict,
     _setscopeattr,
     _setscopeattr_drill,
+    _to_camel_case,
     _TaipyBase,
-    _TaipyBool,
     _TaipyContent,
     _TaipyContentImage,
     _TaipyData,
@@ -86,6 +85,8 @@ from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
+from .utils.table_col_builder import _enhance_columns
+from .utils.chart_config_builder import _build_chart_config
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 
 
@@ -509,7 +510,7 @@ class Gui:
         if derived_modified is not None:
             self.__send_var_list_update(list(derived_modified), var_name)
 
-    def __get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
+    def _get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
         if not var_name:
             return (var_name, var_name)
         # Handle holder prefix if needed
@@ -550,7 +551,7 @@ class Gui:
 
     def _call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         try:
-            var_name, current_context = self.__get_real_var_name(var_name)
+            var_name, current_context = self._get_real_var_name(var_name)
         except Exception as e: # pragma: no cover
             warnings.warn(f"{e}")
             return
@@ -740,7 +741,7 @@ class Gui:
                         try:
                             with contextlib.suppress(NameError):
                                 # ignore name error and keep var_name
-                                user_var_name = self.__get_real_var_name(var_name)[0]
+                                user_var_name = self._get_real_var_name(var_name)[0]
                             ret_payload = lib.get_data(lib_name, payload, user_var_name, newvalue)
                             if ret_payload:
                                 break
@@ -928,7 +929,7 @@ class Gui:
                     args[0] = self.__get_state()
                 if argcount > 1:
                     try:
-                        args[1] = self.__get_real_var_name(id)[0]
+                        args[1] = self._get_real_var_name(id)[0]
                     except Exception:
                         args[1] = id
                 if argcount > 2:
@@ -985,31 +986,41 @@ class Gui:
         return self.__evaluator._is_expression(expr)
 
     # make components resettable
+    def _get_rebuild_fn_name(self, name: str):
+        return f"{Gui.__SELF_VAR}.{name}"
 
-    def _calculate_table_columns(self, rebuild: t.Any, rebuild_hash: t.Optional[str],
-                                    data: t.Any, data_hash: str,
-                                    columns: t.Any, columns_hash: t.Optional[str],
-                                    date_format: str, number_format: str) -> t.Tuple[t.Dict[str, t.Dict[str, t.Any]], t.Dict[str, str], t.Optional[str]]:
-        col_types = self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
-        columns_str = columns if isinstance(columns, str) else ""
-        col_dict = _get_columns_dict(data, columns, col_types, date_format, number_format)
-        rebuild_val = _TaipyBool(rebuild, rebuild_hash).get() if rebuild_hash else _is_boolean_true(t.cast(bool, rebuild))
-        expr_hash: t.Optional[str] = None
-        if data_hash and (rebuild_hash or rebuild_val):
-            data_var_name = self.__get_real_var_name(data_hash)[0]
-            columns_var_name = self.__get_real_var_name(columns_hash)[0] if columns_hash else '""'
-            rebuild_var_name = self.__get_real_var_name(rebuild_hash)[0] if rebuild_hash else 'None'
-            expr_hash = self._evaluate_expr(
-                "{"+f"{Gui.__SELF_VAR}._tbl_cols({rebuild_val}, {bool(rebuild_hash)}, {rebuild_var_name}, {data_var_name}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format or ''}', '{number_format or ''}')" + "}")
-        return col_dict, col_types, expr_hash
+    def __get_attributes(self, attr_json: str, hash_json: str, args_dict: t.Dict[str, t.Any]):
+        attributes: t.Dict[str, t.Any] = json.loads(unquote(attr_json))
+        hashes: t.Dict[str, str] = json.loads(unquote(hash_json))
+        attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
+        return attributes, hashes
 
-    def _tbl_cols(self, rebuild: bool, is_rebuild_var: bool, rebuild_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
+    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> str:
         try:
-            rebuild = _TaipyBool(rebuild_val, '').get() if is_rebuild_var else rebuild
+            rebuild = rebuild_val if rebuild_val is not None else rebuild
             if rebuild:
-                return json.dumps(_get_columns_dict(data, columns_val if columns_val else columns, self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)), date_format, number_format))
+                attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
+                data_hash = hashes.get("data", "")
+                data = kwargs.get(data_hash)
+                col_dict = _get_columns_dict(data, attributes.get("columns", {}), self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)), attributes.get("date_format"), attributes.get("number_format"))
+                _enhance_columns(attributes, hashes, col_dict, "table(cols)")
+
+                return json.dumps(col_dict)
         except Exception as e: # pragma: no cover
             warnings.warn(f"Exception while rebuilding table columns {e}")
+        return Gui.__DO_NOT_UPDATE_VALUE
+
+    def _chart_conf(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> str:
+        try:
+            rebuild = rebuild_val if rebuild_val is not None else rebuild
+            if rebuild:
+                attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
+                data_hash = hashes.get("data", "")
+                config = _build_chart_config(self, attributes, self._accessors._get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)))
+
+                return json.dumps(config)
+        except Exception as e: # pragma: no cover
+            warnings.warn(f"Exception while rebuilding chart config {e}")
         return Gui.__DO_NOT_UPDATE_VALUE
 
     # Proxy methods for Adapter

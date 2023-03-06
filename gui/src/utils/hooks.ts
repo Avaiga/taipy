@@ -51,9 +51,9 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
  * @param defaultStatic - The default static value.
  * @returns The latest updated value.
  */
-export const useDynamicJsonProperty = <T>(value: string | T, defaultValue: string, defaultStatic: T): T => {
+export const useDynamicJsonProperty = <T>(value: string | undefined, defaultValue: string, defaultStatic: T): T => {
     const defaultJson = useMemo(() => {
-        if (defaultValue !== undefined) {
+        if (defaultValue && typeof defaultValue === "string") {
             try {
                 return JSON.parse(defaultValue);
             } catch (e) {
@@ -65,11 +65,7 @@ export const useDynamicJsonProperty = <T>(value: string | T, defaultValue: strin
     return useMemo(() => {
         if (value && typeof value === "string") {
             try {
-                const json = JSON.parse(value);
-                Object.keys(json).filter(key => key in defaultJson).forEach((key) => {
-                    json[key] = {...defaultJson[key], ...json[key]};
-                });
-                return json;
+                return JSON.parse(value);
             } catch (e) {
                 console.warn("useDynamicJsonProperty: value", e);
             }

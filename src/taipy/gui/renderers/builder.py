@@ -12,13 +12,12 @@
 import contextlib
 import json
 import numbers
-import re
 import typing as t
 import warnings
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
-from enum import Enum
 from inspect import isclass
+from urllib.parse import quote
 
 from ..partial import Partial
 from ..types import PropertyType, _get_taipy_type
@@ -31,55 +30,21 @@ from ..utils import (
     _getscopeattr_drill,
     _is_boolean,
     _is_boolean_true,
+    _to_camel_case,
     _MapDict,
 )
-from ..utils.types import _TaipyData
+from ..utils.types import _TaipyBase, _TaipyData
+from ..utils.table_col_builder import _get_name_indexed_property, _enhance_columns
+from ..utils.chart_config_builder import _build_chart_config, _CHART_NAMES
 from .json import _TaipyJsonEncoder
 from .utils import (
     _add_to_dict_and_get,
-    _get_col_from_indexed,
-    _get_column_desc,
     _get_columns_dict,
     _get_tuple_val,
-    _to_camel_case,
 )
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
-
-
-class _Chart_iprops(Enum):
-    x = 0
-    y = 1
-    z = 2
-    label = 3
-    text = 4
-    mode = 5
-    type = 6
-    color = 7
-    xaxis = 8
-    yaxis = 9
-    selected_color = 10
-    marker = 11
-    selected_marker = 12
-    orientation = 13
-    _name = 14
-    line = 15
-    text_anchor = 16
-    options = 17
-    lon = 18
-    lat = 19
-    base = 20
-    r = 21
-    theta = 22
-    close = 23
-    open = 24
-    high = 25
-    low = 26
-    locations = 27
-    values = 28
-    labels = 29
-    decimator = 30
 
 
 class _Builder:
@@ -93,27 +58,7 @@ class _Builder:
 
     __BLOCK_CONTROLS = ["dialog", "expandable", "pane", "part"]
 
-    __CHART_AXIS: t.Dict[str, t.Iterable[_Chart_iprops]] = {
-        "scattermapbox": (_Chart_iprops.lon, _Chart_iprops.lat),
-        "scattergeo": (_Chart_iprops.lon, _Chart_iprops.lat),
-        "densitymapbox": (_Chart_iprops.lon, _Chart_iprops.lat, _Chart_iprops.z),
-        "scatterpolar": (_Chart_iprops.r, _Chart_iprops.theta),
-        "scatterpolargl": (_Chart_iprops.r, _Chart_iprops.theta),
-        "candlestick": (
-            _Chart_iprops.x,
-            _Chart_iprops.close,
-            _Chart_iprops.open,
-            _Chart_iprops.high,
-            _Chart_iprops.low,
-        ),
-        "bar": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.base),
-        "pie": (_Chart_iprops.values, _Chart_iprops.labels),
-        "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
-        "funnelarea": (_Chart_iprops.values,),
-    }
-    __CHART_DEFAULT_AXIS: t.Iterable[_Chart_iprops] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
-    __CHART_MARKER_TO_COLS: t.Iterable[str] = ("color", "size", "symbol", "opacity")
-    __CHART_NO_INDEX: t.Iterable[str] = ("pie", "histogram", "heatmap", "funnelarea")
+    __TABLE_COLUMNS_DEPS = ["data", "columns", "date_format", "number_format", "nan_value", "width", "filter", "editable", "group_by", "apply", "style", "tooltip"]
 
     def __init__(
         self,
@@ -235,18 +180,7 @@ class _Builder:
 
             name (str): The property name.
         """
-        ret = {}
-        index_re = re.compile(name + r"\[(.*)\]$")
-        for key in self.__attributes.keys():
-            if m := index_re.match(key):
-                ret[m.group(1)] = self.__attributes.get(key)
-        return ret
-
-    def __get_multiple_indexed_attributes(
-        self, names: t.Tuple[str], index: t.Optional[int] = None
-    ) -> t.List[t.Optional[str]]:
-        names = names if index is None else [f"{n}[{index}]" for n in names]  # type: ignore
-        return [self.__attributes.get(name) for name in names]
+        return _get_name_indexed_property(self.__attributes, name)
 
     def __get_boolean_attribute(self, name: str, default_value=False):
         boolattr = self.__attributes.get(name, default_value)
@@ -455,291 +389,85 @@ class _Builder:
                 self.__set_default_value("value", ret_val)
         return self
 
-    def __update_col_desc_from_indexed(self, columns: t.Dict[str, t.Any], name: str):
-        col_value = self.get_name_indexed_property(name)
-        for k, v in col_value.items():
-            if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
-                if col_desc.get(_to_camel_case(name)) is None:
-                    col_desc[_to_camel_case(name)] = str(v)
-            else:
-                warnings.warn(f"{self.__element_name} {name}[{k}] is not in the list of displayed columns")
+    def __filter_attribute_names(self, names: t.Iterable[str]):
+        return [k for k in self.__attributes if k in names or any(k.startswith(n + '[') for n in names)]
 
-    def _get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None) -> '_Builder': # noqa: C901
-        columns, col_types, rebuild_fn_hash = self.__gui._calculate_table_columns(self.__attributes.get("rebuild", False), self.__hashes.get("rebuild"),
-            self.__attributes.get("data"), self.__hashes.get("data", ""),
-            self.__attributes.get("columns", {}), self.__hashes.get("columns"),
-            _add_to_dict_and_get(self.__attributes, "date_format", date_format), _add_to_dict_and_get(self.__attributes, "number_format", number_format))
+    def __get_holded_name(self, key: str):
+        name = self.__hashes.get(key)
+        if name:
+            v = self.__attributes.get(key)
+            if isinstance(v, _TaipyBase):
+                return name[:len(v.get_hash()) + 1]
+        return name
+
+    def __filter_attributes_hashes(self, keys: t.List[str]):
+        hash_names = [k for k in self.__hashes if k in keys]
+        attr_names = [k for k in keys if k not in hash_names]
+        return ({k: v for k, v in self.__attributes.items() if k in attr_names}, {k: self.__get_holded_name(k) for k in self.__hashes if k in hash_names})
+
+    def __build_rebuild_fn(self, fn_name: str, attribute_names: t.Iterable[str]):
+        rebuild = self.__attributes.get("rebuild", False)
+        rebuild_hash = self.__hashes.get("rebuild")
+        if (rebuild_hash or rebuild):
+            attributes, hashes = self.__filter_attributes_hashes(self.__filter_attribute_names(attribute_names))
+            rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else 'None'
+            return self.__gui._evaluate_expr("{" + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{v}={self.__gui._get_real_var_name(v)[0]}" for v in hashes.values()])})' + "}")
+        return None
+
+    def _get_dataframe_attributes(self) -> '_Builder': # noqa: C901
+        date_format = _add_to_dict_and_get(self.__attributes, "date_format", "MM/dd/yyyy")
+        data = self.__attributes.get("data")
+        data_hash = self.__hashes.get("data", "")
+        col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
+        col_dict = _get_columns_dict(data, self.__attributes.get("columns", {}), col_types, date_format, self.__attributes.get("number_format"))
+
+        rebuild_fn_hash = self.__build_rebuild_fn(self.__gui._get_rebuild_fn_name("_tbl_cols"), _Builder.__TABLE_COLUMNS_DEPS)
         if rebuild_fn_hash:
             self.__set_react_attribute("columns", rebuild_fn_hash)
-        if columns is not None:
-            self.__update_col_desc_from_indexed(columns, "nan_value")
-            self.__update_col_desc_from_indexed(columns, "width")
-            filters = self.get_name_indexed_property("filter")
-            for k, v in filters.items():
-                if _is_boolean_true(v):
-                    if col_desc := _get_column_desc(columns, k):
-                        col_desc["filter"] = True
-                    else:
-                        warnings.warn(f"{self.__element_name} filter[{k}] is not in the list of displayed columns")
-            editables = self.get_name_indexed_property("editable")
-            for k, v in editables.items():
-                if _is_boolean(v):
-                    if col_desc := _get_column_desc(columns, k):
-                        col_desc["notEditable"] = not _is_boolean_true(v)
-                    else:
-                        warnings.warn(f"{self.__element_name} editable[{k}] is not in the list of displayed columns")
-            group_by = self.get_name_indexed_property("group_by")
-            for k, v in group_by.items():
-                if _is_boolean_true(v):
-                    if col_desc := _get_column_desc(columns, k):
-                        col_desc["groupBy"] = True
-                    else:
-                        warnings.warn(f"{self.__element_name} group_by[{k}] is not in the list of displayed columns")
-            apply = self.get_name_indexed_property("apply")
-            for k, v in apply.items():  # pragma: no cover
-                if col_desc := _get_column_desc(columns, k):
-                    if callable(v):
-                        value = self.__hashes.get(f"apply[{k}]")
-                    elif isinstance(v, str):
-                        value = v.strip()
-                    else:
-                        warnings.warn(f"{self.__element_name} apply[{k}] should be a user or predefined function")
-                        value = None
-                    if value:
-                        col_desc["apply"] = value
-                else:
-                    warnings.warn(f"{self.__element_name} apply[{k}] is not in the list of displayed columns")
-            if line_style := self.__attributes.get("style"):
-                if callable(line_style):
-                    value = self.__hashes.get("style")
-                elif isinstance(line_style, str):
-                    value = line_style.strip()
-                else:
-                    value = None
-                if value in col_types.keys():
-                    warnings.warn(f"{self.__element_name} style={value} cannot be a column's name")
-                elif value:
-                    self.set_attribute("lineStyle", value)
-            styles = self.get_name_indexed_property("style")
-            for k, v in styles.items():  # pragma: no cover
-                if col_desc := _get_column_desc(columns, k):
-                    if callable(v):
-                        value = self.__hashes.get(f"style[{k}]")
-                    elif isinstance(v, str):
-                        value = v.strip()
-                    else:
-                        value = None
-                    if value in col_types.keys():
-                        warnings.warn(f"{self.__element_name} style[{k}]={value} cannot be a column's name")
-                    elif value:
-                        col_desc["style"] = value
-                else:
-                    warnings.warn(f"{self.__element_name} style[{k}] is not in the list of displayed columns")
-            if tooltip := self.__attributes.get("tooltip"):
-                if callable(tooltip):
-                    value = self.__hashes.get("tooltip")
-                elif isinstance(tooltip, str):
-                    value = tooltip.strip()
-                else:
-                    value = None
-                if value in col_types.keys():
-                    warnings.warn(f"{self.__element_name} tooltip={value} cannot be a column's name")
-                elif value:
-                    self.set_attribute("tooltip", value)
-            tooltips = self.get_name_indexed_property("tooltip")
-            for k, v in tooltips.items():  # pragma: no cover
-                if col_desc := _get_column_desc(columns, k):
-                    if callable(v):
-                        value = self.__hashes.get(f"tooltip[{k}]")
-                    elif isinstance(v, str):
-                        value = v.strip()
-                    else:
-                        value = None
-                    if value in col_types.keys():
-                        warnings.warn(f"{self.__element_name} tooltip[{k}]={value} cannot be a column's name")
-                    elif value:
-                        col_desc["tooltip"] = value
-                else:
-                    warnings.warn(f"{self.__element_name} tooltip[{k}] is not in the list of displayed columns")
-            self.__set_json_attribute("defaultColumns", columns)
+        if col_dict is not None:
+            _enhance_columns(self.__attributes, self.__hashes, col_dict, self.__element_name)
+            self.__set_json_attribute("defaultColumns", col_dict)
+        if line_style := self.__attributes.get("style"):
+            if callable(line_style):
+                value = self.__hashes.get("style")
+            elif isinstance(line_style, str):
+                value = line_style.strip()
+            else:
+                value = None
+            if value in col_types.keys():
+                warnings.warn(f"{self.__element_name} style={value} cannot be a column's name")
+            elif value:
+                self.set_attribute("lineStyle", value)
+        if tooltip := self.__attributes.get("tooltip"):
+            if callable(tooltip):
+                value = self.__hashes.get("tooltip")
+            elif isinstance(tooltip, str):
+                value = tooltip.strip()
+            else:
+                value = None
+            if value in col_types.keys():
+                warnings.warn(f"{self.__element_name} tooltip={value} cannot be a column's name")
+            elif value:
+                self.set_attribute("tooltip", value)
         return self
 
-    def __check_dict(self, values: t.List[t.Any], properties: t.Tuple[_Chart_iprops]) -> None:
-        for prop in properties:
-            if values[prop.value] is not None and not isinstance(values[prop.value], (dict, _MapDict)):
-                warnings.warn(f"{self.__element_name} {prop.name} should be a dict")
-                values[prop.value] = None
-
-    def _get_chart_config(self, default_type="scatter", default_mode="lines+markers"):  # noqa: C901
-        names = tuple(e.name[1:] if e.name[0] == "_" else e.name for e in _Chart_iprops)
-        trace = self.__get_multiple_indexed_attributes(names)
-        if not trace[_Chart_iprops.mode.value]:
-            trace[_Chart_iprops.mode.value] = default_mode
-        # type
-        if not trace[_Chart_iprops.type.value]:
-            trace[_Chart_iprops.type.value] = default_type
-        if not trace[_Chart_iprops.xaxis.value]:
-            trace[_Chart_iprops.xaxis.value] = "x"
-        if not trace[_Chart_iprops.yaxis.value]:
-            trace[_Chart_iprops.yaxis.value] = "y"
-        # Indexed properties: Check for arrays
-        for prop in _Chart_iprops:
-            values = trace[prop.value]
-            if isinstance(values, (list, tuple)) and len(values):
-                prop_name = prop.name[1:] if prop.name[0] == "_" else prop.name
-                for idx, val in enumerate(values):
-                    if idx == 0:
-                        trace[prop.value] = val
-                    if val is not None:
-                        indexed_prop = f"{prop_name}[{idx + 1}]"
-                        if self.__attributes.get(indexed_prop) is None:
-                            self.__attributes[indexed_prop] = val
-        # marker selected_marker options
-        self.__check_dict(trace, (_Chart_iprops.marker, _Chart_iprops.selected_marker, _Chart_iprops.options))
-        axis = []
-        traces = []
-        idx = 1
-        indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
-        if len([x for x in indexed_trace if x]):
-            while len([x for x in indexed_trace if x]):
-                axis.append(
-                    _Builder.__CHART_AXIS.get(
-                        indexed_trace[_Chart_iprops.type.value] or trace[_Chart_iprops.type.value],
-                        _Builder.__CHART_DEFAULT_AXIS,
-                    )
-                )
-                # marker selected_marker options
-                self.__check_dict(
-                    indexed_trace, (_Chart_iprops.marker, _Chart_iprops.selected_marker, _Chart_iprops.options)
-                )
-                if trace[_Chart_iprops.decimator.value] and not indexed_trace[_Chart_iprops.decimator.value]:
-                    # copy the decimator only once
-                    indexed_trace[_Chart_iprops.decimator.value] = trace[_Chart_iprops.decimator.value]
-                    trace[_Chart_iprops.decimator.value] = None
-                traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
-                idx += 1
-                indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
-        else:
-            traces.append(trace)
-            # axis names
-            axis.append(_Builder.__CHART_AXIS.get(trace[_Chart_iprops.type.value], _Builder.__CHART_DEFAULT_AXIS))
+    def _get_chart_config(self, default_type: str, default_mode: str):  # noqa: C901
+        self.__attributes["_default_type"] = default_type
+        self.__attributes["_default_mode"] = default_mode
+        rebuild_fn_hash = self.__build_rebuild_fn(self.__gui._get_rebuild_fn_name("_chart_conf"), _CHART_NAMES + ("_default_type", "_default_mode", "data"))
+        if rebuild_fn_hash:
+            self.__set_react_attribute("config", rebuild_fn_hash)
 
         # read column definitions
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
         col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
 
-        # list of data columns name indexes with label text
-        dt_idx = tuple(e.value for e in axis[0] + (_Chart_iprops.label, _Chart_iprops.text))
+        config = _build_chart_config(self.__gui, self.__attributes, col_types)
 
-        # configure columns
-        columns = set()
-        for j, trace in enumerate(traces):
-            dt_idx = tuple(
-                e.value for e in (axis[j] if j < len(axis) else axis[0]) + (_Chart_iprops.label, _Chart_iprops.text)
-            )
-            columns.update([trace[i] for i in dt_idx if trace[i]])
-        # add optionnal column if any
-        markers = [
-            t[_Chart_iprops.marker.value]
-            or ({"color": t[_Chart_iprops.color.value]} if t[_Chart_iprops.color.value] else None)
-            for t in traces
-        ]
-        opt_cols = set()
-        for m in markers:
-            if isinstance(m, (dict, _MapDict)):
-                for prop in _Builder.__CHART_MARKER_TO_COLS:
-                    val = m.get(prop)
-                    if isinstance(val, str) and val not in columns:
-                        opt_cols.add(val)
-
-        # Validate the column names
-        col_dict = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
-
-        # Manage Decimator
-        decimators = []
-        for tr in traces:
-            if tr[_Chart_iprops.decimator.value]:
-                cls = self.__gui._get_user_instance(
-                    class_name=str(tr[_Chart_iprops.decimator.value]), class_type=PropertyType.decimator.value
-                )
-                if isinstance(cls, PropertyType.decimator.value):
-                    decimators.append(str(tr[_Chart_iprops.decimator.value]))
-                    continue
-            decimators.append(None)
-
-        # set default columns if not defined
-        icols = [
-            [c2 for c2 in [_get_col_from_indexed(c1, i) for c1 in col_dict.keys()] if c2] for i in range(len(traces))
-        ]
-
-        for i, tr in enumerate(traces):
-            if i < len(axis):
-                used_cols = {tr[ax.value] for ax in axis[i] if tr[ax.value]}
-                unused_cols = [c for c in icols[i] if c not in used_cols]
-                if unused_cols and not any(tr[ax.value] for ax in axis[i]):
-                    traces[i] = tuple(
-                        v or (unused_cols.pop(0) if unused_cols and _Chart_iprops(j) in axis[i] else v)
-                        for j, v in enumerate(tr)
-                    )
-
-        if col_dict is not None:
-            self.__attributes["columns"] = col_dict
-            reverse_cols = {str(cd.get("dfid")): c for c, cd in col_dict.items()}
-
-            # List used axis
-            used_axis = [
-                [e for e in (axis[j] if j < len(axis) else axis[0]) if tr[e.value]] for j, tr in enumerate(traces)
-            ]
-
-            ret_dict = {
-                "columns": col_dict,
-                "labels": [
-                    reverse_cols.get(tr[_Chart_iprops.label.value], (tr[_Chart_iprops.label.value] or ""))
-                    for tr in traces
-                ],
-                "texts": [
-                    reverse_cols.get(tr[_Chart_iprops.text.value], (tr[_Chart_iprops.text.value] or None))
-                    for tr in traces
-                ],
-                "modes": [tr[_Chart_iprops.mode.value] for tr in traces],
-                "types": [tr[_Chart_iprops.type.value] for tr in traces],
-                "xaxis": [tr[_Chart_iprops.xaxis.value] for tr in traces],
-                "yaxis": [tr[_Chart_iprops.yaxis.value] for tr in traces],
-                "markers": markers,
-                "selectedMarkers": [
-                    tr[_Chart_iprops.selected_marker.value]
-                    or (
-                        {"color": tr[_Chart_iprops.selected_color.value]}
-                        if tr[_Chart_iprops.selected_color.value]
-                        else None
-                    )
-                    for tr in traces
-                ],
-                "traces": [
-                    [reverse_cols.get(c, c) for c in [tr[e.value] for e in used_axis[j]]] for j, tr in enumerate(traces)
-                ],
-                "orientations": [tr[_Chart_iprops.orientation.value] for tr in traces],
-                "names": [tr[_Chart_iprops._name.value] for tr in traces],
-                "lines": [
-                    tr[_Chart_iprops.line.value]
-                    if isinstance(tr[_Chart_iprops.line.value], (dict, _MapDict))
-                    else {"dash": tr[_Chart_iprops.line.value]}
-                    if tr[_Chart_iprops.line.value]
-                    else None
-                    for tr in traces
-                ],
-                "textAnchors": [tr[_Chart_iprops.text_anchor.value] for tr in traces],
-                "options": [tr[_Chart_iprops.options.value] for tr in traces],
-                "axisNames": [[e.name for e in ax] for ax in used_axis],
-                "addIndex": [tr[_Chart_iprops.type.value] not in _Builder.__CHART_NO_INDEX for tr in traces],
-            }
-            if len([d for d in decimators if d]):
-                ret_dict.update(decimators=decimators)
-
-            self.__set_json_attribute("config", ret_dict)
-            self._set_chart_selected(max=len(traces))
-            self.__set_refresh_on_update()
+        self.__set_json_attribute("defaultConfig", config)
+        self._set_chart_selected(max=len(config.get("traces", "")))
+        self.__set_refresh_on_update()
         return self
 
     def _set_string_with_check(self, var_name: str, values: t.List[str], default_value: t.Optional[str] = None):
