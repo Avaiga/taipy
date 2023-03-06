@@ -414,7 +414,7 @@ class _Builder:
             return self.__gui._evaluate_expr("{" + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{v}={self.__gui._get_real_var_name(v)[0]}" for v in hashes.values()])})' + "}")
         return None
 
-    def _get_dataframe_attributes(self) -> '_Builder': # noqa: C901
+    def _get_dataframe_attributes(self) -> '_Builder':
         date_format = _add_to_dict_and_get(self.__attributes, "date_format", "MM/dd/yyyy")
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
@@ -451,7 +451,7 @@ class _Builder:
                 self.set_attribute("tooltip", value)
         return self
 
-    def _get_chart_config(self, default_type: str, default_mode: str):  # noqa: C901
+    def _get_chart_config(self, default_type: str, default_mode: str):
         self.__attributes["_default_type"] = default_type
         self.__attributes["_default_mode"] = default_mode
         rebuild_fn_hash = self.__build_rebuild_fn(self.__gui._get_rebuild_fn_name("_chart_conf"), _CHART_NAMES + ("_default_type", "_default_mode", "data"))

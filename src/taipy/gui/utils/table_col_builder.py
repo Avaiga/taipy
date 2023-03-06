@@ -36,7 +36,7 @@ def _update_col_desc_from_indexed(attributes: t.Dict[str, t.Any], columns: t.Dic
         else:
             warnings.warn(f"{elt_name} {name}[{k}] is not in the list of displayed columns")
 
-def _enhance_columns(attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str], columns: t.Dict[str, t.Any], elt_name: str):
+def _enhance_columns(attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str], columns: t.Dict[str, t.Any], elt_name: str): # noqa: C901
     _update_col_desc_from_indexed(attributes, columns, "nan_value", elt_name)
     _update_col_desc_from_indexed(attributes, columns, "width", elt_name)
     filters = _get_name_indexed_property(attributes, "filter")
