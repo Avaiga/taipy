@@ -102,7 +102,7 @@ def __get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
     return col_name
 
 
-def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t.Dict[str, str]): # noqa: C901
+def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t.Dict[str, str]):  # noqa: C901
     default_type = attributes.get("_default_type", "scatter")
     default_mode = attributes.get("_default_mode", "lines+markers")
     trace = __get_multiple_indexed_attributes(attributes, _CHART_NAMES)

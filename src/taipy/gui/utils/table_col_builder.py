@@ -16,8 +16,10 @@ import warnings
 from .clientvarname import _to_camel_case
 from .boolean import _is_boolean, _is_boolean_true
 
+
 def _get_column_desc(columns: t.Dict[str, t.Any], key: str) -> t.Optional[t.Dict[str, t.Any]]:
     return next((x for x in columns.values() if x.get("dfid") == key), None)
+
 
 def _get_name_indexed_property(attributes: t.Dict[str, t.Any], name: str) -> t.Dict[str, t.Any]:
     ret = {}
@@ -26,6 +28,7 @@ def _get_name_indexed_property(attributes: t.Dict[str, t.Any], name: str) -> t.D
         if m := index_re.match(key):
             ret[m.group(1)] = attributes.get(key)
     return ret
+
 
 def _update_col_desc_from_indexed(attributes: t.Dict[str, t.Any], columns: t.Dict[str, t.Any], name: str, elt_name: str):
     col_value = _get_name_indexed_property(attributes, name)
@@ -36,7 +39,8 @@ def _update_col_desc_from_indexed(attributes: t.Dict[str, t.Any], columns: t.Dic
         else:
             warnings.warn(f"{elt_name} {name}[{k}] is not in the list of displayed columns")
 
-def _enhance_columns(attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str], columns: t.Dict[str, t.Any], elt_name: str): # noqa: C901
+
+def _enhance_columns(attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str], columns: t.Dict[str, t.Any], elt_name: str):  # noqa: C901
     _update_col_desc_from_indexed(attributes, columns, "nan_value", elt_name)
     _update_col_desc_from_indexed(attributes, columns, "width", elt_name)
     filters = _get_name_indexed_property(attributes, "filter")
