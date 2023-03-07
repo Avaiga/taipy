@@ -411,7 +411,11 @@ class _Builder:
         if (rebuild_hash or rebuild):
             attributes, hashes = self.__filter_attributes_hashes(self.__filter_attribute_names(attribute_names))
             rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else 'None'
-            return self.__gui._evaluate_expr("{" + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{v}={self.__gui._get_real_var_name(v)[0]}" for v in hashes.values()])})' + "}")
+            try:
+                self.__gui._set_building(True)
+                return self.__gui._evaluate_expr("{" + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{v}={self.__gui._get_real_var_name(v)[0]}" for v in hashes.values()])})' + "}")
+            finally:
+                self.__gui._set_building(False)
         return None
 
     def _get_dataframe_attributes(self) -> '_Builder':
