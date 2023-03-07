@@ -58,19 +58,16 @@ default_config: Config = {
         "color_paper_dark": "#072636",
 
         # DEFINING FONTS
-
         # Set main font family
         "font_family": "Lato, Arial, sans-serif",
 
         # DEFINING SHAPES
-
         # Base border radius
-        "border_radius": 8,
+        "border_radius": "8px",
 
         # DEFINING MUI COMPONENTS STYLES
-
         # Matching input and button height
-        "input_button_height": 48
+        "input_button_height": "48px"
     },
     "upload_folder": None,
     "use_arrow": False,

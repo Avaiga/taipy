@@ -1666,6 +1666,8 @@ class Gui:
         ]
         if self._get_config("stylekit", False):
             styles.append("/stylekit/stylekit.css")
+        else:
+            styles.append("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")
         if self.__css_file:
             styles.append(f"/{self.__css_file}")
 

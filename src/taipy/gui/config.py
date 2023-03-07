@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import argparse
 import os
 import re
 import typing as t
@@ -93,7 +92,7 @@ Config = t.TypedDict(
         "time_zone": t.Optional[str],
         "title": t.Optional[str],
         "stylekit": bool,
-        "stylekit_variables": t.Dict[str, t.Any],
+        "stylekit_variables": t.Dict[str, str],
         "upload_folder": t.Optional[str],
         "use_arrow": bool,
         "use_reloader": bool,
