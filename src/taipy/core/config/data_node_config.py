@@ -72,11 +72,13 @@ class DataNodeConfig(Section):
 
     _EXPOSED_TYPE_KEY = "exposed_type"
     _EXPOSED_TYPE_PANDAS = "pandas"
+    _EXPOSED_TYPE_MODIN = "modin"
     _EXPOSED_TYPE_NUMPY = "numpy"
     _DEFAULT_EXPOSED_TYPE = _EXPOSED_TYPE_PANDAS
 
     _ALL_EXPOSED_TYPES = [
         _EXPOSED_TYPE_PANDAS,
+        _EXPOSED_TYPE_MODIN,
         _EXPOSED_TYPE_NUMPY,
     ]
     # Generic
