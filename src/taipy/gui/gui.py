@@ -24,7 +24,7 @@ import typing as t
 import warnings
 from importlib import util
 from types import FrameType
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 import __main__
 import markdown as md_lib
@@ -53,7 +53,7 @@ from .renderers import _EmptyPage
 from .renderers._markdown import _TaipyMarkdownExtension
 from .renderers.factory import _Factory
 from .renderers.json import _TaipyJsonEncoder
-from .renderers.utils import _get_columns_dict, _to_camel_case
+from .renderers.utils import _get_columns_dict
 from .server import _Server
 from .state import State
 from .types import _WsType
@@ -67,14 +67,13 @@ from .utils import (
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
-    _is_boolean_true,
     _is_in_notebook,
     _LocalsContext,
     _MapDict,
     _setscopeattr,
     _setscopeattr_drill,
+    _to_camel_case,
     _TaipyBase,
-    _TaipyBool,
     _TaipyContent,
     _TaipyContentImage,
     _TaipyData,
@@ -86,7 +85,14 @@ from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
+from .utils.table_col_builder import _enhance_columns
+from .utils.chart_config_builder import _build_chart_config
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
+
+
+class _DoNotUpdate:
+    def __repr__(self):
+        return "Taipy: Do not update"
 
 
 class Gui:
@@ -173,7 +179,7 @@ class Gui:
     __UPLOAD_URL = "/taipy-uploads"
     _EXTENSION_ROOT = "/taipy-extension/"
     __SELF_VAR = "__gui"
-    __DO_NOT_UPDATE_VALUE = "Taipy: Do not update"
+    __DO_NOT_UPDATE_VALUE = _DoNotUpdate()
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -285,7 +291,7 @@ class Gui:
             gui_file = pathlib.Path(__file__ or ".").resolve()
             with open(gui_file.parent / "version.json") as version_file:
                 self.__version = json.load(version_file)
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             warnings.warn(f"Cannot retrieve version.json file:\n{e}")
             self.__version = {}
 
@@ -341,7 +347,8 @@ class Gui:
             else:
                 raise NameError(f"ElementLibrary passed to add_library() has an invalid name: '{library_name}'")
         else:  # pragma: no cover
-            raise RuntimeError(f"add_library() argument should be a subclass of ElementLibrary instead of '{type(library)}'")
+            raise RuntimeError(
+                f"add_library() argument should be a subclass of ElementLibrary instead of '{type(library)}'")
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -444,7 +451,7 @@ class Gui:
                 self._bindings()._get_or_create_scope(message.get("payload", ""))
             self._reset_locals_context()
             self.__send_ack(message.get("ack_id"))
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
     def __front_end_update(
@@ -509,7 +516,7 @@ class Gui:
         if derived_modified is not None:
             self.__send_var_list_update(list(derived_modified), var_name)
 
-    def __get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
+    def _get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
         if not var_name:
             return (var_name, var_name)
         # Handle holder prefix if needed
@@ -544,14 +551,14 @@ class Gui:
                     var_name = k
                     _found = True
                     break
-            if not _found: # pragma: no cover
+            if not _found:  # pragma: no cover
                 raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
         return f"{var_name}.{suffix_var_name}" if suffix_var_name else var_name, current_context
 
     def _call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         try:
-            var_name, current_context = self.__get_real_var_name(var_name)
-        except Exception as e: # pragma: no cover
+            var_name, current_context = self._get_real_var_name(var_name)
+        except Exception as e:  # pragma: no cover
             warnings.warn(f"{e}")
             return
         on_change_fn = self._get_user_function(on_change) if on_change else None
@@ -570,7 +577,7 @@ class Gui:
                 if argcount > 3:
                     args[3] = current_context
                 on_change_fn(*args)
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(on_change or "on_change", e):
                     warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception:\n{e}")
 
@@ -624,7 +631,7 @@ class Gui:
             )
             try:
                 base_json.update(json.loads(template.read_text()))
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
         return {"gui": base_json}
 
@@ -688,7 +695,7 @@ class Gui:
         for k, v in values.items():
             if isinstance(v, _TaipyData) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
-            elif isinstance(v, str) and v == Gui.__DO_NOT_UPDATE_VALUE:
+            elif isinstance(v, _DoNotUpdate):
                 modified_vars.remove(k)
         for _var in modified_vars:
             newvalue = values.get(_var)
@@ -740,11 +747,11 @@ class Gui:
                         try:
                             with contextlib.suppress(NameError):
                                 # ignore name error and keep var_name
-                                user_var_name = self.__get_real_var_name(var_name)[0]
+                                user_var_name = self._get_real_var_name(var_name)[0]
                             ret_payload = lib.get_data(lib_name, payload, user_var_name, newvalue)
                             if ret_payload:
                                 break
-                        except Exception as e: # pragma: no cover
+                        except Exception as e:  # pragma: no cover
                             warnings.warn(
                                 f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)':\n{e}"
                             )
@@ -766,7 +773,7 @@ class Gui:
                     to=self.__get_ws_receiver(),
                 )
                 time.sleep(0.001)
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
         else:
             grouping_message.append(payload)
@@ -776,9 +783,9 @@ class Gui:
             try:
                 self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
                 time.sleep(0.001)
-            except Exception as e: # pragma: no cover
-                warnings.warn(f"Exception raised in Web Socket communication (send ack) in '{self.__frame.f_code.co_name}':\n{e}")
-
+            except Exception as e:  # pragma: no cover
+                warnings.warn(
+                    f"Exception raised in Web Socket communication (send ack) in '{self.__frame.f_code.co_name}':\n{e}")
 
     def _send_ws_id(self, id: str) -> None:
         self.__send_ws(
@@ -868,9 +875,9 @@ class Gui:
     def __exit__(self, exc_type, exc_value, traceback):
         try:
             self.__send_messages()
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             warnings.warn(f"Exception raised while sending messages:\n{e}")
-        if exc_value: # pragma: no cover
+        if exc_value:  # pragma: no cover
             warnings.warn(f"An {exc_type or 'Exception'} was raised: {exc_value}")
         return True
 
@@ -909,7 +916,7 @@ class Gui:
                 action_function=self._get_user_function(action), id=id, payload=payload, action=action
             ):
                 return
-            else: # pragma: no cover
+            else:  # pragma: no cover
                 warnings.warn(f"on_action: '{action}' is not a valid function")
         if hasattr(self, "on_action"):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
@@ -928,7 +935,7 @@ class Gui:
                     args[0] = self.__get_state()
                 if argcount > 1:
                     try:
-                        args[1] = self.__get_real_var_name(id)[0]
+                        args[1] = self._get_real_var_name(id)[0]
                     except Exception:
                         args[1] = id
                 if argcount > 2:
@@ -937,7 +944,7 @@ class Gui:
                     args[3] = payload
                 action_function(*args)
                 return True
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function.__name__, e):
                     warnings.warn(f"on_action: Exception raised in function '{action_function.__name__}':\n{e}")
         return False
@@ -960,7 +967,7 @@ class Gui:
                 if module_context is not None:
                     self._set_locals_context(module_context)
                 return self._call_function_with_state(user_callback, args)
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             if not self._call_on_exception(user_callback.__name__, e):
                 warnings.warn(f"invoke_callback: Exception raised in function '{user_callback.__name__}'.\n{e}")
         return None
@@ -985,31 +992,51 @@ class Gui:
         return self.__evaluator._is_expression(expr)
 
     # make components resettable
+    def _set_building(self, building: bool):
+        self._building = building
 
-    def _calculate_table_columns(self, rebuild: t.Any, rebuild_hash: t.Optional[str],
-                                    data: t.Any, data_hash: str,
-                                    columns: t.Any, columns_hash: t.Optional[str],
-                                    date_format: str, number_format: str) -> t.Tuple[t.Dict[str, t.Dict[str, t.Any]], t.Dict[str, str], t.Optional[str]]:
-        col_types = self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
-        columns_str = columns if isinstance(columns, str) else ""
-        col_dict = _get_columns_dict(data, columns, col_types, date_format, number_format)
-        rebuild_val = _TaipyBool(rebuild, rebuild_hash).get() if rebuild_hash else _is_boolean_true(t.cast(bool, rebuild))
-        expr_hash: t.Optional[str] = None
-        if data_hash and (rebuild_hash or rebuild_val):
-            data_var_name = self.__get_real_var_name(data_hash)[0]
-            columns_var_name = self.__get_real_var_name(columns_hash)[0] if columns_hash else '""'
-            rebuild_var_name = self.__get_real_var_name(rebuild_hash)[0] if rebuild_hash else 'None'
-            expr_hash = self._evaluate_expr(
-                "{"+f"{Gui.__SELF_VAR}._tbl_cols({rebuild_val}, {bool(rebuild_hash)}, {rebuild_var_name}, {data_var_name}, '{data_hash}', '{columns_str}', {columns_var_name}, '{date_format or ''}', '{number_format or ''}')" + "}")
-        return col_dict, col_types, expr_hash
+    def __is_building(self):
+        return hasattr(self, "_building") and self._building
 
-    def _tbl_cols(self, rebuild: bool, is_rebuild_var: bool, rebuild_val: t.Any, data: t.Any, data_hash: str, columns: str, columns_val: t.Any, date_format: str, number_format: str) -> str:
-        try:
-            rebuild = _TaipyBool(rebuild_val, '').get() if is_rebuild_var else rebuild
-            if rebuild:
-                return json.dumps(_get_columns_dict(data, columns_val if columns_val else columns, self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)), date_format, number_format))
-        except Exception as e: # pragma: no cover
-            warnings.warn(f"Exception while rebuilding table columns {e}")
+    def _get_rebuild_fn_name(self, name: str):
+        return f"{Gui.__SELF_VAR}.{name}"
+
+    def __get_attributes(self, attr_json: str, hash_json: str, args_dict: t.Dict[str, t.Any]):
+        attributes: t.Dict[str, t.Any] = json.loads(unquote(attr_json))
+        hashes: t.Dict[str, str] = json.loads(unquote(hash_json))
+        attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
+        return attributes, hashes
+
+    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> t.Union[str, _DoNotUpdate]:
+        if not self.__is_building():
+            try:
+                rebuild = rebuild_val if rebuild_val is not None else rebuild
+                if rebuild:
+                    attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
+                    data_hash = hashes.get("data", "")
+                    data = kwargs.get(data_hash)
+                    col_dict = _get_columns_dict(data, attributes.get("columns", {}), self._accessors._get_col_types(
+                        data_hash, _TaipyData(data, data_hash)), attributes.get("date_format"), attributes.get("number_format"))
+                    _enhance_columns(attributes, hashes, col_dict, "table(cols)")
+
+                    return json.dumps(col_dict)
+            except Exception as e:  # pragma: no cover
+                warnings.warn(f"Exception while rebuilding table columns {e}")
+        return Gui.__DO_NOT_UPDATE_VALUE
+
+    def _chart_conf(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> t.Union[str, _DoNotUpdate]:
+        if not self.__is_building():
+            try:
+                rebuild = rebuild_val if rebuild_val is not None else rebuild
+                if rebuild:
+                    attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
+                    data_hash = hashes.get("data", "")
+                    config = _build_chart_config(self, attributes, self._accessors._get_col_types(
+                        data_hash, _TaipyData(kwargs.get(data_hash), data_hash)))
+
+                    return json.dumps(config)
+            except Exception as e:  # pragma: no cover
+                warnings.warn(f"Exception while rebuilding chart config {e}")
         return Gui.__DO_NOT_UPDATE_VALUE
 
     # Proxy methods for Adapter
@@ -1128,21 +1155,21 @@ class Gui:
         page must have a unique name.
         """
         # Validate name
-        if name is None: # pragma: no cover
+        if name is None:  # pragma: no cover
             raise Exception("name is required for add_page() function.")
-        if not Gui.__RE_PAGE_NAME.match(name): # pragma: no cover
+        if not Gui.__RE_PAGE_NAME.match(name):  # pragma: no cover
             raise SyntaxError(
                 f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'
             )
-        if name.startswith("/"): # pragma: no cover
+        if name.startswith("/"):  # pragma: no cover
             raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character.')
-        if name in self._config.routes: # pragma: no cover
+        if name in self._config.routes:  # pragma: no cover
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
 
             page = Markdown(page, frame=None)
-        elif not isinstance(page, Page): # pragma: no cover
+        elif not isinstance(page, Page):  # pragma: no cover
             raise Exception(
                 f'Parameter "page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}.'
             )
@@ -1238,11 +1265,11 @@ class Gui:
                 self._root_dir = os.path.dirname(inspect.getabsfile(self.__frame))
             folder_path = folder_name if os.path.isabs(folder_name) else os.path.join(self._root_dir, folder_name)
             folder_name = os.path.basename(folder_path)
-            if not os.path.isdir(folder_path): # pragma: no cover
+            if not os.path.isdir(folder_path):  # pragma: no cover
                 raise RuntimeError(f"Path {folder_path} is not a valid directory")
-            if folder_name in self.__directory_name_of_pages: # pragma: no cover
+            if folder_name in self.__directory_name_of_pages:  # pragma: no cover
                 raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique")
-            if folder_name in Gui.__reserved_routes: # pragma: no cover
+            if folder_name in Gui.__reserved_routes:  # pragma: no cover
                 raise Exception(f"Invalid directory. Directory {folder_name} is a reserved route")
             self.__directory_name_of_pages.append(folder_name)
             self.__add_pages_in_folder(folder_name, folder_path)
@@ -1273,13 +1300,13 @@ class Gui:
         """
         new_partial = Partial()
         # Validate name
-        if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes: # pragma: no cover
+        if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes:  # pragma: no cover
             warnings.warn(f'Partial name "{new_partial._route}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
 
             page = Markdown(page, frame=None)
-        elif not isinstance(page, Page): # pragma: no cover
+        elif not isinstance(page, Page):  # pragma: no cover
             raise Exception(f'Partial name "{new_partial._route}" has an invalid Page.')
         new_partial._renderer = page
         # Append partial to _config
@@ -1333,7 +1360,7 @@ class Gui:
 
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
-        if func is not None and not callable(func): # pragma: no cover
+        if func is not None and not callable(func):  # pragma: no cover
             warnings.warn(
                 f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script."
             )
@@ -1343,7 +1370,7 @@ class Gui:
         if func is not None:
             if callable(func):
                 setattr(self, name, func)
-            else: # pragma: no cover
+            else:  # pragma: no cover
                 warnings.warn(f"{name}: {func} should be a function.")
 
     def load_config(self, config: Config) -> None:
@@ -1402,7 +1429,7 @@ class Gui:
             _setscopeattr(self, Gui.__ON_INIT_NAME, True)
             try:
                 self._call_function_with_state(self.on_init, [])
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_init", e):
                     warnings.warn(f"Exception raised in on_init.\n{e}")
         return self._render_route()
@@ -1411,7 +1438,7 @@ class Gui:
         if hasattr(self, "on_exception") and callable(self.on_exception):
             try:
                 self.on_exception(self.__get_state(), str(function_name), exception)
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 warnings.warn(f"Exception raised in on_exception.\n{e}")
             return True
         return False
@@ -1420,7 +1447,7 @@ class Gui:
         if hasattr(self, "on_status") and callable(self.on_status):
             try:
                 return self.on_status(self.__get_state())
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_status", e):
                     warnings.warn(f"Exception raised in on_status.\n{e}")
         return None
@@ -1438,7 +1465,7 @@ class Gui:
                     else:
                         warnings.warn(f"on_navigate() returned an invalid page name '{nav_page}'.")
                     nav_page = page_name
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_navigate", e):
                     warnings.warn(f"Exception raised in on_navigate.\n{e}")
         page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
@@ -1520,7 +1547,7 @@ class Gui:
         return self._server.get_flask()
 
     def _set_frame(self, frame: FrameType):
-        if not isinstance(frame, FrameType): # pragma: no cover
+        if not isinstance(frame, FrameType):  # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
@@ -1553,10 +1580,9 @@ class Gui:
         css_vars = []
         if self._get_config("stylekit", False):
             stylekit = self._get_config("stylekit_variables", {})
-            for k,v in stylekit.items():
+            for k, v in stylekit.items():
                 css_vars.append(f'--{k.replace("_", "-")}:{_get_css_var_value(v)};')
         return " ".join(css_vars)
-
 
     def __init_server(self):
         app_config = self._config.config
@@ -1653,7 +1679,7 @@ class Gui:
             if _conf_webapp_path.is_dir():
                 _webapp_path = str(_conf_webapp_path.resolve())
                 warnings.warn(f"Now using webapp_path: '{_conf_webapp_path}'.")
-            else: # pragma: no cover
+            else:  # pragma: no cover
                 warnings.warn(
                     f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."
                 )

@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from ..renderers.builder import _Builder
-from ..renderers.utils import _to_camel_case
+from ..utils import _to_camel_case
 from ..types import PropertyType
 
 if t.TYPE_CHECKING:

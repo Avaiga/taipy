@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import re
 import typing as t
 import warnings
 
@@ -25,10 +24,6 @@ def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.
 
 def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
-
-
-def _get_column_desc(columns: t.Dict[str, t.Any], key: str) -> t.Optional[t.Dict[str, t.Any]]:
-    return next((x for x in columns.values() if x.get("dfid") == key), None)
 
 
 def _get_columns_dict_from_list(col_list: t.Union[t.List[str], t.Tuple[str]], col_types_keys: t.List[str], value: t.Any):
@@ -99,22 +94,3 @@ def _get_columns_dict(  # noqa: C901
             elif number_format and ctype in NumberTypes:
                 _add_to_dict_and_get(col_dict[col], "format", number_format)
     return col_dict
-
-
-__RE_INDEXED_DATA = re.compile(r"^(\d+)\/(.*)")
-
-
-def _get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
-    if re_res := __RE_INDEXED_DATA.search(col_name):
-        return col_name if str(idx) == re_res.group(1) else None
-    return col_name
-
-
-def _to_camel_case(value: str, upcase_first=False) -> str:
-    if not isinstance(value, str):
-        raise Exception("_to_camel_case allows only string parameter")
-
-    if len(value) <= 1:
-        return value.lower()
-    value = value.replace("_", " ").title().replace(" ", "").replace("[", "_").replace("]", "_")
-    return value[0].lower() + value[1:] if not upcase_first else value

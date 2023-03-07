@@ -46,6 +46,7 @@ import { createRequestTableUpdateAction, createSendActionNameAction } from "../.
 import {
     addDeleteColumn,
     baseBoxSx,
+    defaultColumns,
     EditableCell,
     EDIT_COL,
     getClassName,
@@ -112,7 +113,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, {} as Record<string, ColumnDesc>);
+    const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
     const [colsOrder, columns, styles, tooltips, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;

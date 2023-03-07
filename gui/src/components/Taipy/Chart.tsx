@@ -43,7 +43,7 @@ import {
     createSendUpdateAction,
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty } from "../../utils/hooks";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -51,7 +51,8 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     title?: string;
     width?: string | number;
     height?: string | number;
-    config: string;
+    defaultConfig: string;
+    config?: string;
     data?: Record<string, TraceValueType>;
     layout?: string;
     plotConfig?: string;
@@ -163,6 +164,26 @@ const selectedPropRe = /selected(\d+)/;
 
 const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
 
+const defaultConfig = {
+    columns: {} as Record<string, ColumnDesc>,
+    labels: [],
+    modes: [],
+    types: [],
+    traces: [],
+    xaxis: [],
+    yaxis: [],
+    markers: [],
+    selectedMarkers: [],
+    orientations: [],
+    names: [],
+    lines: [],
+    texts: [],
+    textAnchors: [],
+    options: [],
+    axisNames: [],
+    addIndex: [],
+} as ChartConfig;
+
 const Chart = (props: ChartProp) => {
     const {
         title = "",
@@ -222,34 +243,7 @@ const Chart = (props: ChartProp) => {
         });
     }, [props]);
 
-    const config = useMemo(() => {
-        if (props.config) {
-            try {
-                return JSON.parse(props.config) as ChartConfig;
-            } catch (e) {
-                console.info(`Error while parsing Chart.config\n${(e as Error).message || e}`);
-            }
-        }
-        return {
-            columns: {} as Record<string, ColumnDesc>,
-            labels: [],
-            modes: [],
-            types: [],
-            traces: [],
-            xaxis: [],
-            yaxis: [],
-            markers: [],
-            selectedMarkers: [],
-            orientations: [],
-            names: [],
-            lines: [],
-            texts: [],
-            textAnchors: [],
-            options: [],
-            axisNames: [],
-            addIndex: [],
-        } as ChartConfig;
-    }, [props.config]);
+    const config = useDynamicJsonProperty(props.config, props.defaultConfig, defaultConfig);
 
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
