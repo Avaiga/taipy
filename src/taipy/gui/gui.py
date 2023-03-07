@@ -1007,7 +1007,7 @@ class Gui:
         attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
         return attributes, hashes
 
-    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> str:
+    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> t.Union[str, _DoNotUpdate]:
         if not self.__is_building():
             try:
                 rebuild = rebuild_val if rebuild_val is not None else rebuild
@@ -1024,7 +1024,7 @@ class Gui:
                 warnings.warn(f"Exception while rebuilding table columns {e}")
         return Gui.__DO_NOT_UPDATE_VALUE
 
-    def _chart_conf(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> str:
+    def _chart_conf(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> t.Union[str, _DoNotUpdate]:
         if not self.__is_building():
             try:
                 rebuild = rebuild_val if rebuild_val is not None else rebuild
