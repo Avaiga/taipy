@@ -169,7 +169,7 @@ class Pipeline(_Entity, _Submittable):
             is_data_node = not is_data_node
         return True
 
-    def _get_tasks(self) -> Dict[str, Task]:
+    def _get_tasks(self):
         from ..task._task_manager_factory import _TaskManagerFactory
 
         tasks = {}
@@ -179,7 +179,18 @@ class Pipeline(_Entity, _Submittable):
             if not isinstance(t, Task):
                 raise NonExistingTask(task_or_id)
             tasks[t.config_id] = t
+        return tasks
 
+    def _get_set_tasks(self) -> Set[Task]:
+        from ..task._task_manager_factory import _TaskManagerFactory
+
+        tasks = set()
+        task_manager = _TaskManagerFactory._build_manager()
+        for task_or_id in self._tasks:
+            task = task_manager._get(task_or_id, task_or_id)
+            if not isinstance(task, Task):
+                raise NonExistingTask(task_or_id)
+            tasks.add(task)
         return tasks
 
     @property  # type: ignore
@@ -191,12 +202,6 @@ class Pipeline(_Entity, _Submittable):
     @_self_setter(_MANAGER_NAME)
     def subscribers(self, val):
         self._subscribers = _ListAttributes(self, val)
-
-    def _get_sorted_tasks(self) -> List[List[Task]]:
-        dag = self._build_dag()
-        remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
-        dag.remove_nodes_from(remove)
-        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
 
     def get_parents(self):
         """Get parents of the pipeline entity"""

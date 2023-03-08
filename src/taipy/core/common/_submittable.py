@@ -49,13 +49,17 @@ class _Submittable:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _get_tasks(self) -> Dict[str, Task]:
+    def _get_tasks(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _get_set_tasks(self) -> Set[Task]:
         raise NotImplementedError
 
     def _build_dag(self) -> nx.DiGraph:
         graph = nx.DiGraph()
-        tasks = self._get_tasks()
-        for task in tasks.values():
+        tasks = self._get_set_tasks()
+        for task in tasks:
             if has_input := task.input:
                 for predecessor in task.input.values():
                     graph.add_edges_from([(predecessor, task)])
@@ -65,6 +69,12 @@ class _Submittable:
             if not has_input and not has_output:
                 graph.add_node(task)
         return graph
+
+    def _get_sorted_tasks(self) -> List[List[Task]]:
+        dag = self._build_dag()
+        remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
+        dag.remove_nodes_from(remove)
+        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
 
     def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         params = [] if params is None else params
