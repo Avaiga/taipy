@@ -12,10 +12,10 @@
  */
 
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import TextField, { TextFieldProps } from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
@@ -38,6 +38,7 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 }
 
 const boxSx = { display: "inline-block" };
+const textFieldProps = {textField: {margin:"dense"}} as BaseDateTimePickerSlotsComponentsProps<Date>;
 
 const DateSelector = (props: DateSelectorProps) => {
     const { updateVarName, withTime = false, id, propagate = true } = props;
@@ -76,11 +77,6 @@ const DateSelector = (props: DateSelectorProps) => {
         [updateVarName, dispatch, withTime, propagate, tz, props.onChange]
     );
 
-    const renderInput = useCallback(
-        (params: TextFieldProps) => <TextField id={id} {...params} className={className} />,
-        [id, className]
-    );
-
     // Run every time props.value get updated
     useEffect(() => {
         if (props.date !== undefined) {
@@ -97,17 +93,17 @@ const DateSelector = (props: DateSelectorProps) => {
                             <DateTimePicker
                                 value={value}
                                 onChange={handleChange}
-                                renderInput={renderInput}
                                 className={getSuffixedClassNames(className, "-picker")}
                                 disabled={!active}
+                                slotProps={textFieldProps}
                             />
                         ) : (
                             <DatePicker
                                 value={value}
                                 onChange={handleChange}
-                                renderInput={renderInput}
                                 className={getSuffixedClassNames(className, "-picker")}
                                 disabled={!active}
+                                slotProps={textFieldProps}
                             />
                         )
                     ) : (
@@ -116,7 +112,7 @@ const DateSelector = (props: DateSelectorProps) => {
                             defaultValue={props.defaultDate}
                             value={props.date}
                             format={props.format}
-                            id={id + "-field"}
+                            id={id && id + "-field"}
                             className={getSuffixedClassNames(className, "-text")}
                         />
                     )}

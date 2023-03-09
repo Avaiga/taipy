@@ -16,9 +16,6 @@ import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-
 import TableFilter from "./TableFilter";
 import { ColumnDesc, defaultDateFormat } from "./tableUtils";
 
@@ -143,9 +140,7 @@ describe("Table Filter Component", () => {
     });
     it("behaves on date column", async () => {
         const { getByTestId, getAllByTestId, findByRole, getByText, getAllByText, getByPlaceholderText } = render(
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} />
-            </LocalizationProvider>
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);
@@ -159,9 +154,9 @@ describe("Table Filter Component", () => {
         await userEvent.click(getByText("before equal"));
         const validate = getByTestId("CheckIcon").parentElement;
         expect(validate).toBeDisabled();
-        const input = getByPlaceholderText(defaultDateFormat.toLowerCase());
+        const input = getByPlaceholderText("⁦⁨YYYY⁩ / ⁨MM⁩ / ⁨DD⁩⁩");
         await userEvent.click(input);
-        await userEvent.type(input, "2020/11/11", {delay: 1});
+        await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}2020/11/11", {delay: 1});
         expect(validate).not.toBeDisabled();
     });
     it("adds a row on validation", async () => {

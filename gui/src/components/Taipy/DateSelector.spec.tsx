@@ -63,161 +63,175 @@ afterEach(() => {
 const curDate = new Date();
 curDate.setHours(1, 1, 1, 1);
 const curDateStr = curDate.toISOString();
-const testDate = `${("" + (curDate.getMonth() + 1)).padStart(2, "0")}/${("" + curDate.getDate()).padStart(
-    2,
-    "0"
-)}/${curDate.getFullYear()}`;
 
-const testTime = testDate + " 01:01 am";
+const cleanText = (val: string) => val.replace(/\u200e|\u2066|\u2067|\u2068|\u2069/g, '');
 
 describe("DateSelector Component", () => {
     it("renders", async () => {
-        const { getByDisplayValue } = render(
+        const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testDate);
-        expect(elt.tagName).toBe("INPUT");
+        const elt = getByTestId("CalendarIcon");
+        expect(elt.parentElement?.tagName).toBe("BUTTON");
     });
     it("displays the right info for string", async () => {
-        const { getByDisplayValue } = render(
+        const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} defaultDate="2001-01-01T00:00:01.001Z" className="taipy-date" />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testDate);
-        expect(elt.parentElement?.parentElement).toHaveClass("taipy-date");
+        const elt = getByTestId("CalendarIcon");
+        expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-date-picker");
+        expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-date");
     });
     it("displays the default value", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector defaultDate="2001-01-01T00:00:01.001Z" date={undefined as unknown as string} />
             </LocalizationProvider>
         );
-        getByDisplayValue("01/01/2001");
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "")).toEqual("01 / 01 / 2001");
     });
     it("is disabled", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} active={false} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testDate);
-        expect(elt).toBeDisabled();
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).toBeDisabled();
     });
     it("is enabled by default", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testDate);
-        expect(elt).not.toBeDisabled();
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).not.toBeDisabled();
     });
     it("is enabled by active", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} active={true} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testDate);
-        expect(elt).not.toBeDisabled();
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).not.toBeDisabled();
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByDisplayValue } = render(
+        render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DateSelector date={curDateStr} />
                 </LocalizationProvider>
             </TaipyContext.Provider>
         );
-        const elt = getByDisplayValue(testDate);
-        await userEvent.clear(elt);
-        await userEvent.type(elt, "01012001", { delay: 1 });
-        expect(dispatch).toHaveBeenLastCalledWith({
-            name: "",
-            payload: { value: "2001-01-01T00:00:00.000Z" },
-            propagate: true,
-            type: "SEND_UPDATE_ACTION",
-        });
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        if (input) {
+            await userEvent.clear(input);
+            await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}01012001", { delay: 1 });
+            expect(dispatch).toHaveBeenLastCalledWith({
+                name: "",
+                payload: { value: "2001-01-01T00:00:00.000Z" },
+                propagate: true,
+                type: "SEND_UPDATE_ACTION",
+            });
+        }
     });
 });
 
 describe("DateSelector with time Component", () => {
     it("renders", async () => {
-        const { getByDisplayValue } = render(
+        const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} withTime={true} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testTime);
-        expect(elt.tagName).toBe("INPUT");
+        const elt = getByTestId("CalendarIcon");
+        expect(elt.parentElement?.tagName).toBe("BUTTON");
     });
     it("displays the right info for string", async () => {
-        const { getByDisplayValue } = render(
+        const { getByTestId } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} withTime={true} className="taipy-time" />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testTime);
-        expect(elt.parentElement?.parentElement).toHaveClass("taipy-time");
+        const elt = getByTestId("CalendarIcon");
+        expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-time-picker");
+        expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-time");
     });
     it("displays the default value", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector defaultDate={curDateStr} withTime={true} date={undefined as unknown as string} />
+                <DateSelector defaultDate="2001-01-01T01:01:01.001Z" withTime={true} date={undefined as unknown as string} />
             </LocalizationProvider>
         );
-        getByDisplayValue(testTime);
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(cleanText(input?.value || "")).toEqual("01 / 01 / 2001 01:01 am");
     });
     it("is disabled", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} withTime={true} active={false} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testTime);
-        expect(elt).toBeDisabled();
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).toBeDisabled();
     });
     it("is enabled by default", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} withTime={true} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testTime);
-        expect(elt).not.toBeDisabled();
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).not.toBeDisabled();
     });
     it("is enabled by active", async () => {
-        const { getByDisplayValue } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector date={curDateStr} withTime={true} active={true} />
             </LocalizationProvider>
         );
-        const elt = getByDisplayValue(testTime);
-        expect(elt).not.toBeDisabled();
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        expect(input).not.toBeDisabled();
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByDisplayValue } = render(
+        render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DateSelector date={curDateStr} withTime={true} updateVarName="varname" />
                 </LocalizationProvider>
             </TaipyContext.Provider>
         );
-        const elt = getByDisplayValue(testTime);
-        await userEvent.clear(elt);
-        await userEvent.type(elt, "01/01/2001 01:01 am", { delay: 1 });
-        expect(dispatch).toHaveBeenLastCalledWith({
-            name: "varname",
-            payload: { value: "2001-01-01T01:01:00.000Z" },
-            propagate: true,
-            type: "SEND_UPDATE_ACTION",
-        });
+        const input = document.querySelector("input");
+        expect(input).toBeInTheDocument();
+        if (input) {
+            await userEvent.clear(input);
+            await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}010120010101am", { delay: 1 });
+            expect(dispatch).toHaveBeenLastCalledWith({
+                name: "varname",
+                payload: { value: "2001-01-01T01:01:00.000Z" },
+                propagate: true,
+                type: "SEND_UPDATE_ACTION",
+            });
+        }
     });
 });

@@ -13,6 +13,7 @@
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Popover, { PopoverOrigin } from "@mui/material/Popover";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
@@ -21,17 +22,17 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Tooltip from "@mui/material/Tooltip";
 import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import TextField, { TextFieldProps } from "@mui/material/TextField";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import TextField from "@mui/material/TextField";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SendIcon from "@mui/icons-material/Send";
+import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import { ColumnDesc, defaultDateFormat, iconInRowSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
-import { Button } from "@mui/material";
 
 export interface FilterDesc {
     col: string;
@@ -90,7 +91,7 @@ const filtersSx = {
     p: 1,
     m: 1,
     bgcolor: "background.paper",
-    borderRadius: 1,
+    borderRadius: window.taipyConfig?.stylekit?.borderRadius || 1,
 };
 
 const filterBoxSx = {
@@ -99,7 +100,7 @@ const filterBoxSx = {
     p: 1,
     m: 1,
     bgcolor: "background.paper",
-    borderRadius: 1,
+    borderRadius: window.taipyConfig?.stylekit?.borderRadius || 1,
     gap: "1em",
 };
 
@@ -110,7 +111,7 @@ const buttonBoxSx = {
     py: 1,
     m: 1,
     bgcolor: "background.paper",
-    borderRadius: 1,
+    borderRadius: window.taipyConfig?.stylekit?.borderRadius || 1,
     gap: "4em",
 };
 
@@ -143,8 +144,6 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
         }
     }
 };
-
-const renderInput = (params: TextFieldProps) => <TextField {...params} sx={valSx} />;
 
 const FilterRow = (props: FilterRowProps) => {
     const { idx, setFilter, columns, colsOrder, filter } = props;
@@ -226,7 +225,7 @@ const FilterRow = (props: FilterRowProps) => {
 
     return (
         <Box sx={filterBoxSx}>
-            <FormControl>
+            <FormControl margin="dense">
                 <InputLabel>Column</InputLabel>
                 <Select value={colId || ""} onChange={onColSelect} sx={colSx} input={<OutlinedInput label="Column" />}>
                     {colsOrder.map((col) =>
@@ -238,7 +237,7 @@ const FilterRow = (props: FilterRowProps) => {
                     )}
                 </Select>
             </FormControl>
-            <FormControl>
+            <FormControl margin="dense">
                 <InputLabel>Action</InputLabel>
                 <Select value={action || ""} onChange={onActSelect} sx={actSx} input={<OutlinedInput label="Action" />}>
                     {Object.keys(getActionsByType(colType)).map((a) => (
@@ -255,9 +254,10 @@ const FilterRow = (props: FilterRowProps) => {
                     onChange={onValueChange}
                     label="Number"
                     sx={valSx}
+                    margin="dense"
                 />
             ) : colType == "boolean" ? (
-                <FormControl>
+                <FormControl margin="dense">
                     <InputLabel>Boolean</InputLabel>
                     <Select
                         value={typeof val === "boolean" ? (val ? "1" : "0") : val || ""}
@@ -270,12 +270,12 @@ const FilterRow = (props: FilterRowProps) => {
                     </Select>
                 </FormControl>
             ) : colType == "date" ? (
-                <DatePicker
-                    value={val || null}
+                <DateField
+                    value={(val && new Date(val)) || null}
                     onChange={onDateChange}
-                    renderInput={renderInput}
-                    inputFormat={colFormat}
-                    disableMaskedInput={true}
+                    format={colFormat}
+                    sx={valSx}
+                    margin="dense"
                 />
             ) : (
                 <TextField
@@ -283,6 +283,7 @@ const FilterRow = (props: FilterRowProps) => {
                     onChange={onValueChange}
                     label={`${val ? "" : "Empty "}String`}
                     sx={valSx}
+                    margin="dense"
                 />
             )}
             <Tooltip title="Validate">
@@ -351,29 +352,32 @@ const TableFilter = (props: TableFilterProps) => {
                 onClose={onShowFilterClick}
             >
                 <Box sx={filtersSx}>
-                    {filters.map((fd, idx) => (
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        {filters.map((fd, idx) => (
+                            <FilterRow
+                                key={"fd" + idx}
+                                idx={idx}
+                                filter={fd}
+                                columns={columns}
+                                colsOrder={colsOrder}
+                                setFilter={updateFilter}
+                            />
+                        ))}
                         <FilterRow
-                            key={"fd" + idx}
-                            idx={idx}
-                            filter={fd}
+                            idx={-(filters.length + 1)}
                             columns={columns}
                             colsOrder={colsOrder}
                             setFilter={updateFilter}
                         />
-                    ))}
-                    <FilterRow
-                        idx={-(filters.length + 1)}
-                        columns={columns}
-                        colsOrder={colsOrder}
-                        setFilter={updateFilter}
-                    />
+                    </LocalizationProvider>
                     <Box sx={buttonBoxSx}>
                         <Button
                             endIcon={<ClearIcon />}
                             onClick={onRemove}
                             disabled={appliedFilters.length == 0}
+                            variant="outlined"
                         >{`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}</Button>
-                        <Button endIcon={<SendIcon />} onClick={onApply} disabled={filters.length == 0}>{`Apply ${
+                        <Button endIcon={<SendIcon />} onClick={onApply} disabled={filters.length == 0} variant="outlined">{`Apply ${
                             filters.length
                         } filter${filters.length > 1 ? "s" : ""}`}</Button>
                     </Box>

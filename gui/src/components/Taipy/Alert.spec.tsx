@@ -39,21 +39,21 @@ describe("Alert Component", () => {
     it("displays a success alert", async () => {
         const { getByText } = render(<SnackbarProvider><Alert alert={defaultAlert} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
-        expect(elt.closest(".SnackbarItem-variantSuccess")).toBeInTheDocument()
+        expect(elt.closest(".notistack-MuiContent-success")).toBeInTheDocument()
     });
     it("displays an error alert", async () => {
         const { getByText } = render(<SnackbarProvider><Alert alert={{...defaultAlert, atype:"error"}} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
-        expect(elt.closest(".SnackbarItem-variantError")).toBeInTheDocument()
+        expect(elt.closest(".notistack-MuiContent-error")).toBeInTheDocument()
     });
     it("displays a warning alert", async () => {
         const { getByText } = render(<SnackbarProvider><Alert alert={{...defaultAlert, atype:"warning"}} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
-        expect(elt.closest(".SnackbarItem-variantWarning")).toBeInTheDocument()
+        expect(elt.closest(".notistack-MuiContent-warning")).toBeInTheDocument()
     });
     it("displays an info alert", async () => {
         const { getByText } = render(<SnackbarProvider><Alert alert={{...defaultAlert, atype:"info"}} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
-        expect(elt.closest(".SnackbarItem-variantInfo")).toBeInTheDocument()
+        expect(elt.closest(".notistack-MuiContent-info")).toBeInTheDocument()
     });
 });
