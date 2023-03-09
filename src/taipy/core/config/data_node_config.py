@@ -648,7 +648,7 @@ class DataNodeConfig(Section):
             id (str): The unique identifier of the new SQL data node configuration.
             db_username (str): The database username.
             db_password (str): The database password.
-            db_name (str): The database name.
+            db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             table_name (str): The name of the SQL table.
@@ -714,7 +714,7 @@ class DataNodeConfig(Section):
             id (str): The unique identifier of the new SQL data node configuration.
             db_username (str): The database username.
             db_password (str): The database password.
-            db_name (str): The database name.
+            db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             read_query (str): The SQL query string used to read the data from the database.

@@ -47,7 +47,7 @@ def single_write_query_builder(data):
 class TestSQLDataNode:
     __pandas_properties = [
         {
-            "db_name": "taipy",
+            "db_name": "taipy.sqlite3",
             "db_engine": "sqlite",
             "read_query": "SELECT * FROM foo",
             "write_query_builder": my_write_query_builder_with_pandas,
@@ -60,7 +60,7 @@ class TestSQLDataNode:
 
     __modin_properties = [
         {
-            "db_name": "taipy",
+            "db_name": "taipy.sqlite3",
             "db_engine": "sqlite",
             "read_query": "SELECT * FROM foo",
             "write_query_builder": my_write_query_builder_with_modin,

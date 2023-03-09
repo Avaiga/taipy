@@ -47,7 +47,7 @@ class SQLDataNode(_AbstractSQLDataNode):
 
             - _"db_username"_ `(str)`: The database username.
             - _"db_password"_ `(str)`: The database password.
-            - _"db_name"_ `(str)`: The database name.
+            - _"db_name"_ `(str)`: The database name, or the name of the SQLite database file.
             - _"db_engine"_ `(str)`: The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             - _"db_port"_ `(int)`: The database port. The default value is 1433.
@@ -74,11 +74,11 @@ class SQLDataNode(_AbstractSQLDataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
-        version: str = None,
+        edits: Optional[List[Edit]] = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
-        properties: Dict = None,
+        properties: Optional[Dict] = None,
     ):
         if properties is None:
             properties = {}

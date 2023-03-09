@@ -85,11 +85,11 @@ class _AbstractSQLDataNode(DataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
-        version: str = None,
+        edits: Optional[List[Edit]] = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
-        properties: Dict = None,
+        properties: Optional[Dict] = None,
     ):
         if properties is None:
             properties = {}
@@ -175,7 +175,7 @@ class _AbstractSQLDataNode(DataNode):
             return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
         elif engine == self.__ENGINE_SQLITE:
             path = self.properties.get(self.__SQLITE_PATH_KEY, "")
-            return os.path.join("sqlite:///", path, f"{db_name}.sqlite3")
+            return os.path.join("sqlite:///", path, f"{db_name}")
 
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 
