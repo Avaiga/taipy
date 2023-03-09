@@ -130,13 +130,13 @@ def test_check_consistency():
 
 
 def test_get_sorted_tasks():
-    def assert_two_sorted_list_of_tasks(tasks_a, tasks_b) -> bool:
+    def assert_equal(tasks_a, tasks_b) -> bool:
         if len(tasks_a) != len(tasks_b):
             return False
         for i in range(len(tasks_a)):
             task_a, task_b = tasks_a[i], tasks_b[i]
             if isinstance(task_a, list) and isinstance(task_b, list):
-                if not assert_two_sorted_list_of_tasks(task_a, task_b):
+                if not assert_equal(task_a, task_b):
                     return False
             elif isinstance(task_a, list) or isinstance(task_b, list):
                 return False
@@ -170,7 +170,7 @@ def test_get_sorted_tasks():
     #       |---> t1 ---|      -------------------------> t3 ---> s6
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert assert_two_sorted_list_of_tasks(pipeline._get_sorted_tasks(), [[task_1], [task_2, task_4], [task_3]])
+    assert assert_equal(pipeline._get_sorted_tasks(), [[task_1], [task_2, task_4], [task_3]])
 
     data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
@@ -195,7 +195,7 @@ def test_get_sorted_tasks():
     #       |---> t1 ---|      -----> t3 ---> s6
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert assert_two_sorted_list_of_tasks(pipeline._get_sorted_tasks(), [[task_2, task_1], [task_4, task_3]])
+    assert assert_equal(pipeline._get_sorted_tasks(), [[task_2, task_1], [task_4, task_3]])
 
     data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
@@ -220,7 +220,7 @@ def test_get_sorted_tasks():
     #       |---> t1 ---|      -----> t3
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert assert_two_sorted_list_of_tasks(pipeline._get_sorted_tasks(), [[task_2, task_1], [task_4, task_3]])
+    assert assert_equal(pipeline._get_sorted_tasks(), [[task_2, task_1], [task_4, task_3]])
 
     data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
@@ -245,7 +245,7 @@ def test_get_sorted_tasks():
     #       |---> t1 ---|      -----> t3
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert assert_two_sorted_list_of_tasks(pipeline._get_sorted_tasks(), [[task_2, task_1], [task_4, task_3]])
+    assert assert_equal(pipeline._get_sorted_tasks(), [[task_2, task_1], [task_4, task_3]])
 
     data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
@@ -275,7 +275,7 @@ def test_get_sorted_tasks():
     # s2 ---             ---> s4 ---> t4 ---> s7
     # t2 ---> s5
     # s8 ---> t5
-    assert assert_two_sorted_list_of_tasks(pipeline._get_sorted_tasks(), [[task_5, task_2, task_1], [task_4, task_3]])
+    assert assert_equal(pipeline._get_sorted_tasks(), [[task_5, task_2, task_1], [task_4, task_3]])
 
 
 def test_get_inputs():
@@ -365,12 +365,12 @@ def test_get_tasks():
     assert pipeline_1.tasks == {"grault": task_1, "garply": task_2, "waldo": task_3}
 
 
-def test_get_set_tasks():
+def test_get_set_of_tasks():
     task_1 = Task("grault", {}, print, id=TaskId("t1"))
     task_2 = Task("garply", {}, print, id=TaskId("t2"))
     task_3 = Task("waldo", {}, print, id=TaskId("t3"))
     pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
-    assert pipeline_1._get_set_tasks() == {task_1, task_2, task_3}
+    assert pipeline_1._get_set_of_tasks() == {task_1, task_2, task_3}
 
 
 def test_auto_set_and_reload(task):

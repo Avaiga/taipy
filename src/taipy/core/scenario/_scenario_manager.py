@@ -142,21 +142,20 @@ class _ScenarioManager(_Manager[Scenario]):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
         check_inputs_are_ready: bool = True,
-    ):
+    ) -> List[Job]:
         scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
         scenario = cls._get(scenario_id)
         if scenario is None:
             raise NonExistingScenario(scenario_id)
         callbacks = callbacks or []
-        callbacks = cls.__get_status_notifier_callbacks(scenario) + callbacks
+        scenario_subscription_callback = cls.__get_status_notifier_callbacks(scenario) + callbacks
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(scenario._get_inputs())
-        jobs_in_pipelines = {}
-        for pipeline in scenario.pipelines.values():
-            jobs_in_pipelines[pipeline.id] = _PipelineManagerFactory._build_manager()._submit(
-                pipeline, callbacks=callbacks, force=force, wait=wait, timeout=timeout, check_inputs_are_ready=False
-            )
-        return jobs_in_pipelines
+        return (
+            _TaskManagerFactory._build_manager()
+            ._scheduler()
+            .submit(scenario, callbacks=scenario_subscription_callback, force=force, wait=wait, timeout=timeout)
+        )
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:

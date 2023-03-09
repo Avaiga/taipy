@@ -108,7 +108,7 @@ class Pipeline(_Entity, _Submittable):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def tasks(self):
+    def tasks(self) -> Dict[str, Task]:
         return self._get_tasks()
 
     @tasks.setter  # type: ignore
@@ -169,7 +169,7 @@ class Pipeline(_Entity, _Submittable):
             is_data_node = not is_data_node
         return True
 
-    def _get_tasks(self):
+    def _get_tasks(self) -> Dict[str, Task]:
         from ..task._task_manager_factory import _TaskManagerFactory
 
         tasks = {}
@@ -181,7 +181,7 @@ class Pipeline(_Entity, _Submittable):
             tasks[t.config_id] = t
         return tasks
 
-    def _get_set_tasks(self) -> Set[Task]:
+    def _get_set_of_tasks(self) -> Set[Task]:
         from ..task._task_manager_factory import _TaskManagerFactory
 
         tasks = set()

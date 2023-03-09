@@ -49,16 +49,12 @@ class _Submittable:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _get_tasks(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _get_set_tasks(self) -> Set[Task]:
+    def _get_set_of_tasks(self) -> Set[Task]:
         raise NotImplementedError
 
     def _build_dag(self) -> nx.DiGraph:
         graph = nx.DiGraph()
-        tasks = self._get_set_tasks()
+        tasks = self._get_set_of_tasks()
         for task in tasks:
             if has_input := task.input:
                 for predecessor in task.input.values():

@@ -134,21 +134,21 @@ class Scenario(_Entity, _Submittable):
         self._pipelines = pipelines
 
     @property
-    def tasks(self) -> Dict[str, Task]:
+    def tasks(self) -> Dict[str, List[Task]]:
         return self._get_tasks()
 
-    def _get_tasks(self):
-        tasks = {}
+    def _get_tasks(self) -> Dict[str, List[Task]]:
+        tasks: Dict[str, List[Task]] = {}
         list_dict_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
         for dict_task in list_dict_tasks:
             for task_config_id, task in dict_task.items():
-                if task_config_id in tasks.keys() and task not in tasks[task_config_id]:
+                if task_config_id in tasks and task not in tasks[task_config_id]:
                     tasks[task_config_id].append(task)
                 else:
                     tasks[task_config_id] = [task]
         return tasks
 
-    def _get_set_tasks(self) -> Set[Task]:
+    def _get_set_of_tasks(self) -> Set[Task]:
         tasks = set()
         list_dict_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
         for dict_task in list_dict_tasks:
