@@ -84,8 +84,8 @@ class DataNode(_Entity):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
-        version: str = None,
+        edits: Optional[List[Edit]] = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
         **kwargs,
@@ -359,18 +359,18 @@ class DataNode(_Entity):
         _warn_deprecated("lock_edition", suggest="lock_edit")
         self.lock_edit()
 
-    def unlock_edit(self, at: datetime = None, job_id: JobId = None):
+    def unlock_edit(self, at: Optional[datetime] = None, job_id: Optional[JobId] = None):
         """Unlocks the data node modification.
 
         Parameters:
-            at (datetime): Deprecated.
-            job_id (JobId^): Deprecated.
+            at (Optional[datetime]): Deprecated.
+            job_id (Optional[JobId^]): Deprecated.
         Note:
             The data node can be locked with the method `(DataNode.)lock_edit()^`.
         """
         self.edit_in_progress = False  # type: ignore
 
-    def unlock_edition(self, at: datetime = None, job_id: JobId = None):
+    def unlock_edition(self, at: Optional[datetime] = None, job_id: Optional[JobId] = None):
         """Deprecated. Use `(DataNode.)unlock_edit()^` instead."""
         _warn_deprecated("unlock_edition", suggest="unlock_edit")
         self.unlock_edit()
