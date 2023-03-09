@@ -277,21 +277,21 @@ def test_update_status_fail_job():
     assert job.is_failed()
 
     jobs = _Scheduler.submit(pipeline_1)
-    tasks_jobs = {job.task.id: job for job in jobs}
+    tasks_jobs = {job._task.id: job for job in jobs}
     assert tasks_jobs["task_0"].is_failed()
     assert all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]])
     assert tasks_jobs["task_3"].is_completed()
     assert all(not _Scheduler._is_blocked(job) for job in jobs)
 
     jobs = _Scheduler.submit(scenario_1)
-    tasks_jobs = {job.task.id: job for job in jobs}
+    tasks_jobs = {job._task.id: job for job in jobs}
     assert tasks_jobs["task_0"].is_failed()
     assert all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]])
     assert tasks_jobs["task_3"].is_completed()
     assert all(not _Scheduler._is_blocked(job) for job in jobs)
 
     jobs = _Scheduler.submit(scenario_2)
-    tasks_jobs = {job.task.id: job for job in jobs}
+    tasks_jobs = {job._task.id: job for job in jobs}
     assert tasks_jobs["task_0"].is_failed()
     assert all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]])
     assert tasks_jobs["task_3"].is_completed()
@@ -332,21 +332,21 @@ def test_update_status_fail_job_in_parallel():
     assert_true_after_time(job.is_failed)
 
     jobs = _Scheduler.submit(pipeline_1)
-    tasks_jobs = {job.task.id: job for job in jobs}
+    tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
     assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
     assert_true_after_time(lambda: all(not _Scheduler._is_blocked(job) for job in jobs))
 
     jobs = _Scheduler.submit(scenario_1)
-    tasks_jobs = {job.task.id: job for job in jobs}
+    tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
     assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
     assert_true_after_time(lambda: all(not _Scheduler._is_blocked(job) for job in jobs))
 
     jobs = _Scheduler.submit(scenario_2)
-    tasks_jobs = {job.task.id: job for job in jobs}
+    tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
     assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
@@ -577,7 +577,7 @@ def test_submit_pipeline_multithreading_multiple_task():
 
     with lock_1:
         with lock_2:
-            tasks_jobs = {job.task.id: job for job in _Scheduler.submit(pipeline)}
+            tasks_jobs = {job._task.id: job for job in _Scheduler.submit(pipeline)}
             job_1 = tasks_jobs[task_1.id]
             job_2 = tasks_jobs[task_2.id]
 
@@ -616,7 +616,7 @@ def test_submit_scenario_multithreading_multiple_task():
 
     with lock_1:
         with lock_2:
-            tasks_jobs = {job.task.id: job for job in _Scheduler.submit(scenario)}
+            tasks_jobs = {job._task.id: job for job in _Scheduler.submit(scenario)}
             job_1 = tasks_jobs[task_1.id]
             job_2 = tasks_jobs[task_2.id]
 
@@ -765,7 +765,7 @@ def test_blocked_pipeline():
     with lock_2:
         with lock_1:
             jobs = _Scheduler.submit(pipeline)  # pipeline is submitted
-            tasks_jobs = {job.task.id: job for job in jobs}
+            tasks_jobs = {job._task.id: job for job in jobs}
             job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
             assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running
             assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
@@ -813,7 +813,7 @@ def test_blocked_scenario():
     with lock_2:
         with lock_1:
             jobs = _Scheduler.submit(scenario)  # scenario is submitted
-            tasks_jobs = {job.task.id: job for job in jobs}
+            tasks_jobs = {job._task.id: job for job in jobs}
             job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
             assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running
             assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
