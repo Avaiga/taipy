@@ -17,7 +17,7 @@ from typing import Any, Iterable, Iterator, List, Optional, Type, Union
 from src.taipy.core.common.typing import Entity, Json, ModelType
 from taipy.config.config import Config
 
-from ...exceptions import ModelNotFound
+from ...exceptions import InvalidExportPath, ModelNotFound
 from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
 
 
@@ -116,7 +116,24 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         return next(self.__search(attribute, value, version_number), None)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
-        pass
+        if isinstance(folder_path, str):
+            folder: pathlib.Path = pathlib.Path(folder_path)
+        else:
+            folder = folder_path
+
+        if folder.resolve() == self._storage_folder.resolve():
+            raise InvalidExportPath("The export folder must not be the storage folder.")
+
+        export_dir = folder / self._dir_name
+        if not export_dir.exists():
+            export_dir.mkdir(parents=True)
+
+        export_path = export_dir / f"{entity_id}.json"
+        # Delete if exists.
+        if export_path.exists():
+            export_path.unlink()
+
+        shutil.copy2(self.__get_model_filepath(entity_id), export_path)
 
     def __create_directory_if_not_exists(self):
         self.dir_path.mkdir(parents=True, exist_ok=True)
