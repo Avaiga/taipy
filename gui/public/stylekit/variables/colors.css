@@ -11,14 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-/**************************************************************
+ :root {
+  --color-background: var(--color-background-light);
+  --color-paper: var(--color-paper-light);
+}
 
-                   CARD
-
-***************************************************************/
-
-.card {
-    border-radius: var(--border-radius);
-    background-color: var(--color-paper);
-    box-shadow: var(--box-shadow);
+.taipy-dark {
+  --color-background: var(--color-background-dark);
+  --color-paper: var(--color-paper-dark);
 }

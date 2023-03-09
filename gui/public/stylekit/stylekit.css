@@ -12,6 +12,7 @@
  */
 
 /* Variables */
+@import 'variables/colors.css';
 @import 'variables/spacing.css';
 @import 'variables/typography.css';
 @import 'variables/shapes.css';
@@ -25,6 +26,7 @@
 
 /* Controls */
 @import 'controls/button.css';
+@import 'controls/chart.css';
 @import 'controls/date.css';
 @import 'controls/expandable.css';
 @import 'controls/image.css';
@@ -46,13 +48,3 @@
 @import 'utilities/typography.css';
 @import 'utilities/spacing.css';
 @import 'utilities/misc.css';
-
-:root {
-    --color-background: var(--color-background-light);
-    --color-paper: var(--color-paper-light);
-}
-
-.taipy-dark {
-    --color-background: var(--color-background-dark);
-    --color-paper: var(--color-paper-dark);
-}

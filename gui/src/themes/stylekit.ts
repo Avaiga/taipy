@@ -66,9 +66,11 @@ export const stylekitTheme = {
             styleOverrides: {
                 outlined: {
                     zIndex: "0",
+                    transition: "all 200ms cubic-bezier(0, 0, 0.2, 1) 0ms",
                     // Properly position floating label on Y axis (second translate value) as the input height changes
                     "&:not(.MuiInputLabel-shrink)": {
-                        transform: "translate(14px, 12px) scale(1)",
+                        top: "50%",
+                        transform: "translate(14px, -50%) scale(1)",
                     },
                 },
             },
@@ -106,11 +108,12 @@ export const stylekitTheme = {
             },
         },
         // Button
-        MuiButtonBase: {
+        MuiButton: {
             styleOverrides: {
                 root: {
                     height: "auto",
                     minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    marginBottom: 4,
                 },
             },
         },

@@ -13,12 +13,31 @@
 
 /**************************************************************
 
-                   CARD
+                   TAIPY CHART
 
 ***************************************************************/
 
-.card {
-    border-radius: var(--border-radius);
-    background-color: var(--color-paper);
-    box-shadow: var(--box-shadow);
+/*************************************************
+              OVERRIDES / NORMALIZATION
+**************************************************/
+
+.taipy-chart {
+  border-radius: var(--border-radius);
+  background-color: var(--color-paper);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+}
+
+.card .taipy-chart {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*************************************************
+              UTILITY CLASSES
+**************************************************/
+
+/* .svg_bg: keep the original svg background */
+.taipy-chart:not(.svg_bg) .main-svg {
+  background: transparent !important;
 }
