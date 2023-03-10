@@ -105,20 +105,20 @@ describe("Chart Component", () => {
         const elt = getByTestId("test");
         expect(elt).toHaveClass("taipy-chart");
     });
-    xit("is disabled", async () => {
+    it("is disabled", async () => {
         const { getByTestId } = render(<Chart data={chartValue} defaultConfig={chartConfig} testId="test" active={false} />);
-        const elt = getByTestId("test ");
-        expect(elt).toHaveClass("Mui-disabled");
+        const elt = getByTestId("test");
+        expect(elt.querySelector(".modebar")).toBeNull();
     });
-    xit("is enabled by default", async () => {
-        const { getByText } = render(<Chart data={undefined} defaultConfig={chartConfig} />);
-        const elt = getByText("Entity");
-        expect(elt).not.toHaveClass("Mui-disabled");
+    it("is enabled by default", async () => {
+        const { getByTestId } = render(<Chart data={undefined} defaultConfig={chartConfig} testId="test" />);
+        const elt = getByTestId("test");
+        await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
     });
-    xit("is enabled by active", async () => {
-        const { getByText } = render(<Chart data={undefined} defaultConfig={chartConfig} active={true} />);
-        const elt = getByText("Entity");
-        expect(elt).not.toHaveClass("Mui-disabled");
+    it("is enabled by active", async () => {
+        const { getByTestId } = render(<Chart data={undefined} defaultConfig={chartConfig} testId="test" active={true} />);
+        const elt = getByTestId("test");
+        await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
     });
     it("dispatch 2 well formed messages at first render", async () => {
         const dispatch = jest.fn();
@@ -146,7 +146,7 @@ describe("Chart Component", () => {
             type: "REQUEST_DATA_UPDATE",
         });
     });
-    xit("dispatch a well formed message on selection", async () => {
+    it("dispatch a well formed message on selection", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByTestId } = render(
@@ -155,17 +155,16 @@ describe("Chart Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByTestId("test");
-        await userEvent.click(elt);
+        await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
+        const modebar = elt.querySelector(".modebar");
+        modebar && await userEvent.click(modebar);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: {
-                columns: ["Entity"],
-                end: 100,
-                id: undefined,
-                orderby: "Entity",
-                pagekey: "0-100-Entity-asc",
-                sort: "asc",
-                start: 0,
+                alldata: true,
+                columns: ["Day","Daily hospital occupancy"],
+                decimatorPayload: undefined,
+                pagekey: "Day-Daily hospital occupancy",
             },
             type: "REQUEST_DATA_UPDATE",
         });
@@ -220,11 +219,10 @@ describe("Chart Component", () => {
         expect(elts[0].tagName).toBe("TD");
     });
     describe("Chart Component as Map", () => {
-        xit("renders", async () => {
+        it("renders", async () => {
             const { getByTestId } = render(<Chart data={mapValue} defaultConfig={mapConfig} layout={mapLayout} testId="test" />);
-            await waitFor(() => expect(getByTestId("test")))
             const elt = getByTestId("test");
-            expect(elt.tagName).toBe("DIV");
+            await waitFor(() => expect(elt.querySelector(".modebar")).not.toBeNull());
         });
     });
 });

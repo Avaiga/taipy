@@ -199,7 +199,7 @@ const Chart = (props: ChartProp) => {
     const { dispatch } = useContext(TaipyContext);
     const [selected, setSelected] = useState<number[][]>([]);
     const plotRef = useRef<HTMLDivElement>(null);
-    const dataKey = useRef("default");
+    const [dataKey, setDataKey] = useState("__default__");
     const theme = useTheme();
 
     const refresh = data === null;
@@ -246,18 +246,21 @@ const Chart = (props: ChartProp) => {
     const config = useDynamicJsonProperty(props.config, props.defaultConfig, defaultConfig);
 
     useEffect(() => {
-        if (refresh || !data[dataKey.current]) {
+        if (refresh || !data[dataKey]) {
             const backCols = Object.values(config.columns).map((col) => col.dfid);
-            dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
-            dispatch(
-                createRequestChartUpdateAction(
-                    updateVarName,
-                    id,
-                    backCols,
-                    dataKey.current,
-                    getDecimatorsPayload(config.decimators, plotRef.current, config.modes, config.columns, config.traces)
-                )
-            );
+            const dtKey = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
+            setDataKey(dtKey);
+            if (refresh || !data[dtKey]) {
+                dispatch(
+                    createRequestChartUpdateAction(
+                        updateVarName,
+                        id,
+                        backCols,
+                        dtKey,
+                        getDecimatorsPayload(config.decimators, plotRef.current, config.modes, config.columns, config.traces)
+                    )
+                );
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refresh, dispatch, config.columns, config.traces, config.modes, config.decimators, updateVarName, id]);
@@ -315,8 +318,8 @@ const Chart = (props: ChartProp) => {
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const dataPl = useMemo(() => {
-        const datum = data && data[dataKey.current];
-        return config.traces.map((trace, idx) => {
+        const datum = data && data[dataKey];
+        return datum ? config.traces.map((trace, idx) => {
             const ret = {
                 ...getArrayValue(config.options, idx, {}),
                 type: config.types[idx],
@@ -382,8 +385,8 @@ const Chart = (props: ChartProp) => {
                 ret.selected = { marker: selectedMarker };
             }
             return ret as Data;
-        });
-    }, [data, config, selected]);
+        }) : [];
+    }, [data, config, selected, dataKey]);
 
     const plotConfig = useMemo(() => {
         let plconf = {};
@@ -414,13 +417,14 @@ const Chart = (props: ChartProp) => {
                     const eventDataKey = Object.entries(eventData)
                         .map(([k, v]) => `${k}=${v}`)
                         .join("-");
-                    dataKey.current = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
+                    const dtKey = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
+                    setDataKey(dtKey);
                     dispatch(
                         createRequestChartUpdateAction(
                             updateVarName,
                             id,
                             backCols,
-                            dataKey.current,
+                            dtKey,
                             getDecimatorsPayload(
                                 config.decimators,
                                 plotRef.current,
@@ -452,8 +456,8 @@ const Chart = (props: ChartProp) => {
     }, []);
 
     const getRealIndex = useCallback(
-        (index: number) => (data[dataKey.current].tp_index ? (data[dataKey.current].tp_index[index] as number) : index),
-        [data]
+        (index: number) => (data[dataKey].tp_index ? (data[dataKey].tp_index[index] as number) : index),
+        [data, dataKey]
     );
 
     const onSelect = useCallback(
