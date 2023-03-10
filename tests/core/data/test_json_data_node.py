@@ -116,12 +116,6 @@ class TestJSONDataNode:
         ready_dn = _DataManager._bulk_get_or_create([ready_dn_cfg])[ready_dn_cfg]
         assert ready_dn.is_ready_for_reading
 
-    def test_create_with_missing_parameters(self):
-        with pytest.raises(MissingRequiredProperty):
-            JSONDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
-        with pytest.raises(MissingRequiredProperty):
-            JSONDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={})
-
     def test_read_non_existing_json(self):
         not_existing_json = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": "WRONG.json"})
         with pytest.raises(NoData):
@@ -220,15 +214,22 @@ class TestJSONDataNode:
         assert read_data[0].text == "abc"
         assert read_data[1] == 100
 
+    @pytest.mark.parametrize(
+        ["properties", "exists"],
+        [
+            ({}, False),
+            ({"default_data": {"foo": "bar"}}, True),
+        ],
+    )
+    def test_create_with_default_data(self, properties, exists):
+        dn = JSONDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+        assert os.path.exists(dn.path) is exists
+
     def test_set_path(self):
         dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.json"})
         assert dn.path == "foo.json"
         dn.path = "bar.json"
         assert dn.path == "bar.json"
-
-    def test_raise_error_when_path_not_exist(self):
-        with pytest.raises(MissingRequiredProperty):
-            JSONDataNode("foo", Scope.PIPELINE)
 
     def test_read_write_after_modify_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")

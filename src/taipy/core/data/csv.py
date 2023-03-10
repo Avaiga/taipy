@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import csv
+import os
 from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
@@ -22,11 +23,12 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, Edit, JobId
-from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
+from ..exceptions.exceptions import InvalidExposedType
+from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 
 
-class CSVDataNode(DataNode):
+class CSVDataNode(DataNode, _AbstractFileDataNode):
     """Data Node stored as a CSV file.
 
     Attributes:
@@ -63,6 +65,7 @@ class CSVDataNode(DataNode):
     __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_PATH_KEY = "default_path"
+    __DEFAULT_DATA_KEY = "default_data"
     __HAS_HEADER_PROPERTY = "has_header"
     _REQUIRED_PROPERTIES: List[str] = []
 
@@ -83,19 +86,11 @@ class CSVDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
-        if missing := set(self._REQUIRED_PROPERTIES) - set(properties.keys()):
-            raise MissingRequiredProperty(
-                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
-            )
+
+        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
 
         if self.__HAS_HEADER_PROPERTY not in properties.keys():
             properties[self.__HAS_HEADER_PROPERTY] = True
-
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path is None:
-            raise MissingRequiredProperty("default_path is required in a CSV data node config")
-        else:
-            properties[self.__PATH_KEY] = self._path
 
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
@@ -115,8 +110,15 @@ class CSVDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
+        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if not self._path:
+            self._path = self._build_path(self.storage_type())
+        properties[self.__PATH_KEY] = self._path
+
         if not self._last_edit_date and isfile(self._path):
             self.last_edit_date = datetime.now()  # type: ignore
+        if default_value is not None and not os.path.exists(self._path):
+            self.write(default_value)
 
     @classmethod
     def storage_type(cls) -> str:
