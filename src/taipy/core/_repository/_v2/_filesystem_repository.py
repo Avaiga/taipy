@@ -48,9 +48,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
-
-        # TODO: implement __from_entity on models
-        model = self.model.__from_entity(entity)
+        # TODO: implement _from_entity on models
+        model = self.model._from_entity(entity)
         self.__get_model_filepath(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_CustomEncoder, check_circular=False)
         )
@@ -62,11 +61,11 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def load(self, model_id: str) -> Entity:
         try:
             model = self.model(**self._get(self.__get_model_filepath(model_id)))
-            return model.__to_entity()
+            return model._to_entity()
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), model_id)
 
-    def _load_all(self, version_number: Optional[str]) -> List[Entity]:
+    def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
         """
         Load all entities from a specific version.
         """
@@ -77,10 +76,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         r = []
         try:
             for f in self.dir_path.iterdir():
-                if entity := self.model.__to_entity(
-                    f, retry=Config.global_config.read_entity_retry or 0, version_number=version_number
-                ):
-                    r.append(entity)
+                if entity := self.model._to_entity(self.model(**self._get(f))):
+                    if not version_number or entity.version == version_number:
+                        r.append(entity)
         except FileNotFoundError:
             pass
         return r
@@ -93,7 +91,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         r = []
         try:
             for f in self.dir_path.iterdir():
-                if entity := self.model.__to_entity(f, by=by, version_number=version_number):
+                if entity := self.model._to_entity(f, by=by, version_number=version_number):
                     r.append(entity)
         except FileNotFoundError:
             pass
@@ -112,7 +110,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         for model_id in ids:
             self._delete(model_id)
 
-    def _search(self, attribute: str, value: Any, version_number: Optional[str]) -> Optional[Entity]:
+    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Entity]:
         return next(self.__search(attribute, value, version_number), None)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
