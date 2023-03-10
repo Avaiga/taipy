@@ -98,20 +98,6 @@ class TestExcelDataNode:
         assert dn.has_header is False
         assert dn.sheet_name == sheet_names
 
-    def test_create_with_missing_parameters(self):
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={})
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={"has_header": True})
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={"sheet_name": "sheet_name"})
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode(
-                "foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={"has_header": True, "sheet_name": "Sheet1"}
-            )
-
     def test_read_with_header(self):
         with pytest.raises(NoData):
             not_existing_excel = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx"})
@@ -833,9 +819,16 @@ class TestExcelDataNode:
         dn.path = "bar.xlsx"
         assert dn.path == "bar.xlsx"
 
-    def test_raise_error_when_path_not_exist(self):
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode("foo", Scope.PIPELINE)
+    @pytest.mark.parametrize(
+        ["properties", "exists"],
+        [
+            ({}, False),
+            ({"default_data": {"a": ["foo", "bar"]}}, True),
+        ],
+    )
+    def test_create_with_default_data(self, properties, exists):
+        dn = ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+        assert os.path.exists(dn.path) is exists
 
     def test_read_write_after_modify_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
@@ -902,7 +895,6 @@ class TestExcelDataNode:
             Scope.PIPELINE,
             properties={"default_path": path_1, "exposed_type": [MyCustomObject1, MyCustomObject2]},
         )
-
         data = dn.read()
         assert isinstance(data, Dict)
         assert isinstance(data["Sheet1"][0], MyCustomObject1)

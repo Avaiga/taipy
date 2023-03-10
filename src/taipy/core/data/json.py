@@ -11,6 +11,7 @@
 
 import dataclasses
 import json
+import os
 from datetime import date, datetime, timedelta
 from enum import Enum
 from os.path import isfile
@@ -22,11 +23,11 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, Edit
-from ..exceptions.exceptions import MissingRequiredProperty
+from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 
 
-class JSONDataNode(DataNode):
+class JSONDataNode(DataNode, _AbstractFileDataNode):
     """Data Node stored as a JSON file.
 
     Attributes:
@@ -54,6 +55,7 @@ class JSONDataNode(DataNode):
     """
 
     __STORAGE_TYPE = "json"
+    __DEFAULT_DATA_KEY = "default_data"
     __DEFAULT_PATH_KEY = "default_path"
     __PATH_KEY = "path"
     _ENCODER_KEY = "encoder"
@@ -77,16 +79,8 @@ class JSONDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
-        if missing := set(self._REQUIRED_PROPERTIES) - set(properties.keys()):
-            raise MissingRequiredProperty(
-                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
-            )
 
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path is None:
-            raise MissingRequiredProperty("default_path is required in a JSON data node config")
-        else:
-            properties[self.__PATH_KEY] = self._path
+        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
 
         super().__init__(
             config_id,
@@ -102,8 +96,16 @@ class JSONDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
+        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if not self._path:
+            self._path = self._build_path(self.storage_type())
+        properties[self.__PATH_KEY] = self._path
+
         self._decoder = self._properties.get(self._DECODER_KEY, _DefaultJSONDecoder)
         self._encoder = self._properties.get(self._ENCODER_KEY, _DefaultJSONEncoder)
+
+        if default_value is not None and not os.path.exists(self._path):
+            self.write(default_value)
 
         if not self._last_edit_date and isfile(self._path):  # type: ignore
             self.last_edit_date = datetime.now()  # type: ignore
