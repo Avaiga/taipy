@@ -301,8 +301,7 @@ class Scenario(_Entity, _Submittable):
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
         Returns:
-            A dictionary, with `PipelineId^` as the key and a list of created `Job^` corresponding
-                to that pipeline as its value.
+            A list of created `Job^`s.
         """
         from ._scenario_manager_factory import _ScenarioManagerFactory
 

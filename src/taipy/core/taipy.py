@@ -65,7 +65,7 @@ def submit(
     force: bool = False,
     wait: bool = False,
     timeout: Optional[Union[float, int]] = None,
-):
+) -> Union[Job, List[Job]]:
     """Submit an entity for execution.
 
     If the entity is a pipeline or a scenario, all the tasks of the entity are
@@ -81,9 +81,7 @@ def submit(
     Returns:
         The created `Job^` or a collection of the created `Job^` depends on the submitted entity.
 
-        - If a `Scenario^` is provided, it will return a dictionary with `PipelineId^` as the key and
-            a list of `Job^` corresponding to that pipeline as its value.
-        - If a `Pipeline^` is provided, it will return a list of `Job^`.
+        - If a `Scenario^` or a `Pipeline^` is provided, it will return a list of `Job^`.
         - If a `Task^` is provided, it will return the created `Job^`.
     """
     if isinstance(entity, Scenario):
