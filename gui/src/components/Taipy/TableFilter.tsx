@@ -33,6 +33,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import { ColumnDesc, defaultDateFormat, iconInRowSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
+import { getSuffixedClassNames } from "./utils";
 
 export interface FilterDesc {
     col: string;
@@ -45,6 +46,7 @@ interface TableFilterProps {
     colsOrder: Array<string>;
     onValidate: (data: Array<FilterDesc>) => void;
     appliedFilters?: Array<FilterDesc>;
+    className?: string;
 }
 
 interface FilterRowProps {
@@ -305,7 +307,7 @@ const FilterRow = (props: FilterRowProps) => {
 };
 
 const TableFilter = (props: TableFilterProps) => {
-    const { onValidate, appliedFilters = [], columns, colsOrder } = props;
+    const { onValidate, appliedFilters = [], columns, colsOrder, className = "" } = props;
 
     const [showFilter, setShowFilter] = useState(false);
     const filterRef = useRef<HTMLButtonElement | null>(null);
@@ -341,7 +343,7 @@ const TableFilter = (props: TableFilterProps) => {
     return (
         <>
             <Tooltip title="Filter list">
-                <IconButton onClick={onShowFilterClick} size="small" ref={filterRef} sx={iconInRowSx}>
+                <IconButton onClick={onShowFilterClick} size="small" ref={filterRef} sx={iconInRowSx} className={getSuffixedClassNames(className, "-filter-icon")}>
                     <FilterListIcon fontSize="inherit" />
                 </IconButton>
             </Tooltip>
@@ -350,6 +352,7 @@ const TableFilter = (props: TableFilterProps) => {
                 anchorOrigin={anchorOrigin}
                 open={showFilter}
                 onClose={onShowFilterClick}
+                className={getSuffixedClassNames(className, "-filter")}
             >
                 <Box sx={filtersSx}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>

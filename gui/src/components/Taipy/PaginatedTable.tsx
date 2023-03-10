@@ -71,6 +71,7 @@ import {
 } from "./tableUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
+import { getSuffixedClassNames } from "./utils";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
 const skelSx = { width: "100%", height: "3em" };
@@ -366,7 +367,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
-        <Box id={id} sx={boxSx}>
+        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-paginated")}`}>
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer sx={tableContainerSx}>
@@ -374,7 +375,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                             sx={tableSx}
                             aria-labelledby="tableTitle"
                             size={size}
-                            className={className}
                             stickyHeader={true}
                         >
                             <TableHead>
@@ -405,6 +405,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             colsOrder={colsOrder}
                                                             onValidate={setAppliedFilters}
                                                             appliedFilters={appliedFilters}
+                                                            className={className}
                                                         />
                                                     ) : null,
                                                 ]

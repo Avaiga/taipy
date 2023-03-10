@@ -69,7 +69,7 @@ const NavBar = (props: LovProps) => {
     return isMobile ? (
         <Tooltip title={hover || ""}>
             <>
-                <Drawer open={opened} onClose={() => setOpened(false)}>
+                <Drawer open={opened} onClose={() => setOpened(false)} className={className}>
                     <List>
                         {lovList.map((val) => (
                             <ListItem key={val.id} onClick={() => setOpened(false)} disabled={!active}>

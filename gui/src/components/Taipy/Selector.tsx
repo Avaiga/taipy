@@ -34,15 +34,7 @@ import { Theme, useTheme } from "@mui/material";
 import { doNotPropagateEvent, getUpdateVar } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import {
-    ItemProps,
-    LovImage,
-    paperBaseSx,
-    SelTreeProps,
-    showItem,
-    SingleItem,
-    useLovListMemo,
-} from "./lovUtils";
+import { ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, useLovListMemo } from "./lovUtils";
 import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { Icon } from "../../utils/icon";
 
@@ -112,7 +104,10 @@ const Selector = (props: SelTreeProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars, updateVarName);
 
     const lovList = useLovListMemo(lov, defaultLov);
-    const listSx = useMemo(() => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }), [width]);
+    const listSx = useMemo(
+        () => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }),
+        [width]
+    );
     const paperSx = useMemo(() => {
         let sx = paperBaseSx;
         if (height !== undefined) {
@@ -123,7 +118,7 @@ const Selector = (props: SelTreeProps) => {
         }
         return sx;
     }, [height, width]);
-    const controlSx = useMemo(() => ({ my: 1, mx: 0, width: width , display: "flex"}), [width]);
+    const controlSx = useMemo(() => ({ my: 1, mx: 0, width: width, display: "flex" }), [width]);
 
     useEffect(() => {
         if (value !== undefined && value !== null) {
@@ -225,104 +220,101 @@ const Selector = (props: SelTreeProps) => {
     const dropdownValue = (dropdown &&
         (multiple ? selectedValue : selectedValue.length > 0 ? selectedValue[0] : "")) as string[];
 
-    return dropdown ? (
+    return (
         <FormControl sx={controlSx} className={className}>
             {props.label ? <InputLabel>{props.label}</InputLabel> : null}
             <Tooltip title={hover || ""}>
-                <Select
-                    id={id}
-                    multiple={multiple}
-                    value={dropdownValue}
-                    onChange={handleChange}
-                    input={<OutlinedInput label={props.label} />}
-                    renderValue={(selected) => (
-                        <Box sx={renderBoxSx}>
-                            {lovList
-                                .filter((it) =>
-                                    Array.isArray(selected) ? selected.includes(it.id) : selected === it.id
-                                )
-                                .map((item, idx) => {
-                                    if (multiple) {
-                                        const chipProps = {} as Record<string, unknown>;
-                                        if (typeof item.item === "string") {
-                                            chipProps.label = item.item;
+                {dropdown ? (
+                    <Select
+                        id={id}
+                        multiple={multiple}
+                        value={dropdownValue}
+                        onChange={handleChange}
+                        input={<OutlinedInput label={props.label} />}
+                        renderValue={(selected) => (
+                            <Box sx={renderBoxSx}>
+                                {lovList
+                                    .filter((it) =>
+                                        Array.isArray(selected) ? selected.includes(it.id) : selected === it.id
+                                    )
+                                    .map((item, idx) => {
+                                        if (multiple) {
+                                            const chipProps = {} as Record<string, unknown>;
+                                            if (typeof item.item === "string") {
+                                                chipProps.label = item.item;
+                                            } else {
+                                                chipProps.label = item.item.text || "";
+                                                chipProps.avatar = <Avatar src={item.item.path} />;
+                                            }
+                                            return (
+                                                <Chip
+                                                    key={item.id}
+                                                    {...chipProps}
+                                                    onDelete={handleDelete}
+                                                    data-id={item.id}
+                                                    onMouseDown={doNotPropagateEvent}
+                                                />
+                                            );
+                                        } else if (idx === 0) {
+                                            return typeof item.item === "string" ? (
+                                                item.item
+                                            ) : (
+                                                <LovImage item={item.item} />
+                                            );
                                         } else {
-                                            chipProps.label = item.item.text || "";
-                                            chipProps.avatar = <Avatar src={item.item.path} />;
+                                            return null;
                                         }
-                                        return (
-                                            <Chip
-                                                key={item.id}
-                                                {...chipProps}
-                                                onDelete={handleDelete}
-                                                data-id={item.id}
-                                                onMouseDown={doNotPropagateEvent}
-                                            />
-                                        );
-                                    } else if (idx === 0) {
-                                        return typeof item.item === "string" ? (
-                                            item.item
-                                        ) : (
-                                            <LovImage item={item.item} />
-                                        );
-                                    } else {
-                                        return null;
-                                    }
-                                })}
-                        </Box>
-                    )}
-                    MenuProps={getMenuProps(height)}
-                >
-                    {lovList.map((item) => (
-                        <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)}>
-                            {typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </Tooltip>
-        </FormControl>
-    ) : (
-        <FormControl id={id} sx={controlSx} className={className}>
-            {props.label ? <FormLabel>{props.label}</FormLabel> : null}
-            <Tooltip title={hover || ""}>
-                <Paper sx={paperSx}>
-                    {filter && (
-                        <Box>
-                            <OutlinedInput
-                                margin="dense"
-                                placeholder="Search field"
-                                value={searchValue}
-                                onChange={handleInput}
-                                disabled={!active}
-                            />
-                        </Box>
-                    )}
-                    <List sx={listSx}>
-                        {lovList
-                            .filter((elt) => showItem(elt, searchValue))
-                            .map((elt) =>
-                                multiple ? (
-                                    <MultipleItem
-                                        key={elt.id}
-                                        value={elt.id}
-                                        item={elt.item}
-                                        selectedValue={selectedValue}
-                                        clickHandler={clickHandler}
-                                        disabled={!active}
-                                    />
-                                ) : (
-                                    <SingleItem
-                                        key={elt.id}
-                                        value={elt.id}
-                                        item={elt.item}
-                                        selectedValue={selectedValue}
-                                        clickHandler={clickHandler}
-                                        disabled={!active}
-                                    />
-                                )
-                            )}
-                    </List>
-                </Paper>
+                                    })}
+                            </Box>
+                        )}
+                        MenuProps={getMenuProps(height)}
+                    >
+                        {lovList.map((item) => (
+                            <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)}>
+                                {typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                ) : (
+                    <Paper sx={paperSx}>
+                        {filter && (
+                            <Box>
+                                <OutlinedInput
+                                    margin="dense"
+                                    placeholder="Search field"
+                                    value={searchValue}
+                                    onChange={handleInput}
+                                    disabled={!active}
+                                />
+                            </Box>
+                        )}
+                        <List sx={listSx} id={id}>
+                            {lovList
+                                .filter((elt) => showItem(elt, searchValue))
+                                .map((elt) =>
+                                    multiple ? (
+                                        <MultipleItem
+                                            key={elt.id}
+                                            value={elt.id}
+                                            item={elt.item}
+                                            selectedValue={selectedValue}
+                                            clickHandler={clickHandler}
+                                            disabled={!active}
+                                        />
+                                    ) : (
+                                        <SingleItem
+                                            key={elt.id}
+                                            value={elt.id}
+                                            item={elt.item}
+                                            selectedValue={selectedValue}
+                                            clickHandler={clickHandler}
+                                            disabled={!active}
+                                        />
+                                    )
+                                )}
+                        </List>
+                    </Paper>
+                )}
             </Tooltip>
         </FormControl>
     );

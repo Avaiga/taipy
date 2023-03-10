@@ -40,8 +40,8 @@ def test_selector_action(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui)
     page.goto("/test")
     page.expect_websocket()
-    page.wait_for_selector("#selector1")
-    page.click('#selector1 ul > div[data-id="Item 3"]')
+    page.wait_for_selector("ul#selector1")
+    page.click('#selector1 > div[data-id="Item 3"]')
     page.wait_for_function(
-        "document.querySelector('#selector1 ul > div[data-id=\"Item 3\"]').classList.contains('Mui-selected')"
+        "document.querySelector('#selector1 > div[data-id=\"Item 3\"]').classList.contains('Mui-selected')"
     )

@@ -70,6 +70,7 @@ import {
     useFormatConfig,
 } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
+import { getSuffixedClassNames } from "./utils";
 
 interface RowData {
     colsOrder: string[];
@@ -480,7 +481,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
-        <Box id={id} sx={boxSx}>
+        <Box id={id} sx={boxSx} className={`${className} ${getSuffixedClassNames(className, "-autoloading")}`}>
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer>
@@ -488,7 +489,6 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                             sx={tableSx}
                             aria-labelledby="tableTitle"
                             size={size}
-                            className={className}
                             stickyHeader={true}
                         >
                             <TableHead>
@@ -519,6 +519,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                             colsOrder={colsOrder}
                                                             onValidate={setAppliedFilters}
                                                             appliedFilters={appliedFilters}
+                                                            className={className}
                                                         />
                                                     ) : null,
                                                 ]

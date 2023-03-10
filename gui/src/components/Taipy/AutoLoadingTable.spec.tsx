@@ -110,7 +110,7 @@ describe("AutoLoadingTable Component", () => {
             <AutoLoadingTable data={undefined} defaultColumns={tableColumns} className="taipy-table" />
         );
         const elt = getByText("Entity").closest("table");
-        expect(elt).toHaveClass("taipy-table");
+        expect(elt?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-table", "taipy-table-autoloading");
     });
     it("is disabled", async () => {
         const { getByText } = render(<AutoLoadingTable data={undefined} defaultColumns={tableColumns} active={false} />);
