@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config._toml_serializer import _TomlSerializer
+from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 
 from ...job.job import Job

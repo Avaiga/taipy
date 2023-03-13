@@ -20,7 +20,6 @@ from ._scheduler._scheduler import _Scheduler
 from ._scheduler._scheduler_factory import _SchedulerFactory
 from ._version._version_cli import _VersioningCLI
 from ._version._version_manager_factory import _VersionManagerFactory
-from .exceptions.exceptions import VersionConflictWithPythonConfig
 from .taipy import clean_all_entities_by_version
 
 
@@ -95,10 +94,7 @@ class Core:
                 clean_all_entities_by_version(current_version_number)
                 _TaipyLogger._get_logger().info(f"Clean all entities of version {current_version_number}")
 
-            try:
-                version_setter[mode](current_version_number, force)
-            except VersionConflictWithPythonConfig as e:
-                raise SystemExit(e.message)
+            version_setter[mode](current_version_number, force)
 
         else:
             raise SystemExit(f"Undefined execution mode: {mode}.")

@@ -49,7 +49,7 @@ from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
-from taipy.config._toml_serializer import _TomlSerializer
+from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.checker._checker import _Checker
 from taipy.config.checker._checkers._gLobal_config_checker import _GlobalConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
@@ -278,7 +278,7 @@ def init_config():
     from src.taipy.core.config import _inject_section
 
     _inject_section(
-        JobConfig, "job_config", JobConfig("development"), [("configure_job_executions", JobConfig._configure)]
+        JobConfig, "job_config", JobConfig("development"), [("configure_job_executions", JobConfig._configure)], True
     )
     _inject_section(
         DataNodeConfig,

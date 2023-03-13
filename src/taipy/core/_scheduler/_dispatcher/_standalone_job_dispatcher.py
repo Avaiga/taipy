@@ -12,7 +12,7 @@
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
-from taipy.config._toml_serializer import _TomlSerializer
+from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 
 from ...job.job import Job
