@@ -240,11 +240,15 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode):
             sheet_name=sheet_names,
             **kwargs,
         )
-        if isinstance(df, dict):
-            for key, value in df.items():
-                df[key] = pd.DataFrame(value) if engine == "pandas" else modin_pd.DataFrame(value)
-            return df
-        return pd.DataFrame(df) if engine == "pandas" else modin_pd.DataFrame(df)
+        # We are using pandas to load modin dataframes because of a modin issue
+        # https://github.com/modin-project/modin/issues/4924
+        if engine == "modin":
+            if isinstance(df, dict):  # Check if it s a multiple sheet Excel file
+                for key, value in df.items():
+                    df[key] = modin_pd.DataFrame(value)
+                return df
+            return modin_pd.DataFrame(df)
+        return df
 
     def __get_sheet_names_and_header(self, sheet_names):
         kwargs: Dict[str, Any] = {}
