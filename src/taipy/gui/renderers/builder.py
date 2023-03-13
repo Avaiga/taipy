@@ -782,7 +782,7 @@ class _Builder:
 
         Arguments:
 
-            attributes (list(tuple)): The list of attributes.
+            attributes (list(tuple)): The list of attributes as (property name, property type, default value).
         """
         for attr in attributes:
             if not isinstance(attr, tuple):

@@ -47,7 +47,7 @@ class _Factory:
         "navbar": "value",
         "number": "value",
         "pane": "open",
-        "part": "render",
+        "part": "class_name",
         "selector": "value",
         "slider": "value",
         "status": "value",
@@ -351,12 +351,12 @@ class _Factory:
         "part": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="Part", attributes=attrs, default_value=None
         )
-        .set_value_and_default(with_update=False, var_type=PropertyType.dynamic_boolean, default_val=True)
         ._set_partial()  # partial should be set before page
         .set_attributes(
             [
                 ("id",),
                 ("page",),
+                ("render", PropertyType.dynamic_boolean, True)
             ]
         ),
         "selector": lambda gui, control_type, attrs: _Builder(

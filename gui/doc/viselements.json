@@ -1104,10 +1104,15 @@
         "properties": [
           {
             "name": "render",
-            "default_property": true,
             "type": "dynamic(bool)",
             "default_value": "True",
-            "doc": "If True, this part is visible on the page.<br/>\nIf False, the part is hidden and all its content is not displayed."
+            "doc": "If True, this part is visible on the page.<br/>\nIf False, the part is hidden and its content is not displayed."
+          },
+          {
+            "name": "class_name",
+            "default_property": true,
+            "type": "dynamic(str)",
+            "doc": "List of CSS class names that will be associated with the generated HTML Element.\nThis class names will be added to the default <code>taipy-part</code>."
           }
         ]
       }
@@ -1288,12 +1293,12 @@
           {
             "name": "partial",
             "type": "Partial",
-            "doc": "A Partial object that holds the content of the dialog.\nThis should not be defined if <i>page</i> is set."
+            "doc": "A Partial object that holds the content of the block.\nThis should not be defined if <i>page</i> is set."
           },
           {
             "name": "page",
             "type": "str",
-            "doc": "The page name to show as the content of the dialog.\nThis should not be defined if <i>partial</i> is set."
+            "doc": "The page name to show as the content of the block.\nThis should not be defined if <i>partial</i> is set."
           }
         ]
       }
