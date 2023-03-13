@@ -13,7 +13,7 @@ import threading
 from abc import abstractmethod
 from typing import Any, Dict, List
 
-from taipy.config._toml_serializer import _TomlSerializer
+from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
