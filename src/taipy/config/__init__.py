@@ -23,35 +23,42 @@ from typing import List
 
 from .checker.issue import Issue
 from .checker.issue_collector import IssueCollector
-from .section import Section
-from .unique_section import UniqueSection
+from .common.frequency import Frequency
+from .common.scope import Scope
 from .config import Config
 from .global_app.global_app_config import GlobalAppConfig
-from .common.scope import Scope
-from .common.frequency import Frequency
+from .section import Section
+from .unique_section import UniqueSection
 from .version import _get_version
 
 __version__ = _get_version()
 
 
 def _config_doc(func):
-    def func_with_doc(section, attribute_name, default, configuration_methods):
+    def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
         if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
-            with open('config_doc.txt', 'a') as f:
+            with open("config_doc.txt", "a") as f:
                 from inspect import signature
+
                 for exposed_configuration_method, configuration_method in configuration_methods:
                     annotation = "    @staticmethod\n"
                     sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
                     doc = '        """' + configuration_method.__doc__ + '"""\n'
-                    content = '        pass\n\n'
+                    content = "        pass\n\n"
                     f.write(annotation + sign + doc + content)
-        return func(section, attribute_name, default, configuration_methods)
+        return func(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections)
 
     return func_with_doc
 
 
 @_config_doc
-def _inject_section(section_clazz, attribute_name: str, default: Section, configuration_methods: List[tuple]):
+def _inject_section(
+    section_clazz,
+    attribute_name: str,
+    default: Section,
+    configuration_methods: List[tuple],
+    add_to_unconflicted_sections: bool = False,
+):
     Config._register_default(default)
 
     if issubclass(section_clazz, UniqueSection):
@@ -60,6 +67,9 @@ def _inject_section(section_clazz, attribute_name: str, default: Section, config
         setattr(Config, attribute_name, Config.sections[section_clazz.name])
     else:
         raise TypeError
+
+    if add_to_unconflicted_sections:
+        Config._comparator._add_unconflicted_section(section_clazz.name)
 
     for exposed_configuration_method, configuration_method in configuration_methods:
         setattr(Config, exposed_configuration_method, configuration_method)

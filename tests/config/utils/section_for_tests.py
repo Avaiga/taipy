@@ -22,7 +22,7 @@ class SectionForTest(Section):
     name = "section_name"
     _MY_ATTRIBUTE_KEY = "attribute"
 
-    def __init__(self, id: str, attribute: str = None, **properties):
+    def __init__(self, id: str, attribute: Any = None, **properties):
         self._attribute = attribute
         super().__init__(id, **properties)
 

@@ -12,7 +12,8 @@
 import pytest
 
 from src.taipy.config._config import _Config
-from src.taipy.config._toml_serializer import _TomlSerializer
+from src.taipy.config._config_comparator._config_comparator import _ConfigComparator
+from src.taipy.config._serializer._toml_serializer import _TomlSerializer
 from src.taipy.config.checker.issue_collector import IssueCollector
 from src.taipy.config.config import Config
 from src.taipy.config.section import Section
@@ -35,6 +36,7 @@ def reset_configuration_singleton():
     Config._applied_config = _Config._default_config()
     Config._collector = IssueCollector()
     Config._serializer = _TomlSerializer()
+    Config._comparator = _ConfigComparator()
 
 
 def register_test_sections():

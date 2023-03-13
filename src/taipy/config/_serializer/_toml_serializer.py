@@ -11,9 +11,9 @@
 
 import toml  # type: ignore
 
+from .._config import _Config
+from ..exceptions.exceptions import LoadingError
 from ._base_serializer import _BaseSerializer
-from ._config import _Config
-from .exceptions.exceptions import LoadingError
 
 
 class _TomlSerializer(_BaseSerializer):

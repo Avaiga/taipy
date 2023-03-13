@@ -35,7 +35,7 @@ class _TaipyLogger:
             cls.__logger.setLevel(logging.INFO)
             ch = logging.StreamHandler(sys.stdout)
             ch.setLevel(logging.INFO)
-            formatter = logging.Formatter("[%(asctime)s][%(name)s][%(levelname)s] %(message)s")
+            formatter = logging.Formatter("[%(asctime)s][%(name)s][%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S")
             ch.setFormatter(formatter)
             cls.__logger.addHandler(ch)
         return cls.__logger

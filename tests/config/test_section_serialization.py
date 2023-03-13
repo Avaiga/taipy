@@ -15,7 +15,7 @@ import os
 from unittest import mock
 
 from src.taipy.config import Config
-from src.taipy.config._json_serializer import _JsonSerializer
+from src.taipy.config._serializer._json_serializer import _JsonSerializer
 from src.taipy.config.common.frequency import Frequency
 from src.taipy.config.common.scope import Scope
 from tests.config.utils.named_temporary_file import NamedTemporaryFile

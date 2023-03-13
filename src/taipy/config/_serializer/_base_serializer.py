@@ -16,15 +16,15 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from . import Section
-from ._config import _Config
-from .common._template_handler import _TemplateHandler
-from .common._validate_id import _validate_id
-from .common.frequency import Frequency
-from .common.scope import Scope
-from .exceptions.exceptions import LoadingError
-from .global_app.global_app_config import GlobalAppConfig
-from .unique_section import UniqueSection
+from .._config import _Config
+from ..common._template_handler import _TemplateHandler
+from ..common._validate_id import _validate_id
+from ..common.frequency import Frequency
+from ..common.scope import Scope
+from ..exceptions.exceptions import LoadingError
+from ..global_app.global_app_config import GlobalAppConfig
+from ..section import Section
+from ..unique_section import UniqueSection
 
 
 class _BaseSerializer(object):

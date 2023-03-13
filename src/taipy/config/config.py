@@ -14,8 +14,9 @@ from typing import Dict, Union
 
 from ..logger._taipy_logger import _TaipyLogger
 from ._config import _Config
-from ._json_serializer import _JsonSerializer
-from ._toml_serializer import _TomlSerializer
+from ._config_comparator._config_comparator import _ConfigComparator
+from ._serializer._json_serializer import _JsonSerializer
+from ._serializer._toml_serializer import _TomlSerializer
 from .checker._checker import _Checker
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
@@ -38,6 +39,7 @@ class Config:
     _collector = IssueCollector()
     _serializer = _TomlSerializer()
     __json_serializer = _JsonSerializer()
+    _comparator: _ConfigComparator = _ConfigComparator()
 
     @_Classproperty
     def unique_sections(cls) -> Dict[str, UniqueSection]:
