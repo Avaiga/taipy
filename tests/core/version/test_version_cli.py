@@ -539,8 +539,8 @@ def test_modify_job_configuration_dont_stop_application(caplog):
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         Core().run()
     scenario = _ScenarioManager._create(scenario_config)
-    job_dict = _ScenarioManager._submit(scenario)
-    assert all(job.is_completed for _, jobs in job_dict.items() for job in jobs)
+    jobs = _ScenarioManager._submit(scenario)
+    assert all(job.is_completed() for job in jobs)
 
     init_config()
     scenario_config = config_scenario()
@@ -550,8 +550,8 @@ def test_modify_job_configuration_dont_stop_application(caplog):
         Core().run()
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario)
-    job_dict = _ScenarioManager._submit(scenario)
-    assert all(job.is_completed for _, jobs in job_dict.items() for job in jobs)
+    jobs = _ScenarioManager._submit(scenario)
+    assert all(job.is_completed() for job in jobs)
 
     error_message = str(caplog.text)
     assert 'JOB "mode" was modified' in error_message
