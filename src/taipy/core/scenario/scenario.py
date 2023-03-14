@@ -135,9 +135,6 @@ class Scenario(_Entity, _Submittable):
 
     @property
     def tasks(self) -> Dict[str, List[Task]]:
-        return self._get_tasks()
-
-    def _get_tasks(self) -> Dict[str, List[Task]]:
         tasks: Dict[str, List[Task]] = {}
         list_dict_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
         for dict_task in list_dict_tasks:

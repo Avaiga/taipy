@@ -95,7 +95,7 @@ def test_submit_task():
     assert job.is_completed()
 
 
-def test_submit_pipeline_and_scenario_generate_unique_submit_id(pipeline, task):
+def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
     dn_1 = InMemoryDataNode("dn_config_id_1", Scope.PIPELINE)
     dn_2 = InMemoryDataNode("dn_config_id_2", Scope.PIPELINE)
     task_1 = Task("task_config_id_1", {}, print, [dn_1])
