@@ -79,7 +79,7 @@ class _Preprocessor(MdPreprocessor):
                 tag = "part"
                 properties: List[Tuple[str, str]] = []
                 if m.group(2):
-                    tag, properties = self._process_control(m.group(2), line_count)
+                    tag, properties = self._process_control(m.group(2), line_count, tag)
                 if tag in _MarkdownFactory._TAIPY_BLOCK_TAGS:
                     tag_queue.append((tag, line_count, m.group(1) or None))
                     new_line_delimeter = "\n" if line.startswith("<|") else "\n\n"
@@ -165,7 +165,7 @@ class _Preprocessor(MdPreprocessor):
             warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
         return new_lines
 
-    def _process_control(self, prop_string: str, line_count: int) -> Tuple[str, List[Tuple[str, str]]]:
+    def _process_control(self, prop_string: str, line_count: int, default_control_name: str = _MarkdownFactory.DEFAULT_CONTROL) -> Tuple[str, List[Tuple[str, str]]]:
         fragments = [f for f in _Preprocessor.__SPLIT_RE.split(prop_string) if f]
         control_name = None
         default_prop_name = None
@@ -194,7 +194,7 @@ class _Preprocessor(MdPreprocessor):
                 warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
 
         if control_name is None:
-            control_name = _MarkdownFactory.DEFAULT_CONTROL
+            control_name = default_control_name
         if default_prop_value is not None:
             default_prop_name = _MarkdownFactory.get_default_property_name(control_name)
             # Set property only if it is not already defined

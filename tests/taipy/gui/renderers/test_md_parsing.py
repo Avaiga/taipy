@@ -40,7 +40,7 @@ def test_unclosed_block(gui: Gui, helpers):
 
 def test_opening_unknown_block(gui: Gui, helpers):
     md_string = "<|unknown"
-    expected_list = ["<div", "&lt;|unknown"]
+    expected_list = ["<Part", 'className="unknown"']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
