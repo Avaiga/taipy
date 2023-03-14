@@ -14,6 +14,7 @@ import pathlib
 import shutil
 from typing import Any, Iterable, Iterator, List, Optional, Type, Union
 
+from src.taipy.core.common._utils import _retry
 from src.taipy.core.common.typing import Entity, Json, ModelType
 from taipy.config.config import Config
 
@@ -58,6 +59,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         with pathlib.Path(filepath).open(encoding="UTF-8") as source:
             return json.load(source)
 
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def load(self, model_id: str) -> Entity:
         try:
             model = self.model(**self._get(self.__get_model_filepath(model_id)))
@@ -65,6 +67,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), model_id)
 
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
         """
         Load all entities from a specific version.
@@ -83,6 +86,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             pass
         return r
 
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def _load_all_by(self, by, version_number: Optional[str]) -> List[Entity]:
         from ..._version._version_manager_factory import _VersionManagerFactory
 
