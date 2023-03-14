@@ -36,7 +36,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def load(self, model_id: str) -> Entity:
+    def _load(self, model_id: str) -> Entity:
         """
         Retrieve the entity data from the repository.
 
@@ -153,7 +153,7 @@ def _str_to_timedelta(timedelta_str: str) -> timedelta:
     return timedelta(**time_params)  # type: ignore
 
 
-class _CustomEncoder(json.JSONEncoder):
+class _Encoder(json.JSONEncoder):
     def default(self, o: Any) -> Json:
         if isinstance(o, Enum):
             result = o.value
@@ -166,7 +166,7 @@ class _CustomEncoder(json.JSONEncoder):
         return result
 
 
-class _CustomDecoder(json.JSONDecoder):
+class _Decoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 

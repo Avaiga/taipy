@@ -18,7 +18,7 @@ from src.taipy.core.common.typing import Entity, Json, ModelType
 from taipy.config.config import Config
 
 from ...exceptions import InvalidExportPath, ModelNotFound
-from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
+from .._v2._abstract_repository import _AbstractRepository, _Decoder, _Encoder
 
 
 class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
@@ -51,7 +51,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         # TODO: implement _from_entity on models
         model = self.model._from_entity(entity)
         self.__get_model_filepath(model.id).write_text(
-            json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_CustomEncoder, check_circular=False)
+            json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
 
     def _get(self, filepath: pathlib.Path) -> Json:
