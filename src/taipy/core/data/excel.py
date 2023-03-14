@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import os
 from collections import defaultdict
 from datetime import datetime, timedelta
 from os.path import isfile
@@ -24,16 +24,12 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, Edit, JobId
-from ..exceptions.exceptions import (
-    ExposedTypeLengthMismatch,
-    InvalidExposedType,
-    MissingRequiredProperty,
-    NonExistingExcelSheet,
-)
+from ..exceptions.exceptions import ExposedTypeLengthMismatch, InvalidExposedType, NonExistingExcelSheet
+from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 
 
-class ExcelDataNode(DataNode):
+class ExcelDataNode(DataNode, _AbstractFileDataNode):
     """Data Node stored as an Excel file.
 
     The Excel file format is _xlsx_.
@@ -74,6 +70,7 @@ class ExcelDataNode(DataNode):
     __EXPOSED_TYPE_MODIN = "modin"
     __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
+    __DEFAULT_DATA_KEY = "default_data"
     __DEFAULT_PATH_KEY = "default_path"
     __HAS_HEADER_PROPERTY = "has_header"
     __SHEET_NAME_PROPERTY = "sheet_name"
@@ -96,16 +93,10 @@ class ExcelDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
-        if missing := set(self._REQUIRED_PROPERTIES) - set(properties.keys()):
-            raise MissingRequiredProperty(
-                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
-            )
 
+        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path is None:
-            raise MissingRequiredProperty("default_path is required in a Excel data node config")
-        else:
-            properties[self.__PATH_KEY] = self._path
+        properties[self.__PATH_KEY] = self._path
 
         if self.__SHEET_NAME_PROPERTY not in properties.keys():
             properties[self.__SHEET_NAME_PROPERTY] = None
@@ -129,6 +120,12 @@ class ExcelDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
+        if not self._path:
+            self._path = self._build_path(self.storage_type())
+            properties[self.__PATH_KEY] = self._path
+
+        if default_value is not None and not os.path.exists(self._path):
+            self.write(default_value)
 
         if not self._last_edit_date and isfile(self._path):
             self.last_edit_date = datetime.now()  # type: ignore
@@ -237,37 +234,42 @@ class ExcelDataNode(DataNode):
             return {sheet_name: df.to_numpy() for sheet_name, df in sheets.items()}
         return sheets.to_numpy()
 
-    def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
+    def _do_read_excel(self, engine, sheet_names, kwargs) -> pd.DataFrame:
+        df = pd.read_excel(
+            self._path,
+            sheet_name=sheet_names,
+            **kwargs,
+        )
+        # We are using pandas to load modin dataframes because of a modin issue
+        # https://github.com/modin-project/modin/issues/4924
+        if engine == "modin":
+            if isinstance(df, dict):  # Check if it s a multiple sheet Excel file
+                for key, value in df.items():
+                    df[key] = modin_pd.DataFrame(value)
+                return df
+            return modin_pd.DataFrame(df)
+        return df
+
+    def __get_sheet_names_and_header(self, sheet_names):
+        kwargs: Dict[str, Any] = {}
         if sheet_names is None:
             sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
+        if not self.properties[self.__HAS_HEADER_PROPERTY]:
+            kwargs["header"] = None
+        return sheet_names, kwargs
+
+    def _read_as_pandas_dataframe(self, sheet_names=None) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
+        sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
         try:
-            kwargs: Dict[str, Any] = {}
-            if not self.properties[self.__HAS_HEADER_PROPERTY]:
-                kwargs["header"] = None
-            df = pd.read_excel(
-                self._path,
-                sheet_name=sheet_names,
-                **kwargs,
-            )
-            if isinstance(df, dict):
-                for key, value in df.items():
-                    df[key] = pd.DataFrame(value)
-                return df
-
-            return pd.DataFrame(df)
-
+            return self._do_read_excel("pandas", sheet_names, kwargs)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
     def _read_as_modin_dataframe(
         self, sheet_names=None
     ) -> Union[Dict[Union[int, str], modin_pd.DataFrame], modin_pd.DataFrame]:
-        if sheet_names is None:
-            sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
+        sheet_names, kwargs = self.__get_sheet_names_and_header(sheet_names)
         try:
-            kwargs: Dict[str, Any] = {}
-            if not self.properties[self.__HAS_HEADER_PROPERTY]:
-                kwargs["header"] = None
             if kwargs.get("header", None):
                 return modin_pd.read_excel(
                     self._path,
@@ -275,18 +277,7 @@ class ExcelDataNode(DataNode):
                     **kwargs,
                 )
             else:
-                df = pd.read_excel(
-                    self._path,
-                    sheet_name=sheet_names,
-                    **kwargs,
-                )
-                if isinstance(df, dict):
-                    for key, value in df.items():
-                        df[key] = modin_pd.DataFrame(value)
-                    return df
-
-            return modin_pd.DataFrame(df)
-
+                return self._do_read_excel("modin", sheet_names, kwargs)
         except pd.errors.EmptyDataError:
             return modin_pd.DataFrame()
 

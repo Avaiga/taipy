@@ -14,7 +14,7 @@ import json
 
 from src.taipy.core.config import DataNodeConfig, JobConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.config import Config
-from taipy.config._json_serializer import _JsonSerializer
+from taipy.config._serializer._json_serializer import _JsonSerializer
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from tests.core.utils.named_temporary_file import NamedTemporaryFile

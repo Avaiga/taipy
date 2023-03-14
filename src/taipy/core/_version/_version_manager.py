@@ -13,11 +13,11 @@ import uuid
 from typing import List, Optional, Union
 
 from taipy.config import Config
-from taipy.config._config_comparator import _ConfigComparator
+from taipy.config._config_comparator._comparator_result import _ComparatorResult
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
-from ..exceptions.exceptions import ModelNotFound, NonExistingVersion, VersionConflictWithPythonConfig
+from ..exceptions.exceptions import ModelNotFound, NonExistingVersion
 from ._version import _Version
 from ._version_repository_factory import _VersionRepositoryFactory
 
@@ -48,17 +48,14 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _get_or_create(cls, id: str, force: bool) -> _Version:
         if version := cls._get(id):
-            config_diff = _ConfigComparator(version.config, Config._applied_config)
-            if config_diff["added_items"] or config_diff["removed_items"] or config_diff["modified_items"]:
-                _TaipyLogger._get_logger().warning(
-                    f"The Configuration of version {id} is conflicted with the current Python Config."
-                )
+            comparator_result = Config._comparator._compare(version.config, Config._applied_config, id)
 
+            if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
                 if force:
                     _TaipyLogger._get_logger().warning(f"Overriding version {id} ...")
                     version.config = Config._applied_config
                 else:
-                    raise VersionConflictWithPythonConfig(config_diff)
+                    raise SystemExit("The application is stopped. Please check the error log for more information.")
 
         else:
             version = _Version(id=id, config=Config._applied_config)
@@ -130,13 +127,12 @@ class _VersionManager(_Manager[_Version]):
                 continue
 
             if version := cls._get(production_version):
-                config_diff = _ConfigComparator(version.config, Config._applied_config)
-                if config_diff["added_items"] or config_diff["removed_items"] or config_diff["modified_items"]:
-                    _TaipyLogger._get_logger().error(
-                        f"The Configuration of version {production_version} is conflicted with the current Python"
-                        " Config."
-                    )
-                    raise VersionConflictWithPythonConfig(config_diff)
+                comparator_result = Config._comparator._compare(
+                    version.config, Config._applied_config, production_version
+                )
+                if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
+                    raise SystemExit("The application is stopped. Please check the error log for more information.")
+
             else:
                 raise NonExistingVersion(production_version)
 

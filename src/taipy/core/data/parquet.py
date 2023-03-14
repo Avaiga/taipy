@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import os
 from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
@@ -21,16 +21,12 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, Edit, JobId
-from ..exceptions.exceptions import (
-    InvalidExposedType,
-    MissingRequiredProperty,
-    UnknownCompressionAlgorithm,
-    UnknownParquetEngine,
-)
+from ..exceptions.exceptions import InvalidExposedType, UnknownCompressionAlgorithm, UnknownParquetEngine
+from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 
 
-class ParquetDataNode(DataNode):
+class ParquetDataNode(DataNode, _AbstractFileDataNode):
     """Data Node stored as a Parquet file.
 
     Attributes:
@@ -74,6 +70,7 @@ class ParquetDataNode(DataNode):
     __EXPOSED_TYPE_MODIN = "modin"
     __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
+    __DEFAULT_DATA_KEY = "default_data"
     __DEFAULT_PATH_KEY = "default_path"
     __ENGINE_PROPERTY = "engine"
     __VALID_PARQUET_ENGINES = ["pyarrow", "fastparquet"]
@@ -100,10 +97,8 @@ class ParquetDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
-        if missing := set(self._REQUIRED_PROPERTIES) - set(properties.keys()):
-            raise MissingRequiredProperty(
-                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
-            )
+
+        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
 
         if self.__ENGINE_PROPERTY not in properties.keys():
             properties[self.__ENGINE_PROPERTY] = "pyarrow"
@@ -132,12 +127,6 @@ class ParquetDataNode(DataNode):
         if self.__WRITE_KWARGS_PROPERTY not in properties.keys():
             properties[self.__WRITE_KWARGS_PROPERTY] = {}
 
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path is None:
-            raise MissingRequiredProperty("default_path is required in a Parquet data node config")
-        else:
-            properties[self.__PATH_KEY] = self._path
-
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
         self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
@@ -156,6 +145,14 @@ class ParquetDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
+        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if not self._path:
+            self._path = self._build_path(self.storage_type())
+        properties[self.__PATH_KEY] = self._path
+
+        if default_value is not None and not os.path.exists(self._path):
+            self.write(default_value)
+
         if not self._last_edit_date and isfile(self._path):
             self.last_edit_date = datetime.now()  # type: ignore
 

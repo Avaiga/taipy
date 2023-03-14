@@ -76,13 +76,16 @@ class TestCSVDataNode:
         ready_dn = _DataManager._bulk_get_or_create([ready_dn_cfg])[ready_dn_cfg]
         assert ready_dn.is_ready_for_reading
 
-    def test_create_with_missing_parameters(self):
-        with pytest.raises(MissingRequiredProperty):
-            CSVDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
-        with pytest.raises(MissingRequiredProperty):
-            CSVDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={})
-        with pytest.raises(MissingRequiredProperty):
-            CSVDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={"has_header": True})
+    @pytest.mark.parametrize(
+        ["properties", "exists"],
+        [
+            ({}, False),
+            ({"default_data": ["foo", "bar"]}, True),
+        ],
+    )
+    def test_create_with_default_data(self, properties, exists):
+        dn = CSVDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+        assert os.path.exists(dn.path) is exists
 
     def test_read_with_header(self):
         not_existing_csv = CSVDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": True})
@@ -224,10 +227,6 @@ class TestCSVDataNode:
         assert dn.path == "foo.csv"
         dn.path = "bar.csv"
         assert dn.path == "bar.csv"
-
-    def test_raise_error_when_path_not_exist(self):
-        with pytest.raises(MissingRequiredProperty):
-            CSVDataNode("foo", Scope.PIPELINE)
 
     def test_read_write_after_modify_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")

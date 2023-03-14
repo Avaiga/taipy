@@ -497,7 +497,6 @@ class TestDataManager:
             [DATA_NODE.input]
             scope = "SCENARIO:SCOPE"
             default_path="fake/path.csv"
-            default_data = "21:int"
 
             [DATA_NODE.output]
             storage_type = "in_memory"

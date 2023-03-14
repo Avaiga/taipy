@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-import pathlib
 import pickle
 from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
@@ -22,10 +21,11 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, Edit
+from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 
 
-class PickleDataNode(DataNode):
+class PickleDataNode(DataNode, _AbstractFileDataNode):
     """Data Node stored as a pickle file.
 
     Attributes:
@@ -99,7 +99,7 @@ class PickleDataNode(DataNode):
             **properties,
         )
         if self._path is None:
-            self._path = self.__build_path()
+            self._path = self._build_path(self.storage_type())
         if not self._last_edit_date and os.path.exists(self._path):
             self.last_edit_date = datetime.now()  # type: ignore
         if default_value is not None and not os.path.exists(self._path):
@@ -135,11 +135,3 @@ class PickleDataNode(DataNode):
             os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
         with open(self._path, "wb") as pf:
             pickle.dump(data, pf)
-
-    def __build_path(self):
-        from taipy.config.config import Config
-
-        dir_path = pathlib.Path(Config.global_config.storage_folder) / "pickles"
-        if not dir_path.exists():
-            dir_path.mkdir(parents=True, exist_ok=True)
-        return dir_path / f"{self.id}.p"

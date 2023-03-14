@@ -32,7 +32,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_scope(data_node_config_id, data_node_config)
             self._check_required_properties(data_node_config_id, data_node_config)
             self._check_callable(data_node_config_id, data_node_config)
-            self._check_generic_read_write_fct_params(data_node_config_id, data_node_config)
+            self._check_generic_read_write_fct_and_args(data_node_config_id, data_node_config)
             self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
 
@@ -94,11 +94,11 @@ class _DataNodeConfigChecker(_ConfigChecker):
                                 f"property `{required_property}` for type `{storage_type}`.",
                             )
 
-    def _check_generic_read_write_fct_params(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+    def _check_generic_read_write_fct_and_args(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC:
             properties_to_check = [
-                DataNodeConfig._OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY,
-                DataNodeConfig._OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY,
+                DataNodeConfig._OPTIONAL_READ_FUNCTION_ARGS_GENERIC_PROPERTY,
+                DataNodeConfig._OPTIONAL_WRITE_FUNCTION_ARGS_GENERIC_PROPERTY,
             ]
             for prop_key in properties_to_check:
                 if data_node_config.properties and prop_key in data_node_config.properties:
@@ -110,12 +110,29 @@ class _DataNodeConfigChecker(_ConfigChecker):
                             f"`{prop_key}` field of DataNodeConfig"
                             f" `{data_node_config_id}` must be populated with a List value.",
                         )
+            if data_node_config_id != DataNodeConfig._DEFAULT_KEY:
+                properties_to_check_at_least_one = [
+                    DataNodeConfig._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY,
+                    DataNodeConfig._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY,
+                ]
+                has_at_least_one = False
+                for prop_key in properties_to_check_at_least_one:
+                    if data_node_config.properties and prop_key in data_node_config.properties:
+                        has_at_least_one = True
+                if not has_at_least_one:
+                    self._error(
+                        ", ".join(properties_to_check_at_least_one),
+                        None,
+                        f"Either `{DataNodeConfig._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY}` field or "
+                        f"`{DataNodeConfig._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY}` field of "
+                        f"DataNodeConfig `{data_node_config_id}` must be populated with a Callable function.",
+                    )
 
     def _check_callable(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         properties_to_check = {
             DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC: [
-                DataNodeConfig._REQUIRED_READ_FUNCTION_GENERIC_PROPERTY,
-                DataNodeConfig._REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY,
+                DataNodeConfig._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY,
+                DataNodeConfig._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY,
             ],
             DataNodeConfig._STORAGE_TYPE_VALUE_SQL: [
                 DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,

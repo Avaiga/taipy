@@ -533,7 +533,32 @@ def test_list_version():
     assert "Development" in version_list[5] and "latest" not in version_list[5]
 
 
-def test_modify_config_properties_without_force():
+def test_modify_job_configuration_dont_stop_application(caplog):
+    scenario_config = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Core().run()
+    scenario = _ScenarioManager._create(scenario_config)
+    job_dict = _ScenarioManager._submit(scenario)
+    assert all(job.is_completed for _, jobs in job_dict.items() for job in jobs)
+
+    init_config()
+    scenario_config = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
+        Core().run()
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+    job_dict = _ScenarioManager._submit(scenario)
+    assert all(job.is_completed for _, jobs in job_dict.items() for job in jobs)
+
+    error_message = str(caplog.text)
+    assert 'JOB "mode" was modified' in error_message
+    assert 'JOB "max_nb_of_workers" was modified' in error_message
+
+
+def test_modify_config_properties_without_force(caplog):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -545,12 +570,12 @@ def test_modify_config_properties_without_force():
 
     scenario_config_2 = config_scenario_2()
 
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "--experiment", "1.0"]):
             Core().run()
             scenario = _ScenarioManager._create(scenario_config_2)
             _ScenarioManager._submit(scenario)
-    error_message = str(e.value)
+    error_message = str(caplog.text)
 
     assert 'DATA_NODE "d3" was added' in error_message
 
@@ -581,7 +606,7 @@ def twice(a):
 def config_scenario():
     Config.configure_data_node(id="d0")
     data_node_1_config = Config.configure_data_node(
-        id="d1", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+        id="d1", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
     )
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice, data_node_1_config, data_node_2_config)
