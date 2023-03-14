@@ -550,7 +550,7 @@ def test_modify_job_configuration_dont_stop_application(caplog):
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
         Core().run()
     scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
+
     jobs = _ScenarioManager._submit(scenario)
     assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
     error_message = str(caplog.text)
