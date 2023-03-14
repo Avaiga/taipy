@@ -34,7 +34,7 @@ class TestRepositoriesStorage:
         m = MockObj("uuid", "foo")
         r._save(m)
 
-        fetched_model = r.load(m.id)
+        fetched_model = r._load(m.id)
         assert m == fetched_model
 
     @pytest.mark.parametrize(
@@ -136,7 +136,7 @@ class TestRepositoriesStorage:
         r._export("uuid", export_path)
         assert pathlib.Path(os.path.join(export_path, "mock_model/uuid.json")).exists()
         with open(os.path.join(export_path, "mock_model/uuid.json"), "r") as exported_file:
-            exported_data = json.load(exported_file)
+            exported_data = json._load(exported_file)
             assert exported_data["id"] == "uuid"
             assert exported_data["name"] == "foo"
 

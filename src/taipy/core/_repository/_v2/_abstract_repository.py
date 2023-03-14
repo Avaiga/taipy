@@ -15,7 +15,7 @@ import re
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Generic, Iterable, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 Json = Union[dict, list, str, int, float, bool, None]
 
@@ -50,23 +50,12 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _load_all(self, version_number: Optional[str]) -> List[Entity]:
+    def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
         """
-        Retrieve all the entities' data from the repository of a specific version.
+        Retrieve all the entities' data from the repository taking any passed filter into account.
 
         Returns:
             A list of entities.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def _load_all_by(self, by, version_number: Optional[str]) -> List[Entity]:
-        """
-        Retrieve all the entities' data from the repository of a specific version
-        based on a criteria.
-
-        Returns:
-            The list of all entities matching the criteria.
         """
         raise NotImplementedError
 
@@ -96,12 +85,11 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _search(self, attribute: str, value: Any, version_number: Optional[str]) -> Optional[Entity]:
+    def _search(self, attribute: str, value: Any) -> Optional[Entity]:
         """
         Args:
             attribute: The entity property that is the key to the search.
             value: The value of the attribute that are being searched.
-            version_number (Optional[str]): The version to search from.
 
         Returns:
             A list of entities

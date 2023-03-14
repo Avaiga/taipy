@@ -12,7 +12,7 @@
 import json
 import pathlib
 import shutil
-from typing import Any, Iterable, Iterator, List, Optional, Type, Union
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
 
 from src.taipy.core.common._utils import _retry
 from src.taipy.core.common.typing import Entity, Json, ModelType
@@ -60,7 +60,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             return json.load(source)
 
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
-    def load(self, model_id: str) -> Entity:
+    def _load(self, model_id: str) -> Entity:
         try:
             model = self.model(**self._get(self.__get_model_filepath(model_id)))
             return model._to_entity()
@@ -68,38 +68,15 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             raise ModelNotFound(str(self.dir_path), model_id)
 
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
-    def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
-        """
-        Load all entities from a specific version.
-        """
-        from ..._version._version_manager_factory import _VersionManagerFactory
-
-        version_number = _VersionManagerFactory._build_manager()._replace_version_number(version_number)
-
-        r = []
+    def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
+        entities = []
         try:
             for f in self.dir_path.iterdir():
-                if entity := self.model._to_entity(self.model(**self._get(f))):
-                    if not version_number or entity.version == version_number:
-                        r.append(entity)
+                if data := self.__filter_by(f, filters):
+                    entities.append(self.model(**data)._to_entity())
         except FileNotFoundError:
             pass
-        return r
-
-    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
-    def _load_all_by(self, by, version_number: Optional[str]) -> List[Entity]:
-        from ..._version._version_manager_factory import _VersionManagerFactory
-
-        version_number = _VersionManagerFactory._build_manager()._replace_version_number(version_number)
-
-        r = []
-        try:
-            for f in self.dir_path.iterdir():
-                if entity := self.model._to_entity(f, by=by, version_number=version_number):
-                    r.append(entity)
-        except FileNotFoundError:
-            pass
-        return r
+        return entities
 
     def _delete(self, model_id: str):
         try:
@@ -114,8 +91,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         for model_id in ids:
             self._delete(model_id)
 
-    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Entity]:
-        return next(self.__search(attribute, value, version_number), None)
+    def _search(self, attribute: str, value: Any, filters: List[Dict] = None) -> Optional[Entity]:
+        return next(self.__search(attribute, value), None)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         if isinstance(folder_path, str):
@@ -140,8 +117,19 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def __create_directory_if_not_exists(self):
         self.dir_path.mkdir(parents=True, exist_ok=True)
 
-    def __search(self, attribute: str, value: str, version_number: Optional[str] = None) -> Iterator[Entity]:
-        return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(version_number))
+    def __search(self, attribute: str, value: str, filters: List[Dict] = None) -> Iterator[Entity]:
+        return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(filters))
 
     def __get_model_filepath(self, model_id) -> pathlib.Path:
         return self.dir_path / f"{model_id}.json"
+
+    def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Json:
+        if not filters:
+            filters = []
+        with open(filepath, "r") as f:
+            contents = f.read()
+
+            if not all(f'"{key}": "{value}"' in contents for key, value in filters):
+                return None
+
+        return json.loads(contents, cls=_Decoder)
