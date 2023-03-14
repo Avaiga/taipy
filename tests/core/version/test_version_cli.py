@@ -27,6 +27,7 @@ from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from tests.core.utils import assert_true_after_time
 
 from ...conftest import init_config
 
@@ -540,7 +541,7 @@ def test_modify_job_configuration_dont_stop_application(caplog):
         Core().run()
     scenario = _ScenarioManager._create(scenario_config)
     jobs = _ScenarioManager._submit(scenario)
-    assert all(job.is_completed() for job in jobs)
+    assert all(job.is_finished() for job in jobs)
 
     init_config()
     scenario_config = config_scenario()
@@ -551,8 +552,7 @@ def test_modify_job_configuration_dont_stop_application(caplog):
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario)
     jobs = _ScenarioManager._submit(scenario)
-    assert all(job.is_completed() for job in jobs)
-
+    assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
     error_message = str(caplog.text)
     assert 'JOB "mode" was modified' in error_message
     assert 'JOB "max_nb_of_workers" was modified' in error_message
