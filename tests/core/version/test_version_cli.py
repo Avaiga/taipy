@@ -541,7 +541,7 @@ def test_modify_job_configuration_dont_stop_application(caplog):
         Core().run()
     scenario = _ScenarioManager._create(scenario_config)
     jobs = _ScenarioManager._submit(scenario)
-    assert all(job.is_finished() for job in jobs)
+    assert all([job.is_finished() for job in jobs])
 
     init_config()
     scenario_config = config_scenario()
