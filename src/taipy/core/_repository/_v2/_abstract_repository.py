@@ -15,9 +15,12 @@ import re
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, Generic, Iterable, List, Optional, Union
+from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
-from src.taipy.core.common.typing import Entity, Json, ModelType
+from src.taipy.core.common.typing import Json
+
+ModelType = TypeVar("ModelType")
+Entity = TypeVar("Entity")
 
 
 class _AbstractRepository(Generic[ModelType, Entity]):  # type: ignore
