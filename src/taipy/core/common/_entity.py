@@ -9,12 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import TypeVar
-
 from ._reload import _set_entity
-
-# TODO: to be imported from taipy.core.common.typing
-# after PR https://github.com/Avaiga/taipy-core/pull/514 is merged
 
 
 class _Entity:
