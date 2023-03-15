@@ -391,8 +391,7 @@ class TestTaipy:
         scenario_cfg_2 = Config.configure_scenario("s2", pipeline_cfg_2, Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
-        job_1 = tp.submit(scenario_1)
-        job_1 = job_1[scenario_1.p1.id][0]
+        job_1 = tp.submit(scenario_1)[0]
 
         # Export scenario 1
         tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_1")
@@ -406,8 +405,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
 
         scenario_2 = tp.create_scenario(scenario_cfg_2)
-        job_2 = tp.submit(scenario_2)
-        job_2 = job_2[scenario_2.p2.id][0]
+        job_2 = tp.submit(scenario_2)[0]
 
         # Export scenario 2
         scenario_2.export(pathlib.Path.cwd() / "./tmp/exp_scenario_2")

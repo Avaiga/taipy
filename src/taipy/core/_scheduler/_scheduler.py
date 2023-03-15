@@ -20,11 +20,11 @@ from typing import Callable, Iterable, List, Optional, Set, Union
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ..common._submittable import _Submittable
 from ..common.alias import JobId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
-from ..pipeline.pipeline import Pipeline
 from ..task.task import Task
 from ._abstract_scheduler import _AbstractScheduler
 
@@ -49,20 +49,20 @@ class _Scheduler(_AbstractScheduler):
     @classmethod
     def submit(
         cls,
-        pipeline: Pipeline,
+        submittable: _Submittable,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
     ) -> List[Job]:
-        """Submit the given `Pipeline^` for an execution.
+        """Submit the given `Scenario^` or `Pipeline^` for an execution.
 
         Parameters:
-             pipeline (Pipeline^): The pipeline to submit for execution.
+             submittable (Union[SCenario^, Pipeline^]): The scenario or pipeline to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
-             force (bool) : Enforce execution of the pipeline's tasks even if their output data
+             force (bool) : Enforce execution of the scenario's or pipeline's tasks even if their output data
                 nodes are cached.
-             wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in
+             wait (bool): Wait for the scheduled jobs created from the scenario or pipeline submission to be finished in
                 asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
@@ -71,7 +71,7 @@ class _Scheduler(_AbstractScheduler):
         """
         submit_id = cls.__generate_submit_id()
         res = []
-        tasks = pipeline._get_sorted_tasks()
+        tasks = submittable._get_sorted_tasks()
         with cls.lock:
             for ts in tasks:
                 for task in ts:

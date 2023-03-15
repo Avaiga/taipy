@@ -130,12 +130,12 @@ class _PipelineManager(_Manager[Pipeline]):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
         check_inputs_are_ready: bool = True,
-    ):
-        callbacks = callbacks or []
+    ) -> List[Job]:
         pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
         pipeline = cls._get(pipeline_id)
         if pipeline is None:
             raise NonExistingPipeline(pipeline_id)
+        callbacks = callbacks or []
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(pipeline._get_inputs())

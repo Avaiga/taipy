@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
 
 import pytest
 
@@ -923,57 +923,55 @@ def test_submit():
             cls.submit_calls.append(task.id)
             return super()._submit_task(task, submit_id, callbacks, force)
 
-    _TaskManager._scheduler = MockScheduler
+    with patch("src.taipy.core.task._task_manager._TaskManager._scheduler", new=MockScheduler):
 
-    with pytest.raises(NonExistingScenario):
+        with pytest.raises(NonExistingScenario):
+            _ScenarioManager._submit(scenario.id)
+        with pytest.raises(NonExistingScenario):
+            _ScenarioManager._submit(scenario)
+
+        # scenario does exist, but pipeline does not exist.
+        # We expect an exception to be raised
+        _ScenarioManager._set(scenario)
+        with pytest.raises(NonExistingPipeline):
+            _ScenarioManager._submit(scenario.id)
+        with pytest.raises(NonExistingPipeline):
+            _ScenarioManager._submit(scenario)
+
+        # scenario and pipeline do exist, but tasks does not exist.
+        # We expect an exception to be raised
+        _PipelineManager._set(pipeline_1)
+        _PipelineManager._set(pipeline_2)
+        with pytest.raises(NonExistingTask):
+            _ScenarioManager._submit(scenario.id)
+        with pytest.raises(NonExistingTask):
+            _ScenarioManager._submit(scenario)
+
+        # scenario, pipeline, and tasks do exist.
+        # We expect all the tasks to be submitted once,
+        # and respecting specific constraints on the order
+        _TaskManager._set(task_1)
+        _TaskManager._set(task_2)
+        _TaskManager._set(task_3)
+        _TaskManager._set(task_4)
+        _TaskManager._set(task_5)
         _ScenarioManager._submit(scenario.id)
-    with pytest.raises(NonExistingScenario):
+        submit_calls = _TaskManager._scheduler().submit_calls
+        assert len(submit_calls) == 5
+        assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
+        assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
+        assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
+        assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
+        assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
+
         _ScenarioManager._submit(scenario)
-
-    # scenario does exist, but pipeline does not exist.
-    # We expect an exception to be raised
-    _ScenarioManager._set(scenario)
-    with pytest.raises(NonExistingPipeline):
-        _ScenarioManager._submit(scenario.id)
-    with pytest.raises(NonExistingPipeline):
-        _ScenarioManager._submit(scenario)
-
-    # scenario and pipeline do exist, but tasks does not exist.
-    # We expect an exception to be raised
-    _PipelineManager._set(pipeline_1)
-    _PipelineManager._set(pipeline_2)
-    with pytest.raises(NonExistingTask):
-        _ScenarioManager._submit(scenario.id)
-    with pytest.raises(NonExistingTask):
-        _ScenarioManager._submit(scenario)
-
-    # scenario, pipeline, and tasks do exist.
-    # We expect all the tasks to be submitted once,
-    # and respecting specific constraints on the order
-    _TaskManager._set(task_1)
-    _TaskManager._set(task_2)
-    _TaskManager._set(task_3)
-    _TaskManager._set(task_4)
-    _TaskManager._set(task_5)
-    _ScenarioManager._submit(scenario.id)
-    submit_calls = _TaskManager._scheduler().submit_calls
-    assert len(submit_calls) == 5
-    assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
-    assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
-    assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
-    assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
-    assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
-
-    _ScenarioManager._submit(scenario)
-    submit_calls = _TaskManager._scheduler().submit_calls
-    assert len(submit_calls) == 10
-    assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
-    assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
-    assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
-    assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
-    assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
-
-    _TaskManager._scheduler = _SchedulerFactory._build_scheduler
+        submit_calls = _TaskManager._scheduler().submit_calls
+        assert len(submit_calls) == 10
+        assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
+        assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
+        assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
+        assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
+        assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
 
 
 def my_print(a, b):
