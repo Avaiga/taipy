@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="{{css_vars}}">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,6 +12,13 @@
     {%- if version -%}
     window.taipyVersion="{{version}}";
     {% endif %}</script>
+    {%- if css_vars -%}
+      <style>
+        :root{
+          {{css_vars}}
+        }
+      </style>
+    {% endif %}
     <!-- Taipy Gui js <%= htmlWebpackPlugin.options.frontend_version %> <%= htmlWebpackPlugin.options.frontend_build_date %> <%= htmlWebpackPlugin.options.frontend_build_mode %> -->
   </head>
   <body >
