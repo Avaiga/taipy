@@ -9,7 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import TypeVar
+
 from ._reload import _set_entity
+
+# TODO: to be imported from taipy.core.common.typing
+# after PR https://github.com/Avaiga/taipy-core/pull/514 is merged
 
 
 class _Entity:
@@ -23,3 +28,11 @@ class _Entity:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._is_in_context = False
         _set_entity(self._MANAGER_NAME, self)
+
+    @classmethod
+    def _to_model(cls, entity):
+        raise NotImplementedError
+
+    @classmethod
+    def _from_model(cls, model):
+        raise NotImplementedError

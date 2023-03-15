@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import uuid
+from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
@@ -20,6 +21,7 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common import _utils
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
@@ -32,6 +34,7 @@ from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
 from ..task.task import Task
+from ._pipeline_model import _PipelineModel
 
 
 class Pipeline(_Entity, _Submittable):
@@ -260,3 +263,45 @@ class Pipeline(_Entity, _Submittable):
         from ._pipeline_manager_factory import _PipelineManagerFactory
 
         return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+
+    @classmethod
+    def _to_model(cls, pipeline):
+        datanode_task_edges = defaultdict(list)
+        task_datanode_edges = defaultdict(list)
+
+        for task in pipeline._get_tasks().values():
+            task_id = str(task.id)
+            for predecessor in task.input.values():
+                datanode_task_edges[str(predecessor.id)].append(task_id)
+            for successor in task.output.values():
+                task_datanode_edges[task_id].append(str(successor.id))
+        return _PipelineModel(
+            pipeline.id,
+            pipeline.owner_id,
+            list(pipeline._parent_ids),
+            pipeline.config_id,
+            pipeline._properties.data,
+            cls.__to_task_ids(pipeline._tasks),
+            _utils._fcts_to_dict(pipeline._subscribers),
+            pipeline.version,
+        )
+
+    @classmethod
+    def _from_model(cls, model):
+        return Pipeline(
+            model.config_id,
+            model.properties,
+            model.tasks,
+            model.id,
+            model.owner_id,
+            set(model.parent_ids),
+            [
+                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                for it in model.subscribers
+            ],  # type: ignore
+            model.version,
+        )
+
+    @staticmethod
+    def __to_task_ids(tasks):
+        return [t.id if isinstance(t, Task) else t for t in tasks]

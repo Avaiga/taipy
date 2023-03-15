@@ -18,28 +18,46 @@ from src.taipy.core.common.alias import PipelineId, TaskId
 from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
+from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
+def test_from_and_to_model(pipeline, pipeline_model):
+    repository = _PipelineRepositoryFactory._build_repository().repo
+
+    assert repository._to_model(pipeline) == pipeline_model
+    assert repository._from_model(pipeline_model) == pipeline
+
+
+def test_from_and_to_model_with_sql_repo(pipeline, pipeline_model):
+    Config.configure_global_app(repository_type="sql")
+
+    repository = _PipelineRepositoryFactory._build_repository().repo._table
+
+    assert repository._to_model(pipeline) == pipeline_model
+    assert repository._from_model(pipeline_model) == pipeline
+
+
 def test_create_pipeline():
-    input = InMemoryDataNode("foo", Scope.PIPELINE)
-    output = InMemoryDataNode("bar", Scope.PIPELINE)
-    task = Task("baz", {}, print, [input], [output], TaskId("task_id"))
+    input_0 = InMemoryDataNode("foo", Scope.PIPELINE)
+    output_0 = InMemoryDataNode("bar", Scope.PIPELINE)
+    task = Task("baz", {}, print, [input_0], [output_0], TaskId("task_id"))
 
     pipeline = Pipeline("name_1", {"description": "description"}, [task])
     assert pipeline.id is not None
     assert pipeline.owner_id is None
     assert pipeline.config_id == "name_1"
     assert pipeline.description == "description"
-    assert pipeline.foo == input
-    assert pipeline.bar == output
+    assert pipeline.foo == input_0
+    assert pipeline.bar == output_0
     assert pipeline.baz.id == task.id
     assert pipeline.tasks == {task.config_id: task}
-    assert pipeline.data_nodes == {"foo": input, "bar": output}
+    assert pipeline.data_nodes == {"foo": input_0, "bar": output_0}
     assert pipeline.parent_ids == set()
 
     with pytest.raises(AttributeError):
@@ -78,7 +96,7 @@ def test_create_pipeline():
     assert pipeline_2.config_id == "name_2"
     assert pipeline_2.description == "description"
     assert pipeline_2.tasks == {task.config_id: task, task_1.config_id: task_1}
-    assert pipeline_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
+    assert pipeline_2.data_nodes == {"foo": input_0, "bar": output_0, "input": input_1, "output": output_1}
     assert pipeline_2.parent_ids == {"parent_id_1", "parent_id_2"}
 
 

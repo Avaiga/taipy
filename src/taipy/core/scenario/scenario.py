@@ -20,13 +20,15 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common import _utils
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._submittable import _Submittable
 from ..common._utils import _Subscriber
-from ..common.alias import PipelineId, ScenarioId
+from ..common.alias import CycleId, PipelineId, ScenarioId
+from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
@@ -35,6 +37,7 @@ from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
+from ._scenario_model import _ScenarioModel
 
 
 class Scenario(_Entity, _Submittable):
@@ -362,3 +365,48 @@ class Scenario(_Entity, _Submittable):
                 raise NonExistingPipeline(pipeline_or_id)
             pipelines[p.config_id] = p
         return pipelines
+
+    @classmethod
+    def _to_model(cls, entity):
+        return _ScenarioModel(
+            id=entity.id,
+            config_id=entity.config_id,
+            pipelines=cls.__to_pipeline_ids(entity._pipelines),
+            properties=entity._properties.data,
+            creation_date=entity._creation_date.isoformat(),
+            primary_scenario=entity._primary_scenario,
+            subscribers=_utils._fcts_to_dict(entity._subscribers),
+            tags=list(entity._tags),
+            version=entity.version,
+            cycle=cls.__to_cycle_id(entity._cycle),
+        )
+
+    @classmethod
+    def _from_model(cls, model):
+        return Scenario(
+            scenario_id=model.id,
+            config_id=model.config_id,
+            pipelines=model.pipelines,  # type: ignore
+            properties=model.properties,
+            creation_date=datetime.fromisoformat(model.creation_date),
+            is_primary=model.primary_scenario,
+            tags=set(model.tags),
+            cycle=Scenario.__to_cycle(model.cycle),
+            subscribers=[
+                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                for it in model.subscribers
+            ],
+            version=model.version,
+        )
+
+    @staticmethod
+    def __to_pipeline_ids(pipelines) -> List[PipelineId]:
+        return [p.id if isinstance(p, Pipeline) else p for p in pipelines]
+
+    @staticmethod
+    def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
+        return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
+
+    @staticmethod
+    def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:
+        return cycle.id if cycle else None

@@ -10,61 +10,22 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
-from datetime import datetime
 from typing import Any, Iterable, List, Optional, Union
 
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
-from ..common import _utils
-from ..common._utils import _Subscriber
-from ..common.alias import CycleId, PipelineId
-from ..cycle._cycle_manager_factory import _CycleManagerFactory
-from ..cycle.cycle import Cycle
-from ..pipeline.pipeline import Pipeline
 from ._scenario_model import _ScenarioModel
 from .scenario import Scenario
 
 
 class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # type: ignore
     def __init__(self, **kwargs):
-        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        kwargs.update({"to_model_fct": Scenario._to_model, "from_model_fct": Scenario._from_model})
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
 
     @property
     def repository(self):
         return self.repo
-
-    def _to_model(self, scenario: Scenario):
-        return _ScenarioModel(
-            id=scenario.id,
-            config_id=scenario.config_id,
-            pipelines=self.__to_pipeline_ids(scenario._pipelines),
-            properties=scenario._properties.data,
-            creation_date=scenario._creation_date.isoformat(),
-            primary_scenario=scenario._primary_scenario,
-            subscribers=_utils._fcts_to_dict(scenario._subscribers),
-            tags=list(scenario._tags),
-            version=scenario.version,
-            cycle=self.__to_cycle_id(scenario._cycle),
-        )
-
-    def _from_model(self, model: _ScenarioModel) -> Scenario:
-        scenario = Scenario(
-            scenario_id=model.id,
-            config_id=model.config_id,
-            pipelines=model.pipelines,  # type: ignore
-            properties=model.properties,
-            creation_date=datetime.fromisoformat(model.creation_date),
-            is_primary=model.primary_scenario,
-            tags=set(model.tags),
-            cycle=self.__to_cycle(model.cycle),
-            subscribers=[
-                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
-                for it in model.subscribers
-            ],
-            version=model.version,
-        )
-        return scenario
 
     def load(self, model_id: str) -> Scenario:
         return self.repo.load(model_id)
@@ -92,15 +53,3 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)
-
-    @staticmethod
-    def __to_pipeline_ids(pipelines) -> List[PipelineId]:
-        return [p.id if isinstance(p, Pipeline) else p for p in pipelines]
-
-    @staticmethod
-    def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
-        return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
-
-    @staticmethod
-    def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:
-        return cycle.id if cycle else None
