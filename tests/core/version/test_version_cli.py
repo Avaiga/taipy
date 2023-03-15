@@ -538,7 +538,8 @@ def test_modify_job_configuration_dont_stop_application(caplog):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Core().run()
+        Config.configure_job_executions(mode="development")
+        Core().run(force_restart=True)
     scenario = _ScenarioManager._create(scenario_config)
     jobs = _ScenarioManager._submit(scenario)
     assert all([job.is_finished() for job in jobs])
@@ -548,7 +549,7 @@ def test_modify_job_configuration_dont_stop_application(caplog):
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
-        Core().run()
+        Core().run(force_restart=True)
     scenario = _ScenarioManager._create(scenario_config)
 
     jobs = _ScenarioManager._submit(scenario)

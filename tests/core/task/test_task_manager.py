@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
+from unittest import mock
 
 import pytest
 
@@ -321,27 +322,27 @@ def test_submit_task():
             self.submit_ids.append(submit_id)
             return None
 
-    _TaskManager._scheduler = MockScheduler
+    with mock.patch("src.taipy.core.task._task_manager._TaskManager._scheduler", new=MockScheduler):
 
-    # Task does not exist, we expect an exception
-    with pytest.raises(NonExistingTask):
+        # Task does not exist, we expect an exception
+        with pytest.raises(NonExistingTask):
+            _TaskManager._submit(task_1)
+        with pytest.raises(NonExistingTask):
+            _TaskManager._submit(task_1.id)
+
+        _TaskManager._set(task_1)
         _TaskManager._submit(task_1)
-    with pytest.raises(NonExistingTask):
-        _TaskManager._submit(task_1.id)
+        call_ids = [call.id for call in MockScheduler.submit_calls]
+        assert call_ids == [task_1.id]
+        assert len(MockScheduler.submit_ids) == 1
 
-    _TaskManager._set(task_1)
-    _TaskManager._submit(task_1)
-    call_ids = [call.id for call in MockScheduler.submit_calls]
-    assert call_ids == [task_1.id]
-    assert len(MockScheduler.submit_ids) == 1
+        _TaskManager._submit(task_1)
+        assert len(MockScheduler.submit_ids) == 2
+        assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
 
-    _TaskManager._submit(task_1)
-    assert len(MockScheduler.submit_ids) == 2
-    assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
-
-    _TaskManager._submit(task_1)
-    assert len(MockScheduler.submit_ids) == 3
-    assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
+        _TaskManager._submit(task_1)
+        assert len(MockScheduler.submit_ids) == 3
+        assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
 
 
 def my_print(a, b):
