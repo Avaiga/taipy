@@ -23,7 +23,7 @@ ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
 
 
-class _AbstractRepository(Generic[ModelType, Entity]):  # type: ignore
+class _AbstractRepository(Generic[ModelType, Entity]):
     @abstractmethod
     def _save(self, entity: Entity):
         """
