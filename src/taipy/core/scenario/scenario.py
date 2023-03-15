@@ -29,11 +29,10 @@ from ..common._utils import _Subscriber
 from ..common.alias import PipelineId, ScenarioId
 from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
-from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
+from ..exceptions.exceptions import NonExistingPipeline
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
-from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 
 
@@ -139,8 +138,9 @@ class Scenario(_Entity, _Submittable):
         list_dict_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
         for dict_task in list_dict_tasks:
             for task_config_id, task in dict_task.items():
-                if task_config_id in tasks and task not in tasks[task_config_id]:
-                    tasks[task_config_id].append(task)
+                if task_config_id in tasks:
+                    if task not in tasks[task_config_id]:
+                        tasks[task_config_id].append(task)
                 else:
                     tasks[task_config_id] = [task]
         return tasks

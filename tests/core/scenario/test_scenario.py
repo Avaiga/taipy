@@ -14,7 +14,7 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core import DataNode
+from src.taipy.core import DataNode, taipy
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -25,6 +25,7 @@ from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task.task import Task
+from taipy import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
@@ -437,6 +438,37 @@ def test_get_tasks():
     pipeline_4 = Pipeline("xyzzyx", {}, [task_5, task_4], PipelineId("p4"))
     scenario_2 = Scenario("scenario_2", [pipeline_3, pipeline_4], {}, ScenarioId("s2"))
     assert scenario_2.tasks == {"grault": [task_1], "garply": [task_2], "waldo": [task_3, task_5], "fred": [task_4]}
+
+
+def test_get_tasks_with_pipeline_scope():
+
+    a = Config.configure_data_node("A")
+    b = Config.configure_data_node("B")
+    c = Config.configure_data_node("C", scope=Scope.PIPELINE)
+    d = Config.configure_data_node("D", scope=Scope.PIPELINE)
+    e = Config.configure_data_node("E", scope=Scope.PIPELINE)
+
+    t1 = Config.configure_task("t1", print, a, b)
+    t2 = Config.configure_task("t2", print, b, c)
+    t3 = Config.configure_task("t3", print, c, d)
+    t4 = Config.configure_task("t4", print, c, e)
+
+    pA = Config.configure_pipeline("pA", [t1, t2])
+    pB = Config.configure_pipeline("pB", [t2, t3])
+    pC = Config.configure_pipeline("pC", [t2, t4])
+
+    s = Config.configure_scenario("scenario", [pA, pB, pC])
+
+    scenario = taipy.create_scenario(s)
+
+    assert "t1" in scenario.tasks
+    assert len(scenario.tasks["t1"]) == 1
+    assert "t2" in scenario.tasks
+    assert len(scenario.tasks["t2"]) == 3
+    assert "t3" in scenario.tasks
+    assert len(scenario.tasks["t3"]) == 1
+    assert "t4" in scenario.tasks
+    assert len(scenario.tasks["t4"]) == 1
 
 
 def test_get_set_of_tasks():
