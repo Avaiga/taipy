@@ -15,15 +15,12 @@ import re
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, Iterable, List, Optional, Union
 
-Json = Union[dict, list, str, int, float, bool, None]
-
-ModelType = TypeVar("ModelType")
-Entity = TypeVar("Entity")
+from src.taipy.core.common.typing import Entity, Json, ModelType
 
 
-class _AbstractRepository(Generic[ModelType, Entity]):
+class _AbstractRepository(Generic[ModelType, Entity]):  # type: ignore
     @abstractmethod
     def _save(self, entity: Entity):
         """
@@ -85,7 +82,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _search(self, attribute: str, value: Any) -> Optional[Entity]:
+    def _search(self, attribute: str, value: Any, filters: List[Dict]) -> Optional[Entity]:
         """
         Args:
             attribute: The entity property that is the key to the search.
