@@ -65,7 +65,7 @@ def submit(
     force: bool = False,
     wait: bool = False,
     timeout: Optional[Union[float, int]] = None,
-):
+) -> Union[Job, List[Job]]:
     """Submit an entity for execution.
 
     If the entity is a pipeline or a scenario, all the tasks of the entity are
@@ -74,10 +74,15 @@ def submit(
     Parameters:
         entity (Union[Scenario^, Pipeline^, Task^]): The entity to submit.
         force (bool): If True, the execution is forced even if the data nodes are in cache.
-        wait (bool): Wait for the scheduled jobs created from the submission to be finished in asynchronous mode.
-        timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before
-            returning.
+        wait (bool): Wait for the scheduled jobs created from the submission to be finished
+            in asynchronous mode.
+        timeout (Union[float, int]): The optional maximum number of seconds to wait
+            for the jobs to be finished before returning.
+    Returns:
+        The created `Job^` or a collection of the created `Job^` depends on the submitted entity.
 
+        - If a `Scenario^` or a `Pipeline^` is provided, it will return a list of `Job^`.
+        - If a `Task^` is provided, it will return the created `Job^`.
     """
     if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)

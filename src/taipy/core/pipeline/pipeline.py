@@ -260,7 +260,8 @@ class Pipeline(_Entity, _Submittable):
                 mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before
                 returning.
-
+        Returns:
+            A list of created `Job^`s.
         """
         from ._pipeline_manager_factory import _PipelineManagerFactory
 

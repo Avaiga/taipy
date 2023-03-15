@@ -304,6 +304,8 @@ class Scenario(_Entity, _Submittable):
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
+        Returns:
+            A list of created `Job^`s.
         """
         from ._scenario_manager_factory import _ScenarioManagerFactory
 
