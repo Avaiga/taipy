@@ -13,35 +13,16 @@
 
 /**************************************************************
 
-                   TAIPY LAYOUT
+                   TAIPY IMAGE
 
 ***************************************************************/
-
-/*************************************************
-              OVERRIDES / NORMALIZATION
-**************************************************/
-
-/* Prevent background repeat */
-.taipy-image>span {
-    background-repeat: no-repeat;
-}
 
 /*************************************************
               MODIFIER CLASSES
 **************************************************/
 
-/* contain : resize the image to be perfectly contained and centered in its container */
-.taipy-image.contain>span {
-    background-size: contain;
-    background-position: center center;
-}
-
-/* position_left: position the image on the left side of its container */
-.taipy-image.position_left>span {
-    background-position: left center;
-}
-
-/* position_right: position the image on the right side of its container */
-.taipy-image.position_left>span {
-    background-position: right center;
+/* inline : inline an image that is block by default */
+.taipy-image.inline {
+    display: inline-flex;
+    vertical-align: middle;
 }

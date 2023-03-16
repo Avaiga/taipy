@@ -58,7 +58,12 @@ const Image = (props: ImageProps) => {
         return [undefined, undefined, false];
     }, [content]);
 
-    const style = useMemo(() => ({ width: width, height: height, display: inlineSvg ? "inline-flex" : undefined }), [width, height, inlineSvg]);
+    const style = useMemo(() => ({
+        width: width, 
+        height: height, 
+        display: inlineSvg ? "inline-flex" : undefined,
+        verticalAlign: inlineSvg ? "middle" : undefined
+    }), [width, height, inlineSvg]);
 
     useEffect(() => {
         if (svg) {
