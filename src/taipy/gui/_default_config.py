@@ -41,8 +41,8 @@ default_config: Config = {
     "stylekit": True,
     "stylekit_variables" : {
         # Primary and secondary colors
-        "color_primary": "#ff462b",
-        "color_secondary": "#283282",
+        "color_primary": "#ff6049",
+        "color_secondary": "#293ee7",
 
         # Contextual color
         "color_error": "#FF595E",
@@ -50,12 +50,12 @@ default_config: Config = {
         "color_success": "#96E6B3",
 
         # Background and elevation color for LIGHT MODE
-        "color_background_light": "#f1f1f1",
+        "color_background_light": "#f0f5f7",
         "color_paper_light": "#ffffff",
 
         # Background and elevation color for DARK MODE
-        "color_background_dark": "#051924",
-        "color_paper_dark": "#072636",
+        "color_background_dark": "#152335",
+        "color_paper_dark": "#1f2f44",
 
         # DEFINING FONTS
         # Set main font family
