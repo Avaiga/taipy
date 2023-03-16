@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
-from src.taipy.core.common.typing import Json
+from ...common.typing import Json
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
