@@ -17,6 +17,10 @@
 
 ***************************************************************/
 
+/*************************************************
+              TEXT COLOR
+**************************************************/
+
 .color_primary {
     color: var(--color-primary) !important;
 }
@@ -37,6 +41,47 @@
     color: var(--color-success) !important;
 }
 
+.color_background_light {
+    color: var(--color-background-light) !important;
+}
+
+.color_background_dark {
+    color: var(--color-background-dark) !important;
+}
+
+.color_background {
+    color: var(--color-background) !important;
+}
+
+.color_paper_light {
+    color: var(--color-paper-light) !important;
+}
+
+.color_paper_dark {
+    color: var(--color-paper-dark) !important;
+}
+
+.color_paper {
+    color: var(--color-paper) !important;
+}
+
+.color_contrast_light {
+    color: var(--color-contrast-light) !important;
+}
+
+.color_contrast_dark {
+    color: var(--color-contrast-dark) !important;
+}
+
+.color_contrast {
+    color: var(--color-contrast) !important;
+}
+
+
+/*************************************************
+              BACKGROUND COLOR
+**************************************************/
+
 .bg_primary {
     background-color: var(--color-primary) !important;
 }
@@ -55,4 +100,40 @@
 
 .bg_success {
     background-color: var(--color-success) !important;
+}
+
+.bg_default_light {
+    background-color: var(--color-background-light) !important;
+}
+
+.bg_default_dark {
+    background-color: var(--color-background-dark) !important;
+}
+
+.bg_default {
+    background-color: var(--color-background) !important;
+}
+
+.bg_paper_light {
+    background-color: var(--color-paper-light) !important;
+}
+
+.bg_paper_dark {
+    background-color: var(--color-paper-dark) !important;
+}
+
+.bg_paper {
+    background-color: var(--color-paper) !important;
+}
+
+.bg_contrast_light {
+    background-color: var(--color-contrast-light) !important;
+}
+
+.bg_contrast_dark {
+    background-color: var(--color-contrast-dark) !important;
+}
+
+.bg_contrast {
+    background-color: var(--color-contrast) !important;
 }

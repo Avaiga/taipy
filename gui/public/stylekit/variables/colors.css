@@ -14,9 +14,13 @@
  :root {
   --color-background: var(--color-background-light);
   --color-paper: var(--color-paper-light);
+  --color-contrast-light: rgba(0, 0, 0, 0.87);
+  --color-contrast-dark: rgba(255, 255, 255, 0.87);
+  --color-contrast: var(--color-contrast-light);
 }
 
 .taipy-dark {
   --color-background: var(--color-background-dark);
   --color-paper: var(--color-paper-dark);
+  --color-contrast: var(--color-contrast-dark);
 }
