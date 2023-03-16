@@ -11,6 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
+import { lighten } from "@mui/material";
+
 export const stylekitTheme = {
     palette: {
         // Primary and secondary colors
@@ -42,6 +44,15 @@ export const stylekitTheme = {
     },
     // Components normalization
     components: {
+        // Paper element
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    // Remove the unwanted linear gradient overlay one the paper background color
+                    backgroundImage: 'none',
+                }
+            }
+        },
         // Form control
         MuiFormControl: {
             styleOverrides: {
@@ -164,6 +175,16 @@ export const stylekitModeThemes = {
             },
         },
         components: {
+            // Give popover paper a slighly lighter color to reflect superior elevation
+            MuiPopover: {
+                styleOverrides: {
+                    paper: {
+                        backgroundColor: window.taipyConfig?.stylekit?.colorPaperLight 
+                                            ? lighten(window.taipyConfig.stylekit.colorPaperLight, 0.5)
+                                            : undefined,
+                    },
+                },
+            },
             // Give MuiSlider disabled thumb a fill color matching the theme
             MuiSlider: {
                 styleOverrides: {
@@ -186,6 +207,16 @@ export const stylekitModeThemes = {
             },
         },
         components: {
+            // Give popover paper a slighly lighter color to reflect superior elevation
+            MuiPopover: {
+                styleOverrides: {
+                    paper: {
+                        backgroundColor: window.taipyConfig?.stylekit?.colorPaperDark 
+                                            ? lighten(window.taipyConfig.stylekit.colorPaperDark, 0.05)
+                                            : undefined,
+                    },
+                },
+            },
             // Give MuiSlider disabled thumb a fill color matching the theme
             MuiSlider: {
                 styleOverrides: {

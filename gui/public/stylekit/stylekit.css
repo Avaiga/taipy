@@ -26,6 +26,7 @@
 
 /* Controls */
 @import 'controls/button.css';
+@import 'controls/table.css';
 @import 'controls/chart.css';
 @import 'controls/date.css';
 @import 'controls/expandable.css';

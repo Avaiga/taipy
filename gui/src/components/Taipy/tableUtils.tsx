@@ -129,6 +129,7 @@ export const paperSx = { width: "100%", mb: 2 };
 export const tableSx = { minWidth: 250 };
 export const headBoxSx = { display: "flex", alignItems: "flex-start" };
 export const iconInRowSx = { fontSize: "body2.fontSize" };
+export const iconsWrapperSx = { gridColumnStart: 2, display: 'flex', alignItems: 'center' } as CSSProperties;
 const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
 const tableFontSx = { fontSize: "body2.fontSize" };
 
@@ -195,10 +196,6 @@ const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: F
 
 const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
     switch (col.type) {
-        case "int":
-        case "float":
-            base.align = "right";
-            break;
         case "bool":
             base.align = "center";
             break;
@@ -343,14 +340,14 @@ export const EditableCell = (props: EditableCellProps) => {
                             onChange={onBoolChange}
                             inputRef={setInputFocus}
                         />
-                        <div>
+                        <Box sx={iconsWrapperSx}>
                             <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                 <CheckIcon fontSize="inherit" />
                             </IconButton>
                             <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                                 <ClearIcon fontSize="inherit" />
                             </IconButton>
-                        </div>
+                        </Box>
                     </Box>
                 ) : (
                     <Input
@@ -361,14 +358,14 @@ export const EditableCell = (props: EditableCellProps) => {
                         margin="dense"
                         sx={tableFontSx}
                         endAdornment={
-                            <>
+                            <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
                                 </IconButton>
                                 <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                                     <ClearIcon fontSize="inherit" />
                                 </IconButton>
-                            </>
+                            </Box>
                         }
                     />
                 )
@@ -380,28 +377,32 @@ export const EditableCell = (props: EditableCellProps) => {
                         inputRef={setInputFocus}
                         sx={tableFontSx}
                         endAdornment={
-                            <>
+                            <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
                                     <CheckIcon fontSize="inherit" />
                                 </IconButton>
                                 <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
                                     <ClearIcon fontSize="inherit" />
                                 </IconButton>
-                            </>
+                            </Box>
                         }
                     />
                 ) : onDeletion ? (
-                    <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
-                        <DeleteIcon fontSize="inherit" />
-                    </IconButton>
+                    <Box sx={iconsWrapperSx}>
+                        <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                            <DeleteIcon fontSize="inherit" />
+                        </IconButton>
+                    </Box>
                 ) : null
             ) : (
                 <Box sx={cellBoxSx} onClick={onSelect}>
                     {renderCellValue(value, colDesc, formatConfig, nanValue)}
                     {onValidation ? (
-                        <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                            <EditIcon fontSize="inherit" />
-                        </IconButton>
+                        <Box sx={iconsWrapperSx}>
+                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                <EditIcon fontSize="inherit" />
+                            </IconButton>
+                        </Box>
                     ) : null}
                 </Box>
             )}

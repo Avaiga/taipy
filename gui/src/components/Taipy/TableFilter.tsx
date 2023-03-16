@@ -31,7 +31,7 @@ import SendIcon from "@mui/icons-material/Send";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
-import { ColumnDesc, defaultDateFormat, iconInRowSx } from "./tableUtils";
+import { ColumnDesc, defaultDateFormat, iconInRowSx, iconsWrapperSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
 
@@ -88,33 +88,23 @@ const getActionsByType = (colType?: string) =>
 
 const filtersSx = {
     display: "flex",
-    alignItems: "flex-start",
     flexDirection: "column",
-    p: 1,
-    m: 1,
-    bgcolor: "background.paper",
-    borderRadius: window.taipyConfig?.stylekit?.borderRadius || 1,
+    alignItems: "stretch",
+    p: 4,
 };
 
 const filterBoxSx = {
     display: "flex",
     flexDirection: "row",
-    p: 1,
-    m: 1,
-    bgcolor: "background.paper",
-    borderRadius: window.taipyConfig?.stylekit?.borderRadius || 1,
-    gap: "1em",
+    gap: 2,
 };
 
 const buttonBoxSx = {
     display: "flex",
     flexDirection: "row",
-    px: 4,
-    py: 1,
-    m: 1,
-    bgcolor: "background.paper",
-    borderRadius: window.taipyConfig?.stylekit?.borderRadius || 1,
-    gap: "4em",
+    justifyContent: "space-between",
+    mt: 2,
+    gap: 2,
 };
 
 const colSx = { width: "15em" };
@@ -289,18 +279,18 @@ const FilterRow = (props: FilterRowProps) => {
                 />
             )}
             <Tooltip title="Validate">
-                <span>
+                <Box component="span" sx={iconsWrapperSx}>
                     <IconButton onClick={onCheckClick} disabled={!enableCheck} sx={iconInRowSx}>
                         <CheckIcon />
                     </IconButton>
-                </span>
+                </Box>
             </Tooltip>
             <Tooltip title="Delete">
-                <span>
+                <Box component="span" sx={iconsWrapperSx}>
                     <IconButton onClick={onDeleteClick} disabled={!enableDel} sx={iconInRowSx}>
                         <DeleteIcon />
                     </IconButton>
-                </span>
+                </Box>
             </Tooltip>
         </Box>
     );
@@ -379,10 +369,18 @@ const TableFilter = (props: TableFilterProps) => {
                             onClick={onRemove}
                             disabled={appliedFilters.length == 0}
                             variant="outlined"
-                        >{`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}</Button>
-                        <Button endIcon={<SendIcon />} onClick={onApply} disabled={filters.length == 0} variant="outlined">{`Apply ${
-                            filters.length
-                        } filter${filters.length > 1 ? "s" : ""}`}</Button>
+                            color="inherit"
+                        >
+                            {`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}
+                        </Button>
+                        <Button 
+                            endIcon={<SendIcon />} 
+                            onClick={onApply} 
+                            disabled={filters.length == 0} 
+                            variant="outlined"
+                        >
+                            {`Apply ${ filters.length } filter${filters.length > 1 ? "s" : ""}`}
+                        </Button>
                     </Box>
                 </Box>
             </Popover>
