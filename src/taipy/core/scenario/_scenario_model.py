@@ -11,10 +11,17 @@
 
 import dataclasses
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from .._version._utils import _version_migration
+from ..common import _utils
+from ..common._utils import _Subscriber
 from ..common.alias import CycleId, PipelineId, ScenarioId
+from ..cycle._cycle_manager_factory import _CycleManagerFactory
+from ..cycle.cycle import Cycle
+from ..pipeline.pipeline import Pipeline
+from ..scenario.scenario import Scenario
 
 
 @dataclass
@@ -47,3 +54,40 @@ class _ScenarioModel:
             version=data["version"] if "version" in data.keys() else _version_migration(),
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )
+
+    @classmethod
+    def _from_entity(cls, scenario: Scenario):
+        return _ScenarioModel(
+            id=scenario.id,
+            config_id=scenario.config_id,
+            pipelines=[p.id if isinstance(p, Pipeline) else p for p in scenario._pipelines],
+            properties=scenario._properties.data,
+            creation_date=scenario._creation_date.isoformat(),
+            primary_scenario=scenario._primary_scenario,
+            subscribers=_utils._fcts_to_dict(scenario._subscribers),
+            tags=list(scenario._tags),
+            version=scenario.version,
+            cycle=scenario._cycle.id if scenario._cycle else None,
+        )
+
+    def _to_entity(self) -> Scenario:
+        scenario = Scenario(
+            scenario_id=self.id,
+            config_id=self.config_id,
+            pipelines=self.pipelines,  # type: ignore
+            properties=self.properties,
+            creation_date=datetime.fromisoformat(self.creation_date),
+            is_primary=self.primary_scenario,
+            tags=set(self.tags),
+            cycle=self.__to_cycle(self.cycle),
+            subscribers=[
+                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                for it in self.subscribers
+            ],
+            version=self.version,
+        )
+        return scenario
+
+    @staticmethod
+    def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
+        return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
