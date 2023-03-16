@@ -219,3 +219,19 @@ class CSVDataNode(DataNode, _AbstractFileDataNode):
             df = pd.DataFrame(data, columns=columns)
         df.to_csv(self._path, index=False)
         self._track_edit(timestamp=datetime.now(), job_id=job_id)
+
+    def _serialize_datanode_properties(self):
+        properties = super()._serialize_datanode_properties()
+        properties = super()._serialize_exposed_type(
+            properties, self.__EXPOSED_TYPE_PROPERTY, self.__VALID_STRING_EXPOSED_TYPES
+        )
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, data_node_model):
+        properties = super()._deserialize_datanode_properties(data_node_model)
+        properties = super()._deserialize_exposed_type(
+            properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
+        )
+
+        return properties

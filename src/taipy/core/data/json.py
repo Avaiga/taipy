@@ -22,6 +22,7 @@ from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
+from ..common._utils import _load_fct
 from ..common.alias import DataNodeId, Edit
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
@@ -58,8 +59,12 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
     __DEFAULT_DATA_KEY = "default_data"
     __DEFAULT_PATH_KEY = "default_path"
     __PATH_KEY = "path"
-    _ENCODER_KEY = "encoder"
-    _DECODER_KEY = "decoder"
+    __ENCODER_KEY = "encoder"
+    __DECODER_KEY = "decoder"
+    __ENCODER_NAME_KEY = "encoder_name"
+    __ENCODER_MODULE_KEY = "encoder_module"
+    __DECODER_NAME_KEY = "decoder_name"
+    __DECODER_MODULE_KEY = "decoder_module"
     _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -101,8 +106,8 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
             self._path = self._build_path(self.storage_type())
         properties[self.__PATH_KEY] = self._path
 
-        self._decoder = self._properties.get(self._DECODER_KEY, _DefaultJSONDecoder)
-        self._encoder = self._properties.get(self._ENCODER_KEY, _DefaultJSONEncoder)
+        self._decoder = self._properties.get(self.__DECODER_KEY, _DefaultJSONDecoder)
+        self._encoder = self._properties.get(self.__ENCODER_KEY, _DefaultJSONEncoder)
 
         if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
@@ -131,7 +136,7 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
 
     @encoder.setter
     def encoder(self, encoder: json.JSONEncoder):
-        self.properties[self._ENCODER_KEY] = encoder
+        self.properties[self.__ENCODER_KEY] = encoder
 
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)
@@ -140,7 +145,7 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
 
     @decoder.setter
     def decoder(self, decoder: json.JSONDecoder):
-        self.properties[self._DECODER_KEY] = decoder
+        self.properties[self.__DECODER_KEY] = decoder
 
     def _read(self):
         with open(self._path, "r") as f:
@@ -149,6 +154,48 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
     def _write(self, data: Any):
         with open(self._path, "w") as f:  # type: ignore
             json.dump(data, f, indent=4, cls=self._encoder)
+
+    def _serialize_datanode_properties(self):
+        properties = super()._serialize_datanode_properties()
+
+        encoder = properties.get(self.__ENCODER_KEY)
+        properties[self.__ENCODER_NAME_KEY] = encoder.__name__ if encoder else None
+        properties[self.__ENCODER_MODULE_KEY] = encoder.__module__ if encoder else None
+        properties.pop(self.__ENCODER_KEY, None)
+
+        decoder = properties.get(self.__DECODER_KEY)
+        properties[self.__DECODER_NAME_KEY] = decoder.__name__ if decoder else None
+        properties[self.__DECODER_MODULE_KEY] = decoder.__module__ if decoder else None
+        properties.pop(self.__DECODER_KEY, None)
+
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, data_node_model):
+        properties = super()._deserialize_datanode_properties(data_node_model)
+
+        if properties[cls.__ENCODER_MODULE_KEY]:
+            properties[cls.__ENCODER_KEY] = _load_fct(
+                properties[cls.__ENCODER_MODULE_KEY],
+                properties[cls.__ENCODER_NAME_KEY],
+            )
+        else:
+            properties[cls.__ENCODER_KEY] = None
+
+        if properties[cls.__DECODER_MODULE_KEY]:
+            properties[cls.__DECODER_KEY] = _load_fct(
+                properties[cls.__DECODER_MODULE_KEY],
+                properties[cls.__DECODER_NAME_KEY],
+            )
+        else:
+            properties[cls.__DECODER_KEY] = None
+
+        del properties[cls.__ENCODER_NAME_KEY]
+        del properties[cls.__ENCODER_MODULE_KEY]
+        del properties[cls.__DECODER_NAME_KEY]
+        del properties[cls.__DECODER_MODULE_KEY]
+
+        return properties
 
 
 class _DefaultJSONEncoder(json.JSONEncoder):

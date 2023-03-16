@@ -15,6 +15,7 @@ from typing import Dict, List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common._utils import _load_fct
 from ..common.alias import DataNodeId, Edit
 from ..exceptions.exceptions import MissingRequiredProperty
 from .abstract_sql import _AbstractSQLDataNode
@@ -63,7 +64,9 @@ class SQLDataNode(_AbstractSQLDataNode):
 
     __STORAGE_TYPE = "sql"
     __READ_QUERY_KEY = "read_query"
-    _WRITE_QUERY_BUILDER_KEY = "write_query_builder"
+    __WRITE_QUERY_BUILDER_KEY = "write_query_builder"
+    __WRITE_QUERY_BUILDER_NAME_KEY = "write_query_builder_name"
+    __WRITE_QUERY_BUILDER_MODULE_KEY = "write_query_builder_module"
 
     def __init__(
         self,
@@ -84,8 +87,8 @@ class SQLDataNode(_AbstractSQLDataNode):
             properties = {}
         if properties.get(self.__READ_QUERY_KEY) is None:
             raise MissingRequiredProperty(f"Property {self.__READ_QUERY_KEY} is not informed and is required")
-        if properties.get(self._WRITE_QUERY_BUILDER_KEY) is None:
-            raise MissingRequiredProperty(f"Property {self._WRITE_QUERY_BUILDER_KEY} is not informed and is required")
+        if properties.get(self.__WRITE_QUERY_BUILDER_KEY) is None:
+            raise MissingRequiredProperty(f"Property {self.__WRITE_QUERY_BUILDER_KEY} is not informed and is required")
 
         super().__init__(
             config_id,
@@ -110,7 +113,7 @@ class SQLDataNode(_AbstractSQLDataNode):
         return self.properties.get(self.__READ_QUERY_KEY)
 
     def _do_write(self, data, engine, connection) -> None:
-        queries = self.properties.get(self._WRITE_QUERY_BUILDER_KEY)(data)
+        queries = self.properties.get(self.__WRITE_QUERY_BUILDER_KEY)(data)
         if not isinstance(queries, list):
             queries = [queries]
         for query in queries:
@@ -118,3 +121,30 @@ class SQLDataNode(_AbstractSQLDataNode):
                 connection.execute(query)
             else:
                 connection.execute(*query)
+
+    def _serialize_datanode_properties(self):
+        properties = super()._serialize_datanode_properties()
+
+        query_builder = properties.get(self.__WRITE_QUERY_BUILDER_KEY)
+        properties[self.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
+        properties[self.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
+        properties.pop(self.__WRITE_QUERY_BUILDER_KEY, None)
+
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, data_node_model):
+        properties = super()._deserialize_datanode_properties(data_node_model)
+
+        if properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]:
+            properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = _load_fct(
+                properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY],
+                properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY],
+            )
+        else:
+            properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = None
+
+        del properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY]
+        del properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]
+
+        return properties

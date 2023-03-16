@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common._utils import _load_fct
 from ..common.alias import DataNodeId, Edit
 from ..exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 from .data_node import DataNode
@@ -51,12 +52,16 @@ class GenericDataNode(DataNode):
     """
 
     __STORAGE_TYPE = "generic"
-    _OPTIONAL_READ_FUNCTION_PROPERTY = "read_fct"
-    _READ_FUNCTION_ARGS_PROPERTY = "read_fct_args"
-    _OPTIONAL_WRITE_FUNCTION_PROPERTY = "write_fct"
-    _WRITE_FUNCTION_ARGS_PROPERTY = "write_fct_args"
+    __OPTIONAL_READ_FUNCTION_PROPERTY = "read_fct"
+    __READ_FUNCTION_ARGS_PROPERTY = "read_fct_args"
+    __OPTIONAL_WRITE_FUNCTION_PROPERTY = "write_fct"
+    __WRITE_FUNCTION_ARGS_PROPERTY = "write_fct_args"
+    __READ_FCT_NAME_KEY = "read_fct_name"
+    __READ_FCT_MODULE_KEY = "read_fct_module"
+    __WRITE_FCT_NAME_KEY = "write_fct_name"
+    __WRITE_FCT_MODULE_KEY = "write_fct_module"
     _REQUIRED_PROPERTIES: List[str] = []
-    _REQUIRED_AT_LEAST_ONE_PROPERTY: List[str] = [_OPTIONAL_READ_FUNCTION_PROPERTY, _OPTIONAL_WRITE_FUNCTION_PROPERTY]
+    _REQUIRED_AT_LEAST_ONE_PROPERTY: List[str] = [__OPTIONAL_READ_FUNCTION_PROPERTY, __OPTIONAL_WRITE_FUNCTION_PROPERTY]
 
     def __init__(
         self,
@@ -111,8 +116,8 @@ class GenericDataNode(DataNode):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        if read_fct := self.properties[self._OPTIONAL_READ_FUNCTION_PROPERTY]:
-            if read_fct_args := self.properties.get(self._READ_FUNCTION_ARGS_PROPERTY, None):
+        if read_fct := self.properties[self.__OPTIONAL_READ_FUNCTION_PROPERTY]:
+            if read_fct_args := self.properties.get(self.__READ_FUNCTION_ARGS_PROPERTY, None):
                 if not isinstance(read_fct_args, list):
                     return read_fct(*[read_fct_args])
                 return read_fct(*read_fct_args)
@@ -120,10 +125,55 @@ class GenericDataNode(DataNode):
         raise MissingReadFunction(f"The read function is not defined in data node config {self.config_id}.")
 
     def _write(self, data: Any):
-        if write_fct := self.properties[self._OPTIONAL_WRITE_FUNCTION_PROPERTY]:
-            if write_fct_args := self.properties.get(self._WRITE_FUNCTION_ARGS_PROPERTY, None):
+        if write_fct := self.properties[self.__OPTIONAL_WRITE_FUNCTION_PROPERTY]:
+            if write_fct_args := self.properties.get(self.__WRITE_FUNCTION_ARGS_PROPERTY, None):
                 if not isinstance(write_fct_args, list):
                     return write_fct(data, *[write_fct_args])
                 return write_fct(data, *write_fct_args)
             return write_fct(data)
         raise MissingWriteFunction(f"The write function is not defined in data node config {self.config_id}.")
+
+    def _serialize_datanode_properties(self):
+        properties = super()._serialize_datanode_properties()
+
+        read_fct = properties.get(self.__OPTIONAL_READ_FUNCTION_PROPERTY, None)
+        properties[self.__READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
+        properties[self.__READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
+
+        write_fct = properties.get(self.__OPTIONAL_WRITE_FUNCTION_PROPERTY, None)
+        properties[self.__WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
+        properties[self.__WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
+
+        del (
+            properties[self.__OPTIONAL_READ_FUNCTION_PROPERTY],
+            properties[self.__OPTIONAL_WRITE_FUNCTION_PROPERTY],
+        )
+
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, data_node_model):
+        properties = super()._deserialize_datanode_properties(data_node_model)
+
+        if properties[cls.__READ_FCT_MODULE_KEY]:
+            properties[GenericDataNode.__OPTIONAL_READ_FUNCTION_PROPERTY] = _load_fct(
+                properties[cls.__READ_FCT_MODULE_KEY],
+                properties[cls.__READ_FCT_NAME_KEY],
+            )
+        else:
+            properties[GenericDataNode.__OPTIONAL_READ_FUNCTION_PROPERTY] = None
+
+        if properties[cls.__WRITE_FCT_MODULE_KEY]:
+            properties[GenericDataNode.__OPTIONAL_WRITE_FUNCTION_PROPERTY] = _load_fct(
+                properties[cls.__WRITE_FCT_MODULE_KEY],
+                properties[cls.__WRITE_FCT_NAME_KEY],
+            )
+        else:
+            properties[GenericDataNode.__OPTIONAL_WRITE_FUNCTION_PROPERTY] = None
+
+        del properties[cls.__READ_FCT_NAME_KEY]
+        del properties[cls.__READ_FCT_MODULE_KEY]
+        del properties[cls.__WRITE_FCT_NAME_KEY]
+        del properties[cls.__WRITE_FCT_MODULE_KEY]
+
+        return properties

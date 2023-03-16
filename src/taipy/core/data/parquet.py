@@ -251,3 +251,19 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(kwargs)
         return self._read_as(kwargs)
+
+    def _serialize_datanode_properties(self):
+        properties = super()._serialize_datanode_properties()
+        properties = super()._serialize_exposed_type(
+            properties, self.__EXPOSED_TYPE_PROPERTY, self.__VALID_STRING_EXPOSED_TYPES
+        )
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, data_node_model):
+        properties = super()._deserialize_datanode_properties(data_node_model)
+        properties = super()._deserialize_exposed_type(
+            properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
+        )
+
+        return properties

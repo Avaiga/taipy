@@ -14,6 +14,7 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
+from pydoc import locate
 from typing import Any, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
@@ -31,6 +32,7 @@ from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import NoData
+from ._data_model import _DataNodeModel
 from ._filter import _FilterDataNode
 from .operator import JoinOperator, Operator
 
@@ -534,3 +536,97 @@ class DataNode(_Entity):
             return subclasses
 
         return {c.storage_type(): c for c in all_subclasses(DataNode) if c.storage_type() is not None}
+
+    @staticmethod
+    def _serialize_exposed_type(properties, exposed_type_key, valid_string_exposed_types):
+        if exposed_type_key in properties.keys():
+            if not isinstance(properties[exposed_type_key], str):
+                if isinstance(properties[exposed_type_key], dict):
+                    properties[exposed_type_key] = {
+                        k: v if v in valid_string_exposed_types else f"{v.__module__}.{v.__qualname__}"
+                        for k, v in properties[exposed_type_key].items()
+                    }
+                elif isinstance(properties[exposed_type_key], List):
+                    properties[exposed_type_key] = [
+                        v if v in valid_string_exposed_types else f"{v.__module__}.{v.__qualname__}"
+                        for v in properties[exposed_type_key]
+                    ]
+                else:
+                    properties[exposed_type_key] = (
+                        f"{properties[exposed_type_key].__module__}." f"{properties[exposed_type_key].__qualname__}"
+                    )
+        return properties
+
+    @staticmethod
+    def _deserialize_exposed_type(properties, exposed_type_key, valid_string_exposed_types):
+        if exposed_type_key in properties.keys():
+            if properties[exposed_type_key] not in valid_string_exposed_types:
+                if isinstance(properties[exposed_type_key], str):
+                    properties[exposed_type_key] = locate(properties[exposed_type_key])
+                elif isinstance(properties[exposed_type_key], dict):
+                    properties[exposed_type_key] = {
+                        k: v if v in valid_string_exposed_types else locate(v)
+                        for k, v in properties[exposed_type_key].items()
+                    }
+                elif isinstance(properties[exposed_type_key], List):
+                    properties[exposed_type_key] = [
+                        v if v in valid_string_exposed_types else locate(v) for v in properties[exposed_type_key]
+                    ]
+        return properties
+
+    def _serialize_datanode_properties(self):
+        properties = self._properties.data.copy()
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, data_node_model):
+        properties = data_node_model.data_node_properties.copy()
+        return properties
+
+    @classmethod
+    def _to_model(cls, entity):
+
+        properties = entity._serialize_datanode_properties()
+
+        return _DataNodeModel(
+            entity.id,
+            entity.config_id,
+            entity._scope,
+            entity.storage_type(),
+            entity._name,
+            entity.owner_id,
+            list(entity._parent_ids),
+            entity._last_edit_date.isoformat() if entity._last_edit_date else None,
+            entity._edits,
+            entity._version,
+            entity._validity_period.days if entity._validity_period else None,
+            entity._validity_period.seconds if entity._validity_period else None,
+            entity._edit_in_progress,
+            properties,
+        )
+
+    @classmethod
+    def _from_model(cls, model):
+
+        __CLASS_MAP = cls._class_map()
+
+        model.data_node_properties = __CLASS_MAP[model.storage_type]._deserialize_datanode_properties(model)
+
+        validity_period = None
+        if model.validity_seconds is not None and model.validity_days is not None:
+            validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
+
+        return __CLASS_MAP[model.storage_type](
+            config_id=model.config_id,
+            scope=model.scope,
+            id=model.id,
+            name=model.name,
+            owner_id=model.owner_id,
+            parent_ids=set(model.parent_ids),
+            last_edit_date=datetime.fromisoformat(model.last_edit_date) if model.last_edit_date else None,
+            edits=model.edits,
+            version=model.version,
+            validity_period=validity_period,
+            edit_in_progress=model.edit_in_progress,
+            properties=model.data_node_properties,
+        )
