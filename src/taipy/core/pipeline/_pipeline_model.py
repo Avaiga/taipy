@@ -10,11 +10,17 @@
 # specific language governing permissions and limitations under the License.
 
 import dataclasses
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from ... import Task
 from .._version._utils import _version_migration
+from ..common import _utils
+from ..common._utils import _Subscriber
 from ..common.alias import PipelineId, TaskId
+from ..exceptions import NonExistingPipeline, NonExistingTask
+from ..pipeline.pipeline import Pipeline
 
 
 @dataclass
@@ -43,3 +49,51 @@ class _PipelineModel:
             subscribers=data["subscribers"],
             version=data["version"] if "version" in data.keys() else _version_migration(),
         )
+
+    def _to_entity(self) -> Pipeline:
+        try:
+            pipeline = Pipeline(
+                self.config_id,
+                self.properties,
+                self.tasks,
+                self.id,
+                self.owner_id,
+                set(self.parent_ids),
+                [
+                    _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                    for it in self.subscribers
+                ],  # type: ignore
+                self.version,
+            )
+            return pipeline
+        except NonExistingTask as err:
+            raise err
+        except KeyError:
+            pipeline_err = NonExistingPipeline(self.id)
+            raise pipeline_err
+
+    @classmethod
+    def _from_entity(cls, pipeline: Pipeline) -> "_PipelineModel":
+        datanode_task_edges = defaultdict(list)
+        task_datanode_edges = defaultdict(list)
+
+        for task in pipeline._get_tasks().values():
+            task_id = str(task.id)
+            for predecessor in task.input.values():
+                datanode_task_edges[str(predecessor.id)].append(task_id)
+            for successor in task.output.values():
+                task_datanode_edges[task_id].append(str(successor.id))
+        return _PipelineModel(
+            pipeline.id,
+            pipeline.owner_id,
+            list(pipeline._parent_ids),
+            pipeline.config_id,
+            pipeline._properties.data,
+            cls.__to_task_ids(pipeline._tasks),
+            _utils._fcts_to_dict(pipeline._subscribers),
+            pipeline.version,
+        )
+
+    @staticmethod
+    def __to_task_ids(tasks):
+        return [t.id if isinstance(t, Task) else t for t in tasks]
