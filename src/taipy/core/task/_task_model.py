@@ -13,7 +13,14 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from taipy.logger._taipy_logger import _TaipyLogger
+
+from ... import TaskId
 from .._version._utils import _version_migration
+from ..common._utils import _load_fct
+from ..data._data_manager_factory import _DataManagerFactory
+from ..exceptions import NonExistingDataNode
+from ..task.task import Task
 
 
 def _skippable(task_id, output_ids) -> bool:
@@ -29,7 +36,6 @@ def _skippable(task_id, output_ids) -> bool:
             return False
         if not output.cacheable:
             return False
-    from taipy.logger._taipy_logger import _TaipyLogger
 
     _TaipyLogger._get_logger().warning(f"Task {task_id} has automatically been set to skippable.")
     return True
@@ -67,3 +73,48 @@ class _TaskModel:
             skippable=data["skippable"] if "skippable" in data.keys() else _skippable(data["id"], data["output_ids"]),
             properties=data["properties"] if "properties" in data.keys() else {},
         )
+
+    @classmethod
+    def _from_entity(cls, task: Task) -> "_TaskModel":
+        return _TaskModel(
+            id=task.id,
+            owner_id=task.owner_id,
+            parent_ids=list(task._parent_ids),
+            config_id=task.config_id,
+            input_ids=cls.__to_ids(task.input.values()),
+            function_name=task._function.__name__,
+            function_module=task._function.__module__,
+            output_ids=cls.__to_ids(task.output.values()),
+            version=task.version,
+            skippable=task._skippable,
+            properties=task._properties.data.copy(),
+        )
+
+    def _to_entity(self) -> Task:
+        return Task(
+            id=TaskId(self.id),
+            owner_id=self.owner_id,
+            parent_ids=set(self.parent_ids),
+            config_id=self.config_id,
+            function=_load_fct(self.function_module, self.function_name),
+            input=self.__to_data_nodes(self.input_ids),
+            output=self.__to_data_nodes(self.output_ids),
+            version=self.version,
+            skippable=self.skippable,
+            properties=self.properties,
+        )
+
+    @staticmethod
+    def __to_ids(data_nodes):
+        return [i.id for i in data_nodes]
+
+    @staticmethod
+    def __to_data_nodes(data_nodes_ids):
+        data_nodes = []
+        data_manager = _DataManagerFactory._build_manager()
+        for _id in data_nodes_ids:
+            if data_node := data_manager._get(_id):
+                data_nodes.append(data_node)
+            else:
+                raise NonExistingDataNode(_id)
+        return data_nodes
