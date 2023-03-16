@@ -24,6 +24,11 @@ class TestPipelineRepository:
         assert isinstance(loaded_pipeline, Pipeline)
         assert pipeline.id == loaded_pipeline.id
 
+    def test_from_and_to_model(self, pipeline, pipeline_model):
+        repository = _PipelineRepositoryFactory._build_repository().repo
+        assert repository._to_model(pipeline) == pipeline_model
+        assert repository._from_model(pipeline_model) == pipeline
+
     def test_save_and_load_with_sql_repo(self, tmpdir, pipeline):
         Config.configure_global_app(repository_type="sql")
         repository = _PipelineRepositoryFactory._build_repository()
@@ -34,3 +39,11 @@ class TestPipelineRepository:
 
         assert isinstance(loaded_pipeline, Pipeline)
         assert pipeline.id == loaded_pipeline.id
+
+    def test_from_and_to_model_with_sql_repo(self, pipeline, pipeline_model):
+        Config.configure_global_app(repository_type="sql")
+
+        repository = _PipelineRepositoryFactory._build_repository().repo._table
+
+        assert repository._to_model(pipeline) == pipeline_model
+        assert repository._from_model(pipeline_model) == pipeline

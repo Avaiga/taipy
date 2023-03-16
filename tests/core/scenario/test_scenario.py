@@ -23,28 +23,10 @@ from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task.task import Task
-from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
-
-
-def test_from_and_to_model(scenario, scenario_model):
-    repository = _ScenarioRepositoryFactory._build_repository().repo
-
-    assert repository._to_model(scenario) == scenario_model
-    assert repository._from_model(scenario_model) == scenario
-
-
-def test_from_and_to_model_with_sql_repo(scenario, scenario_model):
-    Config.configure_global_app(repository_type="sql")
-
-    repository = _ScenarioRepositoryFactory._build_repository().repo._table
-
-    assert repository._to_model(scenario) == scenario_model
-    assert repository._from_model(scenario_model) == scenario
 
 
 def test_create_scenario(cycle, current_datetime):

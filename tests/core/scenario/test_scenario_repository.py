@@ -25,6 +25,12 @@ def test_save_and_load(tmpdir, scenario):
     assert scenario.id == sc.id
 
 
+def test_from_and_to_model(scenario, scenario_model):
+    repository = _ScenarioRepositoryFactory._build_repository().repo
+    assert repository._to_model(scenario) == scenario_model
+    assert repository._from_model(scenario_model) == scenario
+
+
 def test_save_and_load_with_sql_repo(tmpdir, scenario):
     Config.configure_global_app(repository_type="sql")
 
@@ -34,3 +40,12 @@ def test_save_and_load_with_sql_repo(tmpdir, scenario):
 
     assert isinstance(sc, Scenario)
     assert scenario.id == sc.id
+
+
+def test_from_and_to_model_with_sql_repo(scenario, scenario_model):
+    Config.configure_global_app(repository_type="sql")
+
+    repository = _ScenarioRepositoryFactory._build_repository().repo._table
+
+    assert repository._to_model(scenario) == scenario_model
+    assert repository._from_model(scenario_model) == scenario
