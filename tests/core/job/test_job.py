@@ -9,7 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from datetime import timedelta
+import traceback
+from datetime import datetime, timedelta
 from time import sleep
 from unittest.mock import MagicMock
 
@@ -18,13 +19,19 @@ import pytest
 from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-from src.taipy.core.common.alias import JobId, TaskId
+from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.config.job_config import JobConfig
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
+from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.exceptions.exceptions import ModelNotFound
 from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.job._job_model import _JobModel
+from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -71,6 +78,88 @@ def test_create_job(task, job):
     assert task in job
     assert job.is_submitted()
     assert job.submit_id is not None
+
+
+data_node_entity = CSVDataNode(
+    "test_data_node",
+    Scope.PIPELINE,
+    DataNodeId("dn_id"),
+    "name",
+    "owner_id",
+    "task_id",
+    datetime(1985, 10, 14, 2, 30, 0),
+    [dict(timestamp=datetime(1985, 10, 14, 2, 30, 0), job_id="job_id")],
+    "latest",
+    None,
+    False,
+    {"path": "/path", "has_header": True},
+)
+
+task_entity = Task(
+    "config_id", {}, print, [data_node_entity], [], TaskId("task_id"), owner_id="owner_id", version="latest"
+)
+
+
+def f():
+    pass
+
+
+class A:
+    class B:
+        def f(self):
+            pass
+
+    def f(self):
+        pass
+
+    @classmethod
+    def g(cls):
+        pass
+
+    @staticmethod
+    def h():
+        pass
+
+
+job_entity = Job(JobId("id"), task_entity, "submit_id", version="latest")
+job_entity._subscribers = [f, A.f, A.g, A.h, A.B.f]
+job_entity._exceptions = [traceback.TracebackException.from_exception(Exception())]
+
+job_model = _JobModel(
+    id=JobId("id"),
+    task_id=task_entity.id,
+    status=Status(Status.SUBMITTED),
+    force=False,
+    submit_id="submit_id",
+    creation_date=job_entity._creation_date.isoformat(),
+    subscribers=Job._serialize_subscribers(job_entity._subscribers),
+    stacktrace=job_entity._stacktrace,
+    version="latest",
+)
+
+
+def test_from_and_to_model():
+    repository = _JobRepositoryFactory._build_repository().repo
+    assert repository._to_model(job_entity) == job_model
+    with pytest.raises(ModelNotFound):
+        repository._from_model(job_model)
+    _DataManagerFactory._build_manager()._set(data_node_entity)
+    _TaskManagerFactory._build_manager()._set(task_entity)
+    assert repository._from_model(job_model).id == job_entity.id
+
+
+def test_from_and_to_model_with_sql_repo():
+    Config.configure_global_app(repository_type="sql")
+
+    repository = _JobRepositoryFactory._build_repository().repo._table
+    repository._delete_all()
+
+    assert repository._to_model(job_entity) == job_model
+    with pytest.raises(ModelNotFound):
+        repository._from_model(job_model)
+    _DataManagerFactory._build_manager()._set(data_node_entity)
+    _TaskManagerFactory._build_manager()._set(task_entity)
+    assert repository._from_model(job_model).id == job_entity.id
 
 
 def test_comparison(task):

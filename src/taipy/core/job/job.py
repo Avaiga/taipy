@@ -20,8 +20,12 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._reload import _self_reload, _self_setter
+from ..common._utils import _fcts_to_dict, _load_fct
 from ..common.alias import JobId
+from ..exceptions.exceptions import InvalidSubscriber
+from ..task._task_repository_factory import _TaskRepositoryFactory
 from ..task.task import Task
+from ._job_model import _JobModel
 from .status import Status
 
 
@@ -303,3 +307,40 @@ class Job(_Entity):
     def _unlock_edit_on_outputs(self):
         for dn in self.task.output.values():
             dn.unlock_edit()
+
+    @classmethod
+    def _to_model(cls, entity):
+        return _JobModel(
+            entity.id,
+            entity._task.id,
+            entity._status,
+            entity._force,
+            entity.submit_id,
+            entity._creation_date.isoformat(),
+            cls._serialize_subscribers(entity._subscribers),
+            entity._stacktrace,
+            version=entity.version,
+        )
+
+    @classmethod
+    def _from_model(cls, model: _JobModel):
+        task_repository = _TaskRepositoryFactory._build_repository()
+        job = Job(
+            id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id, version=model.version
+        )
+
+        job.status = model.status  # type: ignore
+        job.force = model.force  # type: ignore
+        job.creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
+        for it in model.subscribers:
+            try:
+                job._subscribers.append(_load_fct(it.get("fct_module"), it.get("fct_name")))  # type:ignore
+            except AttributeError:
+                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
+        job._stacktrace = model.stacktrace
+
+        return job
+
+    @staticmethod
+    def _serialize_subscribers(subscribers: List) -> List:
+        return _fcts_to_dict(subscribers)
