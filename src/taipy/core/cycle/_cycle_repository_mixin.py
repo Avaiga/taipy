@@ -18,6 +18,8 @@ from ..cycle.cycle import Cycle
 
 
 class _CycleRepositoryMixin:
+
+    # TODO: Maybe we should move this to CycleManager class
     def get_cycles_by_frequency_and_start_date(
         self, frequency: Frequency, start_date: datetime, cycles: List[Cycle]
     ) -> List[Cycle]:
