@@ -65,13 +65,13 @@ class TestDataRepository:
         assert isinstance(dn, DataNode)
 
     def test_from_and_to_model(self):
-        repository = _DataRepositoryFactory._build_repository()
+        repository = _DataRepositoryFactory._build_repository().repo
         assert repository._to_model(self.data_node) == self.data_node_model
         assert repository._from_model(self.data_node_model) == self.data_node
 
     def test_data_node_with_env_variable_value_not_serialized(self):
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
-            repository = _DataRepositoryFactory._build_repository()
+            repository = _DataRepositoryFactory._build_repository().repo
             assert repository._to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"
             assert self.data_node._properties.data["prop"] == "ENV[FOO]"
             assert self.data_node.properties["prop"] == "bar"
@@ -91,7 +91,7 @@ class TestDataRepository:
     def test_from_and_to_model_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 
-        repository = _DataRepositoryFactory._build_repository()
+        repository = _DataRepositoryFactory._build_repository().repo._table
         assert repository._to_model(self.data_node) == self.data_node_model
         assert repository._from_model(self.data_node_model) == self.data_node
 
@@ -99,7 +99,7 @@ class TestDataRepository:
         Config.configure_global_app(repository_type="sql")
 
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
-            repository = _DataRepositoryFactory._build_repository()
+            repository = _DataRepositoryFactory._build_repository().repo._table
             assert repository._to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"
             assert self.data_node._properties.data["prop"] == "ENV[FOO]"
             assert self.data_node.properties["prop"] == "bar"

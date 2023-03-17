@@ -11,6 +11,7 @@
 
 from datetime import datetime, timedelta
 from inspect import isclass
+from pydoc import locate
 from typing import Any, Dict, List, Optional, Set
 
 import pymongo
@@ -196,6 +197,24 @@ class MongoCollectionDataNode(DataNode):
             The document dictionary.
         """
         return document_object.__dict__
+
+    def _serialize_datanode_properties(self):
+        properties = super()._serialize_datanode_properties()
+        if self.__CUSTOM_DOCUMENT_PROPERTY in properties.keys():
+            properties[self.__CUSTOM_DOCUMENT_PROPERTY] = (
+                f"{properties[self.__CUSTOM_DOCUMENT_PROPERTY].__module__}."
+                f"{properties[self.__CUSTOM_DOCUMENT_PROPERTY].__qualname__}"
+            )
+
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, data_node_model):
+        properties = super()._deserialize_datanode_properties(data_node_model)
+        if cls.__CUSTOM_DOCUMENT_PROPERTY in properties.keys():
+            if isinstance(properties[cls.__CUSTOM_DOCUMENT_PROPERTY], str):
+                properties[cls.__CUSTOM_DOCUMENT_PROPERTY] = locate(properties[cls.__CUSTOM_DOCUMENT_PROPERTY])
+        return properties
 
 
 def _connect_mongodb(
