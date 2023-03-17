@@ -23,3 +23,11 @@ class _Entity:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._is_in_context = False
         _set_entity(self._MANAGER_NAME, self)
+
+    @classmethod
+    def _to_model(cls, entity):
+        raise NotImplementedError
+
+    @classmethod
+    def _from_model(cls, model):
+        raise NotImplementedError

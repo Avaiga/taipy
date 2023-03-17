@@ -27,22 +27,12 @@ class _VersionRepository(_AbstractRepository[_VersionModel, _Version]):  # type:
     _PRODUCTION_VERSION_KEY = "production_version"
 
     def __init__(self, **kwargs):
-        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        kwargs.update({"to_model_fct": _Version._to_model, "from_model_fct": _Version._from_model})
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
 
     @property
     def repository(self):
         return self.repo
-
-    def _to_model(self, version: _Version):
-        return _VersionModel(
-            id=version.id, config=Config._to_json(version.config), creation_date=version.creation_date.isoformat()
-        )
-
-    def _from_model(self, model):
-        version = _Version(id=model.id, config=Config._from_json(model.config))
-        version.creation_date = datetime.fromisoformat(model.creation_date)
-        return version
 
     def load(self, model_id: str) -> _Version:
         return self.repo.load(model_id)

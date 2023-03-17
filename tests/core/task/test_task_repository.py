@@ -79,7 +79,7 @@ class TestTaskRepository:
         assert len(t.input) == 1
 
     def test_from_and_to_model(self):
-        repository = _TaskRepositoryFactory._build_repository()  # type: ignore
+        repository = _TaskRepositoryFactory._build_repository().repo  # type: ignore
         assert repository._to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):
             repository._from_model(task_model)
@@ -106,7 +106,7 @@ class TestTaskRepository:
         Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
-        repository = _TaskRepositoryFactory._build_repository()  # type: ignore
+        repository = _TaskRepositoryFactory._build_repository().repo._table  # type: ignore
 
         assert repository._to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):

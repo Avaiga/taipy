@@ -11,7 +11,7 @@
 
 from src.taipy.core.common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from taipy import Config
+from taipy.config import Config
 
 
 def test_warn_inputs_all_not_ready(caplog):

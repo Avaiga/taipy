@@ -20,9 +20,13 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
+from ..common._utils import _load_fct
 from ..common._warnings import _warn_deprecated
 from ..common.alias import TaskId
+from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
+from ..exceptions.exceptions import NonExistingDataNode
+from ._task_model import _TaskModel
 
 
 class Task(_Entity):
@@ -192,3 +196,49 @@ class Task(_Entity):
         from ._task_manager_factory import _TaskManagerFactory
 
         _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+
+    @classmethod
+    def _to_model(cls, task) -> _TaskModel:
+        return _TaskModel(
+            id=task.id,
+            owner_id=task.owner_id,
+            parent_ids=list(task._parent_ids),
+            config_id=task.config_id,
+            input_ids=cls.__to_ids(task.input.values()),
+            function_name=task._function.__name__,
+            function_module=task._function.__module__,
+            output_ids=cls.__to_ids(task.output.values()),
+            version=task.version,
+            skippable=task._skippable,
+            properties=task._properties.data.copy(),
+        )
+
+    @classmethod
+    def _from_model(cls, model: _TaskModel):
+        return Task(
+            id=TaskId(model.id),
+            owner_id=model.owner_id,
+            parent_ids=set(model.parent_ids),
+            config_id=model.config_id,
+            function=_load_fct(model.function_module, model.function_name),
+            input=cls.__to_data_nodes(model.input_ids),
+            output=cls.__to_data_nodes(model.output_ids),
+            version=model.version,
+            skippable=model.skippable,
+            properties=model.properties,
+        )
+
+    @staticmethod
+    def __to_ids(data_nodes):
+        return [i.id for i in data_nodes]
+
+    @staticmethod
+    def __to_data_nodes(data_nodes_ids):
+        data_nodes = []
+        data_manager = _DataManagerFactory._build_manager()
+        for _id in data_nodes_ids:
+            if data_node := data_manager._get(_id):
+                data_nodes.append(data_node)
+            else:
+                raise NonExistingDataNode(_id)
+        return data_nodes
