@@ -538,17 +538,17 @@ class DataNode(_Entity):
         return {c.storage_type(): c for c in all_subclasses(DataNode) if c.storage_type() is not None}
 
     @staticmethod
-    def _serialize_exposed_type(properties, exposed_type_key, valid_string_exposed_types):
+    def _serialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types: List[str]) -> dict:
         if exposed_type_key in properties.keys():
             if not isinstance(properties[exposed_type_key], str):
                 if isinstance(properties[exposed_type_key], dict):
                     properties[exposed_type_key] = {
-                        k: v if v in valid_string_exposed_types else f"{v.__module__}.{v.__qualname__}"
+                        k: v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
                         for k, v in properties[exposed_type_key].items()
                     }
                 elif isinstance(properties[exposed_type_key], List):
                     properties[exposed_type_key] = [
-                        v if v in valid_string_exposed_types else f"{v.__module__}.{v.__qualname__}"
+                        v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
                         for v in properties[exposed_type_key]
                     ]
                 else:
@@ -558,33 +558,33 @@ class DataNode(_Entity):
         return properties
 
     @staticmethod
-    def _deserialize_exposed_type(properties, exposed_type_key, valid_string_exposed_types):
+    def _deserialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types: List[str]) -> dict:
         if exposed_type_key in properties.keys():
-            if properties[exposed_type_key] not in valid_string_exposed_types:
+            if properties[exposed_type_key] not in valid_str_exposed_types:
                 if isinstance(properties[exposed_type_key], str):
                     properties[exposed_type_key] = locate(properties[exposed_type_key])
                 elif isinstance(properties[exposed_type_key], dict):
                     properties[exposed_type_key] = {
-                        k: v if v in valid_string_exposed_types else locate(v)
+                        k: v if v in valid_str_exposed_types else locate(v)
                         for k, v in properties[exposed_type_key].items()
                     }
                 elif isinstance(properties[exposed_type_key], List):
                     properties[exposed_type_key] = [
-                        v if v in valid_string_exposed_types else locate(v) for v in properties[exposed_type_key]
+                        v if v in valid_str_exposed_types else locate(v) for v in properties[exposed_type_key]
                     ]
         return properties
 
-    def _serialize_datanode_properties(self):
+    def _serialize_datanode_properties(self) -> dict:
         properties = self._properties.data.copy()
         return properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
+    def _deserialize_datanode_properties(cls, data_node_model) -> dict:
         properties = data_node_model.data_node_properties.copy()
         return properties
 
     @classmethod
-    def _to_model(cls, entity):
+    def _to_model(cls, entity) -> _DataNodeModel:
 
         properties = entity._serialize_datanode_properties()
 
@@ -606,7 +606,7 @@ class DataNode(_Entity):
         )
 
     @classmethod
-    def _from_model(cls, model):
+    def _from_model(cls, model: _DataNodeModel):
 
         __CLASS_MAP = cls._class_map()
 
