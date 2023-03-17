@@ -265,7 +265,7 @@ class Pipeline(_Entity, _Submittable):
         return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
 
     @classmethod
-    def _to_model(cls, pipeline):
+    def _to_model(cls, pipeline) -> _PipelineModel:
         datanode_task_edges = defaultdict(list)
         task_datanode_edges = defaultdict(list)
 
@@ -287,7 +287,7 @@ class Pipeline(_Entity, _Submittable):
         )
 
     @classmethod
-    def _from_model(cls, model):
+    def _from_model(cls, model: _PipelineModel):
         return Pipeline(
             model.config_id,
             model.properties,

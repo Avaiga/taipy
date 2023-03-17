@@ -309,7 +309,7 @@ class Job(_Entity):
             dn.unlock_edit()
 
     @classmethod
-    def _to_model(cls, entity):
+    def _to_model(cls, entity) -> _JobModel:
         return _JobModel(
             entity.id,
             entity._task.id,

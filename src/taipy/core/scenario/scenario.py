@@ -367,7 +367,7 @@ class Scenario(_Entity, _Submittable):
         return pipelines
 
     @classmethod
-    def _to_model(cls, entity):
+    def _to_model(cls, entity) -> _ScenarioModel:
         return _ScenarioModel(
             id=entity.id,
             config_id=entity.config_id,
@@ -382,7 +382,7 @@ class Scenario(_Entity, _Submittable):
         )
 
     @classmethod
-    def _from_model(cls, model):
+    def _from_model(cls, model: _ScenarioModel):
         return Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
