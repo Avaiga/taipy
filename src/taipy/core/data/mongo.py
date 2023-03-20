@@ -198,19 +198,18 @@ class MongoCollectionDataNode(DataNode):
         """
         return document_object.__dict__
 
-    def _serialize_datanode_properties(self):
-        properties = super()._serialize_datanode_properties()
-        if self.__CUSTOM_DOCUMENT_PROPERTY in properties.keys():
-            properties[self.__CUSTOM_DOCUMENT_PROPERTY] = (
-                f"{properties[self.__CUSTOM_DOCUMENT_PROPERTY].__module__}."
-                f"{properties[self.__CUSTOM_DOCUMENT_PROPERTY].__qualname__}"
+    @classmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+        if cls.__CUSTOM_DOCUMENT_PROPERTY in properties.keys():
+            properties[cls.__CUSTOM_DOCUMENT_PROPERTY] = (
+                f"{properties[cls.__CUSTOM_DOCUMENT_PROPERTY].__module__}."
+                f"{properties[cls.__CUSTOM_DOCUMENT_PROPERTY].__qualname__}"
             )
 
         return properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
-        properties = super()._deserialize_datanode_properties(data_node_model)
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
         if cls.__CUSTOM_DOCUMENT_PROPERTY in properties.keys():
             if isinstance(properties[cls.__CUSTOM_DOCUMENT_PROPERTY], str):
                 properties[cls.__CUSTOM_DOCUMENT_PROPERTY] = locate(properties[cls.__CUSTOM_DOCUMENT_PROPERTY])

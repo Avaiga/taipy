@@ -25,10 +25,11 @@ from taipy.config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common.alias import DataNodeId, Edit
 from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty, UnknownDatabaseEngine
+from ._abstract_tabular import _AbstractTabularDataNode
 from .data_node import DataNode
 
 
-class _AbstractSQLDataNode(DataNode):
+class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
     __STORAGE_TYPE = "NOT_IMPLEMENTED"
@@ -233,17 +234,16 @@ class _AbstractSQLDataNode(DataNode):
             self._engine = None
         return super().__setattr__(key, value)
 
-    def _serialize_datanode_properties(self):
-        properties = super()._serialize_datanode_properties()
-        properties = super()._serialize_exposed_type(
-            properties, self.__EXPOSED_TYPE_PROPERTY, self.__VALID_STRING_EXPOSED_TYPES
+    @classmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+        properties = cls._serialize_exposed_type(
+            properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
         )
         return properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
-        properties = super()._deserialize_datanode_properties(data_node_model)
-        properties = super()._deserialize_exposed_type(
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
+        properties = cls._deserialize_exposed_type(
             properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
         )
 

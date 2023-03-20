@@ -101,3 +101,11 @@ class InMemoryDataNode(DataNode):
 
     def _write(self, data):
         in_memory_storage[self.id] = data
+
+    @classmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+        return properties
+
+    @classmethod
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
+        return properties

@@ -22,11 +22,12 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import InvalidExposedType, UnknownCompressionAlgorithm, UnknownParquetEngine
+from ._abstract_tabular import _AbstractTabularDataNode
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 
 
-class ParquetDataNode(DataNode, _AbstractFileDataNode):
+class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     """Data Node stored as a Parquet file.
 
     Attributes:
@@ -252,18 +253,16 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode):
             return self._read_as_numpy(kwargs)
         return self._read_as(kwargs)
 
-    def _serialize_datanode_properties(self):
-        properties = super()._serialize_datanode_properties()
-        properties = super()._serialize_exposed_type(
-            properties, self.__EXPOSED_TYPE_PROPERTY, self.__VALID_STRING_EXPOSED_TYPES
+    @classmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+        properties = cls._serialize_exposed_type(
+            properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
         )
         return properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
-        properties = super()._deserialize_datanode_properties(data_node_model)
-        properties = super()._deserialize_exposed_type(
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
+        properties = cls._deserialize_exposed_type(
             properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
         )
-
         return properties

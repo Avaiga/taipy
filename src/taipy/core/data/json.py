@@ -155,25 +155,22 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         with open(self._path, "w") as f:  # type: ignore
             json.dump(data, f, indent=4, cls=self._encoder)
 
-    def _serialize_datanode_properties(self):
-        properties = super()._serialize_datanode_properties()
+    @classmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+        encoder = properties.get(cls.__ENCODER_KEY)
+        properties[cls.__ENCODER_NAME_KEY] = encoder.__name__ if encoder else None
+        properties[cls.__ENCODER_MODULE_KEY] = encoder.__module__ if encoder else None
+        properties.pop(cls.__ENCODER_KEY, None)
 
-        encoder = properties.get(self.__ENCODER_KEY)
-        properties[self.__ENCODER_NAME_KEY] = encoder.__name__ if encoder else None
-        properties[self.__ENCODER_MODULE_KEY] = encoder.__module__ if encoder else None
-        properties.pop(self.__ENCODER_KEY, None)
-
-        decoder = properties.get(self.__DECODER_KEY)
-        properties[self.__DECODER_NAME_KEY] = decoder.__name__ if decoder else None
-        properties[self.__DECODER_MODULE_KEY] = decoder.__module__ if decoder else None
-        properties.pop(self.__DECODER_KEY, None)
+        decoder = properties.get(cls.__DECODER_KEY)
+        properties[cls.__DECODER_NAME_KEY] = decoder.__name__ if decoder else None
+        properties[cls.__DECODER_MODULE_KEY] = decoder.__module__ if decoder else None
+        properties.pop(cls.__DECODER_KEY, None)
 
         return properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
-        properties = super()._deserialize_datanode_properties(data_node_model)
-
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
         if properties[cls.__ENCODER_MODULE_KEY]:
             properties[cls.__ENCODER_KEY] = _load_fct(
                 properties[cls.__ENCODER_MODULE_KEY],

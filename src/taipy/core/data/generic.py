@@ -133,27 +133,26 @@ class GenericDataNode(DataNode):
             return write_fct(data)
         raise MissingWriteFunction(f"The write function is not defined in data node config {self.config_id}.")
 
-    def _serialize_datanode_properties(self):
-        properties = super()._serialize_datanode_properties()
+    @classmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
 
-        read_fct = properties.get(self.__OPTIONAL_READ_FUNCTION_PROPERTY, None)
-        properties[self.__READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
-        properties[self.__READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
+        read_fct = properties.get(cls.__OPTIONAL_READ_FUNCTION_PROPERTY, None)
+        properties[cls.__READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
+        properties[cls.__READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
 
-        write_fct = properties.get(self.__OPTIONAL_WRITE_FUNCTION_PROPERTY, None)
-        properties[self.__WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
-        properties[self.__WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
+        write_fct = properties.get(cls.__OPTIONAL_WRITE_FUNCTION_PROPERTY, None)
+        properties[cls.__WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
+        properties[cls.__WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
 
         del (
-            properties[self.__OPTIONAL_READ_FUNCTION_PROPERTY],
-            properties[self.__OPTIONAL_WRITE_FUNCTION_PROPERTY],
+            properties[cls.__OPTIONAL_READ_FUNCTION_PROPERTY],
+            properties[cls.__OPTIONAL_WRITE_FUNCTION_PROPERTY],
         )
 
         return properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
-        properties = super()._deserialize_datanode_properties(data_node_model)
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
 
         if properties[cls.__READ_FCT_MODULE_KEY]:
             properties[GenericDataNode.__OPTIONAL_READ_FUNCTION_PROPERTY] = _load_fct(

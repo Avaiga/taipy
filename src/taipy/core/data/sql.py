@@ -122,19 +122,17 @@ class SQLDataNode(_AbstractSQLDataNode):
             else:
                 connection.execute(*query)
 
-    def _serialize_datanode_properties(self):
-        properties = super()._serialize_datanode_properties()
-
-        query_builder = properties.get(self.__WRITE_QUERY_BUILDER_KEY)
-        properties[self.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
-        properties[self.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
-        properties.pop(self.__WRITE_QUERY_BUILDER_KEY, None)
+    @classmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+        query_builder = properties.get(cls.__WRITE_QUERY_BUILDER_KEY)
+        properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
+        properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
+        properties.pop(cls.__WRITE_QUERY_BUILDER_KEY, None)
 
         return properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
-        properties = super()._deserialize_datanode_properties(data_node_model)
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
 
         if properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]:
             properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = _load_fct(

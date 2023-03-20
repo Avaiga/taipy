@@ -537,56 +537,20 @@ class DataNode(_Entity):
 
         return {c.storage_type(): c for c in all_subclasses(DataNode) if c.storage_type() is not None}
 
-    @staticmethod
-    def _serialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types: List[str]) -> dict:
-        if exposed_type_key in properties.keys():
-            if not isinstance(properties[exposed_type_key], str):
-                if isinstance(properties[exposed_type_key], dict):
-                    properties[exposed_type_key] = {
-                        k: v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
-                        for k, v in properties[exposed_type_key].items()
-                    }
-                elif isinstance(properties[exposed_type_key], List):
-                    properties[exposed_type_key] = [
-                        v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
-                        for v in properties[exposed_type_key]
-                    ]
-                else:
-                    properties[exposed_type_key] = (
-                        f"{properties[exposed_type_key].__module__}." f"{properties[exposed_type_key].__qualname__}"
-                    )
-        return properties
-
-    @staticmethod
-    def _deserialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types: List[str]) -> dict:
-        if exposed_type_key in properties.keys():
-            if properties[exposed_type_key] not in valid_str_exposed_types:
-                if isinstance(properties[exposed_type_key], str):
-                    properties[exposed_type_key] = locate(properties[exposed_type_key])
-                elif isinstance(properties[exposed_type_key], dict):
-                    properties[exposed_type_key] = {
-                        k: v if v in valid_str_exposed_types else locate(v)
-                        for k, v in properties[exposed_type_key].items()
-                    }
-                elif isinstance(properties[exposed_type_key], List):
-                    properties[exposed_type_key] = [
-                        v if v in valid_str_exposed_types else locate(v) for v in properties[exposed_type_key]
-                    ]
-        return properties
-
-    def _serialize_datanode_properties(self) -> dict:
-        properties = self._properties.data.copy()
-        return properties
+    @classmethod
+    @abstractmethod
+    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+        raise NotImplementedError
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model) -> dict:
-        properties = data_node_model.data_node_properties.copy()
-        return properties
+    @abstractmethod
+    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
+        raise NotImplementedError
 
     @classmethod
     def _to_model(cls, entity) -> _DataNodeModel:
 
-        properties = entity._serialize_datanode_properties()
+        properties = entity._serialize_datanode_properties(entity._properties.data.copy())
 
         return _DataNodeModel(
             entity.id,
@@ -610,7 +574,8 @@ class DataNode(_Entity):
 
         __CLASS_MAP = cls._class_map()
 
-        model.data_node_properties = __CLASS_MAP[model.storage_type]._deserialize_datanode_properties(model)
+        properties = model.data_node_properties.copy()
+        model.data_node_properties = __CLASS_MAP[model.storage_type]._deserialize_datanode_properties(properties)
 
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:
