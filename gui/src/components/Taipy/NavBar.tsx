@@ -11,12 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
@@ -33,7 +33,7 @@ import { LovItem } from "../../utils/lov";
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
 const NavBar = (props: LovProps) => {
-    const { id, lov, defaultLov = "" } = props;
+    const { id } = props;
     const { state } = useContext(TaipyContext);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const location = useLocation();
@@ -43,42 +43,42 @@ const NavBar = (props: LovProps) => {
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    let lovList = useLovListMemo(lov, defaultLov);
-    if (!lovList.length) {
-        lovList = Object.keys(state.locations || {})
-            .filter((key) => key !== "/")
-            .map((key) => ({ id: key, item: state.locations[key].substring(1) } as LovItem));
-    }
+    const lovList = useLovListMemo(props.lov, props.defaultLov || "");
+    const lov = useMemo(() => {
+        if (!lovList.length) {
+            return Object.keys(state.locations || {})
+                .filter((key) => key !== "/")
+                .map((key) => ({ id: key, item: state.locations[key].substring(1) } as LovItem));
+        }
+        return lovList;
+    }, [lovList, state.locations]);
 
     const linkChange = useCallback(
         (evt: React.SyntheticEvent, val: string) => {
             if (Object.keys(state.locations || {}).some((route) => val === route)) {
                 navigate(val);
             } else {
-                const win = window.open(val, "_blank");
-                win?.focus();
+                window.open(val, "_blank")?.focus();
             }
         },
-        [navigate, state.locations]
+        [state.locations, navigate]
     );
 
-    const selectedVal =
-        !isMobile &&
-        (lovList.find((it) => it.id === location.pathname)?.id || (lovList.length ? lovList[0].id : false));
+    const selectedVal = lov.find((it) => it.id === location.pathname)?.id || (lov.length ? lov[0].id : false);
 
     return isMobile ? (
         <Tooltip title={hover || ""}>
             <>
                 <Drawer open={opened} onClose={() => setOpened(false)} className={className}>
                     <List>
-                        {lovList.map((val) => (
-                            <ListItem key={val.id} onClick={() => setOpened(false)} disabled={!active}>
+                        {lov.map((val) => (
+                            <ListItemButton key={val.id} onClick={() => setOpened(false)} disabled={!active} selected={selectedVal === val.id}>
                                 <ListItemText>
                                     <Link href={val.id}>
                                         {typeof val.item === "string" ? val.item : <LovImage item={val.item} />}
                                     </Link>
                                 </ListItemText>
-                            </ListItem>
+                            </ListItemButton>
                         ))}
                     </List>
                 </Drawer>
@@ -91,7 +91,7 @@ const NavBar = (props: LovProps) => {
         <Box sx={boxSx} className={className}>
             <Tooltip title={hover || ""}>
                 <Tabs value={selectedVal} id={id} onChange={linkChange}>
-                    {lovList.map((val) => (
+                    {lov.map((val) => (
                         <Tab
                             key={val.id}
                             value={val.id}

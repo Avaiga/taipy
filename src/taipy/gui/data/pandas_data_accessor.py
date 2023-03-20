@@ -36,6 +36,9 @@ class _PandasDataAccessor(_DataAccessor):
 
     __INDEX_COL = "_tp_index"
 
+    __AGGREGATE_FUNCTIONS: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
+
+
     @staticmethod
     def get_supported_classes() -> t.List[str]:
         return [t.__name__ for t in _PandasDataAccessor.__types]  # type: ignore
@@ -228,7 +231,7 @@ class _PandasDataAccessor(_DataAccessor):
             applies = payload.get("applies")
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {
-                    k: v if v in gui._aggregate_functions else gui._get_user_function(v) for k, v in applies.items()
+                    k: v if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS else gui._get_user_function(v) for k, v in applies.items()
                 }
 
                 for col in columns:

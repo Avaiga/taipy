@@ -1,6 +1,6 @@
 Displays its children in a block.
 
-The `part` control is used to group controls in a single element. 
+The `part` control is used to group controls in a single element.
 This allows to show or hide them in one action and be placed as a unique element in a [`Layout`](layout.md) cell.
 
 There is a simplified Markdown syntax to create a `part`, where the element name is optional:
@@ -23,7 +23,7 @@ There is a simplified Markdown syntax to create a `part`, where the element name
             ...
         |>
         ```
-  
+
     === "HTML"
 
         ```html
@@ -47,7 +47,7 @@ There is a simplified Markdown syntax to create a `part`, where the element name
             ...
         |>
         ```
-  
+
     === "HTML"
 
         ```html
@@ -62,7 +62,7 @@ If the _render_ property is bound to a Boolean value, the `part` will show or hi
 
 ### Part with page
 
-The content of the part can be specified as an existing page name using the _page_ property.
+The content of the part can be specified as an existing page name or an URL using the _page_ property.
 
 !!! example "Page content"
 
@@ -71,7 +71,7 @@ The content of the part can be specified as an existing page name using the _pag
         ```
         <|part|page=page_name|>
         ```
-  
+
     === "HTML"
 
         ```html
@@ -89,7 +89,7 @@ The content of the part can be specified as a `Partial^` instance using the _par
         ```
         <|part|partial={partial}|>
         ```
-  
+
     === "HTML"
 
         ```html

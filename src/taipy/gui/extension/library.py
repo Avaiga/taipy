@@ -199,7 +199,7 @@ class ElementLibrary(ABC):
     def get_elements(self) -> t.Dict[str, Element]:
         """
         Return the dictionary holding all visual element declarations.
-        
+
         The key for each of this dictionary's entry is the name of the element,
         and the value is an instance of `Element^`.
 
@@ -317,7 +317,7 @@ class ElementLibrary(ABC):
         """TODO"""
         from ..gui import Gui
 
-        return f"{Gui._EXTENSION_ROOT}{self.get_name()}/{resource}"
+        return f"/{Gui._EXTENSION_ROOT}/{self.get_name()}/{resource}"
 
     def get_data(self, library_name: str, payload: t.Dict, var_name: str, value: t.Any) -> t.Optional[t.Dict]:
         """

@@ -355,7 +355,7 @@ class _Factory:
         .set_attributes(
             [
                 ("id",),
-                ("page",),
+                ("page", PropertyType.dynamic_string),
                 ("render", PropertyType.dynamic_boolean, True)
             ]
         ),

@@ -76,6 +76,7 @@ from .gui_actions import (
     get_module_context,
     get_module_name_from_state,
     get_state_id,
+    get_user_content_url,
     hold_control,
     invoke_callback,
     invoke_long_callback,

@@ -11,30 +11,48 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useContext, useMemo } from "react";
 import Box from "@mui/material/Box";
 
 import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyBaseProps } from "./utils";
+import { TaipyContext } from "../../context/taipyContext";
 
 interface PartProps extends TaipyBaseProps {
     render?: boolean;
     defaultRender?: boolean;
     page?: string;
+    defaultPage?: string;
     children?: ReactNode;
     partial?: boolean;
 }
 
 const Part = (props: PartProps) => {
-    const {id, children, page, partial} = props;
+    const { id, children, partial } = props;
+    const { state } = useContext(TaipyContext);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const page = useDynamicProperty(props.page, props.defaultPage, "");
+    const iFrame = useMemo(() => {
+        if (page && !partial) {
+            if (/^https?\:\/\//.test(page)) {
+                return true;
+            }
+            const sPage = "/" + page;
+            return !Object.keys(state.locations || {}).some((route) => sPage === route);
+        }
+        return false;
+    }, [state.locations, page, partial]);
 
     return render ? (
         <Box id={id} className={className}>
-            {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
+            {iFrame ? (
+                <iframe src={page} />
+            ) : page ? (
+                <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} />
+            ) : null}
             {children}
         </Box>
     ) : null;

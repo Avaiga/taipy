@@ -11,22 +11,33 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useContext, useEffect } from "react";
-import { Navigate as RouterNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { TaipyContext } from "../../context/taipyContext";
 import { createNavigateAction } from "../../context/taipyReducers";
 
 interface NavigateProps {
     to?: string;
+    tab?: string;
 }
 
-const Navigate = ({ to }: NavigateProps) => {
-    const { dispatch} = useContext(TaipyContext);
+const Navigate = ({ to, tab }: NavigateProps) => {
+    const { dispatch, state } = useContext(TaipyContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        to && dispatch(createNavigateAction())
-    }, [to, dispatch]);
+        if (to) {
+            const tos = "/" + to;
+            if (Object.keys(state.locations || {}).some((route) => tos === route)) {
+                navigate(tos);
+            } else {
+                window.open(to, tab || "_blank")?.focus();
+            }
+            dispatch(createNavigateAction());
+        }
+    }, [to, tab, state.locations, dispatch, navigate]);
 
-    return (to ? <RouterNavigate to={"/"+to} /> : null)};
+    return null;
+};
 
 export default Navigate;
