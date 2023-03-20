@@ -13,11 +13,11 @@
     window.taipyVersion="{{version}}";
     {% endif %}</script>
     {%- if css_vars -%}
-      <style>
-        :root{
-          {{css_vars}}
-        }
-      </style>
+    <style>
+    :root{
+      {{css_vars|safe}}
+    }
+    </style>
     {% endif %}
     <!-- Taipy Gui js <%= htmlWebpackPlugin.options.frontend_version %> <%= htmlWebpackPlugin.options.frontend_build_date %> <%= htmlWebpackPlugin.options.frontend_build_mode %> -->
   </head>

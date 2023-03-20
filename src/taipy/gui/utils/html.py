@@ -17,4 +17,6 @@ def _get_css_var_value(value: t.Any) -> str:
         if " " in value:
             return f'"{value}"'
         return value
+    if isinstance(value, int):
+        return f"{value}px"
     return f"{value}"

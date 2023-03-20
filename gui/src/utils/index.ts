@@ -47,11 +47,11 @@ interface StyleKitVars {
     // Set main font family
     fontFamily: string;
     // DEFINING SHAPES
-    // Base border radius
+    // Base border radius in px
     borderRadius: number;
     // DEFINING MUI COMPONENTS STYLES
-    // Matching input and button height
-    inputButtonHeight: number;
+    // Height in css size unit for inputs and buttons
+    inputButtonHeight: string;
 }
 
 // return client server timeZone offset in minutes

@@ -63,6 +63,25 @@ ConfigParameter = t.Literal[
     "port",
 ]
 
+StylekitVariables = t.TypedDict(
+    "StylekitVariables",
+    {
+        "color_primary": str,
+        "color_secondary": str,
+        "color_error": str,
+        "color_warning": str,
+        "color_success": str,
+        "color_background_light": str,
+        "color_paper_light": str,
+        "color_background_dark": str,
+        "color_paper_dark": str,
+        "font_family": str,
+        "border_radius": int,
+        "input_button_height": str
+    },
+    total=False
+)
+
 Config = t.TypedDict(
     "Config",
     {
@@ -92,7 +111,7 @@ Config = t.TypedDict(
         "time_zone": t.Optional[str],
         "title": t.Optional[str],
         "stylekit": bool,
-        "stylekit_variables": t.Dict[str, str],
+        "stylekit_variables": StylekitVariables,
         "upload_folder": t.Optional[str],
         "use_arrow": bool,
         "use_reloader": bool,
