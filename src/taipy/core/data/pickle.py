@@ -137,9 +137,9 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
             pickle.dump(data, pf)
 
     @classmethod
-    def _serialize_datanode_properties(cls, properties: dict) -> dict:
-        return properties
+    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
+        return datanode_properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
-        return properties
+    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
+        return datanode_model_properties

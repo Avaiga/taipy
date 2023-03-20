@@ -14,7 +14,6 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
-from pydoc import locate
 from typing import Any, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
@@ -539,12 +538,12 @@ class DataNode(_Entity):
 
     @classmethod
     @abstractmethod
-    def _serialize_datanode_properties(cls, properties: dict) -> dict:
+    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
+    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
         raise NotImplementedError
 
     @classmethod
@@ -575,7 +574,7 @@ class DataNode(_Entity):
         __CLASS_MAP = cls._class_map()
 
         properties = model.data_node_properties.copy()
-        model.data_node_properties = __CLASS_MAP[model.storage_type]._deserialize_datanode_properties(properties)
+        model.data_node_properties = __CLASS_MAP[model.storage_type]._deserialize_datanode_model_properties(properties)
 
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:

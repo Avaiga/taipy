@@ -199,21 +199,23 @@ class MongoCollectionDataNode(DataNode):
         return document_object.__dict__
 
     @classmethod
-    def _serialize_datanode_properties(cls, properties: dict) -> dict:
-        if cls.__CUSTOM_DOCUMENT_PROPERTY in properties.keys():
-            properties[cls.__CUSTOM_DOCUMENT_PROPERTY] = (
-                f"{properties[cls.__CUSTOM_DOCUMENT_PROPERTY].__module__}."
-                f"{properties[cls.__CUSTOM_DOCUMENT_PROPERTY].__qualname__}"
+    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
+        if cls.__CUSTOM_DOCUMENT_PROPERTY in datanode_properties.keys():
+            datanode_properties[cls.__CUSTOM_DOCUMENT_PROPERTY] = (
+                f"{datanode_properties[cls.__CUSTOM_DOCUMENT_PROPERTY].__module__}."
+                f"{datanode_properties[cls.__CUSTOM_DOCUMENT_PROPERTY].__qualname__}"
             )
 
-        return properties
+        return datanode_properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
-        if cls.__CUSTOM_DOCUMENT_PROPERTY in properties.keys():
-            if isinstance(properties[cls.__CUSTOM_DOCUMENT_PROPERTY], str):
-                properties[cls.__CUSTOM_DOCUMENT_PROPERTY] = locate(properties[cls.__CUSTOM_DOCUMENT_PROPERTY])
-        return properties
+    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
+        if cls.__CUSTOM_DOCUMENT_PROPERTY in datanode_model_properties.keys():
+            if isinstance(datanode_model_properties[cls.__CUSTOM_DOCUMENT_PROPERTY], str):
+                datanode_model_properties[cls.__CUSTOM_DOCUMENT_PROPERTY] = locate(
+                    datanode_model_properties[cls.__CUSTOM_DOCUMENT_PROPERTY]
+                )
+        return datanode_model_properties
 
 
 def _connect_mongodb(

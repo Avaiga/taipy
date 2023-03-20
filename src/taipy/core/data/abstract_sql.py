@@ -235,16 +235,16 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         return super().__setattr__(key, value)
 
     @classmethod
-    def _serialize_datanode_properties(cls, properties: dict) -> dict:
-        properties = cls._serialize_exposed_type(
-            properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
+    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
+        datanode_properties = cls._serialize_exposed_type(
+            datanode_properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
         )
-        return properties
+        return datanode_properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
-        properties = cls._deserialize_exposed_type(
-            properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
+    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
+        datanode_model_properties = cls._deserialize_exposed_type(
+            datanode_model_properties, cls.__EXPOSED_TYPE_PROPERTY, cls.__VALID_STRING_EXPOSED_TYPES
         )
 
-        return properties
+        return datanode_model_properties

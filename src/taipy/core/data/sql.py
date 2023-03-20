@@ -123,26 +123,26 @@ class SQLDataNode(_AbstractSQLDataNode):
                 connection.execute(*query)
 
     @classmethod
-    def _serialize_datanode_properties(cls, properties: dict) -> dict:
-        query_builder = properties.get(cls.__WRITE_QUERY_BUILDER_KEY)
-        properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
-        properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
-        properties.pop(cls.__WRITE_QUERY_BUILDER_KEY, None)
+    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
+        query_builder = datanode_properties.get(cls.__WRITE_QUERY_BUILDER_KEY)
+        datanode_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
+        datanode_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
+        datanode_properties.pop(cls.__WRITE_QUERY_BUILDER_KEY, None)
 
-        return properties
+        return datanode_properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, properties: dict) -> dict:
+    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
 
-        if properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]:
-            properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = _load_fct(
-                properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY],
-                properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY],
+        if datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]:
+            datanode_model_properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = _load_fct(
+                datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY],
+                datanode_model_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY],
             )
         else:
-            properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = None
+            datanode_model_properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = None
 
-        del properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY]
-        del properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]
+        del datanode_model_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY]
+        del datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]
 
-        return properties
+        return datanode_model_properties
