@@ -19,7 +19,7 @@ import pandas as pd
 import pytest
 from sqlalchemy import create_engine
 
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from src.taipy.core.config import (
@@ -58,7 +58,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 current_time = datetime.now()
-_SchedulerFactory._build_scheduler()
+_OrchestratorFactory._build_orchestrator()
 
 
 @pytest.fixture(scope="function")
@@ -257,7 +257,7 @@ def clean_repository():
 
     close_all_sessions()
     init_config()
-    init_scheduler()
+    init_orchestrator()
     init_managers()
     init_config()
 
@@ -340,12 +340,12 @@ def init_managers():
     _VersionManagerFactory._build_manager()._delete_all()
 
 
-def init_scheduler():
-    if _SchedulerFactory._scheduler is None:
-        _SchedulerFactory._build_scheduler()
-    _SchedulerFactory._build_dispatcher()
-    _SchedulerFactory._scheduler.jobs_to_run = Queue()
-    _SchedulerFactory._scheduler.blocked_jobs = []
+def init_orchestrator():
+    if _OrchestratorFactory._orchestrator is None:
+        _OrchestratorFactory._build_orchestrator()
+    _OrchestratorFactory._build_dispatcher()
+    _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
+    _OrchestratorFactory._orchestrator.blocked_jobs = []
 
 
 @pytest.fixture

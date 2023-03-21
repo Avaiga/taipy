@@ -15,39 +15,39 @@ from typing import Optional, Type
 from taipy.config.config import Config
 
 from ..common._utils import _load_fct
-from ..exceptions.exceptions import ModeNotAvailable, SchedulerNotBuilt
-from ._abstract_scheduler import _AbstractScheduler
+from ..exceptions.exceptions import ModeNotAvailable, OrchestratorNotBuilt
+from ._abstract_orchestrator import _AbstractOrchestrator
 from ._dispatcher import _DevelopmentJobDispatcher, _JobDispatcher, _StandaloneJobDispatcher
-from ._scheduler import _Scheduler
+from ._orchestrator import _Orchestrator
 
 
-class _SchedulerFactory:
+class _OrchestratorFactory:
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
-    _TAIPY_ENTERPRISE_CORE_SCHEDULER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._scheduler"
-    _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._dispatcher"
+    _TAIPY_ENTERPRISE_CORE_ORCHESTRATOR_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._orchestrator"
+    _TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._orchestrator._dispatcher"
     __STANDADLONE_JOB_DISPATCHER_TYPE = "_StandaloneJobDispatcher"
 
-    _scheduler: Optional[_Scheduler] = None
+    _orchestrator: Optional[_Orchestrator] = None
     _dispatcher: Optional[_JobDispatcher] = None
 
     @classmethod
-    def _build_scheduler(cls) -> Type[_AbstractScheduler]:
+    def _build_orchestrator(cls) -> Type[_AbstractOrchestrator]:
         if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
-            cls._scheduler = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_SCHEDULER_MODULE,
-                "Scheduler",
+            cls._orchestrator = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_ORCHESTRATOR_MODULE,
+                "Orchestrator",
             )  # type: ignore
         else:
-            cls._scheduler = _Scheduler  # type: ignore
+            cls._orchestrator = _Orchestrator  # type: ignore
 
-        cls._scheduler.initialize()  # type: ignore
+        cls._orchestrator.initialize()  # type: ignore
 
-        return cls._scheduler  # type: ignore
+        return cls._orchestrator  # type: ignore
 
     @classmethod
     def _build_dispatcher(cls, force_restart=False) -> Optional[_JobDispatcher]:
-        if not cls._scheduler:
-            raise SchedulerNotBuilt
+        if not cls._orchestrator:
+            raise OrchestratorNotBuilt
         if Config.job_config.is_standalone:
             return cls.__build_standalone_job_dispatcher(force_restart=force_restart)
         elif Config.job_config.is_development:
@@ -79,9 +79,9 @@ class _SchedulerFactory:
         if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
             cls._dispatcher = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_DISPATCHER_MODULE, cls.__STANDADLONE_JOB_DISPATCHER_TYPE
-            )(cls._scheduler)
+            )(cls._orchestrator)
         else:
-            cls._dispatcher = _StandaloneJobDispatcher(cls._scheduler)  # type: ignore
+            cls._dispatcher = _StandaloneJobDispatcher(cls._orchestrator)  # type: ignore
 
         cls._dispatcher.start()  # type: ignore
         return cls._dispatcher
@@ -92,5 +92,5 @@ class _SchedulerFactory:
             cls._dispatcher, _DevelopmentJobDispatcher
         ):
             cls._dispatcher.stop()
-        cls._dispatcher = _DevelopmentJobDispatcher(cls._scheduler)  # type: ignore
+        cls._dispatcher = _DevelopmentJobDispatcher(cls._orchestrator)  # type: ignore
         return cls._dispatcher

@@ -65,12 +65,12 @@ class Scenario(_Entity, _Submittable):
         config_id: str,
         pipelines: Union[List[PipelineId], List[Pipeline]],
         properties: Dict[str, Any],
-        scenario_id: ScenarioId = None,
-        creation_date=None,
+        scenario_id: Optional[ScenarioId] = None,
+        creation_date: Optional[datetime] = None,
         is_primary: bool = False,
-        cycle: Cycle = None,
-        subscribers: List[_Subscriber] = None,
-        tags: Set[str] = None,
+        cycle: Optional[Cycle] = None,
+        subscribers: Optional[List[_Subscriber]] = None,
+        tags: Optional[Set[str]] = None,
         version: str = None,
     ):
         super().__init__(subscribers)
@@ -300,7 +300,7 @@ class Scenario(_Entity, _Submittable):
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
-            wait (bool): Wait for the scheduled jobs created from the scenario submission to be finished in
+            wait (bool): Wait for the orchestrated jobs created from the scenario submission to be finished in
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.

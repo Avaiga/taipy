@@ -20,9 +20,9 @@ class Status(_ReprEnum):
     The possible values are:
 
     - `SUBMITTED`: A `SUBMITTED` job has been submitted for execution but not processed yet by
-        the scheduler.
+        the orchestrator.
 
-    - `PENDING`: A `PENDING` job has been enqueued by the scheduler. It is waiting for an executor
+    - `PENDING`: A `PENDING` job has been enqueued by the orchestrator. It is waiting for an executor
         to be available for its execution.
 
     - `BLOCKED`: A `BLOCKED` job has been blocked because its input data nodes are not ready yet.

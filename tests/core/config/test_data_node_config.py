@@ -15,7 +15,7 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config.common.scope import Scope
@@ -179,7 +179,7 @@ def test_block_datanode_config_update_in_development_mode():
     assert Config.data_nodes[data_node_id].scope == Scope.SCENARIO
     assert Config.data_nodes[data_node_id].properties == {"default_path": "foo.p"}
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.storage_type = "foo"
@@ -216,7 +216,7 @@ def test_block_datanode_config_update_in_standalone_mode():
     assert Config.data_nodes[data_node_id].scope == Scope.SCENARIO
     assert Config.data_nodes[data_node_id].properties == {"default_path": "foo.p"}
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.storage_type = "foo"

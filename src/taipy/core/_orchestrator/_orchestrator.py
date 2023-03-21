@@ -26,15 +26,12 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..task.task import Task
-from ._abstract_scheduler import _AbstractScheduler
+from ._abstract_orchestrator import _AbstractOrchestrator
 
 
-class _Scheduler(_AbstractScheduler):
+class _Orchestrator(_AbstractOrchestrator):
     """
-    Handles the functional scheduling.
-
-    Attributes:
-
+    Handles the functional orchestrating.
     """
 
     jobs_to_run: Queue = Queue()
@@ -62,8 +59,8 @@ class _Scheduler(_AbstractScheduler):
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : Enforce execution of the scenario's or pipeline's tasks even if their output data
                 nodes are cached.
-             wait (bool): Wait for the scheduled jobs created from the scenario or pipeline submission to be finished in
-                asynchronous mode.
+             wait (bool): Wait for the orchestrated jobs created from the scenario or pipeline submission to be
+                finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
         Returns:
@@ -88,7 +85,7 @@ class _Scheduler(_AbstractScheduler):
     def submit_task(
         cls,
         task: Task,
-        submit_id: str = None,
+        submit_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait=False,
@@ -101,7 +98,7 @@ class _Scheduler(_AbstractScheduler):
              submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
-             wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous
+             wait (bool): Wait for the orchestrated job created from the task submission to be finished in asynchronous
                 mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished
                 before returning.
@@ -122,7 +119,7 @@ class _Scheduler(_AbstractScheduler):
     def _submit_task(
         cls,
         task: Task,
-        submit_id: str = None,
+        submit_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
     ) -> Job:
@@ -133,7 +130,7 @@ class _Scheduler(_AbstractScheduler):
         job = _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, force=force
         )
-        cls._schedule_job_to_run_or_block(job)
+        cls._orchestrate_job_to_run_or_block(job)
 
         return job
 
@@ -142,7 +139,7 @@ class _Scheduler(_AbstractScheduler):
         return f"SUBMISSION_{str(uuid.uuid4())}"
 
     @classmethod
-    def _schedule_job_to_run_or_block(cls, job: Job):
+    def _orchestrate_job_to_run_or_block(cls, job: Job):
         if cls._is_blocked(job):
             job.blocked()
             cls.blocked_jobs.append(job)
@@ -276,10 +273,10 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
-        from ._scheduler_factory import _SchedulerFactory
+        from ._orchestrator_factory import _OrchestratorFactory
 
         for job in jobs:
-            if job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():  # type: ignore
+            if job.id in _OrchestratorFactory._dispatcher._dispatched_processes.keys():  # type: ignore
                 cls.__logger.info(f"{job.id} is running and cannot be canceled.")
             elif job.is_completed() or job.is_skipped():
                 cls.__logger.info(f"{job.id} has already been completed and cannot be canceled.")
@@ -293,7 +290,7 @@ class _Scheduler(_AbstractScheduler):
 
     @staticmethod
     def _check_and_execute_jobs_if_development_mode():
-        from ._scheduler_factory import _SchedulerFactory
+        from ._orchestrator_factory import _OrchestratorFactory
 
-        if dispatcher := _SchedulerFactory._dispatcher:
+        if dispatcher := _OrchestratorFactory._dispatcher:
             dispatcher._execute_jobs_synchronously()

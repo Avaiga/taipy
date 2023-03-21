@@ -18,8 +18,8 @@ from time import sleep
 import pytest
 
 from src.taipy.core import Task
-from src.taipy.core._scheduler._dispatcher._job_dispatcher import _JobDispatcher
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common.alias import JobId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data import InMemoryDataNode
@@ -57,7 +57,7 @@ def test_create_jobs():
 
     task = _create_task(multiply, name="get_job")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     job_1 = _JobManager._create(task, [print], "submit_id", True)
     assert _JobManager._get(job_1.id) == job_1
@@ -83,12 +83,12 @@ def test_get_job():
 
     task = _create_task(multiply, name="get_job")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
     assert _JobManager._get(job_1.id) == job_1
 
-    job_2 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_2")
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_2")
     assert job_1 != job_2
     assert _JobManager._get(job_1.id).id == job_1.id
     assert _JobManager._get(job_2.id).id == job_2.id
@@ -102,19 +102,19 @@ def test_get_latest_job():
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
     assert _JobManager._get_latest(task) == job_1
     assert _JobManager._get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = _SchedulerFactory._scheduler.submit_task(task_2, "submit_id_2")
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task_2, "submit_id_2")
     assert _JobManager._get_latest(task).id == job_1.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_1_bis = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1_bis")
+    job_1_bis = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1_bis")
     assert _JobManager._get_latest(task).id == job_1_bis.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
@@ -132,10 +132,10 @@ def test_get_jobs():
 
     task = _create_task(multiply, name="get_all_jobs")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
-    job_2 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_2")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_2")
 
     assert {job.id for job in _JobManager._get_all()} == {job_1.id, job_2.id}
 
@@ -148,10 +148,10 @@ def test_delete_job():
 
     task = _create_task(multiply, name="delete_job")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_1")
-    job_2 = _SchedulerFactory._scheduler.submit_task(task, "submit_id_2")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_2")
 
     _JobManager._delete(job_1)
 
@@ -170,10 +170,10 @@ def test_raise_when_trying_to_delete_unfinished_job():
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
     task = Task("task_cfg", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished")
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock:
-        job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+        job = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id")
 
         assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 1)
         assert_true_after_time(job.is_running)
@@ -199,10 +199,10 @@ def test_force_deleting_unfinished_job():
         "task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="delete_force_unfinished_job"
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock:
-        job = _SchedulerFactory._scheduler.submit_task(task_1, "submit_id")
+        job = _OrchestratorFactory._orchestrator.submit_task(task_1, "submit_id")
         assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)

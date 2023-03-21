@@ -11,7 +11,7 @@
 
 import pytest
 
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common.alias import PipelineId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
@@ -44,7 +44,7 @@ def test_set_and_get_pipeline():
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline_id_1 = PipelineId("id1")
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
@@ -149,7 +149,7 @@ def test_get_or_create_data():
     pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_two, task_config_mult_by_3])
     # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -436,7 +436,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     _PipelineManager._submit(pipeline.id)
@@ -466,7 +466,7 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
@@ -495,7 +495,7 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
@@ -524,7 +524,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
@@ -553,7 +553,7 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
@@ -586,7 +586,7 @@ def test_hard_delete_shared_entities():
     task_2 = Config.configure_task("task_2", print, intermediate_dn, output_dn)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_1, task_2])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)

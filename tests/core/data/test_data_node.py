@@ -16,7 +16,7 @@ from unittest import mock
 import pytest
 
 import src.taipy.core as tp
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common.alias import DataNodeId, JobId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
@@ -263,7 +263,7 @@ class TestDataNode:
         pipeline_d = Config.configure_pipeline("pipeline_d", [task_a_b, task_b_d])
         scenario_cfg = Config.configure_scenario("scenario", [pipeline_c, pipeline_d])
 
-        _SchedulerFactory._build_dispatcher()
+        _OrchestratorFactory._build_dispatcher()
 
         scenario = tp.create_scenario(scenario_cfg)
         scenario.submit()

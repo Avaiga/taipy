@@ -16,8 +16,8 @@ from ..job.job import Job
 from ..task.task import Task
 
 
-class _AbstractScheduler:
-    """Creates, Enqueues and schedules jobs as instances of `Job^` class."""
+class _AbstractOrchestrator:
+    """Creates, enqueues, and orchestrates jobs as instances of `Job^` class."""
 
     @classmethod
     @abstractmethod
@@ -41,10 +41,10 @@ class _AbstractScheduler:
     def submit_task(
         cls,
         task: Task,
-        submit_id: str = None,
+        submit_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
-        wait=False,
+        wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
     ) -> Job:
         raise NotImplementedError

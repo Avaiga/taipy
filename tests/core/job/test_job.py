@@ -15,9 +15,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
-from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
+from src.taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common.alias import JobId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data.in_memory import InMemoryDataNode
@@ -228,10 +228,10 @@ def test_auto_set_and_reload(current_datetime, job_id):
 
 def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     Config.configure_job_executions(mode=mode)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
     _TaskManager._set(task)
     _JobManager._set(job)
-    dispatcher = _StandaloneJobDispatcher(_SchedulerFactory._scheduler)
+    dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
     if mode == JobConfig._DEVELOPMENT_MODE:
-        dispatcher = _DevelopmentJobDispatcher(_SchedulerFactory._scheduler)
+        dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
     dispatcher._dispatch(job)

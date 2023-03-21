@@ -141,7 +141,7 @@ class _PipelineManager(_Manager[Pipeline]):
             _warn_if_inputs_not_ready(pipeline._get_inputs())
         return (
             _TaskManagerFactory._build_manager()
-            ._scheduler()
+            ._orchestrator()
             .submit(pipeline, callbacks=pipeline_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
 

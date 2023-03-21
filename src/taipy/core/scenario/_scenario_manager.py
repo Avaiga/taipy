@@ -44,7 +44,7 @@ from .scenario import Scenario
 
 class _ScenarioManager(_Manager[Scenario]):
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
-    _repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
+    _repository = _ScenarioRepositoryFactory._build_repository()
     _ENTITY_NAME = Scenario.__name__
 
     @classmethod
@@ -91,8 +91,8 @@ class _ScenarioManager(_Manager[Scenario]):
     def _create(
         cls,
         config: ScenarioConfig,
-        creation_date: datetime.datetime = None,
-        name: str = None,
+        creation_date: Optional[datetime.datetime] = None,
+        name: Optional[str] = None,
     ) -> Scenario:
         scenario_id = Scenario._new_id(str(config.id))  # type: ignore
         cycle = (
@@ -153,7 +153,7 @@ class _ScenarioManager(_Manager[Scenario]):
             _warn_if_inputs_not_ready(scenario._get_inputs())
         return (
             _TaskManagerFactory._build_manager()
-            ._scheduler()
+            ._orchestrator()
             .submit(scenario, callbacks=scenario_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
 
@@ -242,7 +242,7 @@ class _ScenarioManager(_Manager[Scenario]):
         super()._delete(scenario_id)
 
     @classmethod
-    def _compare(cls, *scenarios: Scenario, data_node_config_id: str = None):
+    def _compare(cls, *scenarios: Scenario, data_node_config_id: Optional[str] = None):
         if len(scenarios) < 2:
             raise InsufficientScenarioToCompare("At least two scenarios are required to compare.")
 

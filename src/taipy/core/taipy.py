@@ -74,7 +74,7 @@ def submit(
     Parameters:
         entity (Union[Scenario^, Pipeline^, Task^]): The entity to submit.
         force (bool): If True, the execution is forced even if the data nodes are in cache.
-        wait (bool): Wait for the scheduled jobs created from the submission to be finished
+        wait (bool): Wait for the orchestrated jobs created from the submission to be finished
             in asynchronous mode.
         timeout (Union[float, int]): The optional maximum number of seconds to wait
             for the jobs to be finished before returning.
