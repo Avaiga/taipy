@@ -11,7 +11,7 @@
 
 import abc
 import threading
-from queue import Empty, Queue
+from queue import Empty, SimpleQueue
 
 from .event import Event
 
@@ -24,7 +24,7 @@ class CoreEventConsumer(threading.Thread):
 
     """
 
-    def __init__(self, register_id: str, queue: Queue):
+    def __init__(self, register_id: str, queue: SimpleQueue):
         threading.Thread.__init__(self, name=f"Thread-Taipy-Core-Consumer-{register_id}")
         self.queue = queue
         self._STOP_FLAG = True
