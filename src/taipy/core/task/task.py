@@ -192,6 +192,8 @@ class Task(_Entity):
                 mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before
                 returning.
+        Returns:
+            The created `Job^`.
         """
         from ._task_manager_factory import _TaskManagerFactory
 

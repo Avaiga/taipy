@@ -150,38 +150,37 @@ def test_submit():
             cls.submit_calls.append(task)
             return None
 
-    _TaskManager._scheduler = MockScheduler
+    with mock.patch("src.taipy.core.task._task_manager._TaskManager._scheduler", new=MockScheduler):
 
-    # pipeline does not exists. We expect an exception to be raised
-    with pytest.raises(NonExistingPipeline):
+        # pipeline does not exists. We expect an exception to be raised
+        with pytest.raises(NonExistingPipeline):
+            _PipelineManager._submit(pipeline.id)
+        with pytest.raises(NonExistingPipeline):
+            _PipelineManager._submit(pipeline)
+
+        # pipeline does exist, but tasks does not exist. We expect an exception to be raised
+        _PipelineManager._set(pipeline)
+        with pytest.raises(NonExistingTask):
+            _PipelineManager._submit(pipeline.id)
+        with pytest.raises(NonExistingTask):
+            _PipelineManager._submit(pipeline)
+
+        # pipeline, and tasks does exist. We expect the tasks to be submitted
+        # in a specific order
+        _TaskManager._set(task_1)
+        _TaskManager._set(task_2)
+        _TaskManager._set(task_3)
+        _TaskManager._set(task_4)
+
         _PipelineManager._submit(pipeline.id)
-    with pytest.raises(NonExistingPipeline):
+        calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
+        tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
+        assert calls_ids == tasks_ids
+
         _PipelineManager._submit(pipeline)
-
-    # pipeline does exist, but tasks does not exist. We expect an exception to be raised
-    _PipelineManager._set(pipeline)
-    with pytest.raises(NonExistingTask):
-        _PipelineManager._submit(pipeline.id)
-    with pytest.raises(NonExistingTask):
-        _PipelineManager._submit(pipeline)
-
-    # pipeline, and tasks does exist. We expect the tasks to be submitted
-    # in a specific order
-    _TaskManager._set(task_1)
-    _TaskManager._set(task_2)
-    _TaskManager._set(task_3)
-    _TaskManager._set(task_4)
-
-    _PipelineManager._submit(pipeline.id)
-    calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
-    tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
-    assert calls_ids == tasks_ids
-
-    _PipelineManager._submit(pipeline)
-    calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
-    tasks_ids = tasks_ids * 2
-    assert set(calls_ids) == set(tasks_ids)
-    _TaskManager._scheduler = _SchedulerFactory._build_scheduler
+        calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
+        tasks_ids = tasks_ids * 2
+        assert set(calls_ids) == set(tasks_ids)
 
 
 def test_assign_pipeline_as_parent_of_task():

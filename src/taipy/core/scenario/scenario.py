@@ -31,11 +31,10 @@ from ..common.alias import CycleId, PipelineId, ScenarioId
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
-from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
+from ..exceptions.exceptions import NonExistingPipeline
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
-from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from ._scenario_model import _ScenarioModel
 
@@ -137,20 +136,25 @@ class Scenario(_Entity, _Submittable):
         self._pipelines = pipelines
 
     @property
-    def tasks(self) -> Dict[str, Task]:
-        task_manager = _TaskManagerFactory._build_manager()
-        tasks = {}
-        list_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
-        for task in list_tasks:
-            for k, v in task.items():
-                t = task_manager._get(v, v)
-                if not isinstance(t, Task):
-                    raise NonExistingTask(v)
-                tasks[k] = v
+    def tasks(self) -> Dict[str, List[Task]]:
+        tasks: Dict[str, List[Task]] = {}
+        list_dict_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
+        for dict_task in list_dict_tasks:
+            for task_config_id, task in dict_task.items():
+                if task_config_id in tasks:
+                    if task not in tasks[task_config_id]:
+                        tasks[task_config_id].append(task)
+                else:
+                    tasks[task_config_id] = [task]
         return tasks
 
-    def _get_tasks(self) -> Dict[str, Task]:
-        return self.tasks
+    def _get_set_of_tasks(self) -> Set[Task]:
+        tasks = set()
+        list_dict_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
+        for dict_task in list_dict_tasks:
+            for task in dict_task.values():
+                tasks.add(task)
+        return tasks
 
     @property
     def data_nodes(self) -> Dict[str, DataNode]:
@@ -303,6 +307,8 @@ class Scenario(_Entity, _Submittable):
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
+        Returns:
+            A list of created `Job^`s.
         """
         from ._scenario_manager_factory import _ScenarioManagerFactory
 
