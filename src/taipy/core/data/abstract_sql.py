@@ -98,7 +98,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
 
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
+        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
 
         super().__init__(
             config_id,
@@ -129,13 +129,6 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         if missing := set(required) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
-            )
-
-    def _check_exposed_type(self, exposed_type):
-        if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
-            raise InvalidExposedType(
-                f"Invalid string exposed type {exposed_type}. Supported values are "
-                f"{', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
             )
 
     def _get_engine(self):

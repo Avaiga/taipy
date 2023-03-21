@@ -11,10 +11,20 @@
 
 from pydoc import locate
 
+from ..exceptions.exceptions import InvalidExposedType
+
 
 class _AbstractTabularDataNode(object):
     """Abstract base class for tabular data node implementations (CSVDataNode, ParquetDataNode, ExcelDataNode,
     SQLTableDataNode and SQLDataNode) that are tabular representable."""
+
+    @staticmethod
+    def _check_exposed_type(exposed_type, valid_string_exposed_types):
+        if isinstance(exposed_type, str) and exposed_type not in valid_string_exposed_types:
+            raise InvalidExposedType(
+                f"Invalid string exposed type {exposed_type}. Supported values are "
+                f"{', '.join(valid_string_exposed_types)}"
+            )
 
     @staticmethod
     def _serialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types) -> dict:

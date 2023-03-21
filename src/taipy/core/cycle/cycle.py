@@ -20,6 +20,7 @@ from ..common._get_valid_filename import _get_valid_filename
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common.alias import CycleId
+from ._cycle_model import _CycleModel
 
 
 class Cycle(_Entity):
@@ -130,3 +131,27 @@ class Cycle(_Entity):
 
     def __hash__(self):
         return hash(self.id)
+
+    @classmethod
+    def _to_model(cls, cycle) -> _CycleModel:
+        return _CycleModel(
+            id=cycle.id,
+            name=cycle._name,
+            frequency=cycle._frequency,
+            creation_date=cycle._creation_date.isoformat(),
+            start_date=cycle._start_date.isoformat(),
+            end_date=cycle._end_date.isoformat(),
+            properties=cycle._properties.data,
+        )
+
+    @classmethod
+    def _from_model(cls, model: _CycleModel):
+        return Cycle(
+            id=model.id,
+            name=model.name,
+            frequency=model.frequency,
+            properties=model.properties,
+            creation_date=datetime.fromisoformat(model.creation_date),
+            start_date=datetime.fromisoformat(model.start_date),
+            end_date=datetime.fromisoformat(model.end_date),
+        )

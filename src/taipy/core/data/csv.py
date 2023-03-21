@@ -95,7 +95,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
+        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
 
         super().__init__(
             config_id,
@@ -134,13 +134,6 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     def path(self, value):
         self._path = value
         self.properties[self.__PATH_KEY] = value
-
-    def _check_exposed_type(self, exposed_type):
-        if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
-            raise InvalidExposedType(
-                f"Invalid string exposed type {exposed_type}. Supported values are "
-                f"{', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
-            )
 
     def _read(self):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:

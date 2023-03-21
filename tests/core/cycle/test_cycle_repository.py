@@ -30,7 +30,7 @@ def test_save_and_load(tmpdir, cycle):
 
 
 def test_from_and_to_model(cycle, cycle_model):
-    repository = _CycleRepositoryFactory._build_repository()
+    repository = _CycleRepositoryFactory._build_repository().repo
     assert repository._to_model(cycle) == cycle_model
     assert repository._from_model(cycle_model) == cycle
 
@@ -90,7 +90,7 @@ def test_save_and_load_for_sql_repo(tmpdir, cycle):
 def test_from_and_to_model_for_sql_repo(cycle, cycle_model):
     Config.configure_global_app(repository_type="sql")
 
-    repository = _CycleRepositoryFactory._build_repository()
+    repository = _CycleRepositoryFactory._build_repository().repo._table
     assert repository._to_model(cycle) == cycle_model
     assert repository._from_model(cycle_model) == cycle
 
