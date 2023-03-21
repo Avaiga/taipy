@@ -15,9 +15,9 @@ from typing import Optional
 from taipy.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ._scheduler._dispatcher._job_dispatcher import _JobDispatcher
-from ._scheduler._scheduler import _Scheduler
-from ._scheduler._scheduler_factory import _SchedulerFactory
+from ._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
+from ._orchestrator._orchestrator import _Orchestrator
+from ._orchestrator._orchestrator_factory import _OrchestratorFactory
 from ._version._version_cli import _VersioningCLI
 from ._version._version_manager_factory import _VersionManagerFactory
 from .taipy import clean_all_entities_by_version
@@ -28,7 +28,7 @@ class Core:
     Core service
     """
 
-    _scheduler: Optional[_Scheduler] = None
+    _orchestrator: Optional[_Orchestrator] = None
     _dispatcher: Optional[_JobDispatcher] = None
 
     def __init__(self):
@@ -37,7 +37,7 @@ class Core:
         """
         _VersioningCLI._create_parser()
         self.cli_args = _VersioningCLI._parse_arguments()
-        self._scheduler = _SchedulerFactory._build_scheduler()
+        self._orchestrator = _OrchestratorFactory._build_orchestrator()
 
     def run(self, force_restart=False):
         """
@@ -58,7 +58,7 @@ class Core:
         Config.unblock_update()
 
         if self._dispatcher:
-            self._dispatcher = _SchedulerFactory._remove_dispatcher()
+            self._dispatcher = _OrchestratorFactory._remove_dispatcher()
             _TaipyLogger._get_logger().info("Core service has been stopped.")
 
     def __check_config(self):
@@ -100,8 +100,8 @@ class Core:
             raise SystemExit(f"Undefined execution mode: {mode}.")
 
     def __start_dispatcher(self, force_restart):
-        if dispatcher := _SchedulerFactory._build_dispatcher(force_restart=force_restart):
+        if dispatcher := _OrchestratorFactory._build_dispatcher(force_restart=force_restart):
             self._dispatcher = dispatcher
 
         if Config.job_config.is_development:
-            _Scheduler._check_and_execute_jobs_if_development_mode()
+            _Orchestrator._check_and_execute_jobs_if_development_mode()

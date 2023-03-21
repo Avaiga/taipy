@@ -228,8 +228,8 @@ class MultipleTaskFromSameConfigWithSameOwner(Exception):
     """Raised if there are multiple tasks from the same task configuration and the same owner identifier."""
 
 
-class SchedulerNotBuilt(Exception):
-    """Raised if the scheduler was not built in the SchedulerFactory"""
+class OrchestratorNotBuilt(Exception):
+    """Raised if the orchestrator was not built in the OrchestratorFactory"""
 
 
 class ModeNotAvailable(Exception):

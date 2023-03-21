@@ -13,15 +13,15 @@ from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 
 from ...job.job import Job
-from .._abstract_scheduler import _AbstractScheduler
+from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher
 
 
 class _DevelopmentJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in a synchronous way."""
 
-    def __init__(self, scheduler: _AbstractScheduler):
-        super().__init__(scheduler)
+    def __init__(self, orchestrator: _AbstractOrchestrator):
+        super().__init__(orchestrator)
 
     def start(self):
         raise NotImplementedError

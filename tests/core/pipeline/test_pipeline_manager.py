@@ -14,8 +14,8 @@ from unittest.mock import ANY
 
 import pytest
 
-from src.taipy.core._scheduler._scheduler import _Scheduler
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator import _Orchestrator
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common import _utils
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.common.alias import PipelineId, TaskId
@@ -37,7 +37,7 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 def test_set_and_get_pipeline():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline_id_1 = PipelineId("id1")
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
@@ -120,7 +120,7 @@ def test_set_and_get_pipeline():
 
 def test_submit():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
@@ -142,7 +142,7 @@ def test_submit():
     task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     pipeline = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
 
-    class MockScheduler(_Scheduler):
+    class MockOrchestrator(_Orchestrator):
         submit_calls = []
 
         @classmethod
@@ -150,7 +150,7 @@ def test_submit():
             cls.submit_calls.append(task)
             return None
 
-    with mock.patch("src.taipy.core.task._task_manager._TaskManager._scheduler", new=MockScheduler):
+    with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
 
         # pipeline does not exists. We expect an exception to be raised
         with pytest.raises(NonExistingPipeline):
@@ -173,12 +173,12 @@ def test_submit():
         _TaskManager._set(task_4)
 
         _PipelineManager._submit(pipeline.id)
-        calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
+        calls_ids = [t.id for t in _TaskManager._orchestrator().submit_calls]
         tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
         assert calls_ids == tasks_ids
 
         _PipelineManager._submit(pipeline)
-        calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
+        calls_ids = [t.id for t in _TaskManager._orchestrator().submit_calls]
         tasks_ids = tasks_ids * 2
         assert set(calls_ids) == set(tasks_ids)
 
@@ -228,7 +228,7 @@ def mock_function_no_input_one_output():
 
 def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     # test no input and no output Task
     task_no_input_no_output = Task("task_no_input_no_output", {}, mock_function_no_input_no_output)
@@ -297,7 +297,7 @@ def test_get_or_create_data():
     pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_two, task_config_mult_by_3])
     # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -343,7 +343,7 @@ def test_create_pipeline_and_modify_properties_does_not_modify_config():
     task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
     pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_two, task_config_mult_by_3], foo="bar")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
@@ -392,7 +392,7 @@ def test_pipeline_notification_subscribe(mocker):
         ],
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
@@ -446,7 +446,7 @@ def test_pipeline_notification_subscribe_multi_param(mocker):
         ],
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     notify = mocker.Mock()
@@ -480,7 +480,7 @@ def test_pipeline_notification_unsubscribe(mocker):
         ],
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
@@ -512,7 +512,7 @@ def test_pipeline_notification_unsubscribe_multi_param():
         ],
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
@@ -549,7 +549,7 @@ def test_pipeline_notification_subscribe_all():
         ],
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline_config.id = "other_pipeline"
@@ -807,7 +807,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     _PipelineManager._submit(pipeline.id)
@@ -833,7 +833,7 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
@@ -859,7 +859,7 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
@@ -885,7 +885,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
@@ -911,7 +911,7 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
@@ -941,7 +941,7 @@ def test_hard_delete_shared_entities():
     task_2 = Config.configure_task("task_2", print, intermediate_dn, output_dn)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_1, task_2])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
     pipeline_2 = _PipelineManager._get_or_create(pipeline_config)

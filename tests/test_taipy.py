@@ -19,7 +19,7 @@ import pytest
 
 import src.taipy.core.taipy as tp
 from src.taipy.core import Core
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
@@ -87,7 +87,7 @@ class TestTaipy:
             mck.assert_called_once_with(task, force=True, wait=True, timeout=60)
 
     def test_warning_no_core_service_running(self, scenario):
-        _SchedulerFactory._remove_dispatcher()
+        _OrchestratorFactory._remove_dispatcher()
 
         with pytest.warns(ResourceWarning) as warning:
             with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit"):

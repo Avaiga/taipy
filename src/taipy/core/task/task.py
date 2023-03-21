@@ -59,7 +59,7 @@ class Task(_Entity):
         function,
         input: Optional[Iterable[DataNode]] = None,
         output: Optional[Iterable[DataNode]] = None,
-        id: TaskId = None,
+        id: Optional[TaskId] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         version: str = None,
@@ -184,7 +184,7 @@ class Task(_Entity):
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
-            wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous
+            wait (bool): Wait for the orchestrated job created from the task submission to be finished in asynchronous
                 mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before
                 returning.

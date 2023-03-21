@@ -14,7 +14,7 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core.common.alias import TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
@@ -329,7 +329,7 @@ def test_submit_task():
         TaskId("t1"),
     )
 
-    class MockScheduler(_Scheduler):
+    class MockOrchestrator(_Orchestrator):
         submit_calls = []
         submit_ids = []
 
@@ -339,7 +339,7 @@ def test_submit_task():
             self.submit_ids.append(submit_id)
             return None
 
-    with mock.patch("src.taipy.core.task._task_manager._TaskManager._scheduler", new=MockScheduler):
+    with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
 
         # Task does not exist, we expect an exception
         with pytest.raises(NonExistingTask):
@@ -349,17 +349,17 @@ def test_submit_task():
 
         _TaskManager._set(task_1)
         _TaskManager._submit(task_1)
-        call_ids = [call.id for call in MockScheduler.submit_calls]
+        call_ids = [call.id for call in MockOrchestrator.submit_calls]
         assert call_ids == [task_1.id]
-        assert len(MockScheduler.submit_ids) == 1
+        assert len(MockOrchestrator.submit_ids) == 1
 
         _TaskManager._submit(task_1)
-        assert len(MockScheduler.submit_ids) == 2
-        assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
+        assert len(MockOrchestrator.submit_ids) == 2
+        assert len(MockOrchestrator.submit_ids) == len(set(MockOrchestrator.submit_ids))
 
         _TaskManager._submit(task_1)
-        assert len(MockScheduler.submit_ids) == 3
-        assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
+        assert len(MockOrchestrator.submit_ids) == 3
+        assert len(MockOrchestrator.submit_ids) == len(set(MockOrchestrator.submit_ids))
 
 
 def _create_task_from_config(task_config, *args, **kwargs):

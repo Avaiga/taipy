@@ -44,7 +44,7 @@ class _JobManager(_Manager[Job]):
     def _delete(cls, job: Job, force=False):  # type:ignore
         if job.is_finished() or force:
             super()._delete(job.id)
-            from .._scheduler._dispatcher._job_dispatcher import _JobDispatcher
+            from .._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 
             _JobDispatcher._pop_dispatched_process(job.id)  # type: ignore
         else:
@@ -56,9 +56,9 @@ class _JobManager(_Manager[Job]):
     def _cancel(cls, job: Union[str, Job]):
         job = cls._get(job) if isinstance(job, str) else job
 
-        from .._scheduler._scheduler_factory import _SchedulerFactory
+        from .._orchestrator._orchestrator_factory import _OrchestratorFactory
 
-        _SchedulerFactory._build_scheduler().cancel_job(job)
+        _OrchestratorFactory._build_orchestrator().cancel_job(job)
 
     @classmethod
     def _get_latest(cls, task: Task) -> Optional[Job]:
