@@ -6,8 +6,8 @@
     "creation_date": "2022-03-31T22:00:23.710789",
     "subscribers": [
         {
-            "fct_name": "_Scheduler._on_status_change",
-            "fct_module": "taipy.core._scheduler._scheduler"
+            "fct_name": "_Orchestrator._on_status_change",
+            "fct_module": "taipy.core._orchestrator._orchestrator"
         }
     ],
     "stacktrace": [],
