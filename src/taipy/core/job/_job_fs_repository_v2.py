@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ._job_model import _JobModel
+from .job import Job
 
 
-class _JobFSRepository(_FileSystemRepository):
+class _JobFSRepository(_FileSystemRepository[_JobModel, Job]):
     def __init__(self):
         super().__init__(model=_JobModel, dir_name="jobs")

@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ._data_model import _DataNodeModel
+from .data_node import DataNode
 
 
-class _DataFSRepository(_FileSystemRepository):
+class _DataFSRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
     def __init__(self):
         super().__init__(model=_DataNodeModel, dir_name="data_nodes")

@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ._pipeline_model import _PipelineModel
+from .pipeline import Pipeline
 
 
-class _PipelineFSRepository(_FileSystemRepository):
+class _PipelineFSRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
     def __init__(self):
         super().__init__(model=_PipelineModel, dir_name="pipelines")

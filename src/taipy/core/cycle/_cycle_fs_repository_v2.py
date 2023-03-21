@@ -11,8 +11,9 @@
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ._cycle_model import _CycleModel
 from ._cycle_repository_mixin import _CycleRepositoryMixin
+from .cycle import Cycle
 
 
-class _CycleFSRepository(_FileSystemRepository, _CycleRepositoryMixin):
+class _CycleFSRepository(_FileSystemRepository[_CycleModel, Cycle], _CycleRepositoryMixin):
     def __init__(self):
         super().__init__(model=_CycleModel, dir_name="cycles")

@@ -49,7 +49,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
-        # TODO: implement _from_entity on models
+
         model = self.model._from_entity(entity)
         self.__get_model_filepath(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
@@ -128,8 +128,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             filters = []
         with open(filepath, "r") as f:
             contents = f.read()
-
-            if not all(f'"{key}": "{value}"' in contents for key, value in filters):
-                return None
+            for filter in filters:
+                if not all(f'"{key}": "{value}"' in contents for key, value in filter.items()):
+                    return None
 
         return json.loads(contents, cls=_Decoder)

@@ -15,8 +15,7 @@ from datetime import datetime
 from typing import Any, Dict
 
 from taipy.config import Config
-
-from .._version._version import _Version
+from taipy.core._version._version import _Version
 
 
 @dataclass

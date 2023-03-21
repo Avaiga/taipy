@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ._task_model import _TaskModel
+from .task import Task
 
 
-class _TaskFSRepository(_FileSystemRepository):
+class _TaskFSRepository(_FileSystemRepository[_TaskModel, Task]):
     def __init__(self):
         super().__init__(model=_TaskModel, dir_name="tasks")
