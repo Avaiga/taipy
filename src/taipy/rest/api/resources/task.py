@@ -274,5 +274,5 @@ class TaskExecutor(Resource):
     def post(self, task_id):
         manager = _TaskManagerFactory._build_manager()
         task = _get_or_raise(task_id)
-        manager._scheduler().submit_task(task)
+        manager._orchestrator().submit_task(task)
         return {"message": f"Task {task_id} was submitted."}

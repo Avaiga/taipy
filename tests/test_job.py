@@ -11,7 +11,6 @@
 
 from unittest import mock
 
-import pytest
 from flask import url_for
 
 
@@ -67,10 +66,10 @@ def test_get_all_jobs(client, create_job_list):
 
 def test_cancel_job(client, default_job):
     # test 404
-    from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+    from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 
-    _SchedulerFactory._build_scheduler()
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_orchestrator()
+    _OrchestratorFactory._build_dispatcher()
 
     user_url = url_for("api.job_cancel", job_id="foo")
     rep = client.post(user_url)
