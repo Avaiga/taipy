@@ -155,47 +155,44 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         with open(self._path, "w") as f:  # type: ignore
             json.dump(data, f, indent=4, cls=self._encoder)
 
-    def _serialize_datanode_properties(self):
-        properties = super()._serialize_datanode_properties()
+    @classmethod
+    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
+        encoder = datanode_properties.get(cls.__ENCODER_KEY)
+        datanode_properties[cls.__ENCODER_NAME_KEY] = encoder.__name__ if encoder else None
+        datanode_properties[cls.__ENCODER_MODULE_KEY] = encoder.__module__ if encoder else None
+        datanode_properties.pop(cls.__ENCODER_KEY, None)
 
-        encoder = properties.get(self.__ENCODER_KEY)
-        properties[self.__ENCODER_NAME_KEY] = encoder.__name__ if encoder else None
-        properties[self.__ENCODER_MODULE_KEY] = encoder.__module__ if encoder else None
-        properties.pop(self.__ENCODER_KEY, None)
+        decoder = datanode_properties.get(cls.__DECODER_KEY)
+        datanode_properties[cls.__DECODER_NAME_KEY] = decoder.__name__ if decoder else None
+        datanode_properties[cls.__DECODER_MODULE_KEY] = decoder.__module__ if decoder else None
+        datanode_properties.pop(cls.__DECODER_KEY, None)
 
-        decoder = properties.get(self.__DECODER_KEY)
-        properties[self.__DECODER_NAME_KEY] = decoder.__name__ if decoder else None
-        properties[self.__DECODER_MODULE_KEY] = decoder.__module__ if decoder else None
-        properties.pop(self.__DECODER_KEY, None)
-
-        return properties
+        return datanode_properties
 
     @classmethod
-    def _deserialize_datanode_properties(cls, data_node_model):
-        properties = super()._deserialize_datanode_properties(data_node_model)
-
-        if properties[cls.__ENCODER_MODULE_KEY]:
-            properties[cls.__ENCODER_KEY] = _load_fct(
-                properties[cls.__ENCODER_MODULE_KEY],
-                properties[cls.__ENCODER_NAME_KEY],
+    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
+        if datanode_model_properties[cls.__ENCODER_MODULE_KEY]:
+            datanode_model_properties[cls.__ENCODER_KEY] = _load_fct(
+                datanode_model_properties[cls.__ENCODER_MODULE_KEY],
+                datanode_model_properties[cls.__ENCODER_NAME_KEY],
             )
         else:
-            properties[cls.__ENCODER_KEY] = None
+            datanode_model_properties[cls.__ENCODER_KEY] = None
 
-        if properties[cls.__DECODER_MODULE_KEY]:
-            properties[cls.__DECODER_KEY] = _load_fct(
-                properties[cls.__DECODER_MODULE_KEY],
-                properties[cls.__DECODER_NAME_KEY],
+        if datanode_model_properties[cls.__DECODER_MODULE_KEY]:
+            datanode_model_properties[cls.__DECODER_KEY] = _load_fct(
+                datanode_model_properties[cls.__DECODER_MODULE_KEY],
+                datanode_model_properties[cls.__DECODER_NAME_KEY],
             )
         else:
-            properties[cls.__DECODER_KEY] = None
+            datanode_model_properties[cls.__DECODER_KEY] = None
 
-        del properties[cls.__ENCODER_NAME_KEY]
-        del properties[cls.__ENCODER_MODULE_KEY]
-        del properties[cls.__DECODER_NAME_KEY]
-        del properties[cls.__DECODER_MODULE_KEY]
+        del datanode_model_properties[cls.__ENCODER_NAME_KEY]
+        del datanode_model_properties[cls.__ENCODER_MODULE_KEY]
+        del datanode_model_properties[cls.__DECODER_NAME_KEY]
+        del datanode_model_properties[cls.__DECODER_MODULE_KEY]
 
-        return properties
+        return datanode_model_properties
 
 
 class _DefaultJSONEncoder(json.JSONEncoder):

@@ -135,3 +135,11 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
             os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
         with open(self._path, "wb") as pf:
             pickle.dump(data, pf)
+
+    @classmethod
+    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
+        return datanode_properties
+
+    @classmethod
+    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
+        return datanode_model_properties
