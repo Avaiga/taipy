@@ -13,4 +13,5 @@ from typing import TypeVar, Union
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
+Converter = TypeVar("Converter")
 Json = Union[dict, list, str, int, float, bool, None]
