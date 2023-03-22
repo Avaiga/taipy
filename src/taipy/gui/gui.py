@@ -234,7 +234,7 @@ class Gui:
                 The method `(Gui.)add_pages(pages)^` is called if _pages_ is not None.
                 You can find details on the possible values of this argument in the
                 documentation for this method.
-            css_file (str): An optional pathname to a CSS file that gets used as a style sheet in
+            css_file (Optional[str]): A pathname to a CSS file that gets used as a style sheet in
                 all the pages.<br/>
                 The default value is a file that has the same base name as the Python
                 file defining the `main` function, sitting next to this Python file,
@@ -661,27 +661,27 @@ class Gui:
         return f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
 
     def __append_libraries_to_status(self, status: t.Dict[str, t.Any]):
-        if self.__extensions:
-            libraries: t.Dict[str, t.Any] = {}
-            for libs_list in self.__extensions.values():
-                if isinstance(libs_list, list):
-                    for lib in libs_list:
-                        if isinstance(lib, ElementLibrary):
-                            libs = libraries.get(lib.get_name())
-                            if libs is None:
-                                libs = []
-                                libraries[lib.get_name()] = libs
-                            elts: t.List[t.Dict[str, str]] = []
-                            libs.append({"js module": lib.get_js_module_name(), "elements": elts})
-                            for element_name, elt in lib.get_elements().items():
-                                if isinstance(elt, Element):
-                                    elt_dict = {"name": element_name}
-                                    if hasattr(elt, "_render_xhtml"):
-                                        elt_dict["render function"] = elt._render_xhtml.__code__.co_name
-                                    else:
-                                        elt_dict["react name"] = elt._get_js_name(element_name)
-                                    elts.append(elt_dict)
-            status.update({"libraries": libraries})
+        libraries: t.Dict[str, t.Any] = {}
+        for libs_list in self.__extensions.values():
+            for lib in libs_list:
+                if not isinstance(lib, ElementLibrary):
+                    continue
+                libs = libraries.get(lib.get_name())
+                if libs is None:
+                    libs = []
+                    libraries[lib.get_name()] = libs
+                elts: t.List[t.Dict[str, str]] = []
+                libs.append({"js module": lib.get_js_module_name(), "elements": elts})
+                for element_name, elt in lib.get_elements().items():
+                    if not isinstance(elt, Element):
+                        continue
+                    elt_dict = {"name": element_name}
+                    if hasattr(elt, "_render_xhtml"):
+                        elt_dict["render function"] = elt._render_xhtml.__code__.co_name
+                    else:
+                        elt_dict["react name"] = elt._get_js_name(element_name)
+                    elts.append(elt_dict)
+        status.update({"libraries": libraries})
 
     def _serve_status(self, template: pathlib.Path) -> t.Dict[str, t.Dict[str, str]]:
         base_json: t.Dict[str, t.Any] = {"user_status": str(self.__call_on_status() or "")}
@@ -1888,7 +1888,27 @@ class Gui:
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
-        glob_ctx.update({Gui.__SELF_VAR: self})
+        glob_ctx[Gui.__SELF_VAR] = self
+
+        # call on_init on each library
+        for name, libs in self.__extensions.items():
+            for lib in libs:
+                if not isinstance(lib, ElementLibrary):
+                    continue
+                try:
+                    lib_context = lib.on_init(self)
+                    if isinstance(lib_context, tuple) and len(lib_context) > 1 and isinstance(lib_context[0], str) and lib_context[0].isidentifier():
+                        if lib_context[0] in glob_ctx:
+                            warnings.warn(f"Method {name}.on_init() returned a name already defined '{lib_context[0]}'.")
+                        else:
+                            glob_ctx[lib_context[0]] = lib_context[1]
+                    elif lib_context:
+                        warnings.warn(f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier.")
+                except Exception as e:  # pragma: no cover
+                    if not self._call_on_exception(f"{name}.on_init", e):
+                        warnings.warn(f"Method {name}.on_init() raised an exception:\n{e}.")
+
+        # Initiate the Evaluator with the right context
         self.__evaluator = _Evaluator(glob_ctx)
 
         self.__register_blueprint()
