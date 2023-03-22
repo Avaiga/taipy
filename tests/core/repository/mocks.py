@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 from src.taipy.core._repository import _FileSystemRepository, _SQLRepository
+from src.taipy.core._repository._v2._abstract_converter import _AbstractConverter
 from src.taipy.core._repository._v2._filesystem_repository import _FileSystemRepository as _FileSystemRepositoryV2
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
@@ -50,6 +51,16 @@ class MockModel:
     @classmethod
     def _from_entity(cls, entity: MockObj):
         return MockModel(id=entity.id, name=entity.name, version=entity.version)
+
+
+class MockConverter(_AbstractConverter):
+    @classmethod
+    def _entity_to_model(cls, entity):
+        return MockModel(id=entity.id, name=entity.name, version=entity.version)
+
+    @classmethod
+    def _model_to_entity(cls, model):
+        return MockObj(id=model.id, name=model.name, version=model.version)
 
 
 class MockFSRepository(_FileSystemRepository):

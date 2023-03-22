@@ -12,7 +12,6 @@
 from datetime import datetime
 
 from .._repository._v2._abstract_converter import _AbstractConverter
-from ..common._entity import _Entity
 from ..cycle._cycle_model import _CycleModel
 from ..cycle.cycle import Cycle
 

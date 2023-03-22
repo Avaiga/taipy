@@ -10,15 +10,10 @@
 # specific language governing permissions and limitations under the License.
 import dataclasses
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Any, Dict, List
 
 from .._version._utils import _version_migration
-from ..common._utils import _fcts_to_dict, _load_fct
 from ..common.alias import JobId
-from ..exceptions import InvalidSubscriber
-from ..job.job import Job
-from ..task._task_repository_factory import _TaskRepositoryFactory
 from .status import Status
 
 
@@ -50,37 +45,3 @@ class _JobModel:
             stacktrace=data["stacktrace"],
             version=data["version"] if "version" in data.keys() else _version_migration(),
         )
-
-    def _to_entity(self):
-        task_repository = _TaskRepositoryFactory._build_repository()
-        job = Job(id=self.id, task=task_repository.load(self.task_id), submit_id=self.submit_id, version=self.version)
-
-        job.status = self.status  # type: ignore
-        job.force = self.force  # type: ignore
-        job.creation_date = datetime.fromisoformat(self.creation_date)  # type: ignore
-        for it in self.subscribers:
-            try:
-                job._subscribers.append(_load_fct(it.get("fct_module"), it.get("fct_name")))  # type:ignore
-            except AttributeError:
-                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
-        job._stacktrace = self.stacktrace
-
-        return job
-
-    @classmethod
-    def _from_entity(self, job: Job) -> "_JobModel":
-        return _JobModel(
-            job.id,
-            job._task.id,
-            job._status,
-            job._force,
-            job.submit_id,
-            job._creation_date.isoformat(),
-            self._serialize_subscribers(job._subscribers),
-            job._stacktrace,
-            version=job.version,
-        )
-
-    @staticmethod
-    def _serialize_subscribers(subscribers: List) -> List:
-        return _fcts_to_dict(subscribers)

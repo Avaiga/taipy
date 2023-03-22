@@ -11,11 +11,7 @@
 
 import dataclasses
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Any, Dict
-
-from taipy.config import Config
-from taipy.core._version._version import _Version
 
 
 @dataclass
@@ -33,15 +29,4 @@ class _VersionModel:
             id=data["id"],
             config=data["config"],
             creation_date=data["creation_date"],
-        )
-
-    def _to_entity(self):
-        version = _Version(id=self.id, config=Config._from_json(self.config))
-        version.creation_date = datetime.fromisoformat(self.creation_date)
-        return version
-
-    @classmethod
-    def _from_entity(cls, version: _Version) -> "_VersionModel":
-        return _VersionModel(
-            id=version.id, config=Config._to_json(version.config), creation_date=version.creation_date.isoformat()
         )

@@ -9,10 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from .._repository._v2._filesystem_repository import _FileSystemRepository
+from ._data_converter import _DataNodeConverter
 from ._data_model import _DataNodeModel
-from .data_node import DataNode
 
 
-class _DataFSRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
+class _DataFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model=_DataNodeModel, dir_name="data_nodes")
+        super().__init__(model=_DataNodeModel, converter=_DataNodeConverter, dir_name="data_nodes")

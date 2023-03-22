@@ -9,10 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from .._repository._v2._filesystem_repository import _FileSystemRepository
+from ._pipeline_converter import _PipelineConverter
 from ._pipeline_model import _PipelineModel
-from .pipeline import Pipeline
 
 
-class _PipelineFSRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
+class _PipelineFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model=_PipelineModel, dir_name="pipelines")
+        super().__init__(model=_PipelineModel, converter=_PipelineConverter, dir_name="pipelines")

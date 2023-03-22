@@ -16,6 +16,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ..exceptions.exceptions import VersionIsNotProductionVersion
+from ._version_converter import _VersionConverter
 from ._version_model import _VersionModel
 
 
@@ -25,7 +26,7 @@ class _VersionFSRepository(_FileSystemRepository):
     _PRODUCTION_VERSION_KEY = "production_version"
 
     def __init__(self):
-        super().__init__(model=_VersionModel, dir_name="version")
+        super().__init__(model=_VersionModel, converter=_VersionConverter, dir_name="version")
 
     @property
     def _version_file_path(self):
