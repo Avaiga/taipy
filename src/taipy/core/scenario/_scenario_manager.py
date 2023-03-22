@@ -37,14 +37,21 @@ from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
-from ._scenario_repository_factory import _ScenarioRepositoryFactory
+from ._scenario_fs_repository import _ScenarioFSRepository
+from ._scenario_sql_repository import _ScenarioSQLRepository
 from .scenario import Scenario
 from .scenario_id import ScenarioId
+
+__REPOSITORY_MAP = {"default": _ScenarioFSRepository, "sql": _ScenarioSQLRepository}
+
+
+def _build_repository():
+    return __REPOSITORY_MAP.get(Config.global_config.repository_type, __REPOSITORY_MAP.get("default"))()
 
 
 class _ScenarioManager(_Manager[Scenario]):
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
-    _repository = _ScenarioRepositoryFactory._build_repository()
+    _repository = _build_repository()
     _ENTITY_NAME = Scenario.__name__
 
     @classmethod
