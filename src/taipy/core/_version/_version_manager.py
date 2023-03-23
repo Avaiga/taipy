@@ -98,7 +98,7 @@ class _VersionManager(_Manager[_Version]):
                 f"number for experiment mode. "
             )
 
-        if version_number in cls._get_production_version():
+        if version_number in cls._get_production_versions():
             raise SystemExit(
                 f"Version number {version_number} is already a production version. Please choose a different version "
                 f"number for experiment mode. "
@@ -119,7 +119,7 @@ class _VersionManager(_Manager[_Version]):
 
     @classmethod
     def _set_production_version(cls, version_number: str, force: bool) -> str:
-        production_versions = cls._get_production_version()
+        production_versions = cls._get_production_versions()
 
         # Check if all previous production versions are compatible with current Python Config
         for production_version in production_versions:
@@ -144,9 +144,9 @@ class _VersionManager(_Manager[_Version]):
         return version_number
 
     @classmethod
-    def _get_production_version(cls) -> List[str]:
+    def _get_production_versions(cls) -> List[str]:
         try:
-            return cls._repository._get_production_version()
+            return cls._repository._get_production_versions()
         except:  # noqa: E722
             return []
 
@@ -159,7 +159,7 @@ class _VersionManager(_Manager[_Version]):
         if version_number is None:
             version_number = cls._replace_version_number(cls.__DEFAULT_VERSION)
 
-            production_versions = cls._get_production_version()
+            production_versions = cls._get_production_versions()
 
             if version_number not in production_versions:
                 return version_number
@@ -170,7 +170,7 @@ class _VersionManager(_Manager[_Version]):
         if version_number in cls.__DEVELOPMENT_VERSION:
             return cls._get_development_version()
         if version_number in cls.__PRODUCTION_VERSION:
-            return cls._get_production_version()
+            return cls._get_production_versions()
         if version_number in cls.__ALL_VERSION:
             return ""
         if version := cls._get(version_number):
