@@ -209,7 +209,7 @@ def test_version_number_when_switching_mode():
     with patch("sys.argv", ["prog", "--production"]):
         Core().run()
     ver_6 = _VersionManager._get_latest_version()
-    production_versions = _VersionManager._get_production_version()
+    production_versions = _VersionManager._get_production_versions()
     assert ver_6 == ver_5
     assert production_versions == [ver_6]
     assert len(_VersionManager._get_all()) == 4
@@ -218,7 +218,7 @@ def test_version_number_when_switching_mode():
     with patch("sys.argv", ["prog", "--production", "2.1"]):
         Core().run()
     ver_7 = _VersionManager._get_latest_version()
-    production_versions = _VersionManager._get_production_version()
+    production_versions = _VersionManager._get_production_versions()
     assert ver_7 == "2.1"
     assert production_versions == [ver_6, ver_7]
     assert len(_VersionManager._get_all()) == 4
@@ -237,9 +237,9 @@ def test_production_mode_load_all_entities_from_previous_production_version():
     with patch("sys.argv", ["prog", "--production"]):
         Core().run()
     production_ver_1 = _VersionManager._get_latest_version()
-    assert _VersionManager._get_production_version() == [production_ver_1]
+    assert _VersionManager._get_production_versions() == [production_ver_1]
     # When run production mode on a new app, a dev version is created alongside
-    assert _VersionManager._get_development_version() not in _VersionManager._get_production_version()
+    assert _VersionManager._get_development_version() not in _VersionManager._get_production_versions()
     assert len(_VersionManager._get_all()) == 2
 
     scenario = _ScenarioManager._create(scenario_config)
@@ -255,7 +255,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
     with patch("sys.argv", ["prog", "--production", "2.0"]):
         Core().run()
     production_ver_2 = _VersionManager._get_latest_version()
-    assert _VersionManager._get_production_version() == [production_ver_1, production_ver_2]
+    assert _VersionManager._get_production_versions() == [production_ver_1, production_ver_2]
     assert len(_VersionManager._get_all()) == 3
 
     # All entities from previous production version should be saved
@@ -324,7 +324,7 @@ def test_force_override_production_version():
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         Core().run()
     ver_1 = _VersionManager._get_latest_version()
-    production_versions = _VersionManager._get_production_version()
+    production_versions = _VersionManager._get_production_versions()
     assert ver_1 == "1.0"
     assert production_versions == ["1.0"]
     # When create new production version, a development version entity is also created as a placeholder
@@ -465,7 +465,7 @@ def test_delete_version():
         Core().run()
 
     all_versions = [version.id for version in _VersionManager._get_all()]
-    production_version = _VersionManager._get_production_version()
+    production_version = _VersionManager._get_production_versions()
     assert len(all_versions) == 5
     assert len(production_version) == 2
     assert "1.0" in all_versions
@@ -487,7 +487,7 @@ def test_delete_version():
             Core().run()
     assert str(e.value) == "Successfully delete version 1.1 from production version list."
     all_versions = [version.id for version in _VersionManager._get_all()]
-    production_version = _VersionManager._get_production_version()
+    production_version = _VersionManager._get_production_versions()
     assert len(all_versions) == 4
     assert "1.1" in all_versions and "1.1" not in production_version
 

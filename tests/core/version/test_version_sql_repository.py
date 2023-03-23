@@ -91,7 +91,7 @@ class TestVersionSQLRepository:
         repo._save(version)
         repo._set_production_version(version.id)
 
-        prod_1 = repo._get_production_version()
+        prod_1 = repo._get_production_versions()
         all_production_versions = [version.id]
 
         assert all_production_versions == prod_1
@@ -100,7 +100,7 @@ class TestVersionSQLRepository:
         repo._save(version)
         repo._set_production_version(version.id)
         all_production_versions.append(version.id)
-        prod_2 = repo._get_production_version()
+        prod_2 = repo._get_production_versions()
 
         assert all_production_versions == prod_2
 
@@ -116,8 +116,8 @@ class TestVersionSQLRepository:
             repo._delete_production_version(version.id)
 
         repo._set_production_version(version.id)
-        assert len(repo._get_production_version()) == 1
+        assert len(repo._get_production_versions()) == 1
 
         repo._delete_production_version(version.id)
 
-        assert len(repo._get_production_version()) == 0
+        assert len(repo._get_production_versions()) == 0

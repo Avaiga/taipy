@@ -89,8 +89,8 @@ class _VersionRepository(_AbstractRepository[_VersionModel, _Version]):  # type:
     def _set_production_version(self, version_number):
         self.repo._set_production_version(version_number)
 
-    def _get_production_version(self) -> List[str]:
-        return self.repo._get_production_version()
+    def _get_production_versions(self) -> List[str]:
+        return self.repo._get_production_versions()
 
     def _delete_production_version(self, version_number):
         self.repo._delete_production_version(version_number)
