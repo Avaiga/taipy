@@ -46,6 +46,8 @@ class _ScenarioManager(_Manager[Scenario]):
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
     _ENTITY_NAME = Scenario.__name__
 
+    _repository: _ScenarioRepository
+
     @classmethod
     def _subscribe(
         cls,

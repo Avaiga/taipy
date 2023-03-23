@@ -26,14 +26,15 @@ from ..job.job import Job
 from ..scenario.scenario_id import ScenarioId
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
-from ._pipeline_repository_factory import _PipelineRepositoryFactory
+from ._pipeline_repository import _PipelineRepository
 from .pipeline import Pipeline
 from .pipeline_id import PipelineId
 
 
 class _PipelineManager(_Manager[Pipeline]):
-    _repository = _PipelineRepositoryFactory._build_repository()  # type: ignore
+
     _ENTITY_NAME = Pipeline.__name__
+    _repository: _PipelineRepository
 
     @classmethod
     def _subscribe(
@@ -98,7 +99,7 @@ class _PipelineManager(_Manager[Pipeline]):
         else:
             owner_id = None
 
-        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(str(pipeline_config.id), owner_id):
+        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(str(pipeline_config.id), owner_id):  # type: ignore
             return pipelines_from_owner
 
         version = _VersionManagerFactory._build_manager()._get_latest_version()

@@ -13,14 +13,30 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._data_fs_repository import _DataFSRepository
 from ._data_manager import _DataManager
-from ._data_repository_factory import _DataRepositoryFactory
+from ._data_sql_repository import _DataSQLRepository
 
 
 class _DataManagerFactory(_ManagerFactory):
+
+    _REPOSITORY_MAP = {"default": _DataFSRepository, "sql": _DataSQLRepository}
+
     @classmethod
     def _build_manager(cls) -> Type[_DataManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager")  # type: ignore
-        _DataManager._repository = _DataRepositoryFactory._build_repository()  # type: ignore
-        return _DataManager
+            data_manager = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager"
+            )  # type: ignore
+            build_repository = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager_factory", "_DataManagerFactory"
+            )._build_repository  # type: ignore
+        else:
+            data_manager = _DataManager
+            build_repository = cls._build_repository
+        data_manager._repository = build_repository()  # type: ignore
+        return data_manager  # type: ignore
+
+    @classmethod
+    def _build_repository(cls):
+        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()

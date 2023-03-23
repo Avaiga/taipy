@@ -19,7 +19,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._manager._manager import _Manager
 from ..exceptions.exceptions import ConflictedConfigurationError, ModelNotFound, NonExistingVersion
 from ._version import _Version
-from ._version_repository_factory import _VersionRepositoryFactory
+from ._version_repository import _VersionRepository
 
 
 class _VersionManager(_Manager[_Version]):
@@ -32,7 +32,7 @@ class _VersionManager(_Manager[_Version]):
 
     _DEFAULT_VERSION = __LATEST_VERSION
 
-    _repository = _VersionRepositoryFactory._build_repository()  # type: ignore
+    _repository: _VersionRepository
 
     @classmethod
     def _get(cls, entity: Union[str, _Version], default=None) -> _Version:

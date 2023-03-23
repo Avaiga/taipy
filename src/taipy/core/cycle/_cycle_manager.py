@@ -18,14 +18,14 @@ from taipy.config.common.frequency import Frequency
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from ..job._job_manager_factory import _JobManagerFactory
-from ._cycle_repository_factory import _CycleRepositoryFactory
+from ._cycle_repository import _CycleRepository
 from .cycle import Cycle
 from .cycle_id import CycleId
 
 
 class _CycleManager(_Manager[Cycle]):
-    _repository = _CycleRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Cycle.__name__
+    _repository: _CycleRepository
 
     @classmethod
     def _create(cls, frequency: Frequency, name: str = None, creation_date: datetime = None, **properties):

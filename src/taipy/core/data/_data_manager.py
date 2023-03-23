@@ -21,19 +21,20 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
+from ._data_repository import _DataRepository
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
 from ..task.task_id import TaskId
-from ._data_repository_factory import _DataRepositoryFactory
 from .data_node import DataNode
 from .data_node_id import DataNodeId
 from .pickle import PickleDataNode
 
 
 class _DataManager(_Manager[DataNode]):
+
     __DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
-    _repository = _DataRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
+    _repository: _DataRepository
 
     @classmethod
     def _bulk_get_or_create(

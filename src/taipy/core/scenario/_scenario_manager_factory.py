@@ -11,8 +11,6 @@
 
 from typing import Type
 
-from taipy.config import Config
-
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._scenario_fs_repository import _ScenarioFSRepository
@@ -22,11 +20,7 @@ from ._scenario_sql_repository import _ScenarioSQLRepository
 
 class _ScenarioManagerFactory(_ManagerFactory):
 
-    __REPOSITORY_MAP = {"default": _ScenarioFSRepository, "sql": _ScenarioSQLRepository}
-
-    @classmethod
-    def _build_repository(cls):
-        return cls.__REPOSITORY_MAP.get(Config.global_config.repository_type, cls.__REPOSITORY_MAP.get("default"))()
+    _REPOSITORY_MAP = {"default": _ScenarioFSRepository, "sql": _ScenarioSQLRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_ScenarioManager]:  # type: ignore
@@ -35,10 +29,14 @@ class _ScenarioManagerFactory(_ManagerFactory):
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager"
             )  # type: ignore
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_build_repository"
-            )  # type: ignore
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager_factory", "_ScenarioManagerFactory"
+            )._build_repository  # type: ignore
         else:
             scenario_manager = _ScenarioManager
             build_repository = cls._build_repository
         scenario_manager._repository = build_repository()  # type: ignore
-        return _ScenarioManager
+        return scenario_manager  # type: ignore
+
+    @classmethod
+    def _build_repository(cls):
+        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()

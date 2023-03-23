@@ -14,7 +14,7 @@ from datetime import datetime
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
-from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
+from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.cycle.cycle_id import CycleId
 from src.taipy.core.data._data_manager import _DataManager
@@ -30,7 +30,7 @@ from taipy.config.config import Config
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
     Config.configure_global_app(repository_type="sql")
 
-    _CycleManager._repository = _CycleRepositoryFactory._build_repository()
+    _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
     assert len(_CycleManager._get_all()) == 0
@@ -83,7 +83,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
 def test_create_and_delete_cycle_entity(tmpdir):
     Config.configure_global_app(repository_type="sql")
 
-    _CycleManager._repository = _CycleRepositoryFactory._build_repository()
+    _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
     assert len(_CycleManager._get_all()) == 0
@@ -140,7 +140,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
 def test_get_cycle_start_date_and_end_date():
     Config.configure_global_app(repository_type="sql")
 
-    _CycleManager._repository = _CycleRepositoryFactory._build_repository()
+    _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
 

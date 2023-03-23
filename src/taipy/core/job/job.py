@@ -23,7 +23,6 @@ from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._utils import _fcts_to_dict, _load_fct
 from ..exceptions.exceptions import InvalidSubscriber
-from ..task._task_repository_factory import _TaskRepositoryFactory
 from ..task.task import Task
 from ._job_model import _JobModel
 from .job_id import JobId
@@ -333,7 +332,10 @@ class Job(_Entity, _Labeled):
 
     @classmethod
     def _from_model(cls, model: _JobModel):
-        task_repository = _TaskRepositoryFactory._build_repository()
+        from ..task._task_manager_factory import _TaskManagerFactory
+
+        task_repository = _TaskManagerFactory._build_repository()
+
         job = Job(
             id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id, version=model.version
         )

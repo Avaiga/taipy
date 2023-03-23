@@ -13,16 +13,30 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._pipeline_fs_repository import _PipelineFSRepository
 from ._pipeline_manager import _PipelineManager
-from ._pipeline_repository_factory import _PipelineRepositoryFactory
+from ._pipeline_sql_repository import _PipelineSQLRepository
 
 
 class _PipelineManagerFactory(_ManagerFactory):
+
+    _REPOSITORY_MAP = {"default": _PipelineFSRepository, "sql": _PipelineSQLRepository}
+
     @classmethod
     def _build_manager(cls) -> Type[_PipelineManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(
+            pipeline_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager", "_PipelineManager"
             )  # type: ignore
-        _PipelineManager._repository = _PipelineRepositoryFactory._build_repository()  # type: ignore
-        return _PipelineManager
+            build_repository = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager_factory", "_PipelineManagerFactory"
+            )._build_repository  # type: ignore
+        else:
+            pipeline_manager = _PipelineManager
+            build_repository = cls._build_repository
+        pipeline_manager._repository = build_repository()  # type: ignore
+        return pipeline_manager  # type: ignore
+
+    @classmethod
+    def _build_repository(cls):
+        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()

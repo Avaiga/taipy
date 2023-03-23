@@ -13,16 +13,30 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._version_fs_repository import _VersionFSRepository
 from ._version_manager import _VersionManager
-from ._version_repository_factory import _VersionRepositoryFactory
+from ._version_sql_repository import _VersionSQLRepository
 
 
 class _VersionManagerFactory(_ManagerFactory):
+
+    _REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
+
     @classmethod
-    def _build_manager(cls) -> Type[_VersionManager]:  # type: ignore
+    def _build_manager(cls) -> _VersionManager:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(
+            version_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager", "_VersionManager"
             )  # type: ignore
-        _VersionManager._repository = _VersionRepositoryFactory._build_repository()  # type: ignore
-        return _VersionManager
+            build_repository = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager_factory", "_VersionManagerFactory"
+            )._build_repository  # type: ignore
+        else:
+            version_manager = _VersionManager
+            build_repository = cls._build_repository
+        version_manager._repository = build_repository()  # type: ignore
+        return version_manager  # type: ignore
+
+    @classmethod
+    def _build_repository(cls):
+        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()

@@ -89,7 +89,7 @@ job_model = _JobModel(
 
 class TestJobRepository:
     def test_save_and_load(self, tmpdir):
-        repository = _JobRepositoryFactory._build_repository()
+        repository = _JobManagerFactory._build_repository()
         repository.base_path = tmpdir
         repository._save(job)
         with pytest.raises(ModelNotFound):
@@ -100,7 +100,7 @@ class TestJobRepository:
         assert j.id == job.id
 
     def test_from_and_to_model(self):
-        repository = _JobRepositoryFactory._build_repository().repo
+        repository = _JobManagerFactory._build_repository().repo
         assert repository._to_model(job) == job_model
         with pytest.raises(ModelNotFound):
             repository._from_model(job_model)
@@ -114,7 +114,7 @@ class TestJobRepository:
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()
 
-        repository = _JobRepositoryFactory._build_repository()
+        repository = _JobManagerFactory._build_repository()
         repository._delete_all()
 
         repository._save(job)
@@ -131,7 +131,7 @@ class TestJobRepository:
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()
 
-        repository = _JobRepositoryFactory._build_repository().repo._table
+        repository = _JobManagerFactory._build_repository().repo._table
         repository._delete_all()
 
         assert repository._to_model(job) == job_model

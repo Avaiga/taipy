@@ -26,14 +26,15 @@ from ..exceptions.exceptions import NonExistingTask
 from ..job._job_manager_factory import _JobManagerFactory
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ..task._task_repository_factory import _TaskRepositoryFactory
 from ..task.task import Task
+from ._task_repository import _TaskRepository
 from .task_id import TaskId
 
 
 class _TaskManager(_Manager[Task]):
-    _repository = _TaskRepositoryFactory._build_repository()  # type: ignore
+
     _ENTITY_NAME = Task.__name__
+    _repository: _TaskRepository
 
     @classmethod
     def _orchestrator(cls) -> Type[_AbstractOrchestrator]:
@@ -123,7 +124,11 @@ class _TaskManager(_Manager[Task]):
     @classmethod
     def _get_children_entity_ids(cls, task: Task):
         entity_ids = _EntityIds()
+
+        from ..job._job_manager_factory import _JobManagerFactory
+
         jobs = _JobManagerFactory._build_manager()._get_all()
+
         for job in jobs:
             if job.task.id == task.id:
                 entity_ids.job_ids.add(job.id)
