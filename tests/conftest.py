@@ -20,6 +20,7 @@ import pytest
 from sqlalchemy import create_engine
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId
 from src.taipy.core.config import (
@@ -41,6 +42,7 @@ from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
+from src.taipy.core.job.job import Job
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline.pipeline import Pipeline
@@ -57,8 +59,6 @@ from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core import Job
-from taipy.core._version._version import _Version
 
 current_time = datetime.now()
 _OrchestratorFactory._build_orchestrator()
