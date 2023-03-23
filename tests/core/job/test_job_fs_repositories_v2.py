@@ -16,10 +16,8 @@ import pytest
 from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
 from src.taipy.core.exceptions import ModelNotFound
 from src.taipy.core.job._job_fs_repository_v2 import _JobFSRepository
-from src.taipy.core.job.job import Job
+from src.taipy.core.job.job import Job, JobId, Task
 from src.taipy.core.task._task_fs_repository_v2 import _TaskFSRepository
-from taipy.config import Scope
-from taipy.core import JobId, Task
 
 
 class TestJobFSRepository:

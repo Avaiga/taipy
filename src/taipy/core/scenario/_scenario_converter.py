@@ -12,12 +12,10 @@
 from datetime import datetime
 from typing import Optional
 
-from build.lib.taipy.core import Cycle
-from taipy.core import CycleId
-
 from .._repository._v2._abstract_converter import _AbstractConverter
 from ..common._utils import _fcts_to_dict, _load_fct, _Subscriber
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
+from ..cycle.cycle import Cycle, CycleId
 from ..pipeline.pipeline import Pipeline
 from ..scenario._scenario_model import _ScenarioModel
 from ..scenario.scenario import Scenario

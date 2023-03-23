@@ -9,9 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from datetime import datetime
-
-from taipy.core import TaskId
 
 from .._repository._v2._abstract_converter import _AbstractConverter
 from ..common._utils import _load_fct
@@ -19,6 +16,7 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions import NonExistingDataNode
 from ..task._task_model import _TaskModel
 from ..task.task import Task
+from .task import TaskId
 
 
 class _TaskConverter(_AbstractConverter):

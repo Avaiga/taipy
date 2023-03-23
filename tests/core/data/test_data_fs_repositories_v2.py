@@ -14,9 +14,8 @@ import os
 import pytest
 
 from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
-from src.taipy.core.data.data_node import DataNode
+from src.taipy.core.data.data_node import DataNode, DataNodeId
 from src.taipy.core.exceptions import ModelNotFound
-from taipy.core import DataNodeId
 
 
 class TestDataNodeFSRepository:
