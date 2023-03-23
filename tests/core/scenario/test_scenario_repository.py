@@ -9,13 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from src.taipy.core.scenario._scenario_manager import _build_repository
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario.scenario import Scenario
 from taipy.config.config import Config
 
 
 def test_save_and_load(tmpdir, scenario):
-    repository = _build_repository()
+    repository = _ScenarioManagerFactory._build_repository()
     repository.base_path = tmpdir
     repository._save(scenario)
     sc = repository.load(scenario.id)
@@ -25,7 +25,7 @@ def test_save_and_load(tmpdir, scenario):
 
 
 def test_from_and_to_model(scenario, scenario_model):
-    repository = _build_repository().repo
+    repository = _ScenarioManagerFactory._build_repository().repo
     assert repository._to_model(scenario) == scenario_model
     assert repository._from_model(scenario_model) == scenario
 
@@ -33,7 +33,7 @@ def test_from_and_to_model(scenario, scenario_model):
 def test_save_and_load_with_sql_repo(tmpdir, scenario):
     Config.configure_global_app(repository_type="sql")
 
-    repository = _build_repository()
+    repository = _ScenarioManagerFactory._build_repository()
     repository._save(scenario)
     sc = repository.load(scenario.id)
 
@@ -44,7 +44,7 @@ def test_save_and_load_with_sql_repo(tmpdir, scenario):
 def test_from_and_to_model_with_sql_repo(scenario, scenario_model):
     Config.configure_global_app(repository_type="sql")
 
-    repository = _build_repository().repo._table
+    repository = _ScenarioManagerFactory._build_repository().repo._table
 
     assert repository._to_model(scenario) == scenario_model
     assert repository._from_model(scenario_model) == scenario
