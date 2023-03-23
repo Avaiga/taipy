@@ -20,8 +20,8 @@ from time import sleep
 import pytest
 
 from src.taipy.core import taipy
-from src.taipy.core._scheduler._scheduler import _Scheduler
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator import _Orchestrator
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
@@ -76,7 +76,7 @@ def test_submit_task():
     task = _create_task(multiply)
     output_dn_id = task.output[f"{task.config_id}_output0"].id
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     assert _DataManager._get(output_dn_id).last_edition_date > before_creation
     assert _DataManager._get(output_dn_id).job_ids == []
@@ -84,7 +84,7 @@ def test_submit_task():
 
     before_submission_creation = datetime.now()
     sleep(0.1)
-    job = _Scheduler.submit_task(task, "submit_id")
+    job = _Orchestrator.submit_task(task, "submit_id")
     sleep(0.1)
     after_submission_creation = datetime.now()
     assert _DataManager._get(output_dn_id).read() == 42
@@ -158,10 +158,10 @@ def test_submit_task_that_return_multiple_outputs():
     with_tuple = _create_task(return_2tuple, 2)
     with_list = _create_task(return_list, 2)
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    _Scheduler.submit_task(with_tuple, "submit_id_1")
-    _Scheduler.submit_task(with_list, "submit_id_2")
+    _Orchestrator.submit_task(with_tuple, "submit_id_1")
+    _Orchestrator.submit_task(with_list, "submit_id_2")
 
     assert (
         with_tuple.output[f"{with_tuple.config_id}_output0"].read()
@@ -187,14 +187,14 @@ def test_submit_task_returns_single_iterable_output():
     task_with_tuple = _create_task(return_2tuple, 1)
     task_with_list = _create_task(return_list, 1)
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    _Scheduler.submit_task(task_with_tuple, "submit_id_1")
+    _Orchestrator.submit_task(task_with_tuple, "submit_id_1")
     assert task_with_tuple.output[f"{task_with_tuple.config_id}_output0"].read() == (42, 21)
-    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
-    _Scheduler.submit_task(task_with_list, "submit_id_2")
+    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
+    _Orchestrator.submit_task(task_with_list, "submit_id_2")
     assert task_with_list.output[f"{task_with_list.config_id}_output0"].read() == [42, 21]
-    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
+    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_data_node_not_written_due_to_wrong_result_nb():
@@ -205,17 +205,17 @@ def test_data_node_not_written_due_to_wrong_result_nb():
 
     task = _create_task(return_2tuple(), 3)
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    job = _Scheduler.submit_task(task, "submit_id")
+    job = _Orchestrator.submit_task(task, "submit_id")
     assert task.output[f"{task.config_id}_output0"].read() == 0
     assert job.is_failed()
-    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
+    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_scenario_only_submit_same_task_once():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
     dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
@@ -227,25 +227,25 @@ def test_scenario_only_submit_same_task_once():
     pipeline_2 = Pipeline("pipeline_config_2", {}, [task_1, task_3], pipeline_id="pipeline_2")
     scenario_1 = Scenario("scenario_config_1", [pipeline_1, pipeline_2], {}, "scenario_1")
 
-    jobs = _Scheduler.submit(scenario_1)
+    jobs = _Orchestrator.submit(scenario_1)
     assert len(jobs) == 3
     assert all([job.is_completed() for job in jobs])
-    assert all(not _Scheduler._is_blocked(job) for job in jobs)
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-    jobs = _Scheduler.submit(pipeline_1)
+    jobs = _Orchestrator.submit(pipeline_1)
     assert len(jobs) == 2
     assert all([job.is_completed() for job in jobs])
-    assert all(not _Scheduler._is_blocked(job) for job in jobs)
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-    jobs = _Scheduler.submit(pipeline_2)
+    jobs = _Orchestrator.submit(pipeline_2)
     assert len(jobs) == 2
     assert all([job.is_completed() for job in jobs])
-    assert all(not _Scheduler._is_blocked(job) for job in jobs)
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
 
 def test_update_status_fail_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
     dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
@@ -273,34 +273,34 @@ def test_update_status_fail_job():
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
 
-    job = _Scheduler.submit_task(task_0, "submit_id")
+    job = _Orchestrator.submit_task(task_0, "submit_id")
     assert job.is_failed()
 
-    jobs = _Scheduler.submit(pipeline_1)
+    jobs = _Orchestrator.submit(pipeline_1)
     tasks_jobs = {job._task.id: job for job in jobs}
     assert tasks_jobs["task_0"].is_failed()
     assert all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]])
     assert tasks_jobs["task_3"].is_completed()
-    assert all(not _Scheduler._is_blocked(job) for job in jobs)
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-    jobs = _Scheduler.submit(scenario_1)
+    jobs = _Orchestrator.submit(scenario_1)
     tasks_jobs = {job._task.id: job for job in jobs}
     assert tasks_jobs["task_0"].is_failed()
     assert all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]])
     assert tasks_jobs["task_3"].is_completed()
-    assert all(not _Scheduler._is_blocked(job) for job in jobs)
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-    jobs = _Scheduler.submit(scenario_2)
+    jobs = _Orchestrator.submit(scenario_2)
     tasks_jobs = {job._task.id: job for job in jobs}
     assert tasks_jobs["task_0"].is_failed()
     assert all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]])
     assert tasks_jobs["task_3"].is_completed()
-    assert all(not _Scheduler._is_blocked(job) for job in jobs)
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
 
 def test_update_status_fail_job_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
     dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
@@ -328,29 +328,29 @@ def test_update_status_fail_job_in_parallel():
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
 
-    job = _Scheduler.submit_task(task_0, "submit_id")
+    job = _Orchestrator.submit_task(task_0, "submit_id")
     assert_true_after_time(job.is_failed)
 
-    jobs = _Scheduler.submit(pipeline_1)
+    jobs = _Orchestrator.submit(pipeline_1)
     tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
     assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
-    assert_true_after_time(lambda: all(not _Scheduler._is_blocked(job) for job in jobs))
+    assert_true_after_time(lambda: all(not _Orchestrator._is_blocked(job) for job in jobs))
 
-    jobs = _Scheduler.submit(scenario_1)
+    jobs = _Orchestrator.submit(scenario_1)
     tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
     assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
-    assert_true_after_time(lambda: all(not _Scheduler._is_blocked(job) for job in jobs))
+    assert_true_after_time(lambda: all(not _Orchestrator._is_blocked(job) for job in jobs))
 
-    jobs = _Scheduler.submit(scenario_2)
+    jobs = _Orchestrator.submit(scenario_2)
     tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
     assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
-    assert_true_after_time(lambda: all(not _Scheduler._is_blocked(job) for job in jobs))
+    assert_true_after_time(lambda: all(not _Orchestrator._is_blocked(job) for job in jobs))
 
 
 def test_submit_task_in_parallel():
@@ -361,17 +361,17 @@ def test_submit_task_in_parallel():
 
     task = _create_task(partial(lock_multiply, lock))
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock:
         assert task.output[f"{task.config_id}_output0"].read() == 0
-        job = _Scheduler.submit_task(task, "submit_id")
+        job = _Orchestrator.submit_task(task, "submit_id")
         assert_true_after_time(job.is_running)
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_time(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
     assert_true_after_time(job.is_completed)
-    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
+    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_submit_pipeline_in_parallel():
@@ -383,17 +383,17 @@ def test_submit_pipeline_in_parallel():
     task = _create_task(partial(lock_multiply, lock))
     pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock:
         assert task.output[f"{task.config_id}_output0"].read() == 0
-        job = _Scheduler.submit(pipeline)[0]
+        job = _Orchestrator.submit(pipeline)[0]
         assert_true_after_time(job.is_running)
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_time(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
     assert_true_after_time(job.is_completed)
-    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
+    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_submit_scenario_in_parallel():
@@ -406,17 +406,17 @@ def test_submit_scenario_in_parallel():
     pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
     scenario = Scenario("scenario_config", [pipeline], {}, "scenario_id")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock:
         assert task.output[f"{task.config_id}_output0"].read() == 0
-        job = _Scheduler.submit(scenario)[0]
+        job = _Orchestrator.submit(scenario)[0]
         assert_true_after_time(job.is_running)
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_time(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
     assert_true_after_time(job.is_completed)
-    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
+    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
 def sleep_fct(seconds):
@@ -430,33 +430,33 @@ def sleep_and_raise_error_fct(seconds):
 
 def test_submit_task_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep, sleep_period))
-    job = _Scheduler.submit_task(task, "submit_id", wait=True)
+    job = _Orchestrator.submit_task(task, "submit_id", wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_completed)
 
 
 def test_submit_pipeline_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep, sleep_period))
     pipeline = Pipeline("pipeline_config", {}, [task])
 
-    job = _Scheduler.submit(pipeline, wait=True)[0]
+    job = _Orchestrator.submit(pipeline, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_completed)
 
 
 def test_submit_scenario_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1
     start_time = datetime.now()
@@ -464,40 +464,40 @@ def test_submit_scenario_synchronously_in_parallel():
     pipeline = Pipeline("pipeline_config", {}, [task])
     scenario = Scenario("scenario_config", [pipeline], {})
 
-    job = _Scheduler.submit(scenario, wait=True)[0]
+    job = _Orchestrator.submit(scenario, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_completed)
 
 
 def test_submit_fail_task_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1.0
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep_and_raise_error_fct, sleep_period))
-    job = _Scheduler.submit_task(task, "submit_id", wait=True)
+    job = _Orchestrator.submit_task(task, "submit_id", wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_failed)
 
 
 def test_submit_fail_pipeline_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1.0
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep_and_raise_error_fct, sleep_period))
     pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
 
-    job = _Scheduler.submit(pipeline, wait=True)[0]
+    job = _Orchestrator.submit(pipeline, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_failed)
 
 
 def test_submit_fail_scenario_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1.0
     start_time = datetime.now()
@@ -505,21 +505,21 @@ def test_submit_fail_scenario_synchronously_in_parallel():
     pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
     scenario = Scenario("scenario_config", [pipeline], {})
 
-    job = _Scheduler.submit(scenario, wait=True)[0]
+    job = _Orchestrator.submit(scenario, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_failed)
 
 
 def test_submit_task_synchronously_in_parallel_with_timeout():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     task_duration = 2
     timeout_duration = task_duration - 1
     task = Task("sleep_task", {}, function=partial(sleep, task_duration))
 
     start_time = datetime.now()
-    job = _Scheduler.submit_task(task, "submit_id", wait=True, timeout=timeout_duration)
+    job = _Orchestrator.submit_task(task, "submit_id", wait=True, timeout=timeout_duration)
     end_time = datetime.now()
 
     assert timeout_duration <= (end_time - start_time).seconds
@@ -536,29 +536,29 @@ def test_submit_task_multithreading_multiple_task():
     task_1 = _create_task(partial(lock_multiply, lock_1))
     task_2 = _create_task(partial(lock_multiply, lock_2))
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock_1:
         with lock_2:
-            job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
-            job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
+            job_1 = _Orchestrator.submit_task(task_1, "submit_id_1")
+            job_2 = _Orchestrator.submit_task(task_2, "submit_id_2")
 
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert_true_after_time(job_1.is_running)
             assert_true_after_time(job_2.is_running)
-            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
 
         assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
         assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
         assert_true_after_time(job_2.is_completed)
         assert_true_after_time(job_1.is_running)
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert_true_after_time(job_1.is_completed)
     assert_true_after_time(job_2.is_completed)
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_submit_pipeline_multithreading_multiple_task():
@@ -573,11 +573,11 @@ def test_submit_pipeline_multithreading_multiple_task():
 
     pipeline = Pipeline("pipeline_config", {}, [task_1, task_2])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock_1:
         with lock_2:
-            tasks_jobs = {job._task.id: job for job in _Scheduler.submit(pipeline)}
+            tasks_jobs = {job._task.id: job for job in _Orchestrator.submit(pipeline)}
             job_1 = tasks_jobs[task_1.id]
             job_2 = tasks_jobs[task_2.id]
 
@@ -585,18 +585,18 @@ def test_submit_pipeline_multithreading_multiple_task():
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert_true_after_time(job_1.is_running)
             assert_true_after_time(job_2.is_running)
-            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
 
         assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
         assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
         assert_true_after_time(job_2.is_completed)
         assert_true_after_time(job_1.is_running)
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert_true_after_time(job_1.is_completed)
     assert_true_after_time(job_2.is_completed)
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_submit_scenario_multithreading_multiple_task():
@@ -612,11 +612,11 @@ def test_submit_scenario_multithreading_multiple_task():
     pipeline = Pipeline("pipeline_config", {}, [task_1, task_2])
     scenario = Scenario("scenario_config", [pipeline], {})
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock_1:
         with lock_2:
-            tasks_jobs = {job._task.id: job for job in _Scheduler.submit(scenario)}
+            tasks_jobs = {job._task.id: job for job in _Orchestrator.submit(scenario)}
             job_1 = tasks_jobs[task_1.id]
             job_2 = tasks_jobs[task_2.id]
 
@@ -624,18 +624,18 @@ def test_submit_scenario_multithreading_multiple_task():
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert_true_after_time(job_1.is_running)
             assert_true_after_time(job_2.is_running)
-            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
 
         assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
         assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
         assert_true_after_time(job_2.is_completed)
         assert_true_after_time(job_1.is_running)
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert_true_after_time(job_1.is_completed)
     assert_true_after_time(job_2.is_completed)
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
@@ -650,38 +650,38 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     task_1 = _create_task(partial(lock_multiply, lock_1))
     task_2 = _create_task(partial(lock_multiply, lock_2))
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     with lock_0:
-        job_0 = _Scheduler.submit_task(task_0, "submit_id_0")
+        job_0 = _Orchestrator.submit_task(task_0, "submit_id_0")
         assert_true_after_time(job_0.is_running)
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
         with lock_1:
             with lock_2:
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
-                job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
-                job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
+                job_2 = _Orchestrator.submit_task(task_2, "submit_id_2")
+                job_1 = _Orchestrator.submit_task(task_1, "submit_id_1")
                 assert_true_after_time(job_0.is_running)
                 assert_true_after_time(job_1.is_pending)
                 assert_true_after_time(job_2.is_running)
-                assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+                assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
 
             assert_true_after_time(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert_true_after_time(job_0.is_running)
             assert_true_after_time(job_1.is_running)
             assert_true_after_time(job_2.is_completed)
-            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 2)
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 2)
 
         assert_true_after_time(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
         assert task_0.output[f"{task_0.config_id}_output0"].read() == 0
         assert_true_after_time(job_0.is_running)
         assert_true_after_time(job_1.is_completed)
         assert job_2.is_completed()
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
     assert task_0.output[f"{task_0.config_id}_output0"].read() == 42
     assert job_0.is_completed()
     assert job_1.is_completed()
@@ -699,7 +699,7 @@ def test_blocked_task():
     bar_cfg = Config.configure_data_node("bar")
     baz_cfg = Config.configure_data_node("baz")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
     foo = dns[foo_cfg]
@@ -712,28 +712,28 @@ def test_blocked_task():
     assert not task_1.bar.is_ready_for_reading  # But bar is not ready
     assert not task_2.baz.is_ready_for_reading  # neither does baz
 
-    assert len(_Scheduler.blocked_jobs) == 0
-    job_2 = _Scheduler.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
+    assert len(_Orchestrator.blocked_jobs) == 0
+    job_2 = _Orchestrator.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
     assert job_2.is_blocked()  # since bar is not up_to_date the job 2 is blocked
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
-    assert len(_Scheduler.blocked_jobs) == 1
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
+    assert len(_Orchestrator.blocked_jobs) == 1
     with lock_2:
         with lock_1:
-            job_1 = _Scheduler.submit_task(task_1, "submit_id_1")  # job 1 is submitted and locked
+            job_1 = _Orchestrator.submit_task(task_1, "submit_id_1")  # job 1 is submitted and locked
             assert_true_after_time(job_1.is_running)  # so it is still running
-            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
         assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_time(job_2.is_running)  # And job 2 can start running
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
-        assert len(_Scheduler.blocked_jobs) == 0
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
+        assert len(_Orchestrator.blocked_jobs) == 0
     assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_blocked_pipeline():
@@ -747,7 +747,7 @@ def test_blocked_pipeline():
     bar_cfg = Config.configure_data_node("bar")
     baz_cfg = Config.configure_data_node("baz")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
     foo = dns[foo_cfg]
@@ -761,26 +761,26 @@ def test_blocked_pipeline():
     assert not task_1.bar.is_ready_for_reading  # But bar is not ready
     assert not task_2.baz.is_ready_for_reading  # neither does baz
 
-    assert len(_Scheduler.blocked_jobs) == 0
+    assert len(_Orchestrator.blocked_jobs) == 0
     with lock_2:
         with lock_1:
-            jobs = _Scheduler.submit(pipeline)  # pipeline is submitted
+            jobs = _Orchestrator.submit(pipeline)  # pipeline is submitted
             tasks_jobs = {job._task.id: job for job in jobs}
             job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
             assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running
-            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
         assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_time(job_2.is_running)  # And job 2 can start running
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
-        assert len(_Scheduler.blocked_jobs) == 0
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
+        assert len(_Orchestrator.blocked_jobs) == 0
     assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_blocked_scenario():
@@ -794,7 +794,7 @@ def test_blocked_scenario():
     bar_cfg = Config.configure_data_node("bar")
     baz_cfg = Config.configure_data_node("baz")
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
     foo = dns[foo_cfg]
@@ -809,40 +809,40 @@ def test_blocked_scenario():
     assert not task_1.bar.is_ready_for_reading  # But bar is not ready
     assert not task_2.baz.is_ready_for_reading  # neither does baz
 
-    assert len(_Scheduler.blocked_jobs) == 0
+    assert len(_Orchestrator.blocked_jobs) == 0
     with lock_2:
         with lock_1:
-            jobs = _Scheduler.submit(scenario)  # scenario is submitted
+            jobs = _Orchestrator.submit(scenario)  # scenario is submitted
             tasks_jobs = {job._task.id: job for job in jobs}
             job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
             assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running
-            assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
         assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_time(job_2.is_running)  # And job 2 can start running
-        assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
-        assert len(_Scheduler.blocked_jobs) == 0
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
+        assert len(_Orchestrator.blocked_jobs) == 0
     assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
-    assert_true_after_time(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
-def test_task_scheduler_create_synchronous_dispatcher():
+def test_task_orchestrator_create_synchronous_dispatcher():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-    assert _SchedulerFactory._dispatcher._nb_available_workers == 1
+    assert _OrchestratorFactory._dispatcher._nb_available_workers == 1
 
 
-def test_task_scheduler_create_standalone_dispatcher():
+def test_task_orchestrator_create_standalone_dispatcher():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=3)
-    _SchedulerFactory._build_dispatcher()
-    assert isinstance(_SchedulerFactory._dispatcher._executor, ProcessPoolExecutor)
-    assert _SchedulerFactory._dispatcher._nb_available_workers == 3
+    _OrchestratorFactory._build_dispatcher()
+    assert isinstance(_OrchestratorFactory._dispatcher._executor, ProcessPoolExecutor)
+    assert _OrchestratorFactory._dispatcher._nb_available_workers == 3
 
 
 def modified_config_task(n):
@@ -864,7 +864,7 @@ def test_can_exec_task_with_modified_config():
     task_config = Config.configure_task("task_config", modified_config_task, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
@@ -906,7 +906,7 @@ def test_cannot_exec_task_that_update_config():
     task_config = Config.configure_task("task_config", update_config_task, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
@@ -924,7 +924,7 @@ def test_can_execute_task_with_development_mode():
     task_config = Config.configure_task("task_config", mult_by_2, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline.submit()
@@ -939,7 +939,7 @@ def test_need_to_run_no_output():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[])
     task = _create_task_from_config(task_cfg)
 
-    assert _SchedulerFactory._dispatcher._needs_to_run(task)
+    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_task_not_skippable():
@@ -951,7 +951,7 @@ def test_need_to_run_task_not_skippable():
     )
     task = _create_task_from_config(task_cfg)
 
-    assert _SchedulerFactory._dispatcher._needs_to_run(task)
+    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_skippable_task_no_input():
@@ -960,13 +960,13 @@ def test_need_to_run_skippable_task_no_input():
     hello_world_cfg = Config.configure_data_node("hello_world")
     task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg], skippable=True)
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     task = _create_task_from_config(task_cfg)
-    assert _SchedulerFactory._dispatcher._needs_to_run(task)
-    _Scheduler.submit_task(task, "submit_id")
+    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
+    _Orchestrator.submit_task(task, "submit_id")
 
-    assert not _SchedulerFactory._dispatcher._needs_to_run(task)
+    assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_skippable_task_no_validity_period_on_output():
@@ -979,13 +979,13 @@ def test_need_to_run_skippable_task_no_validity_period_on_output():
         "name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg], skippable=True
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     task = _create_task_from_config(task_cfg)
-    assert _SchedulerFactory._dispatcher._needs_to_run(task)
-    _Scheduler.submit_task(task, "submit_id")
+    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
+    _Orchestrator.submit_task(task, "submit_id")
 
-    assert not _SchedulerFactory._dispatcher._needs_to_run(task)
+    assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_skippable_task_with_validity_period_up_to_date_on_output():
@@ -997,15 +997,15 @@ def test_need_to_run_skippable_task_with_validity_period_up_to_date_on_output():
     task_cfg = Config.configure_task(
         "name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg], skippable=True
     )
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     task = _create_task_from_config(task_cfg)
 
-    assert _SchedulerFactory._dispatcher._needs_to_run(task)
-    job = _Scheduler.submit_task(task, "submit_id_1")
+    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
+    job = _Orchestrator.submit_task(task, "submit_id_1")
 
-    assert not _SchedulerFactory._dispatcher._needs_to_run(task)
-    job_skipped = _Scheduler.submit_task(task, "submit_id_2")
+    assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
+    job_skipped = _Orchestrator.submit_task(task, "submit_id_2")
 
     assert job.is_completed()
     assert job.is_finished()
@@ -1022,13 +1022,13 @@ def test_need_to_run_skippable_task_with_validity_period_obsolete_on_output():
     )
     task = _create_task_from_config(task_cfg)
 
-    assert _SchedulerFactory._dispatcher._needs_to_run(task)
-    _Scheduler.submit_task(task, "submit_id")
+    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
+    _Orchestrator.submit_task(task, "submit_id")
 
     output = task.hello_world
     output._last_edit_date = datetime.now() - timedelta(days=1, minutes=30)
     _DataManager()._set(output)
-    assert _SchedulerFactory._dispatcher._needs_to_run(task)
+    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
 
 
 # ################################  UTIL METHODS    ##################################

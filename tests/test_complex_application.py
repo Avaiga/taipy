@@ -17,7 +17,7 @@ import pandas as pd
 
 import src.taipy.core.taipy as tp
 from src.taipy.core import Status
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config import Config
 
@@ -71,7 +71,7 @@ def return_a_number_with_sleep():
 
 def test_skipped_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_scheduler()
+    _OrchestratorFactory._build_orchestrator()
     input_config = Config.configure_data_node("input")
     intermediate_config = Config.configure_data_node("intermediate")
     output_config = Config.configure_data_node("output")
@@ -111,7 +111,7 @@ def test_complex():
     # t4     d4
 
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._build_scheduler()
+    _OrchestratorFactory._build_orchestrator()
 
     csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
     excel_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
@@ -195,7 +195,7 @@ def test_complex():
 
 # def test_same_pipeline_submission_with_overlap_datanode():
 #     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
-#     _Scheduler._update_job_config()
+#     _Orchestrator._update_job_config()
 
 #     # d1 ---- t1 ---- d2 ---- t2
 #     # t3 ---- d2
@@ -227,30 +227,30 @@ def test_complex():
 #     tp.submit(pipeline_div_print)
 #     tp.submit(pipeline_populate_constant)
 
-#     assert _Scheduler.jobs_to_run.qsize() == 2
+#     assert _Orchestrator.jobs_to_run.qsize() == 2
 #     assert pipeline_div_print.dn2_div.read() is None
 
 #     sleep(1.5)
-#     assert _Scheduler.jobs_to_run.qsize() == 2
+#     assert _Orchestrator.jobs_to_run.qsize() == 2
 #     assert pipeline_div_print.dn2_div.read() is not None
 #     assert len(pipeline_div_print.dn2_div.read()) == 10
 
 #     sleep(1)
-#     assert _Scheduler.jobs_to_run.qsize() == 2
+#     assert _Orchestrator.jobs_to_run.qsize() == 2
 #     assert pipeline_div_print.dn2_div.read() is not None
 #     assert len(pipeline_div_print.dn2_div.read()) == 10
 
 #     sleep(1.5)
-#     assert _Scheduler.jobs_to_run.qsize() == 0
+#     assert _Orchestrator.jobs_to_run.qsize() == 0
 #     assert pipeline_div_print.dn2_div.read() == 10
 
 #     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-#     _Scheduler._update_job_config()
+#     _Orchestrator._update_job_config()
 
 #     tp.submit(pipeline_div_print)
 #     tp.submit(pipeline_div_print)
 
-#     assert _Scheduler.jobs_to_run.qsize() == 0
+#     assert _Orchestrator.jobs_to_run.qsize() == 0
 
 #     sleep(2.5)
 #     assert pipeline_div_print.dn2_div.read() is not None

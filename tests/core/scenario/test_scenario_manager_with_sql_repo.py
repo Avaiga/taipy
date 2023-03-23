@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -49,7 +49,7 @@ def test_set_and_get_scenario(cycle):
     Config.configure_global_app(repository_type="sql")
 
     init_managers()
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
@@ -159,7 +159,7 @@ def test_create_scenario_does_not_modify_config():
     name_1 = "name_1"
     scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     assert scenario_config.properties.get("name") is None
     assert len(scenario_config.properties) == 0
@@ -198,7 +198,7 @@ def test_create_and_delete_scenario():
 
     scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
     assert scenario_1.config_id == "sc"
@@ -276,7 +276,7 @@ def test_scenario_manager_only_creates_data_node_once():
         "awesome_scenario", [pipeline_config_1, pipeline_config_2], Frequency.DAILY
     )
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0

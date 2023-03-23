@@ -11,7 +11,7 @@
 
 from datetime import datetime
 
-from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common.alias import CycleId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -218,7 +218,7 @@ def test_hard_delete_shared_entities():
         "scenario_config_2", [pipeline_config_3]
     )  # No Frequency so cycle attached to scenarios
 
-    _SchedulerFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
     scenario_1 = _ScenarioManager._create(scenario_config_1)
     scenario_2 = _ScenarioManager._create(scenario_config_1)

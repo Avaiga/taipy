@@ -25,7 +25,7 @@ from ...exceptions.exceptions import DataNodeWritingError
 from ...job._job_manager_factory import _JobManagerFactory
 from ...job.job import Job
 from ...task.task import Task
-from .._abstract_scheduler import _AbstractScheduler
+from .._abstract_orchestrator import _AbstractOrchestrator
 
 
 class _JobDispatcher(threading.Thread):
@@ -36,11 +36,11 @@ class _JobDispatcher(threading.Thread):
     __logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, scheduler: _AbstractScheduler):
+    def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
-        self.scheduler = scheduler
-        self.lock = self.scheduler.lock  # type: ignore
+        self.orchestrator = orchestrator
+        self.lock = self.orchestrator.lock  # type: ignore
         Config.block_update()
 
     def start(self):
@@ -60,7 +60,7 @@ class _JobDispatcher(threading.Thread):
             try:
                 if self._can_execute():
                     with self.lock:
-                        job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)
+                        job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
             except:  # In case the last job of the queue has been removed.  # noqa: E722
                 pass
@@ -81,10 +81,10 @@ class _JobDispatcher(threading.Thread):
             self.__logger.info(f"job {job.id} is skipped.")
 
     def _execute_jobs_synchronously(self):
-        while not self.scheduler.jobs_to_run.empty():
+        while not self.orchestrator.jobs_to_run.empty():
             with self.lock:
                 try:
-                    job = self.scheduler.jobs_to_run.get()
+                    job = self.orchestrator.jobs_to_run.get()
                 except:  # In case the last job of the queue has been removed.  # noqa: E722
                     self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
             self._execute_job(job)

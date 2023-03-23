@@ -61,10 +61,10 @@ class Pipeline(_Entity, _Submittable):
         config_id: str,
         properties: Dict[str, Any],
         tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
-        pipeline_id: PipelineId = None,
+        pipeline_id: Optional[PipelineId] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
-        subscribers: List[_Subscriber] = None,
+        subscribers: Optional[List[_Subscriber]] = None,
         version: str = None,
     ):
         super().__init__(subscribers)
@@ -259,8 +259,8 @@ class Pipeline(_Entity, _Submittable):
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
-            wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in asynchronous
-                mode.
+            wait (bool): Wait for the orchestrated jobs created from the pipeline submission to be finished
+                in asynchronous mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before
                 returning.
         Returns:
