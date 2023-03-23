@@ -12,7 +12,7 @@
 import datetime
 import json
 
-from src.taipy.core.config import DataNodeConfig, JobConfig, PipelineConfig, ScenarioConfig, TaskConfig
+from src.taipy.core.config import DataNodeConfig, JobConfig, MigrationConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.config import Config
 from taipy.config._serializer._json_serializer import _JsonSerializer
 from taipy.config.common.frequency import Frequency
@@ -22,6 +22,10 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 def multiply(a):
     return a * 2
+
+
+def migrate_csv_path(dn):
+    dn.path = "foo.csv"
 
 
 def compare_function(*data_node_results):
@@ -91,6 +95,8 @@ def config_test_scenario():
         frequency=Frequency.DAILY,
     )
 
+    Config.add_migration_function("1.0", test_csv_dn_cfg, migrate_csv_path)
+
     return test_scenario_cfg
 
 
@@ -148,6 +154,9 @@ pipelines = []
 pipelines = [ "test_pipeline:SECTION",]
 frequency = "DAILY:FREQUENCY"
 
+[VERSION_MIGRATION.migration_fcts."1.0"]
+test_csv_dn = "tests.core.config.test_config_serialization.migrate_csv_path:function"
+
 [SCENARIO.default.comparators]
 
 [SCENARIO.test_scenario.comparators]
@@ -170,8 +179,12 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert actual_config_2 == expected_toml_config
 
     assert Config.unique_sections is not None
+    assert len(Config.unique_sections) == 2
+
     assert Config.unique_sections[JobConfig.name].mode == "development"
     assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1
+
+    assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
 
     assert Config.sections is not None
     assert len(Config.sections) == 4
@@ -241,6 +254,13 @@ def test_read_write_json_configuration_file():
 "JOB": {
 "mode": "development",
 "max_nb_of_workers": "1:int"
+},
+"VERSION_MIGRATION": {
+"migration_fcts": {
+"1.0": {
+"test_csv_dn": "tests.core.config.test_config_serialization.migrate_csv_path:function"
+}
+}
 },
 "DATA_NODE": {
 "default": {
@@ -328,8 +348,12 @@ def test_read_write_json_configuration_file():
     assert actual_config_2 == expected_json_config
 
     assert Config.unique_sections is not None
+    assert len(Config.unique_sections) == 2
+
     assert Config.unique_sections[JobConfig.name].mode == "development"
     assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1
+
+    assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
 
     assert Config.sections is not None
     assert len(Config.sections) == 4

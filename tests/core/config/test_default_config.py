@@ -11,6 +11,7 @@
 
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
+from src.taipy.core.config.migration_config import MigrationConfig
 from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
 from src.taipy.core.config.task_config import TaskConfig
@@ -30,7 +31,7 @@ def _test_default_data_node_config(dn_config: DataNodeConfig):
     assert dn_config.id is not None
     assert dn_config.storage_type == "pickle"
     assert dn_config.scope == Scope.SCENARIO
-    assert len(dn_config.properties) == 0
+    assert len(dn_config.properties) == 0  # type: ignore
 
 
 def _test_default_task_config(task_config: TaskConfig):
@@ -40,21 +41,27 @@ def _test_default_task_config(task_config: TaskConfig):
     assert task_config.output_configs == []
     assert task_config.function is None
     assert not task_config.skippable
-    assert len(task_config.properties) == 0
+    assert len(task_config.properties) == 0  # type: ignore
 
 
 def _test_default_pipeline_config(pipeline_config: PipelineConfig):
     assert pipeline_config is not None
     assert pipeline_config.id is not None
     assert pipeline_config.task_configs == []
-    assert len(pipeline_config.properties) == 0
+    assert len(pipeline_config.properties) == 0  # type: ignore
 
 
 def _test_default_scenario_config(scenario_config: ScenarioConfig):
     assert scenario_config is not None
     assert scenario_config.id is not None
     assert scenario_config.pipeline_configs == []
-    assert len(scenario_config.properties) == 0
+    assert len(scenario_config.properties) == 0  # type: ignore
+
+
+def _test_default_version_migration_config(version_migration_config: MigrationConfig):
+    assert version_migration_config is not None
+    assert version_migration_config.migration_fcts == {}
+    assert len(version_migration_config.properties) == 0  # type: ignore
 
 
 def _test_default_global_app_config(global_config: GlobalAppConfig):
@@ -75,12 +82,16 @@ def test_default_configuration():
     _test_default_global_app_config(GlobalAppConfig().default_config())
 
     assert default_config._unique_sections is not None
-    assert len(default_config._unique_sections) == 1
+    assert len(default_config._unique_sections) == 2
     assert len(default_config._sections) == 4
 
     _test_default_job_config(default_config._unique_sections[JobConfig.name])
     _test_default_job_config(Config.job_config)
     _test_default_job_config(JobConfig().default_config())
+
+    _test_default_version_migration_config(default_config._unique_sections[MigrationConfig.name])
+    _test_default_version_migration_config(Config.migration_functions)
+    _test_default_version_migration_config(MigrationConfig.default_config())
 
     _test_default_data_node_config(default_config._sections[DataNodeConfig.name][_Config.DEFAULT_KEY])
     _test_default_data_node_config(Config.data_nodes[_Config.DEFAULT_KEY])

@@ -18,11 +18,13 @@ from taipy.config.global_app.global_app_config import GlobalAppConfig  # type: i
 
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
 from .checkers._job_config_checker import _JobConfigChecker
+from .checkers._migration_config_checker import _MigrationConfigChecker
 from .checkers._pipeline_config_checker import _PipelineConfigChecker
 from .checkers._scenario_config_checker import _ScenarioConfigChecker
 from .checkers._task_config_checker import _TaskConfigChecker
 from .data_node_config import DataNodeConfig
 from .job_config import JobConfig
+from .migration_config import MigrationConfig
 from .pipeline_config import PipelineConfig
 from .scenario_config import ScenarioConfig
 from .task_config import TaskConfig
@@ -77,6 +79,13 @@ _inject_section(
         ("configure_default_scenario", ScenarioConfig._configure_default),
         ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
     ],
+)
+_inject_section(
+    MigrationConfig,
+    "migration_functions",
+    MigrationConfig.default_config(),
+    [("add_migration_function", MigrationConfig._add_migration_function)],
+    add_to_unconflicted_sections=True,
 )
 
 _Checker.add_checker(_JobConfigChecker)

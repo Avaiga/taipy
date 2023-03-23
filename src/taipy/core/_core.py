@@ -13,6 +13,7 @@ import uuid
 from typing import Optional
 
 from taipy.config import Config
+from taipy.config.checker.issue_collector import IssueCollector
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._scheduler._dispatcher._job_dispatcher import _JobDispatcher
@@ -20,6 +21,7 @@ from ._scheduler._scheduler import _Scheduler
 from ._scheduler._scheduler_factory import _SchedulerFactory
 from ._version._version_cli import _VersioningCLI
 from ._version._version_manager_factory import _VersionManagerFactory
+from .config.checkers._migration_config_checker import _MigrationConfigChecker
 from .taipy import clean_all_entities_by_version
 
 
@@ -36,6 +38,7 @@ class Core:
         Initialize a Core service.
         """
         _VersioningCLI._create_parser()
+        self.__logger = _TaipyLogger._get_logger()
         self.cli_args = _VersioningCLI._parse_arguments()
         self._scheduler = _SchedulerFactory._build_scheduler()
 
@@ -59,7 +62,7 @@ class Core:
 
         if self._dispatcher:
             self._dispatcher = _SchedulerFactory._remove_dispatcher()
-            _TaipyLogger._get_logger().info("Core service has been stopped.")
+            self.__logger.info("Core service has been stopped.")
 
     def __check_config(self):
         Config.check()
@@ -70,7 +73,7 @@ class Core:
             current_version_number = _VersionManagerFactory._build_manager()._get_development_version()
 
             clean_all_entities_by_version(current_version_number)
-            _TaipyLogger._get_logger().info(f"Development mode: Clean all entities of version {current_version_number}")
+            self.__logger.info(f"Development mode: Clean all entities of version {current_version_number}")
 
             _VersionManagerFactory._build_manager()._set_development_version(current_version_number)
 
@@ -79,7 +82,6 @@ class Core:
                 "experiment": str(uuid.uuid4()),
                 "production": _VersionManagerFactory._build_manager()._get_latest_version(),
             }
-
             version_setter = {
                 "experiment": _VersionManagerFactory._build_manager()._set_experiment_version,
                 "production": _VersionManagerFactory._build_manager()._set_production_version,
@@ -92,10 +94,11 @@ class Core:
 
             if clean_entities:
                 clean_all_entities_by_version(current_version_number)
-                _TaipyLogger._get_logger().info(f"Clean all entities of version {current_version_number}")
+                self.__logger.info(f"Clean all entities of version {current_version_number}")
 
             version_setter[mode](current_version_number, force)
-
+            if mode == "production":
+                self.__check_production_migration_config()
         else:
             raise SystemExit(f"Undefined execution mode: {mode}.")
 
@@ -105,3 +108,14 @@ class Core:
 
         if Config.job_config.is_development:
             _Scheduler._check_and_execute_jobs_if_development_mode()
+
+    def __check_production_migration_config(self):
+        collector = _MigrationConfigChecker(Config._applied_config, IssueCollector())._check()
+        for issue in collector._warnings:
+            self.__logger.warning(str(issue))
+        for issue in collector._infos:
+            self.__logger.info(str(issue))
+        for issue in collector._errors:
+            self.__logger.error(str(issue))
+        if len(collector._errors) != 0:
+            raise SystemExit("Configuration errors found. Please check the error log for more information.")

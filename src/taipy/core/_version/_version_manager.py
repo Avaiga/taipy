@@ -30,7 +30,7 @@ class _VersionManager(_Manager[_Version]):
     __PRODUCTION_VERSION = "production"
     __ALL_VERSION = ["all", ""]
 
-    __DEFAULT_VERSION = __LATEST_VERSION
+    _DEFAULT_VERSION = __LATEST_VERSION
 
     _repository = _VersionRepositoryFactory._build_repository()  # type: ignore
 
@@ -157,7 +157,7 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _replace_version_number(cls, version_number):
         if version_number is None:
-            version_number = cls._replace_version_number(cls.__DEFAULT_VERSION)
+            version_number = cls._replace_version_number(cls._DEFAULT_VERSION)
 
             production_versions = cls._get_production_version()
 
@@ -169,7 +169,7 @@ class _VersionManager(_Manager[_Version]):
             return cls._get_latest_version()
         if version_number in cls.__DEVELOPMENT_VERSION:
             return cls._get_development_version()
-        if version_number in cls.__PRODUCTION_VERSION:
+        if version_number == cls.__PRODUCTION_VERSION:
             return cls._get_production_version()
         if version_number in cls.__ALL_VERSION:
             return ""

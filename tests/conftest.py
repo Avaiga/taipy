@@ -25,6 +25,7 @@ from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,
+    MigrationConfig,
     PipelineConfig,
     ScenarioConfig,
     TaskConfig,
@@ -322,6 +323,13 @@ def init_config():
             ("configure_default_scenario", ScenarioConfig._configure_default),
             ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
         ],
+    )
+    _inject_section(
+        MigrationConfig,
+        "migration_functions",
+        MigrationConfig.default_config(),
+        [("add_migration_function", MigrationConfig._add_migration_function)],
+        True,
     )
     _Checker.add_checker(_JobConfigChecker)
     _Checker.add_checker(_DataNodeConfigChecker)

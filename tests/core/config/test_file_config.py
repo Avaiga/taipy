@@ -31,6 +31,8 @@ repository_type = "filesystem"
 mode = "standalone"
 max_nb_of_workers = "2:int"
 
+[VERSION_MIGRATION.migration_fcts]
+
 [DATA_NODE.default]
 storage_type = "in_memory"
 custom = "default_custom_prop"
