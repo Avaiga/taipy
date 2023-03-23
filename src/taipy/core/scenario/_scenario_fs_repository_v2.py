@@ -11,7 +11,6 @@
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ._scenario_converter import _ScenarioConverter
 from ._scenario_model import _ScenarioModel
-from .scenario import Scenario
 
 
 class _ScenarioFSRepository(_FileSystemRepository):

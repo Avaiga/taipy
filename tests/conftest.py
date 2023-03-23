@@ -21,7 +21,7 @@ from sqlalchemy import create_engine
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
+from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId
 from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,
@@ -57,6 +57,8 @@ from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core import Job
+from taipy.core._version._version import _Version
 
 current_time = datetime.now()
 _OrchestratorFactory._build_orchestrator()
@@ -217,6 +219,16 @@ def pipeline():
         parent_ids=set(["parent_id_1", "parent_id_2"]),
         version="random_version_number",
     )
+
+
+@pytest.fixture(scope="function")
+def job(task):
+    return Job(JobId("job"), task, "foo")
+
+
+@pytest.fixture(scope="function")
+def _version():
+    return _Version(id="foo", config=Config._applied_config)
 
 
 @pytest.fixture(scope="function")
