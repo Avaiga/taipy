@@ -32,7 +32,6 @@ from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import NoData
-
 from ._data_model import _DataNodeModel
 from ._filter import _FilterDataNode
 from .operator import JoinOperator, Operator
