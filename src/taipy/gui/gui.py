@@ -60,6 +60,7 @@ from .types import _WsType
 from .utils import (
     _delscopeattr,
     _filter_locals,
+    _get_broadcast_var_name,
     _get_client_var_name,
     _get_module_name_from_frame,
     _get_non_existent_file_path,
@@ -631,12 +632,16 @@ class Gui:
                     args.append(path)
                 if len(qargs):
                     args.append(qargs)
-                return (self._call_function_with_state(self.on_user_content, args), 200)
+                ret = self._call_function_with_state(self.on_user_content, args)
+                if ret is None:
+                    warnings.warn("on_user_content() callback function should return a value.")
+                else:
+                    return (ret, 200)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_user_content", e):
-                    warnings.warn(f"on_user_content callback function raised an exception:\n{e}")
+                    warnings.warn(f"on_user_content() callback function raised an exception:\n{e}")
         else:
-            warnings.warn("on_user_content callback function has not been defined.")
+            warnings.warn("on_user_content() callback function has not been defined.")
         return ("", 404)
 
     def __serve_extension(self, path: str) -> t.Any:
@@ -827,6 +832,10 @@ class Gui:
 
     def __request_var_update(self, payload: t.Any):
         if isinstance(payload, dict) and isinstance(payload.get("names"), list):
+            if payload.get("refresh", False):
+                # refresh vars
+                for _var in t.cast(list, payload.get("names")):
+                    self._refresh_expr(_var)
             self.__send_var_list_update(payload["names"])
 
     def __send_ws(self, payload: dict) -> None:
@@ -843,6 +852,16 @@ class Gui:
                 warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
         else:
             grouping_message.append(payload)
+
+    def __broadcast_ws(self, payload: dict):
+        try:
+            self._server._ws.emit(
+                "message",
+                payload,
+            )
+            time.sleep(0.001)
+        except Exception as e:  # pragma: no cover
+            warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
 
     def __send_ack(self, ack_id: t.Optional[str]) -> None:
         if ack_id:
@@ -861,7 +880,7 @@ class Gui:
             }
         )
 
-    def _send_ws_download(self, content: str, name: str, on_action: str) -> None:
+    def __send_ws_download(self, content: str, name: str, on_action: str) -> None:
         self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "on_action": on_action})
 
     def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
@@ -919,6 +938,10 @@ class Gui:
             for k, v in modified_values.items()
         ]
         self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
+
+    def __send_ws_broadcast(self, var_name: str, var_value: t.Any):
+        self.__broadcast_ws({"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(
+            var_name), "payload": {"value": var_value}})
 
     def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._get_single_client():
@@ -1046,6 +1069,9 @@ class Gui:
 
     def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)
+
+    def _refresh_expr(self, var_name: str):
+        return self.__evaluator.refresh_expr(self, var_name)
 
     def _get_expr_from_hash(self, hash_val: str) -> str:
         return self.__evaluator.get_expr_from_hash(hash_val)
@@ -1444,9 +1470,19 @@ class Gui:
     def load_config(self, config: Config) -> None:
         self._config._load(config)
 
+    def broadcast(self, name: str, value: t.Any):
+        """
+        Send a new value for a variable to all connected clients.
+
+        Arguments:
+            name: The name of the variable to update or create.
+            value: The value (must be serializable to json format)
+        """
+        self.__send_ws_broadcast(name, value)
+
     def _download(self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
         content_str = self._get_content("Gui.download", content, False)
-        self._send_ws_download(content_str, str(name), str(on_action))
+        self.__send_ws_download(content_str, str(name), str(on_action))
 
     def _notify(
         self,
@@ -1899,11 +1935,13 @@ class Gui:
                     lib_context = lib.on_init(self)
                     if isinstance(lib_context, tuple) and len(lib_context) > 1 and isinstance(lib_context[0], str) and lib_context[0].isidentifier():
                         if lib_context[0] in glob_ctx:
-                            warnings.warn(f"Method {name}.on_init() returned a name already defined '{lib_context[0]}'.")
+                            warnings.warn(
+                                f"Method {name}.on_init() returned a name already defined '{lib_context[0]}'.")
                         else:
                             glob_ctx[lib_context[0]] = lib_context[1]
                     elif lib_context:
-                        warnings.warn(f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier.")
+                        warnings.warn(
+                            f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier.")
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception(f"{name}.on_init", e):
                         warnings.warn(f"Method {name}.on_init() raised an exception:\n{e}.")

@@ -543,18 +543,33 @@ class _Factory:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         prop = _Factory.__CONTROL_DEFAULT_PROP_NAME.get(name)
         if prop is None:
-            parts = name.split(".")
-            if len(parts) > 1:
-                libs = _Factory.__LIBRARIES.get(parts[0])
-                if libs is not None:
-                    for lib in libs:
-                        elts = lib.get_elements()
-                        if isinstance(elts, dict):
-                            builder = elts.get(".".join(parts[1:]))
-                            if builder is not None:
-                                prop = builder.default_attribute
-                                break
+            _, _, element = _Factory.__get_library_element(name)
+            if element:
+                prop = element.default_attribute
         return prop
+
+    @staticmethod
+    def __get_library_element(name: str):
+        parts = name.split(".")
+        if len(parts) > 1:
+            element_name = ".".join(parts[1:])
+            for lib in _Factory.__LIBRARIES.get(parts[0], []):
+                elts = lib.get_elements()
+                if isinstance(elts, dict):
+                    element = elts.get(element_name)
+                    if element:
+                        return lib, element_name, element
+        else:
+            element_name = name
+            for libs in list(_Factory.__LIBRARIES.values()):
+                for lib in libs:
+                    elts = lib.get_elements()
+                    if isinstance(elts, dict):
+                        element = elts.get(element_name)
+                        if element:
+                            return lib, element_name, element
+        return None, None, None
+
 
     @staticmethod
     def call_builder(
@@ -564,20 +579,12 @@ class _Factory:
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
         if builder is None:
-            parts = name.split(".")
-            if len(parts) > 0:
-                lib_name = parts[0]
-                libs = _Factory.__LIBRARIES.get(lib_name)
-                if libs:
-                    for lib in libs:
-                        elements = lib.get_elements()
-                        if isinstance(elements, dict):
-                            from ..extension.library import Element
+            lib, element_name, element = _Factory.__get_library_element(name)
+            if lib:
+                from ..extension.library import Element
 
-                            element_name = parts[1]
-                            element = elements.get(element_name)
-                            if isinstance(element, Element):
-                                return element._call_builder(element_name, gui, all_properties, lib, is_html)
+                if isinstance(element, Element):
+                    return element._call_builder(element_name, gui, all_properties, lib, is_html)
         else:
             built = builder(gui, name, all_properties)
         if isinstance(built, _Builder):

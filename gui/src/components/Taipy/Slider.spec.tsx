@@ -87,10 +87,11 @@ describe("Slider Component", () => {
             <Slider
                 value={"Item 1"}
                 defaultLov={'[["Item 1", "Item 1"], ["Item 2", "Item 2"], ["Item 3", "Item 3"]]'}
+                labels={true}
             />
         );
         const elts = getAllByText("Item 1");
-        expect(elts).toHaveLength(2);
+        expect(elts).toHaveLength(3);
         expect(elts[0].tagName).toBe("P")
         expect(elts[1].tagName).toBe("P")
     });
@@ -105,6 +106,18 @@ describe("Slider Component", () => {
         const elts = getAllByText("Item 1");
         expect(elts).toHaveLength(1);
         expect(elts[0].tagName).toBe("P");
+    });
+    it("shows marks", async () => {
+        const { getAllByText } = render(
+            <Slider
+                value={"Item 1"}
+                defaultLov={'[["Item 1", "Item 1"], ["Item 2", "Item 2"], ["Item 3", "Item 3"]]'}
+                labels={'{"Item 1":"Item 1"}'}
+            />
+        );
+        const elts = getAllByText("Item 1");
+        expect(elts).toHaveLength(3);
+        expect(elts[0].tagName).toBe("SPAN");
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();

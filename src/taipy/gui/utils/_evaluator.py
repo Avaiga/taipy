@@ -218,6 +218,28 @@ class _Evaluator:
         # save the expression if it needs to be re-evaluated
         return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_map)
 
+    def refresh_expr(self, gui: Gui, var_name: str):
+        """
+        This function will execute when the __request_var_update function receive a refresh order
+        """
+        expr = self.__hash_to_expr.get(var_name)
+        if expr:
+            expr_decoded, _ = _variable_decode(expr)
+            var_map = self.__expr_to_var_map.get(expr, {})
+            eval_dict = {k: _getscopeattr_drill(gui, gui._bind_var(v)) for k, v in var_map.items()}
+            if self._is_expression(expr_decoded):
+                expr_string = 'f"' + _variable_decode(expr)[0].replace('"', '\\"') + '"'
+            else:
+                expr_string = expr_decoded
+            try:
+                ctx: t.Dict[str, t.Any] = {}
+                ctx.update(self.__global_ctx)
+                ctx.update(eval_dict)
+                expr_evaluated = eval(expr_string, ctx)
+                _setscopeattr(gui, var_name, expr_evaluated)
+            except Exception as e:
+                warnings.warn(f"Problem evaluating {expr_string}: {e}")
+
     def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]:
         """
         This function will execute when the _update_var function is handling

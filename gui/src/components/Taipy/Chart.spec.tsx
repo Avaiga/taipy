@@ -131,7 +131,7 @@ describe("Chart Component", () => {
         );
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { id: "chart", names: ["varname"] },
+            payload: { id: "chart", names: ["varname"], refresh: false },
             type: "REQUEST_UPDATE",
         });
         expect(dispatch).toHaveBeenCalledWith({

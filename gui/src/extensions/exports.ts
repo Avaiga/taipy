@@ -24,6 +24,7 @@ import {
     createSendActionNameAction,
     createSendUpdateAction,
     createRequestDataUpdateAction,
+    createRequestUpdateAction,
 } from "../context/taipyReducers";
 
 export {
@@ -34,6 +35,7 @@ export {
     createSendActionNameAction,
     createSendUpdateAction,
     createRequestDataUpdateAction,
+    createRequestUpdateAction,
     getUpdateVar,
     useLovListMemo,
     useDispatchRequestUpdateOnFirstRender,

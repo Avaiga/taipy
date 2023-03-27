@@ -29,4 +29,10 @@ describe("Part Component", () => {
         const elt = getByText("bar");
         expect(elt).toHaveClass("taipy-part");
     })
+    it("renders an iframe", async () => {
+        const {getByText} = render(<Part className="taipy-part" page="http://taipy.io">bar</Part>);
+        const elt = getByText("bar");
+        expect(elt.parentElement?.firstElementChild?.tagName).toBe("DIV");
+        expect(elt.parentElement?.firstElementChild?.firstElementChild?.tagName).toBe("IFRAME");
+    })
 });

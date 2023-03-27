@@ -90,7 +90,7 @@ export interface State {}
  */
 export interface Action {}
 /**
- * Creates a *send update* `Action` that will be used to update `Context`.
+ * Create a *send update* `Action` that will be used to update `Context`.
  *
  * This action will update the variable *name* (if *propagate* is true) and trigger the
  * invocation of the `on_change` Python function on the backend.
@@ -107,7 +107,7 @@ export interface Action {}
  */
 export declare const createSendUpdateAction: (name: string | undefined, value: unknown, onChange?: string, propagate?: boolean, relName?: string) => Action;
 /**
- * Creates an *action* `Action` that will be used to update `Context`.
+ * Create an *action* `Action` that will be used to update `Context`.
  *
  * This action will trigger the invocation of the `on_action` Python function on the backend,
  * providing all the parameters as a payload.
@@ -119,7 +119,7 @@ export declare const createSendUpdateAction: (name: string | undefined, value: u
  */
 export declare const createSendActionNameAction: (name: string | undefined, value: unknown, ...args: unknown[]) => Action;
 /**
- * Creates a *request data update* `Action` that will be used to update the `Context`.
+ * Create a *request data update* `Action` that will be used to update the `Context`.
  *
  * This action will provoke the invocation of the `get_data()` method of the backend
  * library. That invocation generates an update of the elements holding the data named
@@ -138,6 +138,17 @@ export declare const createSendActionNameAction: (name: string | undefined, valu
  * @returns The action fed to the reducer.
  */
 export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
+/**
+ * Create a *request update* `Action` that will be used to update the `Context`.
+ *
+ * This action will generate an update of the elements holding the variables named
+ * *names* on the front-end.
+ * @param id - The identifier of the visual element.
+ * @param names - The names of the requested variables as received in updateVarName and/or updateVars properties.
+ * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values.
+ * @returns The action fed to the reducer.
+ */
+export declare const createRequestUpdateAction: (id: string | undefined, names: string[], forceRefresh?: boolean) => Action;
 /**
  * A column description as received by the backend.
  */

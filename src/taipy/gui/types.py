@@ -101,6 +101,7 @@ class PropertyType(Enum):
     The property holds a number.
     """
     react = "react"
+    broadcast = "broadcast"
     string = "string"
     """
     The property holds a string.

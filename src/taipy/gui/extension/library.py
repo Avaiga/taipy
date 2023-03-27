@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from ..renderers.builder import _Builder
-from ..utils import _to_camel_case
+from ..utils import _to_camel_case, _get_broadcast_var_name
 from ..types import PropertyType
 
 if t.TYPE_CHECKING:
@@ -48,8 +48,15 @@ class ElementProperty:
                 "my_property_name", then this property is referred to as "myPropertyName" in the
                 JavaScript code.
         """
-        self.property_type = property_type
         self.default_value = default_value
+        if property_type == PropertyType.broadcast:
+            if isinstance(default_value, str):
+                self.default_value = _get_broadcast_var_name(default_value)
+            else:
+                warnings.warn("Element property with type 'broadcast' must define a string default value")
+            self.property_type = PropertyType.react
+        else:
+            self.property_type = property_type
         self._js_name = js_name
         super().__init__()
 
@@ -135,6 +142,7 @@ class Element:
         is_html: t.Optional[bool] = False,
     ) -> t.Union[t.Any, t.Tuple[str, str]]:
         attributes = properties or {}
+        # this modifies attributes
         hash_names = _Builder._get_variable_hash_names(gui, attributes)  # variable replacement
         # call user render if any
         if self._is_server_only():

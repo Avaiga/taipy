@@ -215,6 +215,8 @@ const messageToAction = (message: WsMessage) => {
     if (message.type) {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             return createMultipleUpdateAction(message.payload as NamePayload[]);
+        } else if (message.type === "U") {
+            return createUpdateAction(message as unknown as NamePayload);
         } else if (message.type === "AL") {
             return createAlertAction(message as unknown as AlertMessage);
         } else if (message.type === "BL") {
@@ -456,13 +458,18 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
     return state;
 };
 
+const createUpdateAction = (payload: NamePayload): TaipyAction => ({
+    ...payload,
+    type: Types.Update
+});
+
 const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
     type: Types.MultipleUpdate,
     payload: payload,
 });
 
 /**
- * Creates a *send update* `Action` that will be used to update `Context`.
+ * Create a *send update* `Action` that will be used to update `Context`.
  *
  * This action will update the variable *name* (if *propagate* is true) and trigger the
  * invocation of the `on_change` Python function on the backend.
@@ -502,7 +509,7 @@ const getPayload = (value: unknown, onChange?: string, relName?: string) => {
 };
 
 /**
- * Creates an *action* `Action` that will be used to update `Context`.
+ * Create an *action* `Action` that will be used to update `Context`.
  *
  * This action will trigger the invocation of the `on_action` Python function on the backend,
  * providing all the parameters as a payload.
@@ -603,7 +610,7 @@ export const createRequestInfiniteTableUpdateAction = (
     });
 
 /**
- * Creates a *request data update* `Action` that will be used to update the `Context`.
+ * Create a *request data update* `Action` that will be used to update the `Context`.
  *
  * This action will provoke the invocation of the `get_data()` method of the backend
  * library. That invocation generates an update of the elements holding the data named
@@ -649,12 +656,23 @@ export const createRequestDataUpdateAction = (
     };
 };
 
-export const createRequestUpdateAction = (id: string | undefined, names: string[]): TaipyAction => ({
+/**
+ * Create a *request update* `Action` that will be used to update the `Context`.
+ *
+ * This action will generate an update of the elements holding the variables named
+ * *names* on the front-end.
+ * @param id - The identifier of the visual element.
+ * @param names - The names of the requested variables as received in updateVarName and/or updateVars properties.
+ * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values
+ * @returns The action fed to the reducer.
+ */
+export const createRequestUpdateAction = (id: string | undefined, names: string[], forceRefresh = false): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
     payload: {
         id: id,
         names: names,
+        refresh: forceRefresh
     },
 });
 

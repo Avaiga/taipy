@@ -165,7 +165,7 @@ describe("PaginatedTable Component", () => {
         );
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { id: "table", names: ["varname"] },
+            payload: { id: "table", names: ["varname"], refresh: false },
             type: "REQUEST_UPDATE",
         });
         expect(dispatch).toHaveBeenCalledWith({
