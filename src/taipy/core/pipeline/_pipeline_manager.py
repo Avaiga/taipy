@@ -99,7 +99,9 @@ class _PipelineManager(_Manager[Pipeline]):
         else:
             owner_id = None
 
-        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(str(pipeline_config.id), owner_id):
+        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(  # type: ignore
+            str(pipeline_config.id), owner_id
+        ):
             return pipelines_from_owner
 
         version = _VersionManagerFactory._build_manager()._get_latest_version()

@@ -17,7 +17,7 @@ from ..common._utils import _fcts_to_dict, _load_fct
 from ..exceptions import InvalidSubscriber
 from ..job._job_model import _JobModel
 from ..job.job import Job
-from ..task._task_repository_factory import _TaskRepositoryFactory
+from ..task._task_manager_factory import _TaskManagerFactory
 
 
 class _JobConverter(_AbstractConverter):
@@ -37,7 +37,7 @@ class _JobConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _JobModel) -> Job:
-        task_repository = _TaskRepositoryFactory._build_repository()
+        task_repository = _TaskManagerFactory._build_repository()
         job = Job(
             id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id, version=model.version
         )
