@@ -285,9 +285,21 @@ class DataNode(_Entity):
 
     def __get_last_modified_datetime(self) -> Optional[datetime]:
         path = self._properties.get(self.__PATH_KEY, None)
-        if path and os.path.exists(path):
+        if path and os.path.isfile(path):
             return datetime.fromtimestamp(os.path.getmtime(path))
-        return None
+
+        last_modified_datetime = None
+        if path and os.path.isdir(path):
+            for filename in os.listdir(path):
+                filepath = os.path.join(path, filename)
+                if (
+                    os.path.isfile(filepath)
+                    and last_modified_datetime
+                    and datetime.fromtimestamp(os.path.getmtime(filepath)) > last_modified_datetime
+                ):
+                    last_modified_datetime = datetime.fromtimestamp(os.path.getmtime(filepath))
+
+        return last_modified_datetime
 
     @classmethod
     @abstractmethod
