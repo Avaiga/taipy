@@ -8,10 +8,11 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from .._repository._v2._filesystem_repository import _FileSystemRepository
+from ._pipeline_converter import _PipelineConverter
+from ._pipeline_model import _PipelineModel
 
-from typing import TypeVar, Union
 
-ModelType = TypeVar("ModelType")
-Entity = TypeVar("Entity")
-Converter = TypeVar("Converter")
-Json = Union[dict, list, str, int, float, bool, None]
+class _PipelineFSRepository(_FileSystemRepository):
+    def __init__(self):
+        super().__init__(model=_PipelineModel, converter=_PipelineConverter, dir_name="pipelines")

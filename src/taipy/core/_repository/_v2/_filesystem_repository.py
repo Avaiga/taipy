@@ -15,7 +15,7 @@ import shutil
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
 
 from src.taipy.core.common._utils import _retry
-from src.taipy.core.common.typing import Entity, Json, ModelType
+from src.taipy.core.common.typing import Converter, Entity, Json, ModelType
 from taipy.config.config import Config
 
 from ...exceptions import InvalidExportPath, ModelNotFound
@@ -35,8 +35,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         dir_name (str): Folder that will hold the files for this dataclass model.
     """
 
-    def __init__(self, model: Type[ModelType], dir_name: str):
+    def __init__(self, model: Type[ModelType], converter: Type[Converter], dir_name: str):
         self.model = model
+        self.converter = converter
         self._dir_name = dir_name
 
     @property
@@ -49,8 +50,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
-        # TODO: implement _from_entity on models
-        model = self.model._from_entity(entity)
+
+        model = self.converter._entity_to_model(entity)
         self.__get_model_filepath(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
@@ -63,7 +64,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _load(self, model_id: str) -> Entity:
         try:
             model = self.model(**self._get(self.__get_model_filepath(model_id)))
-            return model._to_entity()
+            return self.converter._model_to_entity(model)
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), model_id)
 
@@ -73,7 +74,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         try:
             for f in self.dir_path.iterdir():
                 if data := self.__filter_by(f, filters):
-                    entities.append(self.model(**data)._to_entity())
+                    entities.append(self.converter._model_to_entity(self.model(**data)))
         except FileNotFoundError:
             pass
         return entities
@@ -128,8 +129,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             filters = []
         with open(filepath, "r") as f:
             contents = f.read()
-
-            if not all(f'"{key}": "{value}"' in contents for key, value in filters):
-                return None
+            for filter in filters:
+                if not all(f'"{key}": "{value}"' in contents for key, value in filter.items()):
+                    return None
 
         return json.loads(contents, cls=_Decoder)

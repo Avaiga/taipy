@@ -20,8 +20,9 @@ import pytest
 from sqlalchemy import create_engine
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
+from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId
 from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,
@@ -41,6 +42,7 @@ from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
+from src.taipy.core.job.job import Job
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline.pipeline import Pipeline
@@ -217,6 +219,16 @@ def pipeline():
         parent_ids=set(["parent_id_1", "parent_id_2"]),
         version="random_version_number",
     )
+
+
+@pytest.fixture(scope="function")
+def job(task):
+    return Job(JobId("job"), task, "foo")
+
+
+@pytest.fixture(scope="function")
+def _version():
+    return _Version(id="foo", config=Config._applied_config)
 
 
 @pytest.fixture(scope="function")

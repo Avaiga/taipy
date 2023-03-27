@@ -13,6 +13,8 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from taipy.logger._taipy_logger import _TaipyLogger
+
 from .._version._utils import _version_migration
 
 
@@ -29,7 +31,6 @@ def _skippable(task_id, output_ids) -> bool:
             return False
         if not output.cacheable:
             return False
-    from taipy.logger._taipy_logger import _TaipyLogger
 
     _TaipyLogger._get_logger().warning(f"Task {task_id} has automatically been set to skippable.")
     return True

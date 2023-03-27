@@ -9,9 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import TypeVar, Union
+from abc import ABC, abstractmethod
 
-ModelType = TypeVar("ModelType")
-Entity = TypeVar("Entity")
-Converter = TypeVar("Converter")
-Json = Union[dict, list, str, int, float, bool, None]
+
+class _AbstractConverter(ABC):
+    @classmethod
+    @abstractmethod
+    def _entity_to_model(cls, entity):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def _model_to_entity(cls, model):
+        raise NotImplementedError

@@ -8,10 +8,12 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from .._repository._v2._filesystem_repository import _FileSystemRepository
+from ._cycle_converter import _CycleConverter
+from ._cycle_model import _CycleModel
+from ._cycle_repository_mixin import _CycleRepositoryMixin
 
-from typing import TypeVar, Union
 
-ModelType = TypeVar("ModelType")
-Entity = TypeVar("Entity")
-Converter = TypeVar("Converter")
-Json = Union[dict, list, str, int, float, bool, None]
+class _CycleFSRepository(_FileSystemRepository, _CycleRepositoryMixin):
+    def __init__(self):
+        super().__init__(model=_CycleModel, converter=_CycleConverter, dir_name="cycles")
