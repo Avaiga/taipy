@@ -20,7 +20,7 @@ from ._job_sql_repository import _JobSQLRepository
 
 class _JobManagerFactory(_ManagerFactory):
 
-    _REPOSITORY_MAP = {"default": _JobFSRepository, "sql": _JobSQLRepository}
+    __REPOSITORY_MAP = {"default": _JobFSRepository, "sql": _JobSQLRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_JobManager]:  # type: ignore
@@ -39,4 +39,4 @@ class _JobManagerFactory(_ManagerFactory):
 
     @classmethod
     def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

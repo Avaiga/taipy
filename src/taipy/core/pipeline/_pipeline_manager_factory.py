@@ -20,7 +20,7 @@ from ._pipeline_sql_repository import _PipelineSQLRepository
 
 class _PipelineManagerFactory(_ManagerFactory):
 
-    _REPOSITORY_MAP = {"default": _PipelineFSRepository, "sql": _PipelineSQLRepository}
+    __REPOSITORY_MAP = {"default": _PipelineFSRepository, "sql": _PipelineSQLRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_PipelineManager]:  # type: ignore
@@ -39,4 +39,4 @@ class _PipelineManagerFactory(_ManagerFactory):
 
     @classmethod
     def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

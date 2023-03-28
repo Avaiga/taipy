@@ -20,7 +20,7 @@ from ._cycle_sql_repository import _CycleSQLRepository
 
 class _CycleManagerFactory(_ManagerFactory):
 
-    _REPOSITORY_MAP = {"default": _CycleFSRepository, "sql": _CycleSQLRepository}
+    __REPOSITORY_MAP = {"default": _CycleFSRepository, "sql": _CycleSQLRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_CycleManager]:  # type: ignore
@@ -39,4 +39,4 @@ class _CycleManagerFactory(_ManagerFactory):
 
     @classmethod
     def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

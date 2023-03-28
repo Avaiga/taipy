@@ -20,7 +20,7 @@ from ._task_sql_repository import _TaskSQLRepository
 
 class _TaskManagerFactory(_ManagerFactory):
 
-    _REPOSITORY_MAP = {"default": _TaskFSRepository, "sql": _TaskSQLRepository}
+    __REPOSITORY_MAP = {"default": _TaskFSRepository, "sql": _TaskSQLRepository}
 
     @classmethod
     def _build_manager(cls) -> Type[_TaskManager]:  # type: ignore
@@ -39,4 +39,4 @@ class _TaskManagerFactory(_ManagerFactory):
 
     @classmethod
     def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

@@ -20,7 +20,7 @@ from ._version_sql_repository import _VersionSQLRepository
 
 class _VersionManagerFactory(_ManagerFactory):
 
-    _REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
+    __REPOSITORY_MAP = {"default": _VersionFSRepository, "sql": _VersionSQLRepository}
 
     @classmethod
     def _build_manager(cls) -> _VersionManager:  # type: ignore
@@ -39,4 +39,4 @@ class _VersionManagerFactory(_ManagerFactory):
 
     @classmethod
     def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls._REPOSITORY_MAP)()
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()
