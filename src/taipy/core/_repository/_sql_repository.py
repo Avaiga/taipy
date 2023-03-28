@@ -417,7 +417,7 @@ class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
 
         self.session.commit()
 
-    def _get_production_version(self):
+    def _get_production_versions(self):
         if productions := self.session.query(self._table).filter_by(is_production=True).all():
             return [p.id for p in productions]
         return []
@@ -498,8 +498,8 @@ class _SQLRepository(_BaseSQLRepository):
     def _set_production_version(self, version_number):
         self._table._set_production_version(version_number)
 
-    def _get_production_version(self):
-        return self._table._get_production_version()
+    def _get_production_versions(self):
+        return self._table._get_production_versions()
 
     def _delete_production_version(self, version_number):
         self._table._delete_production_version(version_number)

@@ -96,7 +96,7 @@ class _VersioningCLI:
 
             latest_version_number = _VersionManagerFactory._build_manager()._get_latest_version()
             development_version_number = _VersionManagerFactory._build_manager()._get_development_version()
-            production_version_numbers = _VersionManagerFactory._build_manager()._get_production_version()
+            production_version_numbers = _VersionManagerFactory._build_manager()._get_production_versions()
 
             versions = _VersionManagerFactory._build_manager()._get_all()
             versions.sort(key=lambda x: x.creation_date, reverse=True)

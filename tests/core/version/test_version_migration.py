@@ -28,7 +28,7 @@ def test_experiment_mode_converts_old_entities_to_latest_version():
         Core().run()
         scenario = taipy.get("SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1")
         assert _VersionManager._get_development_version() != version
-        assert version not in _VersionManager._get_production_version()
+        assert version not in _VersionManager._get_production_versions()
         assert scenario.version == version
         assert scenario.my_pipeline.version == version
         assert scenario.my_pipeline.my_task.version == version
@@ -45,7 +45,7 @@ def test_production_mode_converts_old_entities_to_latest_version():
         Core().run()
         scenario = taipy.get("SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1")
         assert _VersionManager._get_development_version() != version
-        assert version in _VersionManager._get_production_version()
+        assert version in _VersionManager._get_production_versions()
         assert scenario.version == version
         assert scenario.my_pipeline.version == version
         assert scenario.my_pipeline.my_task.version == version
@@ -62,7 +62,7 @@ def test_development_mode_converts_old_entities_to_latest_version():
         scenario = taipy.get("SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1")
         version = "LEGACY-VERSION"
         assert _VersionManager._get_development_version() != version
-        assert version not in _VersionManager._get_production_version()
+        assert version not in _VersionManager._get_production_versions()
         assert scenario.version == version
         assert scenario.my_pipeline.version == version
         assert scenario.my_pipeline.my_task.version == version
