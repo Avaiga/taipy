@@ -321,7 +321,7 @@ class TestConfigComparator:
             t in error_messages[5]
             for t in [
                 "ERROR",
-                "To override these changes, run your application with --force option.",
+                "To override these changes, run your application with --override option.",
             ]
         )
 
