@@ -12,8 +12,8 @@
 from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
-from ..common._utils import _load_fct
-from ._version_fs_repository import _VersionFSRepository
+from ..common import _utils
+from ._version_fs_repository_v2 import _VersionFSRepository
 from ._version_manager import _VersionManager
 from ._version_sql_repository import _VersionSQLRepository
 
@@ -25,10 +25,10 @@ class _VersionManagerFactory(_ManagerFactory):
     @classmethod
     def _build_manager(cls) -> _VersionManager:  # type: ignore
         if cls._using_enterprise():
-            version_manager = _load_fct(
+            version_manager = _utils._load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager", "_VersionManager"
             )  # type: ignore
-            build_repository = _load_fct(
+            build_repository = _utils._load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager_factory", "_VersionManagerFactory"
             )._build_repository  # type: ignore
         else:

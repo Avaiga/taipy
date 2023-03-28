@@ -334,10 +334,11 @@ class Job(_Entity, _Labeled):
     def _from_model(cls, model: _JobModel):
         from ..task._task_manager_factory import _TaskManagerFactory
 
-        task_repository = _TaskManagerFactory._build_repository()
+        task_manager = _TaskManagerFactory._build_manager()
+        task_repository = task_manager._repository
 
         job = Job(
-            id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id, version=model.version
+            id=model.id, task=task_repository._load(model.task_id), submit_id=model.submit_id, version=model.version
         )
 
         job.status = model.status  # type: ignore

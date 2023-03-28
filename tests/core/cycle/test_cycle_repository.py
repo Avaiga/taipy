@@ -11,6 +11,8 @@
 
 from datetime import datetime
 
+import pytest
+
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle
 from taipy.config.common.frequency import Frequency
@@ -21,7 +23,7 @@ def test_save_and_load(tmpdir, cycle):
     repository = _CycleManagerFactory._build_repository()
     repository.base_path = tmpdir
     repository._save(cycle)
-    cc = repository.load(cycle.id)
+    cc = repository._load(cycle.id)
 
     assert isinstance(cc, Cycle)
     assert cc.id == cycle.id
@@ -29,12 +31,14 @@ def test_save_and_load(tmpdir, cycle):
     assert cc.creation_date == cycle.creation_date
 
 
+@pytest.mark.skip("Deprecated: Old repository version")
 def test_from_and_to_model(cycle, cycle_model):
     repository = _CycleManagerFactory._build_repository().repo
     assert repository._to_model(cycle) == cycle_model
     assert repository._from_model(cycle_model) == cycle
 
 
+@pytest.mark.skip("Deprecated: Old repository version")
 def test_get_primary(tmpdir, cycle, current_datetime):
     cycle_repository = _CycleManagerFactory._build_repository()
     cycle_repository.base_path = tmpdir
@@ -73,6 +77,7 @@ def test_get_primary(tmpdir, cycle, current_datetime):
     )
 
 
+@pytest.mark.skip("Deprecated: Old repository version")
 def test_save_and_load_for_sql_repo(tmpdir, cycle):
     Config.configure_global_app(repository_type="sql")
 
@@ -87,6 +92,7 @@ def test_save_and_load_for_sql_repo(tmpdir, cycle):
     assert cc.creation_date == cycle.creation_date
 
 
+@pytest.mark.skip("Deprecated: Old repository version")
 def test_from_and_to_model_for_sql_repo(cycle, cycle_model):
     Config.configure_global_app(repository_type="sql")
 

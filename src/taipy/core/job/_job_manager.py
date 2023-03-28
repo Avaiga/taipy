@@ -10,22 +10,32 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Callable, Iterable, Optional, Union
+from typing import Callable, Iterable, List, Optional, Union
 
 from .._manager._manager import _Manager
+from .._repository._v2._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
+from .._version._version_mixin import _VersionMixin
+from ..common.alias import JobId
 from ..exceptions.exceptions import JobNotDeletedException
 from ..task.task import Task
-from ._job_repository import _JobRepository
 from .job import Job
 from .job_id import JobId
 
 
-class _JobManager(_Manager[Job]):
+class _JobManager(_Manager[Job], _VersionMixin):
 
     _ENTITY_NAME = Job.__name__
     _ID_PREFIX = "JOB_"
-    _repository: _JobRepository
+    _repository: _AbstractRepository
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[Job]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:

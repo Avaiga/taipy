@@ -12,7 +12,7 @@ from collections import defaultdict
 
 from .._repository._v2._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
-from ..common._utils import _fcts_to_dict, _load_fct, _Subscriber
+from ..common import _utils
 from ..exceptions import NonExistingPipeline, NonExistingTask
 from ..pipeline._pipeline_model import _PipelineModel
 from ..pipeline.pipeline import Pipeline
@@ -38,7 +38,7 @@ class _PipelineConverter(_AbstractConverter):
             pipeline.config_id,
             pipeline._properties.data,
             cls.__to_task_ids(pipeline._tasks),
-            _fcts_to_dict(pipeline._subscribers),
+            _utils._fcts_to_dict(pipeline._subscribers),
             pipeline.version,
         )
 
@@ -53,7 +53,7 @@ class _PipelineConverter(_AbstractConverter):
                 model.owner_id,
                 set(model.parent_ids),
                 [
-                    _Subscriber(_load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                    _utils._Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                     for it in model.subscribers
                 ],
                 model.version,

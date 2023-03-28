@@ -14,7 +14,7 @@ from typing import Optional
 
 from .._repository._v2._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
-from ..common._utils import _fcts_to_dict, _load_fct, _Subscriber
+from ..common import _utils
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle, CycleId
 from ..pipeline.pipeline import Pipeline
@@ -32,7 +32,7 @@ class _ScenarioConverter(_AbstractConverter):
             properties=scenario._properties.data,
             creation_date=scenario._creation_date.isoformat(),
             primary_scenario=scenario._primary_scenario,
-            subscribers=_fcts_to_dict(scenario._subscribers),
+            subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
             version=scenario.version,
             cycle=scenario._cycle.id if scenario._cycle else None,
@@ -50,7 +50,8 @@ class _ScenarioConverter(_AbstractConverter):
             tags=set(model.tags),
             cycle=cls.__to_cycle(model.cycle),
             subscribers=[
-                _Subscriber(_load_fct(it["fct_module"], it["fct_name"]), it["fct_params"]) for it in model.subscribers
+                _utils._Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                for it in model.subscribers
             ],
             version=model.version,
         )

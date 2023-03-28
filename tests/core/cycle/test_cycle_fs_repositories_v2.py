@@ -12,6 +12,7 @@
 import os
 
 import pytest
+from pandas._typing import Frequency
 
 from src.taipy.core.cycle._cycle_fs_repository_v2 import _CycleFSRepository
 from src.taipy.core.cycle.cycle import Cycle, CycleId

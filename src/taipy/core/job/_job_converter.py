@@ -37,9 +37,11 @@ class _JobConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _JobModel) -> Job:
-        task_repository = _TaskManagerFactory._build_repository()
+        task_manager = _TaskManagerFactory._build_manager()
+        task_repository = task_manager._repository
+
         job = Job(
-            id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id, version=model.version
+            id=model.id, task=task_repository._load(model.task_id), submit_id=model.submit_id, version=model.version
         )
 
         job.status = model.status  # type: ignore

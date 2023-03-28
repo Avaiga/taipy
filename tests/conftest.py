@@ -40,6 +40,7 @@ from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.cycle.cycle_id import CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
+from src.taipy.core.data._data_model import _DataNodeModel
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job.job import Job
@@ -207,6 +208,26 @@ def scenario(cycle):
 @pytest.fixture(scope="function")
 def data_node():
     return InMemoryDataNode("data_node_config_id", Scope.PIPELINE, version="random_version_number")
+
+
+@pytest.fixture(scope="function")
+def data_node_model():
+    return _DataNodeModel(
+        "my_dn_id",
+        "test_data_node",
+        Scope.PIPELINE,
+        "csv",
+        "name",
+        "owner_id",
+        list({"parent_id_1", "parent_id_2"}),
+        datetime(1985, 10, 14, 2, 30, 0).isoformat(),
+        [dict(timestamp=datetime(1985, 10, 14, 2, 30, 0).isoformat(), job_id="job_id")],
+        "latest",
+        None,
+        None,
+        False,
+        {"path": "/path", "has_header": True, "prop": "ENV[FOO]", "exposed_type": "pandas"},
+    )
 
 
 @pytest.fixture(scope="function")

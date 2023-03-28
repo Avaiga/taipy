@@ -93,21 +93,13 @@ class TestJobRepository:
         repository.base_path = tmpdir
         repository._save(job)
         with pytest.raises(ModelNotFound):
-            repository.load("id")
+            repository._load("id")
         _DataManager._set(data_node)
         _TaskManager._set(task)
-        j = repository.load("id")
+        j = repository._load("id")
         assert j.id == job.id
 
-    def test_from_and_to_model(self):
-        repository = _JobManagerFactory._build_repository().repo
-        assert repository._to_model(job) == job_model
-        with pytest.raises(ModelNotFound):
-            repository._from_model(job_model)
-        _DataManager._set(data_node)
-        _TaskManager._set(task)
-        assert repository._from_model(job_model).id == job.id
-
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_save_and_load_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 
@@ -125,6 +117,7 @@ class TestJobRepository:
         j = repository.load("id")
         assert j.id == job.id
 
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_from_and_to_model_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 

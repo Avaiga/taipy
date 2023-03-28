@@ -16,28 +16,31 @@ from taipy.config.common.scope import Scope
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._orchestrator._abstract_orchestrator import _AbstractOrchestrator
-from .._orchestrator._orchestrator_factory import _OrchestratorFactory
-from .._version._version_manager_factory import _VersionManagerFactory
+from .._repository._v2._abstract_repository import _AbstractRepository
+
+from .._version._version_mixin import _VersionMixin
+from ..common._entity_ids import _EntityIds
+from ..common.alias import CycleId, PipelineId, ScenarioId, TaskId
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.task_config import TaskConfig
 from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
-from ..job._job_manager_factory import _JobManagerFactory
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
 from ..task.task import Task
-from ._task_repository import _TaskRepository
 from .task_id import TaskId
 
 
-class _TaskManager(_Manager[Task]):
+class _TaskManager(_Manager[Task], _VersionMixin):
 
     _ENTITY_NAME = Task.__name__
-    _repository: _TaskRepository
+    _repository: _AbstractRepository
 
     @classmethod
     def _orchestrator(cls) -> Type[_AbstractOrchestrator]:
+        from .._orchestrator._orchestrator_factory import _OrchestratorFactory
+
         return _OrchestratorFactory._build_orchestrator()
 
     @classmethod
@@ -87,7 +90,7 @@ class _TaskManager(_Manager[Task]):
             if task := tasks_by_config.get((task_config, owner_id)):
                 tasks.append(task)
             else:
-                version = _VersionManagerFactory._build_manager()._get_latest_version()
+                version = cls._get_latest_version()
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
                 skippable = task_config.skippable
@@ -107,6 +110,14 @@ class _TaskManager(_Manager[Task]):
                 cls._set(task)
                 tasks.append(task)
         return tasks
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[Task]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def __save_data_nodes(cls, data_nodes):

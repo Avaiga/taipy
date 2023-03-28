@@ -30,6 +30,10 @@ class _JobRepository(_AbstractRepository[_JobModel, Job]):  # type: ignore
     def load(self, model_id: str) -> Job:
         return self.repo.load(model_id)
 
+    # This is temporary, just to keep the same interface as the new repository signature, to not break old tests
+    def _load(self, model_id: str) -> Job:
+        return self.repo.load(model_id)
+
     def _load_all(self, version_number: Optional[str] = None) -> List[Job]:
         return self.repo._load_all(version_number)
 

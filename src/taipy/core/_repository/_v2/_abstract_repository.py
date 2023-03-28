@@ -38,13 +38,13 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     @abstractmethod
     def _load(self, model_id: str) -> Entity:
         """
-        Retrieve the entity data from the repository.
+                Retrieve the entity data from the repository.
+        _CycleManager._get_all()
+                Args:
+                    model_id: The entity id, i.e., its primary key.
 
-        Args:
-            model_id: The entity id, i.e., its primary key.
-
-        Returns:
-            An entity.
+                Returns:
+                    An entity.
 
         """
         raise NotImplementedError
@@ -85,7 +85,14 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _search(self, attribute: str, value: Any, filters: List[Dict]) -> Optional[Entity]:
+    def _delete_by(self, attribute: str, value: str):
+        """
+        Delete all entities from the list of ids from the repository.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
         """
         Args:
             attribute: The entity property that is the key to the search.

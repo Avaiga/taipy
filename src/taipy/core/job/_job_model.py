@@ -29,6 +29,10 @@ class _JobModel:
     stacktrace: List[str]
     version: str
 
+    # def __post_init__(self):
+    #     if isinstance(self.status, str):
+    #         self.status = Status._from_repr(self.status)
+
     def to_dict(self) -> Dict[str, Any]:
         return {**dataclasses.asdict(self), "status": repr(self.status)}
 

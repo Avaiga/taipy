@@ -10,18 +10,20 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from typing import Dict, Iterable, Optional, Set, Union
+from typing import Dict, Iterable, List, Optional, Set, Union
 
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 from .._manager._manager import _Manager
+from .._version._version_mixin import _VersionMixin
+from ..common.alias import CycleId, DataNodeId, PipelineId, ScenarioId, TaskId
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
-from ._data_repository import _DataRepository
+from ._data_fs_repository_v2 import _DataFSRepository
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
 from ..task.task_id import TaskId
@@ -30,11 +32,11 @@ from .data_node_id import DataNodeId
 from .pickle import PickleDataNode
 
 
-class _DataManager(_Manager[DataNode]):
+class _DataManager(_Manager[DataNode], _VersionMixin):
 
     __DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
-    _repository: _DataRepository
+    _repository: _DataFSRepository
 
     @classmethod
     def _bulk_get_or_create(
@@ -59,7 +61,9 @@ class _DataManager(_Manager[DataNode]):
                 owner_id = None
             dn_configs_and_owner_id.append((dn_config, owner_id))
 
-        data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore
+        data_nodes = cls._repository._get_by_configs_and_owner_ids(
+            dn_configs_and_owner_id, cls._build_filters_with_version(None)
+        )
 
         return {
             dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id, None)
@@ -79,7 +83,7 @@ class _DataManager(_Manager[DataNode]):
         cls, data_node_config: DataNodeConfig, owner_id: Optional[str], parent_ids: Optional[Set[str]]
     ) -> DataNode:
         try:
-            version = _VersionManagerFactory._build_manager()._get_latest_version()
+            version = cls._get_latest_version()
             props = data_node_config._properties.copy()
             validity_period = props.pop("validity_period", None)
 
@@ -99,6 +103,14 @@ class _DataManager(_Manager[DataNode]):
             )
         except KeyError:
             raise InvalidDataNodeType(data_node_config.storage_type)
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[DataNode]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId]):
@@ -127,8 +139,3 @@ class _DataManager(_Manager[DataNode]):
     def _delete_all(cls):
         cls._clean_pickle_files(cls._get_all())
         super()._delete_all()
-
-    @classmethod
-    def _delete_by_version(cls, version_number: str):
-        cls._clean_pickle_files(cls._get_all(version_number))
-        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")  # type: ignore

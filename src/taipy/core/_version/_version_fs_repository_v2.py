@@ -124,7 +124,7 @@ class _VersionFSRepository(_FileSystemRepository):
             )
         )
 
-    def _get_production_version(self) -> List[str]:
+    def _get_production_versions(self) -> List[str]:
         with open(self._version_file_path, "r") as f:
             file_content = json.load(f)
 

@@ -28,6 +28,10 @@ class _CycleModel:
     start_date: str
     end_date: str
 
+    # def __post_init__(self):
+    #     if isinstance(self.frequency, str):
+    #         self.frequency = Frequency._from_repr(self.frequency)
+
     def to_dict(self) -> Dict[str, Any]:
         return {**dataclasses.asdict(self), "frequency": repr(self.frequency)}
 

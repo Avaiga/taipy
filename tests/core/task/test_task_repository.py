@@ -73,22 +73,13 @@ class TestTaskRepository:
         repository.base_path = tmpdir
         repository._save(task)
         with pytest.raises(NonExistingDataNode):
-            repository.load("id")
+            repository._load("id")
         _DataManager._set(data_node)
-        t = repository.load("id")
+        t = repository._load("id")
         assert t.id == task.id
         assert len(t.input) == 1
 
-    def test_from_and_to_model(self):
-        repository = _TaskManagerFactory._build_repository().repo  # type: ignore
-        assert repository._to_model(task) == task_model
-        with pytest.raises(NonExistingDataNode):
-            repository._from_model(task_model)
-        _DataManager._set(data_node)
-        t = repository._from_model(task_model)
-        assert isinstance(t, Task)
-        assert len(t.input) == 1
-
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_save_and_load_with_sql_repo(self, tmpdir):
         Config.configure_global_app(repository_type="sql")
 
@@ -103,6 +94,7 @@ class TestTaskRepository:
         assert t.id == task.id
         assert len(t.input) == 1
 
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_from_and_to_model_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 

@@ -52,16 +52,12 @@ class GenericDataNode(DataNode):
     """
 
     __STORAGE_TYPE = "generic"
-    __OPTIONAL_READ_FUNCTION_PROPERTY = "read_fct"
+    _OPTIONAL_READ_FUNCTION_PROPERTY = "read_fct"
     __READ_FUNCTION_ARGS_PROPERTY = "read_fct_args"
-    __OPTIONAL_WRITE_FUNCTION_PROPERTY = "write_fct"
+    _OPTIONAL_WRITE_FUNCTION_PROPERTY = "write_fct"
     __WRITE_FUNCTION_ARGS_PROPERTY = "write_fct_args"
-    __READ_FCT_NAME_KEY = "read_fct_name"
-    __READ_FCT_MODULE_KEY = "read_fct_module"
-    __WRITE_FCT_NAME_KEY = "write_fct_name"
-    __WRITE_FCT_MODULE_KEY = "write_fct_module"
     _REQUIRED_PROPERTIES: List[str] = []
-    _REQUIRED_AT_LEAST_ONE_PROPERTY: List[str] = [__OPTIONAL_READ_FUNCTION_PROPERTY, __OPTIONAL_WRITE_FUNCTION_PROPERTY]
+    _REQUIRED_AT_LEAST_ONE_PROPERTY: List[str] = [_OPTIONAL_READ_FUNCTION_PROPERTY, _OPTIONAL_WRITE_FUNCTION_PROPERTY]
 
     def __init__(
         self,
@@ -116,7 +112,7 @@ class GenericDataNode(DataNode):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        if read_fct := self.properties[self.__OPTIONAL_READ_FUNCTION_PROPERTY]:
+        if read_fct := self.properties[self._OPTIONAL_READ_FUNCTION_PROPERTY]:
             if read_fct_args := self.properties.get(self.__READ_FUNCTION_ARGS_PROPERTY, None):
                 if not isinstance(read_fct_args, list):
                     return read_fct(*[read_fct_args])
@@ -125,54 +121,10 @@ class GenericDataNode(DataNode):
         raise MissingReadFunction(f"The read function is not defined in data node config {self.config_id}.")
 
     def _write(self, data: Any):
-        if write_fct := self.properties[self.__OPTIONAL_WRITE_FUNCTION_PROPERTY]:
+        if write_fct := self.properties[self._OPTIONAL_WRITE_FUNCTION_PROPERTY]:
             if write_fct_args := self.properties.get(self.__WRITE_FUNCTION_ARGS_PROPERTY, None):
                 if not isinstance(write_fct_args, list):
                     return write_fct(data, *[write_fct_args])
                 return write_fct(data, *write_fct_args)
             return write_fct(data)
         raise MissingWriteFunction(f"The write function is not defined in data node config {self.config_id}.")
-
-    @classmethod
-    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
-
-        read_fct = datanode_properties.get(cls.__OPTIONAL_READ_FUNCTION_PROPERTY, None)
-        datanode_properties[cls.__READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
-        datanode_properties[cls.__READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
-
-        write_fct = datanode_properties.get(cls.__OPTIONAL_WRITE_FUNCTION_PROPERTY, None)
-        datanode_properties[cls.__WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
-        datanode_properties[cls.__WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
-
-        del (
-            datanode_properties[cls.__OPTIONAL_READ_FUNCTION_PROPERTY],
-            datanode_properties[cls.__OPTIONAL_WRITE_FUNCTION_PROPERTY],
-        )
-
-        return datanode_properties
-
-    @classmethod
-    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
-
-        if datanode_model_properties[cls.__READ_FCT_MODULE_KEY]:
-            datanode_model_properties[GenericDataNode.__OPTIONAL_READ_FUNCTION_PROPERTY] = _load_fct(
-                datanode_model_properties[cls.__READ_FCT_MODULE_KEY],
-                datanode_model_properties[cls.__READ_FCT_NAME_KEY],
-            )
-        else:
-            datanode_model_properties[GenericDataNode.__OPTIONAL_READ_FUNCTION_PROPERTY] = None
-
-        if datanode_model_properties[cls.__WRITE_FCT_MODULE_KEY]:
-            datanode_model_properties[GenericDataNode.__OPTIONAL_WRITE_FUNCTION_PROPERTY] = _load_fct(
-                datanode_model_properties[cls.__WRITE_FCT_MODULE_KEY],
-                datanode_model_properties[cls.__WRITE_FCT_NAME_KEY],
-            )
-        else:
-            datanode_model_properties[GenericDataNode.__OPTIONAL_WRITE_FUNCTION_PROPERTY] = None
-
-        del datanode_model_properties[cls.__READ_FCT_NAME_KEY]
-        del datanode_model_properties[cls.__READ_FCT_MODULE_KEY]
-        del datanode_model_properties[cls.__WRITE_FCT_NAME_KEY]
-        del datanode_model_properties[cls.__WRITE_FCT_MODULE_KEY]
-
-        return datanode_model_properties

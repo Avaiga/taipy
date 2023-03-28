@@ -14,7 +14,7 @@ from typing import Type
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ..cycle._cycle_manager import _CycleManager
-from ._cycle_fs_repository import _CycleFSRepository
+from ._cycle_fs_repository_v2 import _CycleFSRepository
 from ._cycle_sql_repository import _CycleSQLRepository
 
 
