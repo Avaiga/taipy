@@ -23,6 +23,8 @@ repositories = {
     "cycle": _CycleManagerFactory._build_repository,
 }
 
+# TODO: correctly get _to_model function (converter) from taipy-core
+
 
 def _to_model(repository, entity, **kwargs):
     return repositories[repository](**kwargs)._to_model(entity)
