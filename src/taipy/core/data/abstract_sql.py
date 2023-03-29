@@ -47,7 +47,8 @@ class _AbstractSQLDataNode(DataNode):
     __DB_ENGINE_KEY = "db_engine"
     __DB_DRIVER_KEY = "db_driver"
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
-    __SQLITE_PATH_KEY = "path"
+    __SQLITE_FOLDER_PATH = "sqlite_folder_path"
+    __SQLITE_FILE_EXTENSION = "sqlite_file_extension"
 
     __ENGINE_PROPERTIES: List[str] = [
         __DB_NAME_KEY,
@@ -57,12 +58,15 @@ class _AbstractSQLDataNode(DataNode):
         __DB_PORT_KEY,
         __DB_DRIVER_KEY,
         __DB_EXTRA_ARGS_KEY,
-        __SQLITE_PATH_KEY,
+        __SQLITE_FOLDER_PATH,
+        __SQLITE_FILE_EXTENSION,
     ]
 
     __DB_HOST_DEFAULT = "localhost"
     __DB_PORT_DEFAULT = 1433
     __DB_DRIVER_DEFAULT = "ODBC Driver 17 for SQL Server"
+    __SQLITE_FOLDER_PATH_DEFAULT = ""
+    __SQLITE_FILE_EXTENSION_DEFAULT = ".db"
 
     __ENGINE_MSSQL = "mssql"
     __ENGINE_SQLITE = "sqlite"
@@ -174,8 +178,9 @@ class _AbstractSQLDataNode(DataNode):
         elif engine == self.__ENGINE_POSTGRESQL:
             return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
         elif engine == self.__ENGINE_SQLITE:
-            path = self.properties.get(self.__SQLITE_PATH_KEY, "")
-            return os.path.join("sqlite:///", path, f"{db_name}")
+            folder_path = self.properties.get(self.__SQLITE_FOLDER_PATH, self.__SQLITE_FOLDER_PATH_DEFAULT)
+            file_extension = self.properties.get(self.__SQLITE_FILE_EXTENSION, self.__SQLITE_FILE_EXTENSION_DEFAULT)
+            return "sqlite:///" + os.path.join(folder_path, f"{db_name}{file_extension}")
 
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 

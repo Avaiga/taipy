@@ -106,7 +106,7 @@ class DataNode(_Entity):
 
         self._properties = _Properties(self, **kwargs)
 
-    @property  # type: ignore
+    @property
     def parent_id(self):
         """
         Deprecated. Use owner_id instead.
@@ -114,7 +114,7 @@ class DataNode(_Entity):
         _warn_deprecated("parent_id", suggest="owner_id")
         return self.owner_id
 
-    @parent_id.setter  # type: ignore
+    @parent_id.setter
     def parent_id(self, val):
         """
         Deprecated. Use owner_id instead.
@@ -160,13 +160,13 @@ class DataNode(_Entity):
     def last_edit_date(self, val):
         self._last_edit_date = val
 
-    @property  # type: ignore
+    @property
     def last_edition_date(self):
         """Deprecated. Use last_edit_date instead."""
         _warn_deprecated("last_edition_date", suggest="last_edit_date")
         return self.last_edit_date
 
-    @last_edition_date.setter  # type: ignore
+    @last_edition_date.setter
     def last_edition_date(self, val):
         _warn_deprecated("last_edition_date", suggest="last_edit_date")
         self.last_edit_date = val
@@ -213,17 +213,17 @@ class DataNode(_Entity):
     def name(self, val):
         self._name = val
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
 
-    @property  # type: ignore
+    @property
     def cacheable(self):
         """Deprecated. Use `skippable` attribute of a `Task^` instead."""
         _warn_deprecated("cacheable", suggest="the skippable feature")
         return self.properties.get("cacheable", False)
 
-    @cacheable.setter  # type: ignore
+    @cacheable.setter
     def cacheable(self, val):
         _warn_deprecated("cacheable", suggest="the skippable feature")
 
@@ -237,13 +237,13 @@ class DataNode(_Entity):
     def edit_in_progress(self, val):
         self._edit_in_progress = val
 
-    @property  # type: ignore
+    @property
     def edition_in_progress(self):
         """Deprecated. Use edit_in_progress instead."""
         _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
         return self.edit_in_progress
 
-    @edition_in_progress.setter  # type: ignore
+    @edition_in_progress.setter
     def edition_in_progress(self, val):
         """Deprecated. Use edit_in_progress instead."""
         _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
@@ -255,7 +255,7 @@ class DataNode(_Entity):
         """List of the jobs having edited the data node."""
         return [edit.get("job_id") for edit in self.edits if edit.get("job_id")]
 
-    @property  # type: ignore
+    @property
     def properties(self):
         """Dictionary of custom properties."""
         r = _reload(self._MANAGER_NAME, self)

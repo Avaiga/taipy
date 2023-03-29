@@ -98,11 +98,13 @@ class DataNodeConfig(Section):
     # In memory
     _OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY = "default_data"
     # SQL
-    _REQUIRED_DB_USERNAME_SQL_PROPERTY = "db_username"
-    _REQUIRED_DB_PASSWORD_SQL_PROPERTY = "db_password"
     _REQUIRED_DB_NAME_SQL_PROPERTY = "db_name"
     _REQUIRED_DB_ENGINE_SQL_PROPERTY = "db_engine"
-    _REQUIRED_DB_ENGINE_SQLITE = "sqlite"
+    _DB_ENGINE_SQLITE = "sqlite"
+    _OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY = "sqlite_folder_path"
+    _OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY = "sqlite_file_extension"
+    _OPTIONAL_DB_PASSWORD_SQL_PROPERTY = "db_password"
+    _OPTIONAL_DB_USERNAME_SQL_PROPERTY = "db_username"
     _OPTIONAL_PORT_SQL_PROPERTY = "db_port"
     _OPTIONAL_HOST_SQL_PROPERTY = "db_host"
     _OPTIONAL_DRIVER_SQL_PROPERTY = "db_driver"
@@ -140,15 +142,11 @@ class DataNodeConfig(Section):
     _REQUIRED_PROPERTIES: Dict[str, List] = {
         _STORAGE_TYPE_VALUE_PICKLE: [],
         _STORAGE_TYPE_VALUE_SQL_TABLE: [
-            _REQUIRED_DB_USERNAME_SQL_PROPERTY,
-            _REQUIRED_DB_PASSWORD_SQL_PROPERTY,
             _REQUIRED_DB_NAME_SQL_PROPERTY,
             _REQUIRED_DB_ENGINE_SQL_PROPERTY,
             _REQUIRED_TABLE_NAME_SQL_TABLE_PROPERTY,
         ],
         _STORAGE_TYPE_VALUE_SQL: [
-            _REQUIRED_DB_USERNAME_SQL_PROPERTY,
-            _REQUIRED_DB_PASSWORD_SQL_PROPERTY,
             _REQUIRED_DB_NAME_SQL_PROPERTY,
             _REQUIRED_DB_ENGINE_SQL_PROPERTY,
             _REQUIRED_READ_QUERY_SQL_PROPERTY,
@@ -186,18 +184,26 @@ class DataNodeConfig(Section):
         },
         _STORAGE_TYPE_VALUE_IN_MEMORY: {_OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY: None},
         _STORAGE_TYPE_VALUE_SQL_TABLE: {
+            _OPTIONAL_DB_USERNAME_SQL_PROPERTY: None,
+            _OPTIONAL_DB_PASSWORD_SQL_PROPERTY: None,
             _OPTIONAL_HOST_SQL_PROPERTY: "localhost",
             _OPTIONAL_PORT_SQL_PROPERTY: 1433,
             _OPTIONAL_DRIVER_SQL_PROPERTY: "ODBC Driver 17 for SQL Server",
-            _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+            _OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY: None,
+            _OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY: ".db",
             _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY: None,
+            _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
         },
         _STORAGE_TYPE_VALUE_SQL: {
+            _OPTIONAL_DB_USERNAME_SQL_PROPERTY: None,
+            _OPTIONAL_DB_PASSWORD_SQL_PROPERTY: None,
             _OPTIONAL_HOST_SQL_PROPERTY: "localhost",
             _OPTIONAL_PORT_SQL_PROPERTY: 1433,
             _OPTIONAL_DRIVER_SQL_PROPERTY: "ODBC Driver 17 for SQL Server",
-            _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+            _OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY: None,
+            _OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY: ".db",
             _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY: None,
+            _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
         },
         _STORAGE_TYPE_VALUE_MONGO_COLLECTION: {
             _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY: DefaultCustomDocument,
@@ -629,14 +635,16 @@ class DataNodeConfig(Section):
     def _configure_sql_table(
         cls,
         id: str,
-        db_username: str,
-        db_password: str,
         db_name: str,
         db_engine: str,
         table_name: str,
+        db_username: Optional[str],
+        db_password: Optional[str],
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
+        sqlite_folder_path: Optional[str] = None,
+        sqlite_file_extension: Optional[str] = None,
         db_extra_args: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
@@ -646,16 +654,20 @@ class DataNodeConfig(Section):
 
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
-            db_username (str): The database username.
-            db_password (str): The database password.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             table_name (str): The name of the SQL table.
+            db_username (Optional[str]): The database username. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
+            db_password (Optional[str]): The database password. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
             db_host (Optional[str]): The database host. The default value is _"localhost"_.
             db_port (Optional[int]): The database port. The default value is 1433.
-            db_driver (Optional[str]): The database driver. The default value is
-                _"ODBC Driver 17 for SQL Server"_.
+            db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
+                is the current working folder.
+            sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
             db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
                 connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL table.
@@ -669,20 +681,26 @@ class DataNodeConfig(Section):
         """
         properties.update(
             {
-                cls._REQUIRED_DB_USERNAME_SQL_PROPERTY: db_username,
-                cls._REQUIRED_DB_PASSWORD_SQL_PROPERTY: db_password,
                 cls._REQUIRED_DB_NAME_SQL_PROPERTY: db_name,
                 cls._REQUIRED_DB_ENGINE_SQL_PROPERTY: db_engine,
                 cls._REQUIRED_TABLE_NAME_SQL_TABLE_PROPERTY: table_name,
             }
         )
 
+        if db_username is not None:
+            properties[cls._OPTIONAL_DB_USERNAME_SQL_PROPERTY] = db_username
+        if db_password is not None:
+            properties[cls._OPTIONAL_DB_PASSWORD_SQL_PROPERTY] = db_password
         if db_host is not None:
             properties[cls._OPTIONAL_HOST_SQL_PROPERTY] = db_host
         if db_port is not None:
             properties[cls._OPTIONAL_PORT_SQL_PROPERTY] = db_port
         if db_driver is not None:
             properties[cls._OPTIONAL_DRIVER_SQL_PROPERTY] = db_driver
+        if sqlite_folder_path is not None:
+            properties[cls._OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY] = sqlite_folder_path
+        if sqlite_file_extension is not None:
+            properties[cls._OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY] = sqlite_file_extension
         if db_extra_args is not None:
             properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_args
         if exposed_type is not None:
@@ -703,6 +721,8 @@ class DataNodeConfig(Section):
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
+        sqlite_folder_path: Optional[str] = None,
+        sqlite_file_extension: Optional[str] = None,
         db_extra_args: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
@@ -712,17 +732,22 @@ class DataNodeConfig(Section):
 
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
-            db_username (str): The database username.
-            db_password (str): The database password.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             read_query (str): The SQL query string used to read the data from the database.
             write_query_builder (Callable): A callback function that takes the data as an input parameter
                 and returns a list of SQL queries.
+            db_username (Optional[str]): The database username. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
+            db_password (Optional[str]): The database password. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
             db_host (Optional[str]): The database host. The default value is _"localhost"_.
             db_port (Optional[int]): The database port. The default value is 1433.
             db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
+                is the current working folder.
+            sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
             db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
                 connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL query.
@@ -735,8 +760,6 @@ class DataNodeConfig(Section):
         """
         properties.update(
             {
-                cls._REQUIRED_DB_USERNAME_SQL_PROPERTY: db_username,
-                cls._REQUIRED_DB_PASSWORD_SQL_PROPERTY: db_password,
                 cls._REQUIRED_DB_NAME_SQL_PROPERTY: db_name,
                 cls._REQUIRED_DB_ENGINE_SQL_PROPERTY: db_engine,
                 cls._REQUIRED_READ_QUERY_SQL_PROPERTY: read_query,
@@ -744,12 +767,20 @@ class DataNodeConfig(Section):
             }
         )
 
+        if db_username is not None:
+            properties[cls._OPTIONAL_DB_USERNAME_SQL_PROPERTY] = db_username
+        if db_password is not None:
+            properties[cls._OPTIONAL_DB_PASSWORD_SQL_PROPERTY] = db_password
         if db_host is not None:
             properties[cls._OPTIONAL_HOST_SQL_PROPERTY] = db_host
         if db_port is not None:
             properties[cls._OPTIONAL_PORT_SQL_PROPERTY] = db_port
         if db_driver is not None:
             properties[cls._OPTIONAL_DRIVER_SQL_PROPERTY] = db_driver
+        if sqlite_folder_path is not None:
+            properties[cls._OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY] = sqlite_folder_path
+        if sqlite_file_extension is not None:
+            properties[cls._OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY] = sqlite_file_extension
         if db_extra_args is not None:
             properties[cls._OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY] = db_extra_args
         if exposed_type is not None:

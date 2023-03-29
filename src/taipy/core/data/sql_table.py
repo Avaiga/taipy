@@ -47,20 +47,22 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties. Note that the
-            _properties_ parameter must at least contain an entry for _"db_username"_,
-            _"db_password"_, _"db_name"_, _"db_engine"_, _"table_name"_:
+            _properties_ parameter must at least contain an entry for _"db_name"_, _"db_engine"_, _"table_name"_:
 
-            - _"db_username"_ `(str)`: The database username.
-            - _"db_password"_ `(str)`: The database password.
             - _"db_name"_ `(str)`: The database name, or the name of the SQLite database file.
-            - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.
             - _"db_engine"_ `(str)`: The database engine. For now, the accepted values are _"sqlite"_, _"mssql"_,
                 _"mysql"_, or _"postgresql"_.
-            - _"db_driver"_ `(str)`: The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            - _"table_name"_ `(str)`: The name of the SQL table.
+            - _"db_username"_ `(str)`: The database username.
+            - _"db_password"_ `(str)`: The database password.
+            - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.
             - _"db_port"_ `(int)`: The database port. The default value is 1433.
+            - _"db_driver"_ `(str)`: The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            - _"sqlite_folder_path"_ (str): The path to the folder that contains SQLite file. The default value
+                is the current working folder.
+            - _"sqlite_file_extension"_ (str): The filename extension of the SQLite file. The default value is ".db".
             - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database
                 connection string.
-            - _"table_name"_ `(str)`: The name of the SQL table.
             - _"exposed_type"_: The exposed type of the data read from SQL query. The default value is `pandas`.
     """
 
