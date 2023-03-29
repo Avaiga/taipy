@@ -6,6 +6,7 @@ __pycache__
 Pipfile.lock
 build/
 *.egg-info/
+dist/
 
 # IDE settings
 .vscode/

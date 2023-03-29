@@ -1,1 +1,2 @@
 include src/taipy/*.json
+include src/taipy/gui-core/lib/taipy-gui-core.js
