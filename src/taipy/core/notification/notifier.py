@@ -18,20 +18,17 @@ from .topic import Topic
 
 
 class Notifier:
-    # TODO add a lock on _registration
     _registrations: List[Registration] = []
 
     @classmethod
-    def register(cls, entity_type, entity_id, operation, attribute_name, time_to_live) -> Tuple[str, Queue]:
+    def register(cls, entity_type, entity_id, operation, attribute_name) -> Tuple[str, Queue]:
         register_id = "gui"  # TODO generate an id to return so the client can unregister.
-        registration = Registration(register_id, entity_type, entity_id, operation, attribute_name, time_to_live)
-        # TODO lock before updating cls._registrations
+        registration = Registration(register_id, entity_type, entity_id, operation, attribute_name)
         cls._registrations.append(registration)
         return register_id, registration.queue
 
     @classmethod
     def unregister(cls, register_id: str = "gui"):
-        # TODO lock before updating cls._registrations
         cls._registrations = [reg for reg in cls._registrations if reg.register_id != register_id]
 
     @classmethod
