@@ -408,3 +408,26 @@ class TestSQLTableDataNode:
 
             dn.some_random_attribute_that_does_not_related_to_engine = "foo"
             assert dn._engine is not None
+
+    @pytest.mark.parametrize(
+        "tmp_sqlite_path",
+        [
+            "tmp_sqlite_db_file_path",
+            "tmp_sqlite_sqlite3_file_path",
+        ],
+    )
+    def test_sqlite_read_file_with_different_extension(self, tmp_sqlite_path, request):
+        tmp_sqlite_path = request.getfixturevalue(tmp_sqlite_path)
+        folder_path, db_name, file_extension = tmp_sqlite_path
+        properties = {
+            "db_engine": "sqlite",
+            "table_name": "example",
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+        }
+
+        dn = SQLTableDataNode("sqlite_dn", Scope.PIPELINE, properties=properties)
+        data = dn.read()
+
+        assert data.equals(pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]))

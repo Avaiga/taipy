@@ -90,6 +90,4 @@ None
 .airflow
 *.dags
 
-*.sqlite3
-
 dask-worker-space/

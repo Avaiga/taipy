@@ -134,10 +134,8 @@ class TestDataNodeConfigChecker:
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 5
+        assert len(Config._collector.errors) == 3
         expected_error_messages = [
-            "DataNodeConfig `new` is missing the required property `db_username` for type `sql_table`.",
-            "DataNodeConfig `new` is missing the required property `db_password` for type `sql_table`.",
             "DataNodeConfig `new` is missing the required property `db_name` for type `sql_table`.",
             "DataNodeConfig `new` is missing the required property `db_engine` for type `sql_table`.",
             "DataNodeConfig `new` is missing the required property `table_name` for type `sql_table`.",
@@ -148,10 +146,8 @@ class TestDataNodeConfigChecker:
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 6
+        assert len(Config._collector.errors) == 4
         expected_error_messages = [
-            "DataNodeConfig `new` is missing the required property `db_username` for type `sql`.",
-            "DataNodeConfig `new` is missing the required property `db_password` for type `sql`.",
             "DataNodeConfig `new` is missing the required property `db_name` for type `sql`.",
             "DataNodeConfig `new` is missing the required property `db_engine` for type `sql`.",
             "DataNodeConfig `new` is missing the required property `read_query` for type `sql`.",
@@ -167,6 +163,57 @@ class TestDataNodeConfigChecker:
         expected_error_messages = [
             "DataNodeConfig `new` is missing the required property `db_name` for type `mongo_collection`.",
             "DataNodeConfig `new` is missing the required property `collection_name` for type `mongo_collection`.",
+        ]
+        assert all(message in caplog.text for message in expected_error_messages)
+
+    def test_check_properties_of_sqlite_engine(self, caplog):
+        config = Config._default_config
+        config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
+
+        # Test SQLite engine
+        config._sections[DataNodeConfig.name]["new"].storage_type = "sql_table"
+        config._sections[DataNodeConfig.name]["new"].properties = {"db_engine": "sqlite"}
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 2
+        expected_error_messages = [
+            "DataNodeConfig `new` is missing the required property `db_name` for type `sql_table`.",
+            "DataNodeConfig `new` is missing the required property `table_name` for type `sql_table`.",
+        ]
+        assert all(message in caplog.text for message in expected_error_messages)
+
+    def test_check_properties_of_not_sqlite_engine(self, caplog):
+        config = Config._default_config
+        config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
+
+        # Test other engines
+        config._sections[DataNodeConfig.name]["new"].storage_type = "sql_table"
+        config._sections[DataNodeConfig.name]["new"].properties = {"db_engine": "mssql"}
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 4
+
+        config._sections[DataNodeConfig.name]["new"].storage_type = "sql_table"
+        config._sections[DataNodeConfig.name]["new"].properties = {"db_engine": "mysql"}
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 4
+
+        config._sections[DataNodeConfig.name]["new"].storage_type = "sql_table"
+        config._sections[DataNodeConfig.name]["new"].properties = {"db_engine": "postgresql"}
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 4
+
+        expected_error_messages = [
+            "DataNodeConfig `new` is missing the required property `db_username` for type `sql_table`.",
+            "DataNodeConfig `new` is missing the required property `db_password` for type `sql_table`.",
+            "DataNodeConfig `new` is missing the required property `db_name` for type `sql_table`.",
+            "DataNodeConfig `new` is missing the required property `table_name` for type `sql_table`.",
         ]
         assert all(message in caplog.text for message in expected_error_messages)
 

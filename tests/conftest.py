@@ -17,7 +17,7 @@ from queue import Queue
 
 import pandas as pd
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
@@ -116,6 +116,40 @@ def parquet_file_path(tmpdir_factory) -> str:
     fn = tmpdir_factory.mktemp("data").join("df.parquet")
     data.to_parquet(str(fn))
     return fn.strpath
+
+
+@pytest.fixture(scope="function")
+def tmp_sqlite_db_file_path(tmpdir_factory):
+    fn = tmpdir_factory.mktemp("data")
+    db_name = "df"
+    file_extension = ".db"
+
+    db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
+    conn = db.connect()
+    conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.close()
+    db.dispose()
+
+    return fn.strpath, db_name, file_extension
+
+
+@pytest.fixture(scope="function")
+def tmp_sqlite_sqlite3_file_path(tmpdir_factory):
+    fn = tmpdir_factory.mktemp("data")
+    db_name = "df"
+    file_extension = ".sqlite3"
+
+    db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
+    conn = db.connect()
+    conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.close()
+    db.dispose()
+
+    return fn.strpath, db_name, file_extension
 
 
 @pytest.fixture(scope="function")
