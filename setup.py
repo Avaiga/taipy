@@ -15,8 +15,10 @@
 
 import json
 import os
+from pathlib import Path
 
-from setuptools import find_namespace_packages, find_packages, setup
+from setuptools import find_packages, find_namespace_packages, setup
+from setuptools.command.build_py import build_py
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -35,12 +37,27 @@ requirements = [
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
-    "ngrok": ["pyngrok>=5"],
-    "image": ["python-magic;platform_system!='Windows'", "python-magic-bin;platform_system=='Windows'"],
+    "ngrok": ["pyngrok>=5.1,<6.0"],
+    "image": [
+        "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
+        "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
+        ],
     "rdp": ["rdp>=0.8"],
-    "arrow": ["pyarrow>=7.0"],
+    "arrow": ["pyarrow>=10.0.1,<11.0"],
     "mssql": ["pyodbc>=4"],
 }
+
+def _build_webapp():
+    already_exists = Path("./src/taipy/gui-core/lib/taipy-gui-core.js").exists()
+    if not already_exists:
+        os.system("cd gui && npm ci && npm run build")
+
+
+class NPMInstall(build_py):
+    def run(self):
+        _build_webapp()
+        build_py.run(self)
+
 
 setup(
     author="Avaiga",
@@ -71,4 +88,5 @@ setup(
     version=version_string,
     zip_safe=False,
     extras_require=extras_require,
+    cmdclass={"build_py": NPMInstall},
 )
