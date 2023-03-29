@@ -23,8 +23,6 @@ entity_to_models = {
     "cycle": _CycleConverter._entity_to_model,
 }
 
-# TODO: correctly get _to_model function (converter) from taipy-core
-
 
 def _to_model(repository, entity, **kwargs):
     return entity_to_models[repository](entity)
