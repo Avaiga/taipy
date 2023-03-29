@@ -28,6 +28,7 @@ class CoreEventConsumer(threading.Thread):
         threading.Thread.__init__(self, name=f"Thread-Taipy-Core-Consumer-{register_id}")
         self.queue = queue
         self._STOP_FLAG = True
+        self.start()
 
     def start(self):
         threading.Thread.start(self)
@@ -40,10 +41,10 @@ class CoreEventConsumer(threading.Thread):
         while not self._STOP_FLAG:
             try:
                 event: Event = self.queue.get(block=True, timeout=1)
-                self.process_event(event)
+                self.process(event)
             except Empty:
                 pass
 
     @abc.abstractmethod
-    def process_event(self, event: Event):
+    def process(self, event: Event):
         raise NotImplementedError
