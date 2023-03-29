@@ -292,12 +292,11 @@ class DataNode(_Entity):
         if path and os.path.isdir(path):
             for filename in os.listdir(path):
                 filepath = os.path.join(path, filename)
-                if (
-                    os.path.isfile(filepath)
-                    and last_modified_datetime
-                    and datetime.fromtimestamp(os.path.getmtime(filepath)) > last_modified_datetime
-                ):
-                    last_modified_datetime = datetime.fromtimestamp(os.path.getmtime(filepath))
+                if os.path.isfile(filepath):
+                    file_mtime = datetime.fromtimestamp(os.path.getmtime(filepath))
+
+                    if last_modified_datetime is None or file_mtime > last_modified_datetime:
+                        last_modified_datetime = file_mtime
 
         return last_modified_datetime
 
