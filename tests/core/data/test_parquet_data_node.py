@@ -227,7 +227,7 @@ class TestParquetDataNode:
         dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": MyCustomObject})
         assert dn.read() == []
 
-    def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+    def test_get_system_file_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
         pd.DataFrame([]).to_parquet(temp_file_path)
         dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
@@ -247,6 +247,25 @@ class TestParquetDataNode:
 
         dn.write(pd.DataFrame(data={"col1": [9, 10], "col2": [10, 12]}))
         assert new_edit_date < dn.last_edit_date
+        os.unlink(temp_file_path)
+
+    def test_get_system_folder_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+        temp_folder_path = tmpdir_factory.mktemp("data").strpath
+        temp_file_path = os.path.join(temp_folder_path, "temp.parquet")
+        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_folder_path, "exposed_type": "pandas"})
+
+        pd.DataFrame([]).to_parquet(temp_file_path)
+
+        assert dn.last_edit_date == datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+        previous_edit_date = dn.last_edit_date
+
+        sleep(0.1)
+
+        pd.DataFrame(pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})).to_parquet(temp_file_path)
+        new_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+
+        assert previous_edit_date < dn.last_edit_date
+        assert new_edit_date == dn.last_edit_date
         os.unlink(temp_file_path)
 
     @pytest.mark.parametrize(
