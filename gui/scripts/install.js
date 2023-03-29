@@ -1,8 +1,12 @@
 require("dotenv").config();
 const { exec, execSync } = require("child_process");
-const { existsSync } = require('fs')
+const { existsSync, writeFileSync } = require('fs')
 
-const TAIPY_GUI_DIR = process.env.TAIPY_GUI_DIR || execSync(process.platform === "win32" ? 'pipenv run pip show taipy-gui | findStr "Location:"' : "pipenv run pip show taipy-gui | grep Location:").toString().trim().substring(9).trim();
+let TAIPY_GUI_DIR = process.env.TAIPY_GUI_DIR;
+if (!TAIPY_GUI_DIR) {
+  TAIPY_GUI_DIR = execSync(process.platform === "win32" ? 'pipenv run pip show taipy-gui | findStr "Location:"' : "pipenv run pip show taipy-gui | grep Location:").toString().trim().substring(9).trim();
+  !existsSync(".env") && writeFileSync(".env", `TAIPY_GUI_DIR=${TAIPY_GUI_DIR}`);
+}
 
 taipy_webapp_dir = `${TAIPY_GUI_DIR}/taipy/gui/webapp`
 if (!existsSync(taipy_webapp_dir)) {
