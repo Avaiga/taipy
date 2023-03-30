@@ -4,7 +4,7 @@ from taipy.core import Core, Scenario
 from taipy.gui import Gui, State
 from taipy.gui.extension import ElementLibrary, Element, ElementProperty, PropertyType
 
-class CoreGuiContext():
+class GuiCoreContext():
 
   _CORE_CHANGED_NAME = "core_changed"
   _VAR_NAME = "__CCCtx"
@@ -21,7 +21,7 @@ class CoreGuiContext():
      pass
   
   def broadcast_core_changed(self):
-    self.gui.broadcast(CoreGuiContext._CORE_CHANGED_NAME)
+    self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME)
 
 class GuiCore(ElementLibrary):
     
@@ -30,9 +30,9 @@ class GuiCore(ElementLibrary):
     "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
     "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
     "scenario_id": ElementProperty(PropertyType.dynamic_string),
-    "scenarios": ElementProperty(PropertyType.react, f"{CoreGuiContext._VAR_NAME}.get_scenarios()"),
-    "on_scenario_create": ElementProperty(PropertyType.function, f"{CoreGuiContext._VAR_NAME}.create_new_scenario()"),
-    "core_changed": ElementProperty(PropertyType.broadcast, CoreGuiContext._CORE_CHANGED_NAME)
+    "scenarios": ElementProperty(PropertyType.react, f"{GuiCoreContext._VAR_NAME}.get_scenarios()"),
+    "on_scenario_create": ElementProperty(PropertyType.function, f"{GuiCoreContext._VAR_NAME}.create_new_scenario()"),
+    "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME)
   })}
 
   def get_name(self) -> str:
@@ -42,9 +42,9 @@ class GuiCore(ElementLibrary):
     return GuiCore.__elts
 
   def get_scripts(self) -> t.List[str]:
-    return ["taipy/gui-core/lib/taipy-gui-core.js"]
+    return ["lib/taipy-gui-core.js"]
   
   def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
-    return CoreGuiContext._VAR_NAME, CoreGuiContext(gui, Core())
+    return GuiCoreContext._VAR_NAME, GuiCoreContext(gui, Core())
     
 
