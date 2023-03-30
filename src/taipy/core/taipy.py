@@ -613,3 +613,14 @@ def get_parents(
             get_parents(parent, parent_dict)
 
     return parent_dict
+
+
+def get_cycle_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
+
+    cycles_scenarios: Dict[Optional[Cycle], List[Scenario]] = {}
+    for scenario in get_scenarios():
+        if scenario.cycle in cycles_scenarios.keys():
+            cycles_scenarios[scenario.cycle].append(scenario)
+        else:
+            cycles_scenarios[scenario.cycle] = [scenario]
+    return cycles_scenarios
