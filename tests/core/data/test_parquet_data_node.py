@@ -25,7 +25,6 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.parquet import ParquetDataNode
 from src.taipy.core.exceptions.exceptions import (
     InvalidExposedType,
-    MissingRequiredProperty,
     NoData,
     UnknownCompressionAlgorithm,
     UnknownParquetEngine,
@@ -112,7 +111,7 @@ class TestParquetDataNode:
         assert os.path.exists(dn.path) is exists
 
     @pytest.mark.parametrize("engine", __engine)
-    def test_read(self, engine, parquet_file_path):
+    def test_read_file(self, engine, parquet_file_path):
         not_existing_parquet = ParquetDataNode(
             "foo", Scope.PIPELINE, properties={"path": "nonexistent.parquet", "engine": engine}
         )
@@ -131,17 +130,15 @@ class TestParquetDataNode:
         assert data_pandas.equals(df)
         assert np.array_equal(data_pandas.to_numpy(), df.to_numpy())
 
-        # !!! Modin still check for pyarrow eventhough it is not necessary when using `fastparquet`
-        if engine == "pyarrow":
-            # Create ParquetDataNode with modin exposed_type
-            parquet_data_node_as_modin = ParquetDataNode(
-                "bar", Scope.PIPELINE, properties={"path": parquet_file_path, "exposed_type": "modin", "engine": engine}
-            )
-            data_modin = parquet_data_node_as_modin.read()
-            assert isinstance(data_modin, modin_pd.DataFrame)
-            assert len(data_modin) == 2
-            assert data_modin.equals(df)
-            assert np.array_equal(data_modin.to_numpy(), df.to_numpy())
+        # Create ParquetDataNode with modin exposed_type
+        parquet_data_node_as_modin = ParquetDataNode(
+            "bar", Scope.PIPELINE, properties={"path": parquet_file_path, "exposed_type": "modin", "engine": engine}
+        )
+        data_modin = parquet_data_node_as_modin.read()
+        assert isinstance(data_modin, modin_pd.DataFrame)
+        assert len(data_modin) == 2
+        assert data_modin.equals(df)
+        assert np.array_equal(data_modin.to_numpy(), df.to_numpy())
 
         # Create ParquetDataNode with numpy exposed_type
         parquet_data_node_as_numpy = ParquetDataNode(
@@ -151,6 +148,20 @@ class TestParquetDataNode:
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 2
         assert np.array_equal(data_numpy, df.to_numpy())
+
+    @pytest.mark.parametrize("engine", __engine)
+    def test_read_folder(self, engine):
+        parquet_folder_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/parquet_example")
+
+        df = pd.read_parquet(parquet_folder_path)
+        parquet_data_node_as_pandas = ParquetDataNode(
+            "bar", Scope.PIPELINE, properties={"path": parquet_folder_path, "engine": engine}
+        )
+        data_pandas = parquet_data_node_as_pandas.read()
+        assert isinstance(data_pandas, pd.DataFrame)
+        assert len(data_pandas) == 5
+        assert data_pandas.equals(df)
+        assert np.array_equal(data_pandas.to_numpy(), df.to_numpy())
 
     def test_set_path(self):
         dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": "foo.parquet"})
@@ -216,7 +227,7 @@ class TestParquetDataNode:
         dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": MyCustomObject})
         assert dn.read() == []
 
-    def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+    def test_get_system_file_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
         pd.DataFrame([]).to_parquet(temp_file_path)
         dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
@@ -236,6 +247,31 @@ class TestParquetDataNode:
 
         dn.write(pd.DataFrame(data={"col1": [9, 10], "col2": [10, 12]}))
         assert new_edit_date < dn.last_edit_date
+        os.unlink(temp_file_path)
+
+    def test_get_system_folder_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+        temp_folder_path = tmpdir_factory.mktemp("data").strpath
+        temp_file_path = os.path.join(temp_folder_path, "temp.parquet")
+        pd.DataFrame([]).to_parquet(temp_file_path)
+
+        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_folder_path})
+        initial_edit_date = dn.last_edit_date
+
+        # Sleep so that the file can be created successfully on Ubuntu
+        sleep(0.1)
+
+        pd.DataFrame(pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})).to_parquet(temp_file_path)
+        first_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+        assert dn.last_edit_date > initial_edit_date
+        assert dn.last_edit_date == first_edit_date
+
+        sleep(0.1)
+
+        pd.DataFrame(pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})).to_parquet(temp_file_path)
+        second_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+        assert dn.last_edit_date > first_edit_date
+        assert dn.last_edit_date == second_edit_date
+
         os.unlink(temp_file_path)
 
     @pytest.mark.parametrize(
