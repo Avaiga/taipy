@@ -526,14 +526,16 @@ class Config:
     def configure_sql_table_data_node(
         cls,
         id: str,
-        db_username: str,
-        db_password: str,
         db_name: str,
         db_engine: str,
         table_name: str,
+        db_username: Optional[str],
+        db_password: Optional[str],
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
+        sqlite_folder_path: Optional[str] = None,
+        sqlite_file_extension: Optional[str] = None,
         db_extra_args: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
@@ -543,16 +545,20 @@ class Config:
 
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
-            db_username (str): The database username.
-            db_password (str): The database password.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             table_name (str): The name of the SQL table.
+            db_username (Optional[str]): The database username. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
+            db_password (Optional[str]): The database password. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
             db_host (Optional[str]): The database host. The default value is _"localhost"_.
             db_port (Optional[int]): The database port. The default value is 1433.
-            db_driver (Optional[str]): The database driver. The default value is
-                _"ODBC Driver 17 for SQL Server"_.
+            db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
+                is the current working folder.
+            sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
             db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
                 connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL table.
@@ -578,6 +584,8 @@ class Config:
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
+        sqlite_folder_path: Optional[str] = None,
+        sqlite_file_extension: Optional[str] = None,
         db_extra_args: Optional[Dict[str, Any]] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
@@ -587,17 +595,22 @@ class Config:
 
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
-            db_username (str): The database username.
-            db_password (str): The database password.
             db_name (str): The database name, or the name of the SQLite database file.
             db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
                 _"postgresql"_.
             read_query (str): The SQL query string used to read the data from the database.
             write_query_builder (Callable): A callback function that takes the data as an input parameter
                 and returns a list of SQL queries.
+            db_username (Optional[str]): The database username. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
+            db_password (Optional[str]): The database password. Required by _"mssql"_, _"mysql"_, and
+                _"postgresql"_ engine.
             db_host (Optional[str]): The database host. The default value is _"localhost"_.
             db_port (Optional[int]): The database port. The default value is 1433.
             db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
+                is the current working folder.
+            sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
             db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
                 connection string.
             exposed_type (Optional[str]): The exposed type of the data read from SQL query.
