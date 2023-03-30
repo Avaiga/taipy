@@ -107,7 +107,9 @@ class _ConfigComparator:
             self.__logger.error(
                 f"The {old_config_str} is conflicted with the {new_config_str}:\n\t" + "\n\t".join(conflicted_messages)
             )
-            self.__logger.error("To override these changes, run your application with --override option.")
+            self.__logger.error(
+                "To force running the application with the changes, run your application with --force-run option."
+            )
 
     def __get_messages(self, diff_sections):
         dq = '"'
