@@ -257,6 +257,7 @@ class TestParquetDataNode:
         dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_folder_path})
         initial_edit_date = dn.last_edit_date
 
+        # Sleep so that the file can be created successfully on Ubuntu
         sleep(0.1)
 
         pd.DataFrame(pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})).to_parquet(temp_file_path)
