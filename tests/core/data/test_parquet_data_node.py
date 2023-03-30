@@ -252,20 +252,25 @@ class TestParquetDataNode:
     def test_get_system_folder_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_folder_path = tmpdir_factory.mktemp("data").strpath
         temp_file_path = os.path.join(temp_folder_path, "temp.parquet")
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_folder_path, "exposed_type": "pandas"})
-
         pd.DataFrame([]).to_parquet(temp_file_path)
 
-        assert dn.last_edit_date == datetime.fromtimestamp(os.path.getmtime(temp_file_path))
-        previous_edit_date = dn.last_edit_date
+        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_folder_path})
+        initial_edit_date = dn.last_edit_date
+
+        sleep(0.1)
+
+        pd.DataFrame(pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})).to_parquet(temp_file_path)
+        first_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+        assert dn.last_edit_date > initial_edit_date
+        assert dn.last_edit_date == first_edit_date
 
         sleep(0.1)
 
         pd.DataFrame(pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})).to_parquet(temp_file_path)
-        new_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+        second_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+        assert dn.last_edit_date > first_edit_date
+        assert dn.last_edit_date == second_edit_date
 
-        assert previous_edit_date < dn.last_edit_date
-        assert new_edit_date == dn.last_edit_date
         os.unlink(temp_file_path)
 
     @pytest.mark.parametrize(
