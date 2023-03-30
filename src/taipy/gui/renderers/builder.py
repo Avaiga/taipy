@@ -30,18 +30,14 @@ from ..utils import (
     _getscopeattr_drill,
     _is_boolean,
     _is_boolean_true,
-    _to_camel_case,
     _MapDict,
+    _to_camel_case,
 )
+from ..utils.chart_config_builder import _CHART_NAMES, _build_chart_config
+from ..utils.table_col_builder import _enhance_columns, _get_name_indexed_property
 from ..utils.types import _TaipyBase, _TaipyData
-from ..utils.table_col_builder import _get_name_indexed_property, _enhance_columns
-from ..utils.chart_config_builder import _build_chart_config, _CHART_NAMES
 from .json import _TaipyJsonEncoder
-from .utils import (
-    _add_to_dict_and_get,
-    _get_columns_dict,
-    _get_tuple_val,
-)
+from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -58,7 +54,20 @@ class _Builder:
 
     __BLOCK_CONTROLS = ["dialog", "expandable", "pane", "part"]
 
-    __TABLE_COLUMNS_DEPS = ["data", "columns", "date_format", "number_format", "nan_value", "width", "filter", "editable", "group_by", "apply", "style", "tooltip"]
+    __TABLE_COLUMNS_DEPS = [
+        "data",
+        "columns",
+        "date_format",
+        "number_format",
+        "nan_value",
+        "width",
+        "filter",
+        "editable",
+        "group_by",
+        "apply",
+        "style",
+        "tooltip",
+    ]
 
     def __init__(
         self,
@@ -390,42 +399,53 @@ class _Builder:
         return self
 
     def __filter_attribute_names(self, names: t.Iterable[str]):
-        return [k for k in self.__attributes if k in names or any(k.startswith(n + '[') for n in names)]
+        return [k for k in self.__attributes if k in names or any(k.startswith(n + "[") for n in names)]
 
     def __get_holded_name(self, key: str):
         name = self.__hashes.get(key)
         if name:
             v = self.__attributes.get(key)
             if isinstance(v, _TaipyBase):
-                return name[:len(v.get_hash()) + 1]
+                return name[: len(v.get_hash()) + 1]
         return name
 
     def __filter_attributes_hashes(self, keys: t.List[str]):
         hash_names = [k for k in self.__hashes if k in keys]
         attr_names = [k for k in keys if k not in hash_names]
-        return ({k: v for k, v in self.__attributes.items() if k in attr_names}, {k: self.__get_holded_name(k) for k in self.__hashes if k in hash_names})
+        return (
+            {k: v for k, v in self.__attributes.items() if k in attr_names},
+            {k: self.__get_holded_name(k) for k in self.__hashes if k in hash_names},
+        )
 
     def __build_rebuild_fn(self, fn_name: str, attribute_names: t.Iterable[str]):
         rebuild = self.__attributes.get("rebuild", False)
         rebuild_hash = self.__hashes.get("rebuild")
-        if (rebuild_hash or rebuild):
+        if rebuild_hash or rebuild:
             attributes, hashes = self.__filter_attributes_hashes(self.__filter_attribute_names(attribute_names))
-            rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else 'None'
+            rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else "None"
             try:
                 self.__gui._set_building(True)
-                return self.__gui._evaluate_expr("{" + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{v}={self.__gui._get_real_var_name(v)[0]}" for v in hashes.values()])})' + "}")
+                return self.__gui._evaluate_expr(
+                    "{"
+                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{v}={self.__gui._get_real_var_name(v)[0]}" for v in hashes.values()])})'
+                    + "}"
+                )
             finally:
                 self.__gui._set_building(False)
         return None
 
-    def _get_dataframe_attributes(self) -> '_Builder':
+    def _get_dataframe_attributes(self) -> "_Builder":
         date_format = _add_to_dict_and_get(self.__attributes, "date_format", "MM/dd/yyyy")
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
         col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
-        col_dict = _get_columns_dict(data, self.__attributes.get("columns", {}), col_types, date_format, self.__attributes.get("number_format"))
+        col_dict = _get_columns_dict(
+            data, self.__attributes.get("columns", {}), col_types, date_format, self.__attributes.get("number_format")
+        )
 
-        rebuild_fn_hash = self.__build_rebuild_fn(self.__gui._get_rebuild_fn_name("_tbl_cols"), _Builder.__TABLE_COLUMNS_DEPS)
+        rebuild_fn_hash = self.__build_rebuild_fn(
+            self.__gui._get_rebuild_fn_name("_tbl_cols"), _Builder.__TABLE_COLUMNS_DEPS
+        )
         if rebuild_fn_hash:
             self.__set_react_attribute("columns", rebuild_fn_hash)
         if col_dict is not None:
@@ -458,7 +478,9 @@ class _Builder:
     def _get_chart_config(self, default_type: str, default_mode: str):
         self.__attributes["_default_type"] = default_type
         self.__attributes["_default_mode"] = default_mode
-        rebuild_fn_hash = self.__build_rebuild_fn(self.__gui._get_rebuild_fn_name("_chart_conf"), _CHART_NAMES + ("_default_type", "_default_mode", "data"))
+        rebuild_fn_hash = self.__build_rebuild_fn(
+            self.__gui._get_rebuild_fn_name("_chart_conf"), _CHART_NAMES + ("_default_type", "_default_mode", "data")
+        )
         if rebuild_fn_hash:
             self.__set_react_attribute("config", rebuild_fn_hash)
 
@@ -795,7 +817,10 @@ class _Builder:
                     self.set_boolean_attribute(attr[0], val)
             elif var_type == PropertyType.dynamic_boolean:
                 self.__set_dynamic_bool_attribute(
-                    attr[0], _get_tuple_val(attr, 2, False), _get_tuple_val(attr, 3, False)
+                    attr[0],
+                    _get_tuple_val(attr, 2, False),
+                    _get_tuple_val(attr, 3, False),
+                    _get_tuple_val(attr, 4, True),
                 )
             elif var_type == PropertyType.number:
                 self.set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))

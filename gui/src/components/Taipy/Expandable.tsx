@@ -18,11 +18,12 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Tooltip from "@mui/material/Tooltip";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
-import { TaipyActiveProps } from "./utils";
+import { useClassNames, useDispatch, useDynamicProperty } from "../../utils/hooks";
+import { TaipyActiveProps, TaipyChangeProps, getUpdateVar } from "./utils";
 import TaipyRendered from "../pages/TaipyRendered";
+import { createSendUpdateAction } from "../../context/taipyReducers";
 
-interface ExpandableProps extends TaipyActiveProps {
+interface ExpandableProps extends TaipyActiveProps, TaipyChangeProps {
     expanded?: boolean;
     defaultExpanded?: boolean;
     children?: ReactNode;
@@ -33,8 +34,11 @@ interface ExpandableProps extends TaipyActiveProps {
 }
 
 const Expandable = (props: ExpandableProps) => {
-    const { id, expanded = true, defaultExpanded, title, defaultTitle, page, partial } = props;
-    const [opened, setOpened] = useState(defaultExpanded === undefined ? expanded : defaultExpanded);
+    const { id, expanded, defaultExpanded, title, defaultTitle, page, partial, updateVars, propagate = true } = props;
+    const dispatch = useDispatch();
+    const [opened, setOpened] = useState(
+        defaultExpanded === undefined ? (expanded === undefined ? true : expanded) : defaultExpanded
+    );
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -44,7 +48,16 @@ const Expandable = (props: ExpandableProps) => {
         expanded !== undefined && setOpened(expanded);
     }, [expanded]);
 
-    const onChange = useCallback(() => setOpened((op) => !op), []);
+    const onChange = useCallback(
+        (_: React.SyntheticEvent<Element, Event>, expanded: boolean) => {
+            setOpened(expanded);
+            if (updateVars) {
+                const expandedVar = getUpdateVar(updateVars, "expanded");
+                dispatch(createSendUpdateAction(expandedVar, expanded, props.onChange, propagate));
+            }
+        },
+        [dispatch, props.onChange, propagate, updateVars]
+    );
 
     return (
         <Tooltip title={hover || ""}>
