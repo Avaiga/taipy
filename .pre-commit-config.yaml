@@ -9,6 +9,10 @@ repos:
                 'types-pytz',
                 'types-tzlocal',
         ]
+        args:
+        - --ignore-missing-imports
+        - --implicit-optional
+        - --no-namespace-packages
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.1.10
     hooks:
@@ -29,6 +33,15 @@ repos:
     - id: check-merge-conflict
     - id: check-yaml
       args: [--unsafe]
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.9.3
+    hooks:
+    - id: isort
+      args:
+      - --line-length=120
+      - --force-grid-wrap=10
+      - --multi-line=VERTICAL_HANGING_INDENT
+      - --trailing-comma
 -   repo: https://github.com/ambv/black
     rev: 22.3.0
     hooks:

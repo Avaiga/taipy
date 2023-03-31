@@ -15,7 +15,8 @@
 
 import json
 import os
-from setuptools import find_packages, find_namespace_packages, setup
+
+from setuptools import find_namespace_packages, find_packages, setup
 
 with open("README.md") as readme_file:
     readme = readme_file.read()

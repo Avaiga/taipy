@@ -14,9 +14,9 @@ import typing as t
 
 from flask import Flask
 
+from taipy.core import Core
 from taipy.gui import Gui
 from taipy.rest import Rest
-from taipy.core import Core
 
 if sys.version_info >= (3, 10):
     from typing import TypeGuard
@@ -65,6 +65,8 @@ def _run(*apps: t.List[_AppType], **kwargs) -> t.Optional[Flask]:
         return app.run(**kwargs)
 
 
+# Avoid black adding too many empty lines
+# fmt: off
 if sys.version_info >= (3, 10):
     def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
         def filter_isinstance(tl: _AppType) -> TypeGuard[_AppTypeT]:
@@ -74,3 +76,4 @@ if sys.version_info >= (3, 10):
 else:
     def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
         return next(filter(lambda a: isinstance(a, type_), apps), None)
+# fmt: on
