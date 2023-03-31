@@ -378,7 +378,7 @@ def notify_multi_param(*args, **kwargs):
 def test_pipeline_notification_subscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+    mocker.patch("src.taipy.core.common._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.configure_pipeline(
         "by_6",
@@ -432,7 +432,7 @@ def test_pipeline_notification_subscribe(mocker):
 def test_pipeline_notification_subscribe_multi_param(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+    mocker.patch("src.taipy.core.common._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.configure_pipeline(
         "by_6",
@@ -466,7 +466,7 @@ def test_pipeline_notification_subscribe_multi_param(mocker):
 def test_pipeline_notification_unsubscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+    mocker.patch("src.taipy.core.common._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.configure_pipeline(
         "by_6",

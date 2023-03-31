@@ -19,12 +19,13 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
+from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common import _utils
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
+from ..common._reload import _Reloader, _self_reload, _self_setter
 from ..common._submittable import _Submittable
 from ..common._utils import _Subscriber
 from ..common.alias import CycleId, PipelineId, ScenarioId
@@ -74,7 +75,7 @@ class Scenario(_Entity, _Submittable):
         cycle: Optional[Cycle] = None,
         subscribers: Optional[List[_Subscriber]] = None,
         tags: Optional[Set[str]] = None,
-        version: str = None,
+        version: Optional[str] = None,
     ):
         super().__init__(subscribers)
         self.config_id = _validate_id(config_id)
@@ -215,13 +216,17 @@ class Scenario(_Entity, _Submittable):
     def tags(self, val):
         self._tags = val or set()
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
 
-    @property  # type: ignore
+    @version.setter
+    def version(self, val):
+        self._version = val
+
+    @property
     def properties(self):
-        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     @property  # type: ignore
@@ -245,11 +250,11 @@ class Scenario(_Entity, _Submittable):
         return tag in self.tags
 
     def _add_tag(self, tag: str):
-        self._tags = _reload("scenario", self)._tags
+        self._tags = _Reloader()._reload("scenario", self)._tags
         self._tags.add(tag)
 
     def _remove_tag(self, tag: str):
-        self._tags = _reload("scenario", self)._tags
+        self._tags = _Reloader()._reload("scenario", self)._tags
         if self.has_tag(tag):
             self._tags.remove(tag)
 
@@ -389,10 +394,10 @@ class Scenario(_Entity, _Submittable):
 
     @classmethod
     def _from_model(cls, model: _ScenarioModel):
-        return Scenario(
+        scenario = Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
-            pipelines=model.pipelines,  # type: ignore
+            pipelines=model.pipelines,
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
             is_primary=model.primary_scenario,
@@ -404,15 +409,16 @@ class Scenario(_Entity, _Submittable):
             ],
             version=model.version,
         )
+        return _migrate_entity(scenario)
 
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:
         return [p.id if isinstance(p, Pipeline) else p for p in pipelines]
 
     @staticmethod
-    def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
+    def __to_cycle(cycle_id: Optional[CycleId] = None) -> Optional[Cycle]:
         return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
 
     @staticmethod
-    def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:
+    def __to_cycle_id(cycle: Optional[Cycle] = None) -> Optional[CycleId]:
         return cycle.id if cycle else None

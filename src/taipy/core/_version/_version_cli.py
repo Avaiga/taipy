@@ -119,12 +119,12 @@ class _VersioningCLI:
                     mode += " (latest)"
 
                 list_version_message += (
-                    f"{(version.id):<36}   {mode:<20}   {version.creation_date.strftime('%Y-%m-%d %H:%M:%S'):<20}\n"
+                    f"{(version.id):<36}   {mode:<20}   {version.creation_date.strftime('%Y-%m-%d %H:%M:%S'):<20}"
                 )
                 list_version_message += _Bcolors.END
-
                 if bold:
                     list_version_message += _Bcolors.END
+                list_version_message += "\n"
 
             raise SystemExit(list_version_message)
 

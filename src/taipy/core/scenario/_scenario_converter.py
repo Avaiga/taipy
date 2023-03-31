@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import Optional
 
 from .._repository._v2._abstract_converter import _AbstractConverter
+from .._version._utils import _migrate_entity
 from ..common._utils import _fcts_to_dict, _load_fct, _Subscriber
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle, CycleId
@@ -42,7 +43,7 @@ class _ScenarioConverter(_AbstractConverter):
         scenario = Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
-            pipelines=model.pipelines,  # type: ignore
+            pipelines=model.pipelines,
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
             is_primary=model.primary_scenario,
@@ -53,8 +54,8 @@ class _ScenarioConverter(_AbstractConverter):
             ],
             version=model.version,
         )
-        return scenario
+        return _migrate_entity(scenario)
 
     @staticmethod
-    def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
+    def __to_cycle(cycle_id: Optional[CycleId] = None) -> Optional[Cycle]:
         return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None

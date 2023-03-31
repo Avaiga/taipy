@@ -249,3 +249,7 @@ class NonExistingVersion(Exception):
 
 class VersionIsNotProductionVersion(Exception):
     """Raised if the version is not a production version."""
+
+
+class ConflictedConfigurationError(Exception):
+    """Conflicts have been detected between the current and previous Configurations."""

@@ -11,13 +11,15 @@
 
 import collections.abc
 from copy import deepcopy
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.config import Config
 from taipy.config.section import Section
 from taipy.config.unique_section import UniqueSection
+
+from .._version._version_manager import _VersionManager
 
 
 class MigrationConfig(UniqueSection):
@@ -107,3 +109,22 @@ class MigrationConfig(UniqueSection):
         )
         Config._register(section)
         return Config.unique_sections[MigrationConfig.name]
+
+    @classmethod
+    def _get_migration_fcts_to_latest(cls, source_version: str, config_id: str) -> List[Callable]:
+        migration_fcts_to_latest: List[Callable] = []
+
+        production_versions = _VersionManager._get_production_versions()
+        try:
+            start_index = production_versions.index(source_version) + 1
+        except ValueError:
+            return migration_fcts_to_latest
+
+        versions_to_migrate = production_versions[start_index:]
+
+        for version in versions_to_migrate:
+            migration_fct = Config.unique_sections[MigrationConfig.name].migration_fcts.get(version, {}).get(config_id)
+            if migration_fct:
+                migration_fcts_to_latest.append(migration_fct)
+
+        return migration_fcts_to_latest

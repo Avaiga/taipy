@@ -16,10 +16,11 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
+from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
+from ..common._reload import _Reloader, _self_reload, _self_setter
 from ..common._utils import _load_fct
 from ..common._warnings import _warn_deprecated
 from ..common.alias import TaskId
@@ -66,7 +67,7 @@ class Task(_Entity):
         id: Optional[TaskId] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
-        version: str = None,
+        version: Optional[str] = None,
         skippable: bool = False,
     ):
         self.config_id = _validate_id(config_id)
@@ -90,18 +91,18 @@ class Task(_Entity):
     def skippable(self, val):
         self._skippable = val
 
-    @property  # type: ignore
+    @property
     def properties(self):
-        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
-    @property  # type: ignore
+    @property
     def parent_id(self):
         """Deprecated. Use owner_id instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
         return self.owner_id
 
-    @parent_id.setter  # type: ignore
+    @parent_id.setter
     def parent_id(self, val):
         """Deprecated. Use owner_id instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
@@ -127,15 +128,15 @@ class Task(_Entity):
     def __setstate__(self, state):
         vars(self).update(state)
 
-    @property  # type: ignore
+    @property
     def input(self) -> Dict[str, DataNode]:
         return self.__input
 
-    @property  # type: ignore
+    @property
     def output(self) -> Dict[str, DataNode]:
         return self.__output
 
-    @property  # type: ignore
+    @property
     def data_nodes(self) -> Dict[str, DataNode]:
         return {**self.input, **self.output}
 
@@ -171,9 +172,13 @@ class Task(_Entity):
         scope = min(dn.scope for dn in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
         return Scope(scope)
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
+
+    @version.setter
+    def version(self, val):
+        self._version = val
 
     def submit(
         self,
@@ -217,7 +222,7 @@ class Task(_Entity):
 
     @classmethod
     def _from_model(cls, model: _TaskModel):
-        return Task(
+        task = Task(
             id=TaskId(model.id),
             owner_id=model.owner_id,
             parent_ids=set(model.parent_ids),
@@ -229,6 +234,7 @@ class Task(_Entity):
             skippable=model.skippable,
             properties=model.properties,
         )
+        return _migrate_entity(task)
 
     @staticmethod
     def __to_ids(data_nodes):

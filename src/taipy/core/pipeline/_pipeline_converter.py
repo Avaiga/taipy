@@ -11,6 +11,7 @@
 from collections import defaultdict
 
 from .._repository._v2._abstract_converter import _AbstractConverter
+from .._version._utils import _migrate_entity
 from ..common._utils import _fcts_to_dict, _load_fct, _Subscriber
 from ..exceptions import NonExistingPipeline, NonExistingTask
 from ..pipeline._pipeline_model import _PipelineModel
@@ -54,10 +55,10 @@ class _PipelineConverter(_AbstractConverter):
                 [
                     _Subscriber(_load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                     for it in model.subscribers
-                ],  # type: ignore
+                ],
                 model.version,
             )
-            return pipeline
+            return _migrate_entity(pipeline)
         except NonExistingTask as err:
             raise err
         except KeyError:

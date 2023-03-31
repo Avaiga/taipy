@@ -17,7 +17,7 @@ from taipy.config._config_comparator._comparator_result import _ComparatorResult
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
-from ..exceptions.exceptions import ModelNotFound, NonExistingVersion
+from ..exceptions.exceptions import ConflictedConfigurationError, ModelNotFound, NonExistingVersion
 from ._version import _Version
 from ._version_repository_factory import _VersionRepositoryFactory
 
@@ -39,7 +39,7 @@ class _VersionManager(_Manager[_Version]):
         """
         Returns the version entity by id or reference.
         """
-        entity_id = entity if isinstance(entity, str) else entity.id  # type: ignore
+        entity_id = entity if isinstance(entity, str) else entity.id
         try:
             return cls._repository.load(entity_id)
         except ModelNotFound:
@@ -55,7 +55,7 @@ class _VersionManager(_Manager[_Version]):
                     _TaipyLogger._get_logger().warning(f"Overriding version {id} ...")
                     version.config = Config._applied_config
                 else:
-                    raise SystemExit("The application is stopped. Please check the error log for more information.")
+                    raise ConflictedConfigurationError()
 
         else:
             version = _Version(id=id, config=Config._applied_config)
@@ -94,17 +94,23 @@ class _VersionManager(_Manager[_Version]):
     def _set_experiment_version(cls, version_number: str, force: bool) -> str:
         if version_number == cls._get_development_version():
             raise SystemExit(
-                f"Version number {version_number} is already a development version. Please choose a different version "
-                f"number for experiment mode. "
+                f"Version number {version_number} is the development version. Please choose a different name"
+                f" for this experiment."
             )
 
         if version_number in cls._get_production_versions():
             raise SystemExit(
-                f"Version number {version_number} is already a production version. Please choose a different version "
-                f"number for experiment mode. "
+                f"Version number {version_number} is already a production version. Please choose a different name"
+                f" for this experiment."
             )
 
-        cls._get_or_create(version_number, force)
+        try:
+            cls._get_or_create(version_number, force)
+        except ConflictedConfigurationError:
+            raise SystemExit(
+                f"Please add a new experiment version or run your application with --force-run option to"
+                f" override the Config of experiment {version_number}."
+            )
         cls._repository._set_latest_version(version_number)
         return version_number
 
@@ -119,27 +125,16 @@ class _VersionManager(_Manager[_Version]):
 
     @classmethod
     def _set_production_version(cls, version_number: str, force: bool) -> str:
-        production_versions = cls._get_production_versions()
-
-        # Check if all previous production versions are compatible with current Python Config
-        for production_version in production_versions:
-            if production_version == version_number:
-                continue
-
-            if version := cls._get(production_version):
-                comparator_result = Config._comparator._compare(
-                    version.config, Config._applied_config, production_version
-                )
-                if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
-                    raise SystemExit("The application is stopped. Please check the error log for more information.")
-
-            else:
-                raise NonExistingVersion(production_version)
-
         if version_number == cls._get_development_version():
             cls._set_development_version(str(uuid.uuid4()))
 
-        cls._get_or_create(version_number, force)
+        try:
+            cls._get_or_create(version_number, force)
+        except ConflictedConfigurationError:
+            raise SystemExit(
+                f"Please add a new production version with a migration function or run your application with"
+                f" --force-run option to override the Config of production version {version_number}."
+            )
         cls._repository._set_production_version(version_number)
         return version_number
 

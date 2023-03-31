@@ -18,7 +18,6 @@ from taipy.config.global_app.global_app_config import GlobalAppConfig  # type: i
 
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
 from .checkers._job_config_checker import _JobConfigChecker
-from .checkers._migration_config_checker import _MigrationConfigChecker
 from .checkers._pipeline_config_checker import _PipelineConfigChecker
 from .checkers._scenario_config_checker import _ScenarioConfigChecker
 from .checkers._task_config_checker import _TaskConfigChecker

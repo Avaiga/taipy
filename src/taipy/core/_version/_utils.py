@@ -9,6 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from .._version._version_manager import _VersionManager
+from ..common._reload import _Reloader
+from ..config import MigrationConfig
+
 
 def _version_migration() -> str:
     """Add version attribute on old entities. Used to migrate from <=2.0 to >=2.1 version."""
@@ -22,3 +26,14 @@ def _version_migration() -> str:
     else:
         _VersionManager._get_or_create("LEGACY-VERSION", True)
         return "LEGACY-VERSION"
+
+
+def _migrate_entity(entity):
+    if (latest_version := _VersionManager._get_latest_version()) in _VersionManager._get_production_versions():
+        with _Reloader():
+            if migration_fcts := MigrationConfig._get_migration_fcts_to_latest(entity.version, entity.config_id):
+                for fct in migration_fcts:
+                    entity = fct(entity)
+                entity.version = latest_version
+
+    return entity

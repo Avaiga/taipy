@@ -14,7 +14,6 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
-from pydoc import locate
 from typing import Any, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
@@ -25,10 +24,11 @@ from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._entity import _Entity
 from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
+from ..common._reload import _Reloader, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import NoData
@@ -108,7 +108,7 @@ class DataNode(_Entity):
 
         self._properties = _Properties(self, **kwargs)
 
-    @property  # type: ignore
+    @property
     def parent_id(self):
         """
         Deprecated. Use owner_id instead.
@@ -116,7 +116,7 @@ class DataNode(_Entity):
         _warn_deprecated("parent_id", suggest="owner_id")
         return self.owner_id
 
-    @parent_id.setter  # type: ignore
+    @parent_id.setter
     def parent_id(self, val):
         """
         Deprecated. Use owner_id instead.
@@ -162,13 +162,13 @@ class DataNode(_Entity):
     def last_edit_date(self, val):
         self._last_edit_date = val
 
-    @property  # type: ignore
+    @property
     def last_edition_date(self):
         """Deprecated. Use last_edit_date instead."""
         _warn_deprecated("last_edition_date", suggest="last_edit_date")
         return self.last_edit_date
 
-    @last_edition_date.setter  # type: ignore
+    @last_edition_date.setter
     def last_edition_date(self, val):
         _warn_deprecated("last_edition_date", suggest="last_edit_date")
         self.last_edit_date = val
@@ -215,17 +215,21 @@ class DataNode(_Entity):
     def name(self, val):
         self._name = val
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
 
-    @property  # type: ignore
+    @version.setter
+    def version(self, val):
+        self._version = val
+
+    @property
     def cacheable(self):
         """Deprecated. Use `skippable` attribute of a `Task^` instead."""
         _warn_deprecated("cacheable", suggest="the skippable feature")
         return self.properties.get("cacheable", False)
 
-    @cacheable.setter  # type: ignore
+    @cacheable.setter
     def cacheable(self, val):
         _warn_deprecated("cacheable", suggest="the skippable feature")
 
@@ -239,13 +243,13 @@ class DataNode(_Entity):
     def edit_in_progress(self, val):
         self._edit_in_progress = val
 
-    @property  # type: ignore
+    @property
     def edition_in_progress(self):
         """Deprecated. Use edit_in_progress instead."""
         _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
         return self.edit_in_progress
 
-    @edition_in_progress.setter  # type: ignore
+    @edition_in_progress.setter
     def edition_in_progress(self, val):
         """Deprecated. Use edit_in_progress instead."""
         _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
@@ -257,10 +261,10 @@ class DataNode(_Entity):
         """List of the jobs having edited the data node."""
         return [edit.get("job_id") for edit in self.edits if edit.get("job_id")]
 
-    @property  # type: ignore
+    @property
     def properties(self):
         """Dictionary of custom properties."""
-        r = _reload(self._MANAGER_NAME, self)
+        r = _Reloader()._reload(self._MANAGER_NAME, self)
         self._properties = r._properties
         return self._properties
 
@@ -581,7 +585,7 @@ class DataNode(_Entity):
         if model.validity_seconds is not None and model.validity_days is not None:
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
 
-        return __CLASS_MAP[model.storage_type](
+        datanode = __CLASS_MAP[model.storage_type](
             config_id=model.config_id,
             scope=model.scope,
             id=model.id,
@@ -595,3 +599,4 @@ class DataNode(_Entity):
             edit_in_progress=model.edit_in_progress,
             properties=model.data_node_properties,
         )
+        return _migrate_entity(datanode)

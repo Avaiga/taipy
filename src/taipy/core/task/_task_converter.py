@@ -11,6 +11,7 @@
 
 
 from .._repository._v2._abstract_converter import _AbstractConverter
+from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions import NonExistingDataNode
@@ -38,7 +39,7 @@ class _TaskConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _TaskModel) -> Task:
-        return Task(
+        task = Task(
             id=TaskId(model.id),
             owner_id=model.owner_id,
             parent_ids=set(model.parent_ids),
@@ -50,6 +51,7 @@ class _TaskConverter(_AbstractConverter):
             skippable=model.skippable,
             properties=model.properties,
         )
+        return _migrate_entity(task)
 
     @staticmethod
     def __to_ids(data_nodes):

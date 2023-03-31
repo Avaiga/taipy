@@ -70,7 +70,7 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
+        edits: Optional[List[Edit]] = None,
         version: str = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
@@ -114,7 +114,7 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
     def path(self) -> Any:
         return self._path
 
-    @path.setter  # type: ignore
+    @path.setter
     def path(self, value):
         self._path = value
         self.properties[self.__PATH_KEY] = value

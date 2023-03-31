@@ -47,7 +47,7 @@ class _MigrationConfigChecker(_ConfigChecker):
 
     def _check_valid_production_version(self, migration_fcts):
         for target_version in migration_fcts.keys():
-            if target_version not in _VersionManager._get_production_version():
+            if target_version not in _VersionManager._get_production_versions():
                 self._error(
                     MigrationConfig._MIGRATION_FCTS_KEY,
                     target_version,
@@ -55,7 +55,7 @@ class _MigrationConfigChecker(_ConfigChecker):
                 )
 
     def _check_migration_from_productions_to_productions_exist(self, migration_fcts):
-        production_versions = _VersionManager._get_production_version()
+        production_versions = _VersionManager._get_production_versions()
         for source_version, target_version in zip(production_versions[:-1], production_versions[1:]):
             if not migration_fcts.get(target_version):
                 self._info(

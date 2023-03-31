@@ -20,7 +20,7 @@ from taipy.config.config import Config
 
 class TestVersionSQLRepository:
     def test_save_and_load(self, mocker, sql_engine):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
         mocker.patch.object(_sql_repository, "create_engine", return_value=sql_engine)
         repo = _VersionSQLRepository()
         expected = _Version(id="foo", config=Config._applied_config)
@@ -29,7 +29,7 @@ class TestVersionSQLRepository:
         assert expected == repo.load("foo")
 
     def test_load_all(self, mocker, sql_engine):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
         mocker.patch.object(_sql_repository, "create_engine", return_value=sql_engine)
         repo = _VersionSQLRepository()
 
@@ -41,7 +41,7 @@ class TestVersionSQLRepository:
         assert len(repo._load_all()) == 1
 
     def test_get_set_latest_version(self, mocker, sql_engine):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
         mocker.patch.object(_sql_repository, "create_engine", return_value=sql_engine)
         repo = _VersionSQLRepository()
 
@@ -62,7 +62,7 @@ class TestVersionSQLRepository:
         assert version.id == latest_2
 
     def test_get_set_development_version(self, mocker, sql_engine):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
         mocker.patch.object(_sql_repository, "create_engine", return_value=sql_engine)
         repo = _VersionSQLRepository()
 
@@ -83,7 +83,7 @@ class TestVersionSQLRepository:
         assert version.id == dev_2
 
     def test_get_set_production_version(self, mocker, sql_engine):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
         mocker.patch.object(_sql_repository, "create_engine", return_value=sql_engine)
         repo = _VersionSQLRepository()
 
@@ -105,7 +105,7 @@ class TestVersionSQLRepository:
         assert all_production_versions == prod_2
 
     def test_delete_production_version(self, mocker, sql_engine):
-        Config.global_config.repository_type = "sql"
+        Config.configure_global_app(repository_type="sql")
         mocker.patch.object(_sql_repository, "create_engine", return_value=sql_engine)
         repo = _VersionSQLRepository()
 

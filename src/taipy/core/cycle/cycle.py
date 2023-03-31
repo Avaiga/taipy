@@ -11,14 +11,14 @@
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from taipy.config.common.frequency import Frequency
 
 from ..common._entity import _Entity
 from ..common._get_valid_filename import _get_valid_filename
 from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
+from ..common._reload import _Reloader, _self_reload, _self_setter
 from ..common.alias import CycleId
 from ._cycle_model import _CycleModel
 
@@ -47,8 +47,8 @@ class Cycle(_Entity):
         creation_date: datetime,
         start_date: datetime,
         end_date: datetime,
-        name: str = None,
-        id: CycleId = None,
+        name: Optional[str] = None,
+        id: Optional[CycleId] = None,
     ):
         self._frequency = frequency
         self._creation_date = creation_date
@@ -58,7 +58,7 @@ class Cycle(_Entity):
         self.id = id or self._new_id(self._name)
         self._properties = _Properties(self, **properties)
 
-    def _new_name(self, name: str = None) -> str:
+    def _new_name(self, name: Optional[str] = None) -> str:
         return name if name else Cycle.__SEPARATOR.join([str(self._frequency), self._creation_date.isoformat()])
 
     @property  # type: ignore
@@ -111,9 +111,9 @@ class Cycle(_Entity):
     def name(self, val):
         self._name = val
 
-    @property  # type: ignore
+    @property
     def properties(self):
-        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     @staticmethod
