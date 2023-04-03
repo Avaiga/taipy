@@ -615,7 +615,7 @@ def get_parents(
     return parent_dict
 
 
-def get_cycle_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
+def get_cycles_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
     """Get the cycles and its scenarios.
 
     Returns:
