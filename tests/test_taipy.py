@@ -533,7 +533,7 @@ class TestTaipy:
             None: [scenario_5_1.id, scenario_5_2.id, scenario_5_3.id],
         }
 
-        cycles_scenarios = tp.get_cycle_scenarios()
+        cycles_scenarios = tp.get_cycles_scenarios()
 
         assert expected_cycles_scenarios.keys() == cycles_scenarios.keys()
         for cycle, scenarios in cycles_scenarios.items():
