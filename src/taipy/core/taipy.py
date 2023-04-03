@@ -616,6 +616,11 @@ def get_parents(
 
 
 def get_cycle_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
+    """Get the cycles and its scenarios.
+
+    Returns:
+        The dictionary of all cycles and its corresponding scenarios.
+    """
 
     cycles_scenarios: Dict[Optional[Cycle], List[Scenario]] = {}
     for scenario in get_scenarios():
