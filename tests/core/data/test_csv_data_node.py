@@ -19,10 +19,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
-from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty, NoData
+from src.taipy.core.data.data_node_id import DataNodeId
+from src.taipy.core.exceptions.exceptions import InvalidExposedType, NoData
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId

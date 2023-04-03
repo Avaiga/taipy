@@ -14,8 +14,8 @@ from typing import Generic, Iterable, List, Optional, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._entity._entity_ids import _EntityIds
 from .._repository import _AbstractRepository
-from ..common._entity_ids import _EntityIds
 from ..exceptions.exceptions import ModelNotFound
 
 EntityType = TypeVar("EntityType")

@@ -15,12 +15,12 @@ from typing import List, Optional
 
 from taipy.config.common.frequency import Frequency
 
+from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from ..common._entity_ids import _EntityIds
-from ..common.alias import CycleId
 from ..job._job_manager_factory import _JobManagerFactory
 from ._cycle_repository_factory import _CycleRepositoryFactory
 from .cycle import Cycle
+from .cycle_id import CycleId
 
 
 class _CycleManager(_Manager[Cycle]):
@@ -28,13 +28,10 @@ class _CycleManager(_Manager[Cycle]):
     _ENTITY_NAME = Cycle.__name__
 
     @classmethod
-    def _create(
-        cls, frequency: Frequency, name: str = None, creation_date: datetime = None, display_name=None, **properties
-    ):
+    def _create(cls, frequency: Frequency, name: str = None, creation_date: datetime = None, **properties):
         creation_date = creation_date if creation_date else datetime.now()
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
         end_date = _CycleManager._get_end_date_of_cycle(frequency, start_date)
-        properties["display_name"] = display_name if display_name else start_date.isoformat()
         cycle = Cycle(
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
         )
@@ -57,7 +54,7 @@ class _CycleManager(_Manager[Cycle]):
 
     @classmethod
     def _get_or_create(
-        cls, frequency: Frequency, creation_date: Optional[datetime] = None, display_name: Optional[str] = None
+        cls, frequency: Frequency, creation_date: Optional[datetime] = None, name: Optional[str] = None
     ) -> Cycle:
         creation_date = creation_date if creation_date else datetime.now()
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
@@ -67,7 +64,7 @@ class _CycleManager(_Manager[Cycle]):
         if len(cycles) > 0:
             return cycles[0]
         else:
-            return cls._create(frequency=frequency, creation_date=creation_date, display_name=display_name)
+            return cls._create(frequency=frequency, creation_date=creation_date, name=name)
 
     @staticmethod
     def _get_start_date_of_cycle(frequency: Frequency, creation_date: datetime):

@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 
 from .._version._utils import _version_migration
-from ..common.alias import JobId
+from .job_id import JobId
 from .status import Status
 
 

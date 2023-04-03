@@ -20,11 +20,11 @@ from typing import Callable, Iterable, List, Optional, Set, Union
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ..common._submittable import _Submittable
-from ..common.alias import JobId
+from .._entity._submittable import _Submittable
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
+from ..job.job_id import JobId
 from ..task.task import Task
 from ._abstract_orchestrator import _AbstractOrchestrator
 

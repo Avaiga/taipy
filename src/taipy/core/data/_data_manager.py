@@ -18,11 +18,15 @@ from taipy.config.config import Config
 
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common.alias import CycleId, DataNodeId, PipelineId, ScenarioId, TaskId
 from ..config.data_node_config import DataNodeConfig
+from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
+from ..pipeline.pipeline_id import PipelineId
+from ..scenario.scenario_id import ScenarioId
+from ..task.task_id import TaskId
 from ._data_repository_factory import _DataRepositoryFactory
 from .data_node import DataNode
+from .data_node_id import DataNodeId
 from .pickle import PickleDataNode
 
 

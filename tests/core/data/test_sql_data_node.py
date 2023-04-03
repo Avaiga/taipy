@@ -16,7 +16,7 @@ import modin.pandas as modin_pd
 import pandas as pd
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.sql import SQLDataNode
 from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
 from taipy.config.common.scope import Scope

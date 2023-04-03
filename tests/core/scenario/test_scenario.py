@@ -16,15 +16,17 @@ import pytest
 
 from src.taipy.core import DataNode, taipy
 from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task.task import Task
+from src.taipy.core.task.task_id import TaskId
 from taipy import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId

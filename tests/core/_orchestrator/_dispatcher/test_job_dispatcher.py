@@ -19,10 +19,10 @@ from unittest.mock import MagicMock
 
 from pytest import raises
 
+from src.taipy.core import DataNodeId, JobId, TaskId
 from src.taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job.job import Job

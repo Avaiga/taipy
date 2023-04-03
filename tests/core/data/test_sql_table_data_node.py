@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.sql_table import SQLTableDataNode
 from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 from taipy.config.common.scope import Scope

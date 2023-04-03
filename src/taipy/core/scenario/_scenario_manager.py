@@ -15,10 +15,9 @@ from typing import Any, Callable, List, Optional, Union
 
 from taipy.config import Config
 
+from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity_ids import _EntityIds
-from ..common.alias import ScenarioId
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -40,6 +39,7 @@ from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from ._scenario_repository_factory import _ScenarioRepositoryFactory
 from .scenario import Scenario
+from .scenario_id import ScenarioId
 
 
 class _ScenarioManager(_Manager[Scenario]):

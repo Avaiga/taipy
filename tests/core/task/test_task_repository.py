@@ -13,14 +13,15 @@ import datetime
 
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.exceptions.exceptions import NonExistingDataNode
 from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
+from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
