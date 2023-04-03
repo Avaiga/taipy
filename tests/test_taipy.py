@@ -509,8 +509,12 @@ class TestTaipy:
         scenario_cfg_4 = Config.configure_scenario("s4", [], Frequency.YEARLY)
         scenario_cfg_5 = Config.configure_scenario("s5", [], None)
 
-        scenario_1_1 = tp.create_scenario(scenario_cfg_1, datetime.datetime.now())
+        now = datetime.datetime.now()
+        scenario_1_1 = tp.create_scenario(scenario_cfg_1, now)
         scenario_1_2 = tp.create_scenario(scenario_cfg_1, datetime.datetime.now())
+        scenario_1_3 = tp.create_scenario(scenario_cfg_1, now + datetime.timedelta(days=1))
+        scenario_1_4 = tp.create_scenario(scenario_cfg_1, now + datetime.timedelta(days=8))
+        scenario_1_5 = tp.create_scenario(scenario_cfg_1, now + datetime.timedelta(days=25))
         scenario_2 = tp.create_scenario(scenario_cfg_2)
         scenario_3 = tp.create_scenario(scenario_cfg_3)
         scenario_4 = tp.create_scenario(scenario_cfg_4)
@@ -520,6 +524,9 @@ class TestTaipy:
 
         expected_cycles_scenarios = {
             scenario_1_1.cycle: [scenario_1_1.id, scenario_1_2.id],
+            scenario_1_3.cycle: [scenario_1_3.id],
+            scenario_1_4.cycle: [scenario_1_4.id],
+            scenario_1_5.cycle: [scenario_1_5.id],
             scenario_2.cycle: [scenario_2.id],
             scenario_3.cycle: [scenario_3.id],
             scenario_4.cycle: [scenario_4.id],
