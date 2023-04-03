@@ -8,6 +8,13 @@ taipy-gui = {git="https://git@github.com/Avaiga/taipy-gui.git@develop"}
 taipy-rest = {git="https://git@github.com/Avaiga/taipy-rest.git@develop"}
 
 [dev-packages]
+autopep8 = "*"
+black = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
 pytest = "*"
 tox = "*"
 
