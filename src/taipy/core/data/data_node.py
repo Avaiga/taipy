@@ -24,14 +24,15 @@ from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._entity._entity import _Entity
+from .._entity._properties import _Properties
+from .._entity._reload import _reload, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity import _Entity
-from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
-from ..common.alias import DataNodeId, Edit, JobId
 from ..exceptions.exceptions import NoData
+from ..job.job_id import JobId
 from ._filter import _FilterDataNode
+from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator, Operator
 
 
@@ -78,7 +79,7 @@ class DataNode(_Entity):
     def __init__(
         self,
         config_id,
-        scope: Scope = Scope(Scope.PIPELINE),
+        scope: Scope = Scope(Scope.SCENARIO),
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         owner_id: Optional[str] = None,
@@ -285,9 +286,20 @@ class DataNode(_Entity):
 
     def __get_last_modified_datetime(self) -> Optional[datetime]:
         path = self._properties.get(self.__PATH_KEY, None)
-        if path and os.path.exists(path):
+        if path and os.path.isfile(path):
             return datetime.fromtimestamp(os.path.getmtime(path))
-        return None
+
+        last_modified_datetime = None
+        if path and os.path.isdir(path):
+            for filename in os.listdir(path):
+                filepath = os.path.join(path, filename)
+                if os.path.isfile(filepath):
+                    file_mtime = datetime.fromtimestamp(os.path.getmtime(filepath))
+
+                    if last_modified_datetime is None or file_mtime > last_modified_datetime:
+                        last_modified_datetime = file_mtime
+
+        return last_modified_datetime
 
     @classmethod
     @abstractmethod

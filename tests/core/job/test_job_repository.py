@@ -14,19 +14,21 @@ import traceback
 
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.exceptions.exceptions import ModelNotFound
 from src.taipy.core.job._job_model import _JobModel
 from src.taipy.core.job._job_repository import _JobRepository
 from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
 from src.taipy.core.job.job import Job
+from src.taipy.core.job.job_id import JobId
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
+from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 

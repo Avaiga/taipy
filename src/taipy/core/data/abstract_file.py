@@ -10,14 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set
-
-from taipy.config.common.scope import Scope
-
-from .._version._version_manager_factory import _VersionManagerFactory
-from ..common.alias import DataNodeId, Edit
-from .data_node import DataNode
 
 
 class _AbstractFileDataNode(object):

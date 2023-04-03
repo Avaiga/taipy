@@ -15,11 +15,11 @@ from typing import Any, Iterable, List, Optional, Union
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _load_fct
-from ..common.alias import TaskId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingDataNode
 from ._task_model import _TaskModel
 from .task import Task
+from .task_id import TaskId
 
 
 class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore

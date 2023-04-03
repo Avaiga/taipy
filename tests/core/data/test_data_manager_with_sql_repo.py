@@ -14,12 +14,11 @@ import pathlib
 
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
 from taipy.config.common.scope import Scope

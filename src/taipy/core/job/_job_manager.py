@@ -14,11 +14,11 @@ from typing import Callable, Iterable, Optional, Union
 
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common.alias import JobId
 from ..exceptions.exceptions import JobNotDeletedException
 from ..task.task import Task
 from ._job_repository_factory import _JobRepositoryFactory
 from .job import Job
+from .job_id import JobId
 
 
 class _JobManager(_Manager[Job]):

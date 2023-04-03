@@ -17,10 +17,11 @@ from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common import _utils
 from ..common._utils import _Subscriber
-from ..common.alias import CycleId, PipelineId
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
+from ..cycle.cycle_id import CycleId
 from ..pipeline.pipeline import Pipeline
+from ..pipeline.pipeline_id import PipelineId
 from ._scenario_model import _ScenarioModel
 from .scenario import Scenario
 

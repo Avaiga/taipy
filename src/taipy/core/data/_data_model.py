@@ -18,7 +18,7 @@ from taipy.config.common.scope import Scope
 
 from .._version._utils import _version_migration
 from ..common._warnings import _warn_deprecated
-from ..common.alias import Edit
+from .data_node_id import Edit
 
 
 def _to_edits_migration(job_ids: Optional[List[str]]) -> List[Edit]:

@@ -42,15 +42,19 @@ import json
 import os
 
 from ._core import Core
-from .common.alias import CycleId, DataNodeId, Edit, JobId, PipelineId, ScenarioId, TaskId
 from .common.default_custom_document import DefaultCustomDocument
 from .cycle.cycle import Cycle
+from .cycle.cycle_id import CycleId
 from .data.data_node import DataNode
+from .data.data_node_id import DataNodeId, Edit
 from .exceptions import exceptions
 from .job.job import Job
+from .job.job_id import JobId
 from .job.status import Status
 from .pipeline.pipeline import Pipeline
+from .pipeline.pipeline_id import PipelineId
 from .scenario.scenario import Scenario
+from .scenario.scenario_id import ScenarioId
 from .taipy import (
     cancel_job,
     clean_all_entities,
@@ -84,6 +88,7 @@ from .taipy import (
     untag,
 )
 from .task.task import Task
+from .task.task_id import TaskId
 
 with open(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}version.json") as version_file:
     version = json.load(version_file)

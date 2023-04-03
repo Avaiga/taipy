@@ -14,7 +14,9 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from .._version._utils import _version_migration
-from ..common.alias import CycleId, PipelineId, ScenarioId
+from ..cycle.cycle_id import CycleId
+from ..pipeline.pipeline_id import PipelineId
+from .scenario_id import ScenarioId
 
 
 @dataclass

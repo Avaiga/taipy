@@ -15,9 +15,9 @@ from typing import Dict, List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common.alias import DataNodeId, Edit
 from ..exceptions.exceptions import MissingRequiredProperty
 from .abstract_sql import _AbstractSQLDataNode
+from .data_node_id import DataNodeId, Edit
 
 
 class SQLDataNode(_AbstractSQLDataNode):

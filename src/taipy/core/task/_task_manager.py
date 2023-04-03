@@ -13,19 +13,22 @@ from typing import Callable, List, Optional, Type, Union
 
 from taipy.config.common.scope import Scope
 
+from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._orchestrator._abstract_orchestrator import _AbstractOrchestrator
 from .._orchestrator._orchestrator_factory import _OrchestratorFactory
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity_ids import _EntityIds
-from ..common.alias import CycleId, PipelineId, ScenarioId, TaskId
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.task_config import TaskConfig
+from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..job._job_manager_factory import _JobManagerFactory
+from ..pipeline.pipeline_id import PipelineId
+from ..scenario.scenario_id import ScenarioId
 from ..task._task_repository_factory import _TaskRepositoryFactory
 from ..task.task import Task
+from .task_id import TaskId
 
 
 class _TaskManager(_Manager[Task]):

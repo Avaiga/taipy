@@ -11,15 +11,15 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, List, Optional, Set, Union
 
 import networkx as nx
 
+from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..job.job import Job
 from ..task.task import Task
-from ._listattributes import _ListAttributes
 
 
 class _Submittable:
