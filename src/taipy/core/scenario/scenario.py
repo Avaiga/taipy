@@ -19,21 +19,22 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
+from .._entity._entity import _Entity
+from .._entity._properties import _Properties
+from .._entity._reload import _reload, _self_reload, _self_setter
+from .._entity._submittable import _Submittable
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
-from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
-from ..common._submittable import _Submittable
 from ..common._utils import _Subscriber
-from ..common.alias import PipelineId, ScenarioId
 from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
+from ..pipeline.pipeline_id import PipelineId
 from ..task.task import Task
+from .scenario_id import ScenarioId
 
 
 class Scenario(_Entity, _Submittable):
@@ -215,6 +216,10 @@ class Scenario(_Entity, _Submittable):
     @property  # type: ignore
     def version(self):
         return self._version
+
+    @property
+    def owner_id(self):
+        return self._cycle.id
 
     @property  # type: ignore
     def properties(self):

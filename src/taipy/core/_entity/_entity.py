@@ -9,23 +9,17 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from datetime import datetime
-from typing import Any
-
-from taipy.config import Config
-from taipy.config._config import _Config
-
-from .._entity._entity import _Entity
+from .._entity._reload import _set_entity
 
 
-class _Version(_Entity):
-    def __init__(self, id: str, config: Any) -> None:
-        self.id: str = id
-        self.config: _Config = config
-        self.creation_date: datetime = datetime.now()
+class _Entity:
+    _MANAGER_NAME: str
+    _is_in_context = False
 
-    def __eq__(self, other):
-        return self.id == other.id and self.__is_config_eq(other)
+    def __enter__(self):
+        self._is_in_context = True
+        return self
 
-    def __is_config_eq(self, other):
-        return Config._serializer._str(self.config) == Config._serializer._str(other.config)
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._is_in_context = False
+        _set_entity(self._MANAGER_NAME, self)

@@ -14,13 +14,14 @@ from unittest import mock
 import pytest
 
 from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.common.alias import PipelineId, TaskId
 from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
+from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 

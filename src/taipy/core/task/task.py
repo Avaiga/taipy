@@ -16,13 +16,13 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
+from .._entity._entity import _Entity
+from .._entity._properties import _Properties
+from .._entity._reload import _reload, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity import _Entity
-from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
-from ..common.alias import TaskId
 from ..data.data_node import DataNode
+from .task_id import TaskId
 
 
 class Task(_Entity):
@@ -76,15 +76,24 @@ class Task(_Entity):
         self._skippable = skippable
         self._properties = _Properties(self, **properties)
 
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def skippable(self):
-        return self._skippable
+    def __hash__(self):
+        return hash(self.id)
 
-    @skippable.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def skippable(self, val):
-        self._skippable = val
+    def __getstate__(self):
+        return vars(self)
+
+    def __setstate__(self, state):
+        vars(self).update(state)
+
+    def __getattr__(self, attribute_name):
+        protected_attribute_name = _validate_id(attribute_name)
+        if protected_attribute_name in self._properties:
+            return _tpl._replace_templates(self._properties[protected_attribute_name])
+        if protected_attribute_name in self.input:
+            return self.input[protected_attribute_name]
+        if protected_attribute_name in self.output:
+            return self.output[protected_attribute_name]
+        raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
 
     @property  # type: ignore
     def properties(self):
@@ -114,15 +123,6 @@ class Task(_Entity):
     def parent_ids(self):
         return self._parent_ids
 
-    def __hash__(self):
-        return hash(self.id)
-
-    def __getstate__(self):
-        return vars(self)
-
-    def __setstate__(self, state):
-        vars(self).update(state)
-
     @property  # type: ignore
     def input(self) -> Dict[str, DataNode]:
         return self.__input
@@ -145,15 +145,15 @@ class Task(_Entity):
     def function(self, val):
         self._function = val
 
-    def __getattr__(self, attribute_name):
-        protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self._properties:
-            return _tpl._replace_templates(self._properties[protected_attribute_name])
-        if protected_attribute_name in self.input:
-            return self.input[protected_attribute_name]
-        if protected_attribute_name in self.output:
-            return self.output[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def skippable(self):
+        return self._skippable
+
+    @skippable.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def skippable(self, val):
+        self._skippable = val
 
     @property
     def scope(self) -> Scope:

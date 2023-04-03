@@ -20,7 +20,7 @@ from bson import ObjectId
 from bson.errors import InvalidDocument
 
 from src.taipy.core import DefaultCustomDocument
-from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.mongo import MongoCollectionDataNode
 from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from taipy.config.common.scope import Scope

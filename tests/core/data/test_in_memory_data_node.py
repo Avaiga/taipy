@@ -11,7 +11,7 @@
 
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import NoData
 from taipy.config.common.scope import Scope

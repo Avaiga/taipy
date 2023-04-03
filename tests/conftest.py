@@ -19,9 +19,9 @@ import pandas as pd
 import pytest
 from sqlalchemy import create_engine, text
 
+from src.taipy.core import CycleId, PipelineId, ScenarioId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,

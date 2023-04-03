@@ -9,17 +9,18 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import re
 import uuid
 from datetime import datetime
 from typing import Any, Dict
 
 from taipy.config.common.frequency import Frequency
 
-from ..common._entity import _Entity
-from ..common._get_valid_filename import _get_valid_filename
-from ..common._properties import _Properties
-from ..common._reload import _reload, _self_reload, _self_setter
-from ..common.alias import CycleId
+from .._entity._entity import _Entity
+from .._entity._properties import _Properties
+from .._entity._reload import _reload, _self_reload, _self_setter
+from ..exceptions.exceptions import _SuspiciousFileOperation
+from .cycle_id import CycleId
 
 
 class Cycle(_Entity):
@@ -58,7 +59,7 @@ class Cycle(_Entity):
         self._properties = _Properties(self, **properties)
 
     def _new_name(self, name: str = None) -> str:
-        return name if name else Cycle.__SEPARATOR.join([str(self._frequency), self._creation_date.isoformat()])
+        return name if name else Cycle.__SEPARATOR.join([str(self._frequency.value), self._creation_date.isoformat()])
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -117,6 +118,17 @@ class Cycle(_Entity):
 
     @staticmethod
     def _new_id(name: str) -> CycleId:
+        def _get_valid_filename(name: str) -> str:
+            """
+            Source: https://github.com/django/django/blob/main/django/utils/text.py
+            """
+            s = str(name).strip().replace(" ", "_")
+            s = re.sub(r"(?u)[^-\w.]", "", s)
+            if s in {"", ".", ".."}:
+                raise _SuspiciousFileOperation("Could not derive file name from '%s'" % name)
+            s = str(s).strip().replace(" ", "_")
+            return re.sub(r"(?u)[^-\w.]", "", s)
+
         return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle._ID_PREFIX, name, str(uuid.uuid4())])))
 
     def __getattr__(self, attribute_name):

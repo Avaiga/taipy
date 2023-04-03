@@ -20,8 +20,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.parquet import ParquetDataNode
 from src.taipy.core.exceptions.exceptions import (
     InvalidExposedType,

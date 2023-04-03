@@ -17,11 +17,11 @@ from typing import Callable, List
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._entity._entity import _Entity
+from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity import _Entity
-from ..common._reload import _self_reload, _self_setter
-from ..common.alias import JobId
 from ..task.task import Task
+from .job_id import JobId
 from .status import Status
 
 
@@ -76,6 +76,10 @@ class Job(_Entity):
     @_self_setter(_MANAGER_NAME)
     def task(self, val):
         self._task = val
+
+    @property
+    def owner_id(self) -> str:
+        return self.task.id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

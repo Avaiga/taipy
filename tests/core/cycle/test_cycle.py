@@ -35,19 +35,19 @@ def test_create_cycle_entity(current_datetime):
     assert cycle_1.frequency == Frequency.DAILY
 
     cycle_2 = Cycle(Frequency.YEARLY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_2.name.startswith(str(Frequency.YEARLY))
+    assert cycle_2.name.startswith(str(Frequency.YEARLY.value))
     assert cycle_2.frequency == Frequency.YEARLY
 
     cycle_3 = Cycle(Frequency.MONTHLY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_3.name.startswith(str(Frequency.MONTHLY))
+    assert cycle_3.name.startswith(str(Frequency.MONTHLY.value))
     assert cycle_3.frequency == Frequency.MONTHLY
 
     cycle_4 = Cycle(Frequency.WEEKLY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_4.name.startswith(str(Frequency.WEEKLY))
+    assert cycle_4.name.startswith(str(Frequency.WEEKLY.value))
     assert cycle_4.frequency == Frequency.WEEKLY
 
     cycle_5 = Cycle(Frequency.DAILY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_5.name.startswith(str(Frequency.DAILY))
+    assert cycle_5.name.startswith(str(Frequency.DAILY.value))
     assert cycle_5.frequency == Frequency.DAILY
 
 

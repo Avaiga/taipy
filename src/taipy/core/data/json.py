@@ -20,11 +20,11 @@ from typing import Any, Dict, List, Optional, Set
 
 from taipy.config.common.scope import Scope
 
+from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._reload import _self_reload
-from ..common.alias import DataNodeId, Edit
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
+from .data_node_id import DataNodeId, Edit
 
 
 class JSONDataNode(DataNode, _AbstractFileDataNode):

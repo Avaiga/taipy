@@ -12,11 +12,11 @@
 from datetime import datetime
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.common.alias import CycleId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
 from src.taipy.core.cycle.cycle import Cycle
+from src.taipy.core.cycle.cycle_id import CycleId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
@@ -115,7 +115,6 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     assert cycle_3.id is not None
     assert cycle_3.name == "bar"
-    assert cycle_3.properties["display_name"] == cycle_3.start_date.isoformat()
     assert isinstance(cycle_3.creation_date, datetime)
     assert cycle_3.frequency == Frequency.MONTHLY
 

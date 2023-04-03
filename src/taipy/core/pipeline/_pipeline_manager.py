@@ -14,19 +14,21 @@ from typing import Any, Callable, List, Optional, Union
 
 from taipy.config.common.scope import Scope
 
+from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity_ids import _EntityIds
-from ..common.alias import CycleId, PipelineId, ScenarioId
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.pipeline_config import PipelineConfig
+from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
+from ..scenario.scenario_id import ScenarioId
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from ._pipeline_repository_factory import _PipelineRepositoryFactory
 from .pipeline import Pipeline
+from .pipeline_id import PipelineId
 
 
 class _PipelineManager(_Manager[Pipeline]):
