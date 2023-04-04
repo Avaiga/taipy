@@ -65,8 +65,7 @@ class CycleResource(Resource):
                     "id": "CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a",
                     "start_date": "2022-08-04T00:00:00",
                     "end_date": "2022-08-04T23:59:59.999999",
-                    "name": "Frequency.DAILY_2022-08-04T17:13:32.797384",
-                    "properties": {"display_name": "2022-08-04T00:00:00"}}}
+                    "name": "Frequency.DAILY_2022-08-04T17:13:32.797384"
                 ```
 
                 In case of failure here is an example of the response:
@@ -94,8 +93,7 @@ class CycleResource(Resource):
                     'id': 'CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a',
                     'start_date': '2022-08-04T00:00:00',
                     'end_date': '2022-08-04T23:59:59.999999',
-                    'name': 'Frequency.DAILY_2022-08-04T17:13:32.797384',
-                    'properties': {'display_name': '2022-08-04T00:00:00'}}}
+                    'name': 'Frequency.DAILY_2022-08-04T17:13:32.797384'
                 ```
 
                 In case of failure here is an output example:
@@ -247,8 +245,7 @@ class CycleList(Resource):
                     "creation_date": "2022-08-06T15:45:50.223894",
                     "start_date": "2022-08-06T00:00:00",
                     "id": "CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a",
-                    "name": "Frequency.DAILY_2022-08-06T15:45:50.223894",
-                    "properties": {"display_name": "2022-08-06T00:00:00"}
+                    "name": "Frequency.DAILY_2022-08-06T15:45:50.223894"
                     }
                 ]
                 ```
@@ -276,8 +273,7 @@ class CycleList(Resource):
                     "creation_date": "2022-08-06T15:45:50.223894",
                     "start_date": "2022-08-06T00:00:00",
                     "id": "CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a",
-                    "name": "Frequency.DAILY_2022-08-06T15:45:50.223894",
-                    "properties": {"display_name": "2022-08-06T00:00:00"}
+                    "name": "Frequency.DAILY_2022-08-06T15:45:50.223894"
                     }
                 ]
                 ```
