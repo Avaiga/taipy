@@ -206,7 +206,7 @@ export const INITIAL_STATE: TaipyState = {
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
     isSocketConnected: false,
-    socket: io("/"),
+    socket: io("/", { autoConnect: false }),
 });
 
 const storeClientId = (id: string) => localStorage && localStorage.setItem("TaipyClientId", id);
@@ -222,7 +222,10 @@ const messageToAction = (message: WsMessage) => {
         } else if (message.type === "BL") {
             return createBlockAction(message as unknown as BlockMessage);
         } else if (message.type === "NA") {
-            return createNavigateAction((message as unknown as NavigateMessage).to, (message as unknown as NavigateMessage).tab);
+            return createNavigateAction(
+                (message as unknown as NavigateMessage).to,
+                (message as unknown as NavigateMessage).tab
+            );
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
         } else if (message.type === "DF") {
@@ -264,8 +267,22 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
             sendWsMessage(socket, "ID", "TaipyClientId", id, id);
             dispatch({ type: Types.SocketConnected });
         });
+        // try to reconnect on connect_error
+        socket.on("connect_error", () => {
+            setTimeout(() => {
+                socket.connect();
+            }, 500);
+        });
+        // try to reconnect on server disconnection
+        socket.on("disconnect", (reason) => {
+            if (reason === "io server disconnect") {
+                socket.connect();
+            }
+        });
         // handle message data from backend
         socket.on("message", getWsMessageListener(dispatch));
+        // only now does the socket tries to open/connect
+        socket.connect();
     }
 };
 
@@ -362,14 +379,18 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 };
             }
         case Types.Navigate:
-            return { ...state, navigateTo: (action as unknown as TaipyNavigateAction).to, navigateTab: (action as unknown as TaipyNavigateAction).tab };
+            return {
+                ...state,
+                navigateTo: (action as unknown as TaipyNavigateAction).to,
+                navigateTab: (action as unknown as TaipyNavigateAction).tab,
+            };
         case Types.ClientId:
             const id = (action as unknown as TaipyIdAction).id;
             storeClientId(id);
             return { ...state, id: id };
         case Types.Acknowledgement:
             const ackList = state.ackList.filter((v) => v !== (action as unknown as TaipyAckAction).id);
-            return ackList.length < state.ackList.length ? { ...state, ackList} : state;
+            return ackList.length < state.ackList.length ? { ...state, ackList } : state;
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
@@ -460,7 +481,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
 
 const createUpdateAction = (payload: NamePayload): TaipyAction => ({
     ...payload,
-    type: Types.Update
+    type: Types.Update,
 });
 
 const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
@@ -666,13 +687,17 @@ export const createRequestDataUpdateAction = (
  * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values
  * @returns The action fed to the reducer.
  */
-export const createRequestUpdateAction = (id: string | undefined, names: string[], forceRefresh = false): TaipyAction => ({
+export const createRequestUpdateAction = (
+    id: string | undefined,
+    names: string[],
+    forceRefresh = false
+): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
     payload: {
         id: id,
         names: names,
-        refresh: forceRefresh
+        refresh: forceRefresh,
     },
 });
 
@@ -731,7 +756,7 @@ export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
 export const createNavigateAction = (to?: string, tab?: string): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,
-    tab
+    tab,
 });
 
 export const createIdAction = (id: string): TaipyIdAction => ({
