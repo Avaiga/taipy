@@ -41,8 +41,9 @@ attached to the `current sprint`. Please, do not work on it, the Taipy team is o
 
 ## Code organisation
 
-Taipy is organised in four main repositories:
+Taipy is organised in five main repositories:
 
+- [taipy-config](https://github.com/Avaiga/taipy-config).
 - [taipy-core](https://github.com/Avaiga/taipy-core).
 - [taipy-gui](https://github.com/Avaiga/taipy-gui).
 - [taipy-rest](https://github.com/Avaiga/taipy-rest).
@@ -57,7 +58,8 @@ Taipy's repositories follow the [PEP 8](https://www.python.org/dev/peps/pep-0008
 
 ## TypeScript
 
-Taipy's repositories use the [ESLint](https://eslint.org/) and [TypeScript ESLint](https://github.com/typescript-eslint/typescript-eslint) plugin to ensure a common set of rules.
+Taipy's repositories use the [ESLint](https://eslint.org/) and
+[TypeScript ESLint](https://github.com/typescript-eslint/typescript-eslint) plugin to ensure a common set of rules.
 
 ### Git branches
 
@@ -100,11 +102,15 @@ working on it.
      pipenv run python -m pre-commit install
    ```
 
-4. Make the change and create a
-   [pull request from your fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork).
-   Keep your pull request in __draft__ until your work is finished.
+4. Make the changes.<br/>
+   You may want to also add your GitHub login as a new line of the `contributors.txt` file located at the root
+   of this repository. We are using it to list our contributors in the Taipy documentation
+   (see the "Contributing > Contributors" section) and thank them.
+
+5. Create a [pull request from your fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork).<br/>
+   Keep your pull request as __draft__ until your work is finished.
    Do not hesitate to add a comment for help or questions.
-   Before you submit a pull request read to review from your forked repo, check that it meets these guidelines:
+   Before you submit a pull request for review from your forked repo, check that it meets these guidelines:
     - Include tests.
     - Code is [rebase](http://stackoverflow.com/a/7244456/1110993).
     - License is present.
