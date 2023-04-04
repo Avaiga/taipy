@@ -23,7 +23,7 @@ from taipy.config import Config
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.core import Cycle, Job, Pipeline, Scenario, Task
-from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core import DataNodeId, JobId
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager
