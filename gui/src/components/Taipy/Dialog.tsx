@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { MouseEvent, ReactNode, useCallback, useContext, useMemo } from "react";
+import React, { MouseEvent, ReactNode, useCallback, useMemo } from "react";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import MuiDialog from "@mui/material/Dialog";
@@ -22,11 +22,10 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { SxProps, Theme } from "@mui/system";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyActiveProps } from "./utils";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 
 interface DialogProps extends TaipyActiveProps {
     title: string;
@@ -63,7 +62,8 @@ const Dialog = (props: DialogProps) => {
         width,
         height,
     } = props;
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -72,9 +72,9 @@ const Dialog = (props: DialogProps) => {
     const handleAction = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             const { idx = "-1" } = evt.currentTarget.dataset;
-            dispatch(createSendActionNameAction(id, onAction, parseInt(idx, 10)));
+            dispatch(createSendActionNameAction(id, module, onAction, parseInt(idx, 10)));
         },
-        [dispatch, id, onAction]
+        [dispatch, id, onAction, module]
     );
 
     const labels = useMemo(() => {

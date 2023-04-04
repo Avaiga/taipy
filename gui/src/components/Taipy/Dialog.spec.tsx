@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -26,7 +26,7 @@ import { HelmetProvider } from "react-helmet-async";
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
-mockedAxios.get.mockResolvedValue({ data: { jsx1: '<div key="mock" data-testid="mocked"></div>' } });
+mockedAxios.get.mockResolvedValue({ data: { jsx_no: '<div key="mock" data-testid="mocked"></div>' } });
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual("react-router-dom"),

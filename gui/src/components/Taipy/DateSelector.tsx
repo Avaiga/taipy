@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -20,11 +20,10 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
-import { useClassNames, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
 
@@ -42,10 +41,11 @@ const textFieldProps = {textField: {margin:"dense"}} as BaseDateTimePickerSlotsC
 
 const DateSelector = (props: DateSelectorProps) => {
     const { updateVarName, withTime = false, id, propagate = true } = props;
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
     const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz));
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -71,10 +71,10 @@ const DateSelector = (props: DateSelectorProps) => {
                     newDate.setHours(hours);
                     newDate.setMinutes(minutes);
                 }
-                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), props.onChange, propagate));
+                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), module, props.onChange, propagate));
             }
         },
-        [updateVarName, dispatch, withTime, propagate, tz, props.onChange]
+        [updateVarName, dispatch, withTime, propagate, tz, props.onChange, module]
     );
 
     // Run every time props.value get updated

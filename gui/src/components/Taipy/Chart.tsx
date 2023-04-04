@@ -14,7 +14,6 @@
 import React, {
     CSSProperties,
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useRef,
@@ -22,20 +21,12 @@ import React, {
     lazy,
     Suspense,
 } from "react";
-import {
-    Data,
-    Layout,
-    PlotMarker,
-    PlotRelayoutEvent,
-    PlotSelectionEvent,
-    ScatterLine,
-} from "plotly.js";
+import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotSelectionEvent, ScatterLine } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import { useTheme } from "@mui/system";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 import {
     createRequestChartUpdateAction,
@@ -43,7 +34,14 @@ import {
     createSendUpdateAction,
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty } from "../../utils/hooks";
+import {
+    useClassNames,
+    useDispatch,
+    useDispatchRequestUpdateOnFirstRender,
+    useDynamicJsonProperty,
+    useDynamicProperty,
+    useModule,
+} from "../../utils/hooks";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -148,13 +146,17 @@ const getDecimatorsPayload = (
         ? {
               width: plotDiv?.clientWidth,
               height: plotDiv?.clientHeight,
-              decimators: decimators.map((d, i) => d ? {
-                decimator: d,
-                xAxis: getAxis(traces, i, columns, 0),
-                yAxis: getAxis(traces, i, columns, 1),
-                zAxis: getAxis(traces, i, columns, 2),
-                chartMode: modes[i]
-              } : undefined),
+              decimators: decimators.map((d, i) =>
+                  d
+                      ? {
+                            decimator: d,
+                            xAxis: getAxis(traces, i, columns, 0),
+                            yAxis: getAxis(traces, i, columns, 1),
+                            zAxis: getAxis(traces, i, columns, 2),
+                            chartMode: modes[i],
+                        }
+                      : undefined
+              ),
               relayoutData: relayoutData,
           }
         : undefined;
@@ -196,11 +198,12 @@ const Chart = (props: ChartProp) => {
         onRangeChange,
         propagate = true,
     } = props;
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
     const plotRef = useRef<HTMLDivElement>(null);
     const [dataKey, setDataKey] = useState("__default__");
     const theme = useTheme();
+    const module = useModule();
 
     const refresh = data === null;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -255,17 +258,24 @@ const Chart = (props: ChartProp) => {
                     createRequestChartUpdateAction(
                         updateVarName,
                         id,
+                        module,
                         backCols,
                         dtKey,
-                        getDecimatorsPayload(config.decimators, plotRef.current, config.modes, config.columns, config.traces)
+                        getDecimatorsPayload(
+                            config.decimators,
+                            plotRef.current,
+                            config.modes,
+                            config.columns,
+                            config.traces
+                        )
                     )
                 );
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, config.traces, config.modes, config.decimators, updateVarName, id]);
+    }, [refresh, dispatch, config.columns, config.traces, config.modes, config.decimators, updateVarName, id, module]);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     const layout = useMemo(() => {
         let playout = {} as Layout;
@@ -279,8 +289,13 @@ const Chart = (props: ChartProp) => {
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
-            const tplTheme = theme.palette.mode === "dark" ? (props.template_Dark_ ? JSON.parse(props.template_Dark_) : darkTemplate) : props.template_Light_ && JSON.parse(props.template_Light_);
-            template = tpl ? tplTheme ? {...tpl, ...tplTheme} : tpl : tplTheme ? tplTheme : undefined;
+            const tplTheme =
+                theme.palette.mode === "dark"
+                    ? props.template_Dark_
+                        ? JSON.parse(props.template_Dark_)
+                        : darkTemplate
+                    : props.template_Light_ && JSON.parse(props.template_Light_);
+            template = tpl ? (tplTheme ? { ...tpl, ...tplTheme } : tpl) : tplTheme ? tplTheme : undefined;
         } catch (e) {
             console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
         }
@@ -306,7 +321,16 @@ const Chart = (props: ChartProp) => {
             },
             clickmode: "event+select",
         } as Layout;
-    }, [theme.palette.mode, title, config.columns, config.traces, props.layout, props.template, props.template_Dark_, props.template_Light_]);
+    }, [
+        theme.palette.mode,
+        title,
+        config.columns,
+        config.traces,
+        props.layout,
+        props.template,
+        props.template_Dark_,
+        props.template_Light_,
+    ]);
 
     const style = useMemo(
         () =>
@@ -319,73 +343,75 @@ const Chart = (props: ChartProp) => {
 
     const dataPl = useMemo(() => {
         const datum = data && data[dataKey];
-        return datum ? config.traces.map((trace, idx) => {
-            const ret = {
-                ...getArrayValue(config.options, idx, {}),
-                type: config.types[idx],
-                mode: config.modes[idx],
-                name:
-                    getArrayValue(config.names, idx) ||
-                    (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
-            } as Record<string, unknown>;
-                ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
-                MARKER_TO_COL.forEach(prop => {
-                    const val = (ret.marker as Record<string, unknown>)[prop];
-                    if (val !== undefined && typeof val === "string") {
-                        const arr = getValueFromCol(datum, val as string);
-                        if (arr.length) {
-                            (ret.marker as Record<string, unknown>)[prop] = arr;
-                        }
-                    }
-                });
-                const xs = getValue(datum, trace, 0) || [];
-                const ys = getValue(datum, trace, 1) || [];
-                const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
-                const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
-                const baseY = addIndex ? xs : ys;
-                const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : [] as string[];
-                if (baseX.length) {
-                    if (axisNames.length > 0 ) {
-                        ret[axisNames[0]] = baseX;
-                    } else {
-                        ret.x = baseX;
-                    }
-                }
-                if (baseY.length) {
-                    if (axisNames.length > 1) {
-                        ret[axisNames[1]] = baseY;
-                    } else {
-                        ret.y = baseY;
-                    }
-                }
-                const baseZ = getValue(datum, trace, 2, true);
-                if (baseZ) {
-                    if (axisNames.length > 2) {
-                        ret[axisNames[2]] = baseZ;
-                    } else {
-                        ret.z = baseZ;
-                    }
-                }
-                for (let i = 3; i < axisNames.length; i++) {
-                    ret[axisNames[i]] = getValue(datum, trace, i, true);
-                }
-                ret.text = getValue(datum, config.texts, idx, true);
-                ret.xaxis = config.xaxis[idx];
-                ret.yaxis = config.yaxis[idx];
-                ret.hovertext = getValue(datum, config.labels, idx, true);
-                const selPoints = getArrayValue(selected, idx, []);
-                if (selPoints?.length) {
-                    ret.selectedpoints = selPoints;
-                }
-                ret.orientation = getArrayValue(config.orientations, idx);
-                ret.line = getArrayValue(config.lines, idx);
-                ret.textposition = getArrayValue(config.textAnchors, idx);
-            const selectedMarker = getArrayValue(config.selectedMarkers, idx);
-            if (selectedMarker) {
-                ret.selected = { marker: selectedMarker };
-            }
-            return ret as Data;
-        }) : [];
+        return datum
+            ? config.traces.map((trace, idx) => {
+                  const ret = {
+                      ...getArrayValue(config.options, idx, {}),
+                      type: config.types[idx],
+                      mode: config.modes[idx],
+                      name:
+                          getArrayValue(config.names, idx) ||
+                          (config.columns[trace[1]] ? getColNameFromIndexed(config.columns[trace[1]].dfid) : undefined),
+                  } as Record<string, unknown>;
+                  ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
+                  MARKER_TO_COL.forEach((prop) => {
+                      const val = (ret.marker as Record<string, unknown>)[prop];
+                      if (val !== undefined && typeof val === "string") {
+                          const arr = getValueFromCol(datum, val as string);
+                          if (arr.length) {
+                              (ret.marker as Record<string, unknown>)[prop] = arr;
+                          }
+                      }
+                  });
+                  const xs = getValue(datum, trace, 0) || [];
+                  const ys = getValue(datum, trace, 1) || [];
+                  const addIndex = getArrayValue(config.addIndex, idx, true) && !ys.length;
+                  const baseX = addIndex ? Array.from(Array(xs.length).keys()) : xs;
+                  const baseY = addIndex ? xs : ys;
+                  const axisNames = config.axisNames.length > idx ? config.axisNames[idx] : ([] as string[]);
+                  if (baseX.length) {
+                      if (axisNames.length > 0) {
+                          ret[axisNames[0]] = baseX;
+                      } else {
+                          ret.x = baseX;
+                      }
+                  }
+                  if (baseY.length) {
+                      if (axisNames.length > 1) {
+                          ret[axisNames[1]] = baseY;
+                      } else {
+                          ret.y = baseY;
+                      }
+                  }
+                  const baseZ = getValue(datum, trace, 2, true);
+                  if (baseZ) {
+                      if (axisNames.length > 2) {
+                          ret[axisNames[2]] = baseZ;
+                      } else {
+                          ret.z = baseZ;
+                      }
+                  }
+                  for (let i = 3; i < axisNames.length; i++) {
+                      ret[axisNames[i]] = getValue(datum, trace, i, true);
+                  }
+                  ret.text = getValue(datum, config.texts, idx, true);
+                  ret.xaxis = config.xaxis[idx];
+                  ret.yaxis = config.yaxis[idx];
+                  ret.hovertext = getValue(datum, config.labels, idx, true);
+                  const selPoints = getArrayValue(selected, idx, []);
+                  if (selPoints?.length) {
+                      ret.selectedpoints = selPoints;
+                  }
+                  ret.orientation = getArrayValue(config.orientations, idx);
+                  ret.line = getArrayValue(config.lines, idx);
+                  ret.textposition = getArrayValue(config.textAnchors, idx);
+                  const selectedMarker = getArrayValue(config.selectedMarkers, idx);
+                  if (selectedMarker) {
+                      ret.selected = { marker: selectedMarker };
+                  }
+                  return ret as Data;
+              })
+            : [];
     }, [data, config, selected, dataKey]);
 
     const plotConfig = useMemo(() => {
@@ -410,19 +436,25 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
-            if (Object.keys(eventData).some(k => k.startsWith("xaxis."))) {
-                onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
+            if (Object.keys(eventData).some((k) => k.startsWith("xaxis."))) {
+                onRangeChange &&
+                    dispatch(createSendActionNameAction(id, module, { action: onRangeChange, ...eventData }));
                 if (config.decimators && !config.types.includes("scatter3d")) {
                     const backCols = Object.values(config.columns).map((col) => col.dfid);
                     const eventDataKey = Object.entries(eventData)
                         .map(([k, v]) => `${k}=${v}`)
                         .join("-");
-                    const dtKey = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "") + "--" + eventDataKey;
+                    const dtKey =
+                        backCols.join("-") +
+                        (config.decimators ? `--${config.decimators.join("")}` : "") +
+                        "--" +
+                        eventDataKey;
                     setDataKey(dtKey);
                     dispatch(
                         createRequestChartUpdateAction(
                             updateVarName,
                             id,
+                            module,
                             backCols,
                             dtKey,
                             getDecimatorsPayload(
@@ -448,6 +480,7 @@ const Chart = (props: ChartProp) => {
             config.types,
             config.decimators,
             updateVarName,
+            module,
         ]
     );
 
@@ -472,18 +505,18 @@ const Chart = (props: ChartProp) => {
                     traces.forEach((tr, idx) => {
                         const upvar = getUpdateVar(updateVars, `selected${idx}`);
                         if (upvar && tr && tr.length) {
-                            dispatch(createSendUpdateAction(upvar, tr, props.onChange, propagate));
+                            dispatch(createSendUpdateAction(upvar, tr, module, props.onChange, propagate));
                         }
                     });
                 } else if (config.traces.length === 1) {
-                    const upvar = getUpdateVar(updateVars, 'selected0');
+                    const upvar = getUpdateVar(updateVars, "selected0");
                     if (upvar) {
-                        dispatch(createSendUpdateAction(upvar, [], props.onChange, propagate));
+                        dispatch(createSendUpdateAction(upvar, [], module, props.onChange, propagate));
                     }
                 }
             }
         },
-        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length]
+        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module]
     );
 
     return render ? (
@@ -508,531 +541,257 @@ const Chart = (props: ChartProp) => {
 
 export default Chart;
 
-
 const darkTemplate = {
-    "data": {
-        "barpolar": [
+    data: {
+        barpolar: [
             {
-                "marker": {
-                    "line": {
-                        "color": "rgb(17,17,17)"
+                marker: {
+                    line: {
+                        color: "rgb(17,17,17)",
                     },
-                    "pattern": {
-                        "solidity": 0.2
-                    }
-                },
-                "type": "barpolar"
-            }
-        ],
-        "bar": [
-            {
-                "error_x": {
-                    "color": "#f2f5fa"
-                },
-                "error_y": {
-                    "color": "#f2f5fa"
-                },
-                "marker": {
-                    "line": {
-                        "color": "rgb(17,17,17)"
+                    pattern: {
+                        solidity: 0.2,
                     },
-                    "pattern": {
-                        "solidity": 0.2
-                    }
                 },
-                "type": "bar"
-            }
+                type: "barpolar",
+            },
         ],
-        "carpet": [
+        bar: [
             {
-                "aaxis": {
-                    "endlinecolor": "#A2B1C6",
-                    "gridcolor": "#506784",
-                    "linecolor": "#506784",
-                    "minorgridcolor": "#506784",
-                    "startlinecolor": "#A2B1C6"
+                error_x: {
+                    color: "#f2f5fa",
                 },
-                "baxis": {
-                    "endlinecolor": "#A2B1C6",
-                    "gridcolor": "#506784",
-                    "linecolor": "#506784",
-                    "minorgridcolor": "#506784",
-                    "startlinecolor": "#A2B1C6"
+                error_y: {
+                    color: "#f2f5fa",
                 },
-                "type": "carpet"
-            }
-        ],
-        "contour": [
-            {
-                "colorscale": [
-                    [
-                        0.0,
-                        "#0d0887"
-                    ],
-                    [
-                        0.1111111111111111,
-                        "#46039f"
-                    ],
-                    [
-                        0.2222222222222222,
-                        "#7201a8"
-                    ],
-                    [
-                        0.3333333333333333,
-                        "#9c179e"
-                    ],
-                    [
-                        0.4444444444444444,
-                        "#bd3786"
-                    ],
-                    [
-                        0.5555555555555556,
-                        "#d8576b"
-                    ],
-                    [
-                        0.6666666666666666,
-                        "#ed7953"
-                    ],
-                    [
-                        0.7777777777777778,
-                        "#fb9f3a"
-                    ],
-                    [
-                        0.8888888888888888,
-                        "#fdca26"
-                    ],
-                    [
-                        1.0,
-                        "#f0f921"
-                    ]
-                ],
-                "type": "contour"
-            }
-        ],
-        "heatmapgl": [
-            {
-                "colorscale": [
-                    [
-                        0.0,
-                        "#0d0887"
-                    ],
-                    [
-                        0.1111111111111111,
-                        "#46039f"
-                    ],
-                    [
-                        0.2222222222222222,
-                        "#7201a8"
-                    ],
-                    [
-                        0.3333333333333333,
-                        "#9c179e"
-                    ],
-                    [
-                        0.4444444444444444,
-                        "#bd3786"
-                    ],
-                    [
-                        0.5555555555555556,
-                        "#d8576b"
-                    ],
-                    [
-                        0.6666666666666666,
-                        "#ed7953"
-                    ],
-                    [
-                        0.7777777777777778,
-                        "#fb9f3a"
-                    ],
-                    [
-                        0.8888888888888888,
-                        "#fdca26"
-                    ],
-                    [
-                        1.0,
-                        "#f0f921"
-                    ]
-                ],
-                "type": "heatmapgl"
-            }
-        ],
-        "heatmap": [
-            {
-                "colorscale": [
-                    [
-                        0.0,
-                        "#0d0887"
-                    ],
-                    [
-                        0.1111111111111111,
-                        "#46039f"
-                    ],
-                    [
-                        0.2222222222222222,
-                        "#7201a8"
-                    ],
-                    [
-                        0.3333333333333333,
-                        "#9c179e"
-                    ],
-                    [
-                        0.4444444444444444,
-                        "#bd3786"
-                    ],
-                    [
-                        0.5555555555555556,
-                        "#d8576b"
-                    ],
-                    [
-                        0.6666666666666666,
-                        "#ed7953"
-                    ],
-                    [
-                        0.7777777777777778,
-                        "#fb9f3a"
-                    ],
-                    [
-                        0.8888888888888888,
-                        "#fdca26"
-                    ],
-                    [
-                        1.0,
-                        "#f0f921"
-                    ]
-                ],
-                "type": "heatmap"
-            }
-        ],
-        "histogram2dcontour": [
-            {
-                "colorscale": [
-                    [
-                        0.0,
-                        "#0d0887"
-                    ],
-                    [
-                        0.1111111111111111,
-                        "#46039f"
-                    ],
-                    [
-                        0.2222222222222222,
-                        "#7201a8"
-                    ],
-                    [
-                        0.3333333333333333,
-                        "#9c179e"
-                    ],
-                    [
-                        0.4444444444444444,
-                        "#bd3786"
-                    ],
-                    [
-                        0.5555555555555556,
-                        "#d8576b"
-                    ],
-                    [
-                        0.6666666666666666,
-                        "#ed7953"
-                    ],
-                    [
-                        0.7777777777777778,
-                        "#fb9f3a"
-                    ],
-                    [
-                        0.8888888888888888,
-                        "#fdca26"
-                    ],
-                    [
-                        1.0,
-                        "#f0f921"
-                    ]
-                ],
-                "type": "histogram2dcontour"
-            }
-        ],
-        "histogram2d": [
-            {
-                "colorscale": [
-                    [
-                        0.0,
-                        "#0d0887"
-                    ],
-                    [
-                        0.1111111111111111,
-                        "#46039f"
-                    ],
-                    [
-                        0.2222222222222222,
-                        "#7201a8"
-                    ],
-                    [
-                        0.3333333333333333,
-                        "#9c179e"
-                    ],
-                    [
-                        0.4444444444444444,
-                        "#bd3786"
-                    ],
-                    [
-                        0.5555555555555556,
-                        "#d8576b"
-                    ],
-                    [
-                        0.6666666666666666,
-                        "#ed7953"
-                    ],
-                    [
-                        0.7777777777777778,
-                        "#fb9f3a"
-                    ],
-                    [
-                        0.8888888888888888,
-                        "#fdca26"
-                    ],
-                    [
-                        1.0,
-                        "#f0f921"
-                    ]
-                ],
-                "type": "histogram2d"
-            }
-        ],
-        "histogram": [
-            {
-                "marker": {
-                    "pattern": {
-                        "solidity": 0.2
-                    }
-                },
-                "type": "histogram"
-            }
-        ],
-        "scatter": [
-            {
-                "marker": {
-                    "line": {
-                        "color": "#283442"
-                    }
-                },
-                "type": "scatter"
-            }
-        ],
-        "scattergl": [
-            {
-                "marker": {
-                    "line": {
-                        "color": "#283442"
-                    }
-                },
-                "type": "scattergl"
-            }
-        ],
-        "surface": [
-            {
-                "colorscale": [
-                    [
-                        0.0,
-                        "#0d0887"
-                    ],
-                    [
-                        0.1111111111111111,
-                        "#46039f"
-                    ],
-                    [
-                        0.2222222222222222,
-                        "#7201a8"
-                    ],
-                    [
-                        0.3333333333333333,
-                        "#9c179e"
-                    ],
-                    [
-                        0.4444444444444444,
-                        "#bd3786"
-                    ],
-                    [
-                        0.5555555555555556,
-                        "#d8576b"
-                    ],
-                    [
-                        0.6666666666666666,
-                        "#ed7953"
-                    ],
-                    [
-                        0.7777777777777778,
-                        "#fb9f3a"
-                    ],
-                    [
-                        0.8888888888888888,
-                        "#fdca26"
-                    ],
-                    [
-                        1.0,
-                        "#f0f921"
-                    ]
-                ],
-                "type": "surface"
-            }
-        ],
-        "table": [
-            {
-                "cells": {
-                    "fill": {
-                        "color": "#506784"
+                marker: {
+                    line: {
+                        color: "rgb(17,17,17)",
                     },
-                    "line": {
-                        "color": "rgb(17,17,17)"
-                    }
-                },
-                "header": {
-                    "fill": {
-                        "color": "#2a3f5f"
+                    pattern: {
+                        solidity: 0.2,
                     },
-                    "line": {
-                        "color": "rgb(17,17,17)"
-                    }
                 },
-                "type": "table"
-            }
-        ]
+                type: "bar",
+            },
+        ],
+        carpet: [
+            {
+                aaxis: {
+                    endlinecolor: "#A2B1C6",
+                    gridcolor: "#506784",
+                    linecolor: "#506784",
+                    minorgridcolor: "#506784",
+                    startlinecolor: "#A2B1C6",
+                },
+                baxis: {
+                    endlinecolor: "#A2B1C6",
+                    gridcolor: "#506784",
+                    linecolor: "#506784",
+                    minorgridcolor: "#506784",
+                    startlinecolor: "#A2B1C6",
+                },
+                type: "carpet",
+            },
+        ],
+        contour: [
+            {
+                colorscale: [
+                    [0.0, "#0d0887"],
+                    [0.1111111111111111, "#46039f"],
+                    [0.2222222222222222, "#7201a8"],
+                    [0.3333333333333333, "#9c179e"],
+                    [0.4444444444444444, "#bd3786"],
+                    [0.5555555555555556, "#d8576b"],
+                    [0.6666666666666666, "#ed7953"],
+                    [0.7777777777777778, "#fb9f3a"],
+                    [0.8888888888888888, "#fdca26"],
+                    [1.0, "#f0f921"],
+                ],
+                type: "contour",
+            },
+        ],
+        heatmapgl: [
+            {
+                colorscale: [
+                    [0.0, "#0d0887"],
+                    [0.1111111111111111, "#46039f"],
+                    [0.2222222222222222, "#7201a8"],
+                    [0.3333333333333333, "#9c179e"],
+                    [0.4444444444444444, "#bd3786"],
+                    [0.5555555555555556, "#d8576b"],
+                    [0.6666666666666666, "#ed7953"],
+                    [0.7777777777777778, "#fb9f3a"],
+                    [0.8888888888888888, "#fdca26"],
+                    [1.0, "#f0f921"],
+                ],
+                type: "heatmapgl",
+            },
+        ],
+        heatmap: [
+            {
+                colorscale: [
+                    [0.0, "#0d0887"],
+                    [0.1111111111111111, "#46039f"],
+                    [0.2222222222222222, "#7201a8"],
+                    [0.3333333333333333, "#9c179e"],
+                    [0.4444444444444444, "#bd3786"],
+                    [0.5555555555555556, "#d8576b"],
+                    [0.6666666666666666, "#ed7953"],
+                    [0.7777777777777778, "#fb9f3a"],
+                    [0.8888888888888888, "#fdca26"],
+                    [1.0, "#f0f921"],
+                ],
+                type: "heatmap",
+            },
+        ],
+        histogram2dcontour: [
+            {
+                colorscale: [
+                    [0.0, "#0d0887"],
+                    [0.1111111111111111, "#46039f"],
+                    [0.2222222222222222, "#7201a8"],
+                    [0.3333333333333333, "#9c179e"],
+                    [0.4444444444444444, "#bd3786"],
+                    [0.5555555555555556, "#d8576b"],
+                    [0.6666666666666666, "#ed7953"],
+                    [0.7777777777777778, "#fb9f3a"],
+                    [0.8888888888888888, "#fdca26"],
+                    [1.0, "#f0f921"],
+                ],
+                type: "histogram2dcontour",
+            },
+        ],
+        histogram2d: [
+            {
+                colorscale: [
+                    [0.0, "#0d0887"],
+                    [0.1111111111111111, "#46039f"],
+                    [0.2222222222222222, "#7201a8"],
+                    [0.3333333333333333, "#9c179e"],
+                    [0.4444444444444444, "#bd3786"],
+                    [0.5555555555555556, "#d8576b"],
+                    [0.6666666666666666, "#ed7953"],
+                    [0.7777777777777778, "#fb9f3a"],
+                    [0.8888888888888888, "#fdca26"],
+                    [1.0, "#f0f921"],
+                ],
+                type: "histogram2d",
+            },
+        ],
+        histogram: [
+            {
+                marker: {
+                    pattern: {
+                        solidity: 0.2,
+                    },
+                },
+                type: "histogram",
+            },
+        ],
+        scatter: [
+            {
+                marker: {
+                    line: {
+                        color: "#283442",
+                    },
+                },
+                type: "scatter",
+            },
+        ],
+        scattergl: [
+            {
+                marker: {
+                    line: {
+                        color: "#283442",
+                    },
+                },
+                type: "scattergl",
+            },
+        ],
+        surface: [
+            {
+                colorscale: [
+                    [0.0, "#0d0887"],
+                    [0.1111111111111111, "#46039f"],
+                    [0.2222222222222222, "#7201a8"],
+                    [0.3333333333333333, "#9c179e"],
+                    [0.4444444444444444, "#bd3786"],
+                    [0.5555555555555556, "#d8576b"],
+                    [0.6666666666666666, "#ed7953"],
+                    [0.7777777777777778, "#fb9f3a"],
+                    [0.8888888888888888, "#fdca26"],
+                    [1.0, "#f0f921"],
+                ],
+                type: "surface",
+            },
+        ],
+        table: [
+            {
+                cells: {
+                    fill: {
+                        color: "#506784",
+                    },
+                    line: {
+                        color: "rgb(17,17,17)",
+                    },
+                },
+                header: {
+                    fill: {
+                        color: "#2a3f5f",
+                    },
+                    line: {
+                        color: "rgb(17,17,17)",
+                    },
+                },
+                type: "table",
+            },
+        ],
     },
-    "layout": {
-        "annotationdefaults": {
-            "arrowcolor": "#f2f5fa"
+    layout: {
+        annotationdefaults: {
+            arrowcolor: "#f2f5fa",
         },
-        "colorscale": {
-            "diverging": [
-                [
-                    0,
-                    "#8e0152"
-                ],
-                [
-                    0.1,
-                    "#c51b7d"
-                ],
-                [
-                    0.2,
-                    "#de77ae"
-                ],
-                [
-                    0.3,
-                    "#f1b6da"
-                ],
-                [
-                    0.4,
-                    "#fde0ef"
-                ],
-                [
-                    0.5,
-                    "#f7f7f7"
-                ],
-                [
-                    0.6,
-                    "#e6f5d0"
-                ],
-                [
-                    0.7,
-                    "#b8e186"
-                ],
-                [
-                    0.8,
-                    "#7fbc41"
-                ],
-                [
-                    0.9,
-                    "#4d9221"
-                ],
-                [
-                    1,
-                    "#276419"
-                ]
+        colorscale: {
+            diverging: [
+                [0, "#8e0152"],
+                [0.1, "#c51b7d"],
+                [0.2, "#de77ae"],
+                [0.3, "#f1b6da"],
+                [0.4, "#fde0ef"],
+                [0.5, "#f7f7f7"],
+                [0.6, "#e6f5d0"],
+                [0.7, "#b8e186"],
+                [0.8, "#7fbc41"],
+                [0.9, "#4d9221"],
+                [1, "#276419"],
             ],
-            "sequential": [
-                [
-                    0.0,
-                    "#0d0887"
-                ],
-                [
-                    0.1111111111111111,
-                    "#46039f"
-                ],
-                [
-                    0.2222222222222222,
-                    "#7201a8"
-                ],
-                [
-                    0.3333333333333333,
-                    "#9c179e"
-                ],
-                [
-                    0.4444444444444444,
-                    "#bd3786"
-                ],
-                [
-                    0.5555555555555556,
-                    "#d8576b"
-                ],
-                [
-                    0.6666666666666666,
-                    "#ed7953"
-                ],
-                [
-                    0.7777777777777778,
-                    "#fb9f3a"
-                ],
-                [
-                    0.8888888888888888,
-                    "#fdca26"
-                ],
-                [
-                    1.0,
-                    "#f0f921"
-                ]
+            sequential: [
+                [0.0, "#0d0887"],
+                [0.1111111111111111, "#46039f"],
+                [0.2222222222222222, "#7201a8"],
+                [0.3333333333333333, "#9c179e"],
+                [0.4444444444444444, "#bd3786"],
+                [0.5555555555555556, "#d8576b"],
+                [0.6666666666666666, "#ed7953"],
+                [0.7777777777777778, "#fb9f3a"],
+                [0.8888888888888888, "#fdca26"],
+                [1.0, "#f0f921"],
             ],
-            "sequentialminus": [
-                [
-                    0.0,
-                    "#0d0887"
-                ],
-                [
-                    0.1111111111111111,
-                    "#46039f"
-                ],
-                [
-                    0.2222222222222222,
-                    "#7201a8"
-                ],
-                [
-                    0.3333333333333333,
-                    "#9c179e"
-                ],
-                [
-                    0.4444444444444444,
-                    "#bd3786"
-                ],
-                [
-                    0.5555555555555556,
-                    "#d8576b"
-                ],
-                [
-                    0.6666666666666666,
-                    "#ed7953"
-                ],
-                [
-                    0.7777777777777778,
-                    "#fb9f3a"
-                ],
-                [
-                    0.8888888888888888,
-                    "#fdca26"
-                ],
-                [
-                    1.0,
-                    "#f0f921"
-                ]
-            ]
+            sequentialminus: [
+                [0.0, "#0d0887"],
+                [0.1111111111111111, "#46039f"],
+                [0.2222222222222222, "#7201a8"],
+                [0.3333333333333333, "#9c179e"],
+                [0.4444444444444444, "#bd3786"],
+                [0.5555555555555556, "#d8576b"],
+                [0.6666666666666666, "#ed7953"],
+                [0.7777777777777778, "#fb9f3a"],
+                [0.8888888888888888, "#fdca26"],
+                [1.0, "#f0f921"],
+            ],
         },
-        "colorway": [
+        colorway: [
             "#636efa",
             "#EF553B",
             "#00cc96",
@@ -1042,92 +801,92 @@ const darkTemplate = {
             "#FF6692",
             "#B6E880",
             "#FF97FF",
-            "#FECB52"
+            "#FECB52",
         ],
-        "font": {
-            "color": "#f2f5fa"
+        font: {
+            color: "#f2f5fa",
         },
-        "geo": {
-            "bgcolor": "rgb(17,17,17)",
-            "lakecolor": "rgb(17,17,17)",
-            "landcolor": "rgb(17,17,17)",
-            "subunitcolor": "#506784"
+        geo: {
+            bgcolor: "rgb(17,17,17)",
+            lakecolor: "rgb(17,17,17)",
+            landcolor: "rgb(17,17,17)",
+            subunitcolor: "#506784",
         },
-        "mapbox": {
-            "style": "dark"
+        mapbox: {
+            style: "dark",
         },
-        "paper_bgcolor": "rgb(17,17,17)",
-        "plot_bgcolor": "rgb(17,17,17)",
-        "polar": {
-            "angularaxis": {
-                "gridcolor": "#506784",
-                "linecolor": "#506784"
+        paper_bgcolor: "rgb(17,17,17)",
+        plot_bgcolor: "rgb(17,17,17)",
+        polar: {
+            angularaxis: {
+                gridcolor: "#506784",
+                linecolor: "#506784",
             },
-            "bgcolor": "rgb(17,17,17)",
-            "radialaxis": {
-                "gridcolor": "#506784",
-                "linecolor": "#506784"
-            }
-        },
-        "scene": {
-            "xaxis": {
-                "backgroundcolor": "rgb(17,17,17)",
-                "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "zerolinecolor": "#C8D4E3"
+            bgcolor: "rgb(17,17,17)",
+            radialaxis: {
+                gridcolor: "#506784",
+                linecolor: "#506784",
             },
-            "yaxis": {
-                "backgroundcolor": "rgb(17,17,17)",
-                "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "zerolinecolor": "#C8D4E3"
+        },
+        scene: {
+            xaxis: {
+                backgroundcolor: "rgb(17,17,17)",
+                gridcolor: "#506784",
+                linecolor: "#506784",
+                zerolinecolor: "#C8D4E3",
             },
-            "zaxis": {
-                "backgroundcolor": "rgb(17,17,17)",
-                "gridcolor": "#506784",
-                "linecolor": "#506784",
-                "showbackground": true,
-                "zerolinecolor": "#C8D4E3"
-            }
-        },
-        "shapedefaults": {
-            "line": {
-                "color": "#f2f5fa"
-            }
-        },
-        "sliderdefaults": {
-            "bgcolor": "#C8D4E3",
-            "bordercolor": "rgb(17,17,17)"
-        },
-        "ternary": {
-            "aaxis": {
-                "gridcolor": "#506784",
-                "linecolor": "#506784"
+            yaxis: {
+                backgroundcolor: "rgb(17,17,17)",
+                gridcolor: "#506784",
+                linecolor: "#506784",
+                zerolinecolor: "#C8D4E3",
             },
-            "baxis": {
-                "gridcolor": "#506784",
-                "linecolor": "#506784"
+            zaxis: {
+                backgroundcolor: "rgb(17,17,17)",
+                gridcolor: "#506784",
+                linecolor: "#506784",
+                showbackground: true,
+                zerolinecolor: "#C8D4E3",
             },
-            "bgcolor": "rgb(17,17,17)",
-            "caxis": {
-                "gridcolor": "#506784",
-                "linecolor": "#506784"
-            }
         },
-        "updatemenudefaults": {
-            "bgcolor": "#506784"
+        shapedefaults: {
+            line: {
+                color: "#f2f5fa",
+            },
         },
-        "xaxis": {
-            "gridcolor": "#283442",
-            "linecolor": "#506784",
-            "tickcolor": "#506784",
-            "zerolinecolor": "#283442"
+        sliderdefaults: {
+            bgcolor: "#C8D4E3",
+            bordercolor: "rgb(17,17,17)",
         },
-        "yaxis": {
-            "gridcolor": "#283442",
-            "linecolor": "#506784",
-            "tickcolor": "#506784",
-            "zerolinecolor": "#283442"
-        }
-    }
+        ternary: {
+            aaxis: {
+                gridcolor: "#506784",
+                linecolor: "#506784",
+            },
+            baxis: {
+                gridcolor: "#506784",
+                linecolor: "#506784",
+            },
+            bgcolor: "rgb(17,17,17)",
+            caxis: {
+                gridcolor: "#506784",
+                linecolor: "#506784",
+            },
+        },
+        updatemenudefaults: {
+            bgcolor: "#506784",
+        },
+        xaxis: {
+            gridcolor: "#283442",
+            linecolor: "#506784",
+            tickcolor: "#506784",
+            zerolinecolor: "#283442",
+        },
+        yaxis: {
+            gridcolor: "#283442",
+            linecolor: "#506784",
+            tickcolor: "#506784",
+            zerolinecolor: "#283442",
+        },
+    },
 };

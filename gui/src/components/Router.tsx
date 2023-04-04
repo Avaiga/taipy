@@ -25,7 +25,7 @@ import JsxParser from "react-jsx-parser";
 import { BrowserRouter } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { TaipyContext } from "../context/taipyContext";
+import { PageContext, TaipyContext } from "../context/taipyContext";
 import {
     createBlockAction,
     createSetLocationsAction,
@@ -52,6 +52,7 @@ interface AxiosRouter {
 const mainSx = { flexGrow: 1, bgcolor: "background.default" };
 const containerSx = { display: "flex" };
 const progressSx = { position: "fixed", bottom: "1em", right: "1em" };
+const pageStore = {};
 
 const Router = () => {
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
@@ -94,34 +95,38 @@ const Router = () => {
                 <ThemeProvider theme={state.theme}>
                     <SnackbarProvider maxSnack={5}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <BrowserRouter>
-                                <Box style={containerSx} className={themeClass}>
-                                    <CssBaseline />
-                                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                        <Menu {...state.menu} />
-                                    </ErrorBoundary>
-                                    <Box component="main" sx={mainSx}>
+                            <PageContext.Provider value={pageStore}>
+                                <BrowserRouter>
+                                    <Box style={containerSx} className={themeClass}>
+                                        <CssBaseline />
                                         <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                            <JsxParser
-                                                disableKeyGeneration={true}
-                                                components={JSXReactRouterComponents as Record<string, ComponentType>}
-                                                jsx={JSX}
-                                            />
+                                            <Menu {...state.menu} />
                                         </ErrorBoundary>
-                                    </Box>
-                                    {state.ackList.length ? (
-                                        <Box sx={progressSx}>
-                                            <CircularProgress size="1em" disableShrink/>
+                                        <Box component="main" sx={mainSx}>
+                                            <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                                <JsxParser
+                                                    disableKeyGeneration={true}
+                                                    components={
+                                                        JSXReactRouterComponents as Record<string, ComponentType>
+                                                    }
+                                                    jsx={JSX}
+                                                />
+                                            </ErrorBoundary>
                                         </Box>
-                                    ) : null}
-                                </Box>
-                                <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                    <Alert alert={state.alert} />
-                                    <UIBlocker block={state.block} />
-                                    <Navigate to={state.navigateTo} tab={state.navigateTab} />
-                                    <GuiDownload download={state.download} />
-                                </ErrorBoundary>
-                            </BrowserRouter>
+                                        {state.ackList.length ? (
+                                            <Box sx={progressSx}>
+                                                <CircularProgress size="1em" disableShrink />
+                                            </Box>
+                                        ) : null}
+                                    </Box>
+                                    <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                        <Alert alert={state.alert} />
+                                        <UIBlocker block={state.block} />
+                                        <Navigate to={state.navigateTo} tab={state.navigateTab} />
+                                        <GuiDownload download={state.download} />
+                                    </ErrorBoundary>
+                                </BrowserRouter>
+                            </PageContext.Provider>
                         </LocalizationProvider>
                     </SnackbarProvider>
                 </ThemeProvider>

@@ -15,7 +15,7 @@ import { Dispatch, useContext, useEffect, useMemo, useRef } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 
 import { getUpdateVars } from "../components/Taipy/utils";
-import { TaipyContext } from "../context/taipyContext";
+import { PageContext, TaipyContext } from "../context/taipyContext";
 import { createRequestUpdateAction, FormatConfig, TaipyBaseAction } from "../context/taipyReducers";
 import { TIMEZONE_CLIENT } from "../utils";
 
@@ -78,20 +78,22 @@ export const useDynamicJsonProperty = <T>(value: string | undefined, defaultValu
  * A React hook that requests an update for every dynamic property of the element.
  * @param dispatch - The React dispatcher associated to `TaipyContext`.
  * @param id - The identifier of the element.
+ * @param context - The execution context.
  * @param updateVars - The content of the property `updateVars`.
  * @param varName - The default property backend provided variable (through property `updateVarName`).
  */
 export const useDispatchRequestUpdateOnFirstRender = (
     dispatch: Dispatch<TaipyBaseAction>,
     id?: string,
+    context?: string,
     updateVars?: string,
     varName?: string
 ) => {
     useEffect(() => {
         const updateArray = getUpdateVars(updateVars);
         varName && updateArray.push(varName);
-        updateArray.length && dispatch(createRequestUpdateAction(id, updateArray));
-    }, [updateVars, dispatch, id, varName]);
+        updateArray.length && dispatch(createRequestUpdateAction(id, context, updateArray));
+    }, [updateVars, dispatch, id, context, varName]);
 };
 
 export const useFormatConfig = (): FormatConfig => {
@@ -125,6 +127,17 @@ export const useIsMobile = () => {
 export const useDispatch = () => {
     const {dispatch} = useContext(TaipyContext);
     return dispatch;
+}
+
+/**
+ * A React hook that returns the page module.
+ *
+ * The *module* Needs to be added to all Actions to allow for the correct execution of backend functions.
+ * @returns The page module.
+ */
+export const useModule = () => {
+    const {module} = useContext(PageContext);
+    return module;
 }
 
 /**

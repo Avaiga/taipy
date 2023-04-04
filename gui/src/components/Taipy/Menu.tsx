@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useContext, useMemo, useState, MouseEvent, CSSProperties } from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -24,10 +24,9 @@ import Tooltip from '@mui/material/Tooltip';
 import { Theme, useTheme } from "@mui/system";
 
 import { SingleItem } from "./lovUtils";
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
-import { useClassNames } from "../../utils/hooks";
+import { useClassNames, useDispatch, useModule } from "../../utils/hooks";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
@@ -38,8 +37,9 @@ const Menu = (props: MenuProps) => {
     const { label, onAction = "", lov, width, inactiveIds = [], active = true } = props;
     const [selectedValue, setSelectedValue] = useState("");
     const [opened, setOpened] = useState(false);
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const theme = useTheme();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
@@ -48,12 +48,12 @@ const Menu = (props: MenuProps) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
                 setSelectedValue(() => {
-                    dispatch(createSendActionNameAction("menu", onAction, key));
+                    dispatch(createSendActionNameAction("menu", module, onAction, key));
                     return key;
                 });
             }
         },
-        [onAction, dispatch, active]
+        [onAction, dispatch, active, module]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {

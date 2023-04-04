@@ -11,14 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import MuiButton from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
 
 interface ButtonProps extends TaipyActiveProps {
@@ -30,15 +29,16 @@ interface ButtonProps extends TaipyActiveProps {
 const Button = (props: ButtonProps) => {
     const { id, onAction = "", defaultLabel } = props;
     const [value, setValue] = useState<stringIcon>("");
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleClick = useCallback(() => {
-        dispatch(createSendActionNameAction(id, onAction));
-    }, [id, onAction, dispatch]);
+        dispatch(createSendActionNameAction(id, module, onAction));
+    }, [id, onAction, dispatch, module]);
 
     useEffect(() => {
         setValue((val) => {
