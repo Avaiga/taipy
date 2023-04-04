@@ -41,6 +41,7 @@ if find_spec("taipy"):
             export_scenario,
             get,
             get_cycles,
+            get_cycles_scenarios,
             get_data_nodes,
             get_jobs,
             get_latest_job,
