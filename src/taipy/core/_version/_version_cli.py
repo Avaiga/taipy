@@ -59,7 +59,7 @@ class _VersioningCLI:
         )
 
         core_parser.add_argument(
-            "--force-run",
+            "--taipy-force",
             action="store_true",
             help="Force override the configuration of the version if existed and run the application."
             " Default to False.",
@@ -151,4 +151,4 @@ class _VersioningCLI:
             version_number = args.production
             mode = "production"
 
-        return mode, version_number, args.force_run, args.clean_entities
+        return mode, version_number, args.taipy_force, args.clean_entities
