@@ -11,6 +11,7 @@
 
 from datetime import timedelta
 from time import sleep
+from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
@@ -71,6 +72,10 @@ def test_create_job(task, job):
     assert task in job
     assert job.is_submitted()
     assert job.submit_id is not None
+    with mock.patch("src.taipy.core.get") as get_mck:
+        get_mck.return_value = task
+        assert job.get_label() == "name > " + job.id
+    assert job.get_simple_label() == job.id
 
 
 def test_comparison(task):

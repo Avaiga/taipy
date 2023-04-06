@@ -52,7 +52,7 @@ class TestPickleDataNodeEntity:
         assert dn.config_id == "foobar_bazxyxea"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
-        assert dn.name == dn.id
+        assert dn.name is None
         assert dn.owner_id is None
         assert dn.last_edition_date is not None
         assert dn.job_ids == []

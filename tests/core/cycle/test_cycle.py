@@ -8,9 +8,10 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import datetime
 from datetime import timedelta
 
+from src.taipy.core import CycleId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle.cycle import Cycle
 from taipy.config.common.frequency import Frequency
@@ -35,20 +36,52 @@ def test_create_cycle_entity(current_datetime):
     assert cycle_1.frequency == Frequency.DAILY
 
     cycle_2 = Cycle(Frequency.YEARLY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_2.name.startswith(str(Frequency.YEARLY.value))
+    assert cycle_2.name == current_datetime.strftime("%Y")
     assert cycle_2.frequency == Frequency.YEARLY
 
     cycle_3 = Cycle(Frequency.MONTHLY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_3.name.startswith(str(Frequency.MONTHLY.value))
+    assert cycle_3.name == current_datetime.strftime("%B %Y")
     assert cycle_3.frequency == Frequency.MONTHLY
 
     cycle_4 = Cycle(Frequency.WEEKLY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_4.name.startswith(str(Frequency.WEEKLY.value))
+    assert cycle_4.name == current_datetime.strftime("Week %W from %A, %d. %B %Y")
     assert cycle_4.frequency == Frequency.WEEKLY
 
     cycle_5 = Cycle(Frequency.DAILY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_5.name.startswith(str(Frequency.DAILY.value))
+    assert cycle_5.name == current_datetime.strftime("%A, %d. %B %Y")
     assert cycle_5.frequency == Frequency.DAILY
+
+
+def test_cycle_name(current_datetime):
+    start_date = datetime.datetime(2023, 1, 2)
+    cycle = Cycle(Frequency.DAILY, {}, current_datetime, start_date, start_date, "name", CycleId("id"))
+    assert cycle.name == "name"
+    cycle = Cycle(Frequency.DAILY, {}, current_datetime, start_date, start_date, None, CycleId("id"))
+    assert cycle.name == "Monday, 02. January 2023"
+    cycle = Cycle(Frequency.WEEKLY, {}, current_datetime, start_date, start_date, None, CycleId("id"))
+    assert cycle.name == "Week 01 2023, from 02. January"
+    cycle = Cycle(Frequency.MONTHLY, {}, current_datetime, start_date, start_date, None, CycleId("id"))
+    assert cycle.name == "January 2023"
+    cycle = Cycle(Frequency.QUARTERLY, {}, current_datetime, start_date, start_date, None, CycleId("id"))
+    assert cycle.name == "2023 Q1"
+    cycle = Cycle(Frequency.YEARLY, {}, current_datetime, start_date, start_date, None, CycleId("id"))
+    assert cycle.name == "2023"
+
+
+def test_cycle_label(current_datetime):
+    cycle = Cycle(
+        Frequency.DAILY,
+        {"key": "value"},
+        creation_date=current_datetime,
+        start_date=current_datetime,
+        end_date=current_datetime,
+    )
+    assert cycle.get_label() == cycle.name
+    assert cycle.get_simple_label() == cycle.name
+
+    cycle._properties["label"] = "label"
+    assert cycle.get_label() == "label"
+    assert cycle.get_simple_label() == "label"
 
 
 def test_add_property_to_scenario(current_datetime):
