@@ -25,7 +25,7 @@ class GuiCoreContext():
 
 class GuiCore(ElementLibrary):
     
-  __elts = {"scenario_selector", Element("scenario", {
+  __elts = {"scenario_selector": Element("scenario", {
     "show_add_button": ElementProperty(PropertyType.dynamic_boolean, True),
     "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
     "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
@@ -47,4 +47,11 @@ class GuiCore(ElementLibrary):
   def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
     return GuiCoreContext._VAR_NAME, GuiCoreContext(gui, Core())
     
+page = """
+# test
 
+<|{value}|scenario_selector|lov=Item 1;Item 2;|>
+"""
+
+Gui.add_library(GuiCore())
+Gui(page).run(debug=True)
