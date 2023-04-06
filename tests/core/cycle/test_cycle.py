@@ -44,7 +44,7 @@ def test_create_cycle_entity(current_datetime):
     assert cycle_3.frequency == Frequency.MONTHLY
 
     cycle_4 = Cycle(Frequency.WEEKLY, {}, current_datetime, current_datetime, current_datetime)
-    assert cycle_4.name == current_datetime.strftime("Week %W from %A, %d. %B %Y")
+    assert cycle_4.name == current_datetime.strftime("Week %W %Y, from %d. %B")
     assert cycle_4.frequency == Frequency.WEEKLY
 
     cycle_5 = Cycle(Frequency.DAILY, {}, current_datetime, current_datetime, current_datetime)
