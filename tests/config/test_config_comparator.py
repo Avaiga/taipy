@@ -321,7 +321,7 @@ class TestConfigComparator:
             t in error_messages[5]
             for t in [
                 "ERROR",
-                "To force running the application with the changes, run your application with --force-run option.",
+                "To force running the application with the changes, run your application with --taipy-force option.",
             ]
         )
 
