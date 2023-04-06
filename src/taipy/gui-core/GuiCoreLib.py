@@ -46,12 +46,3 @@ class GuiCore(ElementLibrary):
   
   def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
     return GuiCoreContext._VAR_NAME, GuiCoreContext(gui, Core())
-    
-page = """
-# test
-
-<|{value}|scenario_selector|lov=Item 1;Item 2;|>
-"""
-
-Gui.add_library(GuiCore())
-Gui(page).run(debug=True)
