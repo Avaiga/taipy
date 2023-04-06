@@ -106,7 +106,7 @@ class TestDataNode:
         assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
-        assert dn.name == dn.id
+        assert dn.name is None
         assert dn.owner_id is None
         assert dn.parent_ids == set()
         assert dn.last_edition_date is None
@@ -662,3 +662,46 @@ class TestDataNode:
         assert last_edit["message"] == "This is a comment on this edit"
         assert last_edit["env"] == "staging"
         assert last_edit["timestamp"] == date
+
+    def test_label(self):
+        a_date = datetime.now()
+        dn = DataNode(
+            "foo_bar",
+            Scope.SCENARIO,
+            DataNodeId("an_id"),
+            "a name",
+            "a_scenario_id",
+            {"a_parent_id"},
+            a_date,
+            [dict(job_id="a_job_id")],
+            edit_in_progress=False,
+            prop="erty",
+        )
+        with mock.patch("src.taipy.core.get") as get_mck:
+
+            class MockOwner:
+                label = "owner_label"
+
+                def get_label(self):
+                    return self.label
+
+            get_mck.return_value = MockOwner()
+            assert dn.get_label() == "owner_label > " + dn.name
+            assert dn.get_simple_label() == dn.name
+
+    def test_explicit_label(self):
+        a_date = datetime.now()
+        dn = DataNode(
+            "foo_bar",
+            Scope.SCENARIO,
+            DataNodeId("an_id"),
+            "a name",
+            "a_scenario_id",
+            {"a_parent_id"},
+            a_date,
+            [dict(job_id="a_job_id")],
+            edit_in_progress=False,
+            label="a label",
+        )
+        assert dn.get_label() == "a label"
+        assert dn.get_simple_label() == "a label"

@@ -18,6 +18,7 @@ from typing import Callable, List
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._entity._entity import _Entity
+from .._entity._labeled import _Labeled
 from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..task.task import Task
@@ -34,7 +35,7 @@ def _run_callbacks(fn):
     return __run_callbacks
 
 
-class Job(_Entity):
+class Job(_Entity, _Labeled):
     """Execution of a `Task^`.
 
     A job handles the status of the execution, contains the stacktrace of exceptions that were

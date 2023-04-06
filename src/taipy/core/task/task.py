@@ -17,6 +17,7 @@ from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 
 from .._entity._entity import _Entity
+from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _reload, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
@@ -25,7 +26,7 @@ from ..data.data_node import DataNode
 from .task_id import TaskId
 
 
-class Task(_Entity):
+class Task(_Entity, _Labeled):
     """Hold a user function that will be executed, its parameters and the results.
 
     A `Task` brings together the user code as function, the inputs and the outputs as data nodes

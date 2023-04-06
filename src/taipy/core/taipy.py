@@ -127,8 +127,13 @@ def get(entity_id: JobId) -> Job:
     ...
 
 
+@overload
+def get(entity_id: str) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
+    ...
+
+
 def get(
-    entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]
+    entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId, str]
 ) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
     """Get an entity from its identifier.
 

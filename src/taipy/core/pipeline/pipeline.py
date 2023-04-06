@@ -20,6 +20,7 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
 from .._entity._entity import _Entity
+from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _reload, _self_reload, _self_setter
 from .._entity._submittable import _Submittable
@@ -35,7 +36,7 @@ from ..task.task_id import TaskId
 from .pipeline_id import PipelineId
 
 
-class Pipeline(_Entity, _Submittable):
+class Pipeline(_Entity, _Submittable, _Labeled):
     """List of `Task^`s and additional attributes representing a set of data processing
     elements connected as a direct acyclic graph.
 
