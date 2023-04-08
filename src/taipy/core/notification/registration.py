@@ -9,12 +9,25 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from queue import Queue
+from typing import Optional
+from uuid import uuid4
 
+from .registration_id import RegistrationId
 from .topic import Topic
 
 
 class Registration:
-    def __init__(self, register_id, entity_type, entity_id, operation, attribute_name):
-        self.register_id = register_id
-        self.queue = Queue()
-        self.topic = Topic(entity_type, entity_id, operation, attribute_name)
+
+    _ID_PREFIX = "REGISTRATION"
+    __SEPARATOR = "_"
+
+    def __init__(self, entity_type: Optional[str], entity_id: Optional[str], operation, attribute_name):
+
+        self.register_id: str = self._new_id()
+        self.topic: Topic = Topic(entity_type, entity_id, operation, attribute_name)
+        self.queue: Queue = Queue()
+
+    @staticmethod
+    def _new_id() -> RegistrationId:
+        """Generate a unique scenario identifier."""
+        return RegistrationId(Registration.__SEPARATOR.join([Registration._ID_PREFIX, str(uuid4())]))

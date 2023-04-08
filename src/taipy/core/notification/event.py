@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
-from typing import Optional
 
 from ..common._repr_enum import _ReprEnum
 
@@ -19,7 +18,7 @@ class EventOperation(_ReprEnum):
     CREATION = 1
     UPDATE = 2
     DELETION = 3
-    # SUBMISSION = 4
+    SUBMISSION = 4
 
 
 class EventEntityType(_ReprEnum):
@@ -34,10 +33,10 @@ class EventEntityType(_ReprEnum):
 class Event:
     def __init__(
         self,
-        entity_type: Optional[EventEntityType] = None,
-        entity_id: Optional[str] = None,
-        operation: Optional[EventOperation] = None,
-        attribute_name: Optional[str] = None,
+        entity_type: EventEntityType,
+        entity_id: str,
+        operation: EventOperation,
+        attribute_name: str,
     ):
         self.creation_date = datetime.now()
         self.entity_type = entity_type

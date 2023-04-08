@@ -249,3 +249,11 @@ class NonExistingVersion(Exception):
 
 class VersionIsNotProductionVersion(Exception):
     """Raised if the version is not a production version."""
+
+
+class InvalidEntityId(Exception):
+    """Raised if the provided entity id is invalid"""
+
+
+class InvalidEntityType(Exception):
+    """Raised if the provided entity type is invalid"""

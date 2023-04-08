@@ -24,13 +24,12 @@ from .job import Job
 class _JobManager(_Manager[Job]):
     _repository = _JobRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Job.__name__
-    _ID_PREFIX = "JOB_"
 
     @classmethod
     def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:
         version = _VersionManagerFactory._build_manager()._get_latest_version()
         job = Job(
-            id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"),
+            id=JobId(f"{Job._ID_PREFIX}_{task.config_id}_{uuid.uuid4()}"),
             task=task,
             submit_id=submit_id,
             force=force,

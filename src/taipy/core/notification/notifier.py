@@ -10,34 +10,45 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import Queue
-from typing import List, Tuple
+from typing import Dict, List, Optional
 
-from .event import Event
+from .event import Event, EventEntityType, EventOperation
 from .registration import Registration
 from .topic import Topic
 
 
 class Notifier:
-    _registrations: List[Registration] = []
+    _registrations: Dict[Topic, List[Registration]] = {}  # What if this is a dictionary instead?
 
     @classmethod
-    def register(cls, entity_type, entity_id, operation, attribute_name) -> Tuple[str, Queue]:
-        register_id = "gui"  # TODO generate an id to return so the client can unregister.
-        registration = Registration(register_id, entity_type, entity_id, operation, attribute_name)
-        cls._registrations.append(registration)
-        return register_id, registration.queue
+    def register(
+        cls,
+        entity_type: Optional[str],
+        entity_id: Optional[str],
+        operation: Optional[str],
+        attribute_name: Optional[str],
+    ) -> Registration:
+        registration = Registration(entity_type, entity_id, operation, attribute_name)
+
+        if registrations := cls._registrations.get(registration.topic, None):
+            registrations.append(registration)
+        else:
+            cls._registrations[registration.topic] = [registration]
+
+        return registration
 
     @classmethod
-    def unregister(cls, register_id: str = "gui"):
-        cls._registrations = [reg for reg in cls._registrations if reg.register_id != register_id]
+    def unregister(cls, registration: Registration):
+        if registrations := cls._registrations.get(registration.topic, None):
+            registrations.remove(registration)
+            if len(registrations) == 0:
+                del cls._registrations[registration.topic]
 
     @classmethod
     def publish(cls, event: Event):
-        for registration in cls._registrations:
-            if cls.is_matching(event, registration.topic):
-                registration.queue.put(event)
+        generated_matched_topics_with_event = Topic.generate_topics_from_event(event)
 
-    @classmethod
-    def is_matching(cls, event: Event, topic: Topic) -> bool:
-        # TODO implement logic to see if event matches the topic
-        return True
+        for topic in generated_matched_topics_with_event:
+            if registrations := cls._registrations.get(topic, None):
+                for registration in registrations:
+                    registration.queue.put(event)

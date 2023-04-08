@@ -137,7 +137,7 @@ def get(
     Raises:
         ModelNotFound^: If _entity_id_ does not match a correct entity pattern.
     """
-    if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
+    if entity_id.startswith(Job._ID_PREFIX):
         return _JobManagerFactory._build_manager()._get(JobId(entity_id))
     if entity_id.startswith(Cycle._ID_PREFIX):
         return _CycleManagerFactory._build_manager()._get(CycleId(entity_id))
@@ -180,7 +180,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     Raises:
         ModelNotFound^: No entity corresponds to _entity_id_.
     """
-    if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
+    if entity_id.startswith(Job._ID_PREFIX):
         job_manager = _JobManagerFactory._build_manager()
         return job_manager._delete(job_manager._get(JobId(entity_id)))  # type: ignore
     if entity_id.startswith(Cycle._ID_PREFIX):
