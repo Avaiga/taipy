@@ -261,3 +261,11 @@ class InvalidEntityType(Exception):
 
 class _SuspiciousFileOperation(Exception):
     pass
+
+
+class InvalidEntityId(Exception):
+    """Raised if the provided entity id is invalid"""
+
+
+class InvalidEntityType(Exception):
+    """Raised if the provided entity type is invalid"""
