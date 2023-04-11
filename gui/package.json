@@ -18,7 +18,7 @@
     "plotly.js": "^2.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-error-boundary": "^3.1.4",
+    "react-error-boundary": "^4.0.3",
     "react-helmet-async": "^1.1.2",
     "react-jsx-parser": "^1.28.4",
     "react-plotly.js": "^2.5.1",
@@ -95,7 +95,7 @@
     "css-loader": "^6.5.0",
     "css-mediaquery": "^0.1.2",
     "dotenv-webpack": "^8.0.0",
-    "dts-bundle-generator": "^7.1.0",
+    "dts-bundle-generator": "^8.0.0",
     "eslint": "^8.3.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
@@ -113,7 +113,7 @@
     "ts-loader": "^9.2.6",
     "typedoc": "^0.23.21",
     "typedoc-plugin-markdown": "^3.13.4",
-    "typescript": "^4.9.3",
+    "typescript": "^5.0.3",
     "webpack": "^5.61.0",
     "webpack-cli": "^5.0.0"
   }

@@ -11,14 +11,14 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useCallback, useContext } from "react";
+import React, { CSSProperties, useCallback } from "react";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
 import { BlockMessage, BLOCK_CLOSE, createBlockAction, createSendActionNameAction } from "../../context/taipyReducers";
-import { TaipyContext } from "../../context/taipyContext";
+import { useDispatch, useModule } from "../../utils/hooks";
 
 interface UIBlockerProps {
     block?: BlockMessage;
@@ -38,13 +38,14 @@ const style = {
 } as unknown as CSSProperties;
 
 const UIBlocker = ({ block }: UIBlockerProps) => {
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
+    const module = useModule();
     const handleClose = useCallback(() => {
         if (block && !block.noCancel) {
-            dispatch(createSendActionNameAction("UIBlocker", block.action));
+            dispatch(createSendActionNameAction("UIBlocker", module, block.action));
             dispatch(createBlockAction(BLOCK_CLOSE));
         }
-    }, [block, dispatch]);
+    }, [block, dispatch, module]);
 
     return block === undefined || block.close ? null : (
         <Modal open>

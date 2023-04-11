@@ -11,11 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useContext, useMemo, useEffect } from "react";
+import React, { useMemo, useEffect } from "react";
 
 import { LovProps, useLovListMemo } from "./lovUtils";
-import { TaipyContext } from "../../context/taipyContext";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useIsMobile } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useIsMobile, useModule } from "../../utils/hooks";
 import { createSetMenuAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 
@@ -37,13 +36,14 @@ const MenuCtl = (props: MenuCtlProps) => {
         width = "15vw",
         width_Mobile_ = "85vw",
     } = props;
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const isMobile = useIsMobile();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, props.updateVars, props.updateVarName);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars, props.updateVarName);
 
     const lovList = useLovListMemo(props.lov, defaultLov, true);
 

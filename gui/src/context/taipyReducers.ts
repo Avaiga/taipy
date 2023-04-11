@@ -43,7 +43,6 @@ enum Types {
     SetMenu = "SET_MENU",
     DownloadFile = "DOWNLOAD_FILE",
     Partial = "PARTIAL",
-    ModuleContext = "MODULE_CONTEXT",
     Acknowledgement = "ACKNOWLEDGEMENT",
 }
 
@@ -66,7 +65,6 @@ export interface TaipyState {
     id: string;
     menu: MenuProps;
     download?: FileDownloadProps;
-    moduleContext: string;
     ackList: string[];
 }
 
@@ -91,6 +89,7 @@ export interface AlertMessage {
 
 interface TaipyAction extends NamePayload, TaipyBaseAction {
     propagate?: boolean;
+    context?: string;
 }
 
 interface TaipyMultipleAction extends TaipyBaseAction {
@@ -134,10 +133,6 @@ export interface FileDownloadProps {
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
 
 interface TaipyAckAction extends TaipyBaseAction, IdMessage {}
-
-interface TaipyModuleContextAction extends TaipyBaseAction {
-    context: string;
-}
 
 interface TaipyDownloadAction extends TaipyBaseAction, FileDownloadProps {}
 
@@ -199,14 +194,13 @@ export const INITIAL_STATE: TaipyState = {
         : undefined,
     id: getLocalStorageValue("TaipyClientId", ""),
     menu: {},
-    moduleContext: "",
     ackList: [],
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
     isSocketConnected: false,
-    socket: io("/"),
+    socket: io("/", { autoConnect: false }),
 });
 
 const storeClientId = (id: string) => localStorage && localStorage.setItem("TaipyClientId", id);
@@ -222,7 +216,10 @@ const messageToAction = (message: WsMessage) => {
         } else if (message.type === "BL") {
             return createBlockAction(message as unknown as BlockMessage);
         } else if (message.type === "NA") {
-            return createNavigateAction((message as unknown as NavigateMessage).to, (message as unknown as NavigateMessage).tab);
+            return createNavigateAction(
+                (message as unknown as NavigateMessage).to,
+                (message as unknown as NavigateMessage).tab
+            );
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
         } else if (message.type === "DF") {
@@ -264,8 +261,22 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
             sendWsMessage(socket, "ID", "TaipyClientId", id, id);
             dispatch({ type: Types.SocketConnected });
         });
+        // try to reconnect on connect_error
+        socket.on("connect_error", () => {
+            setTimeout(() => {
+                socket.connect();
+            }, 500);
+        });
+        // try to reconnect on server disconnection
+        socket.on("disconnect", (reason) => {
+            if (reason === "io server disconnect") {
+                socket.connect();
+            }
+        });
         // handle message data from backend
         socket.on("message", getWsMessageListener(dispatch));
+        // only now does the socket tries to open/connect
+        socket.connect();
     }
 };
 
@@ -362,14 +373,18 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 };
             }
         case Types.Navigate:
-            return { ...state, navigateTo: (action as unknown as TaipyNavigateAction).to, navigateTab: (action as unknown as TaipyNavigateAction).tab };
+            return {
+                ...state,
+                navigateTo: (action as unknown as TaipyNavigateAction).to,
+                navigateTab: (action as unknown as TaipyNavigateAction).tab,
+            };
         case Types.ClientId:
             const id = (action as unknown as TaipyIdAction).id;
             storeClientId(id);
             return { ...state, id: id };
         case Types.Acknowledgement:
             const ackList = state.ackList.filter((v) => v !== (action as unknown as TaipyAckAction).id);
-            return ackList.length < state.ackList.length ? { ...state, ackList} : state;
+            return ackList.length < state.ackList.length ? { ...state, ackList } : state;
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
@@ -423,10 +438,6 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             }
             return { ...state, data: data };
         }
-        case Types.ModuleContext: {
-            const mcAction = baseAction as TaipyModuleContextAction;
-            return { ...state, moduleContext: mcAction.context };
-        }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -440,18 +451,18 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 action.name,
                 action.payload,
                 state.id,
-                state.moduleContext,
+                action.context,
                 action.propagate
             );
             break;
         case Types.Action:
-            ackId = sendWsMessage(state.socket, "A", action.name, action.payload, state.id, state.moduleContext);
+            ackId = sendWsMessage(state.socket, "A", action.name, action.payload, state.id, action.context);
             break;
         case Types.RequestDataUpdate:
-            ackId = sendWsMessage(state.socket, "DU", action.name, action.payload, state.id, state.moduleContext);
+            ackId = sendWsMessage(state.socket, "DU", action.name, action.payload, state.id, action.context);
             break;
         case Types.RequestUpdate:
-            ackId = sendWsMessage(state.socket, "RU", action.name, action.payload, state.id, state.moduleContext);
+            ackId = sendWsMessage(state.socket, "RU", action.name, action.payload, state.id, action.context);
             break;
     }
     if (ackId) return { ...state, ackList: [...state.ackList, ackId] };
@@ -460,7 +471,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
 
 const createUpdateAction = (payload: NamePayload): TaipyAction => ({
     ...payload,
-    type: Types.Update
+    type: Types.Update,
 });
 
 const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
@@ -476,6 +487,7 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
  * @param name - The name of the variable holding the requested data
  *    as received as a property.
  * @param value - The new value for the variable named *name*.
+ * @param context - The execution context.
  * @param onChange - The name of the `on_change` Python function to
  *   invoke on the backend (default is "on_change").
  * @param propagate - A flag indicating that the variable should be
@@ -487,12 +499,14 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
 export const createSendUpdateAction = (
     name = "",
     value: unknown,
+    context: string | undefined,
     onChange?: string,
     propagate = true,
     relName?: string
 ): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
+    context: context,
     propagate: propagate,
     payload: getPayload(value, onChange, relName),
 });
@@ -514,6 +528,7 @@ const getPayload = (value: unknown, onChange?: string, relName?: string) => {
  * This action will trigger the invocation of the `on_action` Python function on the backend,
  * providing all the parameters as a payload.
  * @param name - The name of the action function on the backend.
+ * @param context - The execution context.
  * @param value - The value associated with the action. This can be an object or
  *   any type of value.
  * @param args - Additional information associated to the action.
@@ -521,11 +536,13 @@ const getPayload = (value: unknown, onChange?: string, relName?: string) => {
  */
 export const createSendActionNameAction = (
     name: string | undefined,
+    context: string | undefined,
     value: unknown,
     ...args: unknown[]
 ): TaipyAction => ({
     type: Types.Action,
     name: name || "",
+    context: context,
     payload:
         typeof value === "object" && !Array.isArray(value) && value !== null
             ? { ...(value as object), args: args }
@@ -535,6 +552,7 @@ export const createSendActionNameAction = (
 export const createRequestChartUpdateAction = (
     name: string | undefined,
     id: string | undefined,
+    context: string | undefined,
     columns: string[],
     pageKey: string,
     decimatorPayload: unknown | undefined
@@ -542,6 +560,7 @@ export const createRequestChartUpdateAction = (
     createRequestDataUpdateAction(
         name,
         id,
+        context,
         columns,
         pageKey,
         {
@@ -553,6 +572,7 @@ export const createRequestChartUpdateAction = (
 export const createRequestTableUpdateAction = (
     name: string | undefined,
     id: string | undefined,
+    context: string | undefined,
     columns: string[],
     pageKey: string,
     start?: number,
@@ -566,7 +586,7 @@ export const createRequestTableUpdateAction = (
     handleNan?: boolean,
     filters?: Array<FilterDesc>
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, columns, pageKey, {
+    createRequestDataUpdateAction(name, id, context, columns, pageKey, {
         start: start,
         end: end,
         orderby: orderBy,
@@ -582,6 +602,7 @@ export const createRequestTableUpdateAction = (
 export const createRequestInfiniteTableUpdateAction = (
     name: string | undefined,
     id: string | undefined,
+    context: string | undefined,
     columns: string[],
     pageKey: string,
     start?: number,
@@ -595,7 +616,7 @@ export const createRequestInfiniteTableUpdateAction = (
     handleNan?: boolean,
     filters?: Array<FilterDesc>
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, columns, pageKey, {
+    createRequestDataUpdateAction(name, id, context, columns, pageKey, {
         infinite: true,
         start: start,
         end: end,
@@ -618,6 +639,7 @@ export const createRequestInfiniteTableUpdateAction = (
  * @param name - The name of the variable holding the requested data as received as
  *   a property.
  * @param id - The identifier of the visual element.
+ * @param context - The execution context.
  * @param columns - The list of the columns needed by the element that emitted this
  *   action.
  * @param pageKey - The unique identifier of the data that will be received from
@@ -631,6 +653,7 @@ export const createRequestInfiniteTableUpdateAction = (
 export const createRequestDataUpdateAction = (
     name: string | undefined,
     id: string | undefined,
+    context: string | undefined,
     columns: string[],
     pageKey: string,
     payload: Record<string, unknown>,
@@ -652,6 +675,7 @@ export const createRequestDataUpdateAction = (
     return {
         type: Types.RequestDataUpdate,
         name: name || "",
+        context: context,
         payload: payload,
     };
 };
@@ -666,13 +690,14 @@ export const createRequestDataUpdateAction = (
  * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values
  * @returns The action fed to the reducer.
  */
-export const createRequestUpdateAction = (id: string | undefined, names: string[], forceRefresh = false): TaipyAction => ({
+export const createRequestUpdateAction = (id: string | undefined, context: string | undefined, names: string[], forceRefresh = false): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
+    context: context,
     payload: {
         id: id,
         names: names,
-        refresh: forceRefresh
+        refresh: forceRefresh,
     },
 });
 
@@ -731,7 +756,7 @@ export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
 export const createNavigateAction = (to?: string, tab?: string): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,
-    tab
+    tab,
 });
 
 export const createIdAction = (id: string): TaipyIdAction => ({
@@ -760,11 +785,6 @@ export const createPartialAction = (name: string, create: boolean): TaipyPartial
     type: Types.Partial,
     name,
     create,
-});
-
-export const createModuleContextAction = (context: string): TaipyModuleContextAction => ({
-    type: Types.ModuleContext,
-    context,
 });
 
 type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR" | "ACK";

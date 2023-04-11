@@ -11,15 +11,14 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import FileDownloadIco from "@mui/icons-material/FileDownload";
 
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { noDisplayStyle, TaipyActiveProps } from "./utils";
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 
 interface FileDownloadProps extends TaipyActiveProps {
@@ -38,7 +37,8 @@ interface FileDownloadProps extends TaipyActiveProps {
 const FileDownload = (props: FileDownloadProps) => {
     const { id, auto, name, bypassPreview, onAction, label, defaultLabel = "" } = props;
     const aRef = useRef<HTMLAnchorElement>(null);
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -49,16 +49,16 @@ const FileDownload = (props: FileDownloadProps) => {
     useEffect(() => {
         if (auto && aRef.current && active && render) {
             aRef.current.click();
-            onAction && dispatch(createSendActionNameAction(id, onAction));
+            onAction && dispatch(createSendActionNameAction(id, module, onAction));
         }
-    }, [active, render, auto, dispatch, id, onAction]);
+    }, [active, render, auto, dispatch, id, onAction, module]);
 
     const clickHandler = useCallback(() => {
         if (aRef.current) {
             aRef.current.click();
-            onAction && dispatch(createSendActionNameAction(id, onAction));
+            onAction && dispatch(createSendActionNameAction(id, module, onAction));
         }
-    }, [dispatch, id, onAction]);
+    }, [dispatch, id, onAction, module]);
 
     const [url, download] = useMemo(() => {
         const url = props.content || props.defaultContent || "";

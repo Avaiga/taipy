@@ -19,7 +19,7 @@ import UploadFile from "@mui/icons-material/UploadFile";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty, useModule } from "../../utils/hooks";
 import { noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 
@@ -58,6 +58,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const { state, dispatch } = useContext(TaipyContext);
     const butRef = useRef<HTMLElement>(null);
     const inputId = useMemo(() => (id || `tp-${Date.now()}-${Math.random()}`) + "-upload-file", [id]);
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -72,7 +73,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 uploadFile(updateVarName, files, setProgress, state.id).then(
                     (value) => {
                         setUpload(false);
-                        onAction && dispatch(createSendActionNameAction(id, onAction));
+                        onAction && dispatch(createSendActionNameAction(id, module, onAction));
                         dispatch(
                             createAlertAction({ atype: "success", message: value, system: false, duration: 3000 })
                         );
@@ -86,7 +87,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 );
             }
         },
-        [state.id, id, onAction, updateVarName, dispatch]
+        [state.id, id, onAction, updateVarName, dispatch, module]
     );
 
     const handleChange = useCallback(

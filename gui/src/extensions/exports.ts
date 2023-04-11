@@ -19,7 +19,7 @@ import { getUpdateVar } from "../components/Taipy/utils";
 import { ColumnDesc, RowType, RowValue } from "../components/Taipy/tableUtils";
 import { TaipyContext, TaipyStore } from "../context/taipyContext";
 import { TaipyBaseAction, TaipyState } from "../context/taipyReducers";
-import { useDynamicProperty, useDispatchRequestUpdateOnFirstRender, useDispatch } from "../utils/hooks";
+import { useDynamicProperty, useDispatchRequestUpdateOnFirstRender, useDispatch, useModule } from "../utils/hooks";
 import {
     createSendActionNameAction,
     createSendUpdateAction,
@@ -40,6 +40,7 @@ export {
     useLovListMemo,
     useDispatchRequestUpdateOnFirstRender,
     useDispatch,
+    useModule,
 };
 
 export type {

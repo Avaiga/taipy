@@ -17,7 +17,7 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
 import TableFilter from "./TableFilter";
-import { ColumnDesc, defaultDateFormat } from "./tableUtils";
+import { ColumnDesc } from "./tableUtils";
 
 const tableColumns = {
     StringCol: { dfid: "StringCol", type: "object", index: 0, format: "", filter: true },
@@ -139,7 +139,7 @@ describe("Table Filter Component", () => {
         expect(validate).not.toBeDisabled();
     });
     it("behaves on date column", async () => {
-        const { getByTestId, getAllByTestId, findByRole, getByText, getAllByText, getByPlaceholderText } = render(
+        const { getByTestId, getAllByTestId, findByRole, getByText, getByPlaceholderText } = render(
                 <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} />
         );
         const elt = getByTestId("FilterListIcon");
@@ -154,7 +154,7 @@ describe("Table Filter Component", () => {
         await userEvent.click(getByText("before equal"));
         const validate = getByTestId("CheckIcon").parentElement;
         expect(validate).toBeDisabled();
-        const input = getByPlaceholderText("⁦⁨YYYY⁩ / ⁨MM⁩ / ⁨DD⁩⁩");
+        const input = getByPlaceholderText("YYYY / MM / DD");
         await userEvent.click(input);
         await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}2020/11/11", {delay: 1});
         expect(validate).not.toBeDisabled();

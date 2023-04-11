@@ -26,8 +26,15 @@ export interface TaipyStore {
 
 /**
  * The Taipy-specific React context.
- * 
+ *
  * The type of this variable is `React.Context<Store>`.
  */
 export const TaipyContext = createContext<TaipyStore>({state: {data: {}} as TaipyState, dispatch: () => null});
 TaipyContext.displayName = 'Taipy Context';
+
+interface PageStore {
+    module?: string;
+}
+
+export const PageContext = createContext<PageStore>({});
+PageContext.displayName = 'Page Context';

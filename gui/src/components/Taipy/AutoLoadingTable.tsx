@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties, MouseEvent } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo, CSSProperties, MouseEvent } from "react";
 import Box from "@mui/material/Box";
 import MuiTable from "@mui/material/Table";
 import TableCell, { TableCellProps } from "@mui/material/TableCell";
@@ -22,7 +22,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList as List, ListOnItemsRenderedProps } from "react-window";
+import { FixedSizeList, ListOnItemsRenderedProps } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import Skeleton from "@mui/material/Skeleton";
 import IconButton from "@mui/material/IconButton";
@@ -31,7 +31,6 @@ import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 
-import { TaipyContext } from "../../context/taipyContext";
 import {
     createRequestInfiniteTableUpdateAction,
     createSendActionNameAction,
@@ -64,10 +63,12 @@ import {
 } from "./tableUtils";
 import {
     useClassNames,
+    useDispatch,
     useDispatchRequestUpdateOnFirstRender,
     useDynamicJsonProperty,
     useDynamicProperty,
     useFormatConfig,
+    useModule,
 } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 import { getSuffixedClassNames } from "./utils";
@@ -178,7 +179,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const page = useRef<key2Rows>({ key: defaultKey, promises: {} });
     const [orderBy, setOrderBy] = useState("");
     const [order, setOrder] = useState<Order>("asc");
@@ -188,6 +189,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const infiniteLoaderRef = useRef<InfiniteLoader>(null);
     const headerRow = useRef<HTMLTableRowElement>(null);
     const formatConfig = useFormatConfig();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -211,7 +213,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         }
     }, [props.data]);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     const onSort = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
@@ -347,6 +349,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     createRequestInfiniteTableUpdateAction(
                         updateVarName,
                         id,
+                        module,
                         cols,
                         key,
                         startIndex,
@@ -376,18 +379,19 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             handleNan,
             appliedFilters,
             dispatch,
+            module,
         ]
     );
 
     const onAddRowClick = useCallback(
         () =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onAdd,
                     index: visibleStartIndex,
                 })
             ),
-        [visibleStartIndex, dispatch, updateVarName, onAdd]
+        [visibleStartIndex, dispatch, updateVarName, onAdd, module]
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
@@ -395,7 +399,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const onCellValidation: OnCellValidation = useCallback(
         (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onEdit,
                     value: value,
                     index: getRowIndex(rows[rowIndex], rowIndex),
@@ -403,29 +407,29 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     user_value: userValue,
                 })
             ),
-        [dispatch, updateVarName, onEdit, rows]
+        [dispatch, updateVarName, onEdit, rows, module]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
         (rowIndex: number) =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onDelete,
                     index: getRowIndex(rows[rowIndex], rowIndex),
                 })
             ),
-        [dispatch, updateVarName, onDelete, rows]
+        [dispatch, updateVarName, onDelete, rows, module]
     );
 
     const onRowSelection: OnRowSelection = useCallback(
         (rowIndex: number) =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex),
                 })
             ),
-        [dispatch, updateVarName, onAction, rows]
+        [dispatch, updateVarName, onAction, rows, module]
     );
 
     const onTaipyItemsRendered = useCallback(
@@ -485,12 +489,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer>
-                        <MuiTable
-                            sx={tableSx}
-                            aria-labelledby="tableTitle"
-                            size={size}
-                            stickyHeader={true}
-                        >
+                        <MuiTable sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow ref={headerRow}>
                                     {colsOrder.map((col, idx) => (
@@ -578,9 +577,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         minimumBatchSize={pageSize}
                                     >
                                         {({ onItemsRendered, ref }) => (
-                                            <List
-                                                height={height}
-                                                width={width}
+                                            <FixedSizeList
+                                                height={height || 100}
+                                                width={width || 100}
                                                 itemCount={rowCount}
                                                 itemSize={getRowHeight(size)}
                                                 onItemsRendered={onTaipyItemsRendered(onItemsRendered)}
@@ -588,7 +587,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                 itemData={rowData}
                                             >
                                                 {Row}
-                                            </List>
+                                            </FixedSizeList>
                                         )}
                                     </InfiniteLoader>
                                 )}

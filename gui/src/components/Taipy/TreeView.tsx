@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useContext, useCallback, useEffect, useMemo, SyntheticEvent, HTMLAttributes, forwardRef, Ref, CSSProperties } from "react";
+import React, { useState, useCallback, useEffect, useMemo, SyntheticEvent, HTMLAttributes, forwardRef, Ref, CSSProperties } from "react";
 import Box from "@mui/material/Box";
 import MuiTreeView from "@mui/lab/TreeView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -22,7 +22,6 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import {
     isLovParent,
@@ -32,7 +31,7 @@ import {
     showItem,
     useLovListMemo,
 } from "./lovUtils";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useModule } from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
@@ -145,13 +144,14 @@ const TreeView = (props: TreeViewProps) => {
     const [oneExpanded, setOneExpanded] = useState(false);
     const [refreshExpanded, setRefreshExpanded] = useState(false);
     const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars, updateVarName);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, updateVarName);
 
     const lovList = useLovListMemo(lov, defaultLov, true);
     const treeSx = useMemo(() => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }), [width]);
@@ -232,13 +232,14 @@ const TreeView = (props: TreeViewProps) => {
                     createSendUpdateAction(
                         updateVarName,
                         Array.isArray(nodeIds) ? nodeIds : [nodeIds],
+                        module,
                         props.onChange,
                         propagate,
                         valueById ? undefined : getUpdateVar(updateVars, "lov")
                     )
                 );
         },
-        [updateVarName, dispatch, propagate, updateVars, valueById, props.onChange]
+        [updateVarName, dispatch, propagate, updateVars, valueById, props.onChange, module]
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
@@ -253,18 +254,18 @@ const TreeView = (props: TreeViewProps) => {
                         nodeIds = nodeIds.filter((n, i) => i == 0 || isLovParent(lovList, n, nodeIds[0]));
                     }
                     if (refreshExpanded) {
-                        dispatch(createSendUpdateAction(expVar, nodeIds, props.onChange, propagate));
+                        dispatch(createSendUpdateAction(expVar, nodeIds, module, props.onChange, propagate));
                     }
                     return nodeIds;
                 });
             } else {
                 setExpandedNodes(nodeIds);
                 if (refreshExpanded) {
-                    dispatch(createSendUpdateAction(expVar, nodeIds, props.onChange, propagate));
+                    dispatch(createSendUpdateAction(expVar, nodeIds, module, props.onChange, propagate));
                 }
             }
         },
-        [oneExpanded, refreshExpanded, lovList, propagate, updateVars, dispatch, props.onChange]
+        [oneExpanded, refreshExpanded, lovList, propagate, updateVars, dispatch, props.onChange, module]
     );
 
     const treeProps = useMemo(

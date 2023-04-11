@@ -11,16 +11,15 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useContext, useMemo, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { SxProps } from "@mui/material";
 import MuiSlider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { getCssSize, getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
@@ -52,9 +51,10 @@ const Slider = (props: SliderProps) => {
         valueById,
     } = props;
     const [value, setValue] = useState(0);
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const delayCall = useRef(-1);
-    const lastVal = useRef<string|number>(0)
+    const lastVal = useRef<string|number>(0);
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -76,17 +76,17 @@ const Slider = (props: SliderProps) => {
                 if (changeDelay) {
                     if (delayCall.current < 0) {
                         delayCall.current = window.setTimeout(() => {
-                            dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                            dispatch(createSendUpdateAction(updateVarName, lastVal.current, module, props.onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
                             delayCall.current = -1;
                         }, changeDelay);
                     }
                 } else {
-                    dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                    dispatch(createSendUpdateAction(updateVarName, lastVal.current, module, props.onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
                 }
                 delayCall.current = 0;
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.onChange, changeDelay]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.onChange, changeDelay, module]
     );
 
     const handleRangeCommitted = useCallback(
@@ -98,6 +98,7 @@ const Slider = (props: SliderProps) => {
                     createSendUpdateAction(
                         updateVarName,
                         value,
+                        module,
                         props.onChange,
                         propagate,
                         valueById ? undefined : getUpdateVar(updateVars, "lov")
@@ -105,7 +106,7 @@ const Slider = (props: SliderProps) => {
                 );
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.onChange]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.onChange, module]
     );
 
     const getLabel = useCallback(

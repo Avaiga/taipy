@@ -62,7 +62,7 @@ must be created (using the `create*Action()` functions) and dispatched to the Re
 context:
 
 ```
-const { dispatch } = useContext(Context);
+const dispatch = useDispatch();
 ...
 const action = create*Action(...);
 ...

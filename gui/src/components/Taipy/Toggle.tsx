@@ -11,18 +11,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, MouseEvent, useCallback, useContext, useEffect, useState } from "react";
+import React, { CSSProperties, MouseEvent, useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Tooltip from "@mui/material/Tooltip";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import ThemeToggle from "./ThemeToggle";
 import { LovProps, useLovListMemo } from "./lovUtils";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { getUpdateVar } from "./utils";
 import { Icon, IconAvatar } from "../../utils/icon";
 
@@ -50,8 +49,9 @@ const Toggle = (props: ToggleProps) => {
         updateVars = "",
         valueById,
     } = props;
-    const { dispatch } = useContext(TaipyContext);
-    const [value, setValue] = useState(props.defaultValue)
+    const dispatch = useDispatch();
+    const [value, setValue] = useState(props.defaultValue);
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -68,12 +68,13 @@ const Toggle = (props: ToggleProps) => {
                 createSendUpdateAction(
                     updateVarName,
                     val === null ? unselectedValue : val,
+                    module,
                     props.onChange,
                     propagate,
                     valueById ? undefined : getUpdateVar(updateVars, "lov")
                 )
             )},
-        [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById, props.onChange, props.allowUnselect]
+        [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById, props.onChange, props.allowUnselect, module]
     );
 
     useEffect(() => {props.value !== undefined && setValue(props.value)}, [props.value]);

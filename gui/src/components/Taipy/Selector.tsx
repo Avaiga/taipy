@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useContext, useCallback, useEffect, useMemo, CSSProperties, MouseEvent } from "react";
+import React, { useState, useCallback, useEffect, useMemo, CSSProperties, MouseEvent } from "react";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import InputLabel from "@mui/material/InputLabel";
@@ -31,10 +31,9 @@ import Chip from "@mui/material/Chip";
 import { Theme, useTheme } from "@mui/material";
 
 import { doNotPropagateEvent, getUpdateVar } from "./utils";
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, useLovListMemo } from "./lovUtils";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useModule } from "../../utils/hooks";
 import { Icon } from "../../utils/icon";
 
 const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
@@ -93,14 +92,15 @@ const Selector = (props: SelTreeProps) => {
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
+    const module = useModule();
     const theme = useTheme();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars, updateVarName);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, updateVarName);
 
     const lovList = useLovListMemo(lov, defaultLov);
     const listSx = useMemo(
@@ -150,6 +150,7 @@ const Selector = (props: SelTreeProps) => {
                             createSendUpdateAction(
                                 updateVarName,
                                 newKeys,
+                                module,
                                 props.onChange,
                                 propagate,
                                 valueById ? undefined : getUpdateVar(updateVars, "lov")
@@ -161,6 +162,7 @@ const Selector = (props: SelTreeProps) => {
                             createSendUpdateAction(
                                 updateVarName,
                                 key,
+                                module,
                                 props.onChange,
                                 propagate,
                                 valueById ? undefined : getUpdateVar(updateVars, "lov")
@@ -171,7 +173,7 @@ const Selector = (props: SelTreeProps) => {
                 });
             }
         },
-        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.onChange]
+        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.onChange, module]
     );
 
     const handleChange = useCallback(
@@ -184,13 +186,14 @@ const Selector = (props: SelTreeProps) => {
                 createSendUpdateAction(
                     updateVarName,
                     value,
+                    module,
                     props.onChange,
                     propagate,
                     valueById ? undefined : getUpdateVar(updateVars, "lov")
                 )
             );
         },
-        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange]
+        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
     );
 
     const handleDelete = useCallback(
@@ -203,6 +206,7 @@ const Selector = (props: SelTreeProps) => {
                         createSendUpdateAction(
                             updateVarName,
                             keys,
+                            module,
                             props.onChange,
                             propagate,
                             valueById ? undefined : getUpdateVar(updateVars, "lov")
@@ -211,7 +215,7 @@ const Selector = (props: SelTreeProps) => {
                     return keys;
                 });
         },
-        [updateVarName, propagate, dispatch, updateVars, valueById, props.onChange]
+        [updateVarName, propagate, dispatch, updateVars, valueById, props.onChange, module]
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);

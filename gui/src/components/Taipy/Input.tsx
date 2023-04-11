@@ -11,14 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useContext, useRef, KeyboardEvent } from "react";
+import React, { useState, useEffect, useCallback, useRef, KeyboardEvent } from "react";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
 
@@ -45,9 +44,10 @@ const Input = (props: TaipyInputProps) => {
         linesShown = 5,
     } = props;
     const [value, setValue] = useState(defaultValue);
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const delayCall = useRef(-1);
     const [actionKeys] = useState(() => (onAction ? getActionKeys(props.actionKeys) : []));
+    const module = useModule();
 
     const changeDelay = typeof props.changeDelay === "number" && props.changeDelay >= 0 ? props.changeDelay : 300;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -64,13 +64,13 @@ const Input = (props: TaipyInputProps) => {
                 }
                 delayCall.current = window.setTimeout(() => {
                     delayCall.current = -1;
-                    dispatch(createSendUpdateAction(updateVarName, val, onChange, propagate));
+                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
                 }, changeDelay);
             } else {
-                dispatch(createSendUpdateAction(updateVarName, val, onChange, propagate));
+                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
             }
         },
-        [updateVarName, dispatch, propagate, onChange, changeDelay]
+        [updateVarName, dispatch, propagate, onChange, changeDelay, module]
     );
 
     const handleAction = useCallback(
@@ -80,13 +80,13 @@ const Input = (props: TaipyInputProps) => {
                 if (changeDelay && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
-                    dispatch(createSendUpdateAction(updateVarName, val, onChange, propagate));
+                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
                 }
-                dispatch(createSendActionNameAction(id, onAction, evt.key, updateVarName, val));
+                dispatch(createSendActionNameAction(id, module, onAction, evt.key, updateVarName, val));
                 evt.preventDefault();
             }
         },
-        [actionKeys, updateVarName, onAction, id, dispatch, onChange, changeDelay, propagate]
+        [actionKeys, updateVarName, onAction, id, dispatch, onChange, changeDelay, propagate, module]
     );
 
     useEffect(() => {

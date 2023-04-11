@@ -70,9 +70,6 @@ describe("reducer", () => {
     it("resets partial", async () => {
         expect(taipyReducer({...INITIAL_STATE, data: {partial: true}}, {type: "PARTIAL", name: "partial"} as TaipyBaseAction).data.partial).toBeUndefined();
     });
-    it("sets module", async () => {
-        expect(taipyReducer({...INITIAL_STATE}, {type: "MODULE_CONTEXT", context: "context"} as TaipyBaseAction).moduleContext).toBeDefined();
-    });
     it("creates an alert action", () => {
         expect(createAlertAction({atype: "I", message: "message"} as AlertMessage).type).toBe("SET_ALERT");
         expect(createAlertAction({atype: "err", message: "message"} as AlertMessage).atype).toBe("error");

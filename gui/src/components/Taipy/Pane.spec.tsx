@@ -26,7 +26,7 @@ import { HelmetProvider } from "react-helmet-async";
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 mockedAxios.get.mockRejectedValue("Network error: Something went wrong");
-mockedAxios.get.mockResolvedValue({ data: { jsx1: '<div key="mock" data-testid="mocked"></div>' } });
+mockedAxios.get.mockResolvedValue({ data: { jsx_no: '<div key="mock" data-testid="mocked"></div>' } });
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual("react-router-dom"),
@@ -91,7 +91,6 @@ describe("Pane Component", () => {
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
         elt && await userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({context: undefined, type: "MODULE_CONTEXT"});
     });
     it("is enabled by default", async () => {
         const dispatch = jest.fn();

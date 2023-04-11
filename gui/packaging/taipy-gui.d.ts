@@ -97,6 +97,7 @@ export interface Action {}
  * @param name - The name of the variable holding the requested data
  *    as received as a property.
  * @param value - The new value for the variable named *name*.
+ * @param context - The execution context (property `context`).
  * @param onChange - The name of the `on_change` Python function to
  *   invoke on the backend (default is "on_change").
  * @param propagate - A flag indicating that the variable should be
@@ -105,19 +106,20 @@ export interface Action {}
  *   example the lov when a lov value is updated).
  * @returns The action fed to the reducer.
  */
-export declare const createSendUpdateAction: (name: string | undefined, value: unknown, onChange?: string, propagate?: boolean, relName?: string) => Action;
+export declare const createSendUpdateAction: (name: string | undefined, value: unknown, context: string | undefined, onChange?: string, propagate?: boolean, relName?: string) => Action;
 /**
  * Create an *action* `Action` that will be used to update `Context`.
  *
  * This action will trigger the invocation of the `on_action` Python function on the backend,
  * providing all the parameters as a payload.
  * @param name - The name of the action function on the backend.
+ * @param context - The execution context (property `context`).
  * @param value - The value associated with the action. This can be an object or
  *   any type of value.
  * @param args - Additional information associated to the action.
  * @returns The action fed to the reducer.
  */
-export declare const createSendActionNameAction: (name: string | undefined, value: unknown, ...args: unknown[]) => Action;
+export declare const createSendActionNameAction: (name: string | undefined, context: string | undefined, value: unknown, ...args: unknown[]) => Action;
 /**
  * Create a *request data update* `Action` that will be used to update the `Context`.
  *
@@ -127,6 +129,7 @@ export declare const createSendActionNameAction: (name: string | undefined, valu
  * @param name - The name of the variable holding the requested data as received as
  *   a property.
  * @param id - The identifier of the visual element.
+ * @param context - The execution context (property `context`).
  * @param columns - The list of the columns needed by the element that emitted this
  *   action.
  * @param pageKey - The unique identifier of the data that will be received from
@@ -137,18 +140,19 @@ export declare const createSendActionNameAction: (name: string | undefined, valu
  * @param library - The name of the {@link extension} library.
  * @returns The action fed to the reducer.
  */
-export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
+export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, context: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
 /**
  * Create a *request update* `Action` that will be used to update the `Context`.
  *
  * This action will generate an update of the elements holding the variables named
  * *names* on the front-end.
  * @param id - The identifier of the visual element.
+ * @param context - The execution context (property `context`).
  * @param names - The names of the requested variables as received in updateVarName and/or updateVars properties.
  * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values.
  * @returns The action fed to the reducer.
  */
-export declare const createRequestUpdateAction: (id: string | undefined, names: string[], forceRefresh?: boolean) => Action;
+export declare const createRequestUpdateAction: (id: string | undefined, context: string | undefined, names: string[], forceRefresh?: boolean) => Action;
 /**
  * A column description as received by the backend.
  */
@@ -232,10 +236,11 @@ export const useDynamicJsonProperty: <T>(value: string | T, defaultValue: string
  * A React hook that requests an update for every dynamic property of the element.
  * @param dispatch - The React dispatcher associated to `TaipyContext`.
  * @param id - The identifier of the element.
+ * @param context - The execution context (property `context`).
  * @param updateVars - The content of the property `updateVars`.
  * @param varName - The default property backend provided variable (through property `updateVarName`).
  */
- export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: React.Dispatch<Action>, id?: string, updateVars?: string, varName?: string) => void;
+ export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: React.Dispatch<Action>, id?: string, context?: string, updateVars?: string, varName?: string) => void;
 /**
  * A React hook that returns the *dispatch* function.
  *
@@ -244,3 +249,10 @@ export const useDynamicJsonProperty: <T>(value: string | T, defaultValue: string
  * @returns The *dispatch* function.
  */
  export declare const useDispatch: () => React.Dispatch<Action>;
+/**
+ * A React hook that returns the page module.
+ *
+ * The *module* Needs to be added to all Actions to allow for the correct execution of backend functions.
+ * @returns The page module.
+ */
+export declare const useModule: () => string | undefined;

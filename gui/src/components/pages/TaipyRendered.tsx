@@ -18,10 +18,10 @@ import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { TaipyContext } from "../../context/taipyContext";
+import { PageContext, TaipyContext } from "../../context/taipyContext";
 import { getRegisteredComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
-import { createModuleContextAction, createPartialAction } from "../../context/taipyReducers";
+import { createPartialAction } from "../../context/taipyReducers";
 import ErrorFallback from "../../utils/ErrorBoundary";
 
 interface TaipyRenderedProps {
@@ -60,12 +60,17 @@ const setStyle = (id: string, styleString: string): void => {
     }
 };
 
-const emptyArray:string[] = [];
+const emptyArray: string[] = [];
+
+interface PageState {
+    jsx?: string;
+    module?: string;
+}
 
 const TaipyRendered = (props: TaipyRenderedProps) => {
-    const {partial, fromBlock} = props;
+    const { partial, fromBlock } = props;
     const location = useLocation();
-    const [JSX, setJSX] = useState("");
+    const [pageState, setPageState] = useState<PageState>({});
     const [head, setHead] = useState<HeadProps[]>([]);
     const { state, dispatch } = useContext(TaipyContext);
 
@@ -77,33 +82,47 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
             dispatch(createPartialAction(path.slice(1), false));
         } else {
             axios
-            .get<AxiosRenderer>(`/taipy-jsx${path}`, {params: {client_id: state.id || "", v: window.taipyVersion}})
-            .then((result) => {
-                // set rendered JSX and CSS style from fetch result
-                typeof result.data.jsx === "string" && setJSX(result.data.jsx);
-                if (!fromBlock) {
-                    setStyle("Taipy_style", result.data.style || "");
-                    result.data.head && setHead(result.data.head);
-                }
-                dispatch(createModuleContextAction(result.data.context));
-            })
-            .catch((error) => setJSX(`<h1>${error.response?.data || `No data fetched from backend from ${path === "/TaiPy_root_page" ? "/" : path}`}</h1><br></br>${error}`));
+                .get<AxiosRenderer>(`/taipy-jsx${path}`, {
+                    params: { client_id: state.id || "", v: window.taipyVersion },
+                })
+                .then((result) => {
+                    // set rendered JSX and CSS style from fetch result
+                    if (typeof result.data.jsx === "string") {
+                        setPageState({module: result.data.context, jsx: result.data.jsx });
+                    }
+                    if (!fromBlock) {
+                        setStyle("Taipy_style", result.data.style || "");
+                        Array.isArray(result.data.head) && setHead(result.data.head);
+                    }
+                })
+                .catch((error) =>
+                    setPageState({
+                        jsx: `<h1>${
+                            error.response?.data ||
+                            `No data fetched from backend from ${path === "/TaiPy_root_page" ? "/" : path}`
+                        }</h1><br></br>${error}`,
+                    })
+                );
         }
     }, [path, state.id, dispatch, partial, fromBlock]);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {head.length ? <Helmet>{head.map((v) => React.createElement(v.tag, v.props, v.content))}</Helmet> : null}
-            <JsxParser
-                disableKeyGeneration={true}
-                bindings={state.data}
-                components={getRegisteredComponents() as Record<string, ComponentType>}
-                jsx={JSX}
-                renderUnrecognized={unregisteredRender}
-                allowUnknownElements={false}
-                renderError={renderError}
-                blacklistedAttrs={emptyArray}
-            />
+            {head.length ? (
+                <Helmet>{head.map((v) => React.createElement(v.tag, v.props, v.content))}</Helmet>
+            ) : null}
+            <PageContext.Provider value={pageState}>
+                <JsxParser
+                    disableKeyGeneration={true}
+                    bindings={state.data}
+                    components={getRegisteredComponents() as Record<string, ComponentType>}
+                    jsx={pageState.jsx}
+                    renderUnrecognized={unregisteredRender}
+                    allowUnknownElements={false}
+                    renderError={renderError}
+                    blacklistedAttrs={emptyArray}
+                />
+            </PageContext.Provider>
         </ErrorBoundary>
     );
 };

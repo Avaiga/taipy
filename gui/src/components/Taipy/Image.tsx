@@ -11,14 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { TaipyActiveProps } from "./utils";
 
 interface ImageProps extends TaipyActiveProps {
@@ -33,8 +32,9 @@ interface ImageProps extends TaipyActiveProps {
 
 const Image = (props: ImageProps) => {
     const { id, onAction, width = 300, height } = props;
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const divRef = useRef<HTMLDivElement>(null);
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -44,9 +44,9 @@ const Image = (props: ImageProps) => {
 
     const handleClick = useCallback(() => {
         if (onAction) {
-            dispatch(createSendActionNameAction(id, onAction));
+            dispatch(createSendActionNameAction(id, module, onAction));
         }
-    }, [id, onAction, dispatch]);
+    }, [id, onAction, dispatch, module]);
 
     const [svg, svgContent, inlineSvg] = useMemo(() => {
         const p = (content || "").trim();
@@ -59,8 +59,8 @@ const Image = (props: ImageProps) => {
     }, [content]);
 
     const style = useMemo(() => ({
-        width: width, 
-        height: height, 
+        width: width,
+        height: height,
         display: inlineSvg ? "inline-flex" : undefined,
         verticalAlign: inlineSvg ? "middle" : undefined
     }), [width, height, inlineSvg]);
