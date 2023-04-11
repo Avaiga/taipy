@@ -26,7 +26,7 @@ class GuiCoreContext():
 
 class GuiCore(ElementLibrary):
     
-  elts = {"scenario_selector": Element("scenario", {
+  _elts = {"scenario_selector": Element("scenario", {
     "show_add_button": ElementProperty(PropertyType.dynamic_boolean, True),
     "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
     "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
@@ -42,10 +42,10 @@ class GuiCore(ElementLibrary):
     return "taipy_gui_core"
 
   def get_elements(self) -> t.Dict[str, Element]:
-    return GuiCore.elts
+    return GuiCore._elts
 
   def get_scripts(self) -> t.List[str]:
-    return ["src/taipy/gui-core/lib/taipy-gui-core.js"]
+    return ["lib/taipy-gui-core.js"]
   
   def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
     return GuiCoreContext._VAR_NAME, GuiCoreContext(gui, Core())

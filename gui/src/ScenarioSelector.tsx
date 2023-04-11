@@ -13,16 +13,12 @@ import {
   InputLabel,
   MenuItem,
   Dialog as MuiDialog,
-  ThemeProvider as MuiThemeProvider,
   Select,
   TextField,
-  createTheme,
 } from "@mui/material";
-import { ThemeProvider as StyledThemeProvider } from "styled-components";
 import { ChevronRight, ExpandMore, Flag, Close } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import { Typography } from "@mui/material";
-import dayjs from "dayjs";
 import { useFormik } from "formik";
 
 import {
@@ -33,12 +29,11 @@ import {
   createRequestUpdateAction,
   getUpdateVar,
 } from "taipy-gui";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import MuiTreeView from "@mui/lab/TreeView";
-import * as Yup from "yup";
-import { InferType } from "yup";
+import { scenarios } from "./data";
+import { format } from "date-fns";
 
 export type Scenario = {
   date: string;
@@ -73,15 +68,17 @@ interface ScenarioSelectorProps {
   updateVarNames: string;
 }
 
-const scenarioSchema = Yup.object().shape({
-  config: Yup.string()
-    .trim("Cannot include leading and trailing spaces")
-    .required("Config is required."),
-  name: Yup.string()
-    .trim("Cannot include leading and trailing spaces")
-    .required("Name is required."),
-  date: Yup.string().required("Date is required."),
-});
+// COMMENTED THIS OUT SINCE WE DONT NEED TO VALIDATE FOR NOW
+//
+// const scenarioSchema = Yup.object().shape({
+//   config: Yup.string()
+//     .trim("Cannot include leading and trailing spaces")
+//     .required("Config is required."),
+//   name: Yup.string()
+//     .trim("Cannot include leading and trailing spaces")
+//     .required("Name is required."),
+//   date: Yup.string().required("Date is required."),
+// });
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
   const {} = props;
@@ -91,13 +88,6 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
   const dispatch = useDispatch();
   const module = useModule();
-
-  const theme = createTheme({
-    spacing: 1,
-    palette: {
-      mode: "dark",
-    },
-  });
 
   const showAddButton = useDynamicProperty(
     props.showAddButton,
@@ -120,52 +110,6 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     ""
   );
 
-  //mock data
-  const scenarios = [
-    {
-      cycle: "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
-      id: "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
-      properties: {},
-      tags: [],
-      version: "latest",
-      pipelines: [
-        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4",
-      ],
-      subscribers: [],
-      creation_date: "2022-08-15T19:21:01.871587",
-      primary_scenario: true,
-    },
-    {
-      cycle: "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
-      id: "SCENARIO_2222222222263cb358d-5834-4d73-84e4-a6343df5e08c",
-      properties: {},
-      tags: [],
-      version: "latest",
-      pipelines: [
-        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4",
-      ],
-      subscribers: [],
-      creation_date: "2022-08-15T19:21:01.871587",
-      primary_scenario: false,
-    },
-    {
-      cycle: "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
-      id: "SCENARIO_333333333333333363cb358d-5834-4d73-84e4-a6343df5e08c",
-      properties: {},
-      tags: [],
-      version: "latest",
-      pipelines: [
-        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4",
-      ],
-      subscribers: [],
-      creation_date: "2022-08-16T19:21:01.871587",
-      primary_scenario: true,
-    },
-  ];
-
   const onAdd = (node: Scenario) => {
     const nodeIndex = nodes.findIndex((item) => item.date === node.date);
 
@@ -185,7 +129,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     }
   };
 
-  const onSubmit = (values: InferType<typeof scenarioSchema>) => {
+  const onSubmit = (values: any) => {
     onAdd(values);
     form.resetForm();
     setOpen(false);
@@ -195,9 +139,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     initialValues: {
       config: "",
       name: "",
-      date: dayjs().toString(),
+      date: new Date().toString(),
     },
-    validationSchema: scenarioSchema,
     onSubmit,
   });
 
@@ -213,7 +156,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     if (scenarios) {
       let initalNodes: any[] = [];
       for (var s of scenarios) {
-        const date = dayjs(s.creation_date).format("YYYY-MM-DD");
+        const date = format(new Date(s.creation_date), "yyyy-MM-dd");
         const nodeDate = initalNodes.find((n) => n.date === date);
 
         const childrenObj = {
@@ -238,158 +181,147 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   }, []);
 
   return (
-    <MuiThemeProvider theme={theme}>
-      <StyledThemeProvider theme={theme}>
-        <div>
-          <Box>
-            <Typography variant="h5" gutterBottom>
-              Scenarios
-            </Typography>
-            <MuiTreeView
-              defaultCollapseIcon={<ExpandMore />}
-              defaultExpandIcon={<ChevronRight />}
-              sx={{
-                mb: 20,
-                maxWidth: 400,
-                overflowY: "auto",
-              }}
+    <div>
+      <Box>
+        <Typography variant="h5" gutterBottom>
+          Scenarios
+        </Typography>
+        <MuiTreeView
+          defaultCollapseIcon={<ExpandMore />}
+          defaultExpandIcon={<ChevronRight />}
+          sx={{
+            mb: 2,
+            maxWidth: 400,
+            overflowY: "auto",
+          }}
+        >
+          {nodes.map((item) => (
+            <TreeItem
+              key={item.date}
+              nodeId={item.date}
+              label={`Cycle ${format(new Date(item.date), "yyyy-MM-dd")}`}
             >
-              {nodes.map((item) => (
+              {item.children.map((child, index) => (
                 <TreeItem
-                  key={item.date}
-                  nodeId={item.date}
-                  label={`Cycle ${dayjs(item.date).format("YYYY-MM-DD")}`}
-                >
-                  {item.children.map((child, index) => (
-                    <TreeItem
-                      key={item.date + index}
-                      nodeId={item.date + index.toString()}
-                      label={
-                        <Grid
-                          container
-                          alignItems="center"
-                          direction="row"
-                          flexWrap="nowrap"
-                          justifyContent="space-between"
-                          spacing={1}
-                        >
-                          <Grid item>{child.label}</Grid>
-                          {child.primary && (
-                            <Grid item>
-                              <Flag />
-                            </Grid>
-                          )}
+                  key={item.date + index}
+                  nodeId={item.date + index.toString()}
+                  label={
+                    <Grid
+                      container
+                      alignItems="center"
+                      direction="row"
+                      flexWrap="nowrap"
+                      justifyContent="space-between"
+                      spacing={1}
+                    >
+                      <Grid item>{child.label}</Grid>
+                      {child.primary && (
+                        <Grid item>
+                          <Flag />
                         </Grid>
+                      )}
+                    </Grid>
+                  }
+                />
+              ))}
+            </TreeItem>
+          ))}
+        </MuiTreeView>
+
+        <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
+          Add
+        </Button>
+      </Box>
+
+      <MuiDialog onClose={() => setOpen(false)} open={open}>
+        <DialogTitle>
+          <Grid
+            container
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            Create new scenario
+            <IconButton
+              aria-label="close"
+              onClick={() => setOpen(false)}
+              sx={{ p: 0 }}
+            >
+              <Close />
+            </IconButton>
+          </Grid>
+        </DialogTitle>
+        <form onSubmit={form.handleSubmit}>
+          <DialogContent
+            sx={{
+              width: "500px",
+            }}
+            dividers
+          >
+            <Grid container rowSpacing={2}>
+              <Grid item xs={12}>
+                <FormGroup>
+                  <InputLabel id="select-config">config:</InputLabel>
+                  <Select
+                    id="select-config"
+                    label="Config:"
+                    {...form.getFieldProps("config")}
+                    error={!!form.errors.config && form.touched.config}
+                  >
+                    <MenuItem value={1}>config_test_1</MenuItem>
+                    <MenuItem value={2}>config_test_2</MenuItem>
+                    <MenuItem value={3}>config_test_3</MenuItem>
+                  </Select>
+                  <FormHelperText
+                    error={!!form.errors.config && form.touched.config}
+                    sx={{ pl: 12 }}
+                  >
+                    {form.errors.config}
+                  </FormHelperText>
+                </FormGroup>
+              </Grid>
+              <Grid item xs={12}>
+                <FormGroup>
+                  <InputLabel id="name">name:</InputLabel>
+                  <TextField
+                    id="name"
+                    {...form.getFieldProps("name")}
+                    error={!!form.errors.name && form.touched.name}
+                    helperText={form.errors.name}
+                  />
+                </FormGroup>
+              </Grid>
+              <Grid item xs={12}>
+                <FormGroup>
+                  <InputLabel id="date">date:</InputLabel>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      value={new Date(form.values.date)}
+                      onChange={(date) =>
+                        form.setFieldValue("date", date?.toString())
                       }
                     />
-                  ))}
-                </TreeItem>
-              ))}
-            </MuiTreeView>
+                  </LocalizationProvider>
+                </FormGroup>
+              </Grid>
+            </Grid>
+          </DialogContent>
 
+          <DialogActions>
+            <Button variant="outlined" color="error" type="submit">
+              Add Scenario
+            </Button>
             <Button
               variant="outlined"
               color="error"
-              onClick={() => setOpen(true)}
+              onClick={() => setOpen(false)}
             >
-              Add
+              Cancel
             </Button>
-          </Box>
-
-          <MuiDialog onClose={() => setOpen(false)} open={open}>
-            <DialogTitle>
-              <Grid
-                container
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                Create new scenario
-                <IconButton
-                  aria-label="close"
-                  onClick={() => setOpen(false)}
-                  sx={{ p: 0 }}
-                >
-                  <Close />
-                </IconButton>
-              </Grid>
-            </DialogTitle>
-            <form onSubmit={form.handleSubmit}>
-              <DialogContent
-                sx={{
-                  width: "500px",
-                }}
-                dividers
-              >
-                <Grid container rowSpacing={20}>
-                  <Grid item xs={12}>
-                    <FormGroup>
-                      <InputLabel id="select-config">config:</InputLabel>
-                      <Select
-                        id="select-config"
-                        label="Config:"
-                        {...form.getFieldProps("config")}
-                        error={!!form.errors.config && form.touched.config}
-                      >
-                        <MenuItem value={1}>config_test_1</MenuItem>
-                        <MenuItem value={2}>config_test_2</MenuItem>
-                        <MenuItem value={3}>config_test_3</MenuItem>
-                      </Select>
-                      <FormHelperText
-                        error={!!form.errors.config && form.touched.config}
-                        sx={{ pl: 12 }}
-                      >
-                        {form.errors.config}
-                      </FormHelperText>
-                    </FormGroup>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <FormGroup>
-                      <InputLabel id="name">name:</InputLabel>
-                      <TextField
-                        id="name"
-                        {...form.getFieldProps("name")}
-                        error={!!form.errors.name && form.touched.name}
-                        helperText={form.errors.name}
-                      />
-                    </FormGroup>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <FormGroup>
-                      <InputLabel id="date">date:</InputLabel>
-                      <LocalizationProvider
-                        id="date"
-                        dateAdapter={AdapterDayjs}
-                      >
-                        <MuiDatePicker
-                          value={dayjs(form.values.date)}
-                          onChange={(date) =>
-                            form.setFieldValue("date", date?.toString())
-                          }
-                        />
-                      </LocalizationProvider>
-                    </FormGroup>
-                  </Grid>
-                </Grid>
-              </DialogContent>
-
-              <DialogActions>
-                <Button variant="outlined" color="error" type="submit">
-                  Add Scenario
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => setOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </DialogActions>
-            </form>
-          </MuiDialog>
-        </div>
-      </StyledThemeProvider>
-    </MuiThemeProvider>
+          </DialogActions>
+        </form>
+      </MuiDialog>
+    </div>
   );
 };
 
