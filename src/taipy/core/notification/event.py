@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
+from typing import Optional
 
 from ..common._repr_enum import _ReprEnum
 
@@ -36,10 +37,18 @@ class Event:
         entity_type: EventEntityType,
         entity_id: str,
         operation: EventOperation,
-        attribute_name: str,
+        attribute_name: Optional[str] = None,
     ):
         self.creation_date = datetime.now()
         self.entity_type = entity_type
         self.entity_id = entity_id
         self.operation = operation
         self.attribute_name = attribute_name
+
+    # def __preprocess_attribute_name(self):
+    #     if self.operation == EventOperation.CREATION/DELETION and self.attribute_name is not None:
+    #         throw error?
+
+    # def __preprocess_operation(self):
+    #     if self.entity_type == EventEntityType.CYCLE and self.operation == EventOperation.SUBMISSION:
+    #         throw error?
