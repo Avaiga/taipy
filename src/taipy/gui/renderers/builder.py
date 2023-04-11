@@ -839,7 +839,10 @@ class _Builder:
             elif var_type == PropertyType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == PropertyType.react:
-                self.__set_react_attribute(_to_camel_case(attr[0]), _get_tuple_val(attr, 2, None))
+                prop_name = _to_camel_case(attr[0])
+                if hash_name := self.__hashes.get(attr[0]):
+                    self.__update_vars.append(f"{prop_name}={hash_name}")
+                self.__set_react_attribute(prop_name, _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.dict:

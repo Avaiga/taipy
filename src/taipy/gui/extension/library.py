@@ -11,6 +11,7 @@
 
 import typing as t
 import warnings
+import sys
 import xml.etree.ElementTree as etree
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -312,8 +313,9 @@ class ElementLibrary(ABC):
         Arguments:
             name (str): The name of the resource for which a local Path should be returned.
         """
-        module = self.__class__.__module__
-        base = (Path(module.__file__) if hasattr(module, "__file__") else Path(".")).resolve()  # type: ignore
+        module_obj = sys.modules.get(self.__class__.__module__)
+        base = (Path(".") if module_obj is None else Path(module_obj.__file__).parent).resolve()  # type: ignore
+        base = base if base.exists() else Path(".").resolve()
         file = (base / name).resolve()
         if str(file).startswith(str(base)) and file.exists():
             return file
