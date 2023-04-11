@@ -14,7 +14,6 @@
 import React, {
     useState,
     useEffect,
-    useContext,
     useCallback,
     useRef,
     useMemo,
@@ -41,7 +40,6 @@ import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
     addDeleteColumn,
@@ -69,7 +67,7 @@ import {
     getRowIndex,
     getTooltip,
 } from "./tableUtils";
-import { useClassNames, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 import { getSuffixedClassNames } from "./utils";
 
@@ -104,10 +102,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [loading, setLoading] = useState(true);
     const [aggregates, setAggregates] = useState<string[]>([]);
     const [appliedFilters, setAppliedFilters] = useState<FilterDesc[]>([]);
-    const { dispatch } = useContext(TaipyContext);
+    const dispatch = useDispatch();
     const pageKey = useRef("no-page");
     const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
     const formatConfig = useFormatConfig();
+    const module = useModule();
 
     const refresh = props.data === null;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -162,7 +161,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return [[] as string[], {} as Record<string, ColumnDesc>, {} as Record<string, string>, {} as Record<string, string>, hNan, false];
     }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     useEffect(() => {
         if (selected.length) {
@@ -208,6 +207,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 createRequestTableUpdateAction(
                     updateVarName,
                     id,
+                    module,
                     cols,
                     pageKey.current,
                     startIndex,
@@ -242,6 +242,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         handleNan,
         appliedFilters,
         dispatch,
+        module,
     ]);
 
     const onSort = useCallback(
@@ -286,12 +287,12 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const onAddRowClick = useCallback(
         () =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onAdd,
                     index: startIndex,
                 })
             ),
-        [startIndex, dispatch, updateVarName, onAdd]
+        [startIndex, dispatch, updateVarName, onAdd, module]
     );
 
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
@@ -331,7 +332,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const onCellValidation: OnCellValidation = useCallback(
         (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onEdit,
                     value: value,
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
@@ -339,29 +340,29 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     user_value: userValue,
                 })
             ),
-        [dispatch, updateVarName, onEdit, rows, startIndex]
+        [dispatch, updateVarName, onEdit, rows, startIndex, module]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
         (rowIndex: number) =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onDelete,
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
                 })
             ),
-        [dispatch, updateVarName, onDelete, rows, startIndex]
+        [dispatch, updateVarName, onDelete, rows, startIndex, module]
     );
 
     const onRowSelection: OnRowSelection = useCallback(
         (rowIndex: number) =>
             dispatch(
-                createSendActionNameAction(updateVarName, {
+                createSendActionNameAction(updateVarName, module, {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
                 })
             ),
-        [dispatch, updateVarName, onAction, rows, startIndex]
+        [dispatch, updateVarName, onAction, rows, startIndex, module]
     );
 
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);

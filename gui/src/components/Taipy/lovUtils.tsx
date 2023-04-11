@@ -121,9 +121,7 @@ export const LovImage = ({
         <CardHeader
             sx={cardSx}
             avatar={
-                <Tooltip title={item.text}>
-                    <IconAvatar img={item} sx={sx} />
-                </Tooltip>
+                <IconAvatar img={item} sx={sx} />
             }
             title={item.text}
             disableTypography={disableTypo}

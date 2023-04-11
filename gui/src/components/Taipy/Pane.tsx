@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -20,9 +20,8 @@ import Tooltip from "@mui/material/Tooltip";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyActiveProps, TaipyChangeProps } from "./utils";
 
@@ -76,8 +75,9 @@ const Pane = (props: PaneProps) => {
         updateVarName,
         propagate = true,
     } = props;
-    const { dispatch } = useContext(TaipyContext);
     const [open, setOpen] = useState(defaultOpen === "true" || defaultOpen === true);
+    const dispatch = useDispatch();
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -92,14 +92,14 @@ const Pane = (props: PaneProps) => {
     const handleClose = useCallback(() => {
         if (active) {
             if (onClose) {
-                dispatch(createSendActionNameAction(id, onClose));
+                dispatch(createSendActionNameAction(id, module, onClose));
             } else if (updateVarName) {
-                dispatch(createSendUpdateAction(updateVarName, false, props.onChange, propagate));
+                dispatch(createSendUpdateAction(updateVarName, false, module, props.onChange, propagate));
             } else {
                 setOpen(false);
             }
         }
-    }, [active, dispatch, id, onClose, updateVarName, propagate, props.onChange]);
+    }, [active, dispatch, id, onClose, updateVarName, propagate, props.onChange, module]);
 
     useEffect(() => {
         if (props.open !== undefined) {

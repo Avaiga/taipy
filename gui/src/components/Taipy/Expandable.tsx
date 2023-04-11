@@ -18,7 +18,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Tooltip from "@mui/material/Tooltip";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-import { useClassNames, useDispatch, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { TaipyActiveProps, TaipyChangeProps, getUpdateVar } from "./utils";
 import TaipyRendered from "../pages/TaipyRendered";
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -39,6 +39,7 @@ const Expandable = (props: ExpandableProps) => {
     const [opened, setOpened] = useState(
         defaultExpanded === undefined ? (expanded === undefined ? true : expanded) : defaultExpanded
     );
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -53,10 +54,10 @@ const Expandable = (props: ExpandableProps) => {
             setOpened(expanded);
             if (updateVars) {
                 const expandedVar = getUpdateVar(updateVars, "expanded");
-                dispatch(createSendUpdateAction(expandedVar, expanded, props.onChange, propagate));
+                expandedVar && dispatch(createSendUpdateAction(expandedVar, expanded, module, props.onChange, propagate));
             }
         },
-        [dispatch, props.onChange, propagate, updateVars]
+        [dispatch, props.onChange, propagate, updateVars, module]
     );
 
     return (
