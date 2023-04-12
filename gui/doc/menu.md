@@ -2,6 +2,11 @@ Shows a left-side menu.
 
 This control is represented by a unique left-anchor and foldable vertical menu.
 
+## Styling
+
+All the menu controls are generated with the "taipy-menu" CSS class. You can use this class
+name to select the menu controls on your page and apply style.
+
 ## Usage
 
 ### Defining a simple static menu

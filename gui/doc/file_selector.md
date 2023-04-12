@@ -2,6 +2,11 @@ Allows uploading a file content.
 
 The upload can be triggered by pressing a button, or drag-and-dropping a file on top of the control.
 
+## Styling
+
+All the file selector controls are generated with the "taipy-file_selector" CSS class. You can use this class
+name to select the file selector controls on your page and apply style.
+
 ## Usage
 
 ### Default behavior

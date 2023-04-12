@@ -37,7 +37,7 @@
               UTILITY CLASSES
 **************************************************/
 
-/* .svg_bg: keep the original svg background */
-.taipy-chart:not(.svg_bg) .main-svg {
+/* .opaque-bg: keep the original background */
+.taipy-chart:not(.opaque-bg) .main-svg {
   background: transparent !important;
 }

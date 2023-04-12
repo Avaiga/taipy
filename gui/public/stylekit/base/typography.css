@@ -64,14 +64,14 @@ h6,
     font-size: var(--font-size-h6);
 }
 
-.text_body {
+.text-body {
     font-size: var(--font-size-body);
 }
 
-.text_small {
+.text-small {
     font-size: var(--font-size-small);
 }
 
-.text_caption {
+.text-caption {
     font-size: var(--font-size-caption);
 }

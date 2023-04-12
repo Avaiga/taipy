@@ -1,5 +1,9 @@
 Displays a status or a list of statuses.
 
+## Styling
+
+All the status controls are generated with the "taipy-status" CSS class. You can use this class
+name to select the status controls on your page and apply style.
 
 ## Usage
 

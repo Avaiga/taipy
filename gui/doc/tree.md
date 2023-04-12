@@ -8,6 +8,12 @@ A filtering feature is available to display only a subset of the items.
 
 You can use an arbitrary type for all the items (see the [example](#binding-to-a-list-of-objects)).
 
+
+## Styling
+
+All the tree controls are generated with the "taipy-tree" CSS class. You can use this class
+name to select the tree controls on your page and apply style.
+
 ## Usage
 
 ### Display a list of string

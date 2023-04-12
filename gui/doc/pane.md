@@ -3,6 +3,13 @@ A side pane.
 Pane allows showing some content on top of the current page.
 The pane is closed when the user clicks outside the area of the pane (triggering a _on_close_ action).
 
+Pane is a block control.
+
+## Styling
+
+All the pane blocks are generated with the "taipy-pane" CSS class. You can use this class
+name to select the pane blocks on your page and apply style.
+
 ## Usage
 
 ### Showing or hiding a pane

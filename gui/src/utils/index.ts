@@ -22,14 +22,14 @@ declare global {
             themes: Record<string, Record<string, unknown>>;
             timeZone: string;
             extensions: Record<string, string[]>;
-            stylekit?: StyleKitVars;
+            stylekit?: StyleKit;
         };
         taipyVersion: string;
         [key: string]: unknown;
     }
 }
 
-interface StyleKitVars {
+interface StyleKit {
     // Primary and secondary colors
     colorPrimary: string;
     colorSecondary: string;

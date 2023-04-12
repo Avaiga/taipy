@@ -17,58 +17,58 @@
 
 ***************************************************************/
 
-.text_weight300 {
+.text-weight300 {
     font-weight: 300 !important;
 }
 
-.text_weight400 {
+.text-weight400 {
     font-weight: 400 !important;
 }
 
-.text_weight500 {
+.text-weight500 {
     font-weight: 500 !important;
 }
 
-.text_weight600 {
+.text-weight600 {
     font-weight: 600 !important;
 }
 
-.text_weight700 {
+.text-weight700 {
     font-weight: 700 !important;
 }
 
-.text_weight800 {
+.text-weight800 {
     font-weight: 800 !important;
 }
 
-.text_weight900 {
+.text-weight900 {
     font-weight: 900 !important;
 }
 
-.text_left {
+.text-left {
     text-align: left !important;
 }
 
-.text_center {
+.text-center {
     text-align: center !important;
 }
 
-.text_right {
+.text-right {
     text-align: right !important;
 }
 
-.text_uppercase {
+.text-uppercase {
     text-transform: uppercase !important;
 }
 
-.text_no_transform {
+.text-no-transform {
     text-transform: none !important;
 }
 
-.text_underline {
+.text-underline {
     text-decoration: underline !important;
 }
 
-.text_no_underline {
+.text-no-underline {
     text-decoration: none !important;
 }

@@ -9,6 +9,18 @@ A control that can display an image.
 
 You can indicate a function to be called when the user clicks on the image.
 
+## Styling
+
+All the image controls are generated with the "taipy-image" CSS class. You can use this class
+name to select the image controls on your page and apply style.
+
+The [Stylekit](../styling/stylekit.md) also provides a specific CSS class that you can use to style
+images:
+
+- *inline*<br/>
+  Displays an image as inline and vertically centered. It would otherwise be displayed as a block.
+  This can be relevant when dealing with SVG images.
+
 ## Usage
 
 ### Default behavior
