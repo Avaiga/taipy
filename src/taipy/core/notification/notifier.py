@@ -27,6 +27,7 @@ class Notifier:
         operation: Optional[str],
         attribute_name: Optional[str],
     ) -> Registration:
+        # TODO: the signature should all parameter be string??
         registration = Registration(entity_type, entity_id, operation, attribute_name)
 
         if registrations := cls._registrations.get(registration.topic, None):
