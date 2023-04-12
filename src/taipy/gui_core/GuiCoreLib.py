@@ -49,12 +49,3 @@ class GuiCore(ElementLibrary):
   
   def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
     return GuiCoreContext._VAR_NAME, GuiCoreContext(gui, Core())
-
-page = """
-# Getting started with example
-
-<|taipy_gui_core.scenario_selector|show_add_button|display_cycles|>
-
-"""    
-Gui.add_library(GuiCore())
-Gui(page).run(port=8000, use_reloader=True)

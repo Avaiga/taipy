@@ -30,7 +30,7 @@
   "dependencies": {
     "lodash-es": "^4.17.21",
     "react": "^18.2.0",
-    "taipy-gui": "file:C:/Users/jupiter/.virtualenvs/taipy-GJ-H-CSS/Lib/site-packages/taipy/gui/webapp"
+    "taipy-gui": "file:C:/Users/MJ/.virtualenvs/taipy-lNlhytKY/Lib/site-packages/taipy/gui/webapp"
   },
   "scripts": {
     "install": "node scripts/install.js",
