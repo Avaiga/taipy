@@ -12,13 +12,7 @@
 from typing import Optional
 
 from ..exceptions.exceptions import InvalidEntityId, InvalidEntityType, InvalidEventAttributeName, InvalidEventOperation
-from .event import (
-    _ENTITY_TYPE_PREFIXES,
-    _NO_ATTRIBUTE_NAME_OPERATIONS,
-    _UNSUBMITTABLE_ENTITY_TYPES,
-    EventEntityType,
-    EventOperation,
-)
+from .event import _ENTITY_TYPE_PREFIXES, _NO_ATTRIBUTE_NAME_OPERATIONS, _UNSUBMITTABLE_ENTITY_TYPES, EventOperation
 
 
 class Topic:
@@ -32,7 +26,7 @@ class Topic:
 
         self.entity_type, self.entity_id = self.__preprocess_entity_type_and_entity_id(entity_type, entity_id)
         self.operation = self.__preprocess_operation(operation, self.entity_type)
-        self.attribute_name = self.__preprocess_attribute_name(attribute_name, operation)
+        self.attribute_name = self.__preprocess_attribute_name(attribute_name, self.operation)
 
     def __hash__(self):
         return (self.entity_type, self.entity_id, self.operation, self.attribute_name)
@@ -60,7 +54,7 @@ class Topic:
 
     @classmethod
     def __preprocess_attribute_name(
-        cls, attribute_name: Optional[str] = None, operation: Optional[str] = None
+        cls, attribute_name: Optional[str] = None, operation: Optional[EventOperation] = None
     ) -> Optional[str]:
         # TODO: check if attribute_name exists in entity? what if attribute_name but operation is None?
         if (operation is None or operation in _NO_ATTRIBUTE_NAME_OPERATIONS) and attribute_name is not None:
@@ -70,8 +64,16 @@ class Topic:
     @classmethod
     def __preprocess_operation(
         cls, operation: Optional[str] = None, entity_type: Optional[str] = None
-    ) -> Optional[str]:
+    ) -> Optional[EventOperation]:
         # TODO: what if operation or entity_type or both is None?
-        if entity_type and entity_type in _UNSUBMITTABLE_ENTITY_TYPES and operation == EventOperation.SUBMISSION:
+        try:
+            converted_operation = operation if operation is None else EventOperation.__members__[operation.upper()]
+        except KeyError:
             raise InvalidEventOperation
-        return operation
+        if (
+            entity_type
+            and entity_type in _UNSUBMITTABLE_ENTITY_TYPES
+            and converted_operation == EventOperation.SUBMISSION
+        ):
+            raise InvalidEventOperation
+        return converted_operation
