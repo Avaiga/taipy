@@ -31,13 +31,11 @@ if util.find_spec("pyarrow"):
 
 
 class _PandasDataAccessor(_DataAccessor):
-
     __types = (pd.DataFrame,)
 
     __INDEX_COL = "_tp_index"
 
     __AGGREGATE_FUNCTIONS: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
-
 
     @staticmethod
     def get_supported_classes() -> t.List[str]:
@@ -64,7 +62,12 @@ class _PandasDataAccessor(_DataAccessor):
         return len(col_types[col_types.astype(str).str.startswith("datetime")]) > 0  # type: ignore
 
     def __build_transferred_cols(
-        self, gui: Gui, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None, tooltips: t.Optional[t.Dict[str, str]] = None
+        self,
+        gui: Gui,
+        payload_cols: t.Any,
+        data: pd.DataFrame,
+        styles: t.Optional[t.Dict[str, str]] = None,
+        tooltips: t.Optional[t.Dict[str, str]] = None,
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
             col_types = data.dtypes[data.dtypes.index.astype(str).isin(payload_cols)]
@@ -124,7 +127,13 @@ class _PandasDataAccessor(_DataAccessor):
         return data
 
     def __apply_user_function(
-        self, gui: Gui, user_function: t.Callable, column_name: t.Optional[str], function_name: str, data: pd.DataFrame, prefix: t.Optional[str]
+        self,
+        gui: Gui,
+        user_function: t.Callable,
+        column_name: t.Optional[str],
+        function_name: str,
+        data: pd.DataFrame,
+        prefix: t.Optional[str],
     ):
         try:
             new_col_name = f"{prefix}{column_name}__{function_name}" if column_name else function_name
@@ -231,7 +240,8 @@ class _PandasDataAccessor(_DataAccessor):
             applies = payload.get("applies")
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {
-                    k: v if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS else gui._get_user_function(v) for k, v in applies.items()
+                    k: v if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS else gui._get_user_function(v)
+                    for k, v in applies.items()
                 }
 
                 for col in columns:
@@ -286,7 +296,9 @@ class _PandasDataAccessor(_DataAccessor):
                     new_indexes = slice(start, end + 1)  # type: ignore
             else:
                 new_indexes = slice(start, end + 1)  # type: ignore
-            value = self.__build_transferred_cols(gui, columns, value.iloc[new_indexes], styles=payload.get("styles"), tooltips=payload.get("tooltips"))
+            value = self.__build_transferred_cols(
+                gui, columns, value.iloc[new_indexes], styles=payload.get("styles"), tooltips=payload.get("tooltips")
+            )
             dictret = self.__format_data(
                 value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
             )
@@ -297,7 +309,9 @@ class _PandasDataAccessor(_DataAccessor):
             nb_rows_max = decimator_payload.get("width")
             for decimator_pl in decimators:
                 decimator = decimator_pl.get("decimator")
-                decimator_instance = gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
+                decimator_instance = (
+                    gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
+                )
                 if isinstance(decimator_instance, PropertyType.decimator.value):
                     x_column, y_column, z_column = (
                         decimator_pl.get("xAxis", ""),
@@ -317,7 +331,12 @@ class _PandasDataAccessor(_DataAccessor):
                     if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max, chart_mode):
                         try:
                             value = _df_data_filter(
-                                value, x_column, y_column, z_column, decimator=decimator_instance, payload=decimator_payload
+                                value,
+                                x_column,
+                                y_column,
+                                z_column,
+                                decimator=decimator_instance,
+                                payload=decimator_payload,
                             )
                             gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
                         except Exception as e:

@@ -23,11 +23,11 @@ if t.TYPE_CHECKING:
 
 class Decimator(ABC):
     """Base class for decimating chart data.
-    
+
     *Decimating* is the term used to name the process of reducing the number of
     data points displayed in charts while retaining the overall shape of the traces.
     `Decimator` is a base class that does decimation on data sets.
-    
+
     Taipy GUI comes out-of-the-box with several implementation of this class for
     different use cases.
     """

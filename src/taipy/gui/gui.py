@@ -24,7 +24,7 @@ import typing as t
 import warnings
 from importlib import util
 from types import FrameType
-from urllib.parse import urlparse, unquote, urlencode
+from urllib.parse import unquote, urlencode, urlparse
 
 import __main__
 import markdown as md_lib
@@ -39,7 +39,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
-from ._default_config import default_config, _default_stylekit
+from ._default_config import _default_stylekit, default_config
 from ._page import _Page
 from .config import Config, ConfigParameter, _Config
 from .data.content_accessor import _ContentAccessor
@@ -62,9 +62,9 @@ from .utils import (
     _filter_locals,
     _get_broadcast_var_name,
     _get_client_var_name,
+    _get_css_var_value,
     _get_module_name_from_frame,
     _get_non_existent_file_path,
-    _get_css_var_value,
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
@@ -73,21 +73,21 @@ from .utils import (
     _MapDict,
     _setscopeattr,
     _setscopeattr_drill,
-    _to_camel_case,
     _TaipyBase,
     _TaipyContent,
     _TaipyContentImage,
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
+    _to_camel_case,
     _variable_decode,
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
-from .utils.table_col_builder import _enhance_columns
 from .utils.chart_config_builder import _build_chart_config
+from .utils.table_col_builder import _enhance_columns
 from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 
 
@@ -202,8 +202,14 @@ class Gui:
     __RE_MD = re.compile(r"(.*?)\.md")
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
-    __reserved_routes: t.List[str] = [__INIT_URL, __JSX_URL,
-                                      __CONTENT_ROOT, __UPLOAD_URL, _EXTENSION_ROOT, __USER_CONTENT_URL]
+    __reserved_routes: t.List[str] = [
+        __INIT_URL,
+        __JSX_URL,
+        __CONTENT_ROOT,
+        __UPLOAD_URL,
+        _EXTENSION_ROOT,
+        __USER_CONTENT_URL,
+    ]
 
     __LOCAL_TZ = str(tzlocal.get_localzone())
 
@@ -366,7 +372,8 @@ class Gui:
                 raise NameError(f"ElementLibrary passed to add_library() has an invalid name: '{library_name}'")
         else:  # pragma: no cover
             raise RuntimeError(
-                f"add_library() argument should be a subclass of ElementLibrary instead of '{type(library)}'")
+                f"add_library() argument should be a subclass of ElementLibrary instead of '{type(library)}'"
+            )
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -403,7 +410,9 @@ class Gui:
 
     def _get_client_id(self) -> str:
         return (
-            _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, Gui.__ARG_CLIENT_ID, "unknown id")
+            _DataScopes._GLOBAL_ID
+            if self._bindings()._get_single_client()
+            else getattr(g, Gui.__ARG_CLIENT_ID, "unknown id")
         )
 
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None):
@@ -541,12 +550,12 @@ class Gui:
         if var_name.startswith(_HOLDER_PREFIX):
             for hp in _HOLDER_PREFIXES:
                 if var_name.startswith(hp):
-                    var_name = var_name[len(hp):]
+                    var_name = var_name[len(hp) :]
                     break
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
-            suffix_var_name = var_name[first_dot_index + 1:]
+            suffix_var_name = var_name[first_dot_index + 1 :]
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
@@ -615,7 +624,9 @@ class Gui:
                 return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
         return ("", 404)
 
-    def _get_user_content_url(self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None) -> t.Optional[str]:
+    def _get_user_content_url(
+        self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
+    ) -> t.Optional[str]:
         qargs = query_args or {}
         qargs.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
         return f"/{Gui.__USER_CONTENT_URL}/{path or ''}?{urlencode(qargs)}"
@@ -870,7 +881,8 @@ class Gui:
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
                 warnings.warn(
-                    f"Exception raised in Web Socket communication (send ack) in '{self.__frame.f_code.co_name}':\n{e}")
+                    f"Exception raised in Web Socket communication (send ack) in '{self.__frame.f_code.co_name}':\n{e}"
+                )
 
     def _send_ws_id(self, id: str) -> None:
         self.__send_ws(
@@ -924,13 +936,7 @@ class Gui:
         to: str,
         tab: t.Optional[str],
     ):
-        self.__send_ws(
-            {
-                "type": _WsType.NAVIGATE.value,
-                "to": to,
-                "tab": tab
-            }
-        )
+        self.__send_ws({"type": _WsType.NAVIGATE.value, "to": to, "tab": tab})
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
@@ -940,8 +946,9 @@ class Gui:
         self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
     def __send_ws_broadcast(self, var_name: str, var_value: t.Any):
-        self.__broadcast_ws({"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(
-            var_name), "payload": {"value": var_value}})
+        self.__broadcast_ws(
+            {"type": _WsType.UPDATE.value, "name": _get_broadcast_var_name(var_name), "payload": {"value": var_value}}
+        )
 
     def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._get_single_client():
@@ -1101,7 +1108,9 @@ class Gui:
         attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
         return attributes, hashes
 
-    def _tbl_cols(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> t.Union[str, _DoNotUpdate]:
+    def _tbl_cols(
+        self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
+    ) -> t.Union[str, _DoNotUpdate]:
         if not self.__is_building():
             try:
                 rebuild = rebuild_val if rebuild_val is not None else rebuild
@@ -1109,8 +1118,13 @@ class Gui:
                     attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
                     data_hash = hashes.get("data", "")
                     data = kwargs.get(data_hash)
-                    col_dict = _get_columns_dict(data, attributes.get("columns", {}), self._accessors._get_col_types(
-                        data_hash, _TaipyData(data, data_hash)), attributes.get("date_format"), attributes.get("number_format"))
+                    col_dict = _get_columns_dict(
+                        data,
+                        attributes.get("columns", {}),
+                        self._accessors._get_col_types(data_hash, _TaipyData(data, data_hash)),
+                        attributes.get("date_format"),
+                        attributes.get("number_format"),
+                    )
                     _enhance_columns(attributes, hashes, col_dict, "table(cols)")
 
                     return json.dumps(col_dict)
@@ -1118,15 +1132,20 @@ class Gui:
                 warnings.warn(f"Exception while rebuilding table columns {e}")
         return Gui.__DO_NOT_UPDATE_VALUE
 
-    def _chart_conf(self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs) -> t.Union[str, _DoNotUpdate]:
+    def _chart_conf(
+        self, rebuild: bool, rebuild_val: t.Optional[bool], attr_json: str, hash_json: str, **kwargs
+    ) -> t.Union[str, _DoNotUpdate]:
         if not self.__is_building():
             try:
                 rebuild = rebuild_val if rebuild_val is not None else rebuild
                 if rebuild:
                     attributes, hashes = self.__get_attributes(attr_json, hash_json, kwargs)
                     data_hash = hashes.get("data", "")
-                    config = _build_chart_config(self, attributes, self._accessors._get_col_types(
-                        data_hash, _TaipyData(kwargs.get(data_hash), data_hash)))
+                    config = _build_chart_config(
+                        self,
+                        attributes,
+                        self._accessors._get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)),
+                    )
 
                     return json.dumps(config)
             except Exception as e:  # pragma: no cover
@@ -1394,7 +1413,9 @@ class Gui:
         """
         new_partial = Partial()
         # Validate name
-        if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes:  # pragma: no cover
+        if (
+            new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes
+        ):  # pragma: no cover
             warnings.warn(f'Partial name "{new_partial._route}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
@@ -1934,15 +1955,22 @@ class Gui:
                     continue
                 try:
                     lib_context = lib.on_init(self)
-                    if isinstance(lib_context, tuple) and len(lib_context) > 1 and isinstance(lib_context[0], str) and lib_context[0].isidentifier():
+                    if (
+                        isinstance(lib_context, tuple)
+                        and len(lib_context) > 1
+                        and isinstance(lib_context[0], str)
+                        and lib_context[0].isidentifier()
+                    ):
                         if lib_context[0] in glob_ctx:
                             warnings.warn(
-                                f"Method {name}.on_init() returned a name already defined '{lib_context[0]}'.")
+                                f"Method {name}.on_init() returned a name already defined '{lib_context[0]}'."
+                            )
                         else:
                             glob_ctx[lib_context[0]] = lib_context[1]
                     elif lib_context:
                         warnings.warn(
-                            f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier.")
+                            f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier."
+                        )
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception(f"{name}.on_init", e):
                         warnings.warn(f"Method {name}.on_init() raised an exception:\n{e}.")

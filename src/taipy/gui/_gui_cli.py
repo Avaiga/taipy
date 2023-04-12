@@ -23,7 +23,13 @@ class _GuiCLI:
         gui_parser.add_argument("-H", "--host", nargs="?", default="", const="", help="Specify server host")
 
         gui_parser.add_argument("--ngrok-token", nargs="?", default="", const="", help="Specify NGROK Authtoken")
-        gui_parser.add_argument("--webapp-path", nargs="?", default="", const="", help="The path to the WebApp to be used. The default is the webapp directory under gui in the Taipy GUI package directory.")
+        gui_parser.add_argument(
+            "--webapp-path",
+            nargs="?",
+            default="",
+            const="",
+            help="The path to the WebApp to be used. The default is the webapp directory under gui in the Taipy GUI package directory.",
+        )
 
         debug_group = gui_parser.add_mutually_exclusive_group()
         debug_group.add_argument("--debug", help="Turn on debug", action="store_true")

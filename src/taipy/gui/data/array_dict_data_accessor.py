@@ -20,7 +20,6 @@ from .pandas_data_accessor import _PandasDataAccessor
 
 
 class _ArrayDictDataAccessor(_PandasDataAccessor):
-
     __types = (dict, list, tuple, _MapDict)
 
     @staticmethod
@@ -49,9 +48,7 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                     return value
 
             elif len(types) == 2 and list in types and pd.DataFrame in types:
-                return [
-                    v if isinstance(v, pd.DataFrame) else pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)
-                ]
+                return [v if isinstance(v, pd.DataFrame) else pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
         elif isinstance(value, _MapDict):
             return pd.DataFrame(value._dict)
         return pd.DataFrame(value)

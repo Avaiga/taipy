@@ -41,7 +41,6 @@ if t.TYPE_CHECKING:
 
 
 class _Server:
-
     __RE_OPENING_CURLY = re.compile(r"([^\"])(\{)")
     __RE_CLOSING_CURLY = re.compile(r"(\})([^\"])")
     __OPENING_CURLY = r"\1&#x7B;"
@@ -109,7 +108,7 @@ class _Server:
         version: str,
         client_config: t.Dict[str, t.Any],
         watermark: t.Optional[str],
-        css_vars: str
+        css_vars: str,
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
@@ -128,7 +127,7 @@ class _Server:
                     scripts=scripts,
                     styles=styles,
                     version=version,
-                    css_vars=css_vars
+                    css_vars=css_vars,
                 )
             if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))

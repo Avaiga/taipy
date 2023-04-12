@@ -19,7 +19,6 @@ from .data_format import _DataFormat
 
 
 class _DataAccessor(ABC):
-
     _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     @staticmethod

@@ -37,7 +37,6 @@ from .types import _HOLDER_PREFIX
 
 
 class _Evaluator:
-
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(([^\}]*)([^\{]*))\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")

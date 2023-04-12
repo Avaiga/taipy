@@ -25,14 +25,13 @@ def render_xhtml_4_my_library_fail(properties: t.Dict[str, t.Any]) -> str:
 
 
 class MyLibrary(ElementLibrary):
-
     elts = {
         "testinput": Element(
             "value",
             {
                 "value": ElementProperty(PropertyType.dynamic_string, "Fred"),
                 "multiline": ElementProperty(PropertyType.boolean, False),
-                "broadcast": ElementProperty(PropertyType.broadcast, "broadcast")
+                "broadcast": ElementProperty(PropertyType.broadcast, "broadcast"),
             },
             "Input",
         ),
@@ -76,7 +75,7 @@ def test_lib_input_md(gui: Gui, test_client, helpers):
         'libClassName="test_lib-testinput"',
         "multiline={true}",
         'defaultValue=""',
-        'broadcast={_bc_broadcast}',
+        "broadcast={_bc_broadcast}",
         "value={tpec_TpExPr_val_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -102,7 +101,13 @@ def test_lib_input_html_1(gui: Gui, test_client, helpers):
     val = ""  # noqa: F841
     gui._set_frame(inspect.currentframe())
     html_string = '<test_lib:testinput value="{val}" multiline="true" />'
-    expected_list = ["<TestLib_Input", "multiline={true}", 'defaultValue=""', 'broadcast={_bc_broadcast}',"value={tpec_TpExPr_val_TPMDL_0}"]
+    expected_list = [
+        "<TestLib_Input",
+        "multiline={true}",
+        'defaultValue=""',
+        "broadcast={_bc_broadcast}",
+        "value={tpec_TpExPr_val_TPMDL_0}",
+    ]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -110,5 +115,11 @@ def test_lib_input_html_2(gui: Gui, test_client, helpers):
     val = ""  # noqa: F841
     gui._set_frame(inspect.currentframe())
     html_string = '<test_lib:testinput multiline="true">{val}</testlib:testinput>'
-    expected_list = ["<TestLib_Input", "multiline={true}", 'defaultValue=""', 'broadcast={_bc_broadcast}',"value={tpec_TpExPr_val_TPMDL_0}"]
+    expected_list = [
+        "<TestLib_Input",
+        "multiline={true}",
+        'defaultValue=""',
+        "broadcast={_bc_broadcast}",
+        "value={tpec_TpExPr_val_TPMDL_0}",
+    ]
     helpers.test_control_html(gui, html_string, expected_list)

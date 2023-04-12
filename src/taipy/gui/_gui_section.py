@@ -19,7 +19,6 @@ from ._default_config import default_config
 
 
 class _GuiSection(UniqueSection):
-
     name = "gui"
 
     def __init__(self, property_list: t.Optional[t.List] = None, **properties):

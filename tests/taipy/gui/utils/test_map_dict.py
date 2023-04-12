@@ -18,7 +18,6 @@ from taipy.gui.utils import _MapDict
 
 
 def test_map_dict():
-
     d = {"a": 1, "b": 2, "c": 3}
     md = _MapDict(d)
     md_copy = _MapDict(d).copy()

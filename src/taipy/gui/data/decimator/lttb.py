@@ -18,7 +18,7 @@ from ..utils import Decimator
 
 class LTTB(Decimator):
     """A decimator using the LTTB algorithm.
-    
+
     The LTTB algorithm is an high performance algorithm that significantly reduces the number of
     data points. It can work very well with time-series data to show trends using by using only
     a few data points.

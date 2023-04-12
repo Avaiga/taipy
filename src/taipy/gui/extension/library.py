@@ -9,16 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import sys
 import typing as t
 import warnings
-import sys
 import xml.etree.ElementTree as etree
 from abc import ABC, abstractmethod
 from pathlib import Path
 
 from ..renderers.builder import _Builder
-from ..utils import _to_camel_case, _get_broadcast_var_name
 from ..types import PropertyType
+from ..utils import _get_broadcast_var_name, _to_camel_case
 
 if t.TYPE_CHECKING:
     from ..gui import Gui

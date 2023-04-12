@@ -17,7 +17,6 @@ from flask import g
 
 
 class _LocalsContext:
-
     __ctx_g_name = "locals_context"
 
     def __init__(self) -> None:
