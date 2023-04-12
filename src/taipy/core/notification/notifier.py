@@ -9,47 +9,56 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Dict, List, Optional
+from queue import SimpleQueue
+from typing import Dict, List, Optional, Tuple
 
-from .event import Event, EventEntityType, EventOperation
+from ..exceptions.exceptions import NonExistingRegistration
+from .event import Event
 from .registration import Registration
 from .topic import Topic
 
 
 class Notifier:
-    _registrations: Dict[Topic, List[Registration]] = {}  # What if this is a dictionary instead?
+    _topics_subscribers_list: Dict[Topic, List[Registration]] = {}
+    _registrations: Dict[str, Registration] = {}
 
     @classmethod
     def register(
         cls,
-        entity_type: Optional[str],
-        entity_id: Optional[str],
-        operation: Optional[str],
-        attribute_name: Optional[str],
-    ) -> Registration:
-        # TODO: the signature should all parameter be string??
+        entity_type: Optional[str] = None,
+        entity_id: Optional[str] = None,
+        operation: Optional[str] = None,
+        attribute_name: Optional[str] = None,
+    ) -> Tuple[str, SimpleQueue]:
         registration = Registration(entity_type, entity_id, operation, attribute_name)
 
-        if registrations := cls._registrations.get(registration.topic, None):
+        cls._registrations[registration.register_id] = registration
+
+        if registrations := cls._topics_subscribers_list.get(registration.topic, None):
             registrations.append(registration)
         else:
-            cls._registrations[registration.topic] = [registration]
+            cls._topics_subscribers_list[registration.topic] = [registration]
 
-        return registration
+        return registration.register_id, registration.queue
 
     @classmethod
-    def unregister(cls, registration: Registration):
-        if registrations := cls._registrations.get(registration.topic, None):
-            registrations.remove(registration)
-            if len(registrations) == 0:
-                del cls._registrations[registration.topic]
+    def unregister(cls, registration_id: str):
+        try:
+            registration = cls._registrations[registration_id]
+            if registrations := cls._topics_subscribers_list.get(registration.topic, None):
+                registrations.remove(registration)
+                if len(registrations) == 0:
+                    del cls._topics_subscribers_list[registration.topic]
+            del cls._registrations[registration_id]
+        except KeyError:
+            raise NonExistingRegistration(registration_id)
 
     @classmethod
     def publish(cls, event: Event):
         generated_matched_topics_with_event = cls.generate_topics_from_event(event)
 
         for topic in generated_matched_topics_with_event:
-            if registrations := cls._registrations.get(topic, None):
+            if registrations := cls._topics_subscribers_list.get(topic, None):
                 for registration in registrations:
                     registration.queue.put(event)
 

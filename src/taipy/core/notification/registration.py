@@ -22,7 +22,13 @@ class Registration:
     _ID_PREFIX = "REGISTRATION"
     __SEPARATOR = "_"
 
-    def __init__(self, entity_type: Optional[str], entity_id: Optional[str], operation, attribute_name):
+    def __init__(
+        self,
+        entity_type: Optional[str] = None,
+        entity_id: Optional[str] = None,
+        operation: Optional[str] = None,
+        attribute_name: Optional[str] = None,
+    ):
 
         self.register_id: str = self._new_id()
         self.topic: Topic = Topic(entity_type, entity_id, operation, attribute_name)
