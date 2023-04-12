@@ -8,9 +8,6 @@ build/
 *.egg-info/
 dist/
 
-# mypy
-.mypy_cache/
-
 # IDE settings
 .vscode/
 .idea/
