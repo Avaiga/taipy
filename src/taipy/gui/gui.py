@@ -41,7 +41,7 @@ if util.find_spec("pyngrok"):
 
 from ._default_config import _default_stylekit, default_config
 from ._page import _Page
-from .config import Config, ConfigParameter, _Config
+from .config import Config, ConfigParameter, Stylekit, _Config
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
