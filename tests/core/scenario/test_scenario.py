@@ -26,8 +26,8 @@ from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task.task import Task
-from taipy.config import Config
 from src.taipy.core.task.task_id import TaskId
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
