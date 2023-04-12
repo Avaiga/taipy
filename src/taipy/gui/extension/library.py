@@ -343,13 +343,24 @@ class ElementLibrary(ABC):
 
     def on_init(self, gui: "Gui") -> t.Optional[t.Tuple[str, t.Any]]:
         """
-        TODO
-        Called by `Gui.run()^`.
+        Initialize this element library.
+
+        This method is invoked by `Gui.run()^`.
+
+        It allows to define variables that are accessible from elements
+        defined in this element library.
 
         Arguments
             gui: The `Gui^` instance.
 
         Returns:
-            An optional Tuple composed of a unique name for the library (that *must* be a valid Python identifier) and it's value
+            An optional tuple composed of a variable name (that *must* be a valid Python
+            identifier), associated with its value.<br/>
+            This name can be used as the name of a variable accessible by the elements defined
+            in this library.<br/>
+            This name must be unique across the entire application, which is a problem since
+            different element libraries might use the same symbol. A good development practice
+            is to make this variable name unique by prefixing it with the name of the element
+            library itself.
         """
         return None

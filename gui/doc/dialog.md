@@ -3,6 +3,11 @@ A modal dialog.
 Dialog allows showing some content over the current page.
 The dialog is closed when the user presses the Cancel or Validate buttons, or clicks outside the area of the dialog (triggering a Cancel action).
 
+## Styling
+
+All the dialogs are generated with the "taipy-dialog" CSS class. You can use this class
+name to select the dialogs on your page and apply style.
+
 ## Usage
 
 ### Showing or hiding a dialog

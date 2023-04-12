@@ -8,6 +8,11 @@ A filtering feature is available to display only a subset of the items.
 
 You can use an arbitrary type for all the items (see the [example](#binding-to-a-list-of-objects)).
 
+## Styling
+
+All the selector controls are generated with the "taipy-selector" CSS class. You can use this class
+name to select the selector controls on your page and apply style.
+
 ## Usage
 
 ### Display a list of string

@@ -40,26 +40,26 @@
 **************************************************/
 
 /* Soft header on rows as Stylekit default */
-/* "header_plain" class to return to MUI default plain header */
-.taipy-table:where(:not(.header_plain)) thead th {
+/* "header-plain" class to return to MUI default plain header */
+.taipy-table:where(:not(.header-plain)) thead th {
   background: var(--color-paper);
   font-weight: bold;
 }
 
 /* No borders on rows as Stylekit default */
-/* "rows_bordered" class to return to MUI default rows with borders */
-.taipy-table:where(:not(.rows_bordered)) thead th,
-.taipy-table:where(:not(.rows_bordered)) tbody td {
+/* "rows-bordered" class to return to MUI default rows with borders */
+.taipy-table:where(:not(.rows-bordered)) thead th,
+.taipy-table:where(:not(.rows-bordered)) tbody td {
   border-bottom: none;
 }
 
 /* Striped rows as Stylekit default */
-/* "rows_similar" to return to MUI default similar looking rows */
-.taipy-table:where(:not(.rows_similar)) tbody tr:nth-child(odd) {
+/* "rows-similar" to return to MUI default similar looking rows */
+.taipy-table:where(:not(.rows-similar)) tbody tr:nth-child(odd) {
   position: relative;
   z-index: 0;
 }
-.taipy-table:where(:not(.rows_similar)) tbody tr:nth-child(odd)::after {
+.taipy-table:where(:not(.rows-similar)) tbody tr:nth-child(odd)::after {
   content: '';
   position: absolute;
   top: 0;

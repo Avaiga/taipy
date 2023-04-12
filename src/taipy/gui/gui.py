@@ -39,7 +39,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
-from ._default_config import default_config
+from ._default_config import default_config, _default_stylekit
 from ._page import _Page
 from .config import Config, ConfigParameter, _Config
 from .data.content_accessor import _ContentAccessor
@@ -1676,14 +1676,15 @@ class Gui:
                         for n, e in lib.get_elements().items()
                         if isinstance(e, Element) and not e._is_server_only()
                     ]
-        if self._get_config("stylekit", False):
-            config["stylekit"] = {_to_camel_case(k): v for k, v in self._get_config("stylekit_variables", {}).items()}
+        stylekit = self._get_config("stylekit", _default_stylekit)
+        if stylekit:
+            config["stylekit"] = {_to_camel_case(k): v for k, v in stylekit.items()}
         return config
 
     def __get_css_vars(self) -> str:
         css_vars = []
-        if self._get_config("stylekit", False):
-            stylekit = self._get_config("stylekit_variables", {})
+        stylekit = self._get_config("stylekit", _default_stylekit)
+        if stylekit:
             for k, v in stylekit.items():
                 css_vars.append(f'--{k.replace("_", "-")}:{_get_css_var_value(v)};')
         return " ".join(css_vars)
@@ -1774,7 +1775,7 @@ class Gui:
             for lib in libs
             for s in (lib.get_styles() or [])
         ]
-        if self._get_config("stylekit", False):
+        if self._get_config("stylekit", True):
             styles.append("/stylekit/stylekit.css")
         else:
             styles.append("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")

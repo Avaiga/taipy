@@ -29,8 +29,8 @@
     min-width: 0;
 }
 
-.taipy-layout.align_columns_stretch>.taipy-part>.md-para,
-.taipy-layout>.taipy-part.align_item_stretch>.md-para {
+.taipy-layout.align-columns-stretch>.taipy-part>.md-para,
+.taipy-layout>.taipy-part.align-item-stretch>.md-para {
     height: 100%;
 }
 
@@ -40,44 +40,44 @@
 
 /***** Assignable to the layout block *****/
 
-/* align_columns_top: vertically align every column's content to the top of the line  */
-.taipy-layout.align_columns_top {
+/* align-columns-top: vertically align every column's content to the top of the line  */
+.taipy-layout.align-columns-top {
     align-items: start;
 }
 
-/* align_columns_center: vertically align every column's content to the center of the line  */
-.taipy-layout.align_columns_center {
+/* align-columns-center: vertically align every column's content to the center of the line  */
+.taipy-layout.align-columns-center {
     align-items: center;
 }
 
-/* align_columns_bottom: vertically align every column's content to the bottom of the line  */
-.taipy-layout.align_columns_bottom {
+/* align-columns-bottom: vertically align every column's content to the bottom of the line  */
+.taipy-layout.align-columns-bottom {
     align-items: end;
 }
 
-/* align_columns_stretch: stretch every column's content to fill the whole height of the line  */
-.taipy-layout.align_columns_stretch {
+/* align-columns-stretch: stretch every column's content to fill the whole height of the line  */
+.taipy-layout.align-columns-stretch {
     align-items: stretch;
 }
 
 /***** Assignable to the layout children parts *****/
 
-/* align_item_top: vertically align this column's content to the top of the line  */
-.taipy-part.align_item_top {
+/* align-item-top: vertically align this column's content to the top of the line  */
+.taipy-part.align-item-top {
     align-self: start;
 }
 
-/* align_item_center: vertically align this column's content to the center of the line  */
-.taipy-part.align_item_center {
+/* align-item-center: vertically align this column's content to the center of the line  */
+.taipy-part.align-item-center {
     align-self: center;
 }
 
-/* align_item_bottom: vertically align this column's content to the bottom of the line  */
-.taipy-part.align_item_bottom {
+/* align-item-bottom: vertically align this column's content to the bottom of the line  */
+.taipy-part.align-item-bottom {
     align-self: end;
 }
 
-/* align_item_stretch: stretch this column's content to fill the whole height of the line  */
-.taipy-part.align_item_stretch {
+/* align-item-stretch: stretch this column's content to fill the whole height of the line  */
+.taipy-part.align-item-stretch {
     align-self: stretch;
 }

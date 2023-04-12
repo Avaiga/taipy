@@ -21,59 +21,59 @@
               TEXT COLOR
 **************************************************/
 
-.color_primary {
+.color-primary {
     color: var(--color-primary) !important;
 }
 
-.color_secondary {
+.color-secondary {
     color: var(--color-secondary) !important;
 }
 
-.color_error {
+.color-error {
     color: var(--color-error) !important;
 }
 
-.color_warning {
+.color-warning {
     color: var(--color-warning) !important;
 }
 
-.color_success {
+.color-success {
     color: var(--color-success) !important;
 }
 
-.color_background_light {
+.color-background-light {
     color: var(--color-background-light) !important;
 }
 
-.color_background_dark {
+.color-background-dark {
     color: var(--color-background-dark) !important;
 }
 
-.color_background {
+.color-background {
     color: var(--color-background) !important;
 }
 
-.color_paper_light {
+.color-paper-light {
     color: var(--color-paper-light) !important;
 }
 
-.color_paper_dark {
+.color-paper-dark {
     color: var(--color-paper-dark) !important;
 }
 
-.color_paper {
+.color-paper {
     color: var(--color-paper) !important;
 }
 
-.color_contrast_light {
+.color-contrast-light {
     color: var(--color-contrast-light) !important;
 }
 
-.color_contrast_dark {
+.color-contrast-dark {
     color: var(--color-contrast-dark) !important;
 }
 
-.color_contrast {
+.color-contrast {
     color: var(--color-contrast) !important;
 }
 
@@ -82,58 +82,58 @@
               BACKGROUND COLOR
 **************************************************/
 
-.bg_primary {
+.bg-primary {
     background-color: var(--color-primary) !important;
 }
 
-.bg_secondary {
+.bg-secondary {
     background-color: var(--color-secondary) !important;
 }
 
-.bg_error {
+.bg-error {
     background-color: var(--color-error) !important;
 }
 
-.bg_warning {
+.bg-warning {
     background-color: var(--color-warning) !important;
 }
 
-.bg_success {
+.bg-success {
     background-color: var(--color-success) !important;
 }
 
-.bg_default_light {
+.bg-default-light {
     background-color: var(--color-background-light) !important;
 }
 
-.bg_default_dark {
+.bg-default-dark {
     background-color: var(--color-background-dark) !important;
 }
 
-.bg_default {
+.bg-default {
     background-color: var(--color-background) !important;
 }
 
-.bg_paper_light {
+.bg-paper-light {
     background-color: var(--color-paper-light) !important;
 }
 
-.bg_paper_dark {
+.bg-paper-dark {
     background-color: var(--color-paper-dark) !important;
 }
 
-.bg_paper {
+.bg-paper {
     background-color: var(--color-paper) !important;
 }
 
-.bg_contrast_light {
+.bg-contrast-light {
     background-color: var(--color-contrast-light) !important;
 }
 
-.bg_contrast_dark {
+.bg-contrast-dark {
     background-color: var(--color-contrast-dark) !important;
 }
 
-.bg_contrast {
+.bg-contrast {
     background-color: var(--color-contrast) !important;
 }

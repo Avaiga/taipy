@@ -10,6 +10,11 @@ The _format_ property uses a format string like the ones used by the string _for
 If the value is a `date` or a `datetime`, then _format_ can be set to a date/time formatting string.
 
 
+## Styling
+
+All the text controls are generated with the "taipy-text" CSS class. You can use this class
+name to select the text controls on your page and apply style.
+
 ## Usage
 
 ### Display value

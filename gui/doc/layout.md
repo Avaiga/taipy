@@ -4,6 +4,29 @@ The _columns_ property follows the [CSS standard](https://developer.mozilla.org/
 If the _columns_ property contains only digits and spaces, it is considered as flex-factor unit:
 "1 1" => "1fr 1fr"
 
+## Styling
+
+All the layout blocks are generated with the "taipy-layout" CSS class. You can use this class
+name to select the layout blocks on your page and apply style.
+
+### [Stylekit](../styling/stylekit.md) support
+
+The [Stylekit](../styling/stylekit.md) provides specific classes that you can use to style layout
+blocks:
+
+- *align-columns-top*<br/>
+  Aligns the content to the top of each column.
+- *align-columns-center*<br/>
+  Aligns the content to the center of each column.
+- *align-columns-bottom*<br/>
+  Aligns the content to the bottom of each column.
+- *align-columns-stretch*<br/>
+  Gives all columns the height of the highest column.
+
+Additional classes are defined for the [`part`](part.md) block element when inserted in
+a layout block. Please see the [section on styling](part.md#stylekit-support) for parts
+for more details.
+
 ## Usage
 
 ### Default layout

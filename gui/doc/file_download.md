@@ -10,6 +10,11 @@ Allows downloading of a file content.
     
 The download can be triggered when clicking on a button, or can be performed automatically.
 
+## Styling
+
+All the file download controls are generated with the "taipy-file_download" CSS class. You can use this class
+name to select the file download controls on your page and apply style.
+
 ## Usage
 
 ### Default behavior

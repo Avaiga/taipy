@@ -2,6 +2,11 @@ Displays its child elements in a collapsable area.
 
 Expandable is a block control.
 
+## Styling
+
+All the expandable blocks are generated with the "taipy-expandable" CSS class. You can use this class
+name to select the expandable blocks on your page and apply style.
+
 ## Usage
 
 ### Defining a title and managing expanded state

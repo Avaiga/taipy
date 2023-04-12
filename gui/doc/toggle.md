@@ -6,6 +6,19 @@ Each button is represented by a string, an image or both.
 
 You can use an arbitrary type for all the items (see the [example](#use-arbitrary-objects)).
 
+## Styling
+
+All the toggle controls are generated with the "taipy-toggle" CSS class. You can use this class
+name to select the toggle controls on your page and apply style.
+
+The [Stylekit](../styling/stylekit.md) also provides specific CSS classes that you can use to style
+toggle controls:
+
+- *relative*<br/>
+  Resets the theme toggle position in the page flow (especially for the theme mode toggle).
+- *nolabel*<br/>
+  Hides the toggle control's label.
+
 ## Usage
 
 ### Display a list of string

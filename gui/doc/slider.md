@@ -4,6 +4,12 @@ The range is set by the values `min` and `max` which must be integer values.
 
 If the _lov_ property is used, then the slider can be used to select a value among the different choices.
 
+
+## Styling
+
+All the slider controls are generated with the "taipy-slider" CSS class. You can use this class
+name to select the sliders on your page and apply style.
+
 ## Usage
 
 ### Selecting a value between 0 and 100

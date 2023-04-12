@@ -1,5 +1,10 @@
 A control that can display and specify a formatted date, with or without time.
 
+## Styling
+
+All the date controls are generated with the "taipy-date" CSS class. You can use this class
+name to select the date selectors on your page and apply style.
+
 ## Usage
 
 ### Using the full date and time

@@ -1,5 +1,11 @@
 A kind of [`input`](input.md) that handles numbers.
 
+
+## Styling
+
+All the number controls are generated with the "taipy-number" CSS class. You can use this class
+name to select the number controls on your page and apply style.
+
 ## Usage
 
 ### Simple

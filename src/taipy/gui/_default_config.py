@@ -9,8 +9,38 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from .config import Config
+from .config import Config, Stylekit
 
+_default_stylekit: Stylekit = {
+    # Primary and secondary colors
+    "color_primary": "#ff6049",
+    "color_secondary": "#293ee7",
+
+    # Contextual color
+    "color_error": "#FF595E",
+    "color_warning": "#FAA916",
+    "color_success": "#96E6B3",
+
+    # Background and elevation color for LIGHT MODE
+    "color_background_light": "#f0f5f7",
+    "color_paper_light": "#ffffff",
+
+    # Background and elevation color for DARK MODE
+    "color_background_dark": "#152335",
+    "color_paper_dark": "#1f2f44",
+
+    # DEFINING FONTS
+    # Set main font family
+    "font_family": "Lato, Arial, sans-serif",
+
+    # DEFINING SHAPES
+    # Base border radius in px
+    "border_radius": 8,
+
+    # DEFINING MUI COMPONENTS STYLES
+    # Matching input and button height in css size unit
+    "input_button_height": "48px"
+}
 
 # Default config loaded by app.py
 default_config: Config = {
@@ -38,37 +68,7 @@ default_config: Config = {
     "theme": None,
     "time_zone": None,
     "title": None,
-    "stylekit": True,
-    "stylekit_variables" : {
-        # Primary and secondary colors
-        "color_primary": "#ff6049",
-        "color_secondary": "#293ee7",
-
-        # Contextual color
-        "color_error": "#FF595E",
-        "color_warning": "#FAA916",
-        "color_success": "#96E6B3",
-
-        # Background and elevation color for LIGHT MODE
-        "color_background_light": "#f0f5f7",
-        "color_paper_light": "#ffffff",
-
-        # Background and elevation color for DARK MODE
-        "color_background_dark": "#152335",
-        "color_paper_dark": "#1f2f44",
-
-        # DEFINING FONTS
-        # Set main font family
-        "font_family": "Lato, Arial, sans-serif",
-
-        # DEFINING SHAPES
-        # Base border radius in px
-        "border_radius": 8,
-
-        # DEFINING MUI COMPONENTS STYLES
-        # Matching input and button height in css size unit
-        "input_button_height": "48px"
-    },
+    "stylekit": _default_stylekit,
     "upload_folder": None,
     "use_arrow": False,
     "use_reloader": False,

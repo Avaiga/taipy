@@ -14,6 +14,30 @@ The _data_ property supported types are:
 
 Data columns are accessed by their name or index (temporary dataframes are built from these different sources).
 
+
+## Styling
+
+All the table controls are generated with the "taipy-table" CSS class. You can use this class
+name to select the tables on your page and apply style.
+
+### [Stylekit](../styling/stylekit.md) support
+
+The [Stylekit](../styling/stylekit.md) provides a CSS custom property:
+
+- *--table-stripe-opacity*<br/>
+  This property contains the opacity applied to odd lines of tables.<br/>
+  The default value is 0.5.
+
+The [Stylekit](../styling/stylekit.md) also provides specific CSS classes that you can use to style
+tables:
+
+- *header-plain*<br/>
+  Adds a plain and contrasting background color to the table header.
+- *rows-bordered*<br/>
+  Adds a bottom border to each row.
+- *rows-similar*<br/>
+  Removes the even-odd striped background so all rows have the same background.
+
 ## Usage
 
 ### Show a table

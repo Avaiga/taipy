@@ -2,6 +2,18 @@ A navigation bar control.
 
 This control is implemented as a list of links.
 
+## Styling
+
+All the navbar controls are generated with the "taipy-navbar" CSS class. You can use this class
+name to select the navbar controls on your page and apply style.
+
+### [Stylekit](../styling/stylekit.md) support
+
+The [Stylekit](../styling/stylekit.md) provides a specific class that you can use to style navbar controls:
+
+* *fullheight*<br/>
+  Ensures the tabs fill the full height of their container (in a header bar for example).
+
 ## Usage
 
 ### Defining a default navbar

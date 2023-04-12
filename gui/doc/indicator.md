@@ -3,6 +3,11 @@ Displays a label on a red to green scale at a specific position.
 The _min_ value can be greater than the _max_ value.<br/>
 The value will be maintained between min and max.
 
+## Styling
+
+All the indicator controls are generated with the "taipy-indicator" CSS class. You can use this class
+name to select the indicator controls on your page and apply style.
+
 ## Usage
 
 ### Minimal usage

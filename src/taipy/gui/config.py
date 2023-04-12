@@ -54,7 +54,6 @@ ConfigParameter = t.Literal[
     "time_zone",
     "title",
     "stylekit",
-    "stylekit_variables",
     "upload_folder",
     "use_arrow",
     "use_reloader",
@@ -63,8 +62,8 @@ ConfigParameter = t.Literal[
     "port",
 ]
 
-StylekitVariables = t.TypedDict(
-    "StylekitVariables",
+Stylekit = t.TypedDict(
+    "Stylekit",
     {
         "color_primary": str,
         "color_secondary": str,
@@ -110,8 +109,7 @@ Config = t.TypedDict(
         "theme": t.Optional[t.Dict[str, t.Any]],
         "time_zone": t.Optional[str],
         "title": t.Optional[str],
-        "stylekit": bool,
-        "stylekit_variables": StylekitVariables,
+        "stylekit": t.Union[bool, Stylekit],
         "upload_folder": t.Optional[str],
         "use_arrow": bool,
         "use_reloader": bool,
@@ -204,6 +202,11 @@ class _Config(object):
         for key, value in kwargs.items():
             key = key.lower()
             if value is not None and key in config:
+                # Special case for "stylekit" that can be a Boolean or a dict
+                if key == "stylekit" and isinstance(value, bool):
+                    from ._default_config import _default_stylekit
+                    config[key] = _default_stylekit if value else {}
+                    continue
                 try:
                     if isinstance(value, dict) and isinstance(config[key], dict):
                         config[key].update(value)
