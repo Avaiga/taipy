@@ -38,14 +38,12 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     @abstractmethod
     def _load(self, model_id: str) -> Entity:
         """
-                Retrieve the entity data from the repository.
-        _CycleManager._get_all()
-                Args:
-                    model_id: The entity id, i.e., its primary key.
+        Retrieve the entity data from the repository.
+        Args:
+            model_id: The entity id, i.e., its primary key.
 
-                Returns:
-                    An entity.
-
+        Returns:
+            An entity.
         """
         raise NotImplementedError
 
