@@ -35,8 +35,6 @@ class GuiCore(ElementLibrary):
     "on_scenario_create": ElementProperty(PropertyType.function, f"{GuiCoreContext._VAR_NAME}.create_new_scenario()"),
     "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME)
   })}
-  
-
 
   def get_name(self) -> str:
     return "taipy_gui_core"
