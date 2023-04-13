@@ -1127,7 +1127,8 @@
       {
         "inherits": [
           "partial",
-          "shared"
+          "shared",
+          "on_change"
         ],
         "properties": [
           {
