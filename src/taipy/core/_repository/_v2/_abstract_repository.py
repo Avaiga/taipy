@@ -29,7 +29,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Save an entity in the repository.
 
-        Args:
+        Parameters:
             entity: The data from an object
 
         """
@@ -39,7 +39,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     def _load(self, model_id: str) -> Entity:
         """
         Retrieve the entity data from the repository.
-        Args:
+        Parameters:
             model_id: The entity id, i.e., its primary key.
 
         Returns:
@@ -62,7 +62,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Delete an entity in the repository.
 
-        Args:
+        Parameters:
             entity_id: The id of the entity to be deleted.
 
         """
@@ -92,7 +92,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     @abstractmethod
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
         """
-        Args:
+        Parameters:
             attribute: The entity property that is the key to the search.
             value: The value of the attribute that are being searched.
 
@@ -107,7 +107,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Export an entity from the repository.
 
-        Args:
+        Parameters:
             entity_id (str): The id of the entity to be exported.
             folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
 
