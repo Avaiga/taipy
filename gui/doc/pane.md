@@ -52,19 +52,35 @@ The _anchor_ property defines on which side of the display the pane is shown.
 
 The pane is shown beside the page content instead of over it if the _persistent_ property evaluates to True.
 
-!!! example "Page content"
+The parent element must have the *flex* display mode in CSS. To achieve this using
+the Markdown syntax, you can leverage the
+[*d-flex* class](../styling/stylekit.md#c-d-flex) provided in the
+[Stylekit](../styling/stylekit.md).
 
-    === "Markdown"
+Here is a full example of how to do this:
 
-        ```
-        <|{show}|pane|persistent|>
-        ```
-  
-    === "HTML"
+```py
+from taipy.gui import Gui
 
-        ```html
-        <taipy:pane persistent="True">{show}</taipy:pane>
-        ```
+show_pane=True
+
+page="""
+<|d-flex|
+<|{show_pane}|pane|persistent|width=100px|
+Pane content
+|>
+This button can be pressed to open the persistent pane:
+<|Open|button|on_action={lambda s: s.assign("show_pane", True)}|>
+|>
+"""
+
+Gui(page=page).run()
+```
+
+The pane is initially opened. If you close it, the bound variable *show_pane* is
+updated (set to False).<br/>
+Pressing the button sets the variable *show_pane* to True using a lambda callback, which
+opens the pane again.
 
 ### Pane as block element
 
