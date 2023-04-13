@@ -48,8 +48,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)
 
-    # inherited methods
-
+    ###############################
+    ###   Inheritated methods   ###
+    ###############################
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
 
@@ -123,8 +124,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
         shutil.copy2(self.__get_path(entity_id), export_path)
 
-    # Specific FS methods
-
+    #########################################
+    ###   Specific or optimized methods   ###
+    #########################################
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
@@ -159,8 +161,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             filters.append({"owner_id": owner_id})
         return self.__filter_files_by_config_and_owner_id(config_id, owner_id, filters)
 
-    # hidden methods
-
+    ###########################
+    ###   Private methods   ###
+    ###########################
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def __filter_files_by_config_and_owner_id(
         self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
