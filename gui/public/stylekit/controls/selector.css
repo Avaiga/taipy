@@ -13,7 +13,7 @@
 
 /**************************************************************
 
-                   TAIPY DATE
+                   TAIPY SELECTOR
 
 ***************************************************************/
 
@@ -21,17 +21,17 @@
               OVERRIDES / NORMALIZATION
 **************************************************/
 
-.taipy-date {
-    display: block;
-    margin: 4px 0;
+.taipy-selector {
+  margin: 4px 0;
 }
+
 
 /*************************************************
               MODIFIER CLASSES
 **************************************************/
 
 /* fullwidth : make the element fit the full width of its container */
-.taipy-date.fullwidth .MuiFormControl-root{
-    display: flex;
-    max-width: initial;
+.taipy-selector.fullwidth{
+  display: flex;
+  max-width: initial;
 }
