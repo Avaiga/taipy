@@ -65,7 +65,7 @@ jobs:
     needs: [test-package]
     timeout-minutes: 20
     name: Release Package
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
