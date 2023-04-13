@@ -13,12 +13,20 @@
 
 /**************************************************************
 
-                   CARD
+                   SIDEBAR
 
 ***************************************************************/
 
-.card {
-    border-radius: var(--border-radius);
+.sidebar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    height: 100vh;
+    min-width: var(--sidebar-min-width);
+    padding: var(--element-padding);
     background-color: var(--color-paper);
+    overflow: auto;
+    overflow-x: clip;
     box-shadow: var(--box-shadow);
 }

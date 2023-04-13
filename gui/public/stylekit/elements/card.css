@@ -11,8 +11,15 @@
  * specific language governing permissions and limitations under the License.
  */
 
-:root {
-    --container-max-width: 75rem;
+/**************************************************************
 
-    --sidebar-min-width: 15rem;
+                   CARD
+
+***************************************************************/
+
+.card {
+    padding: var(--element-padding);
+    border-radius: var(--border-radius);
+    background-color: var(--color-paper);
+    box-shadow: var(--box-shadow);
 }

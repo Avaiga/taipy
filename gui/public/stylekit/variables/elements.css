@@ -11,22 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-/**************************************************************
+:root {
+    --element-padding: var(--spacing2);
 
-                   SIDEBAR
+    --container-max-width: 75rem;
 
-***************************************************************/
-
-.sidebar {
-    position: sticky;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    height: 100vh;
-    min-width: var(--sidebar-min-width);
-    padding: var(--spacing2);
-    background-color: var(--color-paper);
-    overflow: auto;
-    overflow-x: clip;
-    box-shadow: var(--box-shadow);
+    --sidebar-min-width: 15rem;
 }
