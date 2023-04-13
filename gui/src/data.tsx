@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { ItemType, TreeNode } from "./ScenarioSelector";
+import { TreeNode } from "./ScenarioSelector";
 
 export const cycles: TreeNode[] = [
   {
