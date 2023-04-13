@@ -48,6 +48,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)
 
+    # inherited methods
+
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
 
@@ -84,11 +86,11 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             pass
         return entities
 
-    def _delete(self, model_id: str):
+    def _delete(self, entity_id: str):
         try:
-            self.__get_model_filepath(model_id).unlink()
+            self.__get_model_filepath(entity_id).unlink()
         except FileNotFoundError:
-            raise ModelNotFound(str(self.dir_path), model_id)
+            raise ModelNotFound(str(self.dir_path), entity_id)
 
     def _delete_all(self):
         shutil.rmtree(self.dir_path, ignore_errors=True)
@@ -124,6 +126,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
         shutil.copy2(self.__get_model_filepath(entity_id), export_path)
 
+    # Specific FS methods
+
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
@@ -157,6 +161,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         if owner_id is not None:
             filters.append({"owner_id": owner_id})
         return self.__filter_files_by_config_and_owner_id(config_id, owner_id, filters)
+
+    # hidden methods
 
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def __filter_files_by_config_and_owner_id(
