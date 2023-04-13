@@ -54,7 +54,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         self.__create_directory_if_not_exists()
 
         model = self.converter._entity_to_model(entity)
-        self.__get_model_filepath(model.id).write_text(
+        self.__get_path(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
 
@@ -65,7 +65,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def _load(self, model_id: str) -> Entity:
         try:
-            file_content = self._get(self.__get_model_filepath(model_id))
+            file_content = self._get(self.__get_path(model_id))
             model = self.model.from_dict(file_content)
             entity = self.converter._model_to_entity(model)
             self.__migrate_old_entity(file_content, entity)
@@ -88,7 +88,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     def _delete(self, entity_id: str):
         try:
-            self.__get_model_filepath(entity_id).unlink()
+            self.__get_path(entity_id).unlink()
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), entity_id)
 
@@ -124,7 +124,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         if export_path.exists():
             export_path.unlink()
 
-        shutil.copy2(self.__get_model_filepath(entity_id), export_path)
+        shutil.copy2(self.__get_path(entity_id), export_path)
 
     # Specific FS methods
 
@@ -212,7 +212,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def __search(self, attribute: str, value: str, filters: List[Dict] = None) -> Iterator[Entity]:
         return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(filters))
 
-    def __get_model_filepath(self, model_id) -> pathlib.Path:
+    def __get_path(self, model_id) -> pathlib.Path:
         return self.dir_path / f"{model_id}.json"
 
     def __file_content_to_model(self, file_content):
