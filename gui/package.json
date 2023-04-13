@@ -4,10 +4,6 @@
   "private": true,
   "devDependencies": {
     "@emotion/react": "^11.10.6",
-    "@mui/icons-material": "^5.0.5",
-    "@mui/lab": "^5.0.0-alpha.53",
-    "@mui/material": "^5.0.6",
-    "@mui/x-date-pickers": "^6.0.0",
     "@types/react": "^18.0.15",
     "@types/styled-components": "^5.1.25",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
@@ -28,6 +24,10 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
+    "@mui/icons-material": "^5.0.5",
+    "@mui/lab": "^5.0.0-alpha.53",
+    "@mui/material": "^5.0.6",
+    "@mui/x-date-pickers": "^6.0.0",
     "lodash-es": "^4.17.21",
     "react": "^18.2.0"
   },

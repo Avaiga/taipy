@@ -1,3 +1,16 @@
+/*
+ * Copyright 2023 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 import React from "react";
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +30,7 @@ import {
   TextField,
 } from "@mui/material";
 import { ChevronRight, ExpandMore, Flag, Close } from "@mui/icons-material";
-import TreeItem from "@mui/lab/TreeItem";
+import { TreeItem } from "@mui/lab";
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
 
@@ -31,7 +44,7 @@ import {
 } from "taipy-gui";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import MuiTreeView from "@mui/lab/TreeView";
+import { TreeView } from "@mui/lab";
 import { scenarios } from "./data";
 import { format } from "date-fns";
 
@@ -81,8 +94,6 @@ interface ScenarioSelectorProps {
 // });
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-  const {} = props;
-
   const [open, setOpen] = useState(false);
   const [nodes, setNodes] = useState<TreeNode[]>([]);
 
@@ -186,7 +197,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         <Typography variant="h5" gutterBottom>
           Scenarios
         </Typography>
-        <MuiTreeView
+        <TreeView
           defaultCollapseIcon={<ExpandMore />}
           defaultExpandIcon={<ChevronRight />}
           sx={{
@@ -226,7 +237,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
               ))}
             </TreeItem>
           ))}
-        </MuiTreeView>
+        </TreeView>
 
         <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
           Add
