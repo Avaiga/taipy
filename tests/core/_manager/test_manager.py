@@ -68,8 +68,8 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _from_model(self, model: MockModel):
         return MockEntity(model.id, model.name, model.version)
 
-    def _load(self, model_id: str) -> MockEntity:
-        return self.repo._load(model_id)
+    def _load(self, entity_id: str) -> MockEntity:
+        return self.repo._load(entity_id)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[MockEntity]:
         return self.repo._load_all(version_number)

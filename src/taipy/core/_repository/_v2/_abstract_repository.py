@@ -36,11 +36,11 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _load(self, model_id: str) -> Entity:
+    def _load(self, entity_id: str) -> Entity:
         """
         Retrieve the entity data from the repository.
         Parameters:
-            model_id: The entity id, i.e., its primary key.
+            entity_id: The entity id, i.e., its primary key.
 
         Returns:
             An entity.

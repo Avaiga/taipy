@@ -58,20 +58,17 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
 
-    def _get(self, filepath: pathlib.Path) -> Json:
-        with pathlib.Path(filepath).open(encoding="UTF-8") as source:
-            return json.load(source)
-
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
-    def _load(self, model_id: str) -> Entity:
+    def _load(self, entity_id: str) -> Entity:
         try:
-            file_content = self._get(self.__get_path(model_id))
+            with pathlib.Path(self.__get_path(entity_id)).open(encoding="UTF-8") as source:
+                file_content = json.load(source)
             model = self.model.from_dict(file_content)
             entity = self.converter._model_to_entity(model)
             self.__migrate_old_entity(file_content, entity)
             return entity
         except FileNotFoundError:
-            raise ModelNotFound(str(self.dir_path), model_id)
+            raise ModelNotFound(str(self.dir_path), entity_id)
 
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
@@ -81,7 +78,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         try:
             for f in self.dir_path.iterdir():
                 if data := self.__filter_by(f, filters):
-                    entities.append(self.__file_content_to_model(data))
+                    entities.append(self.__file_content_to_entity(data))
         except FileNotFoundError:
             pass
         return entities
@@ -171,7 +168,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         try:
             files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
             entities = map(
-                lambda f: self.__file_content_to_model(self.__filter_by(f, filters)),
+                lambda f: self.__file_content_to_entity(self.__filter_by(f, filters)),
                 files,
             )
             corresponding_entities = filter(
@@ -200,7 +197,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                 if owner_id and owner_id not in file_content:
                     continue
 
-                entity = self.__file_content_to_model(file_content)
+                entity = self.__file_content_to_entity(file_content)
                 if entity.owner_id == owner_id and entity.config_id == config_id.id:
                     return config_id, owner_id, entity
 
@@ -215,7 +212,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def __get_path(self, model_id) -> pathlib.Path:
         return self.dir_path / f"{model_id}.json"
 
-    def __file_content_to_model(self, file_content):
+    def __file_content_to_entity(self, file_content):
         if not file_content:
             return None
         if isinstance(file_content, str):
