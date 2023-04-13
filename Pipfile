@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-taipy-gui = "==2.1"
-taipy-rest = "==2.1"
+taipy-gui = "==2.2"
+taipy-rest = "==2.2"
 
 [dev-packages]
 pytest = "*"
