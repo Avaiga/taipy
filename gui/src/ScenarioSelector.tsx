@@ -30,7 +30,7 @@ import {
   TextField,
 } from "@mui/material";
 import { ChevronRight, ExpandMore, Flag, Close } from "@mui/icons-material";
-import { TreeItem } from "@mui/lab";
+import TreeItem from "@mui/lab/TreeItem";
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
 
@@ -44,8 +44,8 @@ import {
 } from "taipy-gui";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { TreeView } from "@mui/lab";
-import { scenarios } from "./data";
+import MuiTreeView from "@mui/lab/TreeView";
+import { cycles } from "./data";
 import { format } from "date-fns";
 
 export type Scenario = {
@@ -54,15 +54,13 @@ export type Scenario = {
   config: string;
 };
 
-export type TreeNodeChild = {
-  label: string;
-  properties?: any[];
-  primary?: boolean;
-};
-
 export type TreeNode = {
+  id: string;
+  label: string;
+  type: string;
+  primary?: boolean;
   date: string;
-  children: TreeNodeChild[];
+  children?: TreeNode[];
 };
 
 interface ScenarioSelectorProps {
@@ -128,14 +126,40 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
       setNodes(
         nodes.map((item, index) =>
           nodeIndex === index
-            ? { ...item, children: [...item.children, { label: node.name }] }
+            ? {
+                ...item,
+                children: [
+                  ...(item.children || []),
+                  {
+                    id: "scenario_" + index,
+                    label: node.name,
+                    type: "SCENARIO",
+                    primary: false,
+                    date: node.date,
+                  },
+                ],
+              }
             : item
         )
       );
     } else {
       setNodes([
         ...nodes,
-        { date: node.date, children: [{ label: node.name }] },
+        {
+          date: node.date,
+          id: "cycle_" + nodeIndex,
+          label: node.name,
+          type: "CYCLE",
+          children: [
+            {
+              id: "scenario_" + nodeIndex,
+              label: node.name,
+              type: "SCENARIO",
+              primary: false,
+              date: node.date,
+            },
+          ],
+        },
       ]);
     }
   };
@@ -164,30 +188,9 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   }, [props.coreChanged, props.updateVarNames, module, dispatch]);
 
   useEffect(() => {
-    if (scenarios) {
-      let initalNodes: any[] = [];
-      for (var s of scenarios) {
-        const date = format(new Date(s.creation_date), "yyyy-MM-dd");
-        const nodeDate = initalNodes.find((n) => n.date === date);
-
-        const childrenObj = {
-          label: s.id,
-          primary: s.primary_scenario,
-          version: s.version,
-          properties: s.properties,
-        };
-
-        if (nodeDate) {
-          nodeDate.children.push(childrenObj);
-        } else {
-          let parent = {
-            date: date,
-            children: [childrenObj],
-          };
-          initalNodes.push(parent);
-        }
-      }
-      setNodes(initalNodes);
+    const data = cycles;
+    if (data) {
+      setNodes(data);
     }
   }, []);
 
@@ -197,7 +200,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         <Typography variant="h5" gutterBottom>
           Scenarios
         </Typography>
-        <TreeView
+        <MuiTreeView
           defaultCollapseIcon={<ExpandMore />}
           defaultExpandIcon={<ChevronRight />}
           sx={{
@@ -212,7 +215,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
               nodeId={item.date}
               label={`Cycle ${format(new Date(item.date), "yyyy-MM-dd")}`}
             >
-              {item.children.map((child, index) => (
+              {item.children?.map((child, index) => (
                 <TreeItem
                   key={item.date + index}
                   nodeId={item.date + index.toString()}
@@ -237,7 +240,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
               ))}
             </TreeItem>
           ))}
-        </TreeView>
+        </MuiTreeView>
 
         <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
           Add

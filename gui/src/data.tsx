@@ -11,48 +11,97 @@
  * specific language governing permissions and limitations under the License.
  */
 
-//mock data
-export const scenarios = [
+import { ItemType, TreeNode } from "./ScenarioSelector";
+
+export const cycles: TreeNode[] = [
   {
-    cycle: "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
-    id: "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
-    properties: {},
-    tags: [],
-    version: "latest",
-    pipelines: [
-      "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-      "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4",
+    id: "cycle_1",
+    label: "Cycle 1",
+    type: "CYCLE",
+    primary: false,
+    date: "2022-08-15T19:21:01.871587",
+    children: [
+      {
+        id: "scenario_1.1",
+        label: "Scenario 1.1",
+        type: "SCENARIO",
+        primary: true,
+        date: "2022-08-15T19:21:01.871587",
+      },
+      {
+        id: "scenario_1.2",
+        label: "Scenario 1.2",
+        type: "SCENARIO",
+        primary: false,
+        date: "2022-08-15T19:21:01.871587",
+      },
+      {
+        id: "scenario_1.3",
+        label: "Scenario 1.3",
+        type: "SCENARIO",
+        primary: false,
+        date: "2022-08-15T19:21:01.871587",
+      },
     ],
-    subscribers: [],
-    creation_date: "2022-08-15T19:21:01.871587",
-    primary_scenario: true,
   },
   {
-    cycle: "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
-    id: "SCENARIO_2222222222263cb358d-5834-4d73-84e4-a6343df5e08c",
-    properties: {},
-    tags: [],
-    version: "latest",
-    pipelines: [
-      "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-      "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4",
+    id: "cycle_2",
+    label: "Cycle 2",
+    type: "CYCLE",
+    primary: false,
+    date: "2022-06-15T19:21:01.871587",
+    children: [
+      {
+        id: "scenario_2.1",
+        label: "Scenario 2.1",
+        type: "SCENARIO",
+        primary: true,
+        date: "2022-06-15T19:21:01.871587",
+      },
+      {
+        id: "scenario_2.2",
+        label: "Scenario 2.2",
+        type: "SCENARIO",
+        primary: false,
+        date: "2022-06-15T19:21:01.871587",
+      },
+      {
+        id: "scenario_2.3",
+        label: "Scenario 2.3",
+        type: "SCENARIO",
+        primary: false,
+        date: "2022-06-15T19:21:01.871587",
+      },
     ],
-    subscribers: [],
-    creation_date: "2022-08-15T19:21:01.871587",
-    primary_scenario: false,
   },
   {
-    cycle: "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
-    id: "SCENARIO_333333333333333363cb358d-5834-4d73-84e4-a6343df5e08c",
-    properties: {},
-    tags: [],
-    version: "latest",
-    pipelines: [
-      "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-      "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4",
+    id: "cycle_3",
+    label: "Cycle 3",
+    type: "CYCLE",
+    primary: false,
+    date: "2022-07-15T19:21:01.871587",
+    children: [
+      {
+        id: "scenario_3.1",
+        label: "Scenario 3.1",
+        type: "SCENARIO",
+        primary: true,
+        date: "2022-07-15T19:21:01.871587",
+      },
+      {
+        id: "scenario_3.2",
+        label: "Scenario 3.2",
+        type: "SCENARIO",
+        primary: false,
+        date: "2022-07-15T19:21:01.871587",
+      },
+      {
+        id: "scenario_3.3",
+        label: "Scenario 3.3",
+        type: "SCENARIO",
+        primary: false,
+        date: "2022-07-15T19:21:01.871587",
+      },
     ],
-    subscribers: [],
-    creation_date: "2022-08-16T19:21:01.871587",
-    primary_scenario: true,
   },
 ];
