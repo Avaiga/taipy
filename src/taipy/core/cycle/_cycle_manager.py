@@ -11,16 +11,13 @@
 
 import calendar
 from datetime import datetime, time, timedelta
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional
 
 from taipy.config.common.frequency import Frequency
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._v2._abstract_repository import _AbstractRepository
-
-# from .._repository._v2._filesystem_repository import _FileSystemRepository
-from .._version._version_mixin import _VersionMixin
 from ..common._entity_ids import _EntityIds
 from ..common.alias import CycleId
 from ..job._job_manager_factory import _JobManagerFactory
