@@ -732,6 +732,7 @@ class _Builder:
             if isinstance(partial, Partial):
                 self.__attributes["page"] = partial._route
                 self.__set_react_attribute("partial", partial._route)
+                self.__set_react_attribute("defaultPartial", True)
         return self
 
     def _set_propagate(self):
