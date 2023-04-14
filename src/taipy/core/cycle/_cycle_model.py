@@ -15,7 +15,7 @@ from typing import Any, Dict
 
 from taipy.config.common.frequency import Frequency
 
-from ..common.alias import CycleId
+from .cycle_id import CycleId
 
 
 @dataclass

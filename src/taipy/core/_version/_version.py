@@ -15,7 +15,7 @@ from typing import Any
 from taipy.config import Config
 from taipy.config._config import _Config
 
-from ..common._entity import _Entity
+from .._entity._entity import _Entity
 from ._version_model import _VersionModel
 
 

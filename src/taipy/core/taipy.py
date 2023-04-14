@@ -17,25 +17,30 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
-from .common._entity import _Entity
 from .common._warnings import _warn_no_core_service
-from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from .config.pipeline_config import PipelineConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
 from .cycle.cycle import Cycle
+from .cycle.cycle_id import CycleId
 from .data._data_manager_factory import _DataManagerFactory
 from .data.data_node import DataNode
+from .data.data_node_id import DataNodeId
 from .exceptions.exceptions import ModelNotFound, NonExistingVersion, VersionIsNotProductionVersion
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
+from .job.job_id import JobId
 from .pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from .pipeline.pipeline import Pipeline
+from .pipeline.pipeline_id import PipelineId
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
+from .scenario.scenario_id import ScenarioId
 from .task._task_manager_factory import _TaskManagerFactory
 from .task.task import Task
+from .task.task_id import TaskId
 
 __logger = _TaipyLogger._get_logger()
 
@@ -122,8 +127,13 @@ def get(entity_id: JobId) -> Job:
     ...
 
 
+@overload
+def get(entity_id: str) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
+    ...
+
+
 def get(
-    entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]
+    entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId, str]
 ) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
     """Get an entity from its identifier.
 
@@ -613,3 +623,19 @@ def get_parents(
             get_parents(parent, parent_dict)
 
     return parent_dict
+
+
+def get_cycles_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
+    """Get the scenarios grouped by cycles.
+
+    Returns:
+        The dictionary of all cycles and their corresponding scenarios.
+    """
+
+    cycles_scenarios: Dict[Optional[Cycle], List[Scenario]] = {}
+    for scenario in get_scenarios():
+        if scenario.cycle in cycles_scenarios.keys():
+            cycles_scenarios[scenario.cycle].append(scenario)
+        else:
+            cycles_scenarios[scenario.cycle] = [scenario]
+    return cycles_scenarios

@@ -71,6 +71,7 @@ def test_create_task():
 
     path = "my/csv/path"
     abc_dn = InMemoryDataNode("name_1ea", Scope.SCENARIO, properties={"path": path})
+
     task = Task("name_1ea", {}, print, [abc_dn], [], owner_id="owner_id", parent_ids={"parent_id_1", "parent_id_2"})
     assert task.config_id == "name_1ea"
     assert task.id is not None
@@ -80,6 +81,17 @@ def test_create_task():
     assert task.name_1ea.path == path
     with pytest.raises(AttributeError):
         task.bar
+    with mock.patch("src.taipy.core.get") as get_mck:
+
+        class MockOwner:
+            label = "owner_label"
+
+            def get_label(self):
+                return self.label
+
+        get_mck.return_value = MockOwner()
+        assert task.get_label() == "owner_label > " + task.config_id
+        assert task.get_simple_label() == task.config_id
 
 
 def test_parent_id_deprecated():

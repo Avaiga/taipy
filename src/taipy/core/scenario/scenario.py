@@ -19,28 +19,31 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
+from .._entity._entity import _Entity
+from .._entity._labeled import _Labeled
+from .._entity._properties import _Properties
+from .._entity._reload import _Reloader, _self_reload, _self_setter
+from .._entity._submittable import _Submittable
 from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common import _utils
-from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
-from ..common._properties import _Properties
-from ..common._reload import _Reloader, _self_reload, _self_setter
-from ..common._submittable import _Submittable
 from ..common._utils import _Subscriber
-from ..common.alias import CycleId, PipelineId, ScenarioId
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
+from ..cycle.cycle_id import CycleId
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
+from ..pipeline.pipeline_id import PipelineId
 from ..task.task import Task
 from ._scenario_model import _ScenarioModel
+from .scenario_id import ScenarioId
 
 
-class Scenario(_Entity, _Submittable):
+class Scenario(_Entity, _Submittable, _Labeled):
     """Instance of a Business case to solve.
 
     A scenario holds a list of pipelines (instances of `Pipeline^` class) to submit for execution
@@ -75,7 +78,7 @@ class Scenario(_Entity, _Submittable):
         cycle: Optional[Cycle] = None,
         subscribers: Optional[List[_Subscriber]] = None,
         tags: Optional[Set[str]] = None,
-        version: Optional[str] = None,
+        version: str = None,
     ):
         super().__init__(subscribers)
         self.config_id = _validate_id(config_id)
@@ -225,6 +228,10 @@ class Scenario(_Entity, _Submittable):
         self._version = val
 
     @property
+    def owner_id(self):
+        return self._cycle.id
+
+    @property  # type: ignore
     def properties(self):
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties

@@ -11,8 +11,8 @@
 
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data.data_node import DataNode
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.generic import GenericDataNode
 from src.taipy.core.exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 from taipy.config.common.scope import Scope

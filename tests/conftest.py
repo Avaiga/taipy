@@ -17,12 +17,11 @@ from queue import Queue
 
 import pandas as pd
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId
 from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,
@@ -39,16 +38,20 @@ from src.taipy.core.config import (
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle.cycle import Cycle
+from src.taipy.core.cycle.cycle_id import CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job.job import Job
+from src.taipy.core.job.job_id import JobId
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
@@ -119,6 +122,40 @@ def parquet_file_path(tmpdir_factory) -> str:
     fn = tmpdir_factory.mktemp("data").join("df.parquet")
     data.to_parquet(str(fn))
     return fn.strpath
+
+
+@pytest.fixture(scope="function")
+def tmp_sqlite_db_file_path(tmpdir_factory):
+    fn = tmpdir_factory.mktemp("data")
+    db_name = "df"
+    file_extension = ".db"
+
+    db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
+    conn = db.connect()
+    conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.close()
+    db.dispose()
+
+    return fn.strpath, db_name, file_extension
+
+
+@pytest.fixture(scope="function")
+def tmp_sqlite_sqlite3_file_path(tmpdir_factory):
+    fn = tmpdir_factory.mktemp("data")
+    db_name = "df"
+    file_extension = ".sqlite3"
+
+    db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
+    conn = db.connect()
+    conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
+    conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.close()
+    db.dispose()
+
+    return fn.strpath, db_name, file_extension
 
 
 @pytest.fixture(scope="function")

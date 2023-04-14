@@ -9,20 +9,25 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import re
+from .._entity._reload import _set_entity
 
 
-class _SuspiciousFileOperation(Exception):
-    pass
+class _Entity:
+    _MANAGER_NAME: str
+    _is_in_context = False
 
+    def __enter__(self):
+        self._is_in_context = True
+        return self
 
-def _get_valid_filename(name: str) -> str:
-    """
-    Source: https://github.com/django/django/blob/main/django/utils/text.py
-    """
-    s = str(name).strip().replace(" ", "_")
-    s = re.sub(r"(?u)[^-\w.]", "", s)
-    if s in {"", ".", ".."}:
-        raise _SuspiciousFileOperation("Could not derive file name from '%s'" % name)
-    s = str(s).strip().replace(" ", "_")
-    return re.sub(r"(?u)[^-\w.]", "", s)
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._is_in_context = False
+        _set_entity(self._MANAGER_NAME, self)
+
+    @classmethod
+    def _to_model(cls, entity):
+        raise NotImplementedError
+
+    @classmethod
+    def _from_model(cls, model):
+        raise NotImplementedError

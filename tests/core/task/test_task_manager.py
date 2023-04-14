@@ -16,13 +16,13 @@ import pytest
 
 from src.taipy.core import taipy
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
-from src.taipy.core.common.alias import TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
+from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 

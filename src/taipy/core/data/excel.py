@@ -21,13 +21,14 @@ from openpyxl import load_workbook
 
 from taipy.config.common.scope import Scope
 
+from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._reload import _self_reload
-from ..common.alias import DataNodeId, Edit, JobId
-from ..exceptions.exceptions import ExposedTypeLengthMismatch, InvalidExposedType, NonExistingExcelSheet
+from ..exceptions.exceptions import ExposedTypeLengthMismatch, NonExistingExcelSheet
+from ..job.job_id import JobId
 from ._abstract_tabular import _AbstractTabularDataNode
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
+from .data_node_id import DataNodeId, Edit
 
 
 class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):

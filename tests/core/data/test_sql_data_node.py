@@ -16,7 +16,7 @@ import modin.pandas as modin_pd
 import pandas as pd
 import pytest
 
-from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.sql import SQLDataNode
 from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
 from taipy.config.common.scope import Scope
@@ -203,6 +203,10 @@ class TestSQLDataNode:
             {"db_username": "foo"},
             {"db_username": "foo", "db_password": "foo"},
             {"db_username": "foo", "db_password": "foo", "db_name": "foo"},
+            {"engine": "sqlite"},
+            {"engine": "mssql", "db_name": "foo"},
+            {"engine": "mysql", "db_username": "foo"},
+            {"engine": "postgresql", "db_username": "foo", "db_password": "foo"},
         ],
     )
     def test_create_with_missing_parameters(self, properties):
@@ -251,3 +255,27 @@ class TestSQLDataNode:
             # mock connection execute
             dn.write(modin_pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert engine_mock.mock_calls[4] == mock.call().__enter__().execute("DELETE FROM foo")
+
+    @pytest.mark.parametrize(
+        "tmp_sqlite_path",
+        [
+            "tmp_sqlite_db_file_path",
+            "tmp_sqlite_sqlite3_file_path",
+        ],
+    )
+    def test_sqlite_read_file_with_different_extension(self, tmp_sqlite_path, request):
+        tmp_sqlite_path = request.getfixturevalue(tmp_sqlite_path)
+        folder_path, db_name, file_extension = tmp_sqlite_path
+        properties = {
+            "db_engine": "sqlite",
+            "read_query": "SELECT * from example",
+            "write_query_builder": single_write_query_builder,
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+        }
+
+        dn = SQLDataNode("sqlite_dn", Scope.PIPELINE, properties=properties)
+        data = dn.read()
+
+        assert data.equals(pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]))

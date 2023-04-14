@@ -14,13 +14,14 @@ from unittest import mock
 import pytest
 
 from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.common.alias import PipelineId, TaskId
 from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
+from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
@@ -41,9 +42,10 @@ def test_create_pipeline():
     assert pipeline.tasks == {task.config_id: task}
     assert pipeline.data_nodes == {"foo": input, "bar": output}
     assert pipeline.parent_ids == set()
-
     with pytest.raises(AttributeError):
         pipeline.qux
+    assert pipeline.get_label() == pipeline.config_id
+    assert pipeline.get_simple_label() == pipeline.config_id
 
     input_1 = InMemoryDataNode("input", Scope.SCENARIO)
     output_1 = InMemoryDataNode("output", Scope.SCENARIO)
@@ -61,14 +63,25 @@ def test_create_pipeline():
     assert pipeline_1.tasks == {task_1.config_id: task_1}
     assert pipeline_1.data_nodes == {"input": input_1, "output": output_1}
     assert pipeline_1.parent_ids == {"scenario_id"}
-
     assert pipeline_1.id is not None
+    with mock.patch("src.taipy.core.get") as get_mck:
+
+        class MockOwner:
+            label = "owner_label"
+
+            def get_label(self):
+                return self.label
+
+        get_mck.return_value = MockOwner()
+        assert pipeline_1.get_label() == "owner_label > " + pipeline_1.config_id
+        assert pipeline_1.get_simple_label() == pipeline_1.config_id
+
     with pytest.raises(InvalidConfigurationId):
         Pipeline("name 1", {"description": "description"}, [task_1], owner_id="owner_id")
 
     pipeline_2 = Pipeline(
         "name_2",
-        {"description": "description"},
+        {"description": "description", "name": "Name"},
         [task, task_1],
         owner_id="owner_id",
         parent_ids={"parent_id_1", "parent_id_2"},
@@ -80,6 +93,17 @@ def test_create_pipeline():
     assert pipeline_2.tasks == {task.config_id: task, task_1.config_id: task_1}
     assert pipeline_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
     assert pipeline_2.parent_ids == {"parent_id_1", "parent_id_2"}
+    with mock.patch("src.taipy.core.get") as get_mck:
+
+        class MockOwner:
+            label = "owner_label"
+
+            def get_label(self):
+                return self.label
+
+        get_mck.return_value = MockOwner()
+        assert pipeline_2.get_label() == "owner_label > " + pipeline_2.name
+        assert pipeline_2.get_simple_label() == pipeline_2.name
 
 
 def test_parent_id_deprecated():

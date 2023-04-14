@@ -17,14 +17,15 @@ import pytest
 
 import src.taipy.core as tp
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.common.alias import DataNodeId, JobId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._filter import _FilterDataNode
 from src.taipy.core.data.data_node import DataNode
+from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.exceptions.exceptions import NoData
+from src.taipy.core.job.job_id import JobId
 from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
@@ -103,9 +104,9 @@ class TestDataNode:
     def test_create_with_default_values(self):
         dn = DataNode("foo_bar")
         assert dn.config_id == "foo_bar"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
-        assert dn.name == dn.id
+        assert dn.name is None
         assert dn.owner_id is None
         assert dn.parent_ids == set()
         assert dn.last_edition_date is None
@@ -661,3 +662,46 @@ class TestDataNode:
         assert last_edit["message"] == "This is a comment on this edit"
         assert last_edit["env"] == "staging"
         assert last_edit["timestamp"] == date
+
+    def test_label(self):
+        a_date = datetime.now()
+        dn = DataNode(
+            "foo_bar",
+            Scope.SCENARIO,
+            DataNodeId("an_id"),
+            "a name",
+            "a_scenario_id",
+            {"a_parent_id"},
+            a_date,
+            [dict(job_id="a_job_id")],
+            edit_in_progress=False,
+            prop="erty",
+        )
+        with mock.patch("src.taipy.core.get") as get_mck:
+
+            class MockOwner:
+                label = "owner_label"
+
+                def get_label(self):
+                    return self.label
+
+            get_mck.return_value = MockOwner()
+            assert dn.get_label() == "owner_label > " + dn.name
+            assert dn.get_simple_label() == dn.name
+
+    def test_explicit_label(self):
+        a_date = datetime.now()
+        dn = DataNode(
+            "foo_bar",
+            Scope.SCENARIO,
+            DataNodeId("an_id"),
+            "a name",
+            "a_scenario_id",
+            {"a_parent_id"},
+            a_date,
+            [dict(job_id="a_job_id")],
+            edit_in_progress=False,
+            label="a label",
+        )
+        assert dn.get_label() == "a label"
+        assert dn.get_simple_label() == "a label"

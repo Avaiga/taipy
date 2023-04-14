@@ -20,25 +20,27 @@ import networkx as nx
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
+from .._entity._entity import _Entity
+from .._entity._labeled import _Labeled
+from .._entity._properties import _Properties
+from .._entity._reload import _Reloader, _self_reload, _self_setter
+from .._entity._submittable import _Submittable
 from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common import _utils
-from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
-from ..common._properties import _Properties
-from ..common._reload import _Reloader, _self_reload, _self_setter
-from ..common._submittable import _Submittable
 from ..common._utils import _Subscriber
 from ..common._warnings import _warn_deprecated
-from ..common.alias import PipelineId, TaskId
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
 from ..task.task import Task
+from ..task.task_id import TaskId
 from ._pipeline_model import _PipelineModel
+from .pipeline_id import PipelineId
 
 
-class Pipeline(_Entity, _Submittable):
+class Pipeline(_Entity, _Submittable, _Labeled):
     """List of `Task^`s and additional attributes representing a set of data processing
     elements connected as a direct acyclic graph.
 

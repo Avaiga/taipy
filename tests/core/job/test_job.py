@@ -11,14 +11,15 @@
 
 from datetime import timedelta
 from time import sleep
+from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
 
+from src.taipy.core import JobId, TaskId
 from src.taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.common.alias import JobId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager import _JobManager
@@ -71,6 +72,10 @@ def test_create_job(task, job):
     assert task in job
     assert job.is_submitted()
     assert job.submit_id is not None
+    with mock.patch("src.taipy.core.get") as get_mck:
+        get_mck.return_value = task
+        assert job.get_label() == "name > " + job.id
+    assert job.get_simple_label() == job.id
 
 
 def test_comparison(task):

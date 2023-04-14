@@ -8,9 +8,10 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import os
 from datetime import datetime, timedelta
-from os.path import isfile
+from os.path import isdir, isfile
 from typing import Any, Dict, List, Optional, Set
 
 import modin.pandas as modin_pd
@@ -18,13 +19,14 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
+from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._reload import _self_reload
-from ..common.alias import DataNodeId, Edit, JobId
-from ..exceptions.exceptions import InvalidExposedType, UnknownCompressionAlgorithm, UnknownParquetEngine
+from ..exceptions.exceptions import UnknownCompressionAlgorithm, UnknownParquetEngine
+from ..job.job_id import JobId
 from ._abstract_tabular import _AbstractTabularDataNode
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
+from .data_node_id import DataNodeId, Edit
 
 
 class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
@@ -90,11 +92,11 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
-        version: str = None,
+        edits: Optional[List[Edit]] = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
-        properties: Dict = None,
+        properties: Optional[Dict] = None,
     ):
         if properties is None:
             properties = {}
@@ -154,7 +156,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
 
-        if not self._last_edit_date and isfile(self._path):
+        if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
             self.last_edit_date = datetime.now()  # type: ignore
 
     @classmethod
@@ -201,7 +203,6 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             job_id (JobId^): An optional identifier of the writer.
             **write_kwargs: The keyword arguments are passed to `pandas.DataFrame.to_parquet`.
         """
-
         kwargs = {
             self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
             self.__COMPRESSION_PROPERTY: self.properties[self.__COMPRESSION_PROPERTY],
@@ -222,7 +223,6 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         Parameters:
             **read_kwargs: The keyword arguments are passed to `pandas.read_parquet`.
         """
-
         # return None if data was never written
         if not self.last_edit_date:
             self._DataNode__logger.warning(

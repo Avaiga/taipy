@@ -18,10 +18,9 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
-from src.taipy.core import Core
+from src.taipy.core import Core, CycleId, JobId, PipelineId, ScenarioId, TaskId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
@@ -497,3 +496,45 @@ class TestTaipy:
         expected_parents = {}
         parents = tp.get_parents(scenario.cycle)
         assert_result_parents_and_expected_parents(parents, expected_parents)
+
+    def test_get_cycles_scenarios(self):
+        scenario_cfg_1 = Config.configure_scenario(
+            "s1",
+            [],
+            Frequency.DAILY,
+        )
+        scenario_cfg_2 = Config.configure_scenario("s2", [], Frequency.WEEKLY)
+        scenario_cfg_3 = Config.configure_scenario("s3", [], Frequency.MONTHLY)
+        scenario_cfg_4 = Config.configure_scenario("s4", [], Frequency.YEARLY)
+        scenario_cfg_5 = Config.configure_scenario("s5", [], None)
+
+        now = datetime.datetime.now()
+        scenario_1_1 = tp.create_scenario(scenario_cfg_1, now)
+        scenario_1_2 = tp.create_scenario(scenario_cfg_1, datetime.datetime.now())
+        scenario_1_3 = tp.create_scenario(scenario_cfg_1, now + datetime.timedelta(days=1))
+        scenario_1_4 = tp.create_scenario(scenario_cfg_1, now + datetime.timedelta(days=8))
+        scenario_1_5 = tp.create_scenario(scenario_cfg_1, now + datetime.timedelta(days=25))
+        scenario_2 = tp.create_scenario(scenario_cfg_2)
+        scenario_3 = tp.create_scenario(scenario_cfg_3)
+        scenario_4 = tp.create_scenario(scenario_cfg_4)
+        scenario_5_1 = tp.create_scenario(scenario_cfg_5)
+        scenario_5_2 = tp.create_scenario(scenario_cfg_5)
+        scenario_5_3 = tp.create_scenario(scenario_cfg_5)
+
+        expected_cycles_scenarios = {
+            scenario_1_1.cycle: [scenario_1_1.id, scenario_1_2.id],
+            scenario_1_3.cycle: [scenario_1_3.id],
+            scenario_1_4.cycle: [scenario_1_4.id],
+            scenario_1_5.cycle: [scenario_1_5.id],
+            scenario_2.cycle: [scenario_2.id],
+            scenario_3.cycle: [scenario_3.id],
+            scenario_4.cycle: [scenario_4.id],
+            None: [scenario_5_1.id, scenario_5_2.id, scenario_5_3.id],
+        }
+
+        cycles_scenarios = tp.get_cycles_scenarios()
+
+        assert expected_cycles_scenarios.keys() == cycles_scenarios.keys()
+        for cycle, scenarios in cycles_scenarios.items():
+            expected_scenarios = expected_cycles_scenarios[cycle]
+            assert sorted([scenario.id for scenario in scenarios]) == sorted(expected_scenarios)

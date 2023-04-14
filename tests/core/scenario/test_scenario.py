@@ -16,16 +16,18 @@ import pytest
 
 from src.taipy.core import DataNode, taipy
 from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task.task import Task
-from taipy import Config
+from src.taipy.core.task.task_id import TaskId
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
@@ -41,6 +43,17 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_1.is_primary
     assert scenario_1.cycle == cycle
     assert scenario_1.tags == set()
+    assert scenario_1.get_simple_label() == scenario_1.config_id
+    with mock.patch("src.taipy.core.get") as get_mck:
+
+        class MockOwner:
+            label = "owner_label"
+
+            def get_label(self):
+                return self.label
+
+        get_mck.return_value = MockOwner()
+        assert scenario_1.get_label() == "owner_label > " + scenario_1.config_id
 
     scenario_2 = Scenario("bar", [], {}, ScenarioId("baz"), creation_date=current_datetime)
     assert scenario_2.id == "baz"
@@ -51,6 +64,8 @@ def test_create_scenario(cycle, current_datetime):
     assert not scenario_2.is_primary
     assert scenario_2.cycle is None
     assert scenario_2.tags == set()
+    assert scenario_2.get_simple_label() == scenario_2.config_id
+    assert scenario_2.get_label() == scenario_2.config_id
 
     pipeline = Pipeline("qux", {}, [])
     scenario_3 = Scenario("quux", [pipeline], {})
@@ -114,6 +129,21 @@ def test_create_scenario(cycle, current_datetime):
         input_2.config_id: input_2,
         output_2.config_id: output_2,
     }
+
+    scenario_8 = Scenario("scenario_7", [pipeline_4], {"name": "Name"})
+    assert scenario_8.id is not None
+    assert scenario_8.config_id == "scenario_7"
+    assert len(scenario_8.pipelines) == 1
+    assert scenario_8.pipelines == {pipeline_4.config_id: pipeline_4}
+    assert scenario_8.data_nodes == {
+        input_1.config_id: input_1,
+        output_1.config_id: output_1,
+        input_2.config_id: input_2,
+        output_2.config_id: output_2,
+    }
+    assert scenario_8.name == "Name"
+    assert scenario_8.get_label() == "Name"
+    assert scenario_8.get_simple_label() == "Name"
 
 
 def test_add_property_to_scenario():

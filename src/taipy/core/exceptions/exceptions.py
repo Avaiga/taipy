@@ -253,3 +253,7 @@ class VersionIsNotProductionVersion(Exception):
 
 class ConflictedConfigurationError(Exception):
     """Conflicts have been detected between the current and previous Configurations."""
+
+
+class _SuspiciousFileOperation(Exception):
+    pass

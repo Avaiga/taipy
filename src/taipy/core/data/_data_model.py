@@ -18,7 +18,7 @@ from taipy.config.common.scope import Scope
 
 from .._version._utils import _version_migration
 from ..common._warnings import _warn_deprecated
-from ..common.alias import Edit
+from .data_node_id import Edit
 
 
 def _to_edits_migration(job_ids: Optional[List[str]]) -> List[Edit]:
@@ -38,7 +38,7 @@ class _DataNodeModel:
     config_id: str
     scope: Scope
     storage_type: str
-    name: str
+    name: Optional[str]
     owner_id: Optional[str]
     parent_ids: List[str]
     last_edit_date: Optional[str]
@@ -63,7 +63,7 @@ class _DataNodeModel:
             config_id=data["config_id"],
             scope=Scope._from_repr(data["scope"]),
             storage_type=data["storage_type"],
-            name=data["name"],
+            name=data.get("name"),
             owner_id=data.get("owner_id", data.get("parent_id")),
             parent_ids=data.get("parent_ids", []),
             last_edit_date=data.get("last_edit_date", data.get("last_edition_date")),

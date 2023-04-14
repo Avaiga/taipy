@@ -17,15 +17,16 @@ from typing import Callable, List
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._entity._entity import _Entity
+from .._entity._labeled import _Labeled
+from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._entity import _Entity
-from ..common._reload import _self_reload, _self_setter
 from ..common._utils import _fcts_to_dict, _load_fct
-from ..common.alias import JobId
 from ..exceptions.exceptions import InvalidSubscriber
 from ..task._task_repository_factory import _TaskRepositoryFactory
 from ..task.task import Task
 from ._job_model import _JobModel
+from .job_id import JobId
 from .status import Status
 
 
@@ -38,7 +39,7 @@ def _run_callbacks(fn):
     return __run_callbacks
 
 
-class Job(_Entity):
+class Job(_Entity, _Labeled):
     """Execution of a `Task^`.
 
     A job handles the status of the execution, contains the stacktrace of exceptions that were
@@ -80,6 +81,10 @@ class Job(_Entity):
     def task(self, val):
         self._task = val
 
+    @property
+    def owner_id(self) -> str:
+        return self.task.id
+
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def force(self):
@@ -118,9 +123,13 @@ class Job(_Entity):
     def stacktrace(self) -> List[str]:
         return self._stacktrace
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
+
+    @version.setter
+    def version(self, val):
+        self._version = val
 
     def __contains__(self, task: Task):
         return self.task.id == task.id
