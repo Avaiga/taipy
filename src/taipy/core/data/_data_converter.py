@@ -35,14 +35,14 @@ class _DataNodeConverter(_AbstractConverter):
     __WRITE_QUERY_BUILDER_NAME_KEY = "write_query_builder_name"
     __WRITE_QUERY_BUILDER_MODULE_KEY = "write_query_builder_module"
     # TODO: This limits the valid string to only the ones provided by the Converter.
-    # While in practive, each data nodes might have different exposed type possibilites.
+    # While in practice, each data nodes might have different exposed type possibilities.
     # The previous implementation used tabular datanode but it's no longer suitable so
     # new proposal is needed.
     _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas", "modin"]
 
     @staticmethod
     def _to_edits_migration(job_ids: Optional[List[str]]) -> List:
-        "Migrate a list of job IDs to a list of Edits. Used to migrate data model from <=2.0 to >=2.1 version." ""
+        """Migrate a list of job IDs to a list of Edits. Used to migrate data model from <=2.0 to >=2.1 version."""
         _warn_deprecated("job_ids", suggest="edits")
         if not job_ids:
             return []
