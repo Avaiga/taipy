@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import Input from "../components/Taipy/Input";
+import Dialog from "../components/Taipy/Dialog";
 import Router from "../components/Router";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
 import { LovItem } from "../utils/lov";
@@ -28,8 +28,8 @@ import {
 } from "../context/taipyReducers";
 
 export {
+    Dialog,
     Router,
-    Input,
     TaipyContext as Context,
     useDynamicProperty,
     createSendActionNameAction,
@@ -52,5 +52,5 @@ export type {
     LovItem,
     TaipyStore as Store,
     TaipyState as State,
-    TaipyBaseAction as Action
+    TaipyBaseAction as Action,
 };

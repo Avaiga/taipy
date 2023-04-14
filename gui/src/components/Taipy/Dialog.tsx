@@ -39,6 +39,7 @@ interface DialogProps extends TaipyActiveProps {
     children?: ReactNode;
     height?: string | number;
     width?: string | number;
+    localAction?: (idx: number) => void;
 }
 
 const closeSx: SxProps<Theme> = {
@@ -56,6 +57,7 @@ const Dialog = (props: DialogProps) => {
         defaultOpen,
         open,
         onAction = "",
+        localAction,
         closeLabel = "Close",
         page,
         partial,
@@ -72,9 +74,13 @@ const Dialog = (props: DialogProps) => {
     const handleAction = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             const { idx = "-1" } = evt.currentTarget.dataset;
-            dispatch(createSendActionNameAction(id, module, onAction, parseInt(idx, 10)));
+            if (localAction) {
+                 localAction(parseInt(idx, 10));
+            } else {
+                dispatch(createSendActionNameAction(id, module, onAction, parseInt(idx, 10)));
+            }
         },
-        [dispatch, id, onAction, module]
+        [dispatch, id, onAction, module, localAction]
     );
 
     const labels = useMemo(() => {

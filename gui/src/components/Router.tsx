@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useReducer, useState, ComponentType } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import axios from "axios";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -21,8 +21,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { SnackbarProvider } from "notistack";
 import { HelmetProvider } from "react-helmet-async";
-import JsxParser from "react-jsx-parser";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { PageContext, TaipyContext } from "../context/taipyContext";
@@ -35,13 +34,15 @@ import {
     taipyInitialize,
     taipyReducer,
 } from "../context/taipyReducers";
-import { JSXReactRouterComponents } from "./Taipy";
 import Alert from "./Taipy/Alert";
 import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
 import Menu from "./Taipy/Menu";
 import GuiDownload from "./Taipy/GuiDownload";
 import ErrorFallback from "../utils/ErrorBoundary";
+import MainPage from "./pages/MainPage";
+import TaipyRendered from "./pages/TaipyRendered";
+import NotFound404 from "./pages/NotFound404";
 
 interface AxiosRouter {
     router: string;
@@ -56,8 +57,8 @@ const pageStore = {};
 
 const Router = () => {
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
-    const [JSX, setJSX] = useState("");
-    const refresh = !!JSX;
+    const [routes, setRoutes] = useState<Record<string, string>>({});
+    const refresh = !!Object.keys(routes).length;
     const themeClass = "taipy-" + state.theme.palette.mode;
 
     useEffect(() => {
@@ -74,13 +75,13 @@ const Router = () => {
         axios
             .get<AxiosRouter>("/taipy-init", { params: { client_id: state.id || "", v: window.taipyVersion } })
             .then((result) => {
-                setJSX(result.data.router);
                 dispatch(createSetLocationsAction(result.data.locations));
+                setRoutes(result.data.locations);
                 result.data.blockUI && dispatch(createBlockAction(retreiveBlockUi()));
             })
             .catch((error) => {
                 // Fallback router if there is any error
-                setJSX('<Router><Routes><Route path="/*" element={NotFound404} /></Routes></Router>');
+                setRoutes({ "/": "/TaiPy_root_page" });
                 console.log(error);
             });
     }, [refresh, state.isSocketConnected, state.id]);
@@ -104,13 +105,32 @@ const Router = () => {
                                         </ErrorBoundary>
                                         <Box component="main" sx={mainSx}>
                                             <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                                <JsxParser
-                                                    disableKeyGeneration={true}
-                                                    components={
-                                                        JSXReactRouterComponents as Record<string, ComponentType>
-                                                    }
-                                                    jsx={JSX}
-                                                />
+                                                {Object.keys(routes).length ? (
+                                                    <Routes>
+                                                        <Route
+                                                            path="/"
+                                                            element={
+                                                                <MainPage
+                                                                    path={routes["/"]}
+                                                                    route={Object.keys(routes).find(
+                                                                        (path) => path !== "/"
+                                                                    )}
+                                                                />
+                                                            }
+                                                        >
+                                                            {Object.entries(routes)
+                                                                .filter(([path]) => path !== "/")
+                                                                .map(([path, name]) => (
+                                                                    <Route
+                                                                        key={name}
+                                                                        path={path.substring(1)}
+                                                                        element={<TaipyRendered />}
+                                                                    />
+                                                                ))}
+                                                            <Route path="*" key="NotFound" element={<NotFound404 />} />
+                                                        </Route>
+                                                    </Routes>
+                                                ) : null}
                                             </ErrorBoundary>
                                         </Box>
                                         {state.ackList.length ? (

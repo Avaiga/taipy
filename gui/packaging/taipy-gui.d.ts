@@ -22,6 +22,41 @@ import * as React from "react";
  */
 export declare const getUpdateVar: (updateVars: string, name: string) => string | undefined;
 
+export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
+	defaultActive?: boolean;
+	active?: boolean;
+}
+export interface TaipyHoverProps {
+	hoverText?: string;
+	defaultHoverText?: string;
+}
+export interface TaipyDynamicProps extends TaipyBaseProps {
+	updateVarName?: string;
+	propagate?: boolean;
+	updateVars?: string;
+}
+export interface TaipyBaseProps {
+	id?: string;
+	libClassName?: string;
+	className?: string;
+	dynamicClassName?: string;
+}
+export interface DialogProps extends TaipyActiveProps {
+	title: string;
+	onAction?: string;
+	closeLabel?: string;
+	labels?: string;
+	page?: string;
+	partial?: boolean;
+	open?: boolean;
+	defaultOpen?: string | boolean;
+	children?: React.ReactNode;
+	height?: string | number;
+	width?: string | number;
+    localAction?: (idx: number) => void;
+}
+export declare const Dialog: (props: DialogProps) => JSX.Element;
+
 export declare const Router: () => JSX.Element;
 
 /**

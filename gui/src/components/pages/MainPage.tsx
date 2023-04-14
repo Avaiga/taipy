@@ -27,7 +27,7 @@ const MainPage = (props: MainPageProps) => {
 
     useEffect(() => {
         if (props.route && location.pathname == "/") {
-           navigate(props.route);
+           navigate(props.route.substring(1));
         }
     }, [location.pathname, navigate, props.route]);
 

@@ -94,7 +94,7 @@ describe("DateSelector Component", () => {
         );
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
-        expect(cleanText(input?.value || "")).toEqual("01 / 01 / 2001");
+        expect(cleanText(input?.value || "")).toEqual("01/01/2001");
     });
     it("is disabled", async () => {
         render(
@@ -179,7 +179,7 @@ describe("DateSelector with time Component", () => {
         );
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
-        expect(cleanText(input?.value || "")).toEqual("01 / 01 / 2001 01:01 am");
+        expect(cleanText(input?.value || "")).toEqual("01/01/2001 01:01 am");
     });
     it("is disabled", async () => {
         render(

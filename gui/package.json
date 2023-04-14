@@ -111,7 +111,7 @@
     "mock-socket": "^9.0.7",
     "ts-jest": "^29.0.0",
     "ts-loader": "^9.2.6",
-    "typedoc": "^0.23.21",
+    "typedoc": "^0.24.1",
     "typedoc-plugin-markdown": "^3.13.4",
     "typescript": "^5.0.3",
     "webpack": "^5.61.0",

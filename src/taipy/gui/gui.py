@@ -1621,41 +1621,11 @@ class Gui:
             return ("No page template", 404)
 
     def _render_route(self) -> t.Any:
-        router = '<Routes key="routes">'
-        router += (
-            '<Route path="/" key="'
-            + Gui.__root_page_name
-            + '" element={<MainPage key="tr'
-            + Gui.__root_page_name
-            + '" path="/'
-            + Gui.__root_page_name
-            + '"'
-        )
-        routes = self._config.routes
-        route = next((r for r in routes if r != Gui.__root_page_name), None)
-        router += (' route="/' + route + '"') if route else ""
-        router += " />} >"
-        locations = {"/": f"/{Gui.__root_page_name}"}
-        for route in routes:
-            if route != Gui.__root_page_name:
-                router += (
-                    '<Route path="'
-                    + route
-                    + '" key="'
-                    + route
-                    + '" element={<TaipyRendered key="tr'
-                    + route
-                    + '"/>} />'
-                )
-                locations[f"/{route}"] = f"/{route}"
-        router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
-        router += "</Route>"
-        router += "</Routes>"
-
         return self._server._direct_render_json(
             {
-                "router": router,
-                "locations": locations,
+                "locations": {
+                    "/" if route == Gui.__root_page_name else f"/{route}": f"/{route}" for route in self._config.routes
+                },
                 "blockUI": self._is_ui_blocked(),
             }
         )
