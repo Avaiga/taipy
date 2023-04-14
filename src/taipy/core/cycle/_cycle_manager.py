@@ -18,6 +18,7 @@ from taipy.config.common.frequency import Frequency
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from ..job._job_manager_factory import _JobManagerFactory
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ._cycle_repository_factory import _CycleRepositoryFactory
 from .cycle import Cycle
 from .cycle_id import CycleId
@@ -26,6 +27,7 @@ from .cycle_id import CycleId
 class _CycleManager(_Manager[Cycle]):
     _repository = _CycleRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Cycle.__name__
+    _EVENT_ENTITY_TYPE = EventEntityType.CYCLE
 
     @classmethod
     def _create(cls, frequency: Frequency, name: str = None, creation_date: datetime = None, **properties):
@@ -36,6 +38,7 @@ class _CycleManager(_Manager[Cycle]):
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
         )
         cls._set(cycle)
+        _publish_event(cls._EVENT_ENTITY_TYPE, cycle.id, EventOperation.CREATION, None)
         return cycle
 
     @classmethod

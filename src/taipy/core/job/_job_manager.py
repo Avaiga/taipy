@@ -15,6 +15,7 @@ from typing import Callable, Iterable, Optional, Union
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import JobNotDeletedException
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..task.task import Task
 from ._job_repository_factory import _JobRepositoryFactory
 from .job import Job
@@ -24,6 +25,7 @@ from .job_id import JobId
 class _JobManager(_Manager[Job]):
     _repository = _JobRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Job.__name__
+    _EVENT_ENTITY_TYPE = EventEntityType.JOB
 
     @classmethod
     def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:
@@ -36,6 +38,7 @@ class _JobManager(_Manager[Job]):
             version=version,
         )
         cls._set(job)
+        _publish_event(cls._EVENT_ENTITY_TYPE, job.id, EventOperation.CREATION, None)
         job._on_status_change(*callbacks)
         return job
 

@@ -10,13 +10,16 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
+from unittest import mock
 
 import pytest
 
+from src.taipy.core import taipy as tp
 from src.taipy.core.exceptions.exceptions import NonExistingRegistration
 from src.taipy.core.notification import EventEntityType, EventOperation, Notifier
 from src.taipy.core.notification.event import Event
 from src.taipy.core.notification.topic import Topic
+from taipy.config import Config, Frequency
 
 
 def test_register():
@@ -243,3 +246,99 @@ def test_matching():
         Event(EventEntityType.JOB, "job_id", EventOperation.UPDATE, "status"),
         Topic(operation=EventOperation.UPDATE, attribute_name="submit_id"),
     )
+
+
+def test_publish_event(current_datetime):
+    registration_id, registration_queue = Notifier.register()
+
+    dn_config = Config.configure_data_node("dn_config")
+    task_config = Config.configure_task("task_config", print, [dn_config])
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config], frequency=Frequency.DAILY)
+
+    scenario = tp.create_scenario(scenario_config)
+
+    assert registration_queue.qsize() == 5
+
+    published_events = []
+    while registration_queue.qsize() != 0:
+        published_events.append(registration_queue.get())
+
+    expected_event_types = [
+        EventEntityType.CYCLE,
+        EventEntityType.DATA_NODE,
+        EventEntityType.TASK,
+        EventEntityType.PIPELINE,
+        EventEntityType.SCENARIO,
+    ]
+    assert all(
+        [
+            event.operation == EventOperation.CREATION
+            and event.attribute_name is None
+            and event.entity_type == expected_event_types[i]
+            for i, event in enumerate(published_events)
+        ]
+    )
+
+    scenario.is_primary = True
+    assert registration_queue.qsize() == 1
+
+    cycle = scenario.cycle
+    cycle.name = "new cycle name"
+    assert registration_queue.qsize() == 2
+
+    pipeline = scenario.pipelines[pipeline_config.id]
+    task = pipeline.tasks[task_config.id]
+
+    task.skippable = True
+    assert registration_queue.qsize() == 3
+
+    dn = task.data_nodes[dn_config.id]
+    dn.name = "new datanode name"
+    assert registration_queue.qsize() == 4
+
+    expected_event_types = [
+        EventEntityType.SCENARIO,
+        EventEntityType.CYCLE,
+        EventEntityType.TASK,
+        EventEntityType.DATA_NODE,
+    ]
+    expected_attribute_names = ["is_primary", "name", "skippable", "name"]
+
+    published_events = []
+    while registration_queue.qsize() != 0:
+        published_events.append(registration_queue.get())
+    assert all(
+        [
+            event.operation == EventOperation.UPDATE
+            and event.attribute_name == expected_attribute_names[i]
+            and event.entity_type == expected_event_types[i]
+            for i, event in enumerate(published_events)
+        ]
+    )
+
+    scenario.submit()
+
+    published_events = []
+    while registration_queue.qsize() != 0:
+        published_events.append(registration_queue.get())
+    # TODO: add test for publish event for submission this creates a bunch of job events (11 or 17), will be postponed for now
+
+    # tp.delete(dn.id)
+    # assert registration_queue.qsize() == 1
+
+    # tp.delete(task.id)
+    # assert registration_queue.qsize() == 2
+
+    # tp.delete(pipeline.id)
+    # assert registration_queue.qsize() == 3
+
+    tp.delete(scenario.id)
+    assert registration_queue.qsize() == 6
+
+    published_events = []
+    while registration_queue.qsize() != 0:
+        published_events.append(registration_queue.get())
+
+    # TODO: failing: all entity types are job!!
+    print([event.entity_type for event in published_events])

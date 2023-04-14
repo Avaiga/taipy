@@ -34,6 +34,7 @@ from ..exceptions.exceptions import (
 )
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
@@ -46,6 +47,7 @@ class _ScenarioManager(_Manager[Scenario]):
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
     _repository = _ScenarioRepositoryFactory._build_repository()
     _ENTITY_NAME = Scenario.__name__
+    _EVENT_ENTITY_TYPE = EventEntityType.SCENARIO
 
     @classmethod
     def _subscribe(
@@ -125,6 +127,7 @@ class _ScenarioManager(_Manager[Scenario]):
             pipeline._parent_ids.update([scenario_id])
         cls.__save_pipelines(pipelines)
         cls._set(scenario)
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)
         return scenario
 
     @classmethod
@@ -151,11 +154,14 @@ class _ScenarioManager(_Manager[Scenario]):
         scenario_subscription_callback = cls.__get_status_notifier_callbacks(scenario) + callbacks
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(scenario._get_inputs())
-        return (
+
+        jobs = (
             _TaskManagerFactory._build_manager()
             ._orchestrator()
             .submit(scenario, callbacks=scenario_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.SUBMISSION, None)
+        return jobs
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:

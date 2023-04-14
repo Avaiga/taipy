@@ -13,13 +13,7 @@ from datetime import datetime
 from typing import Optional
 
 from ..common._repr_enum import _ReprEnum
-from ..cycle.cycle import Cycle
-from ..data.data_node import DataNode
 from ..exceptions.exceptions import InvalidEventAttributeName, InvalidEventOperation
-from ..job.job import Job
-from ..pipeline.pipeline import Pipeline
-from ..scenario.scenario import Scenario
-from ..task.task import Task
 
 
 class EventOperation(_ReprEnum):

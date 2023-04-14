@@ -17,6 +17,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._entity._entity_ids import _EntityIds
 from .._repository import _AbstractRepository
 from ..exceptions.exceptions import ModelNotFound
+from ..notification import EventEntityType, EventOperation, _publish_event
 
 EntityType = TypeVar("EntityType")
 
@@ -25,6 +26,7 @@ class _Manager(Generic[EntityType]):
     _repository: _AbstractRepository
     _logger = _TaipyLogger._get_logger()
     _ENTITY_NAME: str = "Entity"
+    _EVENT_ENTITY_TYPE: Optional[EventEntityType] = None
 
     @classmethod
     def _delete_all(cls):
@@ -53,6 +55,7 @@ class _Manager(Generic[EntityType]):
         Deletes an entity by id.
         """
         cls._repository._delete(id)
+        _publish_event(cls._EVENT_ENTITY_TYPE, id, EventOperation.DELETION, None)
 
     @classmethod
     def _set(cls, entity: EntityType):

@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import functools
 from queue import SimpleQueue
 from typing import Dict, List, Optional, Tuple
 
@@ -16,6 +17,12 @@ from ..exceptions.exceptions import NonExistingRegistration
 from .event import Event, EventEntityType, EventOperation
 from .registration import Registration
 from .topic import Topic
+
+
+def _publish_event(
+    entity_type: EventEntityType, entity_id: str, operation: EventOperation, attribute_name: Optional[str] = None
+):
+    Notifier.publish(Event(entity_type, entity_id, operation, attribute_name))
 
 
 class Notifier:
