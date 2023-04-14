@@ -52,6 +52,7 @@ export type Scenario = {
   date: string;
   name: string;
   config: string;
+  id: string;
 };
 
 export type TreeNode = {
@@ -59,7 +60,6 @@ export type TreeNode = {
   label: string;
   type: string;
   primary?: boolean;
-  date: string;
   children?: TreeNode[];
 };
 
@@ -120,7 +120,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   );
 
   const onAdd = (node: Scenario) => {
-    const nodeIndex = nodes.findIndex((item) => item.date === node.date);
+    const nodeIndex = nodes.findIndex((item) => item.id === node.id);
 
     if (nodeIndex > -1) {
       setNodes(
@@ -146,17 +146,15 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
       setNodes([
         ...nodes,
         {
-          date: node.date,
-          id: "cycle_" + nodeIndex,
+          id: "cycle_" + nodes.length + 1,
           label: node.name,
           type: "CYCLE",
           children: [
             {
-              id: "scenario_" + nodeIndex,
+              id: "scenario_" + nodes.length + 1,
               label: node.name,
               type: "SCENARIO",
               primary: false,
-              date: node.date,
             },
           ],
         },
@@ -210,15 +208,11 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
           }}
         >
           {nodes.map((item) => (
-            <TreeItem
-              key={item.date}
-              nodeId={item.date}
-              label={`Cycle ${format(new Date(item.date), "yyyy-MM-dd")}`}
-            >
+            <TreeItem key={item.id} nodeId={item.id} label={item.label}>
               {item.children?.map((child, index) => (
                 <TreeItem
-                  key={item.date + index}
-                  nodeId={item.date + index.toString()}
+                  key={child.id}
+                  nodeId={child.id}
                   label={
                     <Grid
                       container
