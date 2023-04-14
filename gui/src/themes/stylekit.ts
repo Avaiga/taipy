@@ -57,18 +57,10 @@ export const stylekitTheme = {
         MuiFormControl: {
             styleOverrides: {
                 root: {
-                    // Fill the available width
-                    display: "flex",
-
-                    // Removing vertical margins if placed in a layout to avoid y-alignment issues
-                    ".taipy-layout > .taipy-part > .md-para > &": {
-                        "&:first-child": {
-                            mt: 0,
-                        },
-                        "&:last-child": {
-                            mb: 0,
-                        },
-                    },
+                    marginTop: 4,
+                    width: '100%',
+                    maxWidth: '15rem',
+                    verticalAlign: 'middle',
                 },
             },
         },

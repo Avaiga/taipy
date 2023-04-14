@@ -18,7 +18,7 @@ from ..utils import Decimator
 
 class RDP(Decimator):
     """A decimator using the RDP algorithm.
-    
+
     The RDP algorithm reduces a shape made of line segments into a similar shape with
     less points. This algorithm should be used if the final visual representation is
     prioritized over the performance of the application.

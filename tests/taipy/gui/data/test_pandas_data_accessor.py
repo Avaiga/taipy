@@ -9,18 +9,17 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import inspect
 from datetime import datetime
 from importlib import util
-import inspect
 
 import pandas  # type: ignore
-
 from flask import g
 
 from taipy.gui import Gui
 from taipy.gui.data.data_format import _DataFormat
-from taipy.gui.data.pandas_data_accessor import _PandasDataAccessor
 from taipy.gui.data.decimator import ScatterDecimator
+from taipy.gui.data.pandas_data_accessor import _PandasDataAccessor
 
 
 def test_simple_data(gui: Gui, helpers, small_dataframe):
@@ -196,6 +195,7 @@ def test_filter_by_date(gui: Gui, helpers, small_dataframe):
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 1
 
+
 def test_decimator(gui: Gui, helpers, small_dataframe):
     a_decimator = ScatterDecimator()
 
@@ -215,7 +215,21 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
 
-        ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1, "alldata": True, "decimatorPayload" : { "decimators": [{"decimator": "a_decimator", "chartMode": "markers"}], "width": 100}}, _DataFormat.JSON)
+        ret_data = accessor.get_data(
+            gui,
+            "x",
+            pd,
+            {
+                "start": 0,
+                "end": -1,
+                "alldata": True,
+                "decimatorPayload": {
+                    "decimators": [{"decimator": "a_decimator", "chartMode": "markers"}],
+                    "width": 100,
+                },
+            },
+            _DataFormat.JSON,
+        )
         assert ret_data
         value = ret_data["value"]
         assert value

@@ -20,7 +20,6 @@ from .preproc import _Preprocessor
 
 
 class _TaipyMarkdownExtension(Extension):
-
     config = {"gui": ["", "Gui object for extension"]}
 
     def extendMarkdown(self, md):

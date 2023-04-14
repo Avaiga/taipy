@@ -15,31 +15,28 @@ _default_stylekit: Stylekit = {
     # Primary and secondary colors
     "color_primary": "#ff6049",
     "color_secondary": "#293ee7",
-
     # Contextual color
     "color_error": "#FF595E",
     "color_warning": "#FAA916",
     "color_success": "#96E6B3",
-
     # Background and elevation color for LIGHT MODE
     "color_background_light": "#f0f5f7",
     "color_paper_light": "#ffffff",
-
     # Background and elevation color for DARK MODE
     "color_background_dark": "#152335",
     "color_paper_dark": "#1f2f44",
-
     # DEFINING FONTS
     # Set main font family
     "font_family": "Lato, Arial, sans-serif",
-
+    # DEFINING ROOT STYLES
+    # Set root margin
+    "root_margin": "1rem",
     # DEFINING SHAPES
     # Base border radius in px
     "border_radius": 8,
-
     # DEFINING MUI COMPONENTS STYLES
     # Matching input and button height in css size unit
-    "input_button_height": "48px"
+    "input_button_height": "48px",
 }
 
 # Default config loaded by app.py
@@ -68,7 +65,7 @@ default_config: Config = {
     "theme": None,
     "time_zone": None,
     "title": None,
-    "stylekit": _default_stylekit,
+    "stylekit": _default_stylekit.copy(),
     "upload_folder": None,
     "use_arrow": False,
     "use_reloader": False,

@@ -18,7 +18,7 @@ from ..utils import Decimator
 
 class MinMaxDecimator(Decimator):
     """A decimator using the MinMax algorithm.
-    
+
     The MinMax algorithm is an efficient algorithm that preserves the peaks within the data. It
     can work very well with noisy signal data where data peeks need to be highlighted.
 

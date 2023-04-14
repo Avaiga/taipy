@@ -22,7 +22,6 @@ if t.TYPE_CHECKING:
 
 
 class _Factory:
-
     DEFAULT_CONTROL = "text"
 
     _START_SUFFIX = ".start"
@@ -56,6 +55,8 @@ class _Factory:
         "toggle": "value",
         "tree": "value",
     }
+
+    _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
 
     __TEXT_ANCHORS = ["bottom", "top", "left", "right"]
     __TEXT_ANCHOR_NONE = "none"

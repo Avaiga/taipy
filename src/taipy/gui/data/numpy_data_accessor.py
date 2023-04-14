@@ -20,7 +20,6 @@ from .pandas_data_accessor import _PandasDataAccessor
 
 
 class _NumpyDataAccessor(_PandasDataAccessor):
-
     __types = (numpy.ndarray,)
 
     @staticmethod

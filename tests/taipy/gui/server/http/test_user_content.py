@@ -27,6 +27,7 @@ def test_user_content_without_callback(gui: Gui, helpers):
 def test_user_content_with_wrong_callback(gui: Gui, helpers):
     def on_user_content_cb(state, path, args):
         return None
+
     on_user_content = on_user_content_cb
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
@@ -39,6 +40,7 @@ def test_user_content_with_wrong_callback(gui: Gui, helpers):
 def test_user_content_with_callback(gui: Gui, helpers):
     def on_user_content_cb(state, path, args):
         return ""
+
     on_user_content = on_user_content_cb
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)

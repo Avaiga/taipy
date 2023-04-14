@@ -127,7 +127,9 @@ def navigate(state: State, to: t.Optional[str] = "", tab: t.Optional[str] = None
         warnings.warn("'navigate()' must be called in the context of a callback")
 
 
-def get_user_content_url(state: State, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None) -> t.Optional[str]:
+def get_user_content_url(
+    state: State, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
+) -> t.Optional[str]:
     """Get a user content URL.
 
     Arguments:

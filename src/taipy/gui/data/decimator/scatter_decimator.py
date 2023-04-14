@@ -18,7 +18,7 @@ from ..utils import Decimator
 
 class ScatterDecimator(Decimator):
     """A decimator designed for scatter charts.
-    
+
     This algorithm fits the data points into a grid. If multiple points are in the same grid
     cell, depending on the chart configuration, some points are removed to reduce the number
     points being displayed.

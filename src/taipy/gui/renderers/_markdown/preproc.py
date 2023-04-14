@@ -19,6 +19,9 @@ from markdown.preprocessors import Preprocessor as MdPreprocessor
 from ..builder import _Builder
 from .factory import _MarkdownFactory
 
+if t.TYPE_CHECKING:
+    from ...gui import Gui
+
 
 class _Preprocessor(MdPreprocessor):
     # ----------------------------------------------------------------------
@@ -56,6 +59,8 @@ class _Preprocessor(MdPreprocessor):
     #  Note 1: 'not <prop_name>=<prop_value>' is an invalid syntax
     #  Note 2: Space characters after the equal sign are significative
     __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?$")
+
+    _gui: "Gui"
 
     @staticmethod
     def extend(md, gui, priority):
@@ -165,7 +170,9 @@ class _Preprocessor(MdPreprocessor):
             warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
         return new_lines
 
-    def _process_control(self, prop_string: str, line_count: int, default_control_name: str = _MarkdownFactory.DEFAULT_CONTROL) -> Tuple[str, List[Tuple[str, str]]]:
+    def _process_control(
+        self, prop_string: str, line_count: int, default_control_name: str = _MarkdownFactory.DEFAULT_CONTROL
+    ) -> Tuple[str, List[Tuple[str, str]]]:
         fragments = [f for f in _Preprocessor.__SPLIT_RE.split(prop_string) if f]
         control_name = None
         default_prop_name = None
@@ -192,9 +199,13 @@ class _Preprocessor(MdPreprocessor):
                 properties.append(self._make_prop_pair(fragment[1:-1], fragment))
             else:
                 warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
-
         if control_name is None:
-            control_name = default_control_name
+            if properties and all(attribute != properties[0][0] for attribute in _MarkdownFactory._TEXT_ATTRIBUTES):
+                control_name = properties[0][0]
+                properties = properties[1:]
+                warnings.warn(f"Unrecognized control {control_name} at line {line_count}: <|{prop_string}|>")
+            else:
+                control_name = default_control_name
         if default_prop_value is not None:
             default_prop_name = _MarkdownFactory.get_default_property_name(control_name)
             # Set property only if it is not already defined

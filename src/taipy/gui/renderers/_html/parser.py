@@ -18,7 +18,6 @@ from .factory import _HtmlFactory
 
 
 class _TaipyHTMLParser(HTMLParser):
-
     __TAIPY_NAMESPACE_RE = re.compile(r"([a-zA-Z\_]+):([a-zA-Z\_]*)")
 
     def __init__(self, gui):

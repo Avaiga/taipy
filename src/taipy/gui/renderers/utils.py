@@ -26,7 +26,9 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
 
 
-def _get_columns_dict_from_list(col_list: t.Union[t.List[str], t.Tuple[str]], col_types_keys: t.List[str], value: t.Any):
+def _get_columns_dict_from_list(
+    col_list: t.Union[t.List[str], t.Tuple[str]], col_types_keys: t.List[str], value: t.Any
+):
     col_dict = {}
     idx = 0
     for col in col_list:
@@ -35,7 +37,8 @@ def _get_columns_dict_from_list(col_list: t.Union[t.List[str], t.Tuple[str]], co
             idx += 1
         elif col:
             warnings.warn(
-                f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"')
+                f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"'
+            )
     return col_dict
 
 
@@ -52,8 +55,7 @@ def _get_columns_dict(  # noqa: C901
     col_types_keys = [str(c) for c in col_types.keys()]
     col_dict: t.Optional[dict] = None
     if isinstance(columns, str):
-        col_dict = _get_columns_dict_from_list(
-            [s.strip() for s in columns.split(";")], col_types_keys, value)
+        col_dict = _get_columns_dict_from_list([s.strip() for s in columns.split(";")], col_types_keys, value)
     elif isinstance(columns, (list, tuple)):
         col_dict = _get_columns_dict_from_list(columns, col_types_keys, value)
     elif isinstance(columns, _MapDict):

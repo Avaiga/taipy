@@ -31,7 +31,13 @@ class Icon:
     def get_dict_or(value: t.Union[str, t.Any]) -> t.Union[str, dict]:
         return value._to_dict() if isinstance(value, Icon) else value
 
-    def __init__(self, path: str, text: t.Optional[str] = None, light_path: t.Optional[bool]= None, dark_path: t.Optional[bool]= None) -> None:
+    def __init__(
+        self,
+        path: str,
+        text: t.Optional[str] = None,
+        light_path: t.Optional[bool] = None,
+        dark_path: t.Optional[bool] = None,
+    ) -> None:
         """Initialize a new Icon.
 
         Arguments:

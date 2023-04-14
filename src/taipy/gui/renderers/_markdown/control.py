@@ -15,7 +15,6 @@ from .factory import _MarkdownFactory
 
 
 class _ControlPattern(InlineProcessor):
-
     __PATTERN = _MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)(.*?)" + _MarkdownFactory._TAIPY_END
 
     @staticmethod

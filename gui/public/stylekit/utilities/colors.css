@@ -102,15 +102,15 @@
     background-color: var(--color-success) !important;
 }
 
-.bg-default-light {
+.bg-background-light {
     background-color: var(--color-background-light) !important;
 }
 
-.bg-default-dark {
+.bg-background-dark {
     background-color: var(--color-background-dark) !important;
 }
 
-.bg-default {
+.bg-background {
     background-color: var(--color-background) !important;
 }
 

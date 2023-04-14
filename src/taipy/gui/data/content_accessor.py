@@ -89,12 +89,18 @@ class _ContentAccessor:
                     temp_file.write(value)
             except Exception as e:
                 warnings.warn(
-                    f"{self.__get_display_name(var_name)} ({type(value)}) cannot be written to file {file_path}.\n{e}")
+                    f"{self.__get_display_name(var_name)} ({type(value)}) cannot be written to file {file_path}.\n{e}"
+                )
             newvalue = file_path
         if isinstance(newvalue, (str, pathlib.Path)):
             path = pathlib.Path(newvalue) if isinstance(newvalue, str) else newvalue
             if not path.is_file():
-                if var_name != "Gui.download" and not str(path).startswith("http") and not str(path).startswith("/") and not str(path).strip().lower().startswith("<svg"):
+                if (
+                    var_name != "Gui.download"
+                    and not str(path).startswith("http")
+                    and not str(path).startswith("/")
+                    and not str(path).strip().lower().startswith("<svg")
+                ):
                     warnings.warn(f"{self.__get_display_name(var_name)} ({value}) file does not exist.")
                 return str(value)
             if image:

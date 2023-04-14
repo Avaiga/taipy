@@ -16,7 +16,7 @@
 @import 'variables/spacing.css';
 @import 'variables/typography.css';
 @import 'variables/shapes.css';
-@import 'variables/components.css';
+@import 'variables/elements.css';
 @import 'variables/misc.css';
 
 /* Base */
@@ -31,18 +31,21 @@
 @import 'controls/date.css';
 @import 'controls/expandable.css';
 @import 'controls/image.css';
+@import 'controls/input.css';
 @import 'controls/navbar.css';
+@import 'controls/number.css';
 @import 'controls/slider.css';
+@import 'controls/selector.css';
 @import 'controls/toggle.css';
 
 /* Blocks */
 @import 'blocks/layout.css';
 
-/* Additional CSS components */
-@import 'components/container.css';
-@import 'components/header.css';
-@import 'components/card.css';
-@import 'components/sidebar.css';
+/* Additional CSS elements */
+@import 'elements/container.css';
+@import 'elements/header.css';
+@import 'elements/card.css';
+@import 'elements/sidebar.css';
 
 /* Utilities */
 @import 'utilities/colors.css';

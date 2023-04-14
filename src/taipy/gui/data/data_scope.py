@@ -17,7 +17,6 @@ from types import SimpleNamespace
 
 
 class _DataScopes:
-
     _GLOBAL_ID = "global"
 
     def __init__(self) -> None:

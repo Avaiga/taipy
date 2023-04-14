@@ -46,6 +46,9 @@ interface StyleKit {
     // DEFINING FONTS
     // Set main font family
     fontFamily: string;
+    // DEFINING ROOT STYLES
+    // Set root margin
+    rootMargin: string;
     // DEFINING SHAPES
     // Base border radius in px
     borderRadius: number;

@@ -12,6 +12,8 @@
  */
 
 :root {
+    --element-padding: var(--spacing2);
+
     --container-max-width: 75rem;
 
     --sidebar-min-width: 15rem;

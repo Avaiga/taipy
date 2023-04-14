@@ -13,7 +13,7 @@
 
 /**************************************************************
 
-                   TAIPY CHART
+                   TAIPY SELECTOR
 
 ***************************************************************/
 
@@ -21,23 +21,17 @@
               OVERRIDES / NORMALIZATION
 **************************************************/
 
-.taipy-chart {
-  border-radius: var(--border-radius);
-  background-color: var(--color-paper);
-  box-shadow: var(--box-shadow);
-  overflow: hidden;
+.taipy-selector {
+  margin: 4px 0;
 }
 
-.card .taipy-chart {
-  border-radius: 0;
-  box-shadow: none;
-}
 
 /*************************************************
-              UTILITY CLASSES
+              MODIFIER CLASSES
 **************************************************/
 
-/* .has-background: keep the original background */
-.taipy-chart:not(.has-background) .main-svg {
-  background: transparent !important;
+/* fullwidth : make the element fit the full width of its container */
+.taipy-selector.fullwidth{
+  display: flex;
+  max-width: initial;
 }

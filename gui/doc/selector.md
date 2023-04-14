@@ -13,6 +13,14 @@ You can use an arbitrary type for all the items (see the [example](#binding-to-a
 All the selector controls are generated with the "taipy-selector" CSS class. You can use this class
 name to select the selector controls on your page and apply style.
 
+### [Stylekit](../styling/stylekit.md) support
+
+The [Stylekit](../styling/stylekit.md) provides a specific class that you can use to style selector controls:
+
+* *fullwidth*<br/>
+    If a selector control uses the *fullwidth* class, then it uses the whole available
+    horizontal space.
+
 ## Usage
 
 ### Display a list of string

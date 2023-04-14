@@ -9,9 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import datetime
 import inspect
 import random
-import datetime
 import typing as t
 
 from taipy.gui import Gui
@@ -158,6 +158,7 @@ def test_map_md(gui: Gui, helpers):
     ]
     helpers.test_control_md(gui, md, expected_list)
 
+
 def test_chart_indexed_properties(gui: Gui, helpers):
     data: t.Dict[str, t.Any] = {}
     data["Date"] = [datetime.datetime(2021, 12, i) for i in range(1, 31)]
@@ -177,8 +178,8 @@ def test_chart_indexed_properties(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
-        '&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]',
-        '&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]',
+        "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",
+        "&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]",
     ]
     helpers.test_control_md(gui, md, expected_list)
 
@@ -206,8 +207,7 @@ def test_chart_indexed_properties_with_arrays(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
-        '&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]',
-        '&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]',
+        "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",
+        "&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]",
     ]
     helpers.test_control_md(gui, md, expected_list)
-

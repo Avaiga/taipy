@@ -28,17 +28,23 @@ def test_timzone_specified_1(page: "Page", gui: Gui, helpers):
 
 @pytest.mark.teste2e
 def test_timzone_specified_2(page: "Page", gui: Gui, helpers):
-    _timezone_test_template(page, gui, helpers, "Europe/Paris", ["2022-03-03 01:00:00 GMT+1", "2022-03-03 01:00:00 UTC+1"])
+    _timezone_test_template(
+        page, gui, helpers, "Europe/Paris", ["2022-03-03 01:00:00 GMT+1", "2022-03-03 01:00:00 UTC+1"]
+    )
 
 
 @pytest.mark.teste2e
 def test_timzone_specified_3(page: "Page", gui: Gui, helpers):
-    _timezone_test_template(page, gui, helpers, "Asia/Ho_Chi_Minh", ["2022-03-03 07:00:00 GMT+7", "2022-03-03 07:00:00 UTC+7"])
+    _timezone_test_template(
+        page, gui, helpers, "Asia/Ho_Chi_Minh", ["2022-03-03 07:00:00 GMT+7", "2022-03-03 07:00:00 UTC+7"]
+    )
 
 
 @pytest.mark.teste2e
 def test_timzone_specified_4(page: "Page", gui: Gui, helpers):
-    _timezone_test_template(page, gui, helpers, "America/Sao_Paulo", ["2022-03-02 21:00:00 GMT-3", "2022-03-02 21:00:00 UTC−3"])
+    _timezone_test_template(
+        page, gui, helpers, "America/Sao_Paulo", ["2022-03-02 21:00:00 GMT-3", "2022-03-02 21:00:00 UTC−3"]
+    )
 
 
 @pytest.mark.teste2e

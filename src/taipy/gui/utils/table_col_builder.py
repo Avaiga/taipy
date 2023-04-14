@@ -9,12 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import typing as t
 import re
+import typing as t
 import warnings
 
-from .clientvarname import _to_camel_case
 from .boolean import _is_boolean, _is_boolean_true
+from .clientvarname import _to_camel_case
 
 
 def _get_column_desc(columns: t.Dict[str, t.Any], key: str) -> t.Optional[t.Dict[str, t.Any]]:
@@ -30,7 +30,9 @@ def _get_name_indexed_property(attributes: t.Dict[str, t.Any], name: str) -> t.D
     return ret
 
 
-def _update_col_desc_from_indexed(attributes: t.Dict[str, t.Any], columns: t.Dict[str, t.Any], name: str, elt_name: str):
+def _update_col_desc_from_indexed(
+    attributes: t.Dict[str, t.Any], columns: t.Dict[str, t.Any], name: str, elt_name: str
+):
     col_value = _get_name_indexed_property(attributes, name)
     for k, v in col_value.items():
         if col_desc := next((x for x in columns.values() if x.get("dfid") == k), None):
@@ -41,8 +43,8 @@ def _update_col_desc_from_indexed(attributes: t.Dict[str, t.Any], columns: t.Dic
 
 
 def _enhance_columns(  # noqa: C901
-        attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str], columns: t.Dict[str, t.Any], elt_name: str
-        ):
+    attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str], columns: t.Dict[str, t.Any], elt_name: str
+):
     _update_col_desc_from_indexed(attributes, columns, "nan_value", elt_name)
     _update_col_desc_from_indexed(attributes, columns, "width", elt_name)
     filters = _get_name_indexed_property(attributes, "filter")
