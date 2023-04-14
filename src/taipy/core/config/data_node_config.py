@@ -188,7 +188,7 @@ class DataNodeConfig(Section):
             _OPTIONAL_DB_PASSWORD_SQL_PROPERTY: None,
             _OPTIONAL_HOST_SQL_PROPERTY: "localhost",
             _OPTIONAL_PORT_SQL_PROPERTY: 1433,
-            _OPTIONAL_DRIVER_SQL_PROPERTY: "ODBC Driver 17 for SQL Server",
+            _OPTIONAL_DRIVER_SQL_PROPERTY: "",
             _OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY: None,
             _OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY: ".db",
             _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY: None,
@@ -199,7 +199,7 @@ class DataNodeConfig(Section):
             _OPTIONAL_DB_PASSWORD_SQL_PROPERTY: None,
             _OPTIONAL_HOST_SQL_PROPERTY: "localhost",
             _OPTIONAL_PORT_SQL_PROPERTY: 1433,
-            _OPTIONAL_DRIVER_SQL_PROPERTY: "ODBC Driver 17 for SQL Server",
+            _OPTIONAL_DRIVER_SQL_PROPERTY: "",
             _OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY: None,
             _OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY: ".db",
             _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY: None,
@@ -638,8 +638,8 @@ class DataNodeConfig(Section):
         db_name: str,
         db_engine: str,
         table_name: str,
-        db_username: Optional[str],
-        db_password: Optional[str],
+        db_username: Optional[str] = None,
+        db_password: Optional[str] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
@@ -664,7 +664,7 @@ class DataNodeConfig(Section):
                 _"postgresql"_ engine.
             db_host (Optional[str]): The database host. The default value is _"localhost"_.
             db_port (Optional[int]): The database port. The default value is 1433.
-            db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            db_driver (Optional[str]): The database driver.
             sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
                 is the current working folder.
             sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
@@ -712,12 +712,12 @@ class DataNodeConfig(Section):
     def _configure_sql(
         cls,
         id: str,
-        db_username: str,
-        db_password: str,
         db_name: str,
         db_engine: str,
         read_query: str,
         write_query_builder: Callable,
+        db_username: Optional[str] = None,
+        db_password: Optional[str] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
@@ -744,7 +744,7 @@ class DataNodeConfig(Section):
                 _"postgresql"_ engine.
             db_host (Optional[str]): The database host. The default value is _"localhost"_.
             db_port (Optional[int]): The database port. The default value is 1433.
-            db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            db_driver (Optional[str]): The database driver.
             sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
                 is the current working folder.
             sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
