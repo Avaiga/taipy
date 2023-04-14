@@ -12,8 +12,9 @@
 
 from queue import SimpleQueue
 
-from src.taipy.core.notification import Registration, Topic
-from src.taipy.core.notification.event import EventEntityType, EventOperation
+from src.taipy.core.notification import EventEntityType, EventOperation
+from src.taipy.core.notification.registration import Registration
+from src.taipy.core.notification.topic import Topic
 
 
 def test_create_registration():
@@ -28,7 +29,9 @@ def test_create_registration():
     assert registration_0.topic.operation is None
     assert registration_0.topic.attribute_name is None
 
-    registration_1 = Registration(entity_type="SCENARIO", entity_id="SCENARIO_scenario_id", operation="creation")
+    registration_1 = Registration(
+        entity_type=EventEntityType.SCENARIO, entity_id="SCENARIO_scenario_id", operation=EventOperation.CREATION
+    )
     assert isinstance(registration_1.register_id, str)
     assert registration_1.register_id.startswith(Registration._ID_PREFIX)
     assert isinstance(registration_1.queue, SimpleQueue)
@@ -40,7 +43,10 @@ def test_create_registration():
     assert registration_1.topic.attribute_name is None
 
     registration_2 = Registration(
-        entity_type="PIPELINE", entity_id="PIPELINE_scenario_id", operation="update", attribute_name="tasks"
+        entity_type=EventEntityType.PIPELINE,
+        entity_id="PIPELINE_scenario_id",
+        operation=EventOperation.UPDATE,
+        attribute_name="tasks",
     )
     assert isinstance(registration_2.register_id, str)
     assert registration_2.register_id.startswith(Registration._ID_PREFIX)

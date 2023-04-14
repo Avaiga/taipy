@@ -11,10 +11,11 @@
 
 from datetime import datetime
 from typing import Optional
+
 from ..common._repr_enum import _ReprEnum
 from ..cycle.cycle import Cycle
 from ..data.data_node import DataNode
-from ..exceptions.exceptions import InvalidEntityId, InvalidEntityType, InvalidEventAttributeName, InvalidEventOperation
+from ..exceptions.exceptions import InvalidEventAttributeName, InvalidEventOperation
 from ..job.job import Job
 from ..pipeline.pipeline import Pipeline
 from ..scenario.scenario import Scenario
@@ -37,15 +38,6 @@ class EventEntityType(_ReprEnum):
     JOB = 6
 
 
-_ENTITY_TYPE_PREFIXES = {
-    Cycle._ID_PREFIX: EventEntityType.CYCLE,
-    Scenario._ID_PREFIX: EventEntityType.SCENARIO,
-    Pipeline._ID_PREFIX: EventEntityType.PIPELINE,
-    Task._ID_PREFIX: EventEntityType.TASK,
-    DataNode._ID_PREFIX: EventEntityType.DATA_NODE,
-    Job._ID_PREFIX: EventEntityType.JOB,
-}
-
 _NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION])
 _UNSUBMITTABLE_ENTITY_TYPES = (EventEntityType.CYCLE, EventEntityType.DATA_NODE, EventEntityType.JOB)
 
@@ -59,28 +51,13 @@ class Event:
         attribute_name: Optional[str] = None,
     ):
         self.creation_date = datetime.now()
+        self.entity_id = entity_id
         self.entity_type = entity_type
-        self.entity_id = self.__preprocess_entity_id(entity_id, entity_type)
         self.operation = self.__preprocess_operation(operation, entity_type)
         self.attribute_name = self.__preprocess_attribute_name(attribute_name, operation)
 
     @classmethod
-    def __preprocess_entity_id(cls, entity_id: str, entity_type: EventEntityType) -> str:
-        tmp_entity_type = cls.__get_entity_type_from_id(entity_id)
-        if tmp_entity_type != entity_type:
-            raise InvalidEntityType
-        return entity_id
-
-    @classmethod
-    def __get_entity_type_from_id(cls, entity_id: str) -> EventEntityType:
-        for entity_prefix, event_entity_type in _ENTITY_TYPE_PREFIXES.items():
-            if entity_id.startswith(entity_prefix):
-                return event_entity_type
-        raise InvalidEntityId
-
-    @classmethod
     def __preprocess_attribute_name(cls, attribute_name: Optional[str], operation: EventOperation) -> Optional[str]:
-        # TODO: check if attribute_name exists in entity? what if attribute_name but operation is None?
         if operation in _NO_ATTRIBUTE_NAME_OPERATIONS and attribute_name is not None:
             raise InvalidEventAttributeName
         return attribute_name

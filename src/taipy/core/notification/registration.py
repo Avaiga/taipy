@@ -13,6 +13,7 @@ from queue import SimpleQueue
 from typing import Optional
 from uuid import uuid4
 
+from .event import EventEntityType, EventOperation
 from .registration_id import RegistrationId
 from .topic import Topic
 
@@ -24,15 +25,15 @@ class Registration:
 
     def __init__(
         self,
-        entity_type: Optional[str] = None,
+        entity_type: Optional[EventEntityType] = None,
         entity_id: Optional[str] = None,
-        operation: Optional[str] = None,
+        operation: Optional[EventOperation] = None,
         attribute_name: Optional[str] = None,
     ):
 
         self.register_id: str = self._new_id()
         self.topic: Topic = Topic(entity_type, entity_id, operation, attribute_name)
-        self.queue: SimpleQueue = SimpleQueue()  # TODO: should we allow user to provide their own queue?
+        self.queue: SimpleQueue = SimpleQueue()
 
     @staticmethod
     def _new_id() -> RegistrationId:
