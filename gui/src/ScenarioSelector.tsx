@@ -58,10 +58,15 @@ export type Scenario = {
 export type TreeNode = {
   id: string;
   label: string;
-  type: string;
+  type: Type;
   primary?: boolean;
   children?: TreeNode[];
 };
+
+export enum Type {
+  CYCLE = 0,
+  SCENARIO = 1,
+}
 
 interface ScenarioSelectorProps {
   defaultShowAddButton: boolean;
@@ -133,7 +138,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                   {
                     id: "scenario_" + index,
                     label: node.name,
-                    type: "SCENARIO",
+                    type: 1,
                     primary: false,
                     date: node.date,
                   },
@@ -147,13 +152,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         ...nodes,
         {
           id: "cycle_" + nodes.length + 1,
-          label: node.name,
-          type: "CYCLE",
+          label: "Cycle " + format(new Date(node.date), "yyyy-MM-dd"),
+          type: 0,
           children: [
             {
               id: "scenario_" + nodes.length + 1,
               label: node.name,
-              type: "SCENARIO",
+              type: 1,
               primary: false,
             },
           ],
