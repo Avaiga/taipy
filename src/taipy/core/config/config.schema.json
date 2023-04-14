@@ -93,7 +93,7 @@
             "type": "string"
           },
           "db_driver": {
-            "description": "storage_type: sql, sql_table specific. The default value of db_driver is \"ODBC Driver 17 for SQL Server\".",
+            "description": "storage_type: sql, sql_table specific.",
             "type": "string"
           },
           "db_extra_args": {
