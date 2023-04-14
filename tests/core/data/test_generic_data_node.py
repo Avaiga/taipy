@@ -56,7 +56,6 @@ class TestGenericDataNode:
         dn = GenericDataNode(
             "foo_bar", Scope.PIPELINE, name="super name", properties={"read_fct": read_fct, "write_fct": write_fct}
         )
-        print(dn._name)
         assert isinstance(dn, GenericDataNode)
         assert dn.storage_type() == "generic"
         assert dn.config_id == "foo_bar"

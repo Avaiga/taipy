@@ -19,8 +19,6 @@ from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._v2._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
-from ..common._entity_ids import _EntityIds
-from ..common.alias import ScenarioId
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory

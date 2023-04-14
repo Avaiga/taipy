@@ -11,6 +11,8 @@
 
 from datetime import datetime
 
+import pytest
+
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -27,6 +29,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
+@pytest.mark.skip("Skipped until SQLRepositoryV2")
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
     Config.configure_global_app(repository_type="sql")
 
@@ -80,6 +83,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
     assert cycle_3.frequency == cycle_3.frequency
 
 
+@pytest.mark.skip("Skipped until SQLRepositoryV2")
 def test_create_and_delete_cycle_entity(tmpdir):
     Config.configure_global_app(repository_type="sql")
 

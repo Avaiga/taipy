@@ -18,8 +18,6 @@ from taipy.config.common.frequency import Frequency
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._v2._abstract_repository import _AbstractRepository
-from ..common._entity_ids import _EntityIds
-from ..common.alias import CycleId
 from ..job._job_manager_factory import _JobManagerFactory
 from .cycle import Cycle
 from .cycle_id import CycleId

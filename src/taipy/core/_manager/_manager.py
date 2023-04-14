@@ -10,12 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
-from typing import Generic, Iterable, List, Optional, TypeVar, Union
+from typing import Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .._repository._v2._abstract_repository import _AbstractRepository
 from .._entity._entity_ids import _EntityIds
+from .._repository._v2._abstract_repository import _AbstractRepository
 from ..exceptions.exceptions import ModelNotFound
 
 EntityType = TypeVar("EntityType")
