@@ -16,8 +16,9 @@ import pytest
 
 from src.taipy.core import taipy as tp
 from src.taipy.core.exceptions.exceptions import NonExistingRegistration
-from src.taipy.core.notification import EventEntityType, EventOperation, Notifier
+from src.taipy.core.notification import EventEntityType, EventOperation
 from src.taipy.core.notification.event import Event
+from src.taipy.core.notification.notifier import Notifier
 from src.taipy.core.notification.topic import Topic
 from taipy.config import Config, Frequency
 

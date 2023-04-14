@@ -11,4 +11,4 @@
 
 
 from .event import EventEntityType, EventOperation
-from .notifier import Notifier, _publish_event
+from .notifier import _publish_event

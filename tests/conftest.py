@@ -40,7 +40,7 @@ from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.notification import Notifier
+from src.taipy.core.notification.notifier import Notifier
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline.pipeline import Pipeline
