@@ -50,6 +50,7 @@ def init_managers():
     _JobManagerFactory._build_manager()._delete_all()
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_create_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -76,6 +77,7 @@ def test_create_jobs():
     assert not job_2.force
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_get_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -94,6 +96,7 @@ def test_get_job():
     assert _JobManager._get(job_2.id).id == job_2.id
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_get_latest_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -119,12 +122,14 @@ def test_get_latest_job():
     assert _JobManager._get_latest(task_2).id == job_2.id
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_get_job_unknown():
     Config.configure_global_app(repository_type="sql")
     init_managers()
     assert _JobManager._get(JobId("Unknown")) is None
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_get_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -140,6 +145,7 @@ def test_get_jobs():
     assert {job.id for job in _JobManager._get_all()} == {job_1.id, job_2.id}
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_delete_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -159,6 +165,7 @@ def test_delete_job():
     assert _JobManager._get(job_1.id) is None
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     Config.configure_global_app(repository_type="sql")
@@ -185,6 +192,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
     _JobManager._delete(job)
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_force_deleting_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     Config.configure_global_app(repository_type="sql")

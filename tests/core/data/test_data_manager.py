@@ -233,7 +233,7 @@ class TestDataManager:
 
     def test_get_if_not_exists(self):
         with pytest.raises(ModelNotFound):
-            _DataManager._repository.load("test_data_node_2")
+            _DataManager._repository._load("test_data_node_2")
 
     def test_get_all(self):
         assert len(_DataManager._get_all()) == 0

@@ -48,42 +48,44 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)
 
+    ###############################
+    # ##   Inherited methods   ## #
+    ###############################
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
 
         model = self.converter._entity_to_model(entity)
-        self.__get_model_filepath(model.id).write_text(
+        self.__get_path(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
 
-    def _get(self, filepath: pathlib.Path) -> Json:
-        with pathlib.Path(filepath).open(encoding="UTF-8") as source:
-            return json.load(source)
-
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
-    def _load(self, model_id: str) -> Entity:
+    def _load(self, entity_id: str) -> Entity:
         try:
-            model = self.model(**self._get(self.__get_model_filepath(model_id)))
-            return self.converter._model_to_entity(model)
+            with pathlib.Path(self.__get_path(entity_id)).open(encoding="UTF-8") as source:
+                file_content = json.load(source)
+            return self.__file_content_to_entity(file_content)
         except FileNotFoundError:
-            raise ModelNotFound(str(self.dir_path), model_id)
+            raise ModelNotFound(str(self.dir_path), entity_id)
 
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
+        if not filters:
+            filters = []
         entities = []
         try:
             for f in self.dir_path.iterdir():
                 if data := self.__filter_by(f, filters):
-                    entities.append(self.converter._model_to_entity(self.model(**data)))
+                    entities.append(self.__file_content_to_entity(data))
         except FileNotFoundError:
             pass
         return entities
 
-    def _delete(self, model_id: str):
+    def _delete(self, entity_id: str):
         try:
-            self.__get_model_filepath(model_id).unlink()
+            self.__get_path(entity_id).unlink()
         except FileNotFoundError:
-            raise ModelNotFound(str(self.dir_path), model_id)
+            raise ModelNotFound(str(self.dir_path), entity_id)
 
     def _delete_all(self):
         shutil.rmtree(self.dir_path, ignore_errors=True)
@@ -91,6 +93,10 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _delete_many(self, ids: Iterable[str]):
         for model_id in ids:
             self._delete(model_id)
+
+    def _delete_by(self, attribute: str, value: str):
+        while entity := self._search(attribute, value):
+            self._delete(entity.id)
 
     def _search(self, attribute: str, value: Any, filters: List[Dict] = None) -> Optional[Entity]:
         return next(self.__search(attribute, value), None)
@@ -113,7 +119,89 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         if export_path.exists():
             export_path.unlink()
 
-        shutil.copy2(self.__get_model_filepath(entity_id), export_path)
+        shutil.copy2(self.__get_path(entity_id), export_path)
+
+    ###########################################
+    # ##   Specific or optimized methods   ## #
+    ###########################################
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
+        # Design in order to optimize performance on Entity creation.
+        # Maintainability and readability were impacted.
+        if not filters:
+            filters = []
+        res = {}
+        configs_and_owner_ids = set(configs_and_owner_ids)
+
+        try:
+            for f in self.dir_path.iterdir():
+                config_id, owner_id, entity = self.__match_file_and_get_entity(f, configs_and_owner_ids, filters)
+
+                if entity:
+                    key = config_id, owner_id
+                    res[key] = entity
+                    configs_and_owner_ids.remove(key)
+
+                    if len(configs_and_owner_ids) == 0:
+                        return res
+        except FileNotFoundError:
+            # Folder with data was not created yet.
+            return {}
+
+        return res
+
+    def _get_by_config_and_owner_id(
+        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+    ) -> Optional[Entity]:
+        if not filters:
+            filters = []
+        if owner_id is not None:
+            filters.append({"owner_id": owner_id})
+        return self.__filter_files_by_config_and_owner_id(config_id, owner_id, filters)
+
+    #############################
+    # ##   Private methods   ## #
+    #############################
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
+    def __filter_files_by_config_and_owner_id(
+        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+    ):
+        try:
+            files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
+            entities = map(
+                lambda f: self.__file_content_to_entity(self.__filter_by(f, filters)),
+                files,
+            )
+            corresponding_entities = filter(
+                lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id,  # type: ignore
+                entities,
+            )
+            return next(corresponding_entities, None)  # type: ignore
+        except FileNotFoundError:
+            pass
+        return None
+
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
+    def __match_file_and_get_entity(self, filepath, config_and_owner_ids, filters):
+        versions = [f'"version": "{item.get("version")}"' for item in filters if item.get("version")]
+
+        filename = filepath.name
+
+        if match := [(c, p) for c, p in config_and_owner_ids if c.id in filename]:
+            with open(filepath, "r") as f:
+                file_content = f.read()
+
+            for config_id, owner_id in match:
+                if not all(version in file_content for version in versions):
+                    continue
+
+                if owner_id and owner_id not in file_content:
+                    continue
+
+                entity = self.__file_content_to_entity(file_content)
+                if entity.owner_id == owner_id and entity.config_id == config_id.id:
+                    return config_id, owner_id, entity
+
+        return None, None, None
 
     def __create_directory_if_not_exists(self):
         self.dir_path.mkdir(parents=True, exist_ok=True)
@@ -121,16 +209,36 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def __search(self, attribute: str, value: str, filters: List[Dict] = None) -> Iterator[Entity]:
         return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(filters))
 
-    def __get_model_filepath(self, model_id) -> pathlib.Path:
+    def __get_path(self, model_id) -> pathlib.Path:
         return self.dir_path / f"{model_id}.json"
+
+    def __file_content_to_entity(self, file_content):
+        if not file_content:
+            return None
+        if isinstance(file_content, str):
+            file_content = json.loads(file_content, cls=_Decoder)
+        model = self.model.from_dict(file_content)
+        entity = self.converter._model_to_entity(model)
+        self.__migrate_old_entity(file_content, entity)
+        return entity
 
     def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Json:
         if not filters:
             filters = []
         with open(filepath, "r") as f:
             contents = f.read()
-            for filter in filters:
-                if not all(f'"{key}": "{value}"' in contents for key, value in filter.items()):
+            for _filter in filters:
+                if not all(f'"{key}": "{value}"' in contents for key, value in _filter.items()):
                     return None
 
         return json.loads(contents, cls=_Decoder)
+
+    def __migrate_old_entity(self, file_content, entity):
+        if not file_content.get("version") and hasattr(entity, "version"):
+            self._save(entity)
+            from taipy.logger._taipy_logger import _TaipyLogger
+
+            _TaipyLogger._get_logger().warning(
+                f"Entity {entity.id} has automatically been assigned to version named " f"{entity.version}"
+            )
+        return entity

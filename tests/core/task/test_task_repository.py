@@ -18,8 +18,8 @@ from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.exceptions.exceptions import NonExistingDataNode
+from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task._task_model import _TaskModel
-from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
@@ -69,31 +69,22 @@ task_model = _TaskModel(
 
 class TestTaskRepository:
     def test_save_and_load(self, tmpdir):
-        repository = _TaskRepositoryFactory._build_repository()  # type: ignore
+        repository = _TaskManagerFactory._build_repository()  # type: ignore
         repository.base_path = tmpdir
         repository._save(task)
         with pytest.raises(NonExistingDataNode):
-            repository.load("id")
+            repository._load("id")
         _DataManager._set(data_node)
-        t = repository.load("id")
+        t = repository._load("id")
         assert t.id == task.id
         assert len(t.input) == 1
 
-    def test_from_and_to_model(self):
-        repository = _TaskRepositoryFactory._build_repository().repo  # type: ignore
-        assert repository._to_model(task) == task_model
-        with pytest.raises(NonExistingDataNode):
-            repository._from_model(task_model)
-        _DataManager._set(data_node)
-        t = repository._from_model(task_model)
-        assert isinstance(t, Task)
-        assert len(t.input) == 1
-
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_save_and_load_with_sql_repo(self, tmpdir):
         Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
-        repository = _TaskRepositoryFactory._build_repository()  # type: ignore
+        repository = _TaskManagerFactory._build_repository()  # type: ignore
 
         repository._save(task)
         with pytest.raises(NonExistingDataNode):
@@ -103,11 +94,12 @@ class TestTaskRepository:
         assert t.id == task.id
         assert len(t.input) == 1
 
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_from_and_to_model_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
-        repository = _TaskRepositoryFactory._build_repository().repo._table  # type: ignore
+        repository = _TaskManagerFactory._build_repository().repo._table  # type: ignore
 
         assert repository._to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):

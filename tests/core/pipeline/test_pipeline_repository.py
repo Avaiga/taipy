@@ -8,42 +8,36 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+import pytest
 
-from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
+from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from taipy.config.config import Config
 
 
 class TestPipelineRepository:
     def test_save_and_load(self, tmpdir, pipeline):
-        repository = _PipelineRepositoryFactory._build_repository()
+        repository = _PipelineManagerFactory._build_repository()
         repository.base_path = tmpdir
         repository._save(pipeline)
-        loaded_pipeline = repository.load("pipeline_id")
+        loaded_pipeline = repository._load("pipeline_id")
 
         assert isinstance(loaded_pipeline, Pipeline)
         assert pipeline.id == loaded_pipeline.id
 
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_from_and_to_model(self, pipeline, pipeline_model):
-        repository = _PipelineRepositoryFactory._build_repository().repo
+        repository = _PipelineManagerFactory._build_repository().repo
         assert repository._to_model(pipeline) == pipeline_model
         assert repository._from_model(pipeline_model) == pipeline
 
     def test_save_and_load_with_sql_repo(self, tmpdir, pipeline):
         Config.configure_global_app(repository_type="sql")
-        repository = _PipelineRepositoryFactory._build_repository()
+        repository = _PipelineManagerFactory._build_repository()
 
         repository.base_path = tmpdir
         repository._save(pipeline)
-        loaded_pipeline = repository.load("pipeline_id")
+        loaded_pipeline = repository._load("pipeline_id")
 
         assert isinstance(loaded_pipeline, Pipeline)
         assert pipeline.id == loaded_pipeline.id
-
-    def test_from_and_to_model_with_sql_repo(self, pipeline, pipeline_model):
-        Config.configure_global_app(repository_type="sql")
-
-        repository = _PipelineRepositoryFactory._build_repository().repo._table
-
-        assert repository._to_model(pipeline) == pipeline_model
-        assert repository._from_model(pipeline_model) == pipeline

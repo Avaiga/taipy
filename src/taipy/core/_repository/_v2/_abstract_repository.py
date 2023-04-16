@@ -29,23 +29,21 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Save an entity in the repository.
 
-        Args:
+        Parameters:
             entity: The data from an object
 
         """
         raise NotImplementedError
 
     @abstractmethod
-    def _load(self, model_id: str) -> Entity:
+    def _load(self, entity_id: str) -> Entity:
         """
         Retrieve the entity data from the repository.
-
-        Args:
-            model_id: The entity id, i.e., its primary key.
+        Parameters:
+            entity_id: The entity id, i.e., its primary key.
 
         Returns:
             An entity.
-
         """
         raise NotImplementedError
 
@@ -64,7 +62,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Delete an entity in the repository.
 
-        Args:
+        Parameters:
             entity_id: The id of the entity to be deleted.
 
         """
@@ -85,9 +83,16 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _search(self, attribute: str, value: Any, filters: List[Dict]) -> Optional[Entity]:
+    def _delete_by(self, attribute: str, value: str):
         """
-        Args:
+        Delete all entities from the list of ids from the repository.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
+        """
+        Parameters:
             attribute: The entity property that is the key to the search.
             value: The value of the attribute that are being searched.
 
@@ -102,7 +107,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         Export an entity from the repository.
 
-        Args:
+        Parameters:
             entity_id (str): The id of the entity to be exported.
             folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
 

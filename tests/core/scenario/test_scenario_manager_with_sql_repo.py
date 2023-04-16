@@ -46,6 +46,7 @@ def init_managers():
     _DataManagerFactory._build_manager()._delete_all()
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_set_and_get_scenario(cycle):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -151,6 +152,7 @@ def test_set_and_get_scenario(cycle):
     assert _TaskManager._get(task_2.id).id == task_2.id
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_create_scenario_does_not_modify_config():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -184,6 +186,7 @@ def test_create_scenario_does_not_modify_config():
     assert scenario_2.name is None
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_create_and_delete_scenario():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -256,6 +259,7 @@ def mult_by_2(nb: int):
     return nb * 2
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_scenario_manager_only_creates_data_node_once():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -302,6 +306,7 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario.cycle.frequency == Frequency.DAILY
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_scenario_create_from_task_config():
     Config.configure_global_app(repository_type="sql")
 

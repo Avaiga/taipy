@@ -226,3 +226,52 @@ def test_hard_delete_shared_entities():
     assert len(_TaskManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
+
+
+def test_get_primary(tmpdir, cycle, current_datetime):
+    _CycleManager._repository.base_path = tmpdir
+
+    assert len(_CycleManager._get_all()) == 0
+
+    _CycleManager._set(cycle)
+    cycle_1 = _CycleManager._get(cycle.id)
+    cycle_2 = Cycle(Frequency.MONTHLY, {}, current_datetime, current_datetime, current_datetime, name="foo")
+    _CycleManager._set(cycle_2)
+    cycle_2 = _CycleManager._get(cycle_2.id)
+    cycles = _CycleManager._get_all()
+    assert len(_CycleManager._get_all()) == 2
+    assert (
+        len(_CycleManager._get_cycles_by_frequency_and_start_date(cycle_1.frequency, cycle_1.start_date, cycles)) == 1
+    )
+    assert (
+        len(_CycleManager._get_cycles_by_frequency_and_start_date(cycle_2.frequency, cycle_2.start_date, cycles)) == 1
+    )
+    assert (
+        len(
+            _CycleManager._get_cycles_by_frequency_and_start_date(
+                Frequency.WEEKLY, datetime(2000, 1, 1, 1, 0, 0, 0), cycles
+            )
+        )
+        == 0
+    )
+
+    assert (
+        len(
+            _CycleManager._get_cycles_by_frequency_and_overlapping_date(
+                cycle_1.frequency, cycle_1.creation_date, cycles
+            )
+        )
+        == 1
+    )
+    assert (
+        _CycleManager._get_cycles_by_frequency_and_overlapping_date(cycle_1.frequency, cycle_1.creation_date, cycles)[0]
+        == cycle_1
+    )
+    assert (
+        len(
+            _CycleManager._get_cycles_by_frequency_and_overlapping_date(
+                Frequency.WEEKLY, datetime(2000, 1, 1, 1, 0, 0, 0), cycles
+            )
+        )
+        == 0
+    )

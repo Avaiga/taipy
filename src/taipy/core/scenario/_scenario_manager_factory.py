@@ -13,16 +13,30 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._scenario_fs_repository_v2 import _ScenarioFSRepository
 from ._scenario_manager import _ScenarioManager
-from ._scenario_repository_factory import _ScenarioRepositoryFactory
+from ._scenario_sql_repository import _ScenarioSQLRepository
 
 
 class _ScenarioManagerFactory(_ManagerFactory):
+
+    __REPOSITORY_MAP = {"default": _ScenarioFSRepository, "sql": _ScenarioSQLRepository}
+
     @classmethod
     def _build_manager(cls) -> Type[_ScenarioManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(
+            scenario_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager"
             )  # type: ignore
-        _ScenarioManager._repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
-        return _ScenarioManager
+            build_repository = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager_factory", "_ScenarioManagerFactory"
+            )._build_repository  # type: ignore
+        else:
+            scenario_manager = _ScenarioManager
+            build_repository = cls._build_repository
+        scenario_manager._repository = build_repository()  # type: ignore
+        return scenario_manager  # type: ignore
+
+    @classmethod
+    def _build_repository(cls):
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

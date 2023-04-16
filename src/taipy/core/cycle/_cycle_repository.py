@@ -33,6 +33,10 @@ class _CycleRepository(_AbstractRepository[_CycleModel, Cycle]):  # type: ignore
     def load(self, model_id: str) -> Cycle:
         return self.repo.load(model_id)
 
+    # This is temporary, just to keep the same interface as the new repository signature, to not break old tests
+    def _load(self, model_id: str) -> Cycle:
+        return self.repo.load(model_id)
+
     def _load_all(self, version_number: Optional[str] = "all") -> List[Cycle]:
         return self.repo._load_all(version_number)
 

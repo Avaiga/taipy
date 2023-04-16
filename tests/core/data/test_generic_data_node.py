@@ -59,7 +59,6 @@ class TestGenericDataNode:
         assert isinstance(dn, GenericDataNode)
         assert dn.storage_type() == "generic"
         assert dn.config_id == "foo_bar"
-        print(dn)
         assert dn.name == "super name"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None

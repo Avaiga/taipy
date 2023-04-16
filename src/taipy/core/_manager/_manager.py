@@ -10,12 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
-from typing import Generic, Iterable, List, Optional, TypeVar, Union
+from typing import Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._entity._entity_ids import _EntityIds
-from .._repository import _AbstractRepository
+from .._repository._v2._abstract_repository import _AbstractRepository
 from ..exceptions.exceptions import ModelNotFound
 
 EntityType = TypeVar("EntityType")
@@ -45,7 +45,7 @@ class _Manager(Generic[EntityType]):
         """
         Deletes entities by version number.
         """
-        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")  # type: ignore
+        cls._repository._delete_by(attribute="version", value=version_number)
 
     @classmethod
     def _delete(cls, id):
@@ -62,18 +62,23 @@ class _Manager(Generic[EntityType]):
         cls._repository._save(entity)
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = None) -> List[EntityType]:
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[EntityType]:
         """
         Returns all entities.
         """
-        return cls._repository._load_all(version_number)
+        filters: List[Dict] = []
+        return cls._repository._load_all(filters)
 
     @classmethod
-    def _get_all_by(cls, by, version_number: Optional[str] = None) -> List[EntityType]:
+    def _get_all_by(cls, by, filters: Optional[List[Dict]] = None) -> List[EntityType]:
         """
         Returns all entities based on a criteria.
         """
-        return cls._repository._load_all_by(by, version_number)
+        if not filters:
+            filters = []
+        if by:
+            filters.append(by)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _get(cls, entity: Union[str, EntityType], default=None) -> EntityType:
@@ -82,7 +87,7 @@ class _Manager(Generic[EntityType]):
         """
         entity_id = entity if isinstance(entity, str) else entity.id  # type: ignore
         try:
-            return cls._repository.load(entity_id)
+            return cls._repository._load(entity_id)
         except ModelNotFound:
             cls._logger.error(f"{cls._ENTITY_NAME} not found: {entity_id}")
             return default

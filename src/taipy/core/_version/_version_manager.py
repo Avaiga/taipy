@@ -10,16 +10,17 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from taipy.config import Config
 from taipy.config._config_comparator._comparator_result import _ComparatorResult
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
+from .._repository._v2._abstract_repository import _AbstractRepository
 from ..exceptions.exceptions import ConflictedConfigurationError, ModelNotFound, NonExistingVersion
 from ._version import _Version
-from ._version_repository_factory import _VersionRepositoryFactory
+from ._version_fs_repository_v2 import _VersionFSRepository
 
 
 class _VersionManager(_Manager[_Version]):
@@ -32,7 +33,7 @@ class _VersionManager(_Manager[_Version]):
 
     _DEFAULT_VERSION = __LATEST_VERSION
 
-    _repository = _VersionRepositoryFactory._build_repository()  # type: ignore
+    _repository: _VersionFSRepository
 
     @classmethod
     def _get(cls, entity: Union[str, _Version], default=None) -> _Version:
@@ -41,7 +42,7 @@ class _VersionManager(_Manager[_Version]):
         """
         entity_id = entity if isinstance(entity, str) else entity.id
         try:
-            return cls._repository.load(entity_id)
+            return cls._repository._load(entity_id)
         except ModelNotFound:
             return default
 
@@ -64,18 +65,26 @@ class _VersionManager(_Manager[_Version]):
         return version
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = "all") -> List[_Version]:
+    def _get_all(cls, version_number: Optional[Union[str, List]] = "all") -> List[_Version]:
         """
         Returns all entities.
         """
-        return cls._repository._load_all(version_number)
+        version_number = cls._replace_version_number(version_number)
+        if not isinstance(version_number, List):
+            version_number = [version_number] if version_number else []
+        filters = [{"version": version} for version in version_number]
+        return cls._repository._load_all(filters)
 
     @classmethod
-    def _get_all_by(cls, by, version_number: Optional[str] = "all") -> List[_Version]:
+    def _get_all_by(cls, by, filters: List[Dict] = None) -> List[_Version]:
         """
         Returns all entities based on a criteria.
         """
-        return cls._repository._load_all_by(by, version_number)
+        if not filters:
+            filters = []
+        if by:
+            filters.append(by)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _set_development_version(cls, version_number: str) -> str:

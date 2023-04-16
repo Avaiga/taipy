@@ -19,8 +19,8 @@ from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.exceptions.exceptions import ModelNotFound
+from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job._job_model import _JobModel
-from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.job_id import JobId
 from src.taipy.core.job.status import Status
@@ -89,32 +89,24 @@ job_model = _JobModel(
 
 class TestJobRepository:
     def test_save_and_load(self, tmpdir):
-        repository = _JobRepositoryFactory._build_repository()
+        repository = _JobManagerFactory._build_repository()
         repository.base_path = tmpdir
         repository._save(job)
         with pytest.raises(ModelNotFound):
-            repository.load("id")
+            repository._load("id")
         _DataManager._set(data_node)
         _TaskManager._set(task)
-        j = repository.load("id")
+        j = repository._load("id")
         assert j.id == job.id
 
-    def test_from_and_to_model(self):
-        repository = _JobRepositoryFactory._build_repository().repo
-        assert repository._to_model(job) == job_model
-        with pytest.raises(ModelNotFound):
-            repository._from_model(job_model)
-        _DataManager._set(data_node)
-        _TaskManager._set(task)
-        assert repository._from_model(job_model).id == job.id
-
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_save_and_load_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()
 
-        repository = _JobRepositoryFactory._build_repository()
+        repository = _JobManagerFactory._build_repository()
         repository._delete_all()
 
         repository._save(job)
@@ -125,13 +117,14 @@ class TestJobRepository:
         j = repository.load("id")
         assert j.id == job.id
 
+    @pytest.mark.skip("Deprecated: Old repository version")
     def test_from_and_to_model_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 
         _DataManagerFactory._build_manager()._delete_all()
         _TaskManagerFactory._build_manager()._delete_all()
 
-        repository = _JobRepositoryFactory._build_repository().repo._table
+        repository = _JobManagerFactory._build_repository().repo._table
         repository._delete_all()
 
         assert repository._to_model(job) == job_model

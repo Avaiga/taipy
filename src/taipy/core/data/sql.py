@@ -67,9 +67,7 @@ class SQLDataNode(_AbstractSQLDataNode):
 
     __STORAGE_TYPE = "sql"
     __READ_QUERY_KEY = "read_query"
-    __WRITE_QUERY_BUILDER_KEY = "write_query_builder"
-    __WRITE_QUERY_BUILDER_NAME_KEY = "write_query_builder_name"
-    __WRITE_QUERY_BUILDER_MODULE_KEY = "write_query_builder_module"
+    _WRITE_QUERY_BUILDER_KEY = "write_query_builder"
 
     def __init__(
         self,
@@ -90,8 +88,8 @@ class SQLDataNode(_AbstractSQLDataNode):
             properties = {}
         if properties.get(self.__READ_QUERY_KEY) is None:
             raise MissingRequiredProperty(f"Property {self.__READ_QUERY_KEY} is not informed and is required")
-        if properties.get(self.__WRITE_QUERY_BUILDER_KEY) is None:
-            raise MissingRequiredProperty(f"Property {self.__WRITE_QUERY_BUILDER_KEY} is not informed and is required")
+        if properties.get(self._WRITE_QUERY_BUILDER_KEY) is None:
+            raise MissingRequiredProperty(f"Property {self._WRITE_QUERY_BUILDER_KEY} is not informed and is required")
 
         super().__init__(
             config_id,
@@ -116,7 +114,7 @@ class SQLDataNode(_AbstractSQLDataNode):
         return self.properties.get(self.__READ_QUERY_KEY)
 
     def _do_write(self, data, engine, connection) -> None:
-        queries = self.properties.get(self.__WRITE_QUERY_BUILDER_KEY)(data)
+        queries = self.properties.get(self._WRITE_QUERY_BUILDER_KEY)(data)
         if not isinstance(queries, list):
             queries = [queries]
         for query in queries:
@@ -124,28 +122,3 @@ class SQLDataNode(_AbstractSQLDataNode):
                 connection.execute(query)
             else:
                 connection.execute(*query)
-
-    @classmethod
-    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
-        query_builder = datanode_properties.get(cls.__WRITE_QUERY_BUILDER_KEY)
-        datanode_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
-        datanode_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
-        datanode_properties.pop(cls.__WRITE_QUERY_BUILDER_KEY, None)
-
-        return datanode_properties
-
-    @classmethod
-    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
-
-        if datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]:
-            datanode_model_properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = _load_fct(
-                datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY],
-                datanode_model_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY],
-            )
-        else:
-            datanode_model_properties[SQLDataNode.__WRITE_QUERY_BUILDER_KEY] = None
-
-        del datanode_model_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY]
-        del datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]
-
-        return datanode_model_properties

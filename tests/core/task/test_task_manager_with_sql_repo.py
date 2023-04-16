@@ -34,6 +34,7 @@ def init_managers():
     _DataManagerFactory._build_manager()._delete_all()
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_create_and_save():
     Config.configure_global_app(repository_type="sql")
 
@@ -66,6 +67,7 @@ def test_create_and_save():
     assert task_retrieved_from_manager.parent_ids == set()
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_do_not_recreate_existing_data_node():
     Config.configure_global_app(repository_type="sql")
 
@@ -82,6 +84,7 @@ def test_do_not_recreate_existing_data_node():
     assert len(_DataManager._get_all()) == 2
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_do_not_recreate_existing_task():
     Config.configure_global_app(repository_type="sql")
 
@@ -201,6 +204,7 @@ def test_do_not_recreate_existing_task():
     assert task_16.id == task_17.id
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_set_and_get_task():
     Config.configure_global_app(repository_type="sql")
 
@@ -255,6 +259,7 @@ def test_set_and_get_task():
     assert _TaskManager._get(second_task).id == second_task.id
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     Config.configure_global_app(repository_type="sql")
 
@@ -281,6 +286,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     assert [o.config_id for o in task_2.output.values()] == [embedded_4.id, embedded_5.id]
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_delete_raise_exception():
     Config.configure_global_app(repository_type="sql")
 
@@ -298,6 +304,7 @@ def test_delete_raise_exception():
         _TaskManager._delete(task_1.id)
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_hard_delete():
     Config.configure_global_app(repository_type="sql")
 

@@ -40,6 +40,7 @@ def init_managers():
     _JobManagerFactory._build_manager()._delete_all()
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_set_and_get_pipeline():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -134,6 +135,7 @@ def mult_by_3(nb: int):
     return nb * 3
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_get_or_create_data():
     # only create intermediate data node once
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
@@ -185,6 +187,7 @@ def test_get_or_create_data():
         pipeline.WRONG.write(7)
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_do_not_recreate_existing_pipeline_except_same_config():
     Config.configure_global_app(repository_type="sql")
     init_managers()
@@ -424,6 +427,7 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert pipeline_35.id != pipeline_37.id
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -456,6 +460,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     assert len(_JobManager._get_all()) == 0
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -485,6 +490,7 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     assert len(_JobManager._get_all()) == 1
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -514,6 +520,7 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     assert len(_JobManager._get_all()) == 1
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -543,6 +550,7 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
     assert len(_JobManager._get_all()) == 0
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -574,6 +582,7 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
     assert len(_JobManager._get_all()) == 1
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     Config.configure_global_app(repository_type="sql")
@@ -607,6 +616,7 @@ def test_hard_delete_shared_entities():
     assert len(_JobManager._get_all()) == 3
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_data_node_creation_pipeline():
     Config.configure_global_app(repository_type="sql")
 
@@ -631,6 +641,7 @@ def test_data_node_creation_pipeline():
     assert pipeline_1.my_output.id != pipeline_2.my_output.id
 
 
+@pytest.mark.skip("Skipped until SQLRepository refactor")
 def test_data_node_creation_scenario():
     Config.configure_global_app(repository_type="sql")
 

@@ -99,7 +99,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     assert len(_TaskManager._get_all(version_number="all")) == 1
     assert len(_PipelineManager._get_all(version_number="all")) == 1
     assert len(_ScenarioManager._get_all(version_number="all")) == 1
-    assert len(_CycleManager._get_all(version_number="all")) == 1
+    assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all(version_number="all")) == 1
 
     # Create a new scenario in experiment mode
@@ -113,9 +113,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     assert len(_TaskManager._get_all(version_number="all")) == 2
     assert len(_PipelineManager._get_all(version_number="all")) == 2
     assert len(_ScenarioManager._get_all(version_number="all")) == 2
-    assert (
-        len(_CycleManager._get_all(version_number="all")) == 1
-    )  # No new cycle is created since old dev version use the same cycle
+    assert len(_CycleManager._get_all()) == 1  # No new cycle is created since old dev version use the same cycle
     assert len(_JobManager._get_all(version_number="all")) == 2
 
     # Run development mode again
@@ -127,7 +125,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     assert len(_TaskManager._get_all(version_number="all")) == 1
     assert len(_PipelineManager._get_all(version_number="all")) == 1
     assert len(_ScenarioManager._get_all(version_number="all")) == 1
-    assert len(_CycleManager._get_all(version_number="all")) == 1
+    assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all(version_number="all")) == 1
 
     # Submit new dev version
@@ -139,7 +137,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     assert len(_TaskManager._get_all(version_number="all")) == 2
     assert len(_PipelineManager._get_all(version_number="all")) == 2
     assert len(_ScenarioManager._get_all(version_number="all")) == 2
-    assert len(_CycleManager._get_all(version_number="all")) == 1
+    assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all(version_number="all")) == 2
 
     # Assert number of entities of the latest version only

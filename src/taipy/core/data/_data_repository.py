@@ -14,13 +14,16 @@ from typing import Any, Iterable, List, Optional, Union
 
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
+from ._data_converter import _DataNodeConverter
 from ._data_model import _DataNodeModel
 from .data_node import DataNode
 
 
 class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: ignore
     def __init__(self, **kwargs):
-        kwargs.update({"to_model_fct": DataNode._to_model, "from_model_fct": DataNode._from_model})
+        kwargs.update(
+            {"to_model_fct": _DataNodeConverter._entity_to_model, "from_model_fct": _DataNodeConverter._model_to_entity}
+        )
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
         self.class_map = DataNode._class_map()
 
@@ -29,6 +32,10 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
         return self.repo
 
     def load(self, model_id: str) -> DataNode:
+        return self.repo.load(model_id)
+
+    # This is temporary, just to keep the same interface as the new repository signature, to not break old tests
+    def _load(self, model_id: str) -> DataNode:
         return self.repo.load(model_id)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[DataNode]:
