@@ -64,10 +64,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         try:
             with pathlib.Path(self.__get_path(entity_id)).open(encoding="UTF-8") as source:
                 file_content = json.load(source)
-            model = self.model.from_dict(file_content)
-            entity = self.converter._model_to_entity(model)
-            self.__migrate_old_entity(file_content, entity)
-            return entity
+            return self.__file_content_to_entity(file_content)
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), entity_id)
 
