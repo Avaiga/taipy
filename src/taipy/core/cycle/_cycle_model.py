@@ -15,11 +15,12 @@ from typing import Any, Dict
 
 from taipy.config.common.frequency import Frequency
 
+from .._repository._v2._base_taipy_model import _BaseModel
 from .cycle_id import CycleId
 
 
 @dataclass
-class _CycleModel:
+class _CycleModel(_BaseModel):
     id: CycleId
     name: str
     frequency: Frequency
@@ -27,9 +28,9 @@ class _CycleModel:
     creation_date: str
     start_date: str
     end_date: str
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {**dataclasses.asdict(self), "frequency": repr(self.frequency)}
+    #
+    # def to_dict(self) -> Dict[str, Any]:
+    #     return {**dataclasses.asdict(self), "frequency": repr(self.frequency)}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
