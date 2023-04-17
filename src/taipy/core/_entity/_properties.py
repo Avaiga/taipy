@@ -23,6 +23,7 @@ class _Properties(UserDict):
 
         if hasattr(self, "_entity_owner"):
             tp.set(self._entity_owner)
+            # TODO: publish event of changing attributes in properties (use key)
 
     def __getitem__(self, key):
         from taipy.config.common._template_handler import _TemplateHandler as _tpl

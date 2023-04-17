@@ -23,6 +23,7 @@ from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..scenario.scenario_id import ScenarioId
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
@@ -34,6 +35,7 @@ from .pipeline_id import PipelineId
 class _PipelineManager(_Manager[Pipeline]):
     _repository = _PipelineRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Pipeline.__name__
+    _EVENT_ENTITY_TYPE = EventEntityType.PIPELINE
 
     @classmethod
     def _subscribe(
@@ -115,6 +117,7 @@ class _PipelineManager(_Manager[Pipeline]):
             task._parent_ids.update([pipeline_id])
         cls.__save_tasks(tasks)
         cls._set(pipeline)
+        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.CREATION, None)
         return pipeline
 
     @classmethod
@@ -141,11 +144,14 @@ class _PipelineManager(_Manager[Pipeline]):
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(pipeline._get_inputs())
-        return (
+
+        jobs = (
             _TaskManagerFactory._build_manager()
             ._orchestrator()
             .submit(pipeline, callbacks=pipeline_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
+        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.SUBMISSION, None)
+        return jobs
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:

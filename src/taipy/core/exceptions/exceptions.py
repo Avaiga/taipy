@@ -253,3 +253,14 @@ class VersionIsNotProductionVersion(Exception):
 
 class _SuspiciousFileOperation(Exception):
     pass
+
+
+class InvalidEventAttributeName(Exception):
+    """
+    Raised if the attribute doesn't exist or an attribute name is provided
+    when operation is either creation, deletion or submission
+    """
+
+
+class InvalidEventOperation(Exception):
+    """Raised when operation doesn't belong to the entity"""
