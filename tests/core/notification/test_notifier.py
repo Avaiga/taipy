@@ -249,15 +249,20 @@ def test_matching():
     )
 
 
-def test_publish_event(current_datetime):
-    registration_id, registration_queue = Notifier.register()
+def test_publish_event():
+    _, registration_queue = Notifier.register()
 
+    Config.configure_global_app(clean_entities_enabled=True)
     dn_config = Config.configure_data_node("dn_config")
     task_config = Config.configure_task("task_config", print, [dn_config])
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
     scenario_config = Config.configure_scenario("scenario_config", [pipeline_config], frequency=Frequency.DAILY)
 
     scenario = tp.create_scenario(scenario_config)
+    cycle = scenario.cycle
+    pipeline = scenario.pipelines[pipeline_config.id]
+    task = pipeline.tasks[task_config.id]
+    dn = task.data_nodes[dn_config.id]
 
     assert registration_queue.qsize() == 5
 
@@ -272,11 +277,14 @@ def test_publish_event(current_datetime):
         EventEntityType.PIPELINE,
         EventEntityType.SCENARIO,
     ]
+    expected_event_entity_id = [cycle.id, dn.id, task.id, pipeline.id, scenario.id]
+
     assert all(
         [
-            event.operation == EventOperation.CREATION
+            event.entity_type == expected_event_types[i]
+            and event.entity_id == expected_event_entity_id[i]
+            and event.operation == EventOperation.CREATION
             and event.attribute_name is None
-            and event.entity_type == expected_event_types[i]
             for i, event in enumerate(published_events)
         ]
     )
@@ -284,19 +292,18 @@ def test_publish_event(current_datetime):
     scenario.is_primary = True
     assert registration_queue.qsize() == 1
 
-    cycle = scenario.cycle
     cycle.name = "new cycle name"
     assert registration_queue.qsize() == 2
-
-    pipeline = scenario.pipelines[pipeline_config.id]
-    task = pipeline.tasks[task_config.id]
 
     task.skippable = True
     assert registration_queue.qsize() == 3
 
-    dn = task.data_nodes[dn_config.id]
     dn.name = "new datanode name"
     assert registration_queue.qsize() == 4
+
+    published_events = []
+    while registration_queue.qsize() != 0:
+        published_events.append(registration_queue.get())
 
     expected_event_types = [
         EventEntityType.SCENARIO,
@@ -305,34 +312,38 @@ def test_publish_event(current_datetime):
         EventEntityType.DATA_NODE,
     ]
     expected_attribute_names = ["is_primary", "name", "skippable", "name"]
+    expected_event_entity_id = [scenario.id, cycle.id, task.id, dn.id]
 
-    published_events = []
-    while registration_queue.qsize() != 0:
-        published_events.append(registration_queue.get())
     assert all(
         [
-            event.operation == EventOperation.UPDATE
+            event.entity_type == expected_event_types[i]
+            and event.entity_id == expected_event_entity_id[i]
+            and event.operation == EventOperation.UPDATE
             and event.attribute_name == expected_attribute_names[i]
-            and event.entity_type == expected_event_types[i]
             for i, event in enumerate(published_events)
         ]
     )
 
-    scenario.submit()
+    job = scenario.submit()[0]
 
     published_events = []
     while registration_queue.qsize() != 0:
         published_events.append(registration_queue.get())
-    # TODO: add test for publish event for submission this creates a bunch of job events (11 or 17), will be postponed for now
 
-    # tp.delete(dn.id)
-    # assert registration_queue.qsize() == 1
+    expected_operations = [EventOperation.CREATION, EventOperation.UPDATE, EventOperation.SUBMISSION]
+    expected_attribute_names = [None, "status", None]
+    expected_event_types = [EventEntityType.JOB, EventEntityType.JOB, EventEntityType.SCENARIO]
+    expected_event_entity_id = [job.id, job.id, scenario.id]
 
-    # tp.delete(task.id)
-    # assert registration_queue.qsize() == 2
-
-    # tp.delete(pipeline.id)
-    # assert registration_queue.qsize() == 3
+    assert all(
+        [
+            event.entity_type == expected_event_types[i]
+            and event.entity_id == expected_event_entity_id[i]
+            and event.operation == expected_operations[i]
+            and event.attribute_name == expected_attribute_names[i]
+            for i, event in enumerate(published_events)
+        ]
+    )
 
     tp.delete(scenario.id)
     assert registration_queue.qsize() == 6
@@ -341,5 +352,56 @@ def test_publish_event(current_datetime):
     while registration_queue.qsize() != 0:
         published_events.append(registration_queue.get())
 
-    # TODO: failing: all entity types are job!!
-    print([event.entity_type for event in published_events])
+    expected_event_types = [
+        EventEntityType.CYCLE,
+        EventEntityType.SCENARIO,
+        EventEntityType.PIPELINE,
+        EventEntityType.TASK,
+        EventEntityType.JOB,
+        EventEntityType.DATA_NODE,
+    ]
+
+    expected_event_entity_id = [cycle.id, scenario.id, pipeline.id, task.id, job.id, dn.id]
+
+    assert all(
+        [
+            event.entity_type == expected_event_types[i]
+            and event.entity_id == expected_event_entity_id[i]
+            and event.operation == EventOperation.DELETION
+            and event.attribute_name is None
+            for i, event in enumerate(published_events)
+        ]
+    )
+
+    scenario = tp.create_scenario(scenario_config)
+    assert registration_queue.qsize() == 5
+
+    # only to clear the queue
+    while registration_queue.qsize() != 0:
+        registration_queue.get()
+
+    tp.clean_all_entities()
+    assert registration_queue.qsize() == 6
+
+    published_events = []
+    while registration_queue.qsize() != 0:
+        published_events.append(registration_queue.get())
+
+    expected_event_types = [
+        EventEntityType.DATA_NODE,
+        EventEntityType.TASK,
+        EventEntityType.PIPELINE,
+        EventEntityType.SCENARIO,
+        EventEntityType.CYCLE,
+        EventEntityType.JOB,
+    ]
+
+    assert all(
+        [
+            event.entity_type == expected_event_types[i]
+            and event.entity_id == "all"
+            and event.operation == EventOperation.DELETION
+            and event.attribute_name is None
+            for i, event in enumerate(published_events)
+        ]
+    )

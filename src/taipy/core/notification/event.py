@@ -40,7 +40,7 @@ class Event:
     def __init__(
         self,
         entity_type: EventEntityType,
-        entity_id: str,
+        entity_id: Optional[str],
         operation: EventOperation,
         attribute_name: Optional[str] = None,
     ):
