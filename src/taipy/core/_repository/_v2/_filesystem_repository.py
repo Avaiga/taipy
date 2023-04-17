@@ -14,12 +14,12 @@ import pathlib
 import shutil
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
 
-from src.taipy.core.common._utils import _retry
-from src.taipy.core.common.typing import Converter, Entity, Json, ModelType
 from taipy.config.config import Config
 
+from ...common._utils import _retry
+from ...common.typing import Converter, Entity, Json, ModelType
 from ...exceptions import InvalidExportPath, ModelNotFound
-from .._v2._abstract_repository import _AbstractRepository, _Decoder, _Encoder
+from ._abstract_repository import _AbstractRepository, _Decoder, _Encoder
 
 
 class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
@@ -54,7 +54,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
 
-        model = self.converter._entity_to_model(entity)
+        model = self.converter._entity_to_model(entity)  # type: ignore
         self.__get_path(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
@@ -96,7 +96,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     def _delete_by(self, attribute: str, value: str):
         while entity := self._search(attribute, value):
-            self._delete(entity.id)
+            self._delete(entity.id)  # type: ignore
 
     def _search(self, attribute: str, value: Any, filters: List[Dict] = None) -> Optional[Entity]:
         return next(self.__search(attribute, value), None)
