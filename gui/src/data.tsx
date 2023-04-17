@@ -118,4 +118,10 @@ export const cycles: TreeNode[] = [
       },
     ],
   },
+  {
+    id: "scenario_5",
+    label: "Scenario 5",
+    type: 1,
+    primary: false,
+  },
 ];

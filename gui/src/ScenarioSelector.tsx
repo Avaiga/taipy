@@ -202,15 +202,22 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             overflowY: "auto",
           }}
         >
-          {nodes.map((item) =>
-            displayCycles ? (
-              <TreeItem key={item.id} nodeId={item.id} label={item.label}>
-                {scenarioNodes(item.children)}
-              </TreeItem>
-            ) : (
-              scenarioNodes(item.children)
-            )
-          )}
+          {nodes.map((item) => (
+            <>
+              {displayCycles &&
+                (item.type === NodeType.CYCLE ? (
+                  <TreeItem key={item.id} nodeId={item.id} label={item.label}>
+                    {scenarioNodes(item.children)}
+                  </TreeItem>
+                ) : (
+                  scenarioNodes([item])
+                ))}
+              {!displayCycles &&
+                (item.type === NodeType.SCENARIO
+                  ? scenarioNodes([item])
+                  : scenarioNodes(item.children))}
+            </>
+          ))}
         </MuiTreeView>
 
         {showAddButton && (
