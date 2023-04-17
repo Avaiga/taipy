@@ -3,6 +3,7 @@
   "version": "2.3.0",
   "private": true,
   "devDependencies": {
+    "@types/react": "^18.0.15",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
     "@typescript-eslint/parser": "^5.30.7",
     "child_process": "^1.0.2",
@@ -12,6 +13,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-webpack-plugin": "^4.0.0",
     "ts-loader": "^9.3.1",
+    "typescript": "^5.0.2",
     "webpack": "^5.74.0",
     "webpack-cli": "^5.0.1"
   },
@@ -21,13 +23,11 @@
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
     "@mui/x-date-pickers": "^6.0.0",
-    "@types/react": "^18.0.15",
     "date-fns": "^2.29.3",
     "formik": "^2.2.9",
     "lodash-es": "^4.17.21",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "typescript": "^5.0.2"
+    "react-dom": "^18.2.0"
   },
   "scripts": {
     "install": "node scripts/install.js",

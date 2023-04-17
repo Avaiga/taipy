@@ -41,6 +41,7 @@ import {
   useModule,
   createRequestUpdateAction,
   getUpdateVar,
+  createSendActionNameAction,
 } from "taipy-gui";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -58,12 +59,12 @@ export type Scenario = {
 export type TreeNode = {
   id: string;
   label: string;
-  type: Type;
+  type: NodeType;
   primary?: boolean;
   children?: TreeNode[];
 };
 
-export enum Type {
+export enum NodeType {
   CYCLE = 0,
   SCENARIO = 1,
 }
@@ -125,46 +126,9 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   );
 
   const onAdd = (node: Scenario) => {
-    const nodeIndex = nodes.findIndex((item) => item.id === node.id);
-
-    if (nodeIndex > -1) {
-      setNodes(
-        nodes.map((item, index) =>
-          nodeIndex === index
-            ? {
-                ...item,
-                children: [
-                  ...(item.children || []),
-                  {
-                    id: "scenario_" + index,
-                    label: node.name,
-                    type: 1,
-                    primary: false,
-                    date: node.date,
-                  },
-                ],
-              }
-            : item
-        )
-      );
-    } else {
-      setNodes([
-        ...nodes,
-        {
-          id: "cycle_" + nodes.length + 1,
-          label: "Cycle " + format(new Date(node.date), "yyyy-MM-dd"),
-          type: 0,
-          children: [
-            {
-              id: "scenario_" + nodes.length + 1,
-              label: node.name,
-              type: 1,
-              primary: false,
-            },
-          ],
-        },
-      ]);
-    }
+    dispatch(
+      createSendActionNameAction("", module, props.onScenarioCreate, node)
+    );
   };
 
   const onSubmit = (values: any) => {
@@ -181,6 +145,32 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     },
     onSubmit,
   });
+
+  const scenarioNodes = (scenarios?: TreeNode[]) =>
+    scenarios &&
+    scenarios?.map((child) => (
+      <TreeItem
+        key={child.id}
+        nodeId={child.id}
+        label={
+          <Grid
+            container
+            alignItems="center"
+            direction="row"
+            flexWrap="nowrap"
+            justifyContent="flex-start"
+            spacing={1}
+          >
+            <Grid item>{child.label}</Grid>
+            {showPrimaryFlag && child.primary && (
+              <Grid item>
+                <Flag />
+              </Grid>
+            )}
+          </Grid>
+        }
+      />
+    ));
 
   useEffect(() => {
     if (props.coreChanged?.scenario) {
@@ -212,38 +202,26 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             overflowY: "auto",
           }}
         >
-          {nodes.map((item) => (
-            <TreeItem key={item.id} nodeId={item.id} label={item.label}>
-              {item.children?.map((child, index) => (
-                <TreeItem
-                  key={child.id}
-                  nodeId={child.id}
-                  label={
-                    <Grid
-                      container
-                      alignItems="center"
-                      direction="row"
-                      flexWrap="nowrap"
-                      justifyContent="space-between"
-                      spacing={1}
-                    >
-                      <Grid item>{child.label}</Grid>
-                      {child.primary && (
-                        <Grid item>
-                          <Flag />
-                        </Grid>
-                      )}
-                    </Grid>
-                  }
-                />
-              ))}
-            </TreeItem>
-          ))}
+          {nodes.map((item) =>
+            displayCycles ? (
+              <TreeItem key={item.id} nodeId={item.id} label={item.label}>
+                {scenarioNodes(item.children)}
+              </TreeItem>
+            ) : (
+              scenarioNodes(item.children)
+            )
+          )}
         </MuiTreeView>
 
-        <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
-          Add
-        </Button>
+        {showAddButton && (
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => setOpen(true)}
+          >
+            Add
+          </Button>
+        )}
       </Box>
 
       <MuiDialog onClose={() => setOpen(false)} open={open}>
