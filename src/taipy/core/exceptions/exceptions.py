@@ -264,10 +264,3 @@ class InvalidEventAttributeName(Exception):
 
 class InvalidEventOperation(Exception):
     """Raised when operation doesn't belong to the entity"""
-
-
-class NonExistingRegistration(Exception):
-    """Raised when the provided registration id or registration does not exist"""
-
-    def __init__(self, registration_id: str):
-        self.message = f"Registration: {registration_id} does not exist."

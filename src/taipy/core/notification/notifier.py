@@ -10,9 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
-from ..exceptions.exceptions import NonExistingRegistration
 from .event import Event, EventEntityType, EventOperation
 from .registration import Registration
 from .topic import Topic
@@ -28,8 +27,7 @@ def _publish_event(
 
 
 class Notifier:
-    _topics_registrations_list: Dict[Topic, List[Registration]] = {}
-    _registrations: Dict[str, Registration] = {}
+    _topics_registrations_list: Dict[Topic, set[Registration]] = {}
 
     @classmethod
     def register(
@@ -41,26 +39,28 @@ class Notifier:
     ) -> Tuple[str, SimpleQueue]:
         registration = Registration(entity_type, entity_id, operation, attribute_name)
 
-        cls._registrations[registration.register_id] = registration
-
         if registrations := cls._topics_registrations_list.get(registration.topic, None):
-            registrations.append(registration)
+            registrations.add(registration)
         else:
-            cls._topics_registrations_list[registration.topic] = [registration]
+            cls._topics_registrations_list[registration.topic] = {registration}
 
-        return registration.register_id, registration.queue
+        return registration.registration_id, registration.queue
 
     @classmethod
     def unregister(cls, registration_id: str):
-        try:
-            registration = cls._registrations[registration_id]
-            if registrations := cls._topics_registrations_list.get(registration.topic, None):
-                registrations.remove(registration)
-                if len(registrations) == 0:
-                    del cls._topics_registrations_list[registration.topic]
-            del cls._registrations[registration_id]
-        except KeyError:
-            raise NonExistingRegistration(registration_id)
+        to_remove_registration: Optional[Registration] = None
+
+        for _, registrations in cls._topics_registrations_list.items():
+            for registration in registrations:
+                if registration.registration_id == registration_id:
+                    to_remove_registration = registration
+                    break
+
+        if to_remove_registration:
+            registrations = cls._topics_registrations_list[to_remove_registration.topic]
+            registrations.remove(to_remove_registration)
+            if len(registrations) == 0:
+                del cls._topics_registrations_list[to_remove_registration.topic]
 
     @classmethod
     def publish(cls, event):

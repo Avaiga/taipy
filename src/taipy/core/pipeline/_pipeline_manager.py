@@ -150,7 +150,7 @@ class _PipelineManager(_Manager[Pipeline]):
             ._orchestrator()
             .submit(pipeline, callbacks=pipeline_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
-        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.CREATION, None)
+        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.SUBMISSION, None)
         return jobs
 
     @staticmethod

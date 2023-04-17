@@ -31,7 +31,7 @@ class Registration:
         attribute_name: Optional[str] = None,
     ):
 
-        self.register_id: str = self._new_id()
+        self.registration_id: str = self._new_id()
         self.topic: Topic = Topic(entity_type, entity_id, operation, attribute_name)
         self.queue: SimpleQueue = SimpleQueue()
 
@@ -39,3 +39,6 @@ class Registration:
     def _new_id() -> RegistrationId:
         """Generate a unique scenario identifier."""
         return RegistrationId(Registration.__SEPARATOR.join([Registration._ID_PREFIX, str(uuid4())]))
+
+    def __hash__(self) -> int:
+        return hash(self.registration_id)

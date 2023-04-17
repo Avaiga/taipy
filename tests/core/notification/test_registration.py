@@ -19,8 +19,8 @@ from src.taipy.core.notification.topic import Topic
 
 def test_create_registration():
     registration_0 = Registration()
-    assert isinstance(registration_0.register_id, str)
-    assert registration_0.register_id.startswith(Registration._ID_PREFIX)
+    assert isinstance(registration_0.registration_id, str)
+    assert registration_0.registration_id.startswith(Registration._ID_PREFIX)
     assert isinstance(registration_0.queue, SimpleQueue)
     assert registration_0.queue.qsize() == 0
     assert isinstance(registration_0.topic, Topic)
@@ -32,8 +32,8 @@ def test_create_registration():
     registration_1 = Registration(
         entity_type=EventEntityType.SCENARIO, entity_id="SCENARIO_scenario_id", operation=EventOperation.CREATION
     )
-    assert isinstance(registration_1.register_id, str)
-    assert registration_1.register_id.startswith(Registration._ID_PREFIX)
+    assert isinstance(registration_1.registration_id, str)
+    assert registration_1.registration_id.startswith(Registration._ID_PREFIX)
     assert isinstance(registration_1.queue, SimpleQueue)
     assert registration_1.queue.qsize() == 0
     assert isinstance(registration_1.topic, Topic)
@@ -48,8 +48,8 @@ def test_create_registration():
         operation=EventOperation.UPDATE,
         attribute_name="tasks",
     )
-    assert isinstance(registration_2.register_id, str)
-    assert registration_2.register_id.startswith(Registration._ID_PREFIX)
+    assert isinstance(registration_2.registration_id, str)
+    assert registration_2.registration_id.startswith(Registration._ID_PREFIX)
     assert isinstance(registration_2.queue, SimpleQueue)
     assert registration_2.queue.qsize() == 0
     assert isinstance(registration_2.topic, Topic)

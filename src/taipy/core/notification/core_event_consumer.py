@@ -24,8 +24,8 @@ class CoreEventConsumer(threading.Thread):
 
     """
 
-    def __init__(self, register_id: str, queue: SimpleQueue):
-        threading.Thread.__init__(self, name=f"Thread-Taipy-Core-Consumer-{register_id}")
+    def __init__(self, registration_id: str, queue: SimpleQueue):
+        threading.Thread.__init__(self, name=f"Thread-Taipy-Core-Consumer-{registration_id}")
         self.queue = queue
         self._STOP_FLAG = True
         self.start()

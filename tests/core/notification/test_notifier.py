@@ -15,7 +15,6 @@ from unittest import mock
 import pytest
 
 from src.taipy.core import taipy as tp
-from src.taipy.core.exceptions.exceptions import NonExistingRegistration
 from src.taipy.core.notification import EventEntityType, EventOperation
 from src.taipy.core.notification.event import Event
 from src.taipy.core.notification.notifier import Notifier
@@ -24,111 +23,102 @@ from taipy.config import Config, Frequency
 
 
 def test_register():
+    def find_registration_and_topic(registration_id):
+        for topic, registrations in Notifier._topics_registrations_list.items():
+            for registration in registrations:
+                if registration.registration_id == registration_id:
+                    return topic, registration
 
-    assert len(Notifier._registrations) == 0
     assert len(Notifier._topics_registrations_list) == 0
 
-    register_id_0, register_queue_0 = Notifier.register()
-    registration_0 = Notifier._registrations[register_id_0]
-    topic_0 = registration_0.topic
+    registration_id_0, register_queue_0 = Notifier.register()
+    topic_0, registration_0 = find_registration_and_topic(registration_id_0)
 
-    assert isinstance(register_id_0, str) and register_id_0 == registration_0.register_id
+    assert isinstance(registration_id_0, str) and registration_id_0 == registration_0.registration_id
     assert isinstance(register_queue_0, SimpleQueue)
-    assert len(Notifier._registrations) == 1
     assert len(Notifier._topics_registrations_list.keys()) == 1
     assert len(Notifier._topics_registrations_list[topic_0]) == 1
-    assert registration_0.queue == register_queue_0 == Notifier._topics_registrations_list[topic_0][0].queue
+    assert registration_0.queue == register_queue_0
+    assert register_queue_0 in [registration.queue for registration in Notifier._topics_registrations_list[topic_0]]
 
-    register_id_1, register_queue_1 = Notifier.register()
-    registration_1 = Notifier._registrations[register_id_1]
-    topic_1 = registration_1.topic
+    registration_id_1, register_queue_1 = Notifier.register()
+    topic_1, registration_1 = find_registration_and_topic(registration_id_1)
 
-    assert isinstance(register_id_1, str) and register_id_1 == registration_1.register_id
+    assert isinstance(registration_id_1, str) and registration_id_1 == registration_1.registration_id
     assert isinstance(register_queue_1, SimpleQueue)
-    assert len(Notifier._registrations) == 2
     assert len(Notifier._topics_registrations_list.keys()) == 1
     assert len(Notifier._topics_registrations_list[topic_1]) == 2
-    assert registration_1.queue == register_queue_1 == Notifier._topics_registrations_list[topic_1][1].queue
+    assert registration_1.queue == register_queue_1
+    assert register_queue_1 in [registration.queue for registration in Notifier._topics_registrations_list[topic_1]]
 
-    register_id_2, register_queue_2 = Notifier.register(EventEntityType.SCENARIO)
-    registration_2 = Notifier._registrations[register_id_2]
-    topic_2 = registration_2.topic
+    registration_id_2, register_queue_2 = Notifier.register(EventEntityType.SCENARIO)
+    topic_2, registration_2 = find_registration_and_topic(registration_id_2)
 
-    assert isinstance(register_id_2, str) and register_id_2 == registration_2.register_id
+    assert isinstance(registration_id_2, str) and registration_id_2 == registration_2.registration_id
     assert isinstance(register_queue_2, SimpleQueue)
-    assert len(Notifier._registrations) == 3
     assert len(Notifier._topics_registrations_list.keys()) == 2
     assert len(Notifier._topics_registrations_list[topic_2]) == 1
-    assert registration_2.queue == register_queue_2 == Notifier._topics_registrations_list[topic_2][0].queue
+    assert registration_2.queue == register_queue_2
+    assert register_queue_2 in [registration.queue for registration in Notifier._topics_registrations_list[topic_2]]
 
-    register_id_3, register_queue_3 = Notifier.register(EventEntityType.SCENARIO, "scenario_id")
-    registration_3 = Notifier._registrations[register_id_3]
-    topic_3 = registration_3.topic
+    registration_id_3, register_queue_3 = Notifier.register(EventEntityType.SCENARIO, "scenario_id")
+    topic_3, registration_3 = find_registration_and_topic(registration_id_3)
 
-    assert isinstance(register_id_3, str) and register_id_3 == registration_3.register_id
+    assert isinstance(registration_id_3, str) and registration_id_3 == registration_3.registration_id
     assert isinstance(register_queue_3, SimpleQueue)
-    assert len(Notifier._registrations) == 4
     assert len(Notifier._topics_registrations_list.keys()) == 3
     assert len(Notifier._topics_registrations_list[topic_3]) == 1
-    assert registration_3.queue == register_queue_3 == Notifier._topics_registrations_list[topic_3][0].queue
+    assert registration_3.queue == register_queue_3
+    assert register_queue_3 in [registration.queue for registration in Notifier._topics_registrations_list[topic_3]]
 
-    register_id_4, register_queue_4 = Notifier.register(
+    registration_id_4, register_queue_4 = Notifier.register(
         EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"
     )
-    registration_4 = Notifier._registrations[register_id_4]
-    topic_4 = registration_4.topic
+    topic_4, registration_4 = find_registration_and_topic(registration_id_4)
 
-    assert isinstance(register_id_4, str) and register_id_4 == registration_4.register_id
+    assert isinstance(registration_id_4, str) and registration_id_4 == registration_4.registration_id
     assert isinstance(register_queue_4, SimpleQueue)
-    assert len(Notifier._registrations) == 5
     assert len(Notifier._topics_registrations_list.keys()) == 4
     assert len(Notifier._topics_registrations_list[topic_4]) == 1
-    assert registration_4.queue == register_queue_4 == Notifier._topics_registrations_list[topic_4][0].queue
+    assert registration_4.queue == register_queue_4
+    assert register_queue_4 in [registration.queue for registration in Notifier._topics_registrations_list[topic_4]]
 
-    register_id_5, register_queue_4 = Notifier.register(EventEntityType.SCENARIO)
-    registration_5 = Notifier._registrations[register_id_5]
-    topic_5 = registration_5.topic
+    registration_id_5, register_queue_5 = Notifier.register(EventEntityType.SCENARIO)
+    topic_5, registration_5 = find_registration_and_topic(registration_id_5)
 
-    assert isinstance(register_id_5, str) and register_id_5 == registration_5.register_id
-    assert isinstance(register_queue_4, SimpleQueue)
-    assert len(Notifier._registrations) == 6
+    assert isinstance(registration_id_5, str) and registration_id_5 == registration_5.registration_id
+    assert isinstance(register_queue_5, SimpleQueue)
     assert len(Notifier._topics_registrations_list.keys()) == 4
     assert len(Notifier._topics_registrations_list[topic_5]) == 2
-    assert registration_5.queue == register_queue_4 == Notifier._topics_registrations_list[topic_5][1].queue
+    assert registration_5.queue == register_queue_5
+    assert register_queue_5 in [registration.queue for registration in Notifier._topics_registrations_list[topic_5]]
 
-    register_id_6, register_queue_6 = Notifier.register()
-    assert len(Notifier._registrations) == 7
+    registration_id_6, register_queue_6 = Notifier.register()
     assert len(Notifier._topics_registrations_list.keys()) == 4
     assert len(Notifier._topics_registrations_list[topic_0]) == 3
 
-    Notifier.unregister(register_id_6)
-    assert len(Notifier._registrations) == 6
+    Notifier.unregister(registration_id_6)
     assert len(Notifier._topics_registrations_list.keys()) == 4
     assert len(Notifier._topics_registrations_list[topic_0]) == 2
 
-    Notifier.unregister(register_id_4)
-    assert len(Notifier._registrations) == 5
+    Notifier.unregister(registration_id_4)
     assert len(Notifier._topics_registrations_list.keys()) == 3
     assert topic_4 not in Notifier._topics_registrations_list.keys()
 
-    Notifier.unregister(register_id_0)
-    assert len(Notifier._registrations) == 4
+    Notifier.unregister(registration_id_0)
     assert len(Notifier._topics_registrations_list.keys()) == 3
     assert len(Notifier._topics_registrations_list[topic_0]) == 1
 
-    Notifier.unregister(register_id_1)
-    assert len(Notifier._registrations) == 3
+    Notifier.unregister(registration_id_1)
     assert len(Notifier._topics_registrations_list.keys()) == 2
+
+    print(Notifier._topics_registrations_list.keys())
     assert all(topic not in Notifier._topics_registrations_list.keys() for topic in [topic_0, topic_1])
 
-    Notifier.unregister(register_id_2)
-    Notifier.unregister(register_id_3)
-    Notifier.unregister(register_id_5)
-    assert len(Notifier._registrations) == 0
+    Notifier.unregister(registration_id_2)
+    Notifier.unregister(registration_id_3)
+    Notifier.unregister(registration_id_5)
     assert len(Notifier._topics_registrations_list.keys()) == 0
-
-    with pytest.raises(NonExistingRegistration):
-        Notifier.unregister(register_id_0)
 
 
 def test_matching():
