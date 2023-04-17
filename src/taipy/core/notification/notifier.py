@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Set, Tuple
 
 from .event import Event, EventEntityType, EventOperation
 from .registration import Registration
@@ -27,7 +27,7 @@ def _publish_event(
 
 
 class Notifier:
-    _topics_registrations_list: Dict[Topic, set[Registration]] = {}
+    _topics_registrations_list: Dict[Topic, Set[Registration]] = {}
 
     @classmethod
     def register(
