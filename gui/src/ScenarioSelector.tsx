@@ -29,7 +29,14 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { ChevronRight, ExpandMore, Flag, Close } from "@mui/icons-material";
+import {
+  ChevronRight,
+  ExpandMore,
+  Flag,
+  Close,
+  DeleteOutline,
+  Add,
+} from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import { Typography } from "@mui/material";
 import { useFormik } from "formik";
@@ -54,6 +61,12 @@ export type Scenario = {
   name: string;
   config: string;
   id: string;
+};
+
+export type Property = {
+  id: string;
+  key: string;
+  value: string;
 };
 
 export type TreeNode = {
@@ -100,6 +113,9 @@ interface ScenarioSelectorProps {
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [nodes, setNodes] = useState<TreeNode[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [key, setKey] = useState<string>("");
+  const [value, setValue] = useState<string>("");
 
   const dispatch = useDispatch();
   const module = useModule();
@@ -129,6 +145,19 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     dispatch(
       createSendActionNameAction("", module, props.onScenarioCreate, node)
     );
+  };
+
+  const propertyAdd = (key: string, value: string) => {
+    let newProp: Property = {
+      id: properties.length + 1 + "",
+      key: key,
+      value: value,
+    };
+    setProperties([...properties, newProp]);
+  };
+  const propertyDelete = (id: string) => {
+    const filtered = properties.filter((itm) => itm.id !== id);
+    setProperties(filtered);
   };
 
   const onSubmit = (values: any) => {
@@ -302,6 +331,73 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                   </LocalizationProvider>
                 </FormGroup>
               </Grid>
+              <Grid item xs={12} container justifyContent="space-between">
+                <Grid item xs={5}>
+                  <Typography variant="body2">Custom Properties</Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Button
+                    variant="outlined"
+                    color="info"
+                    onClick={() => {
+                      setProperties([]);
+                    }}
+                  >
+                    REMOVE ALL
+                  </Button>
+                </Grid>
+              </Grid>
+              {properties?.map((item) => (
+                <Grid item xs={12} key={item.id} container>
+                  <Grid item xs={5}>
+                    <TextField
+                      id="property-key"
+                      value={item.key}
+                      onChange={(e) => {
+                        item.key = e.target.value;
+                      }}
+                      placeholder="Key"
+                    />
+                  </Grid>
+                  <Grid item xs={5}>
+                    <TextField
+                      id="property-value"
+                      value={item.value}
+                      placeholder="Value"
+                    />
+                  </Grid>
+                  <Grid item xs={2}>
+                    <IconButton
+                      color="primary"
+                      component="label"
+                      onClick={() => propertyDelete(item.id)}
+                    >
+                      <DeleteOutline />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Grid item xs={12} container>
+                <Grid item xs={5}>
+                  <TextField id="property-key" value={key} placeholder="Key" />
+                </Grid>
+                <Grid item xs={5}>
+                  <TextField
+                    id="property-value"
+                    value={value}
+                    placeholder="Value"
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <IconButton
+                    color="primary"
+                    component="label"
+                    onClick={() => propertyAdd(key, value)}
+                  >
+                    <Add />
+                  </IconButton>
+                </Grid>
+              </Grid>{" "}
             </Grid>
           </DialogContent>
 
