@@ -27,6 +27,7 @@
 
 .taipy-table {
   position: relative;
+  max-width: 100%;
   z-index: 0; /* Fix table sticky header going above app fixed header on scroll */
 }
 
