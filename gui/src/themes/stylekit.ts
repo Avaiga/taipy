@@ -86,7 +86,7 @@ export const stylekitTheme = {
                     display: "flex",
                 },
                 input: {
-                    height: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
                     boxSizing: "border-box",
 
                     ".MuiInputBase-root &": {
@@ -100,13 +100,11 @@ export const stylekitTheme = {
                 select: {
                     display: "flex",
                     alignItems: "center",
-                    height: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
                     lineHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
                     boxSizing: "border-box",
-
-                    "&.MuiInputBase-input": {
-                        py: 0
-                    },
+                    paddingTop: 8,
+                    paddingBottom: 8,
                 },
             },
         },
