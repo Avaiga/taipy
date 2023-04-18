@@ -11,7 +11,7 @@
 
 import json
 
-from src.taipy.core.common.default_custom_document import DefaultCustomDocument
+from src.taipy.core.common.mongo_default_document import MongoDefaultDocument
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
@@ -478,7 +478,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn1.db_password == ""
     assert dn1.db_name == "default_db_name"
     assert dn1.collection_name == "default_collection"
-    assert dn1.custom_document == DefaultCustomDocument
+    assert dn1.custom_document == MongoDefaultDocument
     assert dn1.db_host == "default_host"
     assert dn1.db_port == 1010
     assert dn1.db_extra_args == {"default": "default"}
@@ -497,7 +497,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn2.db_password == ""
     assert dn2.db_name == "default_db_name"
     assert dn2.collection_name == "collection_2"
-    assert dn2.custom_document == DefaultCustomDocument
+    assert dn2.custom_document == MongoDefaultDocument
     assert dn2.db_host == "host_2"
     assert dn2.db_port == 2020
     assert dn2.db_extra_args == {"default": "default"}
@@ -518,7 +518,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn3.db_password == "pwd_3"
     assert dn3.db_name == "db_3"
     assert dn3.collection_name == "collection_3"
-    assert dn3.custom_document == DefaultCustomDocument
+    assert dn3.custom_document == MongoDefaultDocument
     assert dn3.db_port == 1010
     assert dn3.db_host == "default_host"
     assert dn3.db_driver == "default server"
