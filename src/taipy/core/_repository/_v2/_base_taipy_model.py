@@ -10,10 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import dataclasses
+import enum
 from typing import Any, Dict
-
-from src.taipy.core import Status
-from taipy import Frequency, Scope
 
 
 class _BaseModel:
@@ -25,6 +23,6 @@ class _BaseModel:
         model_dict = {**dataclasses.asdict(self)}
 
         for k, v in model_dict.items():
-            if isinstance(v, (Status, Scope, Frequency)):
+            if isinstance(v, enum.Enum):
                 model_dict[k] = repr(v)
         return model_dict

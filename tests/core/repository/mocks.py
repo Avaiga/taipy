@@ -14,11 +14,18 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict
 
+from sqlalchemy import Column, MetaData, String, Table, create_engine
+from sqlalchemy.orm import declarative_base, registry, sessionmaker
+
 from src.taipy.core._repository import _FileSystemRepository, _SQLRepository
 from src.taipy.core._repository._v2._abstract_converter import _AbstractConverter
 from src.taipy.core._repository._v2._filesystem_repository import _FileSystemRepository as _FileSystemRepositoryV2
+from src.taipy.core._repository._v2._sql_repository import _SQLRepository as _SQLRepositoryV2
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
+
+Base = declarative_base()
+mapper_registry = registry()
 
 
 @dataclass
@@ -33,7 +40,14 @@ class MockObj:
 
 
 @dataclass
-class MockModel:
+class MockModel(Base):  # type: ignore
+    __table__ = Table(
+        "mock_model",
+        mapper_registry.metadata,
+        Column("id", String(200), primary_key=True),
+        Column("name", String(200)),
+        Column("version", String(200)),
+    )
     id: str
     name: str
     version: str
@@ -98,3 +112,15 @@ class MockSQLRepository(_SQLRepository):
 
     def _from_model(self, model: MockModel):
         return MockObj(model.id, model.name, model.version)
+
+
+def create_database(engine):
+    MockModel.__table__.create(engine, checkfirst=True)
+
+
+class MockSQLRepositoryV2(_SQLRepositoryV2):
+    def __init__(self, **kwargs):
+        engine = create_engine("sqlite:///:memory:")
+        create_database(engine)
+        kwargs.update({"session": sessionmaker(autocommit=False, autoflush=False, bind=engine)()})
+        super().__init__(**kwargs)

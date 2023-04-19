@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 from ._sql_base_model import Base
-from ._sql_models import _TaipyModel
 from ._sql_session import engine
 
 
@@ -18,4 +17,4 @@ def init_db() -> None:
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next line
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)  # type: ignore

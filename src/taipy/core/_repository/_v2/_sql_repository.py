@@ -9,11 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 import pathlib
 import uuid
 from typing import Any, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
-
-from db._sql_session import SessionLocal
 
 # from app.encoders import jsonable_encoder
 # from pydantic import BaseModel
@@ -23,10 +22,11 @@ from src.taipy.core.common.typing import Converter, Entity, Json, ModelType
 
 from ...exceptions import ModelNotFound
 from ._abstract_repository import _AbstractRepository
+from .db._sql_session import SessionLocal
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
-    def __init__(self, model: Type[ModelType], converter: Type[Converter], db_table):
+    def __init__(self, model: Type[ModelType], converter: Type[Converter], session=SessionLocal()):
         """
         CRUD object with default methods to Create, Read, Update, Delete (CRUD).
         **Parameters**
@@ -35,28 +35,32 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         * `db_table`: A SQLAlchemy model class
         """
         self.model = model
-        self.db = SessionLocal()
+        self.db = session
         self.converter = converter
 
     def _save(self, entity: Entity):
         obj = self.converter._entity_to_model(entity)
-        if entry := self.db.query(self.model).filter_by(model_id=obj.id).first():
+        if entry := self.db.query(self.model).filter_by(id=obj.id).first():
             self.__update_entry(entry, obj)
             return
         self.__insert_model(obj)
 
     def _load(self, model_id: Any) -> Optional[ModelType]:
-        return self.db.query(self.model).filter(self.model.id == model_id).first()
+        if entry := self.db.query(self.model).filter(self.model.id == model_id).first():
+            return self.converter._model_to_entity(entry)
+        return None
 
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
+        query = self.db.query(self.model)
         try:
-            query = self.db.query(self.model).filter_by(filters)
+            if filters:
+                query.filter(filters)
             return [self.converter._model_to_entity(m) for m in query.all()]
         except NoResultFound:
             return []
 
     def _delete(self, entity_id: str):
-        number_of_deleted_entries = self.db.query(self.model).filter_by(model_id=entity_id).delete()
+        number_of_deleted_entries = self.db.query(self.model).filter_by(id=entity_id).delete()
         if not number_of_deleted_entries:
             raise ModelNotFound(str(self.model.__name__), entity_id)
         self.db.commit()
@@ -74,10 +78,13 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             self._delete(entity.id)
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
-        query = self.db.query(self.model).filter(self.model.document.contains(f'"{attribute}": "{value}"'))
+        query = self.db.query(self.model).filter_by(**{attribute: value})
+
+        if filters:
+            query.filter(filters)
 
         if entry := query.first():
-            return self.converter.model_to_entity(entry)
+            return self.converter._model_to_entity(entry)
         return None
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
@@ -86,21 +93,34 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         else:
             folder = folder_path
 
-        export_dir = folder / self.model.__name__
+        export_dir = folder / self.model.__table__.name
         if not export_dir.exists():
             export_dir.mkdir(parents=True)
 
         export_path = export_dir / f"{entity_id}.json"
 
-        entry = self.db.query(self.model).filter_by(model_id=entity_id).first()
+        entry = self.db.query(self.model).filter_by(id=entity_id).first()
         if entry is None:
             raise ModelNotFound(self.model, entity_id)  # type: ignore
 
         with open(export_path, "w", encoding="utf-8") as export_file:
-            export_file.write(self.converter.entity_to_model(entry))
+            export_file.write(json.dumps(entry.to_dict()))
 
     def get_by_config(self, config_id: Any) -> Optional[ModelType]:
         return self.db.query(self.model).filter(self.model.config_id == config_id).first()
 
     def get_multi(self, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
         return self.db.query(self.model).offset(skip).limit(limit).all()
+
+    def __insert_model(self, obj: ModelType):
+        self.db.add(obj)
+        self.db.commit()
+        self.db.refresh(obj)
+
+    def __update_entry(self, entry, model):
+        for field in entry:
+            if hasattr(field, model):
+                setattr(entry, field, model[field])
+        self.db.add(entry)
+        self.db.commit()
+        self.db.refresh(entry)

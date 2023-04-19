@@ -17,7 +17,8 @@ from queue import Queue
 
 import pandas as pd
 import pytest
-from sqlalchemy import create_engine, text
+from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy.orm import sessionmaker
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version import _Version
