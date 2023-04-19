@@ -23,6 +23,7 @@ from ..partial import Partial
 from ..types import PropertyType, _get_taipy_type
 from ..utils import (
     _date_to_ISO,
+    _get_broadcast_var_name,
     _get_client_var_name,
     _get_data_type,
     _get_expr_var_name,
@@ -847,7 +848,9 @@ class _Builder:
                 else:
                     self.__set_react_attribute(prop_name, self.__attributes.get(attr[0], _get_tuple_val(attr, 2, None)))
             elif var_type == PropertyType.broadcast:
-                self.__set_react_attribute(_to_camel_case(attr[0]), _get_tuple_val(attr, 2, None))
+                self.__set_react_attribute(
+                    _to_camel_case(attr[0]), _get_broadcast_var_name(_get_tuple_val(attr, 2, None))
+                )
             elif var_type == PropertyType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.dict:
