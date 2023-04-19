@@ -21,7 +21,7 @@ from taipy.config.config import Config
 from taipy.config.section import Section
 
 from ..common._warnings import _warn_deprecated
-from ..common.default_custom_document import DefaultCustomDocument
+from ..common.mongo_default_document import MongoDefaultDocument
 
 
 class DataNodeConfig(Section):
@@ -206,7 +206,7 @@ class DataNodeConfig(Section):
             _OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY: _DEFAULT_EXPOSED_TYPE,
         },
         _STORAGE_TYPE_VALUE_MONGO_COLLECTION: {
-            _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY: DefaultCustomDocument,
+            _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY: MongoDefaultDocument,
             _OPTIONAL_USERNAME_MONGO_PROPERTY: "",
             _OPTIONAL_PASSWORD_MONGO_PROPERTY: "",
             _OPTIONAL_HOST_MONGO_PROPERTY: "localhost",

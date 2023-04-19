@@ -42,7 +42,7 @@ import json
 import os
 
 from ._core import Core
-from .common.default_custom_document import DefaultCustomDocument
+from .common.mongo_default_document import MongoDefaultDocument
 from .cycle.cycle import Cycle
 from .cycle.cycle_id import CycleId
 from .data.data_node import DataNode
