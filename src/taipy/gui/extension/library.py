@@ -22,6 +22,7 @@ from ..utils import _get_broadcast_var_name, _to_camel_case
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
+    from ..state import State
 
 
 class ElementProperty:
@@ -142,7 +143,17 @@ class Element:
         lib: "ElementLibrary",
         is_html: t.Optional[bool] = False,
     ) -> t.Union[t.Any, t.Tuple[str, str]]:
-        attributes = properties or {}
+        attributes = properties if isinstance(properties, dict) else {}
+        for prop, attr in self.attributes.items():
+            if (
+                prop not in attributes
+                and (attr.property_type == PropertyType.react or attr.property_type == PropertyType.function)
+                and isinstance(attr.default_value, str)
+                and len(attr.default_value) > 2
+                and attr.default_value[0] == "{"
+                and attr.default_value[-1] == "}"
+            ):
+                attributes[prop] = attr.default_value
         # this modifies attributes
         hash_names = _Builder._get_variable_hash_names(gui, attributes)  # variable replacement
         # call user render if any
@@ -364,3 +375,12 @@ class ElementLibrary(ABC):
             library itself.
         """
         return None
+
+    def on_user_init(self, state: "State"):
+        """
+        Initialize user state on first access.
+
+        Arguments
+            state: The `State^` instance.
+        """
+        pass

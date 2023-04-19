@@ -594,6 +594,8 @@ class Gui:
         if callable(on_change_fn):
             try:
                 argcount = on_change_fn.__code__.co_argcount
+                if argcount > 0 and inspect.ismethod(on_change_fn):
+                    argcount -= 1
                 args: t.List[t.Any] = [None for _ in range(argcount)]
                 if argcount > 0:
                     args[0] = self.__get_state()
@@ -1028,6 +1030,8 @@ class Gui:
         if callable(action_function):
             try:
                 argcount = action_function.__code__.co_argcount
+                if argcount > 0 and inspect.ismethod(action_function):
+                    argcount -= 1
                 args = [None for _ in range(argcount)]
                 if argcount > 0:
                     args[0] = self.__get_state()
@@ -1049,11 +1053,13 @@ class Gui:
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
         args.insert(0, self.__get_state())
-        arg_count = user_function.__code__.co_argcount
-        if arg_count > len(args):
-            args += (arg_count - len(args)) * [None]
+        argcount = user_function.__code__.co_argcount
+        if argcount > 0 and inspect.ismethod(user_function):
+            argcount -= 1
+        if argcount > len(args):
+            args += (argcount - len(args)) * [None]
         else:
-            args = args[:arg_count]
+            args = args[:argcount]
         return user_function(*args)
 
     def _call_user_callback(
@@ -1557,6 +1563,15 @@ class Gui:
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_init", e):
                     warnings.warn(f"Exception raised in on_init.\n{e}")
+        for name, libs in self.__extensions.items():
+            for lib in libs:
+                if not isinstance(lib, ElementLibrary):
+                    continue
+                try:
+                    self._call_function_with_state(lib.on_user_init, [])
+                except Exception as e:  # pragma: no cover
+                    if not self._call_on_exception(f"{name}.on_user_init", e):
+                        warnings.warn(f"Exception raised in {name}.on_user_init().\n{e}")
         return self._render_route()
 
     def _call_on_exception(self, function_name: str, exception: Exception) -> bool:

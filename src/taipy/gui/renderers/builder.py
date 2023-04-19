@@ -843,7 +843,11 @@ class _Builder:
                 prop_name = _to_camel_case(attr[0])
                 if hash_name := self.__hashes.get(attr[0]):
                     self.__update_vars.append(f"{prop_name}={hash_name}")
-                self.__set_react_attribute(prop_name, _get_tuple_val(attr, 2, None))
+                    self.__set_react_attribute(prop_name, hash_name)
+                else:
+                    self.__set_react_attribute(prop_name, self.__attributes.get(attr[0], _get_tuple_val(attr, 2, None)))
+            elif var_type == PropertyType.broadcast:
+                self.__set_react_attribute(_to_camel_case(attr[0]), _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.dict:

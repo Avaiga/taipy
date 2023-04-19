@@ -68,7 +68,14 @@ class State:
 
     __gui_attr = "_gui"
     __attrs = (__gui_attr, "_user_var_list")
-    __methods = ("assign", "_get_placeholder", "_set_placeholder", "_get_gui_attr", "_get_placeholder_attrs")
+    __methods = (
+        "assign",
+        "_get_placeholder",
+        "_set_placeholder",
+        "_get_gui_attr",
+        "_get_placeholder_attrs",
+        "_add_attribute",
+    )
     __placeholder_attrs = ("_taipy_p1",)
     __excluded_attrs = __attrs + __methods + __placeholder_attrs
 
@@ -117,6 +124,11 @@ class State:
 
     def _get_placeholder_attrs(self):
         return State.__placeholder_attrs
+
+    def _add_attribute(self, name: str):
+        attrs: t.List[str] = super().__getattribute__(State.__attrs[1])
+        if name not in attrs:
+            attrs.append(name)
 
     def assign(self, name: str, value: t.Any) -> t.Any:
         """Assign a value to a state variable.
