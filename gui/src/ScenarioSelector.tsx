@@ -14,11 +14,13 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import {
+  Badge,
   Box,
   Button,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   FormGroup,
   FormHelperText,
   Grid,
@@ -32,7 +34,7 @@ import {
 import {
   ChevronRight,
   ExpandMore,
-  Flag,
+  FlagOutlined,
   Close,
   DeleteOutline,
   Add,
@@ -154,6 +156,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
       value: value,
     };
     setProperties([...properties, newProp]);
+    setKey("");
+    setValue("");
   };
   const propertyDelete = (id: string) => {
     const filtered = properties.filter((itm) => itm.id !== id);
@@ -171,6 +175,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
       config: "",
       name: "",
       date: new Date().toString(),
+      properties: properties,
     },
     onSubmit,
   });
@@ -182,21 +187,52 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         key={child.id}
         nodeId={child.id}
         label={
-          <Grid
-            container
-            alignItems="center"
-            direction="row"
-            flexWrap="nowrap"
-            justifyContent="flex-start"
-            spacing={1}
-          >
-            <Grid item>{child.label}</Grid>
-            {showPrimaryFlag && child.primary && (
-              <Grid item>
-                <Flag />
+          showPrimaryFlag && child.primary ? (
+            <Badge
+              badgeContent={
+                <FlagOutlined
+                  sx={{
+                    color: "#FFFFFF",
+                    fontSize: "11px",
+                  }}
+                />
+              }
+              color="primary"
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              sx={{
+                "& .MuiBadge-badge": {
+                  marginLeft: "-20px",
+                  height: "12px",
+                  width: "12px",
+                },
+              }}
+            >
+              <Grid
+                container
+                alignItems="center"
+                direction="row"
+                flexWrap="nowrap"
+                justifyContent="flex-start"
+                spacing={1}
+              >
+                <Grid item>{child.label}</Grid>
               </Grid>
-            )}
-          </Grid>
+            </Badge>
+          ) : (
+            <Grid
+              container
+              alignItems="center"
+              direction="row"
+              flexWrap="nowrap"
+              justifyContent="flex-start"
+              spacing={1}
+            >
+              <Grid item>{child.label}</Grid>
+            </Grid>
+          )
         }
       />
     ));
@@ -218,7 +254,12 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
   return (
     <div>
-      <Box>
+      <Box
+        sx={{
+          maxWidth: 300,
+          overflowY: "auto",
+        }}
+      >
         <Typography variant="h5" gutterBottom>
           Scenarios
         </Typography>
@@ -227,15 +268,28 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
           defaultExpandIcon={<ChevronRight />}
           sx={{
             mb: 2,
-            maxWidth: 400,
-            overflowY: "auto",
           }}
         >
           {nodes.map((item) => (
             <>
               {displayCycles &&
                 (item.type === NodeType.CYCLE ? (
-                  <TreeItem key={item.id} nodeId={item.id} label={item.label}>
+                  <TreeItem
+                    key={item.id}
+                    nodeId={item.id}
+                    label={item.label}
+                    sx={{
+                      ".MuiTreeItem-content": {
+                        padding: "4px 8px",
+                        gap: "4px",
+                        borderRadius: "4px",
+                      },
+                      ".MuiTreeItem-label": {
+                        fontWeight: "700",
+                        fontSize: "16px",
+                      },
+                    }}
+                  >
                     {scenarioNodes(item.children)}
                   </TreeItem>
                 ) : (
@@ -254,8 +308,11 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             variant="outlined"
             color="error"
             onClick={() => setOpen(true)}
+            fullWidth
+            sx={{ minHeight: "36px" }}
           >
-            Add
+            ADD SCENARIO &nbsp;&nbsp;
+            <Add />
           </Button>
         )}
       </Box>
@@ -268,7 +325,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             justifyContent="space-between"
             alignItems="center"
           >
-            Create new scenario
+            <Typography variant="h5">Create new scenario</Typography>
             <IconButton
               aria-label="close"
               onClick={() => setOpen(false)}
@@ -288,41 +345,44 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             <Grid container rowSpacing={2}>
               <Grid item xs={12}>
                 <FormGroup>
-                  <InputLabel id="select-config">config:</InputLabel>
-                  <Select
-                    id="select-config"
-                    label="Config:"
-                    {...form.getFieldProps("config")}
-                    error={!!form.errors.config && form.touched.config}
-                  >
-                    <MenuItem value={1}>config_test_1</MenuItem>
-                    <MenuItem value={2}>config_test_2</MenuItem>
-                    <MenuItem value={3}>config_test_3</MenuItem>
-                  </Select>
-                  <FormHelperText
-                    error={!!form.errors.config && form.touched.config}
-                    sx={{ pl: 12 }}
-                  >
-                    {form.errors.config}
-                  </FormHelperText>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-config">Configuration</InputLabel>
+                    <Select
+                      labelId="select-config"
+                      label="Configuration"
+                      {...form.getFieldProps("config")}
+                      error={!!form.errors.config && form.touched.config}
+                    >
+                      <MenuItem value={1}>config_test_1</MenuItem>
+                      <MenuItem value={2}>config_test_2</MenuItem>
+                      <MenuItem value={3}>config_test_3</MenuItem>
+                    </Select>
+                    <FormHelperText
+                      error={!!form.errors.config && form.touched.config}
+                      sx={{ pl: 12 }}
+                    >
+                      {form.errors.config}
+                    </FormHelperText>
+                  </FormControl>
                 </FormGroup>
               </Grid>
               <Grid item xs={12}>
                 <FormGroup>
-                  <InputLabel id="name">name:</InputLabel>
                   <TextField
                     id="name"
                     {...form.getFieldProps("name")}
                     error={!!form.errors.name && form.touched.name}
                     helperText={form.errors.name}
+                    label="Label"
+                    variant="outlined"
                   />
                 </FormGroup>
               </Grid>
               <Grid item xs={12}>
                 <FormGroup>
-                  <InputLabel id="date">date:</InputLabel>
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
+                      label="Date"
                       value={new Date(form.values.date)}
                       onChange={(date) =>
                         form.setFieldValue("date", date?.toString())
@@ -332,13 +392,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 </FormGroup>
               </Grid>
               <Grid item xs={12} container justifyContent="space-between">
-                <Grid item xs={5}>
-                  <Typography variant="body2">Custom Properties</Typography>
+                <Grid item xs={8} container alignItems="center">
+                  <Typography variant="h6">Custom Properties</Typography>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={4} container justifyContent="flex-end">
                   <Button
                     variant="outlined"
-                    color="info"
+                    color="inherit"
                     onClick={() => {
                       setProperties([]);
                     }}
@@ -347,70 +407,95 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                   </Button>
                 </Grid>
               </Grid>
-              {properties?.map((item) => (
-                <Grid item xs={12} key={item.id} container>
-                  <Grid item xs={5}>
+              {properties?.map((item, index) => (
+                <Grid
+                  item
+                  xs={12}
+                  key={item.id}
+                  container
+                  justifyContent="space-between"
+                >
+                  <Grid item xs={4}>
                     <TextField
                       id="property-key"
                       value={item.key}
+                      label="Key"
+                      variant="outlined"
                       onChange={(e) => {
-                        item.key = e.target.value;
+                        const updated = [...properties];
+                        updated[index].key = e.target.value;
+                        setProperties(updated);
                       }}
-                      placeholder="Key"
                     />
                   </Grid>
                   <Grid item xs={5}>
                     <TextField
                       id="property-value"
                       value={item.value}
-                      placeholder="Value"
+                      label="Value"
+                      variant="outlined"
+                      onChange={(e) => {
+                        const updated = [...properties];
+                        updated[index].value = e.target.value;
+                        setProperties(updated);
+                      }}
                     />
                   </Grid>
                   <Grid item xs={2}>
-                    <IconButton
-                      color="primary"
+                    <Button
+                      color="inherit"
+                      variant="outlined"
                       component="label"
                       onClick={() => propertyDelete(item.id)}
                     >
                       <DeleteOutline />
-                    </IconButton>
+                    </Button>
                   </Grid>
                 </Grid>
               ))}
-              <Grid item xs={12} container>
-                <Grid item xs={5}>
-                  <TextField id="property-key" value={key} placeholder="Key" />
+              <Grid item xs={12} container justifyContent="space-between">
+                <Grid item xs={4}>
+                  <TextField
+                    id="add-key"
+                    value={key}
+                    onChange={(e) => setKey(e.target.value)}
+                    label="Key"
+                    variant="outlined"
+                  />
                 </Grid>
                 <Grid item xs={5}>
                   <TextField
-                    id="property-value"
+                    id="add-value"
                     value={value}
-                    placeholder="Value"
+                    onChange={(e) => setValue(e.target.value)}
+                    label="Value"
+                    variant="outlined"
                   />
                 </Grid>
                 <Grid item xs={2}>
-                  <IconButton
+                  <Button
                     color="primary"
+                    variant="outlined"
                     component="label"
                     onClick={() => propertyAdd(key, value)}
                   >
                     <Add />
-                  </IconButton>
+                  </Button>
                 </Grid>
-              </Grid>{" "}
+              </Grid>
             </Grid>
           </DialogContent>
 
           <DialogActions>
-            <Button variant="outlined" color="error" type="submit">
-              Add Scenario
-            </Button>
             <Button
               variant="outlined"
-              color="error"
+              color="inherit"
               onClick={() => setOpen(false)}
             >
               Cancel
+            </Button>
+            <Button variant="contained" color="primary" type="submit">
+              CREATE
             </Button>
           </DialogActions>
         </form>
