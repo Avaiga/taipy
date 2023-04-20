@@ -11,14 +11,11 @@
 
 import json
 import pathlib
-import uuid
-from typing import Any, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
-# from app.encoders import jsonable_encoder
-# from pydantic import BaseModel
 from sqlalchemy.exc import NoResultFound
 
-from src.taipy.core.common.typing import Converter, Entity, Json, ModelType
+from src.taipy.core.common.typing import Converter, Entity, ModelType
 
 from ...exceptions import ModelNotFound
 from ._abstract_repository import _AbstractRepository
