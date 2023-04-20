@@ -38,6 +38,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.db = session
         self.converter = converter
 
+    ###############################
+    # ##   Inherited methods   ## #
+    ###############################
     def _save(self, entity: Entity):
         obj = self.converter._entity_to_model(entity)
         if entry := self.db.query(self.model).filter_by(id=obj.id).first():
@@ -112,6 +115,42 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def get_multi(self, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
         return self.db.query(self.model).offset(skip).limit(limit).all()
 
+    ###########################################
+    # ##   Specific or optimized methods   ## #
+    ###########################################
+    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
+        entry = self.__get_entities_by_config_and_owner(config_id, owner_id)
+        return self.converter._model_to_entity(entry)
+
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
+        # Design in order to optimize performance on Entity creation.
+        # Maintainability and readability were impacted.
+        res = {}
+        configs_and_owner_ids = set(configs_and_owner_ids)
+
+        for config, owner in configs_and_owner_ids:
+            entry = self.__get_entities_by_config_and_owner(config.id, owner)
+            if entry:
+                entity = self.converter._model_to_entity(entry)
+                key = config, owner
+                res[key] = entity
+
+        return res
+
+    def __get_entities_by_config_and_owner(
+        self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None
+    ) -> ModelType:
+        if owner_id:
+            query = self.db.query(self.model).filter(config_id=config_id).filter(owner_id=owner_id)
+        else:
+            query = self.db.query(self.model).filter(config_id=config_id).filter(owner_id=None)
+        if version_number:
+            query = query.filter(version=version_number)
+        return query.first()
+
+    #############################
+    # ##   Private methods   ## #
+    #############################
     def __insert_model(self, obj: ModelType):
         self.db.add(obj)
         self.db.commit()
