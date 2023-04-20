@@ -14,7 +14,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from sqlalchemy import Column, MetaData, String, Table, create_engine
+from sqlalchemy import Column, String, Table, create_engine
 from sqlalchemy.orm import declarative_base, registry, sessionmaker
 
 from src.taipy.core._repository import _FileSystemRepository, _SQLRepository

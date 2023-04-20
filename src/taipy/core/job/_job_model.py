@@ -8,17 +8,33 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
+from sqlalchemy import Boolean, Column, String, Table
+
+from .._repository._v2._base_taipy_model import _BaseModel
+from .._repository._v2.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from .job_id import JobId
 from .status import Status
 
 
 @dataclass
-class _JobModel:
+class _JobModel(_BaseModel):
+    __table__ = Table(
+        "job",
+        mapper_registry.metadata,
+        Column("id", String, primary_key=True),
+        Column("task_id", String),
+        Column("status", String),
+        Column("force", Boolean),
+        Column("submit_id", String),
+        Column("creation_date", String),
+        Column("subscribers", String),
+        Column("stacktrace", String),
+        Column("version", String),
+    )
     id: JobId
     task_id: str
     status: Status
@@ -28,9 +44,6 @@ class _JobModel:
     subscribers: List[Dict]
     stacktrace: List[str]
     version: str
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {**dataclasses.asdict(self), "status": repr(self.status)}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):

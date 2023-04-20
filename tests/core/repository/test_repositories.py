@@ -30,7 +30,7 @@ class TestRepositoriesStorage:
             (MockSQLRepositoryV2, {"model": MockModel, "converter": MockConverter}),
         ],
     )
-    def test_save_and_fetch_model(self, mock_repo, params, mocker, sql_session):
+    def test_save_and_fetch_model(self, mock_repo, params):
         r = mock_repo(**params)
         m = MockObj("uuid", "foo")
         r._save(m)

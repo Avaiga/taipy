@@ -9,19 +9,27 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict
 
+from sqlalchemy import Column, String, Table
+
+from .._repository._v2._base_taipy_model import _BaseModel
+from .._repository._v2.db._sql_base_model import mapper_registry
+
 
 @dataclass
-class _VersionModel:
+class _VersionModel(_BaseModel):
+    __table__ = Table(
+        "version",
+        mapper_registry.metadata,
+        Column("id", String, primary_key=True),
+        Column("config", String),
+        Column("creation_date", String),
+    )
     id: str
     config: Dict[str, Any]
     creation_date: str
-
-    def to_dict(self) -> Dict[str, Any]:
-        return dataclasses.asdict(self)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):

@@ -13,8 +13,12 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy import Boolean, Column, String, Table
+
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._repository._v2._base_taipy_model import _BaseModel
+from .._repository._v2.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 
 
@@ -37,7 +41,22 @@ def _skippable(task_id, output_ids) -> bool:
 
 
 @dataclass
-class _TaskModel:
+class _TaskModel(_BaseModel):
+    __table__ = Table(
+        "task",
+        mapper_registry.metadata,
+        Column("id", String, primary_key=True),
+        Column("owner_id", String),
+        Column("parent_ids", String),
+        Column("config_id", String),
+        Column("input_ids", String),
+        Column("function_name", Boolean),
+        Column("function_module", String),
+        Column("output_ids", String),
+        Column("version", String),
+        Column("skippable", Boolean),
+        Column("properties", String),
+    )
     id: str
     owner_id: Optional[str]
     parent_ids: List[str]
@@ -49,9 +68,6 @@ class _TaskModel:
     version: str
     skippable: bool
     properties: Dict[str, Any]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return dataclasses.asdict(self)
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):

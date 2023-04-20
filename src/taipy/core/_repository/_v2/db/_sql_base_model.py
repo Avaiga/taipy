@@ -12,6 +12,7 @@
 from typing import Any
 
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
+from sqlalchemy.orm import registry
 
 
 @as_declarative()
@@ -23,3 +24,6 @@ class Base:
     @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
+
+
+mapper_registry = registry()
