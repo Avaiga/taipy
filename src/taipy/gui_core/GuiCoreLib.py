@@ -15,8 +15,7 @@ from dateutil import parser
 
 import taipy as tp
 from taipy.gui import Gui, State
-from taipy.gui.extension import (Element, ElementLibrary, ElementProperty,
-                                 PropertyType)
+from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 
 
 class GuiCoreContext:
