@@ -13,7 +13,8 @@ import typing as t
 
 from taipy.core import Core, Scenario
 from taipy.gui import Gui, State
-from taipy.gui.extension import ElementLibrary, Element, ElementProperty, PropertyType
+from taipy.gui.extension import (Element, ElementLibrary, ElementProperty,
+                                 PropertyType)
 
 
 class GuiCoreContext:

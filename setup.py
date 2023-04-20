@@ -15,7 +15,7 @@ import json
 import os
 from pathlib import Path
 
-from setuptools import find_packages, find_namespace_packages, setup
+from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
 
 with open("README.md") as readme_file:
