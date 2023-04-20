@@ -386,7 +386,6 @@ def init_orchestrator():
 
 def init_notifier():
     Notifier._topics_registrations_list = {}
-    Notifier._registrations = {}
 
 
 @pytest.fixture

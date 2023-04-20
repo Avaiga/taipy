@@ -10,5 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 
+from .core_event_consumer import CoreEventConsumerBase
 from .event import EventEntityType, EventOperation
 from .notifier import _publish_event

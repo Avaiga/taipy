@@ -198,7 +198,7 @@ def test_force_deleting_unfinished_job():
     task_1 = Task(
         "task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="delete_force_unfinished_job"
     )
-
+    reference_last_edit_date = dn_3.last_edit_date
     _OrchestratorFactory._build_dispatcher()
 
     with lock:
@@ -208,6 +208,7 @@ def test_force_deleting_unfinished_job():
             _JobManager._delete(job, force=False)
         _JobManager._delete(job, force=True)
     assert _JobManager._get(job.id) is None
+    assert_true_after_time(lambda: reference_last_edit_date != dn_3.last_edit_date)
 
 
 def _create_task(function, nb_outputs=1, name=None):

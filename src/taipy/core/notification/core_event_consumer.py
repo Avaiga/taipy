@@ -16,7 +16,7 @@ from queue import Empty, SimpleQueue
 from .event import Event
 
 
-class CoreEventConsumer(threading.Thread):
+class CoreEventConsumerBase(threading.Thread):
     """
     Abstract class showing an example on how to implement a Core event consumer.
 
@@ -26,25 +26,25 @@ class CoreEventConsumer(threading.Thread):
 
     def __init__(self, registration_id: str, queue: SimpleQueue):
         threading.Thread.__init__(self, name=f"Thread-Taipy-Core-Consumer-{registration_id}")
+        self.daemon = True
         self.queue = queue
-        self._STOP_FLAG = True
-        self.start()
+        self.__STOP_FLAG = False
 
     def start(self):
+        self.__STOP_FLAG = False
         threading.Thread.start(self)
-        self._STOP_FLAG = False
 
     def stop(self):
-        self._STOP_FLAG = True
+        self.__STOP_FLAG = True
 
     def run(self):
-        while not self._STOP_FLAG:
+        while not self.__STOP_FLAG:
             try:
                 event: Event = self.queue.get(block=True, timeout=1)
-                self.process(event)
+                self.process_event(event)
             except Empty:
                 pass
 
     @abc.abstractmethod
-    def process(self, event: Event):
+    def process_event(self, event: Event):
         raise NotImplementedError
