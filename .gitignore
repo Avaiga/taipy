@@ -6,6 +6,8 @@ __pycache__
 Pipfile.lock
 build/
 *.egg-info/
+# mypy
+.mypy_cache/
 dist/
 
 # IDE settings
