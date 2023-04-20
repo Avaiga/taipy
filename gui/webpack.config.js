@@ -21,23 +21,23 @@ module.exports = (_env, options) => {
     entry: ["./src/index.ts"],
     output: {
       filename: "taipy-gui-core.js",
-      path: path.resolve(__dirname, "../src/taipy/gui-core/lib"),
+      path: path.resolve(__dirname, "../src/taipy/gui_core/lib"),
       library: {
         // Camel case transformation of the library name "example"
         name: "TaipyGuiCore",
-        type: "umd"
+        type: "umd",
       },
       publicPath: "/",
     },
     // The Taipy GUI library is indicated as external so that it is
     // excluded from bundling.
-    externals: {"taipy-gui": "TaipyGui"},
+    externals: { "taipy-gui": "TaipyGui" },
 
     // Enable sourcemaps for debugging webpack's output.
     devtool: options.mode === "development" && "inline-source-map",
     resolve: {
       // All the code is TypeScript
-      extensions: [".ts", ".tsx"],
+      extensions: [".ts", ".tsx", ".js"],
     },
 
     module: {
@@ -58,8 +58,8 @@ module.exports = (_env, options) => {
           __dirname,
           `${process.env.TAIPY_GUI_DIR}/taipy/gui/webapp/taipy-gui-deps-manifest.json`
         ),
-        name: "TaipyGuiDependencies"
+        name: "TaipyGuiDependencies",
       }),
-    ]
+    ],
   };
 };

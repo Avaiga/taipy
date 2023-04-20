@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2023 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
@@ -48,7 +46,7 @@ extras_require = {
 }
 
 def _build_webapp():
-    already_exists = Path("./src/taipy/gui-core/lib/taipy-gui-core.js").exists()
+    already_exists = Path("./src/taipy/gui_core/lib/taipy-gui-core.js").exists()
     if not already_exists:
         os.system("cd gui && npm ci && npm run build")
 
