@@ -11,36 +11,29 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React from "react";
-import { useEffect, useState } from "react";
-import {
-  Badge,
-  Box,
-  Button,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormGroup,
-  FormHelperText,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Dialog as MuiDialog,
-  Select,
-  TextField,
-} from "@mui/material";
-import {
-  ChevronRight,
-  ExpandMore,
-  FlagOutlined,
-  Close,
-  DeleteOutline,
-  Add,
-} from "@mui/icons-material";
+import React, { useEffect, useState, useCallback } from "react";
+import Badge, { BadgeOrigin } from "@mui/material/Badge";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import FormControl from "@mui/material/FormControl";
+import FormGroup from "@mui/material/FormGroup";
+import FormHelperText from "@mui/material/FormHelperText";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Dialog from "@mui/material/Dialog";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import { ChevronRight, ExpandMore, FlagOutlined, Close, DeleteOutline, Add } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
-import { Typography } from "@mui/material";
+import TreeView from "@mui/lab/TreeView";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
 
 import {
@@ -51,38 +44,18 @@ import {
   createRequestUpdateAction,
   getUpdateVar,
   createSendActionNameAction,
+  useDispatchRequestUpdateOnFirstRender,
+  createSendUpdateAction,
 } from "taipy-gui";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import MuiTreeView from "@mui/lab/TreeView";
-import { cycles } from "./data";
-import { format } from "date-fns";
 
-export type Scenario = {
-  date: string;
-  name: string;
-  config: string;
-  id: string;
-};
-
-export type Property = {
-  id: string;
-  key: string;
-  value: string;
-};
-
-export type TreeNode = {
-  id: string;
-  label: string;
-  type: NodeType;
-  primary?: boolean;
-  children?: TreeNode[];
-};
-
-export enum NodeType {
+enum NodeType {
   CYCLE = 0,
   SCENARIO = 1,
 }
+
+type Scenario = [string, string, number, boolean];
+type Scenarios = Array<Scenario>;
+type Cycles = Array<[string, string, number, boolean, Scenarios]>;
 
 interface ScenarioSelectorProps {
   defaultShowAddButton: boolean;
@@ -91,277 +64,243 @@ interface ScenarioSelectorProps {
   displayCycles?: boolean;
   defaultShowPrimaryFlag: boolean;
   showPrimaryFlag?: boolean;
-  scenarios?: LoV;
+  scenarios?: Cycles | Scenarios;
   defaultScenarios?: LoV;
   defaultScenarioId?: string;
   scenarioId?: string;
   onScenarioCreate?: string;
   coreChanged?: Record<string, unknown>;
-  updateVarNames: string;
+  updateVars: string;
+  configs?: Array<[string, string]>;
+  error?: string;
+  updateVarName?: string;
+  propagate?: boolean;
 }
 
-// COMMENTED THIS OUT SINCE WE DONT NEED TO VALIDATE FOR NOW
-//
-// const scenarioSchema = Yup.object().shape({
-//   config: Yup.string()
-//     .trim("Cannot include leading and trailing spaces")
-//     .required("Config is required."),
-//   name: Yup.string()
-//     .trim("Cannot include leading and trailing spaces")
-//     .required("Name is required."),
-//   date: Yup.string().required("Date is required."),
-// });
+interface ScenarioNodesProps {
+  scenarios?: Scenarios | Scenario;
+  showPrimary?: boolean;
+}
+
+const BadgePos = {
+  vertical: "top",
+  horizontal: "left",
+} as BadgeOrigin;
+
+const BadgeSx = {
+  "& .MuiBadge-badge": {
+    marginLeft: "-12px",
+    height: "19px",
+    width: "12px",
+  },
+};
+
+const FlagSx = {
+  color: "#FFFFFF",
+  fontSize: "11px",
+};
+
+const ScenarioNodes = ({ scenarios = [], showPrimary = true }: ScenarioNodesProps) => {
+  const sc = Array.isArray(scenarios) && scenarios.length && Array.isArray(scenarios[0]) ? (scenarios as Scenarios) : scenarios ? [scenarios as Scenario] : [];
+  return (
+    <>
+      {sc.map(([id, label, _, primary]) => (
+        <TreeItem
+          key={id}
+          nodeId={id}
+          label={
+            showPrimary && primary ? (
+              <Badge badgeContent={<FlagOutlined sx={FlagSx} />} color="primary" anchorOrigin={BadgePos} sx={BadgeSx}>
+                <Grid container alignItems="center" direction="row" flexWrap="nowrap" justifyContent="flex-start" spacing={1}>
+                  <Grid item>{label}</Grid>
+                </Grid>
+              </Badge>
+            ) : (
+              <Grid container alignItems="center" direction="row" flexWrap="nowrap" justifyContent="flex-start" spacing={1}>
+                <Grid item>{label}</Grid>
+              </Grid>
+            )
+          }
+        />
+      ))}
+    </>
+  );
+};
+
+type Property = {
+  id: string;
+  key: string;
+  value: string;
+};
+
+const MainBoxSx = {
+  maxWidth: 300,
+  overflowY: "auto",
+};
+
+const TreeViewSx = {
+  mb: 2,
+};
+
+const CycleSx = {
+  ".MuiTreeItem-content": {
+    padding: "4px 8px",
+    gap: "4px",
+    borderRadius: "4px",
+    mb: "5px",
+  },
+  ".MuiTreeItem-label": {
+    fontWeight: "700",
+    fontSize: "16px",
+  },
+};
+
+const DialogContentSx = {
+  width: "500px",
+};
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
+  const { scenarios = [], propagate = true } = props;
   const [open, setOpen] = useState(false);
-  const [nodes, setNodes] = useState<TreeNode[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
-  const [key, setKey] = useState<string>("");
-  const [value, setValue] = useState<string>("");
+  const [newProp, setNewProp] = useState<Property>({ id: "", key: "", value: "" });
 
   const dispatch = useDispatch();
   const module = useModule();
 
-  const showAddButton = useDynamicProperty(
-    props.showAddButton,
-    props.defaultShowAddButton,
-    true
-  );
-  const displayCycles = useDynamicProperty(
-    props.displayCycles,
-    props.defaultDisplayCycles,
-    true
-  );
-  const showPrimaryFlag = useDynamicProperty(
-    props.showPrimaryFlag,
-    props.defaultShowPrimaryFlag,
-    true
-  );
-  const scenarioId = useDynamicProperty(
-    props.scenarioId,
-    props.defaultScenarioId,
-    ""
-  );
+  useDispatchRequestUpdateOnFirstRender(dispatch, "", module, props.updateVars);
 
-  const onAdd = (node: Scenario) => {
-    dispatch(
-      createSendActionNameAction("", module, props.onScenarioCreate, node)
-    );
-  };
-
-  const propertyAdd = (key: string, value: string) => {
-    let newProp: Property = {
-      id: properties.length + 1 + "",
-      key: key,
-      value: value,
-    };
-    setProperties([...properties, newProp]);
-    setKey("");
-    setValue("");
-  };
-  const propertyDelete = (id: string) => {
-    const filtered = properties.filter((itm) => itm.id !== id);
-    setProperties(filtered);
-  };
+  const showAddButton = useDynamicProperty(props.showAddButton, props.defaultShowAddButton, true);
+  const displayCycles = useDynamicProperty(props.displayCycles, props.defaultDisplayCycles, true);
+  const showPrimaryFlag = useDynamicProperty(props.showPrimaryFlag, props.defaultShowPrimaryFlag, true);
+  const scenarioId = useDynamicProperty(props.scenarioId, props.defaultScenarioId, "");
 
   const onSubmit = (values: any) => {
-    onAdd(values);
+    values.properties = [...properties];
+    dispatch(createSendActionNameAction("", module, props.onScenarioCreate, values));
     form.resetForm();
     setOpen(false);
+    setProperties([]);
   };
+
+  const propertyAdd = () => {
+    setProperties((props) => [...props, { ...newProp, id: props.length + 1 + "" }]);
+    setNewProp({ id: "", key: "", value: "" });
+  };
+
+  const emptyProperties = useCallback(() => setProperties([]), []);
+
+  const propertyDelete = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const { id = "-1" } = e.currentTarget.dataset;
+    setProperties((props) => props.filter((item) => item.id !== id));
+  }, []);
+
+  const updatePropertyField = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { idx = "", name = "" } = e.currentTarget.parentElement?.parentElement?.dataset || {};
+    if (name) {
+      if (idx) {
+        setProperties((props) =>
+          props.map((p, i) => {
+            if (idx == i + "") {
+              p[name as keyof Property] = e.target.value;
+            }
+            return p;
+          })
+        );
+      } else {
+        setNewProp((np) => ({ ...np, [name]: e.target.value }));
+      }
+    }
+  }, []);
 
   const form = useFormik({
     initialValues: {
       config: "",
       name: "",
-      date: new Date().toString(),
-      properties: properties,
+      date: new Date().toISOString(),
+      properties: [],
     },
     onSubmit,
   });
 
-  const scenarioNodes = (scenarios?: TreeNode[]) =>
-    scenarios &&
-    scenarios?.map((child) => (
-      <TreeItem
-        key={child.id}
-        nodeId={child.id}
-        label={
-          showPrimaryFlag && child.primary ? (
-            <Badge
-              badgeContent={
-                <FlagOutlined
-                  sx={{
-                    color: "#FFFFFF",
-                    fontSize: "11px",
-                  }}
-                />
-              }
-              color="primary"
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              sx={{
-                "& .MuiBadge-badge": {
-                  marginLeft: "-12px",
-                  height: "19px",
-                  width: "12px",
-                },
-              }}
-            >
-              <Grid
-                container
-                alignItems="center"
-                direction="row"
-                flexWrap="nowrap"
-                justifyContent="flex-start"
-                spacing={1}
-              >
-                <Grid item>{child.label}</Grid>
-              </Grid>
-            </Badge>
-          ) : (
-            <Grid
-              container
-              alignItems="center"
-              direction="row"
-              flexWrap="nowrap"
-              justifyContent="flex-start"
-              spacing={1}
-            >
-              <Grid item>{child.label}</Grid>
-            </Grid>
-          )
-        }
-      />
-    ));
-
+  // Refresh on broadcast
   useEffect(() => {
     if (props.coreChanged?.scenario) {
-      const updateVar = getUpdateVar(props.updateVarNames, "scenarios");
-      updateVar &&
-        dispatch(createRequestUpdateAction("", module, [updateVar], true));
+      const updateVar = getUpdateVar(props.updateVars, "scenarios");
+      updateVar && dispatch(createRequestUpdateAction("", module, [updateVar], true));
     }
-  }, [props.coreChanged, props.updateVarNames, module, dispatch]);
+  }, [props.coreChanged, props.updateVars, module, dispatch]);
 
-  useEffect(() => {
-    const data = cycles;
-    if (data) {
-      setNodes(data);
-    }
-  }, []);
+  const switchDialog = useCallback(() => setOpen((op) => !op), []);
+
+  const onSelect = useCallback((e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
+    dispatch(createSendUpdateAction(props.updateVarName, nodeIds, module, undefined, propagate));
+  }, [props.updateVarName, module, propagate]);
 
   return (
     <div>
-      <Box
-        sx={{
-          maxWidth: 300,
-          overflowY: "auto",
-        }}
-      >
-        <Typography variant="h5" gutterBottom>
-          Scenarios
-        </Typography>
-        <MuiTreeView
-          defaultCollapseIcon={<ExpandMore />}
-          defaultExpandIcon={<ChevronRight />}
-          sx={{
-            mb: 2,
-          }}
-        >
-          {nodes.map((item) => (
-            <>
-              {displayCycles &&
-                (item.type === NodeType.CYCLE ? (
-                  <TreeItem
-                    key={item.id}
-                    nodeId={item.id}
-                    label={item.label}
-                    sx={{
-                      ".MuiTreeItem-content": {
-                        padding: "4px 8px",
-                        gap: "4px",
-                        borderRadius: "4px",
-                        mb: "5px",
-                      },
-                      ".MuiTreeItem-label": {
-                        fontWeight: "700",
-                        fontSize: "16px",
-                      },
-                    }}
-                  >
-                    {scenarioNodes(item.children)}
-                  </TreeItem>
-                ) : (
-                  scenarioNodes([item])
-                ))}
-              {!displayCycles &&
-                (item.type === NodeType.SCENARIO
-                  ? scenarioNodes([item])
-                  : scenarioNodes(item.children))}
-            </>
-          ))}
-        </MuiTreeView>
+      <Box sx={MainBoxSx}>
+        <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />} sx={TreeViewSx} onNodeSelect={onSelect}>
+          {scenarios
+            ? scenarios.map((item) => {
+                const [id, label, nodeType, _, scenarios] = item;
+                return (
+                  <>
+                    {displayCycles ? (
+                      nodeType === NodeType.CYCLE ? (
+                        <TreeItem key={id} nodeId={id} label={label} sx={CycleSx}>
+                          <ScenarioNodes scenarios={scenarios} showPrimary={showPrimaryFlag} />
+                        </TreeItem>
+                      ) : (
+                        <ScenarioNodes scenarios={item as Scenario} showPrimary={showPrimaryFlag} />
+                      )
+                    ) : nodeType === NodeType.SCENARIO ? (
+                      <ScenarioNodes scenarios={item as Scenario} showPrimary={showPrimaryFlag} />
+                    ) : (
+                      <ScenarioNodes scenarios={scenarios} showPrimary={showPrimaryFlag} />
+                    )}
+                  </>
+                );
+              })
+            : null}
+        </TreeView>
 
-        {showAddButton && (
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={() => setOpen(true)}
-            fullWidth
-            sx={{ minHeight: "36px" }}
-          >
+        {showAddButton ? (
+          <Button variant="outlined" onClick={switchDialog} fullWidth>
             ADD SCENARIO &nbsp;&nbsp;
             <Add />
           </Button>
-        )}
+        ) : null}
+
+        <Box>{props.error}</Box>
       </Box>
 
-      <MuiDialog onClose={() => setOpen(false)} open={open}>
+      <Dialog onClose={switchDialog} open={open}>
         <DialogTitle>
-          <Grid
-            container
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <Grid container direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h5">Create new scenario</Typography>
-            <IconButton
-              aria-label="close"
-              onClick={() => setOpen(false)}
-              sx={{ p: 0 }}
-            >
+            <IconButton aria-label="close" onClick={switchDialog} sx={{ p: 0 }}>
               <Close />
             </IconButton>
           </Grid>
         </DialogTitle>
         <form onSubmit={form.handleSubmit}>
-          <DialogContent
-            sx={{
-              width: "500px",
-            }}
-            dividers
-          >
+          <DialogContent sx={DialogContentSx} dividers>
             <Grid container rowSpacing={2}>
               <Grid item xs={12}>
                 <FormGroup>
                   <FormControl fullWidth>
                     <InputLabel id="select-config">Configuration</InputLabel>
-                    <Select
-                      labelId="select-config"
-                      label="Configuration"
-                      {...form.getFieldProps("config")}
-                      error={!!form.errors.config && form.touched.config}
-                    >
-                      <MenuItem value={1}>config_test_1</MenuItem>
-                      <MenuItem value={2}>config_test_2</MenuItem>
-                      <MenuItem value={3}>config_test_3</MenuItem>
+                    <Select labelId="select-config" label="Configuration" {...form.getFieldProps("config")} error={!!form.errors.config && form.touched.config}>
+                      {props.configs
+                        ? props.configs.map(([id, label]) => (
+                            <MenuItem key={id} value={id}>
+                              {label}
+                            </MenuItem>
+                          ))
+                        : null}
                     </Select>
-                    <FormHelperText
-                      error={!!form.errors.config && form.touched.config}
-                      sx={{ pl: 12 }}
-                    >
+                    <FormHelperText error={!!form.errors.config && form.touched.config} sx={{ pl: 12 }}>
                       {form.errors.config}
                     </FormHelperText>
                   </FormControl>
@@ -370,7 +309,6 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
               <Grid item xs={12}>
                 <FormGroup>
                   <TextField
-                    id="name"
                     {...form.getFieldProps("name")}
                     error={!!form.errors.name && form.touched.name}
                     helperText={form.errors.name}
@@ -382,13 +320,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
               <Grid item xs={12}>
                 <FormGroup>
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DatePicker
-                      label="Date"
-                      value={new Date(form.values.date)}
-                      onChange={(date) =>
-                        form.setFieldValue("date", date?.toString())
-                      }
-                    />
+                    <DatePicker label="Date" value={new Date(form.values.date)} onChange={(date) => form.setFieldValue("date", date?.toISOString())} />
                   </LocalizationProvider>
                 </FormGroup>
               </Grid>
@@ -397,89 +329,37 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                   <Typography variant="h6">Custom Properties</Typography>
                 </Grid>
                 <Grid item xs={4} container justifyContent="flex-end">
-                  <Button
-                    variant="outlined"
-                    color="inherit"
-                    onClick={() => {
-                      setProperties([]);
-                    }}
-                  >
+                  <Button variant="outlined" color="inherit" onClick={emptyProperties}>
                     REMOVE ALL
                   </Button>
                 </Grid>
               </Grid>
-              {properties?.map((item, index) => (
-                <Grid
-                  item
-                  xs={12}
-                  key={item.id}
-                  container
-                  justifyContent="space-between"
-                >
-                  <Grid item xs={4}>
-                    <TextField
-                      id="property-key"
-                      value={item.key}
-                      label="Key"
-                      variant="outlined"
-                      onChange={(e) => {
-                        const updated = [...properties];
-                        updated[index].key = e.target.value;
-                        setProperties(updated);
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={5}>
-                    <TextField
-                      id="property-value"
-                      value={item.value}
-                      label="Value"
-                      variant="outlined"
-                      onChange={(e) => {
-                        const updated = [...properties];
-                        updated[index].value = e.target.value;
-                        setProperties(updated);
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <Button
-                      color="inherit"
-                      variant="outlined"
-                      component="label"
-                      onClick={() => propertyDelete(item.id)}
-                    >
-                      <DeleteOutline />
-                    </Button>
-                  </Grid>
-                </Grid>
-              ))}
+              {properties
+                ? properties.map((item, index) => (
+                    <Grid item xs={12} key={item.id} container justifyContent="space-between">
+                      <Grid item xs={4}>
+                        <TextField value={item.key} label="Key" variant="outlined" data-name="key" data-idx={index} onChange={updatePropertyField} />
+                      </Grid>
+                      <Grid item xs={5}>
+                        <TextField value={item.value} label="Value" variant="outlined" data-name="value" data-idx={index} onChange={updatePropertyField} />
+                      </Grid>
+                      <Grid item xs={2}>
+                        <Button variant="outlined" component="label" data-id={item.id} onClick={propertyDelete}>
+                          <DeleteOutline />
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  ))
+                : null}
               <Grid item xs={12} container justifyContent="space-between">
                 <Grid item xs={4}>
-                  <TextField
-                    id="add-key"
-                    value={key}
-                    onChange={(e) => setKey(e.target.value)}
-                    label="Key"
-                    variant="outlined"
-                  />
+                  <TextField value={newProp.key} data-name="key" onChange={updatePropertyField} label="Key" variant="outlined" />
                 </Grid>
                 <Grid item xs={5}>
-                  <TextField
-                    id="add-value"
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    label="Value"
-                    variant="outlined"
-                  />
+                  <TextField value={newProp.value} data-name="value" onChange={updatePropertyField} label="Value" variant="outlined" />
                 </Grid>
                 <Grid item xs={2}>
-                  <Button
-                    color="primary"
-                    variant="outlined"
-                    component="label"
-                    onClick={() => propertyAdd(key, value)}
-                  >
+                  <Button variant="outlined" component="label" onClick={propertyAdd} disabled={!newProp.key || !newProp.value}>
                     <Add />
                   </Button>
                 </Grid>
@@ -488,19 +368,15 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
           </DialogContent>
 
           <DialogActions>
-            <Button
-              variant="outlined"
-              color="inherit"
-              onClick={() => setOpen(false)}
-            >
+            <Button variant="outlined" onClick={switchDialog}>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" type="submit">
+            <Button variant="contained" type="submit" disabled={!form.values.config || !form.values.name}>
               CREATE
             </Button>
           </DialogActions>
         </form>
-      </MuiDialog>
+      </Dialog>
     </div>
   );
 };

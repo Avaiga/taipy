@@ -17,6 +17,7 @@ mypy = "*"
 pre-commit = "*"
 pytest = "*"
 tox = "*"
+types-python-dateutil = "*"
 
 [requires]
 python_version = "3"
