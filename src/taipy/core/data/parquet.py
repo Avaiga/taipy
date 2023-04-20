@@ -44,25 +44,30 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode):
         version (str): The string indicates the application version of the data node to instantiate. If not provided,
             the current version is used.
         validity_period (Optional[timedelta]): The validity period of a data node.
-            Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
+            Implemented as a timedelta. If *validity_period* is set to None, the data_node is
             always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
         path (str): The path to the Parquet file.
-        properties (dict[str, Any]): A dictionary of additional properties. The _properties_
-            must have a _"default_path"_ or _"path"_ entry with the path of the Parquet file:
+        properties (dict[str, Any]): A dictionary of additional properties. *properties*
+            must have a *"default_path"* or *"path"* entry with the path of the Parquet file:
 
-            - _"default_path"_ `(str)`: The default path of the Parquet file.\n
-            - _"exposed_type"_: The exposed type of the data read from Parquet file. The default value is `pandas`.\n
-            - _"engine"_ `(Optional[str])`: Parquet library to use. Possible values are _"fastparquet"_ or _"pyarrow"_.
-                The default value is _"pyarrow"_.
-            - _"compression"_ `(Optional[str])`: Name of the compression to use. Possible values are _"snappy"_,
-                _"gzip"_, _"brotli"_, or _"none"_ (no compression). The default value is _"snappy"_.\n
-            - _"read_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.read_parquet_ method.\n
-            - _"write_kwargs"_ `(Optional[Dict])`: Additional parameters passed to the _pandas.DataFrame.write_parquet_
-                method.
-                The parameters in _"read_kwargs"_ and _"write_kwargs"_ have a **higher precedence** than the top-level
-                parameters which are also passed to Pandas.\n
+            - *"default_path"* (`str`): The default path of the Parquet file.
+            - *"exposed_type"*: The exposed type of the data read from Parquet file. The default
+                value is `pandas`.
+            - *"engine"* (`Optional[str]`): Parquet library to use. Possible values are
+                *"fastparquet"* or *"pyarrow"*.<br/>
+                The default value is *"pyarrow"*.
+            - *"compression"* (`Optional[str]`): Name of the compression to use. Possible values
+                are *"snappy"*, *"gzip"*, *"brotli"*, or *"none"* (no compression).<br/>
+                The default value is *"snappy"*.
+            - *"read_kwargs"* (`Optional[dict]`): Additional parameters passed to the
+                *pandas.read_parquet()* function.
+            - *"write_kwargs"* (`Optional[dict]`): Additional parameters passed to the
+                *pandas.DataFrame.write_parquet()* fucntion.
+                The parameters in *"read_kwargs"* and *"write_kwargs"* have a
+                **higher precedence** than the top-level parameters which are also passed to
+                Pandas.
     """
 
     __STORAGE_TYPE = "parquet"
@@ -200,14 +205,15 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode):
         self.write_with_kwargs(data)
 
     def write_with_kwargs(self, data: Any, job_id: Optional[JobId] = None, **write_kwargs):
-        """Write data, with keyword arguments passed to `pandas.DataFrame.to_parquet`.
+        """Write the data referenced by this data node.
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
         Parameters:
             data (Any): The data to write.
             job_id (JobId^): An optional identifier of the writer.
-            **write_kwargs: The keyword arguments are passed to `pandas.DataFrame.to_parquet`.
+            **write_kwargs (dict[str, any]): The keyword arguments passed to the function
+                `pandas.DataFrame.to_parquet()`.
         """
         kwargs = {
             self.__ENGINE_PROPERTY: self.properties[self.__ENGINE_PROPERTY],
@@ -222,12 +228,13 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode):
         self._track_edit(timestamp=datetime.now(), job_id=job_id)
 
     def read_with_kwargs(self, **read_kwargs):
-        """Read data node, with keyword arguments passed to `pandas.read_parquet`.
+        """Read data from this data node.
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
         Parameters:
-            **read_kwargs: The keyword arguments are passed to `pandas.read_parquet`.
+            **read_kwargs (dict[str, any]): The keyword arguments passed to the function
+                `pandas.read_parquet()`.
         """
         # return None if data was never written
         if not self.last_edit_date:

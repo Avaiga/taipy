@@ -249,7 +249,7 @@ class Pipeline(_Entity, _Submittable, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ):
+    ) -> List[Job]:
         """Submit the pipeline for execution.
 
         All the `Task^`s of the pipeline will be submitted for execution.

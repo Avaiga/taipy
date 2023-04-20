@@ -297,7 +297,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ):
+    ) -> List[Job]:
         """Submit this scenario for execution.
 
         All the `Task^`s of the scenario will be submitted for execution.
@@ -310,6 +310,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
                 asynchronous mode.
             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.
+
         Returns:
             A list of created `Job^`s.
         """

@@ -23,20 +23,24 @@ from .data_node_config import DataNodeConfig
 
 class TaskConfig(Section):
     """
-    Holds all the configuration fields needed to create an actual `Task^` from the `TaskConfig`.
+    Configuration fields needed to instantiate an actual `Task^`.
 
     Attributes:
         id (str): Identifier of the task config. Must be a valid Python variable name.
-        inputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of `DataNodeConfig^` inputs. The
-            default value is [].
-        outputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of `DataNodeConfig^` outputs. The
-            default value is [].
-        skippable (bool): If True, indicates that the task can be skipped if no change has been made on inputs. The
-            default value is _False_.
-        function (Callable): User function taking as inputs some parameters compatible with the exposed types
-            (_exposed_type_ field) of the input data nodes and returning results compatible with the exposed types
-            (_exposed_type_ field) of the outputs list. The default value is None.
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        inputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
+            `DataNodeConfig^` inputs.<br/>
+            The default value is [].
+        outputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
+            `DataNodeConfig^` outputs.<br/>
+            The default value is [].
+        skippable (bool): If True, indicates that the task can be skipped if no change has
+            been made on inputs.<br/>
+            The default value is False.
+        function (Callable): User function taking as inputs some parameters compatible with the
+            exposed types (*exposed_type* field) of the input data nodes and returning results
+            compatible with the exposed types (*exposed_type* field) of the outputs list.<br/>
+            The default value is None.
+        **properties (dict[str, any]): A dictionary of additional properties.
     """
 
     name = "TASK"
@@ -147,7 +151,7 @@ class TaskConfig(Section):
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         skippable: Optional[bool] = False,
         **properties,
-    ):
+    ) -> "TaskConfig":
         """Configure a new task configuration.
 
         Parameters:
@@ -160,11 +164,12 @@ class TaskConfig(Section):
                 function output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has
-                been made on inputs. The default value is _False_.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+                been made on inputs.<br/>
+                The default value is False.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `TaskConfig^`: The new task configuration.
+            The new task configuration.
         """
         section = TaskConfig(id, function, input, output, skippable, **properties)
         Config._register(section)
@@ -177,10 +182,10 @@ class TaskConfig(Section):
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         skippable: Optional[bool] = False,
         **properties,
-    ):
+    ) -> "TaskConfig":
         """Configure the default values for task configurations.
 
-        This function creates the _default task configuration_ object,
+        This function creates the *default task configuration* object,
         where all task configuration objects will find their default
         values when needed.
 
@@ -193,11 +198,12 @@ class TaskConfig(Section):
                 output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has
-                been made on inputs. The default value is _False_.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                been made on inputs.<br/>
+                The default value is False.
+            **properties (dict[str, any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            `TaskConfig^`: The default task configuration.
+            The default task configuration.
         """
         section = TaskConfig(_Config.DEFAULT_KEY, function, input, output, skippable, **properties)
         Config._register(section)

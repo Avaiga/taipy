@@ -26,13 +26,13 @@ from .task_config import TaskConfig
 
 class ScenarioConfig(Section):
     """
-    Holds all the configuration fields needed to instantiate an actual `Scenario^` from the `ScenarioConfig`.
+    Configuration fields needed to instantiate an actual `Scenario^`.
 
     Attributes:
         id (str): Identifier of the scenario config. It must be a valid Python variable name.
-        pipeline_configs (Union[PipelineConfig, List[PipelineConfig]]): List of pipeline configs. The default value
-            is [].
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        pipeline_configs (Union[PipelineConfig, List[PipelineConfig]]): List of pipeline configs.<br/>
+            The default value is [].
+        **properties (dict[str, any]): A dictionary of additional properties.
     """
 
     name = "SCENARIO"
@@ -129,14 +129,14 @@ class ScenarioConfig(Section):
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
-    ):
+    ) -> "ScenarioConfig":
         """Configure a new scenario configuration.
 
         Parameters:
             id (str): The unique identifier of the new scenario configuration.
             pipeline_configs (List[PipelineConfig^]): The list of pipeline configurations used
                 by this new scenario configuration.
-            frequency (Optional[Frequency^]): The scenario frequency.
+            frequency (Optional[Frequency^]): The scenario frequency.<br/>
                 It corresponds to the recurrence of the scenarios instantiated from this
                 configuration. Based on this frequency each scenario will be attached to the
                 relevant cycle.
@@ -147,10 +147,10 @@ class ScenarioConfig(Section):
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `(taipy.)compare_scenarios()^` more more details.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `ScenarioConfig^`: The new scenario configuration.
+            The new scenario configuration.
         """
         section = ScenarioConfig(id, pipeline_configs, frequency=frequency, comparators=comparators, **properties)
         Config._register(section)
@@ -164,10 +164,10 @@ class ScenarioConfig(Section):
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         pipeline_id: Optional[str] = None,
         **properties,
-    ):
+    ) -> "ScenarioConfig":
         """Configure a new scenario configuration made of a single new pipeline configuration.
 
-        A new pipeline configuration is created as well. If _pipeline_id_ is not provided,
+        A new pipeline configuration is created as well. If *pipeline_id* is not provided,
         the new pipeline configuration identifier is set to the scenario configuration identifier
         post-fixed by '_pipeline'.
 
@@ -186,12 +186,11 @@ class ScenarioConfig(Section):
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `(taipy.)compare_scenarios()` more more details.
-            pipeline_id (str): The identifier of the new pipeline configuration to be
-                configured.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            pipeline_id (Optional[str]): The identifier of the new pipeline configuration to be configured.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `ScenarioConfig^`: The new scenario configuration.
+            The new scenario configuration.
         """
         if not pipeline_id:
             pipeline_id = f"{id}_pipeline"
@@ -206,10 +205,10 @@ class ScenarioConfig(Section):
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
-    ):
+    ) -> "ScenarioConfig":
         """Configure the default values for scenario configurations.
 
-        This function creates the _default scenario configuration_ object,
+        This function creates the *default scenario configuration* object,
         where all scenario configuration objects will find their default
         values when needed.
 
@@ -227,10 +226,10 @@ class ScenarioConfig(Section):
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `taipy.compare_scenarios()^` more more details.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `ScenarioConfig^`: The default scenario configuration.
+            The new default scenario configuration.
         """
         section = ScenarioConfig(
             _Config.DEFAULT_KEY, pipeline_configs, frequency=frequency, comparators=comparators, **properties

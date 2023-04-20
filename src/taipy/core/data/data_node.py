@@ -14,7 +14,7 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import Any, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
 import numpy as np
@@ -48,7 +48,7 @@ class DataNode(_Entity, _Labeled):
     SQL Data Node, CSV Data Node, ...).
 
     !!! note
-        It is recommended not to instantiate subclasses of DataNode directly.
+        It is recommended not to instantiate subclasses of `DataNode` directly.
 
     Attributes:
         config_id (str): Identifier of the data node configuration. It must be a valid Python
@@ -57,16 +57,18 @@ class DataNode(_Entity, _Labeled):
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
         owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
-            `None`.
+            None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit^]): The list of Edits (an alias for dict) containing medata about each edition of that node.
-        version (str): The string indicates the application version of the data node to instantiate. If not provided,
-            the current version is used.
+        edits (List[Edit^]): The list of Edits (an alias for dict) containing medata about each
+            edition of that node.
+        version (str): The string indicates the application version of the data node to
+            instantiate. If not provided, the current version is used.
         validity_period (Optional[timedelta]): The validity period of a data node.
-            Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
+            Implemented as a timedelta. If *validity_period* is set to None, the data node is
             always up-to-date.
-        edit_in_progress (bool): True if the data node is locked for modification. False otherwise.
+        edit_in_progress (bool): True if the data node is locked for modification. False
+            otherwise.
         kwargs: A dictionary of additional properties.
     """
 
@@ -110,22 +112,18 @@ class DataNode(_Entity, _Labeled):
 
     @property
     def parent_id(self):
-        """
-        Deprecated. Use owner_id instead.
-        """
+        """Deprecated. Use `owner_id` instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
         return self.owner_id
 
     @parent_id.setter
     def parent_id(self, val):
-        """
-        Deprecated. Use owner_id instead.
-        """
+        """Deprecated. Use `owner_id` instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
         self.owner_id = val
 
     def get_parents(self):
-        """Get all parents of the data node."""
+        """Get all parents of this data node."""
         from ... import core as tp
 
         return tp.get_parents(self)
@@ -133,17 +131,21 @@ class DataNode(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def parent_ids(self):
-        """List of parent ids of the data node."""
+        """List of parent ids of this data node."""
         return self._parent_ids
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def edits(self):
-        """Get all `Edit^`s of the data node."""
+        """Get all `Edit^`s of this data node."""
         return self._edits
 
-    def get_last_edit(self):
-        """Get last `Edit^` of the data node, or None"""
+    def get_last_edit(self) -> Optional[Edit]:
+        """Get last `Edit^` of this data node.
+
+        Returns:
+            None if there has been no `Edit^` on this data node.
+        """
         if self._edits:
             return self._edits[-1]
         return None
@@ -164,7 +166,7 @@ class DataNode(_Entity, _Labeled):
 
     @property
     def last_edition_date(self):
-        """Deprecated. Use last_edit_date instead."""
+        """Deprecated. Use `last_edit_date` instead."""
         _warn_deprecated("last_edition_date", suggest="last_edit_date")
         return self.last_edit_date
 
@@ -196,7 +198,7 @@ class DataNode(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def expiration_date(self) -> datetime:
-        """Datetime instant of the expiration date of the data node."""
+        """Datetime instant of the expiration date of this data node."""
         last_edit_date = self.last_edit_date
         validity_period = self._validity_period
 
@@ -241,20 +243,20 @@ class DataNode(_Entity, _Labeled):
 
     @property
     def edition_in_progress(self):
-        """Deprecated. Use edit_in_progress instead."""
+        """Deprecated. Use `edit_in_progress` instead."""
         _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
         return self.edit_in_progress
 
     @edition_in_progress.setter
     def edition_in_progress(self, val):
-        """Deprecated. Use edit_in_progress instead."""
+        """Deprecated. Use `edit_in_progress` instead."""
         _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
         self.edit_in_progress = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def job_ids(self):
-        """List of the jobs having edited the data node."""
+        """List of the jobs having edited this data node."""
         return [edit.get("job_id") for edit in self.edits if edit.get("job_id")]
 
     @property
@@ -312,6 +314,7 @@ class DataNode(_Entity, _Labeled):
 
         Returns:
             The data referenced by this data node.
+
         Raises:
             NoData^: If the data has not been written yet.
         """
@@ -333,13 +336,14 @@ class DataNode(_Entity, _Labeled):
             )
             return None
 
-    def write(self, data, job_id: Optional[JobId] = None, **kwargs):
+    def write(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
         """Write some data to this data node.
 
         Parameters:
             data (Any): The data to write to this data node.
             job_id (JobId^): An optional identifier of the writer.
-            **kwargs: Extra information to attach to the edit document corresponding to this write.
+            **kwargs (dict[str, any]): Extra information to attach to the edit document
+                corresponding to this write.
         """
         from ._data_manager_factory import _DataManagerFactory
 
@@ -368,7 +372,7 @@ class DataNode(_Entity, _Labeled):
         self.edit_in_progress = True
 
     def lock_edition(self):
-        """Deprecated. Use lock_edit instead."""
+        """Deprecated. Use `lock_edit` instead."""
         _warn_deprecated("lock_edition", suggest="lock_edit")
         self.lock_edit()
 
@@ -378,6 +382,7 @@ class DataNode(_Entity, _Labeled):
         Parameters:
             at (Optional[datetime]): Deprecated.
             job_id (Optional[JobId^]): Deprecated.
+
         Note:
             The data node can be locked with the method `(DataNode.)lock_edit()^`.
         """
@@ -389,7 +394,7 @@ class DataNode(_Entity, _Labeled):
         self.unlock_edit()
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
-        """Read the data referenced by the data node, appying a filter.
+        """Read and filter the data referenced by this data node.
 
         The data is filtered by the provided list of 3-tuples (key, value, `Operator^`).
 
@@ -520,12 +525,12 @@ class DataNode(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def is_up_to_date(self):
+    def is_up_to_date(self) -> bool:
         """Indicate if this data node is up-to-date.
 
         Returns:
-            False if the data ever been written or the expiration date has passed.
-                True otherwise.
+            False if the data ever been written or the expiration date has passed.<br/>
+            True otherwise.
         """
         if not self._last_edit_date:
             # Never been written so it is not up-to-date
