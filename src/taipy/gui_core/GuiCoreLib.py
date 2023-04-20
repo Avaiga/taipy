@@ -71,7 +71,7 @@ class GuiCoreContext:
         try:
             date = parser.parse(date_str) if isinstance(date_str, str) else None
         except Exception as e:
-            state.assign(GuiCoreContext._ERROR_VAR, "Invalid date ({date_str})")
+            state.assign(GuiCoreContext._ERROR_VAR, f"Invalid date ({date_str}).{e}")
             return
         scenario = tp.create_scenario(scenario_config, date, data.get(GuiCoreContext.__PROP_SCENARIO_NAME))
         if props := data.get("properties"):
