@@ -10,7 +10,7 @@ on:
 jobs:
   test-package:
     timeout-minutes: 20
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -73,7 +73,7 @@ jobs:
     needs: [test-package]
     timeout-minutes: 20
     name: Release package
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3

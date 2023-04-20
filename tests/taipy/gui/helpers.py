@@ -130,8 +130,9 @@ class Helpers:
         kwargs["run_in_thread"] = True
         kwargs["single_client"] = True
         kwargs["run_browser"] = False
+        kwargs["stylekit"] = kwargs.get("stylekit", False)
         with warnings.catch_warnings(record=True):
-            gui.run(stylekit=False, **kwargs)
+            gui.run(**kwargs)
         while not Helpers.port_check():
             time.sleep(0.1)
 
