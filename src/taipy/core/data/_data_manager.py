@@ -24,7 +24,6 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ..task.task_id import TaskId
 from ._data_repository_factory import _DataRepositoryFactory
 from .data_node import DataNode
 from .data_node_id import DataNodeId
@@ -44,7 +43,6 @@ class _DataManager(_Manager[DataNode]):
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
-        task_id: Optional[TaskId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
