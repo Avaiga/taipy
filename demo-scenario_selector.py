@@ -17,6 +17,6 @@ page = """
 
 <|taipy_gui_core.scenario_selector|show_add_button|display_cycles|>
 
-"""    
+"""
 Gui.add_library(GuiCore())
 Gui(page).run(port=8000, use_reloader=True)
