@@ -204,8 +204,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
               }}
               sx={{
                 "& .MuiBadge-badge": {
-                  marginLeft: "-20px",
-                  height: "12px",
+                  marginLeft: "-12px",
+                  height: "19px",
                   width: "12px",
                 },
               }}
@@ -283,6 +283,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                         padding: "4px 8px",
                         gap: "4px",
                         borderRadius: "4px",
+                        mb: "5px",
                       },
                       ".MuiTreeItem-label": {
                         fontWeight: "700",
