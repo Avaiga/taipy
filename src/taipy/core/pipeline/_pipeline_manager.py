@@ -33,7 +33,7 @@ from .pipeline_id import PipelineId
 
 
 class _PipelineManager(_Manager[Pipeline]):
-    _repository = _PipelineRepositoryFactory._build_repository()  # type: ignore
+    _repository = _PipelineRepositoryFactory._build_repository()
     _ENTITY_NAME = Pipeline.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.PIPELINE
 
@@ -84,7 +84,7 @@ class _PipelineManager(_Manager[Pipeline]):
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
     ) -> Pipeline:
-        pipeline_id = Pipeline._new_id(str(pipeline_config.id))  # type: ignore
+        pipeline_id = Pipeline._new_id(str(pipeline_config.id))
 
         task_manager = _TaskManagerFactory._build_manager()
         tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id, pipeline_id)
@@ -105,7 +105,7 @@ class _PipelineManager(_Manager[Pipeline]):
 
         version = _VersionManagerFactory._build_manager()._get_latest_version()
         pipeline = Pipeline(
-            str(pipeline_config.id),  # type: ignore
+            str(pipeline_config.id),
             dict(**pipeline_config._properties),
             tasks,
             pipeline_id,

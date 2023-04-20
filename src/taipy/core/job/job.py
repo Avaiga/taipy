@@ -120,7 +120,7 @@ class Job(_Entity, _Labeled):
     def stacktrace(self) -> List[str]:
         return self._stacktrace
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
 

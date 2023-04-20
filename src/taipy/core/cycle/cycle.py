@@ -12,7 +12,7 @@
 import re
 import uuid
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from taipy.config.common.frequency import Frequency
 
@@ -48,8 +48,8 @@ class Cycle(_Entity, _Labeled):
         creation_date: datetime,
         start_date: datetime,
         end_date: datetime,
-        name: str = None,
-        id: CycleId = None,
+        name: Optional[str] = None,
+        id: Optional[CycleId] = None,
     ):
         self._frequency = frequency
         self._creation_date = creation_date
@@ -59,7 +59,7 @@ class Cycle(_Entity, _Labeled):
         self.id = id or self._new_id(self._name)
         self._properties = _Properties(self, **properties)
 
-    def _new_name(self, name: str = None) -> str:
+    def _new_name(self, name: Optional[str] = None) -> str:
         if name:
             return name
         if self._frequency == Frequency.DAILY:
@@ -129,7 +129,7 @@ class Cycle(_Entity, _Labeled):
     def name(self, val):
         self._name = val
 
-    @property  # type: ignore
+    @property
     def properties(self):
         self._properties = _reload(self._MANAGER_NAME, self)._properties
         return self._properties

@@ -32,14 +32,14 @@ class _VersionManager(_Manager[_Version]):
 
     __DEFAULT_VERSION = __LATEST_VERSION
 
-    _repository = _VersionRepositoryFactory._build_repository()  # type: ignore
+    _repository = _VersionRepositoryFactory._build_repository()
 
     @classmethod
     def _get(cls, entity: Union[str, _Version], default=None) -> _Version:
         """
         Returns the version entity by id or reference.
         """
-        entity_id = entity if isinstance(entity, str) else entity.id  # type: ignore
+        entity_id = entity if isinstance(entity, str) else entity.id
         try:
             return cls._repository.load(entity_id)
         except ModelNotFound:

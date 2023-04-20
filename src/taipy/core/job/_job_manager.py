@@ -23,7 +23,7 @@ from .job_id import JobId
 
 
 class _JobManager(_Manager[Job]):
-    _repository = _JobRepositoryFactory._build_repository()  # type: ignore
+    _repository = _JobRepositoryFactory._build_repository()
     _ENTITY_NAME = Job.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.JOB
 
@@ -43,12 +43,12 @@ class _JobManager(_Manager[Job]):
         return job
 
     @classmethod
-    def _delete(cls, job: Job, force=False):  # type:ignore
+    def _delete(cls, job: Job, force=False):
         if job.is_finished() or force:
             super()._delete(job.id)
             from .._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 
-            _JobDispatcher._pop_dispatched_process(job.id)  # type: ignore
+            _JobDispatcher._pop_dispatched_process(job.id)
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.warning(err)

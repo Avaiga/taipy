@@ -88,7 +88,7 @@ class _DataManager(_Manager[DataNode]):
             else:
                 storage_type = Config.sections[DataNodeConfig.name][_Config.DEFAULT_KEY].storage_type
 
-            return cls.__DATA_NODE_CLASS_MAP[storage_type](  # type: ignore
+            return cls.__DATA_NODE_CLASS_MAP[storage_type](
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 owner_id=owner_id,
@@ -114,12 +114,12 @@ class _DataManager(_Manager[DataNode]):
             cls._clean_pickle_file(data_node)
 
     @classmethod
-    def _delete(cls, data_node_id: DataNodeId):  # type:ignore
+    def _delete(cls, data_node_id: DataNodeId):
         cls._clean_pickle_file(data_node_id)
         super()._delete(data_node_id)
 
     @classmethod
-    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):  # type:ignore
+    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
         cls._clean_pickle_files(data_node_ids)
         super()._delete_many(data_node_ids)
 
@@ -131,4 +131,4 @@ class _DataManager(_Manager[DataNode]):
     @classmethod
     def _delete_by_version(cls, version_number: str):
         cls._clean_pickle_files(cls._get_all(version_number))
-        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")  # type: ignore
+        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")
