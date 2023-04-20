@@ -6,12 +6,18 @@ __pycache__
 Pipfile.lock
 build/
 *.egg-info/
-
 # mypy
 .mypy_cache/
+dist/
 
 # IDE settings
 .vscode/
 .idea/
 .idea/taipy.iml
 .DS_Store
+
+# Core .data directory
+.data/
+
+# demo files
+demo-*
