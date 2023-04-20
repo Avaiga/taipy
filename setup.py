@@ -39,11 +39,12 @@ extras_require = {
     "image": [
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
-        ],
+    ],
     "rdp": ["rdp>=0.8"],
     "arrow": ["pyarrow>=10.0.1,<11.0"],
     "mssql": ["pyodbc>=4"],
 }
+
 
 def _build_webapp():
     already_exists = Path("./src/taipy/gui_core/lib/taipy-gui-core.js").exists()
