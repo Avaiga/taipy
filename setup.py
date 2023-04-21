@@ -74,6 +74,11 @@ setup(
     ],
     description="A 360° open-source platform from Python pilots to production-ready web apps.",
     install_requires=requirements,
+    entry_points={
+        "console_scripts": [
+            "taipy = taipy._cli:cli",
+        ]
+    },
     license="Apache License 2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
