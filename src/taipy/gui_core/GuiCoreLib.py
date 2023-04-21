@@ -33,13 +33,14 @@ class GuiCoreContext:
         ] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
 
-
     def get_scenarios(self):
         if self.scenarios is None:
+
             def add_scenarios(res, scens):
                 for scenario in scens:
                     res.append((scenario.id, scenario.name, 1, scenario.is_primary, None))
                 return res
+
             self.scenarios = []
             for cycle, scenarios in tp.get_cycles_scenarios().items():
                 if cycle is None:
