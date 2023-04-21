@@ -305,7 +305,7 @@ class _ScenarioManager(_Manager[Scenario]):
         while scenario := cls._repository._search("version", version_number, version_number="all"):
             if scenario.cycle and len(cls._get_all_by_cycle(scenario.cycle)) == 1:
                 _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
-            cls._repository._delete(scenario.id)
+            super()._delete(scenario.id)
 
     @classmethod
     def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:

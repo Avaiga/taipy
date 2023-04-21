@@ -20,7 +20,6 @@ from ..common._utils import _Subscriber
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
 from ..cycle.cycle_id import CycleId
-from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline import Pipeline
 from ..pipeline.pipeline_id import PipelineId
 from ._scenario_model import _ScenarioModel
@@ -28,9 +27,6 @@ from .scenario import Scenario
 
 
 class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # type: ignore
-
-    _EVENT_ENTITY_TYPE: EventEntityType = EventEntityType.SCENARIO
-
     def __init__(self, **kwargs):
         kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
@@ -84,16 +80,12 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
         return self.repo._save(entity)
 
     def _delete(self, entity_id: str):
-        _publish_event(self._EVENT_ENTITY_TYPE, entity_id, EventOperation.DELETION, None)
         return self.repo._delete(entity_id)
 
     def _delete_all(self):
-        _publish_event(self._EVENT_ENTITY_TYPE, "all", EventOperation.DELETION, None)
         return self.repo._delete_all()
 
     def _delete_many(self, ids: Iterable[str]):
-        for id in ids:
-            _publish_event(self._EVENT_ENTITY_TYPE, id, EventOperation.DELETION, None)
         return self.repo._delete_many(ids)
 
     def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Scenario]:

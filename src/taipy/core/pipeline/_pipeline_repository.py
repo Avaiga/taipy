@@ -18,16 +18,12 @@ from .._repository._repository_adapter import _RepositoryAdapter
 from ..common import _utils
 from ..common._utils import _Subscriber
 from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
-from ..notification import EventEntityType, EventOperation, _publish_event
 from ..task.task import Task
 from ._pipeline_model import _PipelineModel
 from .pipeline import Pipeline
 
 
 class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # type: ignore
-
-    _EVENT_ENTITY_TYPE: EventEntityType = EventEntityType.PIPELINE
-
     def __init__(self, **kwargs):
         kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
@@ -92,20 +88,15 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
         return self.repo._save(entity)
 
     def _delete(self, entity_id: str):
-        _publish_event(self._EVENT_ENTITY_TYPE, entity_id, EventOperation.DELETION, None)
         return self.repo._delete(entity_id)
 
     def _delete_all(self):
-        _publish_event(self._EVENT_ENTITY_TYPE, "all", EventOperation.DELETION, None)
         return self.repo._delete_all()
 
     def _delete_many(self, ids: Iterable[str]):
-        for id in ids:
-            _publish_event(self._EVENT_ENTITY_TYPE, id, EventOperation.DELETION, None)
         return self.repo._delete_many(ids)
 
     def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
-        _publish_event(self._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
         return self.repo._delete_by(attribute, value, version_number)
 
     def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[Pipeline]:

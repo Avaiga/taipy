@@ -17,6 +17,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._entity._entity_ids import _EntityIds
 from .._repository import _AbstractRepository
 from ..exceptions.exceptions import ModelNotFound
+from ..notification import EventOperation, _publish_event
 
 EntityType = TypeVar("EntityType")
 
@@ -32,6 +33,8 @@ class _Manager(Generic[EntityType]):
         Deletes all entities.
         """
         cls._repository._delete_all()
+        if hasattr(cls, "_EVENT_ENTITY_TYPE"):
+            _publish_event(cls._EVENT_ENTITY_TYPE, "all", EventOperation.DELETION, None)
 
     @classmethod
     def _delete_many(cls, ids: Iterable):
@@ -39,6 +42,9 @@ class _Manager(Generic[EntityType]):
         Deletes entities by a list of ids.
         """
         cls._repository._delete_many(ids)
+        if hasattr(cls, "_EVENT_ENTITY_TYPE"):
+            for entity_id in ids:
+                _publish_event(cls._EVENT_ENTITY_TYPE, entity_id, EventOperation.DELETION, None)  # type: ignore
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
@@ -46,6 +52,8 @@ class _Manager(Generic[EntityType]):
         Deletes entities by version number.
         """
         cls._repository._delete_by(attribute="version", value=version_number, version_number="all")  # type: ignore
+        if hasattr(cls, "_EVENT_ENTITY_TYPE"):
+            _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)  # type: ignore
 
     @classmethod
     def _delete(cls, id):
@@ -53,6 +61,8 @@ class _Manager(Generic[EntityType]):
         Deletes an entity by id.
         """
         cls._repository._delete(id)
+        if hasattr(cls, "_EVENT_ENTITY_TYPE"):
+            _publish_event(cls._EVENT_ENTITY_TYPE, id, EventOperation.DELETION, None)
 
     @classmethod
     def _set(cls, entity: EntityType):

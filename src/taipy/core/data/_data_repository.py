@@ -17,7 +17,6 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _load_fct
-from ..notification import EventEntityType, EventOperation, _publish_event
 from ._data_model import _DataNodeModel
 from .data_node import DataNode
 from .generic import GenericDataNode
@@ -39,7 +38,6 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
     _WRITE_QUERY_BUILDER_NAME_KEY = "write_query_builder_name"
     _WRITE_QUERY_BUILDER_MODULE_KEY = "write_query_builder_module"
     _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas", "modin"]
-    _EVENT_ENTITY_TYPE: EventEntityType = EventEntityType.DATA_NODE
 
     def __init__(self, **kwargs):
         kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
@@ -235,20 +233,15 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
         return self.repo._save(entity)
 
     def _delete(self, entity_id: str):
-        _publish_event(self._EVENT_ENTITY_TYPE, entity_id, EventOperation.DELETION, None)
         return self.repo._delete(entity_id)
 
     def _delete_all(self):
-        _publish_event(self._EVENT_ENTITY_TYPE, "all", EventOperation.DELETION, None)
         return self.repo._delete_all()
 
     def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
-        _publish_event(self._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
         return self.repo._delete_by(attribute, value, version_number)
 
     def _delete_many(self, ids: Iterable[str]):
-        for id in ids:
-            _publish_event(self._EVENT_ENTITY_TYPE, id, EventOperation.DELETION, None)
         return self.repo._delete_many(ids)
 
     def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[DataNode]:
