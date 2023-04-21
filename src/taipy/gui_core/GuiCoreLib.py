@@ -10,15 +10,20 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
+import warnings
 
 from dateutil import parser
 
 import taipy as tp
+from taipy.core import Scenario
+from taipy.core.notification import CoreEventConsumerBase, EventEntityType
+from taipy.core.notification.event import Event
+from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 
 
-class GuiCoreContext:
+class GuiCoreContext(CoreEventConsumerBase):
     __PROP_SCENARIO_CONFIG_ID = "config"
     __PROP_SCENARIO_DATE = "date"
     __PROP_SCENARIO_NAME = "name"
@@ -32,6 +37,15 @@ class GuiCoreContext:
             t.List[t.Tuple[str, str, int, bool, t.Optional[t.List[t.Tuple[str, str, int, bool, None]]]]]
         ] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
+        # register to taipy core notification
+        reg_id, reg_queue = Notifier.register()
+        super().__init__(reg_id, reg_queue)
+        self.start()
+
+    def process_event(self, event: Event):
+        if event.entity_type == EventEntityType.SCENARIO or event.entity_type == EventEntityType.CYCLE:
+            self.scenarios = None
+            self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": True})
 
     def get_scenarios(self):
         if self.scenarios is None:
@@ -81,9 +95,34 @@ class GuiCoreContext:
                     scenario._properties[key] = prop.get("value")
         state.assign(GuiCoreContext._ERROR_VAR, "")
 
-        # that should be done following the event fired by Core
-        self.scenarios = None
-        self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": True})
+    def select_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        print(f"select_scenario(state, {id}, {action}, {payload}")
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) == 0 or not isinstance(args[0], dict):
+            return
+        data = args[0]
+        action = data.get("user_action")
+        if not action:
+            return
+        action_function = self.gui._get_user_function(action)
+        if not callable(action_function):
+            warnings.warn(f"on_select ({action_function}) function is not callable.")
+            return
+        ids = data.get("ids")
+        if not isinstance(ids, list) or len(ids) == 0:
+            state.assign(GuiCoreContext._ERROR_VAR, "Invalid selection.")
+            return
+        scenarios: t.List[Scenario] = []
+        for id in ids:
+            try:
+                entity = tp.get(id)
+                if isinstance(entity, Scenario):
+                    scenarios.append(entity)
+            except Exception:
+                pass
+        if len(scenarios) == 0:
+            return
+        self.gui._call_function_with_state(action_function, [id, action_function.__name__, scenarios[0]])
 
     def broadcast_core_changed(self):
         self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, "")
@@ -108,6 +147,8 @@ class GuiCore(ElementLibrary):
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
                 "error": ElementProperty(PropertyType.react, GuiCoreContext._ERROR_VAR),
+                "on_ctx_selection": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_scenario}}"),
+                "on_selection": ElementProperty(PropertyType.function),
             },
         )
     }

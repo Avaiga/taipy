@@ -37,7 +37,6 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
 
 import {
-  LoV,
   useDynamicProperty,
   useDispatch,
   useModule,
@@ -45,7 +44,6 @@ import {
   getUpdateVar,
   createSendActionNameAction,
   useDispatchRequestUpdateOnFirstRender,
-  createSendUpdateAction,
 } from "taipy-gui";
 
 enum NodeType {
@@ -58,6 +56,7 @@ type Scenarios = Array<Scenario>;
 type Cycles = Array<[string, string, number, boolean, Scenarios]>;
 
 interface ScenarioSelectorProps {
+  id?: string;
   defaultShowAddButton: boolean;
   showAddButton?: boolean;
   defaultDisplayCycles: boolean;
@@ -65,16 +64,13 @@ interface ScenarioSelectorProps {
   defaultShowPrimaryFlag: boolean;
   showPrimaryFlag?: boolean;
   scenarios?: Cycles | Scenarios;
-  defaultScenarios?: LoV;
-  defaultScenarioId?: string;
-  scenarioId?: string;
-  onScenarioCreate?: string;
+  onScenarioCreate: string;
+  onCtxSelection: string;
+  onSelection?: string;
   coreChanged?: Record<string, unknown>;
   updateVars: string;
   configs?: Array<[string, string]>;
   error?: string;
-  updateVarName?: string;
-  propagate?: boolean;
 }
 
 interface ScenarioNodesProps {
@@ -160,7 +156,7 @@ const DialogContentSx = {
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-  const { scenarios = [], propagate = true } = props;
+  const { id = "", scenarios = [] } = props;
   const [open, setOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [newProp, setNewProp] = useState<Property>({ id: "", key: "", value: "" });
@@ -173,11 +169,10 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   const showAddButton = useDynamicProperty(props.showAddButton, props.defaultShowAddButton, true);
   const displayCycles = useDynamicProperty(props.displayCycles, props.defaultDisplayCycles, true);
   const showPrimaryFlag = useDynamicProperty(props.showPrimaryFlag, props.defaultShowPrimaryFlag, true);
-  const scenarioId = useDynamicProperty(props.scenarioId, props.defaultScenarioId, "");
 
   const onSubmit = (values: any) => {
     values.properties = [...properties];
-    dispatch(createSendActionNameAction("", module, props.onScenarioCreate, values));
+    dispatch(createSendActionNameAction(id, module, props.onScenarioCreate, values));
     form.resetForm();
     setOpen(false);
     setProperties([]);
@@ -227,15 +222,20 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   useEffect(() => {
     if (props.coreChanged?.scenario) {
       const updateVar = getUpdateVar(props.updateVars, "scenarios");
-      updateVar && dispatch(createRequestUpdateAction("", module, [updateVar], true));
+      updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
     }
   }, [props.coreChanged, props.updateVars, module, dispatch]);
 
   const switchDialog = useCallback(() => setOpen((op) => !op), []);
 
-  const onSelect = useCallback((e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
-    dispatch(createSendUpdateAction(props.updateVarName, nodeIds, module, undefined, propagate));
-  }, [props.updateVarName, module, propagate]);
+  const onSelect = useCallback(
+    (e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
+      dispatch(
+        createSendActionNameAction(id, module, props.onCtxSelection, { ids: Array.isArray(nodeIds) ? nodeIds : [nodeIds], user_action: props.onSelection })
+      );
+    },
+    [props.onCtxSelection, module, props.onSelection]
+  );
 
   return (
     <div>
@@ -325,14 +325,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 </FormGroup>
               </Grid>
               <Grid item xs={12} container justifyContent="space-between">
-                <Grid item xs={8} container alignItems="center">
-                  <Typography variant="h6">Custom Properties</Typography>
-                </Grid>
-                <Grid item xs={4} container justifyContent="flex-end">
-                  <Button variant="outlined" color="inherit" onClick={emptyProperties}>
-                    REMOVE ALL
-                  </Button>
-                </Grid>
+                <Typography variant="h6">Custom Properties</Typography>
               </Grid>
               {properties
                 ? properties.map((item, index) => (
