@@ -164,14 +164,14 @@ class Config:
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
-    ):
+    ) -> "ScenarioConfig":
         """Configure a new scenario configuration.
 
         Parameters:
             id (str): The unique identifier of the new scenario configuration.
             pipeline_configs (List[PipelineConfig^]): The list of pipeline configurations used
                 by this new scenario configuration.
-            frequency (Optional[Frequency^]): The scenario frequency.
+            frequency (Optional[Frequency^]): The scenario frequency.<br/>
                 It corresponds to the recurrence of the scenarios instantiated from this
                 configuration. Based on this frequency each scenario will be attached to the
                 relevant cycle.
@@ -182,10 +182,10 @@ class Config:
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `(taipy.)compare_scenarios()^` more more details.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `ScenarioConfig^`: The new scenario configuration.
+            The new scenario configuration.
         """
 
     @staticmethod
@@ -196,10 +196,10 @@ class Config:
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         pipeline_id: Optional[str] = None,
         **properties,
-    ):
+    ) -> "ScenarioConfig":
         """Configure a new scenario configuration made of a single new pipeline configuration.
 
-        A new pipeline configuration is created as well. If _pipeline_id_ is not provided,
+        A new pipeline configuration is created as well. If *pipeline_id* is not provided,
         the new pipeline configuration identifier is set to the scenario configuration identifier
         post-fixed by '_pipeline'.
 
@@ -218,12 +218,11 @@ class Config:
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `(taipy.)compare_scenarios()` more more details.
-            pipeline_id (str): The identifier of the new pipeline configuration to be
-                configured.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            pipeline_id (Optional[str]): The identifier of the new pipeline configuration to be configured.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `ScenarioConfig^`: The new scenario configuration.
+            The new scenario configuration.
         """
 
     @staticmethod
@@ -232,10 +231,10 @@ class Config:
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
-    ):
+    ) -> "ScenarioConfig":
         """Configure the default values for scenario configurations.
 
-        This function creates the _default scenario configuration_ object,
+        This function creates the *default scenario configuration* object,
         where all scenario configuration objects will find their default
         values when needed.
 
@@ -253,14 +252,14 @@ class Config:
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `taipy.compare_scenarios()^` more more details.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `ScenarioConfig^`: The default scenario configuration.
+            The new default scenario configuration.
         """
 
     @staticmethod
-    def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
+    def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
         """Configure a new pipeline configuration.
 
         Parameters:
@@ -268,17 +267,17 @@ class Config:
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
                 configurations that make this new pipeline. This can be a single task
                 configuration object is this pipeline holds a single task.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `PipelineConfig^`: The new pipeline configuration.
+            The new pipeline configuration.
         """
 
     @staticmethod
-    def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
+    def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
         """Configure the default values for pipeline configurations.
 
-        This function creates the _default pipeline configuration_ object,
+        This function creates the *default pipeline configuration* object,
         where all pipeline configuration objects will find their default
         values when needed.
 
@@ -286,53 +285,53 @@ class Config:
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
                 configurations that make the default pipeline configuration. This can be
                 a single task configuration object is this pipeline holds a single task.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            `PipelineConfig^`: The default pipeline configuration.
+            The default pipeline configuration.
         """
 
     @staticmethod
-    def configure_default_data_node(storage_type: str, scope: Optional[Scope] = None, **properties):
+    def configure_default_data_node(storage_type: str, scope: Optional[Scope] = None, **properties) -> "DataNodeConfig":
         """Configure the default values for data node configurations.
+
         This function creates the _default data node configuration_ object,
         where all data node configuration objects will find their default
         values when needed.
+
         Parameters:
             storage_type (str): The default storage type for all data node configurations.
-                The possible values are _"pickle"_ (the default value), _"csv"_, _"excel"_,
-                _"sql"_, _"mongo_collection"_, _"in_memory"_, _"json"_, _"parquet"_ or _"generic"_.
-            scope (Optional[Scope^]): The default scope for all data node configurations.
+                The possible values are *"pickle"* (the default value), *"csv"*, *"excel"*,
+                *"sql"*, *"mongo_collection"*, *"in_memory"*, *"json"*, *"parquet"* or
+                *"generic"*.
+            scope (Optional[Scope^]): The default scope for all data node configurations.<br/>
                 The default value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The default data node configuration.
+            The default data node configuration.
         """
 
     @classmethod
     def configure_data_node(
-        cls,
-        id: str,
-        storage_type: Optional[str] = None,
-        scope: Optional[Scope] = None,
-        **properties,
-    ):
+        cls, id: str, storage_type: Optional[str] = None, scope: Optional[Scope] = None, **properties
+    ) -> "DataNodeConfig":
         """Configure a new data node configuration.
+
         Parameters:
             id (str): The unique identifier of the new data node configuration.
             storage_type (Optional[str]): The data node configuration storage type. The possible values
-                are _None_ (which is the default value of _"pickle"_, unless it has been overloaded by the
-                _storage_type_ value set in the default data node configuration
-                (see `(Config.)configure_default_data_node()^`)), _"pickle"_, _"csv"_, _"excel"_, _"sql_table"_,
-                _"sql"_, _"json"_, _"parquet"_, _"mongo_collection"_, _"in_memory"_, or _"generic"_.
-            scope (Optional[Scope^]): The scope of the data node configuration. The default value is
-                `Scope.SCENARIO` (or the one specified in
+                are None (which is the default value of *"pickle"*, unless it has been overloaded by the
+                *storage_type* value set in the default data node configuration
+                (see `(Config.)configure_default_data_node()^`)), *"pickle"*, *"csv"*, *"excel"*,
+                *"sql_table"*, *"sql"*, *"json"*, *"parquet"*, *"mongo_collection"*, *"in_memory"*, or
+                *"generic"*.
+            scope (Optional[Scope^]): The scope of the data node configuration.<br/>
+                The default value is `Scope.SCENARIO` (or the one specified in
                 `(Config.)configure_default_data_node()^`).
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new data node configuration.
+            The new data node configuration.
         """
 
     @classmethod
@@ -344,21 +343,21 @@ class Config:
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new CSV data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new CSV data node configuration.
             default_path (Optional[str]): The default path of the CSV file.
             has_header (Optional[bool]): If True, indicates that the CSV file has a header.
-            exposed_type (Optional[str]): The exposed type of the data read from CSV file.
+            exposed_type (Optional[str]): The exposed type of the data read from CSV file.<br/>
                 The default value is `pandas`.
-            scope (Optional[Scope^]): The scope of the CSV data node configuration. The default value
-                is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            scope (Optional[Scope^]): The scope of the CSV data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new CSV data node configuration.
+            The new CSV data node configuration.
         """
 
     @classmethod
@@ -370,7 +369,7 @@ class Config:
         decoder: Optional[json.JSONDecoder] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new JSON data node configuration.
 
         Parameters:
@@ -378,12 +377,11 @@ class Config:
             default_path (Optional[str]): The default path of the JSON file.
             encoder (Optional[json.JSONEncoder]): The JSON encoder used to write data into the JSON file.
             decoder (Optional[json.JSONDecoder]): The JSON decoder used to read data from the JSON file.
-            scope (Optional[Scope^]): The scope of the JSON data node configuration. The default value
-                is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            scope (Optional[Scope^]): The scope of the JSON data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            `DataNodeConfig^`: The new JSON data node configuration.
+            The new JSON data node configuration.
         """
 
     @classmethod
@@ -398,27 +396,31 @@ class Config:
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new Parquet data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new Parquet data node configuration.
             default_path (Optional[str]): The default path of the Parquet file.
-            engine (Optional[str]): Parquet library to use. Possible values are _"fastparquet"_ or _"pyarrow"_.
-                The default value is _"pyarrow"_.
-            compression (Optional[str]): Name of the compression to use. Possible values are _"snappy"_, _"gzip"_,
-                _"brotli"_, or _"none"_ (no compression). The default value is _"snappy"_.
-            read_kwargs (Optional[Dict]): Additional parameters passed to the `pandas.read_parquet` method.
-            write_kwargs (Optional[Dict]): Additional parameters passed to the `pandas.DataFrame.write_parquet` method.
-                The parameters in "read_kwargs" and "write_kwargs" have a **higher precedence** than the top-level
-                parameters which are also passed to Pandas.
-            exposed_type (Optional[str]): The exposed type of the data read from Parquet file.
+            engine (Optional[str]): Parquet library to use. Possible values are *"fastparquet"* or
+                *"pyarrow"*.<br/>
+                The default value is *"pyarrow"*.
+            compression (Optional[str]): Name of the compression to use. Possible values are *"snappy"*,
+                *"gzip"*, *"brotli"*, or *"none"* (no compression). The default value is *"snappy"*.
+            read_kwargs (Optional[dict]): Additional parameters passed to the `pandas.read_parquet()`
+                function.
+            write_kwargs (Optional[dict]): Additional parameters passed to the
+                `pandas.DataFrame.write_parquet()` function.<br/>
+                The parameters in *read_kwargs* and *write_kwargs* have a **higher precedence** than the
+                top-level parameters which are also passed to Pandas.
+            exposed_type (Optional[str]): The exposed type of the data read from Parquet file.<br/>
                 The default value is `pandas`.
-            scope (Optional[Scope^]): The scope of the Parquet data node configuration. The default value
-                is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
+            scope (Optional[Scope^]): The scope of the Parquet data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new Parquet data node configuration.
+            The new Parquet data node configuration.
         """
 
     @classmethod
@@ -431,7 +433,7 @@ class Config:
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new Excel data node configuration.
 
         Parameters:
@@ -440,13 +442,14 @@ class Config:
             has_header (Optional[bool]): If True, indicates that the Excel file has a header.
             sheet_name (Optional[Union[List[str], str]]): The list of sheet names to be used.
                 This can be a unique name.
-            exposed_type (Optional[str]): The exposed type of the data read from Excel file.
+            exposed_type (Optional[str]): The exposed type of the data read from Excel file.<br/>
                 The default value is `pandas`.
-            scope (Optional[Scope^]): The scope of the Excel data node configuration.
+            scope (Optional[Scope^]): The scope of the Excel data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new Excel data node configuration.
+            The new Excel data node configuration.
         """
 
     @classmethod
@@ -459,7 +462,7 @@ class Config:
         write_fct_args: Optional[List] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new generic data node configuration.
 
         Parameters:
@@ -467,36 +470,33 @@ class Config:
             read_fct (Optional[Callable]): The Python function called to read the data.
             write_fct (Optional[Callable]): The Python function called to write the data.
                 The provided function must have at least one parameter that receives the data to be written.
-            read_fct_args (Optional[List]): The list of arguments that are passed to the _read_fct_
-                to read data.
-            write_fct_args (Optional[List]): The list of arguments that are passed to the _write_fct_
-                to write the data.
-            scope (Optional[Scope^]): The scope of the Generic data node configuration.
+            read_fct_args (Optional[List]): The list of arguments that are passed to the function
+                *read_fct* to read data.
+            write_fct_args (Optional[List]): The list of arguments that are passed to the function
+                *write_fct* to write the data.
+            scope (Optional[Scope^]): The scope of the Generic data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            `DataNodeConfig^`: The new Generic data node configuration.
+            The new Generic data node configuration.
         """
 
     @classmethod
     def configure_in_memory_data_node(
-        cls,
-        id: str,
-        default_data: Optional[Any] = None,
-        scope: Optional[Scope] = None,
-        **properties,
-    ):
-        """Configure a new _in_memory_ data node configuration.
+        cls, id: str, default_data: Optional[Any] = None, scope: Optional[Scope] = None, **properties
+    ) -> "DataNodeConfig":
+        """Configure a new *in-memory* data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new in_memory data node configuration.
-            default_data (Optional[Any]): The default data of the data nodes instantiated from
+            default_data (Optional[any]): The default data of the data nodes instantiated from
                 this in_memory data node configuration.
-            scope (Optional[Scope^]): The scope of the in_memory data node configuration. The default
-                value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
+            scope (Optional[Scope^]): The scope of the in_memory data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new _in_memory_ data node configuration.
+            The new *in-memory* data node configuration.
         """
 
     @classmethod
@@ -507,19 +507,20 @@ class Config:
         default_data: Optional[Any] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new pickle data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new pickle data node configuration.
             default_path (Optional[str]): The path of the pickle file.
-            default_data (Optional[Any]): The default data of the data nodes instantiated from
+            default_data (Optional[any]): The default data of the data nodes instantiated from
                 this pickle data node configuration.
-            scope (Optional[Scope^]): The scope of the pickle data node configuration. The default value
-                is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
+            scope (Optional[Scope^]): The scope of the pickle data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new pickle data node configuration.
+            The new pickle data node configuration.
         """
 
     @classmethod
@@ -529,8 +530,8 @@ class Config:
         db_name: str,
         db_engine: str,
         table_name: str,
-        db_username: Optional[str],
-        db_password: Optional[str],
+        db_username: Optional[str] = None,
+        db_password: Optional[str] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
@@ -540,47 +541,50 @@ class Config:
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new SQL table data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
             db_name (str): The database name, or the name of the SQLite database file.
-            db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
-                _"postgresql"_.
+            db_engine (str): The database engine. Possible values are *"sqlite"*, *"mssql"*, *"mysql"*,
+                or *"postgresql"*.
             table_name (str): The name of the SQL table.
-            db_username (Optional[str]): The database username. Required by _"mssql"_, _"mysql"_, and
-                _"postgresql"_ engine.
-            db_password (Optional[str]): The database password. Required by _"mssql"_, _"mysql"_, and
-                _"postgresql"_ engine.
-            db_host (Optional[str]): The database host. The default value is _"localhost"_.
-            db_port (Optional[int]): The database port. The default value is 1433.
-            db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
-            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
-                is the current working folder.
-            sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
-            db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
-                connection string.
-            exposed_type (Optional[str]): The exposed type of the data read from SQL table.
-                The default value is `pandas`.
-            scope (Optional[Scope^]): The scope of the SQL data node configuration. The default value is
-                `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            db_username (Optional[str]): The database username. Required by the *"mssql"*, *"mysql"*, and
+                *"postgresql"* engines.
+            db_password (Optional[str]): The database password. Required by the *"mssql"*, *"mysql"*, and
+                *"postgresql"* engines.
+            db_host (Optional[str]): The database host.<br/>
+                The default value is "localhost".
+            db_port (Optional[int]): The database port.<br/>
+                The default value is 1433.
+            db_driver (Optional[str]): The database driver.
+            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file.<br/>
+                The default value is the current working folder.
+            sqlite_file_extension (Optional[str]): The file extension of the SQLite file.<br/>
+                The default value is ".db".
+            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+                into database connection string.
+            exposed_type (Optional[str]): The exposed type of the data read from SQL table.<br/>
+                The default value is "pandas".
+            scope (Optional[Scope^]): The scope of the SQL data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new SQL data node configuration.
+            The new SQL data node configuration.
         """
 
     @classmethod
     def configure_sql_data_node(
         cls,
         id: str,
-        db_username: str,
-        db_password: str,
         db_name: str,
         db_engine: str,
         read_query: str,
         write_query_builder: Callable,
+        db_username: Optional[str] = None,
+        db_password: Optional[str] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
         db_driver: Optional[str] = None,
@@ -590,36 +594,39 @@ class Config:
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new SQL data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new SQL data node configuration.
             db_name (str): The database name, or the name of the SQLite database file.
-            db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or
-                _"postgresql"_.
+            db_engine (str): The database engine. Possible values are *"sqlite"*, *"mssql"*, *"mysql"*,
+                or *"postgresql"*.
             read_query (str): The SQL query string used to read the data from the database.
             write_query_builder (Callable): A callback function that takes the data as an input parameter
                 and returns a list of SQL queries.
-            db_username (Optional[str]): The database username. Required by _"mssql"_, _"mysql"_, and
-                _"postgresql"_ engine.
-            db_password (Optional[str]): The database password. Required by _"mssql"_, _"mysql"_, and
-                _"postgresql"_ engine.
-            db_host (Optional[str]): The database host. The default value is _"localhost"_.
-            db_port (Optional[int]): The database port. The default value is 1433.
-            db_driver (Optional[str]): The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
-            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file. The default value
-                is the current working folder.
-            sqlite_file_extension (Optional[str]): The file extension of the SQLite file. The default value is ".db".
-            db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into database
-                connection string.
-            exposed_type (Optional[str]): The exposed type of the data read from SQL query.
-                The default value is `pandas`.
-            scope (Optional[Scope^]): The scope of the SQL data node configuration.
+            db_username (Optional[str]): The database username. Required by the *"mssql"*, *"mysql"*, and
+                *"postgresql"* engines.
+            db_password (Optional[str]): The database password. Required by the *"mssql"*, *"mysql"*, and
+                *"postgresql"* engines.
+            db_host (Optional[str]): The database host.<br/>
+                The default value is "localhost".
+            db_port (Optional[int]): The database port.<br/>
+                The default value is 1433.
+            db_driver (Optional[str]): The database driver.
+            sqlite_folder_path (Optional[str]): The path to the folder that contains SQLite file.<br/>
+                The default value is the current working folder.
+            sqlite_file_extension (Optional[str]): The file extension of the SQLite file.<br/>
+                The default value is ".db".
+            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+                into database connection string.
+            exposed_type (Optional[str]): The exposed type of the data read from SQL query.<br/>
+                The default value is "pandas".
+            scope (Optional[Scope^]): The scope of the SQL data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            `DataNodeConfig^`: The new SQL data node configuration.
+            The new SQL data node configuration.
         """
 
     @classmethod
@@ -636,29 +643,32 @@ class Config:
         db_extra_args: Optional[Dict[str, Any]] = None,
         scope: Optional[Scope] = None,
         **properties,
-    ):
+    ) -> "DataNodeConfig":
         """Configure a new Mongo collection data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new Mongo collection data node configuration.
             db_name (str): The database name.
             collection_name (str): The collection in the database to read from and to write the data to.
-            custom_document (Optional[Any]): The custom document class to store, encode, and decode data when reading
-                and writing to a Mongo collection. The custom_document can have optional `decode` method to decode data
-                in the Mongo collection to a custom object, and `encode` method to encode the object's properties to
-                the Mongo collection when writing.
+            custom_document (Optional[any]): The custom document class to store, encode, and decode data
+                when reading and writing to a Mongo collection. The custom_document can have an optional
+                *decode()* method to decode data in the Mongo collection to a custom object, and an
+                optional *encode()*) method to encode the object's properties to the Mongo collection
+                when writing.
             db_username (Optional[str]): The database username.
             db_password (Optional[str]): The database password.
-            db_host (Optional[str]): The database host. The default value is _"localhost"_.
-            db_port (Optional[int]): The database port. The default value is 27017.
-            db_extra_args (Optional[Dict[str, Any]]): A dictionary of additional arguments to be passed into
-                database connection string.
-            scope (Optional[Scope^]): The scope of the Mongo collection data node configuration.
+            db_host (Optional[str]): The database host.<br/>
+                The default value is "localhost".
+            db_port (Optional[int]): The database port.<br/>
+                The default value is 27017.
+            db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+                into database connection string.
+            scope (Optional[Scope^]): The scope of the Mongo collection data node configuration.<br/>
                 The default value is `Scope.SCENARIO`.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `DataNodeConfig^`: The new Mongo collection data node configuration.
+            The new Mongo collection data node configuration.
         """
 
     @staticmethod
@@ -669,7 +679,7 @@ class Config:
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         skippable: Optional[bool] = False,
         **properties,
-    ):
+    ) -> "TaskConfig":
         """Configure a new task configuration.
 
         Parameters:
@@ -682,11 +692,12 @@ class Config:
                 function output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has
-                been made on inputs. The default value is _False_.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+                been made on inputs.<br/>
+                The default value is False.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `TaskConfig^`: The new task configuration.
+            The new task configuration.
         """
 
     @staticmethod
@@ -696,10 +707,10 @@ class Config:
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         skippable: Optional[bool] = False,
         **properties,
-    ):
+    ) -> "TaskConfig":
         """Configure the default values for task configurations.
 
-        This function creates the _default task configuration_ object,
+        This function creates the *default task configuration* object,
         where all task configuration objects will find their default
         values when needed.
 
@@ -712,29 +723,33 @@ class Config:
                 output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has
-                been made on inputs. The default value is _False_.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                been made on inputs.<br/>
+                The default value is False.
+            **properties (dict[str, any]): A keyworded variable length list of additional
                 arguments.
         Returns:
-            `TaskConfig^`: The default task configuration.
+            The default task configuration.
         """
 
     @staticmethod
     def configure_job_executions(
         mode: str = None, nb_of_workers: Union[int, str] = None, max_nb_of_workers: Union[int, str] = None, **properties
-    ):
+    ) -> "JobConfig":
         """Configure job execution.
+
         Parameters:
             mode (Optional[str]): The job execution mode.
-                Possible values are: _"standalone"_ (the default value) or
-                _"development"_.
-            max_nb_of_workers (Optional[int, str]): Parameter used only in default _"standalone"_ mode. The maximum
-                number of jobs able to run in parallel. The default value is 1.<br/>
+                Possible values are: *"standalone"* (the default value) or *"development"*.
+            max_nb_of_workers (Optional[int, str]): Parameter used only in default *"standalone"* mode.
+                This indicates the maximum number of jobs able to run in parallel.<br/>
+                The default value is 1.<br/>
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
-                `&lt;env_var&gt;` is the name of environment variable.
-            nb_of_workers (Optional[int, str]): Deprecated. Use max_nb_of_workers instead.
+                `&lt;env_var&gt;` is the name of an environment variable.
+            nb_of_workers (Optional[int, str]): Deprecated. Use *max_nb_of_workers* instead.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `JobConfig^`: The job execution configuration.
+            The new job execution configuration.
         """
 
