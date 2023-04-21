@@ -89,10 +89,11 @@ class GuiCoreContext(CoreEventConsumerBase):
             return
         scenario = tp.create_scenario(scenario_config, date, data.get(GuiCoreContext.__PROP_SCENARIO_NAME))
         if props := data.get("properties"):
-            for prop in props:
-                key = prop.get("key")
-                if key and key not in GuiCoreContext.__SCENARIO_PROPS:
-                    scenario._properties[key] = prop.get("value")
+            with scenario as sc:
+                for prop in props:
+                    key = prop.get("key")
+                    if key and key not in GuiCoreContext.__SCENARIO_PROPS:
+                        sc._properties[key] = prop.get("value")
         state.assign(GuiCoreContext._ERROR_VAR, "")
 
     def select_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
