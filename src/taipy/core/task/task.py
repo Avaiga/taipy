@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
@@ -29,6 +29,9 @@ from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingDataNode
 from ._task_model import _TaskModel
 from .task_id import TaskId
+
+if TYPE_CHECKING:
+    from ..job.job import Job
 
 
 class Task(_Entity, _Labeled):
@@ -187,7 +190,7 @@ class Task(_Entity, _Labeled):
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
-    ):
+    ) -> "Job":  # noqa
         """Submit the task for execution.
 
         Parameters:
@@ -198,12 +201,13 @@ class Task(_Entity, _Labeled):
                 mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before
                 returning.
+
         Returns:
             The created `Job^`.
         """
         from ._task_manager_factory import _TaskManagerFactory
 
-        _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+        return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
 
     @classmethod
     def _to_model(cls, task) -> _TaskModel:

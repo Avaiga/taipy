@@ -44,9 +44,9 @@ class _JobConverter(_AbstractConverter):
             id=model.id, task=task_repository._load(model.task_id), submit_id=model.submit_id, version=model.version
         )
 
-        job.status = model.status  # type: ignore
-        job.force = model.force  # type: ignore
-        job.creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
+        job._status = model.status  # type: ignore
+        job._force = model.force  # type: ignore
+        job._creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
         for it in model.subscribers:
             try:
                 job._subscribers.append(_load_fct(it.get("fct_module"), it.get("fct_name")))  # type:ignore

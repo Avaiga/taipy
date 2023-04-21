@@ -21,9 +21,9 @@ from .._version._version_mixin import _VersionMixin
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ..task.task_id import TaskId
 from ._data_fs_repository_v2 import _DataFSRepository
 from .data_node import DataNode
 from .data_node_id import DataNodeId
@@ -34,6 +34,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
 
     __DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
+    _EVENT_ENTITY_TYPE = EventEntityType.DATA_NODE
     _repository: _DataFSRepository
 
     @classmethod
@@ -43,7 +44,6 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
-        task_id: Optional[TaskId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
@@ -74,6 +74,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     ) -> DataNode:
         data_node = cls.__create(data_node_config, owner_id, parent_ids)
         cls._set(data_node)
+        _publish_event(cls._EVENT_ENTITY_TYPE, data_node.id, EventOperation.CREATION, None)
         return data_node
 
     @classmethod
@@ -90,7 +91,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             else:
                 storage_type = Config.sections[DataNodeConfig.name][_Config.DEFAULT_KEY].storage_type
 
-            return cls.__DATA_NODE_CLASS_MAP[storage_type](  # type: ignore
+            return cls.__DATA_NODE_CLASS_MAP[storage_type](
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 owner_id=owner_id,
@@ -124,12 +125,12 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             cls._clean_pickle_file(data_node)
 
     @classmethod
-    def _delete(cls, data_node_id: DataNodeId):  # type:ignore
+    def _delete(cls, data_node_id: DataNodeId):
         cls._clean_pickle_file(data_node_id)
         super()._delete(data_node_id)
 
     @classmethod
-    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):  # type:ignore
+    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
         cls._clean_pickle_files(data_node_ids)
         super()._delete_many(data_node_ids)
 
@@ -137,3 +138,9 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     def _delete_all(cls):
         cls._clean_pickle_files(cls._get_all())
         super()._delete_all()
+
+    @classmethod
+    def _delete_by_version(cls, version_number: str):
+        cls._clean_pickle_files(cls._get_all(version_number))
+        cls._repository._delete_by(attribute="version", value=version_number)
+        _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)

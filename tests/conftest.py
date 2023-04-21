@@ -45,6 +45,7 @@ from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.job_id import JobId
+from src.taipy.core.notification.notifier import Notifier
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline.pipeline import Pipeline
@@ -331,6 +332,7 @@ def clean_repository():
     init_orchestrator()
     init_managers()
     init_config()
+    init_notifier()
 
     yield
 
@@ -424,6 +426,10 @@ def init_orchestrator():
     _OrchestratorFactory._build_dispatcher()
     _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
     _OrchestratorFactory._orchestrator.blocked_jobs = []
+
+
+def init_notifier():
+    Notifier._topics_registrations_list = {}
 
 
 @pytest.fixture

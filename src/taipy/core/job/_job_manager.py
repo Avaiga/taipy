@@ -17,6 +17,7 @@ from .._repository._v2._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import JobNotDeletedException
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..task.task import Task
 from .job import Job
 from .job_id import JobId
@@ -36,27 +37,30 @@ class _JobManager(_Manager[Job], _VersionMixin):
         filters = cls._build_filters_with_version(version_number)
         return cls._repository._load_all(filters)
 
+    _EVENT_ENTITY_TYPE = EventEntityType.JOB
+
     @classmethod
     def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:
         version = _VersionManagerFactory._build_manager()._get_latest_version()
         job = Job(
-            id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"),
+            id=JobId(f"{Job._ID_PREFIX}_{task.config_id}_{uuid.uuid4()}"),
             task=task,
             submit_id=submit_id,
             force=force,
             version=version,
         )
         cls._set(job)
+        _publish_event(cls._EVENT_ENTITY_TYPE, job.id, EventOperation.CREATION, None)
         job._on_status_change(*callbacks)
         return job
 
     @classmethod
-    def _delete(cls, job: Job, force=False):  # type:ignore
+    def _delete(cls, job: Job, force=False):
         if job.is_finished() or force:
             super()._delete(job.id)
             from .._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 
-            _JobDispatcher._pop_dispatched_process(job.id)  # type: ignore
+            _JobDispatcher._pop_dispatched_process(job.id)
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.warning(err)

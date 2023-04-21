@@ -65,7 +65,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
 
     __DB_HOST_DEFAULT = "localhost"
     __DB_PORT_DEFAULT = 1433
-    __DB_DRIVER_DEFAULT = "ODBC Driver 17 for SQL Server"
+    __DB_DRIVER_DEFAULT = ""
     __SQLITE_FOLDER_PATH_DEFAULT = ""
     __SQLITE_FILE_EXTENSION_DEFAULT = ".db"
 
@@ -160,7 +160,8 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         driver = self.properties.get(self.__DB_DRIVER_KEY, self.__DB_DRIVER_DEFAULT)
         extra_args = self.properties.get(self.__DB_EXTRA_ARGS_KEY, {})
 
-        extra_args = {**extra_args, "driver": driver}
+        if driver:
+            extra_args = {**extra_args, "driver": driver}
         for k, v in extra_args.items():
             extra_args[k] = re.sub(r"\s+", "+", v)
         extra_args_str = "&".join(f"{k}={str(v)}" for k, v in extra_args.items())

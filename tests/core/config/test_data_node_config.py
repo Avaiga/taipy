@@ -15,12 +15,74 @@ from unittest import mock
 
 import pytest
 
+from src.taipy.core import MongoDefaultDocument
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+
+
+def test_data_node_config_default_parameter():
+    csv_dn_cfg = Config.configure_data_node("data_node_1", "csv")
+    assert csv_dn_cfg.scope == Scope.SCENARIO
+    assert csv_dn_cfg.has_header is True
+    assert csv_dn_cfg.exposed_type == "pandas"
+
+    json_dn_cfg = Config.configure_data_node("data_node_2", "json")
+    assert json_dn_cfg.scope == Scope.SCENARIO
+
+    parquet_dn_cfg = Config.configure_data_node("data_node_3", "parquet")
+    assert parquet_dn_cfg.scope == Scope.SCENARIO
+    assert parquet_dn_cfg.engine == "pyarrow"
+    assert parquet_dn_cfg.compression == "snappy"
+    assert parquet_dn_cfg.exposed_type == "pandas"
+
+    excel_dn_cfg = Config.configure_data_node("data_node_4", "excel")
+    assert excel_dn_cfg.scope == Scope.SCENARIO
+    assert excel_dn_cfg.has_header is True
+    assert excel_dn_cfg.exposed_type == "pandas"
+
+    generic_dn_cfg = Config.configure_data_node("data_node_5", "generic")
+    assert generic_dn_cfg.scope == Scope.SCENARIO
+
+    in_memory_dn_cfg = Config.configure_data_node("data_node_6", "in_memory")
+    assert in_memory_dn_cfg.scope == Scope.SCENARIO
+
+    pickle_dn_cfg = Config.configure_data_node("data_node_7", "pickle")
+    assert pickle_dn_cfg.scope == Scope.SCENARIO
+
+    sql_table_dn_cfg = Config.configure_data_node(
+        "data_node_8", "sql_table", db_name="test", db_engine="mssql", table_name="test"
+    )
+    assert sql_table_dn_cfg.scope == Scope.SCENARIO
+    assert sql_table_dn_cfg.db_host == "localhost"
+    assert sql_table_dn_cfg.db_port == 1433
+    assert sql_table_dn_cfg.db_driver == ""
+    assert sql_table_dn_cfg.sqlite_file_extension == ".db"
+    assert sql_table_dn_cfg.exposed_type == "pandas"
+
+    sql_dn_cfg = Config.configure_data_node(
+        "data_node_9", "sql", db_name="test", db_engine="mssql", read_query="test", write_query_builder=print
+    )
+    assert sql_dn_cfg.scope == Scope.SCENARIO
+    assert sql_dn_cfg.db_host == "localhost"
+    assert sql_dn_cfg.db_port == 1433
+    assert sql_dn_cfg.db_driver == ""
+    assert sql_dn_cfg.sqlite_file_extension == ".db"
+    assert sql_dn_cfg.exposed_type == "pandas"
+
+    mongo_dn_cfg = Config.configure_data_node(
+        "data_node_10", "mongo_collection", db_name="test", collection_name="test"
+    )
+    print(vars(mongo_dn_cfg))
+    assert mongo_dn_cfg.scope == Scope.SCENARIO
+    assert mongo_dn_cfg.db_host == "localhost"
+    assert mongo_dn_cfg.db_port == 27017
+    assert mongo_dn_cfg.custom_document == MongoDefaultDocument
+    assert mongo_dn_cfg.db_username == ""
+    assert mongo_dn_cfg.db_password == ""
 
 
 def test_data_node_config_check(caplog):

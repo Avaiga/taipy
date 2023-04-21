@@ -9,25 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from .._entity._reload import _get_manager
 
-
-class _Entity:
-    _MANAGER_NAME: str
-    _is_in_context = False
-
-    def __enter__(self):
-        self._is_in_context = True
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        self._is_in_context = False
-        _get_manager(self._MANAGER_NAME)._set(self)
-
-    @classmethod
-    def _to_model(cls, entity):
-        raise NotImplementedError
-
-    @classmethod
-    def _from_model(cls, model):
-        raise NotImplementedError
+from .core_event_consumer import CoreEventConsumerBase
+from .event import EventEntityType, EventOperation
+from .notifier import _publish_event

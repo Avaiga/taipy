@@ -23,6 +23,7 @@ from ..config.task_config import TaskConfig
 from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
 from ..task.task import Task
@@ -33,6 +34,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
 
     _ENTITY_NAME = Task.__name__
     _repository: _AbstractRepository
+    _EVENT_ENTITY_TYPE = EventEntityType.TASK
 
     @classmethod
     def _orchestrator(cls) -> Type[_AbstractOrchestrator]:
@@ -92,7 +94,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
                 skippable = task_config.skippable
                 task = Task(
-                    str(task_config.id),  # type: ignore
+                    str(task_config.id),
                     dict(**task_config._properties),
                     task_config.function,
                     inputs,
@@ -105,6 +107,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                 for dn in set(inputs + outputs):
                     dn._parent_ids.update([task.id])
                 cls._set(task)
+                _publish_event(cls._EVENT_ENTITY_TYPE, task.id, EventOperation.CREATION, None)
                 tasks.append(task)
         return tasks
 
@@ -158,4 +161,6 @@ class _TaskManager(_Manager[Task], _VersionMixin):
             raise NonExistingTask(task_id)
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(task.input.values())
-        return cls._orchestrator().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)
+        job = cls._orchestrator().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)
+        _publish_event(cls._EVENT_ENTITY_TYPE, task.id, EventOperation.SUBMISSION, None)
+        return job
