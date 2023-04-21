@@ -96,7 +96,7 @@ class _ScenarioManager(_Manager[Scenario]):
         creation_date: Optional[datetime.datetime] = None,
         name: Optional[str] = None,
     ) -> Scenario:
-        scenario_id = Scenario._new_id(str(config.id))  # type: ignore
+        scenario_id = Scenario._new_id(str(config.id))
         cycle = (
             _CycleManagerFactory._build_manager()._get_or_create(config.frequency, creation_date)
             if config.frequency
@@ -114,7 +114,7 @@ class _ScenarioManager(_Manager[Scenario]):
             props["name"] = name
         version = _VersionManagerFactory._build_manager()._get_latest_version()
         scenario = Scenario(
-            str(config.id),  # type: ignore
+            str(config.id),
             pipelines,
             props,
             scenario_id,
@@ -236,7 +236,7 @@ class _ScenarioManager(_Manager[Scenario]):
         cls._set(scenario)
 
     @classmethod
-    def _delete(cls, scenario_id: ScenarioId):  # type: ignore
+    def _delete(cls, scenario_id: ScenarioId):
         scenario = cls._get(scenario_id)
         if scenario.is_primary:
             if len(cls._get_all_by_cycle(scenario.cycle)) > 1:

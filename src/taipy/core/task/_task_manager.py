@@ -33,7 +33,7 @@ from .task_id import TaskId
 
 
 class _TaskManager(_Manager[Task]):
-    _repository = _TaskRepositoryFactory._build_repository()  # type: ignore
+    _repository = _TaskRepositoryFactory._build_repository()
     _ENTITY_NAME = Task.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.TASK
 
@@ -81,7 +81,7 @@ class _TaskManager(_Manager[Task]):
 
             tasks_configs_and_owner_id.append((task_config, owner_id))
 
-        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(tasks_configs_and_owner_id)  # type: ignore
+        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(tasks_configs_and_owner_id)
 
         tasks = []
         for task_config, owner_id in tasks_configs_and_owner_id:
@@ -93,7 +93,7 @@ class _TaskManager(_Manager[Task]):
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
                 skippable = task_config.skippable
                 task = Task(
-                    str(task_config.id),  # type: ignore
+                    str(task_config.id),
                     dict(**task_config._properties),
                     task_config.function,
                     inputs,

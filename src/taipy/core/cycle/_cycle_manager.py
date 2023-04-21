@@ -25,12 +25,14 @@ from .cycle_id import CycleId
 
 
 class _CycleManager(_Manager[Cycle]):
-    _repository = _CycleRepositoryFactory._build_repository()  # type: ignore
+    _repository = _CycleRepositoryFactory._build_repository()
     _ENTITY_NAME = Cycle.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.CYCLE
 
     @classmethod
-    def _create(cls, frequency: Frequency, name: str = None, creation_date: datetime = None, **properties):
+    def _create(
+        cls, frequency: Frequency, name: Optional[str] = None, creation_date: Optional[datetime] = None, **properties
+    ):
         creation_date = creation_date if creation_date else datetime.now()
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
         end_date = _CycleManager._get_end_date_of_cycle(frequency, start_date)
@@ -61,9 +63,7 @@ class _CycleManager(_Manager[Cycle]):
     ) -> Cycle:
         creation_date = creation_date if creation_date else datetime.now()
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
-        cycles = cls._repository.get_cycles_by_frequency_and_start_date(
-            frequency=frequency, start_date=start_date
-        )  # type: ignore
+        cycles = cls._repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
         if len(cycles) > 0:
             return cycles[0]
         else:

@@ -214,7 +214,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def tags(self, val):
         self._tags = val or set()
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
 
@@ -222,7 +222,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def owner_id(self):
         return self._cycle.id
 
-    @property  # type: ignore
+    @property
     def properties(self):
         self._properties = _reload(self._MANAGER_NAME, self)._properties
         return self._properties

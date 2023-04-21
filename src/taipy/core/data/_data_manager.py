@@ -24,7 +24,6 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ..task.task_id import TaskId
 from ._data_repository_factory import _DataRepositoryFactory
 from .data_node import DataNode
 from .data_node_id import DataNodeId
@@ -44,7 +43,6 @@ class _DataManager(_Manager[DataNode]):
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
-        task_id: Optional[TaskId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
@@ -90,7 +88,7 @@ class _DataManager(_Manager[DataNode]):
             else:
                 storage_type = Config.sections[DataNodeConfig.name][_Config.DEFAULT_KEY].storage_type
 
-            return cls.__DATA_NODE_CLASS_MAP[storage_type](  # type: ignore
+            return cls.__DATA_NODE_CLASS_MAP[storage_type](
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 owner_id=owner_id,
@@ -116,12 +114,12 @@ class _DataManager(_Manager[DataNode]):
             cls._clean_pickle_file(data_node)
 
     @classmethod
-    def _delete(cls, data_node_id: DataNodeId):  # type:ignore
+    def _delete(cls, data_node_id: DataNodeId):
         cls._clean_pickle_file(data_node_id)
         super()._delete(data_node_id)
 
     @classmethod
-    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):  # type:ignore
+    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
         cls._clean_pickle_files(data_node_ids)
         super()._delete_many(data_node_ids)
 
@@ -133,4 +131,4 @@ class _DataManager(_Manager[DataNode]):
     @classmethod
     def _delete_by_version(cls, version_number: str):
         cls._clean_pickle_files(cls._get_all(version_number))
-        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")  # type: ignore
+        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")
