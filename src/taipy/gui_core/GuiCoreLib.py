@@ -103,12 +103,17 @@ class GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         action = data.get("user_action")
-        if not action:
-            return
-        action_function = self.gui._get_user_function(action)
-        if not callable(action_function):
-            warnings.warn(f"on_select ({action_function}) function is not callable.")
-            return
+        action_function = None
+        if action:
+            action_function = self.gui._get_user_function(action)
+            if not callable(action_function):
+                action_function = None
+                warnings.warn(f"on_select ({action_function}) function is not callable.")
+                return
+        if action_function is None:
+            if not hasattr(self.gui, "on_action"):
+                return
+            action_function = self.gui.on_action
         ids = data.get("ids")
         if not isinstance(ids, list) or len(ids) == 0:
             state.assign(GuiCoreContext._ERROR_VAR, "Invalid selection.")
@@ -149,7 +154,7 @@ class GuiCore(ElementLibrary):
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
                 "error": ElementProperty(PropertyType.react, GuiCoreContext._ERROR_VAR),
                 "on_ctx_selection": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_scenario}}"),
-                "on_selection": ElementProperty(PropertyType.function),
+                "on_action": ElementProperty(PropertyType.function),
             },
         )
     }

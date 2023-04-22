@@ -66,7 +66,7 @@ interface ScenarioSelectorProps {
   scenarios?: Cycles | Scenarios;
   onScenarioCreate: string;
   onCtxSelection: string;
-  onSelection?: string;
+  onAction?: string;
   coreChanged?: Record<string, unknown>;
   updateVars: string;
   configs?: Array<[string, string]>;
@@ -183,8 +183,6 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     setNewProp({ id: "", key: "", value: "" });
   };
 
-  const emptyProperties = useCallback(() => setProperties([]), []);
-
   const propertyDelete = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const { id = "-1" } = e.currentTarget.dataset;
     setProperties((props) => props.filter((item) => item.id !== id));
@@ -231,10 +229,10 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   const onSelect = useCallback(
     (e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
       dispatch(
-        createSendActionNameAction(id, module, props.onCtxSelection, { ids: Array.isArray(nodeIds) ? nodeIds : [nodeIds], user_action: props.onSelection })
+        createSendActionNameAction(id, module, props.onCtxSelection, { ids: Array.isArray(nodeIds) ? nodeIds : [nodeIds], user_action: props.onAction })
       );
     },
-    [props.onCtxSelection, module, props.onSelection]
+    [props.onCtxSelection, module, props.onAction]
   );
 
   return (
