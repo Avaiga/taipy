@@ -16,7 +16,7 @@ from sqlalchemy.orm import registry
 
 
 @as_declarative()
-class Base:
+class _SQLBaseModel:
     id: Any
     __name__: str
 

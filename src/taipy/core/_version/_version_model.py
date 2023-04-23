@@ -24,7 +24,7 @@ class _VersionModel(_BaseModel):
         "version",
         mapper_registry.metadata,
         Column("id", String, primary_key=True),
-        Column("config", String),
+        Column("config", String),  # config is store as a json string
         Column("creation_date", String),
     )
     id: str

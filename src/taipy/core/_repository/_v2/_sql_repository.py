@@ -45,8 +45,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             return
         self.__insert_model(obj)
 
-    def _load(self, model_id: Any) -> Optional[ModelType]:
-        if entry := self.db.query(self.model).filter(self.model.id == model_id).first():
+    def _load(self, entity_id: Any) -> Optional[ModelType]:
+        if entry := self.db.query(self.model).filter(self.model.id == entity_id).first():
             return self.converter._model_to_entity(entry)
         return None
 

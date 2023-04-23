@@ -19,7 +19,9 @@ from src.taipy.core.common.typing import Converter, Entity, Json, ModelType
 from taipy.config.config import Config
 
 from ...exceptions import InvalidExportPath, ModelNotFound
-from .._v2._abstract_repository import _AbstractRepository, _Decoder, _Encoder
+from .._v2._abstract_repository import _AbstractRepository
+from .._v2._decoder import _Decoder
+from .._v2._encoder import _Encoder
 
 
 class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
