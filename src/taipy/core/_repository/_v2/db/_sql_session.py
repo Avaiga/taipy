@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from functools import cache
+from functools import lru_cache
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -19,7 +19,7 @@ from src.taipy.core.exceptions import MissingRequiredProperty
 from taipy.config.config import Config
 
 
-@cache
+@lru_cache
 def _build_engine():
     properties = Config.global_config.repository_properties
     try:
