@@ -10,10 +10,16 @@
 # specific language governing permissions and limitations under the License.
 
 import re
+import sys
 
 import pytest
 
 from src.taipy.config._cli._argparser import _Argparser
+
+if sys.version_info >= (3, 9):
+    argparse_options_str = "options:"
+else:
+    argparse_options_str = "optional arguments:"
 
 
 def preprocess_stdout(stdout):
@@ -24,6 +30,8 @@ def preprocess_stdout(stdout):
 @pytest.fixture(autouse=True, scope="function")
 def clean_argparser():
     _Argparser.sub_taipyparsers = {}
+    _Argparser._remove_subparser("subcommand_1")
+    _Argparser._remove_subparser("subcommand_2")
 
     yield
 
@@ -37,40 +45,40 @@ def test_parser(capfd):
     subcommand_2.add_argument("--doo", "-d", help="doo help")
     subcommand_2.add_argument("--baz", "-z", help="baz help")
 
-    expected_help_message = """[-h] {subcommand_1,subcommand_2} ...
+    expected_help_message = f"""[-h] {{subcommand_1,subcommand_2}} ...
 
 positional arguments:
-  {subcommand_1,subcommand_2}
+  {{subcommand_1,subcommand_2}}
     subcommand_1        subcommand_1 help
     subcommand_2        subcommand_2 help
 
-options:
+{argparse_options_str}
   -h, --help            show this help message and exit
-    """.strip()
+    """
 
     _Argparser._main_parser.print_help()
     stdout, _ = capfd.readouterr()
     assert preprocess_stdout(expected_help_message) in preprocess_stdout(stdout)
 
-    expected_subcommand_1_help_message = """subcommand_1 [-h] [--foo FOO] [--bar BAR]
+    expected_subcommand_1_help_message = f"""subcommand_1 [-h] [--foo FOO] [--bar BAR]
 
-options:
+{argparse_options_str}
   -h, --help         show this help message and exit
   --foo FOO, -f FOO  foo help
   --bar BAR, -b BAR  bar help
-    """.strip()
+    """
 
     subcommand_1.print_help()
     stdout, _ = capfd.readouterr()
     assert preprocess_stdout(expected_subcommand_1_help_message) in preprocess_stdout(stdout)
 
-    expected_subcommand_2_help_message = """subcommand_2 [-h] [--doo DOO] [--baz BAZ]
+    expected_subcommand_2_help_message = f"""subcommand_2 [-h] [--doo DOO] [--baz BAZ]
 
-options:
+{argparse_options_str}
   -h, --help         show this help message and exit
   --doo DOO, -d DOO  doo help
   --baz BAZ, -z BAZ  baz help
-    """.strip()
+    """
 
     subcommand_2.print_help()
     stdout, _ = capfd.readouterr()
@@ -96,14 +104,14 @@ def test_remove_subcommand(capfd):
     _Argparser._remove_subparser("subcommand_1")
     _Argparser._remove_subparser("subcommand_2")
 
-    expected_help_message = """[-h] {} ...
+    expected_help_message = f"""[-h] {{}} ...
 
 positional arguments:
-  {}
+  {{}}
 
-options:
+{argparse_options_str}
   -h, --help  show this help message and exit
-    """.strip()
+    """
 
     _Argparser._main_parser.print_help()
     stdout, _ = capfd.readouterr()

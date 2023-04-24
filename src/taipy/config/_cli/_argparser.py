@@ -47,6 +47,8 @@ class _Argparser:
     @classmethod
     def _remove_subparser(cls, name: str):
         """Remove a subparser from argparse."""
+        cls.sub_taipyparsers.pop(name, None)
+
         cls._subparser_action._name_parser_map.pop(name, None)
 
         for action in cls._subparser_action._choices_actions:
