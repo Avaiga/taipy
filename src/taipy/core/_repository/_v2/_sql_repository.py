@@ -106,15 +106,15 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         with open(export_path, "w", encoding="utf-8") as export_file:
             export_file.write(json.dumps(entry.to_dict()))
 
-    def get_by_config(self, config_id: Any) -> Optional[ModelType]:
-        return self.db.query(self.model).filter(self.model.config_id == config_id).first()
-
-    def get_multi(self, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
-        return self.db.query(self.model).offset(skip).limit(limit).all()
-
     ###########################################
     # ##   Specific or optimized methods   ## #
     ###########################################
+    def _get_multi(self, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
+        return self.db.query(self.model).offset(skip).limit(limit).all()
+
+    def _get_by_config(self, config_id: Any) -> Optional[ModelType]:
+        return self.db.query(self.model).filter(self.model.config_id == config_id).first()
+
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
         entry = self.__get_entities_by_config_and_owner(config_id, owner_id)
         return self.converter._model_to_entity(entry)
@@ -148,10 +148,10 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     # ##   Private methods   ## #
     #############################
-    def __insert_model(self, obj: ModelType):
-        self.db.add(obj)
+    def __insert_model(self, model: ModelType):
+        self.db.add(model)
         self.db.commit()
-        self.db.refresh(obj)
+        self.db.refresh(model)
 
     def __update_entry(self, entry, model):
         for field in entry:

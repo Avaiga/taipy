@@ -73,6 +73,9 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     def _delete_many(self, ids: Iterable[str]):
         """
         Delete all entities from the list of ids from the repository.
+
+        Parameters:
+            ids: List of ids to be deleted.
         """
         raise NotImplementedError
 
@@ -80,6 +83,10 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     def _delete_by(self, attribute: str, value: str):
         """
         Delete all entities from the list of ids from the repository.
+
+        Parameters:
+            attribute: The entity property that is the key to the search.
+            value: The value of the attribute that are being searched.
         """
         raise NotImplementedError
 
