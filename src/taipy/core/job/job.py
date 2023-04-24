@@ -57,6 +57,7 @@ class Job(_Entity, _Labeled):
     """
 
     _MANAGER_NAME = "job"
+    _ID_PREFIX = "JOB"
 
     def __init__(self, id: JobId, task: Task, submit_id: str, force=False, version=None):
         self.id = id

@@ -22,12 +22,13 @@ from .task_config import TaskConfig
 
 class PipelineConfig(Section):
     """
-    Holds all the configuration fields needed to instantiate an actual `Pipeline^` from the PipelineConfig.
+    Configuration fields needed to instantiate an actual `Pipeline^`.
 
     Attributes:
         id (str): Identifier of the pipeline configuration. It must be a valid Python variable name.
-        task_configs (Union[TaskConfig, List[TaskConfig]]): List of task configs. The default value is [].
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        task_configs (Union[TaskConfig, List[TaskConfig]]): List of task configs.<br/>
+            The default value is [].
+        **properties (dict[str, any]): A dictionary of additional properties.
     """
 
     name = "PIPELINE"
@@ -80,7 +81,7 @@ class PipelineConfig(Section):
             self._properties = {**default_section.properties, **self._properties}
 
     @staticmethod
-    def _configure(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
+    def _configure(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
         """Configure a new pipeline configuration.
 
         Parameters:
@@ -88,20 +89,20 @@ class PipelineConfig(Section):
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
                 configurations that make this new pipeline. This can be a single task
                 configuration object is this pipeline holds a single task.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `PipelineConfig^`: The new pipeline configuration.
+            The new pipeline configuration.
         """
         section = PipelineConfig(id, task_configs, **properties)
         Config._register(section)
         return Config.sections[PipelineConfig.name][id]
 
     @staticmethod
-    def _configure_default(task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
+    def _configure_default(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
         """Configure the default values for pipeline configurations.
 
-        This function creates the _default pipeline configuration_ object,
+        This function creates the *default pipeline configuration* object,
         where all pipeline configuration objects will find their default
         values when needed.
 
@@ -109,10 +110,9 @@ class PipelineConfig(Section):
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
                 configurations that make the default pipeline configuration. This can be
                 a single task configuration object is this pipeline holds a single task.
-            **properties (Dict[str, Any]): A keyworded variable length list of additional
-                arguments.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            `PipelineConfig^`: The default pipeline configuration.
+            The default pipeline configuration.
         """
         section = PipelineConfig(_Config.DEFAULT_KEY, task_configs, **properties)
         Config._register(section)

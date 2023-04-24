@@ -19,6 +19,7 @@ from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._v2._abstract_repository import _AbstractRepository
 from ..job._job_manager_factory import _JobManagerFactory
+from ..notification import EventEntityType, EventOperation, _publish_event
 from .cycle import Cycle
 from .cycle_id import CycleId
 
@@ -26,9 +27,12 @@ from .cycle_id import CycleId
 class _CycleManager(_Manager[Cycle]):
     _ENTITY_NAME = Cycle.__name__
     _repository: _AbstractRepository
+    _EVENT_ENTITY_TYPE = EventEntityType.CYCLE
 
     @classmethod
-    def _create(cls, frequency: Frequency, name: str = None, creation_date: datetime = None, **properties):
+    def _create(
+        cls, frequency: Frequency, name: Optional[str] = None, creation_date: Optional[datetime] = None, **properties
+    ):
         creation_date = creation_date if creation_date else datetime.now()
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
         end_date = _CycleManager._get_end_date_of_cycle(frequency, start_date)
@@ -36,6 +40,7 @@ class _CycleManager(_Manager[Cycle]):
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
         )
         cls._set(cycle)
+        _publish_event(cls._EVENT_ENTITY_TYPE, cycle.id, EventOperation.CREATION, None)
         return cycle
 
     @classmethod

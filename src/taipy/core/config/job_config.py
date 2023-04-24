@@ -27,7 +27,7 @@ class JobConfig(UniqueSection):
     Parameters:
         mode (str): The Taipy operating mode. By default, the "development" mode is set for testing and debugging the
             executions of jobs. A "standalone" mode is also available.
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        **properties (dict[str, any]): A dictionary of additional properties.
     """
 
     name = "JOB"
@@ -76,20 +76,23 @@ class JobConfig(UniqueSection):
     @staticmethod
     def _configure(
         mode: str = None, nb_of_workers: Union[int, str] = None, max_nb_of_workers: Union[int, str] = None, **properties
-    ):
+    ) -> "JobConfig":
         """Configure job execution.
+
         Parameters:
             mode (Optional[str]): The job execution mode.
-                Possible values are: _"standalone"_ (the default value) or
-                _"development"_.
-            max_nb_of_workers (Optional[int, str]): Parameter used only in default _"standalone"_ mode. The maximum
-                number of jobs able to run in parallel. The default value is 1.<br/>
+                Possible values are: *"standalone"* (the default value) or *"development"*.
+            max_nb_of_workers (Optional[int, str]): Parameter used only in default *"standalone"* mode.
+                This indicates the maximum number of jobs able to run in parallel.<br/>
+                The default value is 1.<br/>
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
-                `&lt;env_var&gt;` is the name of environment variable.
-            nb_of_workers (Optional[int, str]): Deprecated. Use max_nb_of_workers instead.
+                `&lt;env_var&gt;` is the name of an environment variable.
+            nb_of_workers (Optional[int, str]): Deprecated. Use *max_nb_of_workers* instead.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
         Returns:
-            `JobConfig^`: The job execution configuration.
+            The new job execution configuration.
         """
         if nb_of_workers:
             _warn_deprecated("nb_or_workers", suggest="max_nb_of_workers")

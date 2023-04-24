@@ -15,7 +15,6 @@ from typing import Dict, List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._utils import _load_fct
 from ..exceptions.exceptions import MissingRequiredProperty
 from .abstract_sql import _AbstractSQLDataNode
 from .data_node_id import DataNodeId, Edit
@@ -56,7 +55,7 @@ class SQLDataNode(_AbstractSQLDataNode):
             - _"db_password"_ `(str)`: The database password.
             - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.
             - _"db_port"_ `(int)`: The database port. The default value is 1433.
-            - _"db_driver"_ `(str)`: The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            - _"db_driver"_ `(str)`: The database driver.
             - _"sqlite_folder_path"_ (str): The path to the folder that contains SQLite file. The default value
                 is the current working folder.
             - _"sqlite_file_extension"_ (str): The filename extension of the SQLite file. The default value is ".db".

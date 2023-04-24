@@ -35,6 +35,7 @@ from ..exceptions.exceptions import (
 )
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
@@ -45,6 +46,7 @@ from .scenario_id import ScenarioId
 class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
     _ENTITY_NAME = Scenario.__name__
+    _EVENT_ENTITY_TYPE = EventEntityType.SCENARIO
 
     _repository: _AbstractRepository
 
@@ -103,7 +105,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         creation_date: Optional[datetime.datetime] = None,
         name: Optional[str] = None,
     ) -> Scenario:
-        scenario_id = Scenario._new_id(str(config.id))  # type: ignore
+        scenario_id = Scenario._new_id(str(config.id))
         cycle = (
             _CycleManagerFactory._build_manager()._get_or_create(config.frequency, creation_date)
             if config.frequency
@@ -121,7 +123,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             props["name"] = name
         version = cls._get_latest_version()
         scenario = Scenario(
-            str(config.id),  # type: ignore
+            str(config.id),
             pipelines,
             props,
             scenario_id,
@@ -134,6 +136,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             pipeline._parent_ids.update([scenario_id])
         cls.__save_pipelines(pipelines)
         cls._set(scenario)
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)
         return scenario
 
     @classmethod
@@ -160,11 +163,14 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         scenario_subscription_callback = cls.__get_status_notifier_callbacks(scenario) + callbacks
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(scenario._get_inputs())
-        return (
+
+        jobs = (
             _TaskManagerFactory._build_manager()
             ._orchestrator()
             .submit(scenario, callbacks=scenario_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.SUBMISSION, None)
+        return jobs
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:
@@ -240,7 +246,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         cls._set(scenario)
 
     @classmethod
-    def _delete(cls, scenario_id: ScenarioId):  # type: ignore
+    def _delete(cls, scenario_id: ScenarioId):
         scenario = cls._get(scenario_id)
         if scenario.is_primary:
             if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
@@ -309,7 +315,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         while scenario := cls._repository._search("version", version_number):
             if scenario.cycle and len(cls._get_all_by_cycle(scenario.cycle)) == 1:
                 _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
-            cls._repository._delete(scenario.id)
+            super()._delete(scenario.id)
 
     @classmethod
     def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:

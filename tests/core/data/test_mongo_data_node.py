@@ -19,7 +19,7 @@ import pytest
 from bson import ObjectId
 from bson.errors import InvalidDocument
 
-from src.taipy.core import DefaultCustomDocument
+from src.taipy.core import MongoDefaultDocument
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.mongo import MongoCollectionDataNode
 from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
@@ -57,7 +57,7 @@ class TestMongoCollectionDataNode:
             "db_password": "",
             "db_name": "taipy",
             "collection_name": "foo",
-            "custom_document": DefaultCustomDocument,
+            "custom_document": MongoDefaultDocument,
             "db_extra_args": {
                 "ssl": "true",
                 "retrywrites": "false",
@@ -81,7 +81,7 @@ class TestMongoCollectionDataNode:
         assert mongo_dn.owner_id is None
         assert mongo_dn.job_ids == []
         assert mongo_dn.is_ready_for_reading
-        assert mongo_dn.custom_document == DefaultCustomDocument
+        assert mongo_dn.custom_document == MongoDefaultDocument
 
     @pytest.mark.parametrize(
         "properties",
@@ -133,12 +133,12 @@ class TestMongoCollectionDataNode:
         data = mongo_dn.read()
 
         assert isinstance(data, list)
-        assert isinstance(data[0], DefaultCustomDocument)
-        assert isinstance(data[1], DefaultCustomDocument)
-        assert isinstance(data[2], DefaultCustomDocument)
-        assert isinstance(data[3], DefaultCustomDocument)
-        assert isinstance(data[4], DefaultCustomDocument)
-        assert isinstance(data[5], DefaultCustomDocument)
+        assert isinstance(data[0], MongoDefaultDocument)
+        assert isinstance(data[1], MongoDefaultDocument)
+        assert isinstance(data[2], MongoDefaultDocument)
+        assert isinstance(data[3], MongoDefaultDocument)
+        assert isinstance(data[4], MongoDefaultDocument)
+        assert isinstance(data[5], MongoDefaultDocument)
 
         assert isinstance(data[0]._id, ObjectId)
         assert data[0].foo == "baz"

@@ -15,7 +15,7 @@ import pytest
 
 from src.taipy.core import taipy
 from src.taipy.core._entity._labeled import _Labeled
-from taipy import Config, Frequency, Scope
+from taipy.config import Config, Frequency, Scope
 
 
 class MockOwner:

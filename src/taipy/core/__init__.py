@@ -42,7 +42,7 @@ import json
 import os
 
 from ._core import Core
-from .common.default_custom_document import DefaultCustomDocument
+from .common.mongo_default_document import MongoDefaultDocument
 from .cycle.cycle import Cycle
 from .cycle.cycle_id import CycleId
 from .data.data_node import DataNode
@@ -68,6 +68,7 @@ from .taipy import (
     export_scenario,
     get,
     get_cycles,
+    get_cycles_scenarios,
     get_data_nodes,
     get_jobs,
     get_latest_job,

@@ -11,6 +11,8 @@
 
 import functools
 
+from ..notification import EventOperation, _publish_event
+
 
 class _Reloader:
     """The _Reloader singleton class"""
@@ -49,17 +51,15 @@ def _self_reload(manager):
     return __reload
 
 
-def _set_entity(manager: str, obj):
-    _get_manager(manager)._set(obj)
-
-
 def _self_setter(manager):
     def __set_entity(fct):
         @functools.wraps(fct)
         def _do_set_entity(self, *args, **kwargs):
             fct(self, *args, **kwargs)
             if not self._is_in_context:
-                _set_entity(manager, self)
+                entity_manager = _get_manager(manager)
+                entity_manager._set(self)
+                _publish_event(entity_manager._EVENT_ENTITY_TYPE, self.id, EventOperation.UPDATE, fct.__name__)
 
         return _do_set_entity
 

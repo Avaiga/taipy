@@ -24,6 +24,7 @@ from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..scenario.scenario_id import ScenarioId
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
@@ -35,6 +36,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
     _ENTITY_NAME = Pipeline.__name__
     _repository: _AbstractRepository
+    _EVENT_ENTITY_TYPE = EventEntityType.PIPELINE
 
     @classmethod
     def _get_all(cls, version_number: Optional[str] = "all") -> List[Pipeline]:
@@ -91,7 +93,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
     ) -> Pipeline:
-        pipeline_id = Pipeline._new_id(str(pipeline_config.id))  # type: ignore
+        pipeline_id = Pipeline._new_id(str(pipeline_config.id))
 
         task_manager = _TaskManagerFactory._build_manager()
         tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id, pipeline_id)
@@ -114,7 +116,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
         version = cls._get_latest_version()
         pipeline = Pipeline(
-            str(pipeline_config.id),  # type: ignore
+            str(pipeline_config.id),
             dict(**pipeline_config._properties),
             tasks,
             pipeline_id,
@@ -126,6 +128,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             task._parent_ids.update([pipeline_id])
         cls.__save_tasks(tasks)
         cls._set(pipeline)
+        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.CREATION, None)
         return pipeline
 
     @classmethod
@@ -152,11 +155,14 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(pipeline._get_inputs())
-        return (
+
+        jobs = (
             _TaskManagerFactory._build_manager()
             ._orchestrator()
             .submit(pipeline, callbacks=pipeline_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
+        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.SUBMISSION, None)
+        return jobs
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:
