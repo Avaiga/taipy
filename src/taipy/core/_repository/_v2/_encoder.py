@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any
 
-from taipy.core.common.typing import Json
+from ...common.typing import Json
 
 
 class _Encoder(json.JSONEncoder):
