@@ -16,13 +16,13 @@
             "description": "An enum value among GLOBAL, CYCLE, SCENARIO or PIPELINE that represents the visibility of the data node in the graph of entities.",
             "type": "string",
             "enum": [
-              "GLOBAL",
-              "CYCLE",
-              "SCENARIO",
-              "PIPELINE",
+              "GLOBAL:SCOPE",
+              "CYCLE:SCOPE",
+              "SCENARIO:SCOPE",
+              "PIPELINE:SCOPE",
               ""
             ],
-            "default": "SCENARIO"
+            "default": "SCENARIO:SCOPE"
           },
           "storage_type": {
             "description": "An enum value indicating the type of storage of the data node.",
@@ -231,7 +231,7 @@
                   "if": {
                     "properties": {
                       "storage_type": {
-                        "constant": "sql"
+                        "const": "sql"
                       }
                     }
                   },
@@ -242,19 +242,15 @@
                     ]
                   },
                   "else": {
-                    "then": {
-                      "required": [
-                        "table_name"
-                      ]
-                    }
+                    "required": [
+                      "table_name"
+                    ]
                   }
                 },
                 "else": {
-                  "then": {
-                    "required": [
-                      "collection_name"
-                    ]
-                  }
+                  "required": [
+                    "collection_name"
+                  ]
                 }
               }
             }
@@ -292,7 +288,7 @@
             "taipy_function": true
           },
           "skippable": {
-            "description": "A boolean value. True if the task can be skipped if the inputs have been updated since last run.",
+            "description": "A boolean value as a string: one of [False:bool, True:bool].",
             "type": "string",
             "enum": [
               "False:bool",
@@ -342,11 +338,12 @@
             "description": "The recurrence of the scenarios instantiated from this configuration. Based on this frequency the scenarios will be attached to the right cycles.",
             "type": "string",
             "enum": [
-              "DAILY",
-              "WEEKLY",
-              "MONTHLY",
-              "QUARTERLY",
-              "YEARLY"
+              "DAILY:FREQUENCY",
+              "WEEKLY:FREQUENCY",
+              "MONTHLY:FREQUENCY",
+              "QUARTERLY:FREQUENCY",
+              "YEARLY:FREQUENCY",
+              ""
             ]
           },
           "comparators": {
@@ -374,6 +371,7 @@
         },
         "clean_entities_enabled": {
           "description": "Boolean field to activate/deactivate the clean entities feature.",
+          "type": "string",
           "enum": [
             "True:bool",
             "False:bool"
@@ -382,10 +380,14 @@
         },
         "read_entity_retry": {
           "description": "Number of times to retry before return failure to read an entity.",
-          "type": "int"
+          "type": [
+            "integer",
+            "string"
+          ]
         },
         "repository_type": {
           "description": "The repository type that is used to store the entities.",
+          "type": "string",
           "enum": [
             "sql",
             "filesystem"
@@ -402,6 +404,7 @@
       "type": "object",
       "properties": {
         "mode": {
+          "type": "string",
           "enum": [
             "standalone",
             "development"
@@ -410,7 +413,10 @@
         },
         "max_nb_of_workers": {
           "description": "mode: standalone specific. The maximum number of jobs able to run in parallel.",
-          "type": "int"
+          "type": [
+            "integer",
+            "string"
+          ]
         }
       }
     }
