@@ -13,7 +13,7 @@ import sys
 
 from cookiecutter.main import cookiecutter
 
-from taipy.config._cli._argparser import _Argparser
+from taipy.config._cli._cli import _CLI
 
 
 class _ScaffoldCLI:
@@ -23,17 +23,17 @@ class _ScaffoldCLI:
 
     @classmethod
     def create_parser(cls):
-        create_parser = _Argparser._add_subparser("create", help="Create a new Taipy application.")
+        create_parser = _CLI._add_subparser("create", help="Create a new Taipy application.")
         create_parser.add_argument(
             "--template",
-            choices=["default", "scenario_manager"],
+            choices=["default"],
             default="default",
             help="The Taipy template to create new application.",
         )
 
     @classmethod
     def parse_arguments(cls):
-        args = _Argparser._parse()
+        args = _CLI._parse()
 
         if getattr(args, "which", None) == "create":
             cookiecutter(cls.__TEMPLATE_MAP[args.template])

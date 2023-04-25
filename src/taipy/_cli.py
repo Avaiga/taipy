@@ -12,7 +12,7 @@
 import os
 import sys
 
-from taipy.config._cli._argparser import _Argparser
+from taipy.config._cli._cli import _CLI
 from taipy.core._version._cli._version_cli import _VersioningCLI
 
 from ._scaffold_cli import _ScaffoldCLI
@@ -24,7 +24,7 @@ def cli():
 
     _VersioningCLI.create_parser()
     _ScaffoldCLI.create_parser()
-    _Argparser._remove_subparser("taipy")
+    _CLI._remove_subparser("taipy")
 
     _VersioningCLI.parse_arguments()
     _ScaffoldCLI.parse_arguments()

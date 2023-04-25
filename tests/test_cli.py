@@ -65,11 +65,11 @@ def test_taipy_create_help(capsys):
     with patch("sys.argv", ["prog", "create", "--help"]):
         with pytest.raises(SystemExit):
             cli()
-        expected_help = """create [-h] [--template {default,scenario_manager}]
+        expected_help = """create [-h] [--template {default}]
 
 options:
   -h, --help            show this help message and exit
-  --template {default,scenario_manager}
+  --template {default}
                         The Taipy template to create new application.
 """
         out, _ = capsys.readouterr()
