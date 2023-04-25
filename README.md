@@ -129,7 +129,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 <br>
 
 ### Taipy Core - a walk on the code side
-<div align="left">For more advance use cases or if you prefer coding your configurations instead of using Taipy Studio, Taipy has your back! </div>   
+<div align="left">For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Taipy has your back! </div>   
 
 *<div align="left">Check out the movie genre demo scenario creation with this [Demo](https://www.taipy.io/project/movie-genre-selector/) </div>*
 
@@ -181,9 +181,10 @@ def on_genre_selected(state):
     state.df = scenario.filtered_data.read()  
 
 # Get list of genres
-genres = ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy', 'IMAX', 'Romance',
-               'Sci-FI', 'Western', 'Crime', 'Mystery', 'Drama', 'Horror', 'Thriller', 'Film-Noir',
-               'War', 'Musical', 'Documentary']
+genres = [
+    'Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy', 'IMAX'
+    'Romance','Sci-FI', 'Western', 'Crime', 'Mystery', 'Drama', 'Horror', 'Thriller', 'Film-Noir','War', 'Musical', 'Documentary'
+    ]
 
 # Initialization of variables
 df = pd.DataFrame(columns=['Title', 'Popularity %'])
