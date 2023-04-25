@@ -9,17 +9,31 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict
 
+from sqlalchemy import Column, String, Table
+
 from taipy.config.common.frequency import Frequency
 
+from .._repository._v2._base_taipy_model import _BaseModel
+from .._repository._v2.db._sql_base_model import mapper_registry
 from .cycle_id import CycleId
 
 
 @dataclass
-class _CycleModel:
+class _CycleModel(_BaseModel):
+    __table__ = Table(
+        "cycle",
+        mapper_registry.metadata,
+        Column("id", String, primary_key=True),
+        Column("name", String),
+        Column("frequency", String),
+        Column("properties", String),
+        Column("creation_date", String),
+        Column("start_date", String),
+        Column("end_date", String),
+    )
     id: CycleId
     name: str
     frequency: Frequency
@@ -27,9 +41,6 @@ class _CycleModel:
     creation_date: str
     start_date: str
     end_date: str
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {**dataclasses.asdict(self), "frequency": repr(self.frequency)}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):

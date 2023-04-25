@@ -19,7 +19,9 @@ from taipy.config.config import Config
 from ...common._utils import _retry
 from ...common.typing import Converter, Entity, Json, ModelType
 from ...exceptions import InvalidExportPath, ModelNotFound
-from ._abstract_repository import _AbstractRepository, _Decoder, _Encoder
+from .._v2._abstract_repository import _AbstractRepository
+from .._v2._decoder import _Decoder
+from .._v2._encoder import _Encoder
 
 
 class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
@@ -219,7 +221,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             file_content = json.loads(file_content, cls=_Decoder)
         model = self.model.from_dict(file_content)
         entity = self.converter._model_to_entity(model)
-        self.__migrate_old_entity(file_content, entity)
         return entity
 
     def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Json:
@@ -232,13 +233,3 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                     return None
 
         return json.loads(contents, cls=_Decoder)
-
-    def __migrate_old_entity(self, file_content, entity):
-        if not file_content.get("version") and hasattr(entity, "version"):
-            self._save(entity)
-            from taipy.logger._taipy_logger import _TaipyLogger
-
-            _TaipyLogger._get_logger().warning(
-                f"Entity {entity.id} has automatically been assigned to version named " f"{entity.version}"
-            )
-        return entity
