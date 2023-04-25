@@ -18,7 +18,7 @@ from taipy.config._cli._cli import _CLI
 
 class _ScaffoldCLI:
     __TEMPLATE_MAP = {
-        "default": "default_template_path",
+        "default": "https://github.com/Avaiga/scaffold-default",
     }
 
     @classmethod
