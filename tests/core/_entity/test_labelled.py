@@ -28,31 +28,39 @@ class MockOwner:
 def test_get_label():
     labeled_entity = _Labeled()
 
-    with pytest.raises(AttributeError):
+    with pytest.raises(NotImplementedError):
         labeled_entity.get_label()
+
+    with pytest.raises(NotImplementedError):
         labeled_entity.get_simple_label()
 
+    with pytest.raises(AttributeError):
+        labeled_entity._get_label()
+
+    with pytest.raises(AttributeError):
+        labeled_entity._get_simple_label()
+
     labeled_entity.id = "id"
-    assert labeled_entity.get_label() == "id"
-    assert labeled_entity.get_simple_label() == "id"
+    assert labeled_entity._get_label() == "id"
+    assert labeled_entity._get_simple_label() == "id"
 
     labeled_entity.config_id = "the config id"
-    assert labeled_entity.get_label() == "the config id"
-    assert labeled_entity.get_simple_label() == "the config id"
+    assert labeled_entity._get_label() == "the config id"
+    assert labeled_entity._get_simple_label() == "the config id"
 
     labeled_entity._properties = {"name": "a name"}
-    assert labeled_entity.get_label() == "a name"
-    assert labeled_entity.get_simple_label() == "a name"
+    assert labeled_entity._get_label() == "a name"
+    assert labeled_entity._get_simple_label() == "a name"
 
     labeled_entity.owner_id = "owner_id"
     with mock.patch("src.taipy.core.get") as get_mck:
         get_mck.return_value = MockOwner()
-        assert labeled_entity.get_label() == "owner_label > a name"
-        assert labeled_entity.get_simple_label() == "a name"
+        assert labeled_entity._get_label() == "owner_label > a name"
+        assert labeled_entity._get_simple_label() == "a name"
 
         labeled_entity._properties["label"] = "a wonderful label"
-        assert labeled_entity.get_label() == "a wonderful label"
-        assert labeled_entity.get_simple_label() == "a wonderful label"
+        assert labeled_entity._get_label() == "a wonderful label"
+        assert labeled_entity._get_simple_label() == "a wonderful label"
 
 
 def mult(n1, n2):

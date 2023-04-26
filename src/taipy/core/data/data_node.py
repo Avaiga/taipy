@@ -618,3 +618,19 @@ class DataNode(_Entity, _Labeled):
             properties=model.data_node_properties,
         )
         return _migrate_entity(datanode)
+
+    def get_label(self) -> str:
+        """Returns the data node simple label prefixed by its owner label.
+
+        Returns:
+            The label of the data node as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the data node simple label.
+
+        Returns:
+            The simple label of the data node as a string.
+        """
+        return self._get_simple_label()

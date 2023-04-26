@@ -319,3 +319,19 @@ class Pipeline(_Entity, _Submittable, _Labeled):
     @staticmethod
     def __to_task_ids(tasks):
         return [t.id if isinstance(t, Task) else t for t in tasks]
+
+    def get_label(self) -> str:
+        """Returns the pipeline simple label prefixed by its owner label.
+
+        Returns:
+            The label of the pipeline as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the pipeline simple label.
+
+        Returns:
+            The simple label of the pipeline as a string.
+        """
+        return self._get_simple_label()

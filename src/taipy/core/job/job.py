@@ -357,3 +357,19 @@ class Job(_Entity, _Labeled):
     @staticmethod
     def _serialize_subscribers(subscribers: List) -> List:
         return _fcts_to_dict(subscribers)
+
+    def get_label(self) -> str:
+        """Returns the job simple label prefixed by its owner label.
+
+        Returns:
+            The label of the job as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the job simple label.
+
+        Returns:
+            The simple label of the job as a string.
+        """
+        return self._get_simple_label()

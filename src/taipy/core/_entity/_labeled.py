@@ -8,14 +8,18 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import abc
 from typing import Optional
 
 
 class _Labeled:
     __LABEL_SEPARATOR = " > "
 
+    @abc.abstractmethod
     def get_label(self) -> str:
+        raise NotImplementedError
+
+    def _get_label(self) -> str:
         """Returns the entity label made of the simple label prefixed by the owner label.
 
         Returns:
@@ -23,7 +27,11 @@ class _Labeled:
         """
         return self._get_explicit_label() or self._generate_label()
 
+    @abc.abstractmethod
     def get_simple_label(self) -> str:
+        raise NotImplementedError
+
+    def _get_simple_label(self) -> str:
         """Returns the simple label.
 
         Returns:
