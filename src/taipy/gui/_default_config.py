@@ -60,6 +60,7 @@ default_config: Config = {
     "run_browser": True,
     "run_in_thread": False,
     "run_server": True,
+    "server_config": None,
     "single_client": False,
     "system_notification": False,
     "theme": None,

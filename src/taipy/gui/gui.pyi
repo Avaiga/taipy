@@ -6,6 +6,7 @@ from _typeshed import Incomplete
 from flask import Flask
 
 from .config import Config, ConfigParameter
+from .config import ServerConfig as ServerConfig
 from .config import Stylekit as Stylekit
 from .data.data_accessor import _DataAccessor as _DataAccessor
 from .extension.library import ElementLibrary
@@ -256,6 +257,7 @@ class Gui:
         run_browser: bool = ...,
         run_in_thread: bool = ...,
         run_server: bool = ...,
+        server_config: t.Optional[ServerConfig] = ...,
         single_client: bool = ...,
         system_notification: bool = ...,
         theme: t.Optional[t.Dict[str, t.Any]] = ...,

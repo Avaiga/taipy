@@ -48,6 +48,7 @@ ConfigParameter = t.Literal[
     "run_browser",
     "run_in_thread",
     "run_server",
+    "server_config",
     "single_client",
     "system_notification",
     "theme",
@@ -82,6 +83,17 @@ Stylekit = t.TypedDict(
     total=False,
 )
 
+ServerConfig = t.TypedDict(
+    "ServerConfig",
+    {
+        "cors": t.Optional[t.Union[bool, t.Dict[str, t.Any]]],
+        "socketio": t.Optional[t.Dict[str, t.Any]],
+        "ssl_context": t.Optional[t.Union[str, t.Tuple[str, str]]],
+        "flask": t.Optional[t.Dict[str, t.Any]],
+    },
+    total=False,
+)
+
 Config = t.TypedDict(
     "Config",
     {
@@ -105,6 +117,7 @@ Config = t.TypedDict(
         "run_browser": bool,
         "run_in_thread": bool,
         "run_server": bool,
+        "server_config": t.Optional[ServerConfig],
         "single_client": bool,
         "system_notification": bool,
         "theme": t.Optional[t.Dict[str, t.Any]],

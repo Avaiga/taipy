@@ -33,6 +33,7 @@ from werkzeug.serving import is_running_from_reloader
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .config import ServerConfig
 from .renderers.json import _TaipyJsonProvider
 from .utils import _is_in_notebook, _RuntimeManager
 
@@ -50,26 +51,50 @@ class _Server:
         self,
         gui: Gui,
         flask: t.Optional[Flask] = None,
-        path_mapping: t.Optional[dict] = {},
+        path_mapping: t.Optional[dict] = None,
         async_mode: t.Optional[str] = None,
+        server_config: t.Optional[ServerConfig] = None,
     ):
         self._gui = gui
-        self._flask = Flask("Taipy") if flask is None else flask
+        server_config = server_config or {}
+        self._flask = flask
+        if self._flask is None:
+            flask_config: t.Dict[str, t.Any] = {"import_name": "Taipy"}
+            if "flask" in server_config and isinstance(server_config["flask"], dict):
+                flask_config.update(server_config["flask"])
+            self._flask = Flask(**flask_config)
         if "SECRET_KEY" not in self._flask.config or not self._flask.config["SECRET_KEY"]:
             self._flask.config["SECRET_KEY"] = "TaIpY"
-        # set json encoder (for Taipy specific types)
-        self._flask.json_provider_class = _TaipyJsonProvider
-        self._flask.json = self._flask.json_provider_class(self._flask)
-        # Add cors for front-end access
-        self._ws = SocketIO(
-            self._flask, cors_allowed_origins="*", ping_timeout=10, ping_interval=5, json=json, async_mode=async_mode
-        )
+
+        # setup cors
+        if "cors" not in server_config or (
+            "cors" in server_config and (isinstance(server_config["cors"], dict) or server_config["cors"] is True)
+        ):
+            cors_config = (
+                server_config["cors"] if "cors" in server_config and isinstance(server_config["cors"], dict) else {}
+            )
+            CORS(self._flask, **cors_config)
+
+        # setup socketio
+        socketio_config: t.Dict[str, t.Any] = {
+            "cors_allowed_origins": "*",
+            "ping_timeout": 10,
+            "ping_interval": 5,
+            "json": json,
+            "async_mode": async_mode,
+        }
+        if "socketio" in server_config and isinstance(server_config["socketio"], dict):
+            socketio_config.update(server_config["socketio"])
+        self._ws = SocketIO(self._flask, **socketio_config)
 
         self._apply_patch()
 
-        CORS(self._flask)
+        # set json encoder (for Taipy specific types)
+        self._flask.json_provider_class = _TaipyJsonProvider
+        self._flask.json = self._flask.json_provider_class(self._flask)
 
-        self.__path_mapping = path_mapping
+        self.__path_mapping = path_mapping or {}
+        self.__ssl_context = server_config.get("ssl_context", None)
         self._is_running = False
 
         # Websocket (handle json message)
@@ -253,6 +278,8 @@ class _Server:
             "debug": debug,
             "use_reloader": use_reloader,
         }
+        if self.__ssl_context is not None:
+            run_config["ssl_context"] = self.__ssl_context
         # flask-socketio specific conditions for 'allow_unsafe_werkzeug' parameters to be popped out of kwargs
         if self._get_async_mode() == "threading" and (not sys.stdin or not sys.stdin.isatty()):
             run_config = {**run_config, "allow_unsafe_werkzeug": allow_unsafe_werkzeug}
