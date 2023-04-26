@@ -309,3 +309,19 @@ class Job(_Entity, _Labeled):
     def _unlock_edit_on_outputs(self):
         for dn in self.task.output.values():
             dn.unlock_edit()
+
+    def get_label(self) -> str:
+        """Returns the job simple label prefixed by its owner label.
+
+        Returns:
+            The label of the job as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the job simple label.
+
+        Returns:
+            The simple label of the job as a string.
+        """
+        return self._get_simple_label()

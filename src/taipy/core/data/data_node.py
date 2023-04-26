@@ -552,3 +552,19 @@ class DataNode(_Entity, _Labeled):
             return subclasses
 
         return {c.storage_type(): c for c in all_subclasses(DataNode) if c.storage_type() is not None}
+
+    def get_label(self) -> str:
+        """Returns the data node simple label prefixed by its owner label.
+
+        Returns:
+            The label of the data node as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the data node simple label.
+
+        Returns:
+            The simple label of the data node as a string.
+        """
+        return self._get_simple_label()

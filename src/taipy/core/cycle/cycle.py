@@ -160,3 +160,19 @@ class Cycle(_Entity, _Labeled):
 
     def __hash__(self):
         return hash(self.id)
+
+    def get_label(self) -> str:
+        """Returns the cycle label.
+
+        Returns:
+            The label of the cycle as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the cycle simple label.
+
+        Returns:
+            The simple label of the cycle as a string.
+        """
+        return self._get_simple_label()

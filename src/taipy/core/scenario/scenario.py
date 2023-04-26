@@ -375,3 +375,19 @@ class Scenario(_Entity, _Submittable, _Labeled):
                 raise NonExistingPipeline(pipeline_or_id)
             pipelines[p.config_id] = p
         return pipelines
+
+    def get_label(self) -> str:
+        """Returns the scenario simple label prefixed by its owner label.
+
+        Returns:
+            The label of the scenario as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the scenario simple label.
+
+        Returns:
+            The simple label of the scenario as a string.
+        """
+        return self._get_simple_label()

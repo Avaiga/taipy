@@ -199,3 +199,19 @@ class Task(_Entity, _Labeled):
         from ._task_manager_factory import _TaskManagerFactory
 
         return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+
+    def get_label(self) -> str:
+        """Returns the task simple label prefixed by its owner label.
+
+        Returns:
+            The label of the task as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the task simple label.
+
+        Returns:
+            The simple label of the task as a string.
+        """
+        return self._get_simple_label()
