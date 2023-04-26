@@ -12,9 +12,9 @@
 
 import re
 import typing as t
-import warnings
 from enum import Enum
 
+from .._warnings import _warn
 from ..renderers.utils import _get_columns_dict
 from ..types import PropertyType
 from ..utils import _MapDict
@@ -84,7 +84,7 @@ _CHART_NAMES: t.Tuple[str, ...] = tuple(e.name[1:] if e.name[0] == "_" else e.na
 def __check_dict(values: t.List[t.Any], properties: t.Iterable[_Chart_iprops]) -> None:
     for prop in properties:
         if values[prop.value] is not None and not isinstance(values[prop.value], (dict, _MapDict)):
-            warnings.warn(f"chart {prop.name} should be a dict")
+            _warn(f"Property {prop.name} of chart control should be a dict.")
             values[prop.value] = None
 
 

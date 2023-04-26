@@ -13,4 +13,5 @@ import sys
 
 
 def is_debugging() -> bool:
+    """NOT DOCUMENTED"""
     return hasattr(sys, "gettrace") and sys.gettrace() is not None

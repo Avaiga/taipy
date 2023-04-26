@@ -10,13 +10,13 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-import warnings
 from datetime import datetime
 from importlib import util
 
 import numpy as np
 import pandas as pd
 
+from .._warnings import _warn
 from ..gui import Gui
 from ..types import PropertyType
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name
@@ -54,7 +54,7 @@ class _PandasDataAccessor(_DataAccessor):
         try:
             return str(gui._call_function_with_state(user_function, args))
         except Exception as e:
-            warnings.warn(f"Exception raised when calling user function {function_name}\n{e}")
+            _warn(f"Exception raised when calling user function {function_name}():\n{e}")
         return ""
 
     def __is_date_column(self, data: pd.DataFrame, col_name: str) -> bool:
@@ -144,7 +144,7 @@ class _PandasDataAccessor(_DataAccessor):
             )
             return new_col_name
         except Exception as e:
-            warnings.warn(f"Exception raised when invoking user function {function_name}.\n{e}")
+            _warn(f"Exception raised when invoking user function {function_name}():\n{e}")
         return False
 
     def __format_data(
@@ -233,7 +233,7 @@ class _PandasDataAccessor(_DataAccessor):
             try:
                 value = value.query(query)
             except Exception as e:
-                warnings.warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}\n{e}")
+                _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}:\n{e}")
 
         if paged:
             aggregates = payload.get("aggregates")
@@ -250,7 +250,7 @@ class _PandasDataAccessor(_DataAccessor):
                 try:
                     value = value.groupby(aggregates).agg(applies_with_fn)
                 except Exception:
-                    warnings.warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}")
+                    _warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}.")
             inf = payload.get("infinite")
             if inf is not None:
                 ret_payload["infinite"] = inf
@@ -263,7 +263,7 @@ class _PandasDataAccessor(_DataAccessor):
                 try:
                     start = int(str(payload["start"]), base=10)
                 except Exception:
-                    warnings.warn(f'start should be an int value {payload["start"]}')
+                    _warn(f'start should be an int value {payload["start"]}.')
                     start = 0
             if isinstance(payload["end"], int):
                 end = int(payload["end"])
@@ -292,7 +292,7 @@ class _PandasDataAccessor(_DataAccessor):
                     if _PandasDataAccessor.__INDEX_COL not in columns:
                         columns.append(_PandasDataAccessor.__INDEX_COL)
                 except Exception:
-                    warnings.warn(f"Cannot sort {var_name} on columns {order_by}.")
+                    _warn(f"Cannot sort {var_name} on columns {order_by}.")
                     new_indexes = slice(start, end + 1)  # type: ignore
             else:
                 new_indexes = slice(start, end + 1)  # type: ignore
@@ -340,7 +340,7 @@ class _PandasDataAccessor(_DataAccessor):
                             )
                             gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
                         except Exception as e:
-                            warnings.warn(f"Limit rows error with {decimator} for dataframe: {e}")
+                            _warn(f"Limit rows error with {decimator} for Dataframe:\n{e}")
             value = self.__build_transferred_cols(gui, columns, value)
             dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret

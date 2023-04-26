@@ -11,11 +11,11 @@
 
 import sys
 import typing as t
-import warnings
 import xml.etree.ElementTree as etree
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from .._warnings import _warn
 from ..renderers.builder import _Builder
 from ..types import PropertyType
 from ..utils import _get_broadcast_var_name, _to_camel_case
@@ -55,7 +55,7 @@ class ElementProperty:
             if isinstance(default_value, str):
                 self.default_value = _get_broadcast_var_name(default_value)
             else:
-                warnings.warn("Element property with type 'broadcast' must define a string default value")
+                _warn("Element property with type 'broadcast' must define a string default value.")
             self.property_type = PropertyType.react
         else:
             self.property_type = property_type
@@ -64,11 +64,9 @@ class ElementProperty:
 
     def check(self, element_name: str, prop_name: str):
         if not isinstance(prop_name, str) or not prop_name or not prop_name.isidentifier():
-            warnings.warn(f"Property name '{prop_name}' is invalid for element '{element_name}'.")
+            _warn(f"Property name '{prop_name}' is invalid for element '{element_name}'.")
         if not isinstance(self.property_type, PropertyType):
-            warnings.warn(
-                f"Property type '{self.property_type}' is invalid for element property '{element_name}.{prop_name}'."
-            )
+            _warn(f"Property type '{self.property_type}' is invalid for element property '{element_name}.{prop_name}'.")
 
     def _get_tuple(self, name: str) -> tuple:
         return (name, self.property_type, self.default_value)
@@ -91,6 +89,7 @@ class Element:
         properties: t.Dict[str, ElementProperty],
         react_component: t.Optional[str] = None,
         render_xhtml: t.Optional[t.Callable[[t.Dict[str, t.Any]], str]] = None,
+        inner_properties: t.Optional[t.Dict[str, ElementProperty]] = None,
     ) -> None:
         """Initializes a new custom element declaration.
 
@@ -100,6 +99,8 @@ class Element:
         Arguments:
             default_property (str): the name of the default property for this element.
             properties (List[ElementProperty]): The list of properties for this element.
+            inner_properties (Optional[List[ElementProperty]]): The optional list of inner properties for this element.<br/>
+                Default values are set/binded automatically.
             react_component (Optional[str]): The name of the component to be created on the front-end.<br/>
                 If not specified, it is set to a camel case version of the element's name
                 ("one_name" is transformed to "OneName").
@@ -109,6 +110,7 @@ class Element:
         """
         self.default_attribute = default_property
         self.attributes = properties
+        self.inner_properties = inner_properties
         self.js_name = react_component
         if callable(render_xhtml):
             self._render_xhtml = render_xhtml
@@ -119,7 +121,7 @@ class Element:
 
     def check(self, name: str):
         if not isinstance(name, str) or not name or not name.isidentifier():
-            warnings.warn(f"Invalid element name: '{name}'.")
+            _warn(f"Invalid element name: '{name}'.")
         default_found = False
         if self.attributes:
             for prop_name, property in self.attributes.items():
@@ -128,9 +130,9 @@ class Element:
                     if not default_found:
                         default_found = self.default_attribute == prop_name
                 else:
-                    warnings.warn(f"Property must inherit from 'ElementProperty' '{name}.{prop_name}'.")
+                    _warn(f"Property must inherit from 'ElementProperty' '{name}.{prop_name}'.")
         if not default_found:
-            warnings.warn(f"Element {name} has no default property.")
+            _warn(f"Element {name} has no default property.")
 
     def _is_server_only(self):
         return hasattr(self, "_render_xhtml") and callable(self._render_xhtml)
@@ -144,15 +146,9 @@ class Element:
         is_html: t.Optional[bool] = False,
     ) -> t.Union[t.Any, t.Tuple[str, str]]:
         attributes = properties if isinstance(properties, dict) else {}
-        for prop, attr in self.attributes.items():
-            if (
-                prop not in attributes
-                and (attr.property_type == PropertyType.react or attr.property_type == PropertyType.function)
-                and isinstance(attr.default_value, str)
-                and len(attr.default_value) > 2
-                and attr.default_value[0] == "{"
-                and attr.default_value[-1] == "}"
-            ):
+        if self.inner_properties:
+            self.attributes.update(self.inner_properties)
+            for prop, attr in self.inner_properties.items():
                 attributes[prop] = attr.default_value
         # this modifies attributes
         hash_names = _Builder._get_variable_hash_names(gui, attributes)  # variable replacement
@@ -167,7 +163,7 @@ class Element:
                     return xml_root
 
             except Exception as e:
-                warnings.warn(f"{name}.render_xhtml() did not return a valid XHTML string.\n{e}")
+                _warn(f"{name}.render_xhtml() did not return a valid XHTML string:\n{e}")
                 return f"{name}.render_xhtml() did not return a valid XHTML string. {e}"
         else:
             default_attr: t.Optional[ElementProperty] = None

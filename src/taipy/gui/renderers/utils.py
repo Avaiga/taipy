@@ -10,8 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-import warnings
 
+from .._warnings import _warn
 from ..types import NumberTypes
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name, _MapDict
 
@@ -36,8 +36,8 @@ def _get_columns_dict_from_list(
             col_dict[col] = {"index": idx}
             idx += 1
         elif col:
-            warnings.warn(
-                f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"'
+            _warn(
+                f'Error column "{col}" is not present in the Dataframe "{value.head(0) if hasattr(value, "head") else value}".'
             )
     return col_dict
 
@@ -63,7 +63,7 @@ def _get_columns_dict(  # noqa: C901
     elif isinstance(columns, dict):
         col_dict = columns.copy()
     if not isinstance(col_dict, dict):
-        warnings.warn("Error: columns attributes should be a string, list, tuple or dict")
+        _warn("Error: columns attributes should be a string, a list, a tuple or a dict.")
         col_dict = {}
     nb_cols = len(col_dict)
     if nb_cols == 0:

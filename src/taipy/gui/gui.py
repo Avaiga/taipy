@@ -41,6 +41,7 @@ if util.find_spec("pyngrok"):
 
 from ._default_config import _default_stylekit, default_config
 from ._page import _Page
+from ._warnings import _warn
 from .config import Config, ConfigParameter, ServerConfig, Stylekit, _Config
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
@@ -81,6 +82,7 @@ from .utils import (
     _TaipyLovValue,
     _to_camel_case,
     _variable_decode,
+    is_debugging,
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
@@ -88,7 +90,6 @@ from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
-from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 
 
 class _DoNotUpdate:
@@ -316,7 +317,7 @@ class Gui:
             with open(gui_file.parent / "version.json") as version_file:
                 self.__version = json.load(version_file)
         except Exception as e:  # pragma: no cover
-            warnings.warn(f"Cannot retrieve version.json file:\n{e}")
+            _warn(f"Cannot retrieve version.json file:\n{e}")
             self.__version = {}
 
         # Load Markdown extension
@@ -479,7 +480,7 @@ class Gui:
             self._reset_locals_context()
             self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
-            warnings.warn(f"Decoding Message has failed: {message}\n{e}")
+            _warn(f"Decoding Message has failed: {message}\n{e}")
 
     def __front_end_update(
         self,
@@ -547,8 +548,8 @@ class Gui:
         if not var_name:
             return (var_name, var_name)
         # Handle holder prefix if needed
-        if var_name.startswith(_HOLDER_PREFIX):
-            for hp in _HOLDER_PREFIXES:
+        if var_name.startswith(_TaipyBase._HOLDER_PREFIX):
+            for hp in _TaipyBase._get_holder_prefixes():
                 if var_name.startswith(hp):
                     var_name = var_name[len(hp) :]
                     break
@@ -586,7 +587,7 @@ class Gui:
         try:
             var_name, current_context = self._get_real_var_name(var_name)
         except Exception as e:  # pragma: no cover
-            warnings.warn(f"{e}")
+            _warn(f"{e}")
             return
         on_change_fn = self._get_user_function(on_change) if on_change else None
         if not callable(on_change_fn):
@@ -608,7 +609,7 @@ class Gui:
                 on_change_fn(*args)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(on_change or "on_change", e):
-                    warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception:\n{e}")
+                    _warn(f"{on_change or 'on_change'}(): callback function raised an exception:\n{e}")
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
         ret_value = self.__get_content_accessor().get_info(var_name, value, image)
@@ -647,14 +648,14 @@ class Gui:
                     args.append(qargs)
                 ret = self._call_function_with_state(self.on_user_content, args)
                 if ret is None:
-                    warnings.warn("on_user_content() callback function should return a value.")
+                    _warn("on_user_content() callback function should return a value.")
                 else:
                     return (ret, 200)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_user_content", e):
-                    warnings.warn(f"on_user_content() callback function raised an exception:\n{e}")
+                    _warn(f"on_user_content() callback function raised an exception:\n{e}")
         else:
-            warnings.warn("on_user_content() callback function has not been defined.")
+            _warn("on_user_content() callback function has not been defined.")
         return ("", 404)
 
     def __serve_extension(self, path: str) -> t.Any:
@@ -670,9 +671,8 @@ class Gui:
                         return send_file(resource_name)
                 except Exception as e:
                     last_error = e  # Check if the resource is served by another library with the same name
-        warnings.warn(
-            f"Resource '{resource_name or path}' not accessible for library '{parts[0]}':\n{last_error if last_error else ''}"
-        )
+        last_error = f"\n{last_error}" if last_error else ""
+        _warn(f"Resource '{resource_name or path}' not accessible for library '{parts[0]}'{last_error}")
         return ("", 404)
 
     def __get_version(self) -> str:
@@ -716,24 +716,24 @@ class Gui:
             try:
                 base_json.update(json.loads(template.read_text()))
             except Exception as e:  # pragma: no cover
-                warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
+                _warn(f"Exception raised reading JSON in '{template}':\n{e}")
         return {"gui": base_json}
 
     def __upload_files(self):
         self.__set_client_id_in_context()
         if "var_name" not in request.form:
-            warnings.warn("No var name")
+            _warn("No var name")
             return ("No var name", 400)
         var_name = request.form["var_name"]
         multiple = "multiple" in request.form and request.form["multiple"] == "True"
         if "blob" not in request.files:
-            warnings.warn("No file part")
+            _warn("No file part")
             return ("No file part", 400)
         file = request.files["blob"]
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == "":
-            warnings.warn("No selected file")
+            _warn("No selected file")
             return ("No selected file", 400)
         suffix = ""
         complete = True
@@ -756,7 +756,7 @@ class Gui:
                                 with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
                                     grouped_file.write(part_file.read())
                     except EnvironmentError as ee:  # pragma: no cover
-                        warnings.warn(f"cannot group file after chunk upload:\n{ee}")
+                        _warn(f"Cannot group file after chunk upload:\n{ee}")
                         return
                 # notify the file is uploaded
                 newvalue = str(file_path)
@@ -807,12 +807,23 @@ class Gui:
                         newvalue = self.__adapter._run_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
-                with warnings.catch_warnings(record=True) as w:
+                debug_warnings: t.List[warnings.WarningMessage] = []
+                with warnings.catch_warnings(record=True) as warns:
                     warnings.resetwarnings()
                     json.dumps(newvalue, cls=_TaipyJsonEncoder)
-                    if len(w):
-                        # do not send data that is not serializable
-                        continue
+                    if len(warns):
+                        keep_value = True
+                        for w in list(warns):
+                            if is_debugging():
+                                debug_warnings.append(w)
+                            if w.category is not DeprecationWarning and w.category is not PendingDeprecationWarning:
+                                keep_value = False
+                                break
+                        if not keep_value:
+                            # do not send data that is not serializable
+                            continue
+                for w in debug_warnings:
+                    warnings.warn(w.message, w.category)
             ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
@@ -836,7 +847,7 @@ class Gui:
                             if ret_payload:
                                 break
                         except Exception as e:  # pragma: no cover
-                            warnings.warn(
+                            _warn(
                                 f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)':\n{e}"
                             )
             if not isinstance(ret_payload, dict):
@@ -848,7 +859,11 @@ class Gui:
             if payload.get("refresh", False):
                 # refresh vars
                 for _var in t.cast(list, payload.get("names")):
-                    self._refresh_expr(_var)
+                    val = _getscopeattr_drill(self, _var)
+                    self._refresh_expr(
+                        val.get_name() if isinstance(val, _TaipyBase) else _var,
+                        val if isinstance(val, _TaipyBase) else None,
+                    )
             self.__send_var_list_update(payload["names"])
 
     def __send_ws(self, payload: dict) -> None:
@@ -862,7 +877,7 @@ class Gui:
                 )
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
-                warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
+                _warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
         else:
             grouping_message.append(payload)
 
@@ -874,7 +889,7 @@ class Gui:
             )
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
-            warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
+            _warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
 
     def __send_ack(self, ack_id: t.Optional[str]) -> None:
         if ack_id:
@@ -882,7 +897,7 @@ class Gui:
                 self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
                 time.sleep(0.001)
             except Exception as e:  # pragma: no cover
-                warnings.warn(
+                _warn(
                     f"Exception raised in Web Socket communication (send ack) in '{self.__frame.f_code.co_name}':\n{e}"
                 )
 
@@ -976,9 +991,9 @@ class Gui:
         try:
             self.__send_messages()
         except Exception as e:  # pragma: no cover
-            warnings.warn(f"Exception raised while sending messages:\n{e}")
+            _warn(f"Exception raised while sending messages:\n{e}")
         if exc_value:  # pragma: no cover
-            warnings.warn(f"An {exc_type or 'Exception'} was raised: {exc_value}")
+            _warn(f"An {exc_type or 'Exception'} was raised: {exc_value}.")
         return True
 
     def __hold_messages(self):
@@ -1017,7 +1032,7 @@ class Gui:
             ):
                 return
             else:  # pragma: no cover
-                warnings.warn(f"on_action: '{action}' is not a valid function")
+                _warn(f"on_action(): '{action}' is not a valid function.")
         if hasattr(self, "on_action"):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
@@ -1048,7 +1063,7 @@ class Gui:
                 return True
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function.__name__, e):
-                    warnings.warn(f"on_action: Exception raised in function '{action_function.__name__}':\n{e}")
+                    _warn(f"on_action(): Exception raised in '{action_function.__name__}()':\n{e}")
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
@@ -1073,7 +1088,7 @@ class Gui:
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:  # pragma: no cover
             if not self._call_on_exception(user_callback.__name__, e):
-                warnings.warn(f"invoke_callback: Exception raised in function '{user_callback.__name__}'.\n{e}")
+                _warn(f"invoke_callback(): Exception raised in '{user_callback.__name__}()':\n{e}")
         return None
 
     # Proxy methods for Evaluator
@@ -1083,8 +1098,8 @@ class Gui:
     def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)
 
-    def _refresh_expr(self, var_name: str):
-        return self.__evaluator.refresh_expr(self, var_name)
+    def _refresh_expr(self, var_name: str, holder: t.Optional[_TaipyBase]):
+        return self.__evaluator.refresh_expr(self, var_name, holder)
 
     def _get_expr_from_hash(self, hash_val: str) -> str:
         return self.__evaluator.get_expr_from_hash(hash_val)
@@ -1135,7 +1150,7 @@ class Gui:
 
                     return json.dumps(col_dict)
             except Exception as e:  # pragma: no cover
-                warnings.warn(f"Exception while rebuilding table columns {e}")
+                _warn(f"Exception while rebuilding table columns {e}.")
         return Gui.__DO_NOT_UPDATE_VALUE
 
     def _chart_conf(
@@ -1155,7 +1170,7 @@ class Gui:
 
                     return json.dumps(config)
             except Exception as e:  # pragma: no cover
-                warnings.warn(f"Exception while rebuilding chart config {e}")
+                _warn(f"Exception while rebuilding chart config {e}.")
         return Gui.__DO_NOT_UPDATE_VALUE
 
     # Proxy methods for Adapter
@@ -1422,7 +1437,7 @@ class Gui:
         if (
             new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes
         ):  # pragma: no cover
-            warnings.warn(f'Partial name "{new_partial._route}" is already defined.')
+            _warn(f'Partial name "{new_partial._route}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
 
@@ -1466,7 +1481,7 @@ class Gui:
             if var_name in bind_locals.keys():
                 self._bind(encoded_var_name, bind_locals[var_name])
             else:
-                warnings.warn(
+                _warn(
                     f"Variable '{var_name}' is not available in either the '{self._get_locals_context()}' or '__main__' modules."
                 )
         return encoded_var_name
@@ -1482,9 +1497,7 @@ class Gui:
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
         if func is not None and not callable(func):  # pragma: no cover
-            warnings.warn(
-                f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script."
-            )
+            _warn(f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
             func = None
         if func is None:
             func = self._get_locals_bind().get(name)
@@ -1492,7 +1505,7 @@ class Gui:
             if callable(func):
                 setattr(self, name, func)
             else:  # pragma: no cover
-                warnings.warn(f"{name}: {func} should be a function.")
+                _warn(f"{name}: {func} should be a function.")
 
     def load_config(self, config: Config) -> None:
         self._config._load(config)
@@ -1549,7 +1562,7 @@ class Gui:
     def _navigate(self, to: t.Optional[str] = "", tab: t.Optional[str] = None):
         to = to or Gui.__root_page_name
         if not to.startswith("/") and to not in self._config.routes and not urlparse(to).netloc:
-            warnings.warn(f'Cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
+            _warn(f'Cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
             return False
         self.__send_ws_navigate(to or Gui.__root_page_name, tab)
         return True
@@ -1562,7 +1575,7 @@ class Gui:
                 self._call_function_with_state(self.on_init, [])
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_init", e):
-                    warnings.warn(f"Exception raised in on_init.\n{e}")
+                    _warn(f"Exception raised in on_init():\n{e}")
         for name, libs in self.__extensions.items():
             for lib in libs:
                 if not isinstance(lib, ElementLibrary):
@@ -1571,7 +1584,7 @@ class Gui:
                     self._call_function_with_state(lib.on_user_init, [])
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception(f"{name}.on_user_init", e):
-                        warnings.warn(f"Exception raised in {name}.on_user_init().\n{e}")
+                        _warn(f"Exception raised in {name}.on_user_init():\n{e}")
         return self._render_route()
 
     def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
@@ -1579,7 +1592,7 @@ class Gui:
             try:
                 self.on_exception(self.__get_state(), str(function_name), exception)
             except Exception as e:  # pragma: no cover
-                warnings.warn(f"Exception raised in on_exception.\n{e}")
+                _warn(f"Exception raised in on_exception():\n{e}")
             return True
         return False
 
@@ -1589,7 +1602,7 @@ class Gui:
                 return self.on_status(self.__get_state())
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_status", e):
-                    warnings.warn(f"Exception raised in on_status.\n{e}")
+                    _warn(f"Exception raised in on_status:\n{e}")
         return None
 
     def __render_page(self, page_name: str) -> t.Any:
@@ -1603,11 +1616,11 @@ class Gui:
                         if self._navigate(nav_page):
                             return ("Root page cannot be re-routed by on_navigate().", 302)
                     else:
-                        warnings.warn(f"on_navigate() returned an invalid page name '{nav_page}'.")
+                        _warn(f"on_navigate() returned an invalid page name '{nav_page}'.")
                     nav_page = page_name
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_navigate", e):
-                    warnings.warn(f"Exception raised in on_navigate.\n{e}")
+                    _warn(f"Exception raised in on_navigate():\n{e}")
         page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
 
         # try partials
@@ -1797,9 +1810,9 @@ class Gui:
         if _conf_webapp_path:
             if _conf_webapp_path.is_dir():
                 _webapp_path = str(_conf_webapp_path.resolve())
-                warnings.warn(f"Now using webapp_path: '{_conf_webapp_path}'.")
+                _warn(f"Using webapp_path: '{_conf_webapp_path}'.")
             else:  # pragma: no cover
-                warnings.warn(
+                _warn(
                     f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."
                 )
 
@@ -1947,18 +1960,16 @@ class Gui:
                         and lib_context[0].isidentifier()
                     ):
                         if lib_context[0] in glob_ctx:
-                            warnings.warn(
-                                f"Method {name}.on_init() returned a name already defined '{lib_context[0]}'."
-                            )
+                            _warn(f"Method {name}.on_init() returned a name already defined '{lib_context[0]}'.")
                         else:
                             glob_ctx[lib_context[0]] = lib_context[1]
                     elif lib_context:
-                        warnings.warn(
+                        _warn(
                             f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier."
                         )
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception(f"{name}.on_init", e):
-                        warnings.warn(f"Method {name}.on_init() raised an exception:\n{e}.")
+                        _warn(f"Method {name}.on_init() raised an exception:\n{e}")
 
         # Initiate the Evaluator with the right context
         self.__evaluator = _Evaluator(glob_ctx)

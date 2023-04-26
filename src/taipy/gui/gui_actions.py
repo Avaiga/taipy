@@ -11,8 +11,8 @@
 
 import threading
 import typing as t
-import warnings
 
+from ._warnings import _warn
 from .gui import Gui
 from .state import State
 
@@ -29,7 +29,7 @@ def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action
     if state and isinstance(state._gui, Gui):
         state._gui._download(content, name, on_action)
     else:
-        warnings.warn("'download()' must be called in the context of a callback")
+        _warn("'download()' must be called in the context of a callback.")
 
 
 def notify(
@@ -69,7 +69,7 @@ def notify(
     if state and isinstance(state._gui, Gui):
         state._gui._notify(notification_type, message, system_notification, duration)
     else:
-        warnings.warn("'notify()' must be called in the context of a callback")
+        _warn("'notify()' must be called in the context of a callback.")
 
 
 def hold_control(
@@ -93,7 +93,7 @@ def hold_control(
     if state and isinstance(state._gui, Gui):
         state._gui._hold_actions(callback, message)
     else:
-        warnings.warn("'hold_actions()' must be called in the context of a callback")
+        _warn("'hold_actions()' must be called in the context of a callback.")
 
 
 def resume_control(state: State):
@@ -108,7 +108,7 @@ def resume_control(state: State):
     if state and isinstance(state._gui, Gui):
         state._gui._resume_actions()
     else:
-        warnings.warn("'resume_actions()' must be called in the context of a callback")
+        _warn("'resume_actions()' must be called in the context of a callback.")
 
 
 def navigate(state: State, to: t.Optional[str] = "", tab: t.Optional[str] = None):
@@ -124,7 +124,7 @@ def navigate(state: State, to: t.Optional[str] = "", tab: t.Optional[str] = None
     if state and isinstance(state._gui, Gui):
         state._gui._navigate(to, tab)
     else:
-        warnings.warn("'navigate()' must be called in the context of a callback")
+        _warn("'navigate()' must be called in the context of a callback.")
 
 
 def get_user_content_url(
@@ -142,7 +142,7 @@ def get_user_content_url(
     """
     if state and isinstance(state._gui, Gui):
         return state._gui._get_user_content_url(path, query_args)
-    warnings.warn("'get_user_content_url()' must be called in the context of a callback")
+    _warn("'get_user_content_url()' must be called in the context of a callback.")
     return None
 
 
@@ -181,7 +181,7 @@ def get_module_context(state: State) -> t.Optional[str]:
 
 
 def get_context_id(state: State) -> t.Any:
-    warnings.warn("'get_context_id()' was deprecated in Taipy GUI 2.0. Use 'get_state_id()' instead.")
+    _warn("'get_context_id()' was deprecated in Taipy GUI 2.0. Use 'get_state_id()' instead.")
     return get_state_id(state)
 
 
@@ -231,11 +231,11 @@ def invoke_callback(
     """
     if isinstance(gui, Gui):
         return gui._call_user_callback(state_id, callback, list(args), module_context)
-    warnings.warn("'invoke_callback()' must be called with a valid Gui instance")
+    _warn("'invoke_callback()' must be called with a valid Gui instance.")
 
 
 def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
-    warnings.warn("'invoke_state_callback()' was deprecated in Taipy GUI 2.0. Use 'invoke_callback()' instead.")
+    _warn("'invoke_state_callback()' was deprecated in Taipy GUI 2.0. Use 'invoke_callback()' instead.")
     return invoke_callback(gui, state_id, callback, args)
 
 
@@ -287,7 +287,7 @@ def invoke_long_callback(
             terminates (as if *period* was set to 0).
     """
     if not state or not isinstance(state._gui, Gui):
-        warnings.warn("'invoke_long_callback()' must be called in the context of a callback.")
+        _warn("'invoke_long_callback()' must be called in the context of a callback.")
         return
 
     state_id = get_state_id(state)
@@ -299,7 +299,7 @@ def invoke_long_callback(
 
     def callback_on_exception(state: State, function_name: str, e: Exception):
         if not this_gui._call_on_exception(function_name, e):
-            warnings.warn(f"invoke_long_callback: Exception raised in function {function_name}.\n{e}")
+            _warn(f"invoke_long_callback(): Exception raised in function {function_name}().\n{e}")
 
     def callback_on_status(
         status: t.Union[int, bool],

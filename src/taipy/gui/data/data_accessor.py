@@ -11,9 +11,9 @@
 
 import inspect
 import typing as t
-import warnings
 from abc import ABC, abstractmethod
 
+from .._warnings import _warn
 from ..utils import _TaipyData
 from .data_format import _DataFormat
 
@@ -94,7 +94,7 @@ class _DataAccessors(object):
         value = value.get()
         access = self.__access_4_type.get(type(value).__name__)
         if access is None:
-            warnings.warn(f"Can't find Data Accessor for type {type(value).__name__}")
+            _warn(f"Can't find Data Accessor for type {type(value).__name__}.")
             return self.__invalid_data_accessor
         return access
 

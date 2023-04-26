@@ -13,12 +13,12 @@ import contextlib
 import json
 import numbers
 import typing as t
-import warnings
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
 from inspect import isclass
 from urllib.parse import quote
 
+from .._warnings import _warn
 from ..partial import Partial
 from ..types import PropertyType, _get_taipy_type
 from ..utils import (
@@ -112,7 +112,7 @@ class _Builder:
                     (val, key_hash) = _Builder.__parse_attribute_value(gui, v)
                     self.__attributes[k] = f"{{{prop_hash}['{k}']}}" if key_hash is None else v
             else:
-                warnings.warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
+                _warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
         # Bind potential function and expressions in self.attributes
         self.__hashes.update(_Builder._get_variable_hash_names(gui, self.__attributes, hash_names))
@@ -132,7 +132,7 @@ class _Builder:
                     return (func, hash_value)
                 return (_getscopeattr_drill(gui, hash_value), hash_value)
             except AttributeError:
-                warnings.warn(f"Expression '{value}' cannot be evaluated")
+                _warn(f"Expression '{value}' cannot be evaluated.")
         return (value, None)
 
     @staticmethod
@@ -227,7 +227,7 @@ class _Builder:
             if isinstance(dict_attr, (dict, _MapDict)):
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
-                warnings.warn(f"{self.__element_name} {name} should be a dict\n'{str(dict_attr)}'")
+                _warn(f"{self.__element_name}: {name} should be a dict: '{str(dict_attr)}'.")
         return self
 
     def __set_json_attribute(self, name, value):
@@ -237,7 +237,7 @@ class _Builder:
         lof = self.__get_list_of_(name)
         if not isinstance(lof, (list, tuple)):
             if lof is not None:
-                warnings.warn(f"{self.__element_name} {name} should be a list")
+                _warn(f"{self.__element_name}: {name} should be a list.")
             return self
         return self.__set_json_attribute(_to_camel_case(name), lof)
 
@@ -255,7 +255,7 @@ class _Builder:
         value = self.__attributes.get(name, default_value)
         if value is None:
             if not optional:
-                warnings.warn(f"Property {name} is required for control {self.__control_type}")
+                _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
         if isinstance(value, str):
             try:
@@ -276,7 +276,7 @@ class _Builder:
         strattr = self.__attributes.get(name, default_value)
         if strattr is None:
             if not optional:
-                warnings.warn(f"Property {name} is required for control {self.__control_type}")
+                _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
         return self.set_attribute(_to_camel_case(name), str(strattr))
 
@@ -306,7 +306,7 @@ class _Builder:
         strattr = self.__attributes.get(name, default_value)
         if strattr is None:
             if not optional:
-                warnings.warn(f"Property {name} is required for control {self.__control_type}")
+                _warn(f"Property {name} is required for control {self.__control_type}.")
             return self
         elif callable(strattr):
             strattr = self.__hashes.get(name)
@@ -316,7 +316,7 @@ class _Builder:
             strattr = str(strattr)
             func = self.__gui._get_user_function(strattr)
             if func == strattr:
-                warnings.warn(f" {self.__control_type}.{name}: {strattr} is not a function")
+                _warn(f"{self.__control_type}.{name}: {strattr} is not a function.")
         return self.set_attribute(_to_camel_case(name), strattr) if strattr else self
 
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
@@ -339,7 +339,7 @@ class _Builder:
             if adapter and isinstance(adapter, str):
                 adapter = self.__gui._get_user_function(adapter)
             if adapter and not callable(adapter):
-                warnings.warn("'adapter' property value is invalid")
+                _warn("'adapter' property value is invalid.")
                 adapter = None
             var_type = self.__attributes.get("type")
             if isclass(var_type):
@@ -460,7 +460,7 @@ class _Builder:
             else:
                 value = None
             if value in col_types.keys():
-                warnings.warn(f"{self.__element_name} style={value} cannot be a column's name")
+                _warn(f"{self.__element_name}: style={value} must not be a column name.")
             elif value:
                 self.set_attribute("lineStyle", value)
         if tooltip := self.__attributes.get("tooltip"):
@@ -471,7 +471,7 @@ class _Builder:
             else:
                 value = None
             if value in col_types.keys():
-                warnings.warn(f"{self.__element_name} tooltip={value} cannot be a column's name")
+                _warn(f"{self.__element_name}: tooltip={value} must not be a column name.")
             elif value:
                 self.set_attribute("tooltip", value)
         return self
@@ -503,7 +503,7 @@ class _Builder:
             value = str(value).lower()
             self.__attributes[var_name] = value
             if value not in values:
-                warnings.warn(f"{self.__element_name} {var_name}={value} should be in {values}")
+                _warn(f"{self.__element_name}: {var_name}={value} should be in {values}.")
             else:
                 self.__set_string_attribute(var_name, default_value)
         return self
@@ -520,7 +520,7 @@ class _Builder:
             else:
                 self.__set_json_attribute(name, val)
         elif val is not None:
-            warnings.warn(f"{self.__element_name} {name} should be a list of {elt_type}")
+            _warn(f"{self.__element_name}: {name} should be a list of {elt_type}.")
         return []
 
     def _set_chart_selected(self, max=0):
@@ -557,7 +557,7 @@ class _Builder:
                     list_val = [int(v) for v in list_val]
             else:
                 if list_val is not None:
-                    warnings.warn(f"{self.__element_name} {name} should be a list")
+                    _warn(f"{self.__element_name}: {name} should be a list.")
                 list_val = []
             self.__set_react_attribute(_to_camel_case(name), list_val)
         else:
@@ -576,7 +576,7 @@ class _Builder:
         if hash_name := self.__hashes.get(var_name):
             self.__set_update_var_name(hash_name)
         else:
-            warnings.warn("{self.element_name} {var_name} should be bound")
+            _warn("{self.element_name}: {var_name} should be bound.")
         return self
 
     def _set_content(self, var_name: str = "content", image=True):
@@ -626,12 +626,12 @@ class _Builder:
             try:
                 numVal = float(numVal)
             except Exception as e:
-                warnings.warn(f"{self.__element_name} {var_name} cannot be transformed into a number\n{e}")
+                _warn(f"{self.__element_name}: {var_name} cannot be transformed into a number:\n{e}")
                 numVal = 0
         if isinstance(numVal, numbers.Number):
             self.__set_react_attribute(_to_camel_case(f"default_{var_name}"), numVal)
         elif numVal is not None:
-            warnings.warn(f"{self.__element_name} {var_name} value is not not valid {numVal}")
+            _warn(f"{self.__element_name}: {var_name} value is not valid ({numVal}).")
         if hash_name:
             hash_name = self.__get_typed_hash_name(hash_name, PropertyType.number)
             self.__update_vars.append(f"{var_name}={hash_name}")
@@ -727,9 +727,7 @@ class _Builder:
             return self
         if partial := self.__attributes.get("partial"):
             if self.__attributes.get("page"):
-                warnings.warn(
-                    f"{self.__element_name} control: page and partial should not be defined at the same time."
-                )
+                _warn(f"{self.__element_name} control: page and partial should not be both defined.")
             if isinstance(partial, Partial):
                 self.__attributes["page"] = partial._route
                 self.__set_react_attribute("partial", partial._route)
@@ -751,11 +749,11 @@ class _Builder:
             try:
                 page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
             except Exception as e:
-                warnings.warn(f"{self.__element_name} page_size_options: invalid value {page_size_options}\n{e}")
+                _warn(f"{self.__element_name}: page_size_options value is invalid ({page_size_options}):\n{e}")
         if isinstance(page_size_options, list):
             self.__set_json_attribute("pageSizeOptions", page_size_options)
         else:
-            warnings.warn(f"{self.__element_name} page_size_options should be a list")
+            _warn(f"{self.__element_name}: page_size_options should be a list.")
         return self
 
     def _set_input_type(self, type_name: str, allow_password=False):
@@ -792,7 +790,7 @@ class _Builder:
     def __set_dynamic_property_without_default(self, name: str, property_type: PropertyType):
         hash_name = self.__hashes.get(name)
         if hash_name is None:
-            warnings.warn(f"{self.__element_name}.{name} should be bound.")
+            _warn(f"{self.__element_name}.{name} should be bound.")
         else:
             hash_name = self.__get_typed_hash_name(hash_name, property_type)
             self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
@@ -869,6 +867,14 @@ class _Builder:
                 self._set_lov(attr[0])
             elif var_type == PropertyType.lov_value:
                 self.__set_dynamic_property_without_default(attr[0], var_type)
+            elif isclass(var_type) and issubclass(var_type, _TaipyBase):
+                if hash_name := self.__hashes.get(attr[0]):
+                    prop_name = _to_camel_case(attr[0])
+                    expr = self.__gui._get_expr_from_hash(hash_name)
+                    hash_name = self.__gui._evaluate_bind_holder(var_type, expr)
+                    self.__update_vars.append(f"{prop_name}={hash_name}")
+                    self.__set_react_attribute(prop_name, hash_name)
+
             self.__set_refresh_on_update()
         return self
 

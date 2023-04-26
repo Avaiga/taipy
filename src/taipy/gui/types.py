@@ -116,6 +116,10 @@ class PropertyType(Enum):
     number_or_lov_value = "number|lovValue"
     string_list = "stringlist"
     decimator = Decimator
+    """
+    The property holds an inner attributes that is defined by a library and cannot be overridden by the user.
+    """
+    inner = "inner"
 
 
 def _get_taipy_type(a_type: t.Optional[PropertyType]) -> t.Optional[t.Type[_TaipyBase]]:

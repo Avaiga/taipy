@@ -18,15 +18,17 @@ from taipy.gui import Gui
 from taipy.gui.utils.types import _TaipyNumber
 
 
-def test_unbind_variable_in_expression(gui: Gui):
+def test_unbind_variable_in_expression(gui: Gui, helpers):
     gui.run(run_server=False, single_client=True)
     with warnings.catch_warnings(record=True) as records:
         with gui.get_flask_app().app_context():
             gui._evaluate_expr("{x}")
-            assert len(records) == 3
-            assert "Variable 'x' is not available in" in str(records[0].message)
-            assert "Variable 'x' is not defined" in str(records[1].message)
-            assert "Cannot evaluate expression 'x': name 'x' is not defined" in str(records[2].message)
+            warns = helpers.get_taipy_warnings(records)
+            assert len(warns) == 3
+            assert "Variable 'x' is not available in" in str(warns[0].message)
+            assert "Variable 'x' is not defined" in str(warns[1].message)
+            assert "Cannot evaluate expression 'x'" in str(warns[2].message)
+            assert "name 'x' is not defined" in str(warns[2].message)
 
 
 def test_evaluate_same_expression_multiple_times(gui: Gui):
@@ -49,7 +51,7 @@ def test_evaluate_expressions_same_variable(gui: Gui):
         assert "tp_TpExPr_x" in s1 and "tp_TpExPr_x" in s2
 
 
-def test_evaluate_holder(gui: Gui, test_client):
+def test_evaluate_holder(gui: Gui):
     x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)

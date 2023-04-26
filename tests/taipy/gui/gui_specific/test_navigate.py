@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import json
 import warnings
 
 from taipy.gui import Gui, Markdown, State, navigate
@@ -66,8 +65,9 @@ def test_on_navigate_to_inexistant(gui: Gui, helpers):
         # Get the jsx once so that the page will be evaluated -> variable will be registered
         sid = helpers.create_scope_and_get_sid(gui)
         client.get(f"/taipy-jsx/test?client_id={sid}")
-        assert len(records) == 1
-        text = records[0].message.args[0] if isinstance(records[0].message, Warning) else records[0].message
+        warns = helpers.get_taipy_warnings(records)
+        assert len(warns) == 1
+        text = warns[0].message.args[0] if isinstance(warns[0].message, Warning) else warns[0].message
         assert text == 'Cannot navigate to "test2": unknown page.'
 
 

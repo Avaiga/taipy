@@ -12,8 +12,8 @@
 from __future__ import annotations
 
 import typing as t
-import warnings
 
+from .._warnings import _warn
 from ..icon import Icon
 from . import _MapDict
 
@@ -65,7 +65,7 @@ class _Adapter:
                 if children is not None:
                     dict_res.update(self._get_elt_per_ids(var_name, children))
             except Exception as e:
-                warnings.warn(f"Can't run adapter for {var_name}: {e}")
+                _warn(f"Cannot run adapter for {var_name}:\n{e}")
         return dict_res
 
     def _run(
@@ -79,17 +79,21 @@ class _Adapter:
                 result = adapter(result)
             elif isinstance(result, str):
                 return result
-            result = self._get_valid_result(result, id_only)
-            if result is None:
-                warnings.warn(
+            tpl_res = self._get_valid_result(result, id_only)
+            if tpl_res is None:
+                _warn(
                     f"Adapter for {var_name} did not return a valid result. Please check the documentation on List of Values Adapters."
                 )
             else:
-                if not id_only and len(result) > 2 and isinstance(result[2], list) and len(result[2]) > 0:
-                    result = (result[0], result[1], self.__on_tree(adapter, result[2]))
-                return result
+                if not id_only and len(tpl_res) > 2 and isinstance(tpl_res[2], list) and len(tpl_res[2]) > 0:
+                    tpl_res = (tpl_res[0], tpl_res[1], self.__on_tree(adapter, tpl_res[2]))
+                return (
+                    (tpl_res + result[len(tpl_res) :])
+                    if isinstance(result, tuple) and isinstance(tpl_res, tuple)
+                    else tpl_res
+                )
         except Exception as e:
-            warnings.warn(f"Can't run adapter for {var_name}: {e}")
+            _warn(f"Cannot run adapter for {var_name}:\n{e}")
         return None
 
     def __on_tree(self, adapter: t.Optional[t.Callable], tree: t.List[t.Any]):
@@ -120,10 +124,10 @@ class _Adapter:
                 return self.__get_id(value.id, False)
             elif hasattr(value, "__getitem__") and "id" in value:
                 return self.__get_id(value.get("id"), False)
-        if type(value).__name__ not in self.__warning_by_type:
-            warnings.warn(f"LoV id must be a string, using a string representation of {type(value)}")
+        if value is not None and type(value).__name__ not in self.__warning_by_type:
+            _warn(f"LoV id must be a string, using a string representation of {type(value)}.")
             self.__warning_by_type.add(type(value).__name__)
-        return str(value)
+        return "" if value is None else str(value)
 
     def __get_label(self, value: t.Any, dig=True) -> t.Union[str, t.Dict, None]:
         if isinstance(value, (str, Icon)):

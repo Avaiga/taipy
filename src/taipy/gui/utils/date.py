@@ -10,11 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-import warnings
 from datetime import date, datetime, time
 
 from dateutil import parser
 from pytz import utc
+
+from .._warnings import _warn
 
 
 def _date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
@@ -25,7 +26,7 @@ def _date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
         except Exception as e:
             # astimezone() fails on Windows for pre-epoch times
             # See https://bugs.python.org/issue36759
-            warnings.warn(f"There is some problems with date parsing to ISO!\n{e}")
+            _warn(f"Exception raised converting date to ISO 8601:\n{e}")
     return date_val.isoformat()
 
 

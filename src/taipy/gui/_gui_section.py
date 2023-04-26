@@ -44,15 +44,16 @@ class _GuiSection(UniqueSection):
 
     @staticmethod
     def _configure(**properties):
-        """Configure the Graphical User Interface.
+        """NOT DOCUMENTED
+        Configure the Graphical User Interface.
 
         Parameters:
-            **properties (Dict[str, Any]): Keyword arguments that configure the behavior of the `Gui^` instances.<br/>
+            **properties (dict[str, any]): Keyword arguments that configure the behavior of the `Gui^` instances.<br/>
                 Please refer to the
                 [Configuration section](../gui/configuration.md#configuring-the-gui-instance)
                 of the User Manual for more information on the accepted arguments.
         Returns:
-            `_GuiSection^`: The gui configuration.
+            The GUI configuration.
 
         """
         section = _GuiSection(property_list=list(default_config), **properties)

@@ -13,11 +13,11 @@ import base64
 import pathlib
 import tempfile
 import typing as t
-import warnings
 from importlib import util
 from pathlib import Path
 from sys import getsizeof
 
+from .._warnings import _warn
 from ..utils import _get_non_existent_file_path, _variable_decode
 
 _has_magic_module = False
@@ -55,7 +55,7 @@ class _ContentAccessor:
             try:
                 return magic.from_file(str(path), mime=True)
             except Exception as e:
-                warnings.warn(f"({path}) cannot read mime type.\n{e}")
+                _warn(f"Exception reading mime type in '{path}':\n{e}")
         return None
 
     def __get_display_name(self, var_name: str) -> str:
@@ -82,14 +82,14 @@ class _ContentAccessor:
                     mime = magic.from_buffer(value, mime=True)
                     file_name = "TaiPyContent." + mime.split("/")[-1]
                 except Exception as e:
-                    warnings.warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be typed.\n{e}")
+                    _warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be typed:\n{e}")
             file_path = _get_non_existent_file_path(self.__temp_dir_path, file_name)
             try:
                 with open(file_path, "wb") as temp_file:
                     temp_file.write(value)
             except Exception as e:
-                warnings.warn(
-                    f"{self.__get_display_name(var_name)} ({type(value)}) cannot be written to file {file_path}.\n{e}"
+                _warn(
+                    f"{self.__get_display_name(var_name)} ({type(value)}) cannot be written to file {file_path}:\n{e}"
                 )
             newvalue = file_path
         if isinstance(newvalue, (str, pathlib.Path)):
@@ -101,13 +101,13 @@ class _ContentAccessor:
                     and not str(path).startswith("/")
                     and not str(path).strip().lower().startswith("<svg")
                 ):
-                    warnings.warn(f"{self.__get_display_name(var_name)} ({value}) file does not exist.")
+                    _warn(f"{self.__get_display_name(var_name)}: file '{value}' does not exist.")
                 return str(value)
             if image:
                 if not mime:
                     mime = self.__get_mime_from_file(path)
                 if mime and not mime.startswith("image"):
-                    warnings.warn(f"{self.__get_display_name(var_name)} ({path}) is not an image: {mime}")
+                    _warn(f"{self.__get_display_name(var_name)}: file '{path}' mime type ({mime}) is not an image.")
                     return f"Invalid content: {mime}"
             dir_path = path.resolve().parent
             url_path = self.get_path(dir_path)
@@ -120,13 +120,13 @@ class _ContentAccessor:
                 mime = magic.from_buffer(value, mime=True)
                 if not image or mime.startswith("image"):
                     return f"data:{mime};base64," + str(base64.b64encode(value), "utf-8")
-                warnings.warn(f"{self.__get_display_name(var_name)} ({type(value)}) is not an image: {mime}")
+                _warn(f"{self.__get_display_name(var_name)}: ({type(value)}) does not have an image mime type: {mime}.")
                 return f"Invalid content: {mime}"
             except Exception as e:
-                warnings.warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be base64 encoded.\n{e}")
+                _warn(f"{self.__get_display_name(var_name)}: ({type(value)}) cannot be base64 encoded:\n{e}")
                 return "Cannot be base64 encoded"
         else:
-            warnings.warn(
-                "python-magic (and python-magic-bin for win) packages need to be installed if you want to process content as array of bytes."
+            _warn(
+                "python-magic (and python-magic-bin on Windows) packages need to be installed if you want to process content as an array of bytes."
             )
             return "Cannot guess content type"

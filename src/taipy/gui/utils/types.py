@@ -10,14 +10,17 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-import warnings
 from abc import ABC
 from datetime import datetime
 
+from .._warnings import _warn
 from . import _date_to_ISO, _ISO_to_date, _variable_decode
 
 
 class _TaipyBase(ABC):
+    __HOLDER_PREFIXES: t.Optional[t.List[str]] = None
+    _HOLDER_PREFIX = "_Tp"
+
     def __init__(self, data: t.Any, hash_name: str) -> None:
         self.__data = data
         self.__hash_name = hash_name
@@ -47,11 +50,17 @@ class _TaipyBase(ABC):
     def get_hash():
         return NotImplementedError
 
+    @staticmethod
+    def _get_holder_prefixes() -> t.List[str]:
+        if _TaipyBase.__HOLDER_PREFIXES is None:
+            _TaipyBase.__HOLDER_PREFIXES = [cls.get_hash() + "_" for cls in _TaipyBase.__subclasses__()]
+        return _TaipyBase.__HOLDER_PREFIXES
+
 
 class _TaipyData(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "D"
+        return _TaipyBase._HOLDER_PREFIX + "D"
 
 
 class _TaipyBool(_TaipyBase):
@@ -63,7 +72,7 @@ class _TaipyBool(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "B"
+        return _TaipyBase._HOLDER_PREFIX + "B"
 
 
 class _TaipyNumber(_TaipyBase):
@@ -78,13 +87,13 @@ class _TaipyNumber(_TaipyBase):
             try:
                 return float(value) if value else 0.0
             except Exception as e:
-                warnings.warn(f"{self._get_readable_name()}: Parsing {value} as float: {e}")
+                _warn(f"{self._get_readable_name()}: Parsing {value} as float:\n{e}")
                 return 0.0
         return super().cast_value(value)
 
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "N"
+        return _TaipyBase._HOLDER_PREFIX + "N"
 
 
 class _TaipyDate(_TaipyBase):
@@ -103,32 +112,28 @@ class _TaipyDate(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "Dt"
+        return _TaipyBase._HOLDER_PREFIX + "Dt"
 
 
 class _TaipyLovValue(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "Lv"
+        return _TaipyBase._HOLDER_PREFIX + "Lv"
 
 
 class _TaipyLov(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "L"
+        return _TaipyBase._HOLDER_PREFIX + "L"
 
 
 class _TaipyContent(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "C"
+        return _TaipyBase._HOLDER_PREFIX + "C"
 
 
 class _TaipyContentImage(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _HOLDER_PREFIX + "Ci"
-
-
-_HOLDER_PREFIX = "_Tp"
-_HOLDER_PREFIXES = [cls.get_hash() + "_" for cls in _TaipyBase.__subclasses__()]
+        return _TaipyBase._HOLDER_PREFIX + "Ci"

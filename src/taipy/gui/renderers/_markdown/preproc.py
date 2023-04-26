@@ -11,11 +11,11 @@
 
 import re
 import typing as t
-import warnings
 from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
+from ..._warnings import _warn
 from ..builder import _Builder
 from .factory import _MarkdownFactory
 
@@ -100,7 +100,7 @@ class _Preprocessor(MdPreprocessor):
                         line += f' {property[0]}="{prop_value}"'
                     line += _MarkdownFactory._TAIPY_END + new_line_delimeter
                 else:
-                    warnings.warn(f"Invalid tag name '{tag}' in line {line_count}")
+                    _warn(f"Invalid tag name '{tag}' in line {line_count}.")
             # Other controls
             for m in _Preprocessor.__CONTROL_RE.finditer(line):
                 control_name, properties = self._process_control(m.group(1), line_count)
@@ -129,16 +129,16 @@ class _Preprocessor(MdPreprocessor):
                     open_tag, open_tag_line_count, open_tag_identifier = tag_queue.pop()
                     close_tag_identifier = m.group(1)
                     if close_tag_identifier and not open_tag_identifier:
-                        warnings.warn(
-                            f"Missing opening '{open_tag}' tag identifier '{close_tag_identifier}' in line {open_tag_line_count}"
+                        _warn(
+                            f"Missing opening '{open_tag}' tag identifier '{close_tag_identifier}' in line {open_tag_line_count}."
                         )
                     if open_tag_identifier and not close_tag_identifier:
-                        warnings.warn(
-                            f"Missing closing '{open_tag}' tag identifier '{open_tag_identifier}' in line {line_count}"
+                        _warn(
+                            f"Missing closing '{open_tag}' tag identifier '{open_tag_identifier}' in line {line_count}."
                         )
                     if close_tag_identifier and open_tag_identifier and close_tag_identifier != open_tag_identifier:
-                        warnings.warn(
-                            f"Unmatched '{open_tag}' tag identifier in line {open_tag_line_count} and line {line_count}"
+                        _warn(
+                            f"Unmatched '{open_tag}' tag identifier in line {open_tag_line_count} and line {line_count}."
                         )
                     new_line = (
                         new_line[: m.start()]
@@ -155,7 +155,7 @@ class _Preprocessor(MdPreprocessor):
                         + f"<div>No matching opened tag on line {line_count}</div>"
                         + new_line[m.end() :]
                     )
-                    warnings.warn(f"Line {line_count} has an unmatched closing tag")
+                    _warn(f"Line {line_count} has an unmatched closing tag.")
             # append the new line
             new_lines.append(new_line)
         # Issue #337: add an empty string at the beginning of new_lines list if there is not one
@@ -167,7 +167,7 @@ class _Preprocessor(MdPreprocessor):
             new_lines.append(
                 _MarkdownFactory._TAIPY_START + tag + _MarkdownFactory._END_SUFFIX + _MarkdownFactory._TAIPY_END
             )
-            warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
+            _warn(f"Opened tag {tag} in line {line_no} is not closed.")
         return new_lines
 
     def _process_control(
@@ -188,7 +188,7 @@ class _Preprocessor(MdPreprocessor):
                 prop_name = prop_match.group(2)
                 val = prop_match.group(3)
                 if not_prefix and val:
-                    warnings.warn(f"Negated property {prop_name} value ignored at {line_count}")
+                    _warn(f"Negated property {prop_name} value ignored at {line_count}.")
                 prop_value = "True"
                 if not_prefix:
                     prop_value = "False"
@@ -198,12 +198,12 @@ class _Preprocessor(MdPreprocessor):
             elif len(fragment) > 1 and fragment[0] == "{" and fragment[-1] == "}":
                 properties.append(self._make_prop_pair(fragment[1:-1], fragment))
             else:
-                warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
+                _warn(f"Bad Taipy property format at line {line_count}: '{fragment}'.")
         if control_name is None:
             if properties and all(attribute != properties[0][0] for attribute in _MarkdownFactory._TEXT_ATTRIBUTES):
                 control_name = properties[0][0]
                 properties = properties[1:]
-                warnings.warn(f"Unrecognized control {control_name} at line {line_count}: <|{prop_string}|>")
+                _warn(f'Unrecognized control {control_name} at line {line_count}: "<|{prop_string}|>".')
             else:
                 control_name = default_control_name
         if default_prop_value is not None:

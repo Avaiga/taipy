@@ -11,8 +11,8 @@
 
 import re
 import typing as t
-import warnings
 
+from .._warnings import _warn
 from .boolean import _is_boolean, _is_boolean_true
 from .clientvarname import _to_camel_case
 
@@ -39,7 +39,7 @@ def _update_col_desc_from_indexed(
             if col_desc.get(_to_camel_case(name)) is None:
                 col_desc[_to_camel_case(name)] = str(v)
         else:
-            warnings.warn(f"{elt_name} {name}[{k}] is not in the list of displayed columns")
+            _warn(f"{elt_name}: {name}[{k}] is not in the list of displayed columns.")
 
 
 def _enhance_columns(  # noqa: C901
@@ -53,21 +53,21 @@ def _enhance_columns(  # noqa: C901
             if col_desc := _get_column_desc(columns, k):
                 col_desc["filter"] = True
             else:
-                warnings.warn(f"{elt_name} filter[{k}] is not in the list of displayed columns")
+                _warn(f"{elt_name}: filter[{k}] is not in the list of displayed columns.")
     editables = _get_name_indexed_property(attributes, "editable")
     for k, v in editables.items():
         if _is_boolean(v):
             if col_desc := _get_column_desc(columns, k):
                 col_desc["notEditable"] = not _is_boolean_true(v)
             else:
-                warnings.warn(f"{elt_name} editable[{k}] is not in the list of displayed columns")
+                _warn(f"{elt_name}: editable[{k}] is not in the list of displayed columns.")
     group_by = _get_name_indexed_property(attributes, "group_by")
     for k, v in group_by.items():
         if _is_boolean_true(v):
             if col_desc := _get_column_desc(columns, k):
                 col_desc["groupBy"] = True
             else:
-                warnings.warn(f"{elt_name} group_by[{k}] is not in the list of displayed columns")
+                _warn(f"{elt_name}: group_by[{k}] is not in the list of displayed columns.")
     apply = _get_name_indexed_property(attributes, "apply")
     for k, v in apply.items():  # pragma: no cover
         if col_desc := _get_column_desc(columns, k):
@@ -76,12 +76,12 @@ def _enhance_columns(  # noqa: C901
             elif isinstance(v, str):
                 value = v.strip()
             else:
-                warnings.warn(f"{elt_name} apply[{k}] should be a user or predefined function")
+                _warn(f"{elt_name}: apply[{k}] should be a user or predefined function.")
                 value = None
             if value:
                 col_desc["apply"] = value
         else:
-            warnings.warn(f"{elt_name} apply[{k}] is not in the list of displayed columns")
+            _warn(f"{elt_name}: apply[{k}] is not in the list of displayed columns.")
     styles = _get_name_indexed_property(attributes, "style")
     for k, v in styles.items():  # pragma: no cover
         if col_desc := _get_column_desc(columns, k):
@@ -92,11 +92,11 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                warnings.warn(f"{elt_name} style[{k}]={value} cannot be a column's name")
+                _warn(f"{elt_name}: style[{k}]={value} cannot be a column's name.")
             elif value:
                 col_desc["style"] = value
         else:
-            warnings.warn(f"{elt_name} style[{k}] is not in the list of displayed columns")
+            _warn(f"{elt_name}: style[{k}] is not in the list of displayed columns.")
     tooltips = _get_name_indexed_property(attributes, "tooltip")
     for k, v in tooltips.items():  # pragma: no cover
         if col_desc := _get_column_desc(columns, k):
@@ -107,9 +107,9 @@ def _enhance_columns(  # noqa: C901
             else:
                 value = None
             if value in columns.keys():
-                warnings.warn(f"{elt_name} tooltip[{k}]={value} cannot be a column's name")
+                _warn(f"{elt_name}: tooltip[{k}]={value} cannot be a column's name.")
             elif value:
                 col_desc["tooltip"] = value
         else:
-            warnings.warn(f"{elt_name} tooltip[{k}] is not in the list of displayed columns")
+            _warn(f"{elt_name}: tooltip[{k}] is not in the list of displayed columns.")
     return columns
