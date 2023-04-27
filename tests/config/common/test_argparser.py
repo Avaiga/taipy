@@ -14,7 +14,7 @@ import sys
 
 import pytest
 
-from src.taipy.config._cli._cli import _CLI
+from src.taipy.cli import CLI
 
 if sys.version_info >= (3, 10):
     argparse_options_str = "options:"
@@ -29,19 +29,19 @@ def preprocess_stdout(stdout):
 
 @pytest.fixture(autouse=True, scope="function")
 def clean_argparser():
-    _CLI.sub_taipyparsers = {}
-    _CLI._remove_subparser("subcommand_1")
-    _CLI._remove_subparser("subcommand_2")
+    CLI.sub_taipyparsers = {}
+    CLI._remove_subparser("subcommand_1")
+    CLI._remove_subparser("subcommand_2")
 
     yield
 
 
 def test_parser(capfd):
-    subcommand_1 = _CLI._add_subparser("subcommand_1", help="subcommand_1 help")
+    subcommand_1 = CLI._add_subparser("subcommand_1", help="subcommand_1 help")
     subcommand_1.add_argument("--foo", "-f", help="foo help")
     subcommand_1.add_argument("--bar", "-b", help="bar help")
 
-    subcommand_2 = _CLI._add_subparser("subcommand_2", help="subcommand_2 help")
+    subcommand_2 = CLI._add_subparser("subcommand_2", help="subcommand_2 help")
     subcommand_2.add_argument("--doo", "-d", help="doo help")
     subcommand_2.add_argument("--baz", "-z", help="baz help")
 
@@ -56,7 +56,7 @@ positional arguments:
   -h, --help            show this help message and exit
     """
 
-    _CLI._main_parser.print_help()
+    CLI._main_parser.print_help()
     stdout, _ = capfd.readouterr()
     assert preprocess_stdout(expected_help_message) in preprocess_stdout(stdout)
 
@@ -86,23 +86,23 @@ positional arguments:
 
 
 def test_duplicate_subcommand():
-    subcommand_1 = _CLI._add_subparser("subcommand_1", help="subcommand_1 help")
+    subcommand_1 = CLI._add_subparser("subcommand_1", help="subcommand_1 help")
     subcommand_1.add_argument("--foo", "-f", help="foo help")
 
-    subcommand_2 = _CLI._add_subparser("subcommand_1", help="subcommand_2 help")
+    subcommand_2 = CLI._add_subparser("subcommand_1", help="subcommand_2 help")
     subcommand_2.add_argument("--bar", "-b", help="bar help")
 
     # The title of subcommand_2 is duplicated with  subcommand_1, and therefore
     # there will be no new subcommand created
-    assert len(_CLI.sub_taipyparsers) == 1
+    assert len(CLI.sub_taipyparsers) == 1
 
 
 def test_remove_subcommand(capfd):
-    _CLI._add_subparser("subcommand_1", help="subcommand_1 help")
-    _CLI._add_subparser("subcommand_2", help="subcommand_2 help")
+    CLI._add_subparser("subcommand_1", help="subcommand_1 help")
+    CLI._add_subparser("subcommand_2", help="subcommand_2 help")
 
-    _CLI._remove_subparser("subcommand_1")
-    _CLI._remove_subparser("subcommand_2")
+    CLI._remove_subparser("subcommand_1")
+    CLI._remove_subparser("subcommand_2")
 
     expected_help_message = f"""[-h] {{}} ...
 
@@ -113,6 +113,6 @@ positional arguments:
   -h, --help  show this help message and exit
     """
 
-    _CLI._main_parser.print_help()
+    CLI._main_parser.print_help()
     stdout, _ = capfd.readouterr()
     assert preprocess_stdout(expected_help_message) in preprocess_stdout(stdout)

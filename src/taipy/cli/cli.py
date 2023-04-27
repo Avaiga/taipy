@@ -15,7 +15,7 @@ from typing import Dict
 from ._argparse import _ArgumentParser
 
 
-class _CLI:
+class CLI:
     """Argument parser for Taipy application."""
 
     # The conflict_handler is set to "resolve" to override conflict arguments
@@ -27,17 +27,17 @@ class _CLI:
     @classmethod
     def _add_subparser(cls, name: str, **kwargs) -> argparse.ArgumentParser:
         """Create a new subparser and return a argparse handler."""
-        try:
-            return cls.sub_taipyparsers[name]
-        except KeyError:
-            subparser = cls._subparser_action.add_parser(
-                name=name,
-                conflict_handler="resolve",
-                **kwargs,
-            )
-            cls.sub_taipyparsers[name] = subparser
-            subparser.set_defaults(which=name)
+        if subparser := cls.sub_taipyparsers.get(name):
             return subparser
+
+        subparser = cls._subparser_action.add_parser(
+            name=name,
+            conflict_handler="resolve",
+            **kwargs,
+        )
+        cls.sub_taipyparsers[name] = subparser
+        subparser.set_defaults(which=name)
+        return subparser
 
     @classmethod
     def _parse(cls):
