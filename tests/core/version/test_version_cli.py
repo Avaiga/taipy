@@ -169,6 +169,38 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
         assert _JobManager._get_all(version_number="foo")
 
 
+def twice_doppelganger(a):
+    return a * 2
+
+
+def test_dev_mode_clean_all_entities_when_config_is_alternated():
+    data_node_1_config = Config.configure_data_node(
+        id="d1", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
+    )
+    data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
+    task_config = Config.configure_task("my_task", twice_doppelganger, data_node_1_config, data_node_2_config)
+    pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
+    scenario_config = Config.configure_scenario("my_scenario", pipeline_config, frequency=Frequency.DAILY)
+
+    # Create a scenario in development mode with the doppelganger function
+    with patch("sys.argv", ["prog"]):
+        core = Core()
+        core.run()
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+    core.stop()
+
+    # Delete the doppelganger function
+    del globals()["twice_doppelganger"]
+
+    # Create a scenario in development mode with another function
+    scenario_config = config_scenario()
+    with patch("sys.argv", ["prog"]):
+        Core().run()
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario)
+
+
 def test_version_number_when_switching_mode():
     with patch("sys.argv", ["prog", "--development"]):
         Core().run()

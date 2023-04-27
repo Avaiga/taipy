@@ -14,6 +14,7 @@ from typing import List, Optional, Union
 
 from taipy.config import Config
 from taipy.config._config_comparator._comparator_result import _ComparatorResult
+from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
@@ -173,8 +174,12 @@ class _VersionManager(_Manager[_Version]):
             return cls._get_production_versions()
         if version_number in cls.__ALL_VERSION:
             return ""
-        if version := cls._get(version_number):
-            return version.id
+
+        try:
+            if version := cls._get(version_number):
+                return version.id
+        except InconsistentEnvVariableError:  # The version exist but the Config is alternated
+            return version_number
 
         raise NonExistingVersion(version_number)
 
