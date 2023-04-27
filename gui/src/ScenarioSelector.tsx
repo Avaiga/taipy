@@ -91,6 +91,11 @@ interface ScenarioNodesProps {
   openEditDialog: () => void;
 }
 
+interface ScenarioNodesContentProps {
+  label?: string;
+  openEditDialog: () => void;
+}
+
 const BadgePos = {
   vertical: "top",
   horizontal: "left",
@@ -108,6 +113,31 @@ const BadgeSx = {
 const FlagSx = {
   color: "#FFFFFF",
   fontSize: "11px",
+};
+
+const ScenarioNodesContent = ({
+  label,
+  openEditDialog,
+}: ScenarioNodesContentProps) => {
+  return (
+    <Grid
+      container
+      alignItems="center"
+      direction="row"
+      flexWrap="nowrap"
+      justifyContent="space-between"
+      spacing={1}
+    >
+      <Grid item>{label}</Grid>
+      <Grid item>
+        <EditOutlined
+          fontSize="small"
+          color="primary"
+          onClick={openEditDialog}
+        />
+      </Grid>
+    </Grid>
+  );
 };
 
 const ScenarioNodes = ({
@@ -135,42 +165,16 @@ const ScenarioNodes = ({
                 anchorOrigin={BadgePos}
                 sx={BadgeSx}
               >
-                <Grid
-                  container
-                  alignItems="center"
-                  direction="row"
-                  flexWrap="nowrap"
-                  justifyContent="space-between"
-                  spacing={1}
-                >
-                  <Grid item>{label}</Grid>
-                  <Grid item>
-                    <EditOutlined
-                      fontSize="small"
-                      color="primary"
-                      onClick={() => openEditDialog()}
-                    />
-                  </Grid>
-                </Grid>
+                <ScenarioNodesContent
+                  label={label}
+                  openEditDialog={openEditDialog}
+                />
               </Badge>
             ) : (
-              <Grid
-                container
-                alignItems="center"
-                direction="row"
-                flexWrap="nowrap"
-                justifyContent="space-between"
-                spacing={1}
-              >
-                <Grid item>{label}</Grid>
-                <Grid item>
-                  <EditOutlined
-                    fontSize="small"
-                    color="primary"
-                    onClick={() => openEditDialog()}
-                  />
-                </Grid>
-              </Grid>
+              <ScenarioNodesContent
+                label={label}
+                openEditDialog={openEditDialog}
+              />
             )
           }
         />
@@ -244,32 +248,32 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     true
   );
 
-  const onDeleteScenario = () => {
+  const onDeleteScenario = useCallback(() => {
     onConfirmDialogClose();
     onDialogClose();
-  };
+  }, []);
 
-  const onConfirmDialogOpen = () => {
+  const onConfirmDialogOpen = useCallback(() => {
     setConfirmDialogOpen(true);
-  };
+  }, []);
 
-  const onConfirmDialogClose = () => {
+  const onConfirmDialogClose = useCallback(() => {
     setConfirmDialogOpen(false);
-  };
+  }, []);
 
-  const onDialogClose = () => {
+  const onDialogClose = useCallback(() => {
     setOpen(false);
-  };
+  }, []);
 
-  const onDialogOpen = () => {
+  const onDialogOpen = useCallback(() => {
     setOpen(true);
     setActionEdit(false);
-  };
+  }, []);
 
-  const openEditDialog = () => {
+  const openEditDialog = useCallback(() => {
     setOpen(true);
     setActionEdit(true);
-  };
+  }, []);
 
   const onSubmit = (values: any) => {
     values.properties = [...properties];
@@ -604,7 +608,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                   type="submit"
                   disabled={!form.values.config || !form.values.name}
                 >
-                  CREATE
+                  {actionEdit ? "APPLY" : "CREATE"}
                 </Button>
               </Grid>
             </Grid>
@@ -612,10 +616,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         </form>
       </Dialog>
 
-      <Dialog
-        onClose={() => setConfirmDialogOpen(false)}
-        open={confirmDialogOpen}
-      >
+      <Dialog onClose={onConfirmDialogClose} open={confirmDialogOpen}>
         <DialogTitle>
           <Grid
             container
@@ -626,7 +627,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             <Typography variant="h5">Delete Scenario</Typography>
             <IconButton
               aria-label="close"
-              onClick={() => setOpen(false)}
+              onClick={onDialogClose}
               sx={{ p: 0 }}
             >
               <Close />
