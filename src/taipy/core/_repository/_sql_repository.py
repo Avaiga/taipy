@@ -391,7 +391,7 @@ class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
     def _get_latest_version(self):
         if latest := self.session.query(self._table).filter_by(is_latest=True).first():
             return latest.id
-        return ""
+        raise ModelNotFound(self.model, "")
 
     def _set_development_version(self, version_number):
         if old_development := self.session.query(self._table).filter_by(is_development=True).first():
@@ -407,7 +407,7 @@ class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
     def _get_development_version(self):
         if development := self.session.query(self._table).filter_by(is_development=True).first():
             return development.id
-        raise ModelNotFound
+        raise ModelNotFound(self.model, "")
 
     def _set_production_version(self, version_number):
         version = self.__get_by_id(version_number)
@@ -420,7 +420,7 @@ class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
     def _get_production_versions(self):
         if productions := self.session.query(self._table).filter_by(is_production=True).all():
             return [p.id for p in productions]
-        return []
+        raise ModelNotFound(self.model, "")
 
     def _delete_production_version(self, version_number):
         version = self.__get_by_id(version_number)
