@@ -15,7 +15,7 @@ from typing import Dict
 from ._argparse import _ArgumentParser
 
 
-class CLI:
+class _CLI:
     """Argument parser for Taipy application."""
 
     # The conflict_handler is set to "resolve" to override conflict arguments
