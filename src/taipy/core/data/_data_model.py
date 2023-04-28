@@ -36,6 +36,7 @@ def _to_edits_migration(job_ids: Optional[List[str]]) -> List[Edit]:
     return [cast(Edit, dict(timestamp=timestamp, job_id=job_id)) for job_id in job_ids]
 
 
+@mapper_registry.mapped
 @dataclass
 class _DataNodeModel(_BaseModel):
     __table__ = Table(

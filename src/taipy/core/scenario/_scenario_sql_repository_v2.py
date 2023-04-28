@@ -8,11 +8,11 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from .._repository._v2._filesystem_repository import _FileSystemRepository
-from ._job_converter import _JobConverter
-from ._job_model import _JobModel
+from .._repository._v2._sql_repository import _SQLRepository
+from ._scenario_converter import _ScenarioConverter
+from ._scenario_model import _ScenarioModel
 
 
-class _JobFSRepository(_FileSystemRepository):
+class _ScenarioFSRepository(_SQLRepository):
     def __init__(self):
-        super().__init__(model=_JobModel, converter=_JobConverter, dir_name="jobs")
+        super().__init__(model=_ScenarioModel, converter=_ScenarioConverter)

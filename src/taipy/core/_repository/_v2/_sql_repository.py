@@ -11,15 +11,19 @@
 
 import json
 import pathlib
-from typing import Any, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar, Union
 
 from sqlalchemy.exc import NoResultFound
 
-from src.taipy.core.common.typing import Converter, Entity, ModelType
+from src.taipy.core.common.typing import Converter, Entity
 
 from ...exceptions import ModelNotFound
 from ._abstract_repository import _AbstractRepository
+from .db._init_db import init_db
+from .db._sql_base_model import _SQLBaseModel
 from .db._sql_session import SessionLocal
+
+ModelType = TypeVar("ModelType", bound=_SQLBaseModel)
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
@@ -34,11 +38,13 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.model = model
         self.db = session
         self.converter = converter
+        init_db()
 
     ###############################
     # ##   Inherited methods   ## #
     ###############################
     def _save(self, entity: Entity):
+        breakpoint()
         obj = self.converter._entity_to_model(entity)
         if entry := self.db.query(self.model).filter_by(id=obj.id).first():
             self.__update_entry(entry, obj)

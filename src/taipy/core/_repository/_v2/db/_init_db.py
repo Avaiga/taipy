@@ -8,13 +8,26 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from functools import lru_cache
 
 from ._sql_base_model import _SQLBaseModel
 from ._sql_session import engine
 
 
+def run_once(fn):
+    def wrapper(*args, **kwargs):
+        if not wrapper.has_run:
+            wrapper.has_run = True
+            return fn(*args, **kwargs)
+
+    wrapper.has_run = False
+    return wrapper
+
+
+@run_once
 def init_db() -> None:
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next line
+    breakpoint()
     _SQLBaseModel.metadata.create_all(bind=engine)  # type: ignore

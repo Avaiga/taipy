@@ -39,6 +39,7 @@ def _skippable(task_id, output_ids) -> bool:
     return True
 
 
+@mapper_registry.mapped
 @dataclass
 class _TaskModel(_BaseModel):
     __table__ = Table(

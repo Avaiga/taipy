@@ -22,6 +22,7 @@ from ..task.task_id import TaskId
 from .pipeline_id import PipelineId
 
 
+@mapper_registry.mapped
 @dataclass
 class _PipelineModel(_BaseModel):
     __table__ = Table(

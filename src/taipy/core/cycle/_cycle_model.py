@@ -17,12 +17,13 @@ from sqlalchemy import Column, String, Table
 from taipy.config.common.frequency import Frequency
 
 from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import mapper_registry
+from .._repository._v2.db._sql_base_model import _SQLBaseModel, mapper_registry
 from .cycle_id import CycleId
 
 
+@mapper_registry.mapped
 @dataclass
-class _CycleModel(_BaseModel):
+class _CycleModel(_BaseModel, _SQLBaseModel):
     __table__ = Table(
         "cycle",
         mapper_registry.metadata,

@@ -23,6 +23,7 @@ from ..pipeline.pipeline_id import PipelineId
 from .scenario_id import ScenarioId
 
 
+@mapper_registry.mapped
 @dataclass
 class _ScenarioModel(_BaseModel):
     __table__ = Table(

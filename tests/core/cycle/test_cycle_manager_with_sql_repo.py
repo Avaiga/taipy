@@ -29,8 +29,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
-@pytest.mark.skip("Skipped until SQLRepositoryV2")
-def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
+def test_save_and_get_cycle_entity(cycle, current_datetime):
     Config.configure_global_app(repository_type="sql")
 
     _CycleManager._repository = _CycleManagerFactory._build_repository()
@@ -83,8 +82,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
     assert cycle_3.frequency == cycle_3.frequency
 
 
-@pytest.mark.skip("Skipped until SQLRepositoryV2")
-def test_create_and_delete_cycle_entity(tmpdir):
+def test_create_and_delete_cycle_entity():
     Config.configure_global_app(repository_type="sql")
 
     _CycleManager._repository = _CycleManagerFactory._build_repository()

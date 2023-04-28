@@ -17,7 +17,6 @@ from sqlalchemy.orm import registry
 
 @as_declarative()
 class _SQLBaseModel:
-    id: Any
     __name__: str
 
     # Generate __tablename__ automatically

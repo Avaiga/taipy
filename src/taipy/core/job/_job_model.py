@@ -20,6 +20,7 @@ from .job_id import JobId
 from .status import Status
 
 
+@mapper_registry.mapped
 @dataclass
 class _JobModel(_BaseModel):
     __table__ = Table(
