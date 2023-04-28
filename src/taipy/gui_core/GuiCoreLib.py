@@ -14,13 +14,14 @@ import typing as t
 from dateutil import parser
 
 import taipy as tp
-from taipy.core import Scenario, Cycle
+from taipy.core import Cycle, Scenario
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State
+from taipy.gui.extension import (Element, ElementLibrary, ElementProperty,
+                                 PropertyType)
 from taipy.gui.utils import _TaipyBase
-from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 
 
 class GuiCoreScenarioAdapter(_TaipyBase):
