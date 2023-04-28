@@ -55,7 +55,7 @@ class GuiCoreContext(CoreEventConsumerBase):
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
-        self.cycles_scenarios: t.Optional[t.List[t.Tuple[Cycle, t.List[Scenario]] | Scenario]] = None
+        self.cycles_scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
