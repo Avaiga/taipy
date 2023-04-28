@@ -19,8 +19,7 @@ from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State
-from taipy.gui.extension import (Element, ElementLibrary, ElementProperty,
-                                 PropertyType)
+from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 from taipy.gui.utils import _TaipyBase
 
 
