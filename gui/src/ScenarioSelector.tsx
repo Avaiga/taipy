@@ -44,6 +44,7 @@ import {
   getUpdateVar,
   createSendActionNameAction,
   useDispatchRequestUpdateOnFirstRender,
+  createSendUpdateAction,
 } from "taipy-gui";
 
 enum NodeType {
@@ -51,9 +52,9 @@ enum NodeType {
   SCENARIO = 1,
 }
 
-type Scenario = [string, string, number, boolean];
+type Scenario = [string, string, undefined, number, boolean];
 type Scenarios = Array<Scenario>;
-type Cycles = Array<[string, string, number, boolean, Scenarios]>;
+type Cycles = Array<[string, string, Scenarios, number, boolean]>;
 
 interface ScenarioSelectorProps {
   id?: string;
@@ -63,14 +64,17 @@ interface ScenarioSelectorProps {
   displayCycles?: boolean;
   defaultShowPrimaryFlag: boolean;
   showPrimaryFlag?: boolean;
+  value?: Record<string, any>;
+  updateVarName?: string;
   scenarios?: Cycles | Scenarios;
   onScenarioCreate: string;
-  onCtxSelection: string;
-  onAction?: string;
+  onChange?: string;
   coreChanged?: Record<string, unknown>;
   updateVars: string;
   configs?: Array<[string, string]>;
   error?: string;
+  propagate?: boolean;
+  scenario?: Record<string, string>
 }
 
 interface ScenarioNodesProps {
@@ -100,7 +104,7 @@ const ScenarioNodes = ({ scenarios = [], showPrimary = true }: ScenarioNodesProp
   const sc = Array.isArray(scenarios) && scenarios.length && Array.isArray(scenarios[0]) ? (scenarios as Scenarios) : scenarios ? [scenarios as Scenario] : [];
   return (
     <>
-      {sc.map(([id, label, _, primary]) => (
+      {sc.map(([id, label, _, _nodeType, primary]) => (
         <TreeItem
           key={id}
           nodeId={id}
@@ -156,7 +160,7 @@ const DialogContentSx = {
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-  const { id = "", scenarios = [] } = props;
+  const { id = "", scenarios = [], propagate = true } = props;
   const [open, setOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [newProp, setNewProp] = useState<Property>({ id: "", key: "", value: "" });
@@ -228,11 +232,12 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
   const onSelect = useCallback(
     (e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
+      const scenariosVar = getUpdateVar(props.updateVars, "scenarios");
       dispatch(
-        createSendActionNameAction(id, module, props.onCtxSelection, { ids: Array.isArray(nodeIds) ? nodeIds : [nodeIds], user_action: props.onAction })
+        createSendUpdateAction(props.updateVarName, nodeIds, module, props.onChange, propagate, scenariosVar)
       );
     },
-    [props.onCtxSelection, module, props.onAction]
+    [props.updateVarName, props.updateVars, props.onChange, propagate, module]
   );
 
   return (
@@ -241,7 +246,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />} sx={TreeViewSx} onNodeSelect={onSelect}>
           {scenarios
             ? scenarios.map((item) => {
-                const [id, label, nodeType, _, scenarios] = item;
+                const [id, label, scenarios, nodeType, _] = item;
                 return (
                   <>
                     {displayCycles ? (
