@@ -36,7 +36,7 @@ class GuiCoreScenarioAdapter(_TaipyBase):
                 list(data.tags),
                 list(data.properties.items()),
                 [(p.id, p.get_simple_label()) for p in data.pipelines.values()],
-                list(data.properties.get("authorized_tags", set())), 
+                list(data.properties.get("authorized_tags", set())),
             ]
         return data
 
