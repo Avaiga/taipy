@@ -115,6 +115,8 @@ const FlagSx = {
   fontSize: "11px",
 };
 
+const ActionContentSx = { mr: 2, ml: 2 };
+
 const ScenarioNodesContent = ({
   label,
   openEditDialog,
@@ -213,6 +215,10 @@ const CycleSx = {
 
 const DialogContentSx = {
   width: "500px",
+};
+
+const CancelBtnSx = {
+  mr: 2,
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
@@ -575,14 +581,9 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
           </DialogContent>
 
           <DialogActions>
-            <Grid
-              container
-              justifyContent="space-between"
-              spacing={2}
-              sx={{ mr: 2, ml: 0 }}
-            >
-              <Grid item>
-                {actionEdit && (
+            <Grid container justifyContent="space-between" sx={ActionContentSx}>
+              {actionEdit && (
+                <Grid item xs={6}>
                   <Button
                     variant="outlined"
                     color="primary"
@@ -590,26 +591,28 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                   >
                     DELETE
                   </Button>
-                )}
-              </Grid>
-              <Grid item>
-                <Button
-                  variant="outlined"
-                  onClick={onDialogClose}
-                  sx={{ mr: 1 }}
-                >
-                  CANCEL
-                </Button>
-              </Grid>
-
-              <Grid item>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  disabled={!form.values.config || !form.values.name}
-                >
-                  {actionEdit ? "APPLY" : "CREATE"}
-                </Button>
+                </Grid>
+              )}
+              <Grid
+                item
+                container
+                xs={actionEdit ? 6 : 12}
+                justifyContent="flex-end"
+              >
+                <Grid item sx={CancelBtnSx}>
+                  <Button variant="outlined" onClick={onDialogClose}>
+                    CANCEL
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    disabled={!form.values.config || !form.values.name}
+                  >
+                    {actionEdit ? "APPLY" : "CREATE"}
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
           </DialogActions>
