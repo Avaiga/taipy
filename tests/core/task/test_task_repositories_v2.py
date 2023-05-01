@@ -16,12 +16,14 @@ import pytest
 from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
 from src.taipy.core.exceptions import ModelNotFound
 from src.taipy.core.task._task_fs_repository_v2 import _TaskFSRepository
+from src.taipy.core.task._task_sql_repository_v2 import _TaskSQLRepository
 from src.taipy.core.task.task import Task, TaskId
 
 
 class TestTaskFSRepository:
-    def test_save_and_load(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_save_and_load(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -31,8 +33,9 @@ class TestTaskFSRepository:
         obj = repository._load(task.id)
         assert isinstance(obj, Task)
 
-    def test_load_all(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_load_all(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -44,8 +47,9 @@ class TestTaskFSRepository:
 
         assert len(data_nodes) == 10
 
-    def test_load_all_with_filters(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_load_all_with_filters(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -58,8 +62,9 @@ class TestTaskFSRepository:
 
         assert len(objs) == 1
 
-    def test_delete(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_delete(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -70,8 +75,9 @@ class TestTaskFSRepository:
         with pytest.raises(ModelNotFound):
             repository._load(task.id)
 
-    def test_delete_all(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_delete_all(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -86,8 +92,9 @@ class TestTaskFSRepository:
 
         assert len(repository._load_all()) == 0
 
-    def test_delete_many(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_delete_many(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -103,8 +110,9 @@ class TestTaskFSRepository:
 
         assert len(repository._load_all()) == 7
 
-    def test_search(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_search(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -120,12 +128,15 @@ class TestTaskFSRepository:
 
         assert isinstance(obj, Task)
 
-    def test_export(self, tmpdir, data_node):
-        repository = _TaskFSRepository()
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_export(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
         repository._save(task)
 
         repository._export(task.id, tmpdir.strpath)
-        assert os.path.exists(os.path.join(repository.dir_path, f"{task.id}.json"))
+        dir_path = repository.dir_path if repo == _TaskFSRepository else os.path.join(tmpdir.strpath, "task")
+
+        assert os.path.exists(os.path.join(dir_path, f"{task.id}.json"))

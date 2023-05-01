@@ -15,20 +15,23 @@ import pytest
 
 from src.taipy.core.exceptions import ModelNotFound
 from src.taipy.core.pipeline._pipeline_fs_repository_v2 import _PipelineFSRepository
+from src.taipy.core.pipeline._pipeline_sql_repository_v2 import _PipelineSQLRepository
 from src.taipy.core.pipeline.pipeline import Pipeline, PipelineId
 
 
-class TestPipelineFSRepository:
-    def test_save_and_load(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+class TestPipelineRepository:
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_save_and_load(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(pipeline)
 
         obj = repository._load(pipeline.id)
         assert isinstance(obj, Pipeline)
 
-    def test_load_all(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_load_all(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
         for i in range(10):
             pipeline.id = PipelineId(f"pipeline-{i}")
@@ -37,8 +40,9 @@ class TestPipelineFSRepository:
 
         assert len(data_nodes) == 10
 
-    def test_load_all_with_filters(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_load_all_with_filters(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -49,8 +53,9 @@ class TestPipelineFSRepository:
 
         assert len(objs) == 1
 
-    def test_delete(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_delete(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(pipeline)
 
@@ -59,8 +64,9 @@ class TestPipelineFSRepository:
         with pytest.raises(ModelNotFound):
             repository._load(pipeline.id)
 
-    def test_delete_all(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_delete_all(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -73,8 +79,9 @@ class TestPipelineFSRepository:
 
         assert len(repository._load_all()) == 0
 
-    def test_delete_many(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_delete_many(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -88,8 +95,9 @@ class TestPipelineFSRepository:
 
         assert len(repository._load_all()) == 7
 
-    def test_search(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_search(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -103,10 +111,13 @@ class TestPipelineFSRepository:
 
         assert isinstance(obj, Pipeline)
 
-    def test_export(self, tmpdir, pipeline):
-        repository = _PipelineFSRepository()
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_export(self, tmpdir, pipeline, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(pipeline)
 
         repository._export(pipeline.id, tmpdir.strpath)
-        assert os.path.exists(os.path.join(repository.dir_path, f"{pipeline.id}.json"))
+        dir_path = repository.dir_path if repo == _PipelineFSRepository else os.path.join(tmpdir.strpath, "pipeline")
+
+        assert os.path.exists(os.path.join(dir_path, f"{pipeline.id}.json"))

@@ -9,17 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import dataclasses
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, cast
 
-from sqlalchemy import Boolean, Column, Float, String, Table
+from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table
 
 from taipy.config.common.scope import Scope
 
 from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import mapper_registry
+from .._repository._v2.db._sql_base_model import _SQLBaseModel, mapper_registry
 from .._version._utils import _version_migration
 from ..common._warnings import _warn_deprecated
 from .data_node_id import Edit
@@ -44,18 +43,18 @@ class _DataNodeModel(_BaseModel):
         mapper_registry.metadata,
         Column("id", String, primary_key=True),
         Column("config_id", String),
-        Column("scope", String),
+        Column("scope", Enum(Scope)),
         Column("storage_type", String),
         Column("name", String),
         Column("owner_id", String),
-        Column("parent_ids", String),
+        Column("parent_ids", JSON),
         Column("last_edit_date", String),
-        Column("edits", String),
+        Column("edits", JSON),
         Column("version", String),
         Column("validity_days", Float),
         Column("validity_seconds", Float),
         Column("edit_in_progress", Boolean),
-        Column("data_node_properties", String),
+        Column("data_node_properties", JSON),
     )
     id: str
     config_id: str

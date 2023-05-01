@@ -41,6 +41,7 @@ class _VersionManager(_Manager[_Version]):
         """
         Returns the version entity by id or reference.
         """
+        breakpoint()
         entity_id = entity if isinstance(entity, str) else entity.id
         try:
             return cls._repository._load(entity_id)

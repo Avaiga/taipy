@@ -13,6 +13,6 @@ from ._pipeline_converter import _PipelineConverter
 from ._pipeline_model import _PipelineModel
 
 
-class _PipelineFSRepository(_SQLRepository):
+class _PipelineSQLRepository(_SQLRepository):
     def __init__(self):
         super().__init__(model=_PipelineModel, converter=_PipelineConverter)

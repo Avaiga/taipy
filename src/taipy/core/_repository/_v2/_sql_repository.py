@@ -15,15 +15,12 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar, Union
 
 from sqlalchemy.exc import NoResultFound
 
-from src.taipy.core.common.typing import Converter, Entity
+from src.taipy.core.common.typing import Converter, Entity, ModelType
 
 from ...exceptions import ModelNotFound
 from ._abstract_repository import _AbstractRepository
 from .db._init_db import init_db
-from .db._sql_base_model import _SQLBaseModel
 from .db._sql_session import SessionLocal
-
-ModelType = TypeVar("ModelType", bound=_SQLBaseModel)
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
@@ -54,13 +51,13 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _load(self, entity_id: Any) -> Optional[ModelType]:
         if entry := self.db.query(self.model).filter(self.model.id == entity_id).first():
             return self.converter._model_to_entity(entry)
-        return None
+        raise ModelNotFound(str(self.model.__name__), entity_id)
 
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
         query = self.db.query(self.model)
         try:
-            if filters:
-                query.filter(filters)
+            for f in filters or []:
+                query = query.filter_by(**f)
             return [self.converter._model_to_entity(m) for m in query.all()]
         except NoResultFound:
             return []
@@ -125,9 +122,11 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         entry = self.__get_entities_by_config_and_owner(config_id, owner_id)
         return self.converter._model_to_entity(entry)
 
-    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
+        if not filters:
+            filters = []
         res = {}
         configs_and_owner_ids = set(configs_and_owner_ids)
 
@@ -144,9 +143,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None
     ) -> ModelType:
         if owner_id:
-            query = self.db.query(self.model).filter(config_id=config_id).filter(owner_id=owner_id)
+            query = self.db.query(self.model).filter_by(config_id=config_id).filter_by(owner_id=owner_id)
         else:
-            query = self.db.query(self.model).filter(config_id=config_id).filter(owner_id=None)
+            query = self.db.query(self.model).filter_by(config_id=config_id).filter_by(owner_id=None)
         if version_number:
             query = query.filter(version=version_number)
         return query.first()
@@ -161,7 +160,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def __update_entry(self, entry, model):
         for field in entry:
-            if hasattr(field, model):
+            if not isinstance(field, str):
+                continue
+            if hasattr(model, field):
                 setattr(entry, field, model[field])
         self.db.add(entry)
         self.db.commit()

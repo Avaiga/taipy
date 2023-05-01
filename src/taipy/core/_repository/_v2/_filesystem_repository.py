@@ -55,7 +55,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     ###############################
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
-
         model = self.converter._entity_to_model(entity)  # type: ignore
         self.__get_path(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)

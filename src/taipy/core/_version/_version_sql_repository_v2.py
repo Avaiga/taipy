@@ -15,7 +15,7 @@ from ._version_converter import _VersionConverter
 from ._version_model import _VersionModel
 
 
-class _VersionFSRepository(_SQLRepository):
+class _VersionSQLRepository(_SQLRepository):
     _LATEST_VERSION_KEY = "latest_version"
     _DEVELOPMENT_VERSION_KEY = "development_version"
     _PRODUCTION_VERSION_KEY = "production_version"

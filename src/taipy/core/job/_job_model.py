@@ -11,7 +11,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from sqlalchemy import Boolean, Column, String, Table
+from sqlalchemy import JSON, Boolean, Column, Enum, String, Table
 
 from .._repository._v2._base_taipy_model import _BaseModel
 from .._repository._v2.db._sql_base_model import mapper_registry
@@ -28,12 +28,12 @@ class _JobModel(_BaseModel):
         mapper_registry.metadata,
         Column("id", String, primary_key=True),
         Column("task_id", String),
-        Column("status", String),
+        Column("status", Enum(Status)),
         Column("force", Boolean),
         Column("submit_id", String),
         Column("creation_date", String),
-        Column("subscribers", String),
-        Column("stacktrace", String),
+        Column("subscribers", JSON),
+        Column("stacktrace", JSON),
         Column("version", String),
     )
     id: JobId

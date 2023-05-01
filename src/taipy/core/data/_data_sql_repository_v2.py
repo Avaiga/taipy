@@ -13,6 +13,6 @@ from ._data_converter import _DataNodeConverter
 from ._data_model import _DataNodeModel
 
 
-class _DataFSRepository(_SQLRepository):
+class _DataSQLRepository(_SQLRepository):
     def __init__(self):
         super().__init__(model=_DataNodeModel, converter=_DataNodeConverter)

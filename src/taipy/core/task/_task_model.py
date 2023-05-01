@@ -12,7 +12,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import Boolean, Column, String, Table
+from sqlalchemy import JSON, Boolean, Column, String, Table
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
@@ -47,15 +47,15 @@ class _TaskModel(_BaseModel):
         mapper_registry.metadata,
         Column("id", String, primary_key=True),
         Column("owner_id", String),
-        Column("parent_ids", String),
+        Column("parent_ids", JSON),
         Column("config_id", String),
-        Column("input_ids", String),
-        Column("function_name", Boolean),
+        Column("input_ids", JSON),
+        Column("function_name", String),
         Column("function_module", String),
-        Column("output_ids", String),
+        Column("output_ids", JSON),
         Column("version", String),
         Column("skippable", Boolean),
-        Column("properties", String),
+        Column("properties", JSON),
     )
     id: str
     owner_id: Optional[str]

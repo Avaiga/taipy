@@ -13,6 +13,6 @@ from ._job_converter import _JobConverter
 from ._job_model import _JobModel
 
 
-class _JobFSRepository(_SQLRepository):
+class _JobSQLRepository(_SQLRepository):
     def __init__(self):
         super().__init__(model=_JobModel, converter=_JobConverter)

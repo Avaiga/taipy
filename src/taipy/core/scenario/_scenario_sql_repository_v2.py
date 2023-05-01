@@ -13,6 +13,6 @@ from ._scenario_converter import _ScenarioConverter
 from ._scenario_model import _ScenarioModel
 
 
-class _ScenarioFSRepository(_SQLRepository):
+class _ScenarioSQLRepository(_SQLRepository):
     def __init__(self):
         super().__init__(model=_ScenarioModel, converter=_ScenarioConverter)

@@ -17,12 +17,13 @@ from queue import Queue
 
 import pandas as pd
 import pytest
-from sqlalchemy import MetaData, create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, text
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._repository._v2.db._sql_session import engine
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
+from src.taipy.core._version._version_model import _VersionModel
 from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,
@@ -44,6 +45,7 @@ from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data._data_model import _DataNodeModel
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
+from src.taipy.core.job._job_model import _JobModel
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.job_id import JobId
 from src.taipy.core.notification.notifier import Notifier
@@ -56,6 +58,7 @@ from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
+from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
@@ -436,3 +439,22 @@ def init_notifier():
 @pytest.fixture
 def sql_engine():
     return create_engine("sqlite:///:memory:")
+
+
+@pytest.fixture(autouse=True)
+def clean_sql_db():
+    _CycleModel.__table__.drop(engine, checkfirst=True)
+    _DataNodeModel.__table__.drop(bind=engine, checkfirst=True)
+    _JobModel.__table__.drop(bind=engine, checkfirst=True)
+    _PipelineModel.__table__.drop(bind=engine, checkfirst=True)
+    _ScenarioModel.__table__.drop(bind=engine, checkfirst=True)
+    _TaskModel.__table__.drop(bind=engine, checkfirst=True)
+    _VersionModel.__table__.drop(bind=engine, checkfirst=True)
+
+    _CycleModel.__table__.create(engine, checkfirst=True)
+    _DataNodeModel.__table__.create(bind=engine, checkfirst=True)
+    _JobModel.__table__.create(bind=engine, checkfirst=True)
+    _PipelineModel.__table__.create(bind=engine, checkfirst=True)
+    _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
+    _TaskModel.__table__.create(bind=engine, checkfirst=True)
+    _VersionModel.__table__.create(bind=engine, checkfirst=True)
