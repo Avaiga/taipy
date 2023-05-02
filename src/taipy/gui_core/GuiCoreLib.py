@@ -101,7 +101,7 @@ class GuiCoreContext(CoreEventConsumerBase):
             return None
         try:
             return tp.get(id)
-        except Exception as e:
+        except Exception:
             return None
 
     def get_scenario_configs(self):
