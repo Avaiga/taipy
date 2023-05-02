@@ -20,6 +20,7 @@ from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..job.job import Job
 from ..task.task import Task
+from ._dag import _DAG
 
 
 class _Submittable:
@@ -51,6 +52,9 @@ class _Submittable:
     @abc.abstractmethod
     def _get_set_of_tasks(self) -> Set[Task]:
         raise NotImplementedError
+
+    def _get_dag(self) -> _DAG:
+        return _DAG(self._build_dag())
 
     def _build_dag(self) -> nx.DiGraph:
         graph = nx.DiGraph()
