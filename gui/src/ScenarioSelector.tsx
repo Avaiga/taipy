@@ -221,6 +221,10 @@ const CancelBtnSx = {
   mr: 2,
 };
 
+const IconButtonSx = { 
+  p: 0, 
+}
+
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
   const { id = "", scenarios = [], propagate = true } = props;
   const [open, setOpen] = useState(false);
@@ -440,7 +444,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             <IconButton
               aria-label="close"
               onClick={onDialogClose}
-              sx={{ p: 0 }}
+              sx={IconButtonSx}
             >
               <Close />
             </IconButton>
@@ -631,7 +635,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             <IconButton
               aria-label="close"
               onClick={onDialogClose}
-              sx={{ p: 0 }}
+              sx={IconButtonSx}
             >
               <Close />
             </IconButton>
