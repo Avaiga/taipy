@@ -25,12 +25,6 @@ class TestPipelineRepository:
         assert isinstance(loaded_pipeline, Pipeline)
         assert pipeline.id == loaded_pipeline.id
 
-    @pytest.mark.skip("Deprecated: Old repository version")
-    def test_from_and_to_model(self, pipeline, pipeline_model):
-        repository = _PipelineManagerFactory._build_repository().repo
-        assert repository._to_model(pipeline) == pipeline_model
-        assert repository._from_model(pipeline_model) == pipeline
-
     def test_save_and_load_with_sql_repo(self, tmpdir, pipeline):
         Config.configure_global_app(repository_type="sql")
         repository = _PipelineManagerFactory._build_repository()

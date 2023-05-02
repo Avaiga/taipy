@@ -18,6 +18,9 @@ from sqlalchemy.pool import StaticPool
 from src.taipy.core.exceptions import MissingRequiredProperty
 from taipy.config.config import Config
 
+from .._decoder import loads
+from .._encoder import dumps
+
 
 @lru_cache
 def _build_engine():
@@ -25,7 +28,10 @@ def _build_engine():
     try:
         # More sql databases can be easily added in the future
         engine = create_engine(
-            f"sqlite:///{properties.get('db_location')}?check_same_thread=False", poolclass=StaticPool
+            f"sqlite:///{properties.get('db_location')}?check_same_thread=False",
+            poolclass=StaticPool,
+            json_serializer=dumps,
+            json_deserializer=loads,
         )
         return engine
 

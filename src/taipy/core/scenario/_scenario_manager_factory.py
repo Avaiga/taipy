@@ -15,7 +15,7 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._scenario_fs_repository_v2 import _ScenarioFSRepository
 from ._scenario_manager import _ScenarioManager
-from ._scenario_sql_repository import _ScenarioSQLRepository
+from ._scenario_sql_repository_v2 import _ScenarioSQLRepository
 
 
 class _ScenarioManagerFactory(_ManagerFactory):

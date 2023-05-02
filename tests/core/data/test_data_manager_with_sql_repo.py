@@ -129,7 +129,6 @@ class TestDataManager:
         _DataManager._set(dn)
         assert len(_DataManager._get_all()) == 1
 
-        breakpoint()
         # changing data node attribute
         dn.config_id = "foo"
         assert dn.config_id == "foo"

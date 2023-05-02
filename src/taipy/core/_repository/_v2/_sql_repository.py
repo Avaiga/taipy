@@ -41,7 +41,6 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     # ##   Inherited methods   ## #
     ###############################
     def _save(self, entity: Entity):
-        breakpoint()
         obj = self.converter._entity_to_model(entity)
         if entry := self.db.query(self.model).filter_by(id=obj.id).first():
             self.__update_entry(entry, obj)
@@ -118,9 +117,14 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _get_by_config(self, config_id: Any) -> Optional[ModelType]:
         return self.db.query(self.model).filter(self.model.config_id == config_id).first()
 
-    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
-        entry = self.__get_entities_by_config_and_owner(config_id, owner_id)
-        return self.converter._model_to_entity(entry)
+    def _get_by_config_and_owner_id(
+        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+    ) -> Optional[Entity]:
+        if not filters:
+            filters = []
+        if entry := self.__get_entities_by_config_and_owner(config_id, owner_id, filters):
+            return self.converter._model_to_entity(entry)
+        return None
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
         # Design in order to optimize performance on Entity creation.
@@ -131,7 +135,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         configs_and_owner_ids = set(configs_and_owner_ids)
 
         for config, owner in configs_and_owner_ids:
-            entry = self.__get_entities_by_config_and_owner(config.id, owner)
+            entry = self.__get_entities_by_config_and_owner(config.id, owner, filters)
             if entry:
                 entity = self.converter._model_to_entity(entry)
                 key = config, owner
@@ -140,14 +144,17 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         return res
 
     def __get_entities_by_config_and_owner(
-        self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None
+        self, config_id: str, owner_id: Optional[str] = "", filters: List[Dict] = None
     ) -> ModelType:
+        if not filters:
+            filters = []
+        versions = [item.get("version") for item in filters if item.get("version")]
         if owner_id:
             query = self.db.query(self.model).filter_by(config_id=config_id).filter_by(owner_id=owner_id)
         else:
             query = self.db.query(self.model).filter_by(config_id=config_id).filter_by(owner_id=None)
-        if version_number:
-            query = query.filter(version=version_number)
+        if versions:
+            query = query.filter(self.model.version_number.in_(versions))
         return query.first()
 
     #############################

@@ -15,7 +15,7 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._job_fs_repository_v2 import _JobFSRepository
 from ._job_manager import _JobManager
-from ._job_sql_repository import _JobSQLRepository
+from ._job_sql_repository_v2 import _JobSQLRepository
 
 
 class _JobManagerFactory(_ManagerFactory):

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, cast
 
-from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table
+from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table, UniqueConstraint
 
 from taipy.config.common.scope import Scope
 
@@ -56,6 +56,8 @@ class _DataNodeModel(_BaseModel):
         Column("edit_in_progress", Boolean),
         Column("data_node_properties", JSON),
     )
+    __table_args__ = (UniqueConstraint("config_id", "owner_id", name="_config_owner_uc"),)
+
     id: str
     config_id: str
     scope: Scope

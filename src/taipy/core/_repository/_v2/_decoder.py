@@ -45,3 +45,7 @@ class _Decoder(json.JSONDecoder):
             return self._str_to_timedelta(source.get("__value__"))
         else:
             return source
+
+
+def loads(d):
+    return json.loads(d, cls=_Decoder)

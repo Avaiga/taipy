@@ -68,6 +68,7 @@ def test_save_and_get_cycle_entity(cycle, current_datetime):
         name="bar",
         id=cycle_1.id,
     )
+
     _CycleManager._set(cycle_3)
 
     cycle_3 = _CycleManager._get(cycle_1.id)
