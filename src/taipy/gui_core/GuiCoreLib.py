@@ -24,6 +24,8 @@ from taipy.gui.utils import _TaipyBase
 
 
 class GuiCoreScenarioAdapter(_TaipyBase):
+    __INNER_PROPS = ["name"]
+
     def get(self):
         data = super().get()
         if isinstance(data, Scenario):
@@ -32,9 +34,9 @@ class GuiCoreScenarioAdapter(_TaipyBase):
                 data.is_primary,
                 data.config_id,
                 data.creation_date,
-                data.get_label(),
+                data.get_simple_label(),
                 list(data.tags),
-                list(data.properties.items()),
+                [(k, v) for k, v in data.properties.items() if k not in GuiCoreScenarioAdapter.__INNER_PROPS],
                 [(p.id, p.get_simple_label()) for p in data.pipelines.values()],
                 list(data.properties.get("authorized_tags", set())),
             ]
@@ -46,12 +48,14 @@ class GuiCoreScenarioAdapter(_TaipyBase):
 
 
 class GuiCoreContext(CoreEventConsumerBase):
+    __PROP_SCENARIO_ID = "id"
     __PROP_SCENARIO_CONFIG_ID = "config"
     __PROP_SCENARIO_DATE = "date"
     __PROP_SCENARIO_NAME = "name"
     __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_SCENARIO_NAME)
     _CORE_CHANGED_NAME = "core_changed"
     _ERROR_VAR = "gui_core_error"
+    _SCENARIO_SELECTOR_ID_VAR = "gui_core_sc_id"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
@@ -85,6 +89,21 @@ class GuiCoreContext(CoreEventConsumerBase):
                     self.cycles_scenarios.append(cycle)
         return self.cycles_scenarios
 
+    def select_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) == 0:
+            return
+        scenario_id = args[0]
+        state.assign(GuiCoreContext._SCENARIO_SELECTOR_ID_VAR, scenario_id)
+
+    def get_scenario_by_id(self, id: str) -> t.Optional[Scenario]:
+        if not id:
+            return None
+        try:
+            return tp.get(id)
+        except Exception as e:
+            return None
+
     def get_scenario_configs(self):
         if self.scenario_configs is None:
             configs = tp.Config.scenarios
@@ -92,33 +111,58 @@ class GuiCoreContext(CoreEventConsumerBase):
                 self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items()]
         return self.scenario_configs
 
-    def create_new_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
-        if args is None or not isinstance(args, list) or len(args) == 0 or not isinstance(args[0], dict):
+        if (
+            args is None
+            or not isinstance(args, list)
+            or len(args) < 3
+            or not isinstance(args[0], bool)
+            or not isinstance(args[1], bool)
+            or not isinstance(args[2], dict)
+        ):
             return
-        data = args[0]
-        config_id = data.get(GuiCoreContext.__PROP_SCENARIO_CONFIG_ID)
-        scenario_config = tp.Config.scenarios.get(config_id)
-        if scenario_config is None:
-            state.assign(GuiCoreContext._ERROR_VAR, f"Invalid configuration id ({config_id})")
-            return
-        date_str = data.get(GuiCoreContext.__PROP_SCENARIO_DATE)
-        try:
-            date = parser.parse(date_str) if isinstance(date_str, str) else None
-        except Exception as e:
-            state.assign(GuiCoreContext._ERROR_VAR, f"Invalid date ({date_str}).{e}")
-            return
-        try:
-            scenario = tp.create_scenario(scenario_config, date, data.get(GuiCoreContext.__PROP_SCENARIO_NAME))
-            if props := data.get("properties"):
-                with scenario as sc:
-                    for prop in props:
-                        key = prop.get("key")
-                        if key and key not in GuiCoreContext.__SCENARIO_PROPS:
-                            sc._properties[key] = prop.get("value")
-            state.assign(GuiCoreContext._ERROR_VAR, "")
-        except Exception as e:
-            state.assign(GuiCoreContext._ERROR_VAR, f"Error creating Scenario. {e}")
+        update = args[0]
+        delete = args[1]
+        data = args[2]
+        name = data.get(GuiCoreContext.__PROP_SCENARIO_NAME)
+        if update:
+            scenario_id = data.get(GuiCoreContext.__PROP_SCENARIO_ID)
+            if delete:
+                try:
+                    tp.delete(scenario_id)
+                except Exception as e:
+                    state.assign(GuiCoreContext._ERROR_VAR, f"Error deleting Scenario. {e}")
+            else:
+                scenario = tp.get(scenario_id)
+        else:
+            config_id = data.get(GuiCoreContext.__PROP_SCENARIO_CONFIG_ID)
+            scenario_config = tp.Config.scenarios.get(config_id)
+            if scenario_config is None:
+                state.assign(GuiCoreContext._ERROR_VAR, f"Invalid configuration id ({config_id})")
+                return
+            date_str = data.get(GuiCoreContext.__PROP_SCENARIO_DATE)
+            try:
+                date = parser.parse(date_str) if isinstance(date_str, str) else None
+            except Exception as e:
+                state.assign(GuiCoreContext._ERROR_VAR, f"Invalid date ({date_str}).{e}")
+                return
+            try:
+                scenario = tp.create_scenario(scenario_config, date, name)
+            except Exception as e:
+                state.assign(GuiCoreContext._ERROR_VAR, f"Error creating Scenario. {e}")
+        if scenario:
+            with scenario as sc:
+                sc._properties[GuiCoreContext.__PROP_SCENARIO_NAME] = name
+                if props := data.get("properties"):
+                    try:
+                        for prop in props:
+                            key = prop.get("key")
+                            if key and key not in GuiCoreContext.__SCENARIO_PROPS:
+                                sc._properties[key] = prop.get("value")
+                        state.assign(GuiCoreContext._ERROR_VAR, "")
+                    except Exception as e:
+                        state.assign(GuiCoreContext._ERROR_VAR, f"Error creating Scenario. {e}")
 
     def broadcast_core_changed(self):
         self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, "")
@@ -137,18 +181,20 @@ class GuiCore(ElementLibrary):
                 "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
                 "value": ElementProperty(PropertyType.lov_value),
                 "on_change": ElementProperty(PropertyType.function),
-                "scenario": ElementProperty(GuiCoreScenarioAdapter),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
-                "on_scenario_create": ElementProperty(
-                    PropertyType.function, f"{{{__CTX_VAR_NAME}.create_new_scenario}}"
-                ),
+                "on_scenario_crud": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
                 "error": ElementProperty(PropertyType.react, f"{{{GuiCoreContext._ERROR_VAR}}}"),
                 "type": ElementProperty(PropertyType.inner, Scenario),
                 "adapter": ElementProperty(PropertyType.inner, GuiCoreContext.scenario_adapter),
+                "scenario_edit": ElementProperty(
+                    GuiCoreScenarioAdapter,
+                    f"{{{__CTX_VAR_NAME}.get_scenario_by_id({GuiCoreContext._SCENARIO_SELECTOR_ID_VAR})}}",
+                ),
+                "on_scenario_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_scenario}}"),
             },
         )
     }
@@ -168,3 +214,5 @@ class GuiCore(ElementLibrary):
     def on_user_init(self, state: State):
         state._add_attribute(GuiCoreContext._ERROR_VAR)
         state._gui._bind_var_val(GuiCoreContext._ERROR_VAR, "")
+        state._add_attribute(GuiCoreContext._SCENARIO_SELECTOR_ID_VAR)
+        state._gui._bind_var_val(GuiCoreContext._SCENARIO_SELECTOR_ID_VAR, "")
