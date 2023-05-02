@@ -222,9 +222,9 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             with connection.begin() as transaction:
                 try:
                     self._do_write(data, engine, connection)
-                except:  # noqa: E722
+                except Exception as e:
                     transaction.rollback()
-                    raise
+                    raise e
                 else:
                     transaction.commit()
 

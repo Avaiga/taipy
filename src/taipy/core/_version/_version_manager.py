@@ -97,7 +97,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_development_version(cls) -> str:
         try:
             return cls._repository._get_development_version()
-        except:  # noqa: E722
+        except (FileNotFoundError, ModelNotFound):
             return cls._set_development_version(str(uuid.uuid4()))
 
     @classmethod
@@ -128,7 +128,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_latest_version(cls) -> str:
         try:
             return cls._repository._get_latest_version()
-        except:  # noqa: E722
+        except (FileNotFoundError, ModelNotFound):
             # If there is no version in the system yet, create a new version as development version
             # This set the default versioning behavior on Jupyter notebook to Development mode
             return cls._set_development_version(str(uuid.uuid4()))
@@ -152,7 +152,7 @@ class _VersionManager(_Manager[_Version]):
     def _get_production_versions(cls) -> List[str]:
         try:
             return cls._repository._get_production_versions()
-        except:  # noqa: E722
+        except (FileNotFoundError, ModelNotFound):
             return []
 
     @classmethod
@@ -160,7 +160,7 @@ class _VersionManager(_Manager[_Version]):
         return cls._repository._delete_production_version(version_number)
 
     @classmethod
-    def _replace_version_number(cls, version_number):
+    def _replace_version_number(cls, version_number: Optional[str]):
         if version_number is None:
             version_number = cls._replace_version_number(cls._DEFAULT_VERSION)
 

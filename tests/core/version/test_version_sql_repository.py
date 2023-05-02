@@ -14,7 +14,7 @@ import pytest
 from src.taipy.core._repository import _sql_repository
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_sql_repository import _VersionSQLRepository
-from src.taipy.core.exceptions import VersionIsNotProductionVersion
+from src.taipy.core.exceptions import ModelNotFound, VersionIsNotProductionVersion
 from taipy.config.config import Config
 
 
@@ -119,5 +119,5 @@ class TestVersionSQLRepository:
         assert len(repo._get_production_versions()) == 1
 
         repo._delete_production_version(version.id)
-
-        assert len(repo._get_production_versions()) == 0
+        with pytest.raises(ModelNotFound):
+            repo._get_production_versions()

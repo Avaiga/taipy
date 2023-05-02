@@ -62,7 +62,7 @@ class _JobDispatcher(threading.Thread):
                     with self.lock:
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
-            except:  # In case the last job of the queue has been removed.  # noqa: E722
+            except Exception:  # In case the last job of the queue has been removed.
                 pass
 
     def _can_execute(self) -> bool:
@@ -85,7 +85,7 @@ class _JobDispatcher(threading.Thread):
             with self.lock:
                 try:
                     job = self.orchestrator.jobs_to_run.get()
-                except:  # In case the last job of the queue has been removed.  # noqa: E722
+                except Exception:  # In case the last job of the queue has been removed.
                     self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
             self._execute_job(job)
 
