@@ -11,6 +11,7 @@
 
 import json
 import pathlib
+from copy import copy
 from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar, Union
 
 from sqlalchemy.exc import NoResultFound
@@ -42,8 +43,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     ###############################
     def _save(self, entity: Entity):
         obj = self.converter._entity_to_model(entity)
-        if entry := self.db.query(self.model).filter_by(id=obj.id).first():
-            self.__update_entry(entry, obj)
+        if self.db.query(self.model).filter_by(id=obj.id).first():
+            self.__update_entry(obj)
             return
         self.__insert_model(obj)
 
@@ -165,12 +166,6 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.db.commit()
         self.db.refresh(model)
 
-    def __update_entry(self, entry, model):
-        for field in entry:
-            if not isinstance(field, str):
-                continue
-            if hasattr(model, field):
-                setattr(entry, field, model[field])
-        self.db.add(entry)
+    def __update_entry(self, model):
+        self.db.merge(model)
         self.db.commit()
-        self.db.refresh(entry)
