@@ -70,7 +70,7 @@ class _VersionManager(_Manager[_Version]):
         """
         Returns all entities.
         """
-        version_number = cls._replace_version_number(version_number)
+        version_number = cls._replace_version_number(version_number)  # type: ignore
         if not isinstance(version_number, List):
             version_number = [version_number] if version_number else []
         filters = [{"version": version} for version in version_number]
