@@ -33,12 +33,13 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     should be revised in the future.
 
     Attributes:
-        model (ModelType): Generic dataclass.
+        model_type (ModelType): Generic dataclass.
+        converter: A class that handles conversion to and from a database backend
         dir_name (str): Folder that will hold the files for this dataclass model.
     """
 
-    def __init__(self, model: Type[ModelType], converter: Type[Converter], dir_name: str):
-        self.model = model
+    def __init__(self, model_type: Type[ModelType], converter: Type[Converter], dir_name: str):
+        self.model_type = model_type
         self.converter = converter
         self._dir_name = dir_name
 
@@ -218,7 +219,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             return None
         if isinstance(file_content, str):
             file_content = json.loads(file_content, cls=_Decoder)
-        model = self.model.from_dict(file_content)
+        model = self.model_type.from_dict(file_content)
         entity = self.converter._model_to_entity(model)
         return entity
 

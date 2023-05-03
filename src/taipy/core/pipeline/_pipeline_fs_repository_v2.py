@@ -15,4 +15,4 @@ from ._pipeline_model import _PipelineModel
 
 class _PipelineFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model=_PipelineModel, converter=_PipelineConverter, dir_name="pipelines")
+        super().__init__(model_type=_PipelineModel, converter=_PipelineConverter, dir_name="pipelines")

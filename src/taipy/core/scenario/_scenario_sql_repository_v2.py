@@ -15,4 +15,4 @@ from ._scenario_model import _ScenarioModel
 
 class _ScenarioSQLRepository(_SQLRepository):
     def __init__(self):
-        super().__init__(model=_ScenarioModel, converter=_ScenarioConverter)
+        super().__init__(model_type=_ScenarioModel, converter=_ScenarioConverter)

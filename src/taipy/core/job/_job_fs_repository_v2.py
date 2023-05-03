@@ -15,4 +15,4 @@ from ._job_model import _JobModel
 
 class _JobFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model=_JobModel, converter=_JobConverter, dir_name="jobs")
+        super().__init__(model_type=_JobModel, converter=_JobConverter, dir_name="jobs")

@@ -15,4 +15,4 @@ from ._cycle_model import _CycleModel
 
 class _CycleSQLRepository(_SQLRepository):
     def __init__(self):
-        super().__init__(model=_CycleModel, converter=_CycleConverter)
+        super().__init__(model_type=_CycleModel, converter=_CycleConverter)

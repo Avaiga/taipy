@@ -26,8 +26,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model": MockModel, "converter": MockConverter}),
+            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_save_and_fetch_model(self, mock_repo, params):
@@ -41,8 +41,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model": MockModel, "converter": MockConverter}),
+            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_get_all(self, mock_repo, params):
@@ -65,8 +65,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model": MockModel, "converter": MockConverter}),
+            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_delete_all(self, mock_repo, params):
@@ -87,8 +87,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model": MockModel, "converter": MockConverter}),
+            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_delete_many(self, mock_repo, params):
@@ -108,8 +108,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model": MockModel, "converter": MockConverter}),
+            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_search(self, mock_repo, params):
@@ -128,8 +128,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model": MockModel, "converter": MockConverter}),
+            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     @pytest.mark.parametrize("export_path", ["tmp"])

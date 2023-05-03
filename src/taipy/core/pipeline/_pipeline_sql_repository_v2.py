@@ -15,4 +15,4 @@ from ._pipeline_model import _PipelineModel
 
 class _PipelineSQLRepository(_SQLRepository):
     def __init__(self):
-        super().__init__(model=_PipelineModel, converter=_PipelineConverter)
+        super().__init__(model_type=_PipelineModel, converter=_PipelineConverter)

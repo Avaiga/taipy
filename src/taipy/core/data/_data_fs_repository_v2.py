@@ -15,4 +15,4 @@ from ._data_model import _DataNodeModel
 
 class _DataFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model=_DataNodeModel, converter=_DataNodeConverter, dir_name="data_nodes")
+        super().__init__(model_type=_DataNodeModel, converter=_DataNodeConverter, dir_name="data_nodes")

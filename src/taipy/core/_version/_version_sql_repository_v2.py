@@ -21,10 +21,10 @@ class _VersionSQLRepository(_SQLRepository):
     _PRODUCTION_VERSION_KEY = "production_version"
 
     def __init__(self):
-        super().__init__(model=_VersionModel, converter=_VersionConverter)
+        super().__init__(model_type=_VersionModel, converter=_VersionConverter)
 
     def _set_latest_version(self, version_number):
-        if old_latest := self.db.query(self.model).filter_by(is_latest=True).first():
+        if old_latest := self.db.query(self.model_type).filter_by(is_latest=True).first():
             old_latest.is_latest = False
 
         version = self.__get_by_id(version_number)
@@ -33,12 +33,12 @@ class _VersionSQLRepository(_SQLRepository):
         self.db.commit()
 
     def _get_latest_version(self):
-        if latest := self.db.query(self.model).filter_by(is_latest=True).first():
+        if latest := self.db.query(self.model_type).filter_by(is_latest=True).first():
             return latest.id
         return ""
 
     def _set_development_version(self, version_number):
-        if old_development := self.db.query(self.model).filter_by(is_development=True).first():
+        if old_development := self.db.query(self.model_type).filter_by(is_development=True).first():
             old_development.is_development = False
 
         version = self.__get_by_id(version_number)
@@ -49,7 +49,7 @@ class _VersionSQLRepository(_SQLRepository):
         self.db.commit()
 
     def _get_development_version(self):
-        if development := self.db.query(self.model).filter_by(is_development=True).first():
+        if development := self.db.query(self.model_type).filter_by(is_development=True).first():
             return development.id
         raise ModelNotFound
 
@@ -62,7 +62,7 @@ class _VersionSQLRepository(_SQLRepository):
         self.db.commit()
 
     def _get_production_versions(self):
-        if productions := self.db.query(self.model).filter_by(is_production=True).all():
+        if productions := self.db.query(self.model_type).filter_by(is_production=True).all():
             return [p.id for p in productions]
         return []
 
@@ -76,4 +76,4 @@ class _VersionSQLRepository(_SQLRepository):
         self.db.commit()
 
     def __get_by_id(self, version_id):
-        return self.db.query(self.model).filter_by(id=version_id).first()
+        return self.db.query(self.model_type).filter_by(id=version_id).first()
