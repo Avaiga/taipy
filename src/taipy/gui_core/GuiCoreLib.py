@@ -12,6 +12,7 @@
 import typing as t
 
 from dateutil import parser
+from urllib.parse import urlencode
 
 import taipy as tp
 from taipy.core import Cycle, Scenario
@@ -21,6 +22,8 @@ from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 from taipy.gui.utils import _TaipyBase
+
+from ..version import _get_version
 
 
 class GuiCoreScenarioAdapter(_TaipyBase):
@@ -257,3 +260,8 @@ class GuiCore(ElementLibrary):
         ]:
             state._add_attribute(var)
             state._gui._bind_var_val(var, "")
+    
+    def get_version(self) -> str:
+        if not hasattr(self, "version"):
+            self.version = _get_version()
+        return self.version
