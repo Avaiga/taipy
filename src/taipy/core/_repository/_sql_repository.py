@@ -156,8 +156,17 @@ class _TaipyModelTable(_BaseSQLRepository[ModelType, Entity]):
             return None
         return self.__to_entity(entry)
 
+    def _get_all_entities_by_config_id(self, config_id: str) -> List[Entity]:
+        query = (
+            self.session.query(self._table)
+            .filter_by(model_name=self.model_name)
+            .filter(self._table.document.contains(f'"config_id": "{config_id}"'))
+        )
+        entity_models = query.all()
+        return [self.__to_entity(entity_model) for entity_model in entity_models]
+
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
-        entity = self.__get_entities_by_config_and_owner(config_id, owner_id)
+        entity = self.__get_entity_by_config_and_owner(config_id, owner_id)
         return self.__to_entity(entity)
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
@@ -167,7 +176,7 @@ class _TaipyModelTable(_BaseSQLRepository[ModelType, Entity]):
         configs_and_owner_ids = set(configs_and_owner_ids)
 
         for config, owner in configs_and_owner_ids:
-            entry = self.__get_entities_by_config_and_owner(config.id, owner)
+            entry = self.__get_entity_by_config_and_owner(config.id, owner)
             if entry:
                 entity = self.__to_entity(entry)
                 key = config, owner
@@ -175,7 +184,7 @@ class _TaipyModelTable(_BaseSQLRepository[ModelType, Entity]):
 
         return res
 
-    def __get_entities_by_config_and_owner(
+    def __get_entity_by_config_and_owner(
         self, config_id: str, owner_id: Optional[str] = "", version_number: Optional[str] = None
     ) -> _TaipyModel:
         if owner_id:
@@ -482,6 +491,9 @@ class _SQLRepository(_BaseSQLRepository):
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         return self._table._get_by_configs_and_owner_ids(configs_and_owner_ids)
+
+    def _get_all_entities_by_config_id(self, config_id=str) -> List[Entity]:
+        return self._table._get_all_entities_by_config_id(config_id)
 
     def _set_latest_version(self, version_number):
         self._table._set_latest_version(version_number)

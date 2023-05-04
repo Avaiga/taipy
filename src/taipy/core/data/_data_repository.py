@@ -249,3 +249,6 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)
+
+    def _get_all_entities_by_config_id(self, config_id: str) -> List[DataNode]:
+        return self.repo._get_all_entities_by_config_id(config_id)

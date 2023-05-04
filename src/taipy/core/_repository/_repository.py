@@ -135,6 +135,20 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def _get_all_entities_by_config_id(cls, config_id: str) -> List[Entity]:
+        """
+        Get the entities by its cofig id.
+
+        Args:
+            config_id (str): The config id of the entities
+
+        Returns:
+            A list of entities corresponding to the config id
+
+        """
+        raise NotImplementedError
+
 
 def _timedelta_to_str(obj: timedelta) -> str:
     total_seconds = obj.total_seconds()

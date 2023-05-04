@@ -136,6 +136,10 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _search(self, attribute: str, value: str, version_number: Optional[str] = None) -> Optional[Entity]:
         return next(self.__search(attribute, value, version_number), None)
 
+    def _get_all_entities_by_config_id(self, config_id: str) -> List[Entity]:
+        files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
+        return [self.__to_entity(f, retry=Config.global_config.read_entity_retry or 0) for f in files]  # type: ignore
+
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
         # Only get the entity from the latest version
         from .._version._version_manager_factory import _VersionManagerFactory

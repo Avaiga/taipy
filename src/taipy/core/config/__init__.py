@@ -16,6 +16,7 @@ from taipy.config.common.scope import Scope  # type: ignore
 from taipy.config.config import Config  # type: ignore
 from taipy.config.global_app.global_app_config import GlobalAppConfig  # type: ignore
 
+from .checkers._config_id_checker import _ConfigIdChecker
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
 from .checkers._job_config_checker import _JobConfigChecker
 from .checkers._pipeline_config_checker import _PipelineConfigChecker
@@ -79,6 +80,7 @@ _inject_section(
     ],
 )
 
+_Checker.add_checker(_ConfigIdChecker)
 _Checker.add_checker(_JobConfigChecker)
 _Checker.add_checker(_DataNodeConfigChecker)
 _Checker.add_checker(_TaskConfigChecker)
