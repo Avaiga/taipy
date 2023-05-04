@@ -30,7 +30,18 @@ import Dialog from "@mui/material/Dialog";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { ChevronRight, ExpandMore, FlagOutlined, Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
+import {
+    ChevronRight,
+    ExpandMore,
+    FlagOutlined,
+    Close,
+    DeleteOutline,
+    Add,
+    EditOutlined,
+    Send,
+    CheckCircle,
+    Cancel,
+} from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -46,6 +57,7 @@ import {
     useDispatchRequestUpdateOnFirstRender,
     createSendUpdateAction,
 } from "taipy-gui";
+import { Autocomplete, Chip, Divider, InputAdornment } from "@mui/material";
 
 import { Cycle, Scenario } from "./icons";
 
