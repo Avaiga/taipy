@@ -10,9 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
+from urllib.parse import urlencode
 
 from dateutil import parser
-from urllib.parse import urlencode
 
 import taipy as tp
 from taipy.core import Cycle, Scenario
@@ -260,7 +260,7 @@ class GuiCore(ElementLibrary):
         ]:
             state._add_attribute(var)
             state._gui._bind_var_val(var, "")
-    
+
     def get_version(self) -> str:
         if not hasattr(self, "version"):
             self.version = _get_version()
