@@ -159,7 +159,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         else:
             query = self.db.query(self.model_type).filter_by(config_id=config_id).filter_by(owner_id=None)
         if versions:
-            query = query.filter(self.model_type.version_number.in_(versions))
+            query = query.filter(self.model_type.version.in_(versions))
         return query.first()
 
     #############################

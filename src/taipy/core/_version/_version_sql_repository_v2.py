@@ -51,7 +51,7 @@ class _VersionSQLRepository(_SQLRepository):
     def _get_development_version(self):
         if development := self.db.query(self.model_type).filter_by(is_development=True).first():
             return development.id
-        raise ModelNotFound
+        raise ModelNotFound(self.model_type, "")
 
     def _set_production_version(self, version_number):
         version = self.__get_by_id(version_number)
