@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import Dict, List
+
 from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
@@ -19,7 +21,7 @@ class _ConfigIdChecker(_ConfigChecker):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        existing_config_ids: dict[str, list[str]] = dict()
+        existing_config_ids: Dict[str, List[str]] = dict()
         for entity_type, section_dictionary in self._config._sections.items():
             for config_id in section_dictionary.keys():
                 if config_id in existing_config_ids.keys():
