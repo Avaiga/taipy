@@ -12,18 +12,7 @@
 from typing import Any
 
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import registry
+from sqlalchemy.orm import declarative_base, registry
 
-
-@as_declarative()
-class _SQLBaseModel:
-    id: Any
-    __name__: str
-
-    # Generate __tablename__ automatically
-    @declared_attr
-    def __tablename__(cls) -> str:
-        return cls.__name__.lower()
-
-
+_SQLBaseModel = declarative_base()
 mapper_registry = registry()

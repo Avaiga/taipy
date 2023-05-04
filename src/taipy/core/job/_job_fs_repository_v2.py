@@ -11,9 +11,8 @@
 from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ._job_converter import _JobConverter
 from ._job_model import _JobModel
-from .job import Job
 
 
 class _JobFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model=_JobModel, converter=_JobConverter, dir_name="jobs")
+        super().__init__(model_type=_JobModel, converter=_JobConverter, dir_name="jobs")

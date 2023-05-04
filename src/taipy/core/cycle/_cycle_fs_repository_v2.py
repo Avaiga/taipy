@@ -15,4 +15,4 @@ from ._cycle_model import _CycleModel
 
 class _CycleFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model=_CycleModel, converter=_CycleConverter, dir_name="cycles")
+        super().__init__(model_type=_CycleModel, converter=_CycleConverter, dir_name="cycles")

@@ -26,20 +26,23 @@ import pytest
 
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_fs_repository_v2 import _VersionFSRepository
+from src.taipy.core._version._version_sql_repository_v2 import _VersionSQLRepository
 from src.taipy.core.exceptions import ModelNotFound
 
 
 class TestVersionFSRepository:
-    def test_save_and_load(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_save_and_load(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(_version)
 
         obj = repository._load(_version.id)
         assert isinstance(obj, _Version)
 
-    def test_load_all(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_load_all(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
         for i in range(10):
             _version.id = f"_version_{i}"
@@ -48,8 +51,9 @@ class TestVersionFSRepository:
 
         assert len(data_nodes) == 10
 
-    def test_load_all_with_filters(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_load_all_with_filters(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -60,8 +64,9 @@ class TestVersionFSRepository:
 
         assert len(objs) == 1
 
-    def test_delete(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_delete(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(_version)
 
@@ -70,8 +75,9 @@ class TestVersionFSRepository:
         with pytest.raises(ModelNotFound):
             repository._load(_version.id)
 
-    def test_delete_all(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_delete_all(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -84,8 +90,9 @@ class TestVersionFSRepository:
 
         assert len(repository._load_all()) == 0
 
-    def test_delete_many(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_delete_many(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -99,8 +106,9 @@ class TestVersionFSRepository:
 
         assert len(repository._load_all()) == 7
 
-    def test_search(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_search(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -114,10 +122,13 @@ class TestVersionFSRepository:
 
         assert isinstance(obj, _Version)
 
-    def test_export(self, tmpdir, _version):
-        repository = _VersionFSRepository()
+    @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
+    def test_export(self, tmpdir, _version, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(_version)
 
         repository._export(_version.id, tmpdir.strpath)
-        assert os.path.exists(os.path.join(repository.dir_path, f"{_version.id}.json"))
+        dir_path = repository.dir_path if repo == _VersionFSRepository else os.path.join(tmpdir.strpath, "version")
+
+        assert os.path.exists(os.path.join(dir_path, f"{_version.id}.json"))

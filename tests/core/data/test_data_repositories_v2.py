@@ -14,21 +14,24 @@ import os
 import pytest
 
 from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
+from src.taipy.core.data._data_sql_repository_v2 import _DataSQLRepository
 from src.taipy.core.data.data_node import DataNode, DataNodeId
 from src.taipy.core.exceptions import ModelNotFound
 
 
-class TestDataNodeFSRepository:
-    def test_save_and_load(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+class TestDataNodeRepository:
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_save_and_load(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(data_node)
 
         obj = repository._load(data_node.id)
         assert isinstance(obj, DataNode)
 
-    def test_load_all(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_load_all(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         for i in range(10):
             data_node.id = DataNodeId(f"data_node-{i}")
@@ -37,8 +40,9 @@ class TestDataNodeFSRepository:
 
         assert len(data_nodes) == 10
 
-    def test_load_all_with_filters(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_load_all_with_filters(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -49,8 +53,9 @@ class TestDataNodeFSRepository:
 
         assert len(objs) == 1
 
-    def test_delete(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_delete(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(data_node)
 
@@ -59,8 +64,9 @@ class TestDataNodeFSRepository:
         with pytest.raises(ModelNotFound):
             repository._load(data_node.id)
 
-    def test_delete_all(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_delete_all(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -73,8 +79,9 @@ class TestDataNodeFSRepository:
 
         assert len(repository._load_all()) == 0
 
-    def test_delete_many(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_delete_many(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -88,8 +95,9 @@ class TestDataNodeFSRepository:
 
         assert len(repository._load_all()) == 7
 
-    def test_search(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_search(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -103,10 +111,13 @@ class TestDataNodeFSRepository:
 
         assert isinstance(obj, DataNode)
 
-    def test_export(self, tmpdir, data_node):
-        repository = _DataFSRepository()
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_export(self, tmpdir, data_node, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(data_node)
 
         repository._export(data_node.id, tmpdir.strpath)
-        assert os.path.exists(os.path.join(repository.dir_path, f"{data_node.id}.json"))
+        dir_path = repository.dir_path if repo == _DataFSRepository else os.path.join(tmpdir.strpath, "data_node")
+
+        assert os.path.exists(os.path.join(dir_path, f"{data_node.id}.json"))

@@ -15,7 +15,7 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._task_fs_repository_v2 import _TaskFSRepository
 from ._task_manager import _TaskManager
-from ._task_sql_repository import _TaskSQLRepository
+from ._task_sql_repository_v2 import _TaskSQLRepository
 
 
 class _TaskManagerFactory(_ManagerFactory):

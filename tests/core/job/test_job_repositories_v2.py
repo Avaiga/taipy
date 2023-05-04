@@ -16,30 +16,33 @@ import pytest
 from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
 from src.taipy.core.exceptions import ModelNotFound
 from src.taipy.core.job._job_fs_repository_v2 import _JobFSRepository
+from src.taipy.core.job._job_sql_repository_v2 import _JobSQLRepository
 from src.taipy.core.job.job import Job, JobId, Task
 from src.taipy.core.task._task_fs_repository_v2 import _TaskFSRepository
 
 
-class TestJobFSRepository:
-    def test_save_and_load(self, tmpdir, data_node, job):
+class TestJobRepository:
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_save_and_load(self, tmpdir, data_node, job, repo):
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
         _TaskFSRepository()._save(task)
         job._task = task
 
-        repository = _JobFSRepository()
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(job)
 
         obj = repository._load(job.id)
         assert isinstance(obj, Job)
 
-    def test_load_all(self, tmpdir, data_node, job):
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_load_all(self, tmpdir, data_node, job, repo):
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
         _TaskFSRepository()._save(task)
         job._task = task
-        repository = _JobFSRepository()
+        repository = repo()
         repository.base_path = tmpdir
         for i in range(10):
             job.id = JobId(f"job-{i}")
@@ -48,8 +51,9 @@ class TestJobFSRepository:
 
         assert len(jobs) == 10
 
-    def test_load_all_with_filters(self, tmpdir, data_node, job):
-        repository = _JobFSRepository()
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_load_all_with_filters(self, tmpdir, data_node, job, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -63,8 +67,9 @@ class TestJobFSRepository:
 
         assert len(objs) == 1
 
-    def test_delete(self, tmpdir, data_node, job):
-        repository = _JobFSRepository()
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_delete(self, tmpdir, data_node, job, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -77,8 +82,9 @@ class TestJobFSRepository:
         with pytest.raises(ModelNotFound):
             repository._load(job.id)
 
-    def test_delete_all(self, tmpdir, data_node, job):
-        repository = _JobFSRepository()
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_delete_all(self, tmpdir, data_node, job, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -95,8 +101,9 @@ class TestJobFSRepository:
 
         assert len(repository._load_all()) == 0
 
-    def test_delete_many(self, tmpdir, data_node, job):
-        repository = _JobFSRepository()
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_delete_many(self, tmpdir, data_node, job, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -114,8 +121,9 @@ class TestJobFSRepository:
 
         assert len(repository._load_all()) == 7
 
-    def test_search(self, tmpdir, data_node, job):
-        repository = _JobFSRepository()
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_search(self, tmpdir, data_node, job, repo):
+        repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
@@ -132,10 +140,13 @@ class TestJobFSRepository:
 
         assert isinstance(obj, Job)
 
-    def test_export(self, tmpdir, job):
-        repository = _JobFSRepository()
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_export(self, tmpdir, job, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(job)
 
         repository._export(job.id, tmpdir.strpath)
-        assert os.path.exists(os.path.join(repository.dir_path, f"{job.id}.json"))
+        dir_path = repository.dir_path if repo == _JobFSRepository else os.path.join(tmpdir.strpath, "job")
+
+        assert os.path.exists(os.path.join(dir_path, f"{job.id}.json"))

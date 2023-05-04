@@ -37,3 +37,7 @@ class _Encoder(json.JSONEncoder):
         else:
             result = json.JSONEncoder.default(self, o)
         return result
+
+
+def dumps(d):
+    return json.dumps(d, cls=_Encoder)

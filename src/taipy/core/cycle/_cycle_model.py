@@ -12,15 +12,16 @@
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from sqlalchemy import Column, String, Table
+from sqlalchemy import JSON, Column, Enum, String, Table
 
 from taipy.config.common.frequency import Frequency
 
 from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import mapper_registry
+from .._repository._v2.db._sql_base_model import _SQLBaseModel, mapper_registry
 from .cycle_id import CycleId
 
 
+@mapper_registry.mapped
 @dataclass
 class _CycleModel(_BaseModel):
     __table__ = Table(
@@ -28,8 +29,8 @@ class _CycleModel(_BaseModel):
         mapper_registry.metadata,
         Column("id", String, primary_key=True),
         Column("name", String),
-        Column("frequency", String),
-        Column("properties", String),
+        Column("frequency", Enum(Frequency)),
+        Column("properties", JSON),
         Column("creation_date", String),
         Column("start_date", String),
         Column("end_date", String),

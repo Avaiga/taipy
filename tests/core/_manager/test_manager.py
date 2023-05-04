@@ -15,7 +15,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional
 
 from src.taipy.core._manager._manager import _Manager
-from src.taipy.core._repository._repository_adapter import _RepositoryAdapter
 from src.taipy.core._repository._v2._abstract_converter import _AbstractConverter
 from src.taipy.core._repository._v2._abstract_repository import _AbstractRepository
 from src.taipy.core._repository._v2._filesystem_repository import _FileSystemRepository
@@ -99,7 +98,7 @@ class MockRepository(_AbstractRepository):  # type: ignore
 
 class MockManager(_Manager[MockEntity]):
     _ENTITY_NAME = MockEntity.__name__
-    _repository = MockRepository(model=MockModel, dir_name="foo")
+    _repository = MockRepository(model_type=MockModel, dir_name="foo")
 
 
 class TestManager:

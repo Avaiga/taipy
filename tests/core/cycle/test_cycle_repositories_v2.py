@@ -10,26 +10,29 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+from copy import copy
 
 import pytest
-from pandas._typing import Frequency
 
 from src.taipy.core.cycle._cycle_fs_repository_v2 import _CycleFSRepository
+from src.taipy.core.cycle._cycle_sql_repository_v2 import _CycleSQLRepository
 from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.exceptions import ModelNotFound
 
 
-class TestCycleFSRepository:
-    def test_save_and_load(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+class TestCycleRepositories:
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_save_and_load(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(cycle)
 
         obj = repository._load(cycle.id)
         assert isinstance(obj, Cycle)
 
-    def test_load_all(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_load_all(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
         for i in range(10):
             cycle.id = CycleId(f"cycle-{i}")
@@ -38,20 +41,22 @@ class TestCycleFSRepository:
 
         assert len(data_nodes) == 10
 
-    def test_load_all_with_filters(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_load_all_with_filters(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
             cycle.id = CycleId(f"cycle-{i}")
-            cycle.name = f"cycle-{i}"
+            cycle._name = f"cycle-{i}"
             repository._save(cycle)
-        objs = repository._load_all(filters=[{"name": "cycle-2"}])
+        objs = repository._load_all(filters=[{"id": "cycle-2"}])
 
         assert len(objs) == 1
 
-    def test_delete(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+    @pytest.mark.parametrize("repo", [_CycleSQLRepository])
+    def test_delete(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(cycle)
 
@@ -60,8 +65,9 @@ class TestCycleFSRepository:
         with pytest.raises(ModelNotFound):
             repository._load(cycle.id)
 
-    def test_delete_all(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_delete_all(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -74,8 +80,9 @@ class TestCycleFSRepository:
 
         assert len(repository._load_all()) == 0
 
-    def test_delete_many(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_delete_many(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -89,8 +96,9 @@ class TestCycleFSRepository:
 
         assert len(repository._load_all()) == 7
 
-    def test_search(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_search(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
 
         for i in range(10):
@@ -104,10 +112,12 @@ class TestCycleFSRepository:
 
         assert isinstance(obj, Cycle)
 
-    def test_export(self, tmpdir, cycle):
-        repository = _CycleFSRepository()
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_export(self, tmpdir, cycle, repo):
+        repository = repo()
         repository.base_path = tmpdir
         repository._save(cycle)
 
         repository._export(cycle.id, tmpdir.strpath)
-        assert os.path.exists(os.path.join(repository.dir_path, f"{cycle.id}.json"))
+        dir_path = repository.dir_path if repo == _CycleFSRepository else os.path.join(tmpdir.strpath, "cycle")
+        assert os.path.exists(os.path.join(dir_path, f"{cycle.id}.json"))

@@ -15,7 +15,7 @@ from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._data_fs_repository_v2 import _DataFSRepository
 from ._data_manager import _DataManager
-from ._data_sql_repository import _DataSQLRepository
+from ._data_sql_repository_v2 import _DataSQLRepository
 
 
 class _DataManagerFactory(_ManagerFactory):

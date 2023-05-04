@@ -34,7 +34,6 @@ def init_managers():
 
 
 class TestDataManager:
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_create_data_node_and_modify_properties_does_not_modify_config(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
@@ -51,7 +50,6 @@ class TestDataManager:
         assert dn.properties.get("foo") == "bar"
         assert dn.properties.get("baz") == "qux"
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_create_raises_exception_with_wrong_type(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
@@ -60,7 +58,6 @@ class TestDataManager:
         with pytest.raises(InvalidDataNodeType):
             _DataManager._create_and_set(wrong_type_dn_config, None, None)
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_create_from_same_config_generates_new_data_node_and_new_id(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
@@ -70,7 +67,6 @@ class TestDataManager:
         dn_2 = _DataManager._create_and_set(dn_config, None, None)
         assert dn_2.id != dn.id
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_create_uses_overridden_attributes_in_config_file(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
@@ -91,15 +87,13 @@ class TestDataManager:
         assert csv_dn._path == "bar"
         assert csv_dn.has_header
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_get_if_not_exists(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
 
         with pytest.raises(ModelNotFound):
-            _DataManager._repository.load("test_data_node_2")
+            _DataManager._repository._load("test_data_node_2")
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_get_all(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
@@ -116,7 +110,6 @@ class TestDataManager:
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "foo"]) == 1
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_set(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
@@ -144,7 +137,6 @@ class TestDataManager:
         assert dn.config_id == "foo"
         assert _DataManager._get(dn.id).config_id == "foo"
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_delete(self):
         Config.configure_global_app(repository_type="sql")
         init_managers()
@@ -166,7 +158,6 @@ class TestDataManager:
         _DataManager._delete_all()
         assert len(_DataManager._get_all()) == 0
 
-    @pytest.mark.skip("Skipped until SQLRepository refactor")
     def test_get_or_create(self):
         def _get_or_create_dn(config, *args):
             return _DataManager._bulk_get_or_create([config], *args)[config]

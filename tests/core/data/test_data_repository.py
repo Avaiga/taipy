@@ -47,10 +47,6 @@ class TestDataRepository:
         assert isinstance(dn, CSVDataNode)
         assert isinstance(dn, DataNode)
 
-    def test_from_and_to_model(self, data_node_model):
-        assert _DataNodeConverter._entity_to_model(self.data_node) == data_node_model
-        assert _DataNodeConverter._model_to_entity(data_node_model) == self.data_node
-
     def test_data_node_with_env_variable_value_not_serialized(self):
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
             assert _DataNodeConverter._entity_to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"
@@ -69,19 +65,12 @@ class TestDataRepository:
         assert isinstance(dn, CSVDataNode)
         assert isinstance(dn, DataNode)
 
-    def test_from_and_to_model_with_sql_repo(self, data_node_model):
-        Config.configure_global_app(repository_type="sql")
-
-        repository = _DataManagerFactory._build_repository().repo._table
-        assert repository._to_model(self.data_node) == data_node_model
-        assert repository._from_model(data_node_model) == self.data_node
-
     def test_data_node_with_env_variable_value_not_serialized_with_sql_repo(self):
         Config.configure_global_app(repository_type="sql")
 
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
-            repository = _DataManagerFactory._build_repository().repo._table
-            assert repository._to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"
+            converter = _DataNodeConverter()
+            assert converter._entity_to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"
             assert self.data_node._properties.data["prop"] == "ENV[FOO]"
             assert self.data_node.properties["prop"] == "bar"
             assert self.data_node.prop == "bar"
