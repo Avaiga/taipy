@@ -678,14 +678,14 @@ def test_get_pipelines_by_config_id():
     p_3_1 = _PipelineManager._get_or_create(pipeline_config_3)
     assert len(_PipelineManager._get_all()) == 6
 
-    p1_pipelines = _PipelineManager._get_all_entities_by_config_id(pipeline_config_1.id)
+    p1_pipelines = _PipelineManager._get_by_config_id(pipeline_config_1.id)
     assert len(p1_pipelines) == 3
     assert sorted([p_1_1.id, p_1_2.id, p_1_3.id]) == sorted([pipeline.id for pipeline in p1_pipelines])
 
-    p2_pipelines = _PipelineManager._get_all_entities_by_config_id(pipeline_config_2.id)
+    p2_pipelines = _PipelineManager._get_by_config_id(pipeline_config_2.id)
     assert len(p2_pipelines) == 2
     assert sorted([p_2_1.id, p_2_2.id]) == sorted([pipeline.id for pipeline in p2_pipelines])
 
-    p3_pipelines = _PipelineManager._get_all_entities_by_config_id(pipeline_config_3.id)
+    p3_pipelines = _PipelineManager._get_by_config_id(pipeline_config_3.id)
     assert len(p3_pipelines) == 1
     assert sorted([p_3_1.id]) == sorted([pipeline.id for pipeline in p3_pipelines])

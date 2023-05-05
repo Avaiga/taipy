@@ -136,7 +136,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_all_entities_by_config_id(cls, config_id: str) -> List[Entity]:
+    def _get_by_config_id(cls, config_id: str) -> List[Entity]:
         """
         Get the entities by its config id.
 

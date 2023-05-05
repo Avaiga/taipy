@@ -543,14 +543,14 @@ class TestDataManager:
         dn_3_1 = _DataManager._create_and_set(dn_config_3, None, None)
         assert len(_DataManager._get_all()) == 6
 
-        dn_1_datanodes = _DataManager._get_all_entities_by_config_id(dn_config_1.id)
+        dn_1_datanodes = _DataManager._get_by_config_id(dn_config_1.id)
         assert len(dn_1_datanodes) == 3
         assert sorted([dn_1_1.id, dn_1_2.id, dn_1_3.id]) == sorted([pipeline.id for pipeline in dn_1_datanodes])
 
-        dn_2_datanodes = _DataManager._get_all_entities_by_config_id(dn_config_2.id)
+        dn_2_datanodes = _DataManager._get_by_config_id(dn_config_2.id)
         assert len(dn_2_datanodes) == 2
         assert sorted([dn_2_1.id, dn_2_2.id]) == sorted([pipeline.id for pipeline in dn_2_datanodes])
 
-        dn_3_datanodes = _DataManager._get_all_entities_by_config_id(dn_config_3.id)
+        dn_3_datanodes = _DataManager._get_by_config_id(dn_config_3.id)
         assert len(dn_3_datanodes) == 1
         assert sorted([dn_3_1.id]) == sorted([pipeline.id for pipeline in dn_3_datanodes])

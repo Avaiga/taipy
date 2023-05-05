@@ -654,14 +654,12 @@ def get_entities_by_config_id(
 
     entities: List = []
 
-    if entities := _ScenarioManagerFactory._build_manager()._get_all_entities_by_config_id(config_id):
+    if entities := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
-    if entities := _PipelineManagerFactory._build_manager()._get_all_entities_by_config_id(config_id):
+    if entities := _PipelineManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
-    if entities := _TaskManagerFactory._build_manager()._get_all_entities_by_config_id(config_id):
+    if entities := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
-    if entities := _DataManagerFactory._build_manager()._get_all_entities_by_config_id(config_id):
-        return entities
-    if entities := _JobManagerFactory._build_manager()._get_all_entities_by_config_id(config_id):
+    if entities := _DataManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
     return entities

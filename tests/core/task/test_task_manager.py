@@ -417,15 +417,15 @@ def test_get_tasks_by_config_id():
     t_3_1 = _TaskManager._bulk_get_or_create([task_config_3], pipeline_id="p6")[0]
     assert len(_TaskManager._get_all()) == 6
 
-    t1_tasks = _TaskManager._get_all_entities_by_config_id(task_config_1.id)
+    t1_tasks = _TaskManager._get_by_config_id(task_config_1.id)
     assert len(t1_tasks) == 3
     assert sorted([t_1_1.id, t_1_2.id, t_1_3.id]) == sorted([task.id for task in t1_tasks])
 
-    t2_tasks = _TaskManager._get_all_entities_by_config_id(task_config_2.id)
+    t2_tasks = _TaskManager._get_by_config_id(task_config_2.id)
     assert len(t2_tasks) == 2
     assert sorted([t_2_1.id, t_2_2.id]) == sorted([task.id for task in t2_tasks])
 
-    t3_tasks = _TaskManager._get_all_entities_by_config_id(task_config_3.id)
+    t3_tasks = _TaskManager._get_by_config_id(task_config_3.id)
     assert len(t3_tasks) == 1
     assert sorted([t_3_1.id]) == sorted([task.id for task in t3_tasks])
 

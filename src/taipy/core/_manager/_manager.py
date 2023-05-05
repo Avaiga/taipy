@@ -124,8 +124,8 @@ class _Manager(Generic[EntityType]):
         return cls._repository._export(id, folder_path)
 
     @classmethod
-    def _get_all_entities_by_config_id(cls, config_id: str) -> List[EntityType]:
+    def _get_by_config_id(cls, config_id: str) -> List[EntityType]:
         """
         Get all entities by its config id.
         """
-        return cls._repository._get_all_entities_by_config_id(config_id)
+        return cls._repository._get_by_config_id(config_id)
