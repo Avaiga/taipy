@@ -36,7 +36,7 @@ and dynamic elements, handling properties with different types.
            the value of a property as a string where each consecutive character has
            a different color.
       - `scripts/`: A directory containing NodeJS scripts used by the build process.
-   
+
 ## Building the custom library
 
 This section explains how to build the custom extension library.
@@ -46,7 +46,7 @@ This section explains how to build the custom extension library.
 To complete the build of the extension library, we need the following tools:
 
 - Python 3.8 or higher;
-- Taipy GUI 2.0 or higher;
+- Taipy GUI 2.2 or higher;
 - [Node.js](https://nodejs.org/en/) 18.0 or higher: a JavaScript runtime.<br/>
   This embeds [npm](https://www.npmjs.com/), the Node Package Manager.
 
@@ -71,7 +71,7 @@ TAIPY_GUI_DIR=<taipy_gui_installation_directory>
 to the file `example_library/front-end/.env'. This file, if present, is read by the build process
 to initialize the environment variable.
 
-### Notes on configuration 
+### Notes on configuration
 
 This example has all the important settings, ready to be built and used to run a Taipy GUI
 application using this extension or even to make it a regular Python package.

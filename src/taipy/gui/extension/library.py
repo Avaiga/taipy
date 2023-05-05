@@ -14,6 +14,7 @@ import typing as t
 import xml.etree.ElementTree as etree
 from abc import ABC, abstractmethod
 from pathlib import Path
+from urllib.parse import urlencode
 
 from .._warnings import _warn
 from ..renderers.builder import _Builder
@@ -333,7 +334,7 @@ class ElementLibrary(ABC):
         """TODO"""
         from ..gui import Gui
 
-        return f"/{Gui._EXTENSION_ROOT}/{self.get_name()}/{resource}"
+        return f"/{Gui._EXTENSION_ROOT}/{self.get_name()}/{resource}{self.get_query(resource)}"
 
     def get_data(self, library_name: str, payload: t.Dict, var_name: str, value: t.Any) -> t.Optional[t.Dict]:
         """
@@ -380,3 +381,28 @@ class ElementLibrary(ABC):
             state: The `State^` instance.
         """
         pass
+
+    def get_query(self, name: str) -> str:
+        """
+        Return an URL query depending on the resource name.<br/>
+        Default implementation returns the version if defined.
+
+        Arguments:
+            name (str): The name of the resource for which a query should be returned.
+
+        Returns:
+            A string that holds the query part of an URL (starting with ?).
+        """
+        if version := self.get_version():
+            return f"?{urlencode({'v': version})}"
+        return ""
+
+    def get_version(self) -> t.Optional[str]:
+        """
+        The optional library version
+
+        Returns:
+            An optional string representing the library version.<br/>
+            This version will be appended to the resource URL as a query arg (?v=<version>)
+        """
+        return None

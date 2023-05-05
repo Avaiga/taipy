@@ -22,7 +22,7 @@
     "react": "^18.2.0"
   },
   "scripts": {
-    "install": "node scripts/install.js",
+    "postinstall": "node scripts/install.js",
     "build:dev": "webpack --mode development",
     "build": "webpack --mode production"
   }

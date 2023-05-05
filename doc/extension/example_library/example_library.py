@@ -1,4 +1,4 @@
- 
+
 from taipy.gui.extension import ElementLibrary, Element, ElementProperty, PropertyType
 
 class ExampleLibrary(ElementLibrary):
@@ -12,7 +12,7 @@ class ExampleLibrary(ElementLibrary):
                 "denominator": ElementProperty(PropertyType.number)
                 },
                 render_xhtml=ExampleLibrary._fraction_render),
-            # A dynamic element that decorates its value            
+            # A dynamic element that decorates its value
             "label": Element("value", {
                 "value": ElementProperty(PropertyType.dynamic_string)
                 },
@@ -38,10 +38,10 @@ class ExampleLibrary(ElementLibrary):
 
     def get_name(self) -> str:
         return "example"
-    
+
     def get_elements(self) -> dict:
         return self.elements
 
     def get_scripts(self) -> list[str]:
         # Only one JavaScript bundle for this library.
-        return ["example_library/front-end/dist/exampleLibrary.js"]
+        return ["front-end/dist/exampleLibrary.js"]

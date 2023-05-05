@@ -20,4 +20,4 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-dependencies = [ "taipy-gui>=2.0" ]
+dependencies = [ "taipy-gui>=2.2" ]
