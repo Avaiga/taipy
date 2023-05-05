@@ -138,7 +138,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     @abstractmethod
     def _get_all_entities_by_config_id(cls, config_id: str) -> List[Entity]:
         """
-        Get the entities by its cofig id.
+        Get the entities by its config id.
 
         Args:
             config_id (str): The config id of the entities
