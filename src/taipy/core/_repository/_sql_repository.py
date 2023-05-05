@@ -166,8 +166,8 @@ class _TaipyModelTable(_BaseSQLRepository[ModelType, Entity]):
         return [self.__to_entity(entity_model) for entity_model in entity_models]
 
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
-        entity = self.__get_model_by_config_and_owner(config_id, owner_id)
-        return self.__to_entity(entity)
+        model = self.__get_model_by_config_and_owner(config_id, owner_id)
+        return self.__to_entity(model)
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
