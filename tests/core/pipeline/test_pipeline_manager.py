@@ -1061,3 +1061,35 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
     ]
     assert all([expected_output in stdout for expected_output in expected_outputs])
     assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+
+
+def test_get_pipelines_by_config_id():
+    dn_config = Config.configure_data_node("dn", scope=Scope.PIPELINE)
+    task_config = Config.configure_task("t", print, dn_config)
+    pipeline_config_1 = Config.configure_pipeline("p1", task_configs=task_config)
+    pipeline_config_2 = Config.configure_pipeline("p2", task_configs=task_config)
+    pipeline_config_3 = Config.configure_pipeline("p3", task_configs=task_config)
+
+    p_1_1 = _PipelineManager._get_or_create(pipeline_config_1)
+    p_1_2 = _PipelineManager._get_or_create(pipeline_config_1)
+    p_1_3 = _PipelineManager._get_or_create(pipeline_config_1)
+    assert len(_PipelineManager._get_all()) == 3
+
+    p_2_1 = _PipelineManager._get_or_create(pipeline_config_2)
+    p_2_2 = _PipelineManager._get_or_create(pipeline_config_2)
+    assert len(_PipelineManager._get_all()) == 5
+
+    p_3_1 = _PipelineManager._get_or_create(pipeline_config_3)
+    assert len(_PipelineManager._get_all()) == 6
+
+    p1_pipelines = _PipelineManager._get_by_config_id(pipeline_config_1.id)
+    assert len(p1_pipelines) == 3
+    assert sorted([p_1_1.id, p_1_2.id, p_1_3.id]) == sorted([pipeline.id for pipeline in p1_pipelines])
+
+    p2_pipelines = _PipelineManager._get_by_config_id(pipeline_config_2.id)
+    assert len(p2_pipelines) == 2
+    assert sorted([p_2_1.id, p_2_2.id]) == sorted([pipeline.id for pipeline in p2_pipelines])
+
+    p3_pipelines = _PipelineManager._get_by_config_id(pipeline_config_3.id)
+    assert len(p3_pipelines) == 1
+    assert sorted([p_3_1.id]) == sorted([pipeline.id for pipeline in p3_pipelines])

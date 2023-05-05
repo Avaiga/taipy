@@ -108,3 +108,6 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
     @staticmethod
     def __to_task_ids(tasks):
         return [t.id if isinstance(t, Task) else t for t in tasks]
+
+    def _get_by_config_id(self, config_id: str) -> List[Pipeline]:
+        return self.repo._get_by_config_id(config_id)

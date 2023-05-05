@@ -104,3 +104,6 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
             else:
                 raise NonExistingDataNode(_id)
         return data_nodes
+
+    def _get_by_config_id(self, config_id: str) -> List[Task]:
+        return self.repo._get_by_config_id(config_id)

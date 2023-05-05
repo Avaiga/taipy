@@ -94,6 +94,9 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)
 
+    def _get_by_config_id(self, config_id: str) -> List[Scenario]:
+        return self.repo._get_by_config_id(config_id)
+
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:
         return [p.id if isinstance(p, Pipeline) else p for p in pipelines]

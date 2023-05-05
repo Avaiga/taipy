@@ -362,5 +362,40 @@ def test_submit_task():
         assert len(MockOrchestrator.submit_ids) == len(set(MockOrchestrator.submit_ids))
 
 
+def test_get_tasks_by_config_id():
+    Config.configure_global_app(repository_type="sql")
+
+    init_managers()
+
+    dn_config = Config.configure_data_node("dn", scope=Scope.PIPELINE)
+    task_config_1 = Config.configure_task("t1", print, dn_config)
+    task_config_2 = Config.configure_task("t2", print, dn_config)
+    task_config_3 = Config.configure_task("t3", print, dn_config)
+
+    t_1_1 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p1")[0]
+    t_1_2 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p2")[0]
+    t_1_3 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p3")[0]
+    assert len(_TaskManager._get_all()) == 3
+
+    t_2_1 = _TaskManager._bulk_get_or_create([task_config_2], pipeline_id="p4")[0]
+    t_2_2 = _TaskManager._bulk_get_or_create([task_config_2], pipeline_id="p5")[0]
+    assert len(_TaskManager._get_all()) == 5
+
+    t_3_1 = _TaskManager._bulk_get_or_create([task_config_3], pipeline_id="p6")[0]
+    assert len(_TaskManager._get_all()) == 6
+
+    t1_tasks = _TaskManager._get_by_config_id(task_config_1.id)
+    assert len(t1_tasks) == 3
+    assert sorted([t_1_1.id, t_1_2.id, t_1_3.id]) == sorted([task.id for task in t1_tasks])
+
+    t2_tasks = _TaskManager._get_by_config_id(task_config_2.id)
+    assert len(t2_tasks) == 2
+    assert sorted([t_2_1.id, t_2_2.id]) == sorted([task.id for task in t2_tasks])
+
+    t3_tasks = _TaskManager._get_by_config_id(task_config_3.id)
+    assert len(t3_tasks) == 1
+    assert sorted([t_3_1.id]) == sorted([task.id for task in t3_tasks])
+
+
 def _create_task_from_config(task_config, *args, **kwargs):
     return _TaskManager._bulk_get_or_create([task_config], *args, **kwargs)[0]

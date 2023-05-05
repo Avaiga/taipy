@@ -538,3 +538,25 @@ class TestTaipy:
         for cycle, scenarios in cycles_scenarios.items():
             expected_scenarios = expected_cycles_scenarios[cycle]
             assert sorted([scenario.id for scenario in scenarios]) == sorted(expected_scenarios)
+
+    def test_get_entities_by_config_id(self):
+        scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
+        scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+
+        s_1_1 = tp.create_scenario(scenario_config_1)
+        s_1_2 = tp.create_scenario(scenario_config_1)
+        s_1_3 = tp.create_scenario(scenario_config_1)
+
+        assert len(tp.get_scenarios()) == 3
+
+        s_2_1 = tp.create_scenario(scenario_config_2)
+        s_2_2 = tp.create_scenario(scenario_config_2)
+        assert len(tp.get_scenarios()) == 5
+
+        s1_scenarios = tp.get_entities_by_config_id(scenario_config_1.id)
+        assert len(s1_scenarios) == 3
+        assert sorted([s_1_1.id, s_1_2.id, s_1_3.id]) == sorted([scenario.id for scenario in s1_scenarios])
+
+        s2_scenarios = tp.get_entities_by_config_id(scenario_config_2.id)
+        assert len(s2_scenarios) == 2
+        assert sorted([s_2_1.id, s_2_2.id]) == sorted([scenario.id for scenario in s2_scenarios])

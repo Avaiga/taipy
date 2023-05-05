@@ -639,3 +639,27 @@ def get_cycles_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
         else:
             cycles_scenarios[scenario.cycle] = [scenario]
     return cycles_scenarios
+
+
+def get_entities_by_config_id(
+    config_id: str,
+) -> Union[List, List[Task], List[DataNode], List[Pipeline], List[Scenario]]:
+    """Get the entities by its cofig id.
+
+    Parameters:
+        config_id (str): The config id of the entities
+    Returns:
+        The list of all entities by the config id.
+    """
+
+    entities: List = []
+
+    if entities := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
+        return entities
+    if entities := _PipelineManagerFactory._build_manager()._get_by_config_id(config_id):
+        return entities
+    if entities := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
+        return entities
+    if entities := _DataManagerFactory._build_manager()._get_by_config_id(config_id):
+        return entities
+    return entities

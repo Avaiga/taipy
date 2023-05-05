@@ -28,6 +28,7 @@ from src.taipy.core.config import (
     PipelineConfig,
     ScenarioConfig,
     TaskConfig,
+    _ConfigIdChecker,
     _DataNodeConfigChecker,
     _JobConfigChecker,
     _PipelineConfigChecker,
@@ -359,6 +360,7 @@ def init_config():
             ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
         ],
     )
+    _Checker.add_checker(_ConfigIdChecker)
     _Checker.add_checker(_JobConfigChecker)
     _Checker.add_checker(_DataNodeConfigChecker)
     _Checker.add_checker(_TaskConfigChecker)
