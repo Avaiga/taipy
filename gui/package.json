@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.8",
     "@mui/icons-material": "^5.0.5",
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
@@ -26,10 +27,10 @@
     "date-fns": "^2.29.3",
     "formik": "^2.2.9",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "scripts": {
-    "install": "node scripts/install.js",
+    "postinstall": "node scripts/install.js",
     "build:dev": "webpack --mode development",
     "build": "webpack --mode production"
   }
