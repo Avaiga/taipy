@@ -57,7 +57,6 @@ import {
     useDispatchRequestUpdateOnFirstRender,
     createSendUpdateAction,
 } from "taipy-gui";
-import { Autocomplete, Chip, Divider, InputAdornment } from "@mui/material";
 
 import { Cycle, Scenario } from "./icons";
 
