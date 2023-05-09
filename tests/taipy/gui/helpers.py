@@ -19,10 +19,10 @@ import warnings
 from types import FrameType
 
 from taipy.gui import Gui, Html, Markdown
+from taipy.gui._warnings import TaipyGuiWarning
 from taipy.gui.renderers.builder import _Builder
 from taipy.gui.utils._variable_directory import _reset_name_map
 from taipy.gui.utils.expr_var_name import _reset_expr_var_name
-from taipy.gui._warnings import TaipyGuiWarning
 
 
 class Helpers:
@@ -149,6 +149,7 @@ class Helpers:
                 flask_log=False,
                 run_in_thread=True,
                 allow_unsafe_werkzeug=False,
+                notebook_proxy=False,
             )
         while not Helpers.port_check():
             time.sleep(0.1)

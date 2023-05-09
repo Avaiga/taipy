@@ -25,3 +25,6 @@ class _RuntimeManager(object, metaclass=_Singleton):
         if port in self.__port_gui:
             self.__port_gui[port].stop()
         self.__port_gui[port] = gui
+
+    def get_used_port(self):
+        return list(self.__port_gui.keys())

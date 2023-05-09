@@ -1714,6 +1714,7 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 async_mode=app_config["async_mode"],
+                allow_upgrades=not app_config["notebook_proxy"],
                 server_config=app_config.get("server_config"),
             )
 
@@ -1726,6 +1727,7 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 async_mode=app_config["async_mode"],
+                allow_upgrades=not app_config["notebook_proxy"],
                 server_config=app_config.get("server_config"),
             )
             self._bindings()._new_scopes()
@@ -1909,7 +1911,7 @@ class Gui:
         if not hasattr(self, "_root_dir"):
             self._root_dir = run_root_dir
 
-        kwargs = {
+        self.__run_kwargs = kwargs = {
             **kwargs,
             "run_server": run_server,
             "run_in_thread": run_in_thread,
@@ -1993,7 +1995,22 @@ class Gui:
             flask_log=app_config["flask_log"],
             run_in_thread=app_config["run_in_thread"],
             allow_unsafe_werkzeug=app_config["allow_unsafe_werkzeug"],
+            notebook_proxy=app_config["notebook_proxy"],
         )
+
+    def reload(self):  # pragma: no cover
+        """
+        Reload the Web server.
+
+        This function reloads the underlying Web server only in the situation where
+        it was run in a separated thread: the _run_in_thread_ parameter to the
+        `(Gui.)run^` method was set to True, or you are running in an IPython notebook
+        context.
+        """
+        if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
+            self._server.stop_thread()
+            self.run(**self.__run_kwargs)
+            _TaipyLogger._get_logger().info("Gui server has been reloaded.")
 
     def stop(self):
         """

@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import contextlib
 import time
 from urllib.request import urlopen
 
@@ -27,10 +28,22 @@ def test_notebook_simple_gui(tb, helpers):
         time.sleep(0.1)
     assert ">Hello</h1>" in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
     tb.execute_cell("gui_stop")
-    assert helpers.port_check() is False
+    with pytest.raises(Exception) as exc_info:
+        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+    assert "501: Gateway error" in str(exc_info.value)
     tb.execute_cell("gui_re_run")
-    while not helpers.port_check():
-        time.sleep(0.1)
+    while True:
+        with contextlib.suppress(Exception):
+            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            break
+    assert ">Hello</h1>" in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    tb.execute_cell("gui_reload")
+    while True:
+        with contextlib.suppress(Exception):
+            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            break
     assert ">Hello</h1>" in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
     tb.execute_cell("gui_re_stop")
-    assert helpers.port_check() is False
+    with pytest.raises(Exception) as exc_info:
+        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+    assert "501: Gateway error" in str(exc_info.value)

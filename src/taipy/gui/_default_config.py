@@ -55,6 +55,7 @@ default_config: Config = {
     "light_theme": None,
     "margin": "1em",
     "ngrok_token": "",
+    "notebook_proxy": True,
     "notification_duration": 3000,
     "propagate": True,
     "run_browser": True,

@@ -22,6 +22,7 @@ import time
 import typing as t
 import webbrowser
 from importlib import util
+from random import randint
 
 import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
@@ -36,6 +37,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .config import ServerConfig
 from .renderers.json import _TaipyJsonProvider
 from .utils import _is_in_notebook, _RuntimeManager
+from .utils.proxy import NotebookProxy
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -53,6 +55,7 @@ class _Server:
         flask: t.Optional[Flask] = None,
         path_mapping: t.Optional[dict] = None,
         async_mode: t.Optional[str] = None,
+        allow_upgrades: bool = True,
         server_config: t.Optional[ServerConfig] = None,
     ):
         self._gui = gui
@@ -82,6 +85,7 @@ class _Server:
             "ping_interval": 5,
             "json": json,
             "async_mode": async_mode,
+            "allow_upgrades": allow_upgrades,
         }
         if "socketio" in server_config and isinstance(server_config["socketio"], dict):
             socketio_config.update(server_config["socketio"])
@@ -246,8 +250,21 @@ class _Server:
             if not patcher.is_monkey_patched("time"):
                 monkey_patch(time=True)
 
-    def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug):
+    def _get_random_port(self):  # pragma: no cover
+        while True:
+            port = randint(49152, 65535)
+            if port not in _RuntimeManager().get_used_port() and not self._is_port_open(self._host, port):
+                return port
+
+    def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug, notebook_proxy):
         host_value = host if host != "0.0.0.0" else "localhost"
+        self._host = host
+        self._port = port
+        if _is_in_notebook() and notebook_proxy:  # pragma: no cover
+            # Start proxy if not already started
+            self._proxy = NotebookProxy(gui=self._gui, listening_port=port)
+            self._proxy.run()
+            self._port = self._get_random_port()
         if _is_in_notebook() or run_in_thread:
             runtime_manager = _RuntimeManager()
             runtime_manager.add_gui(self._gui, port)
@@ -265,8 +282,6 @@ class _Server:
         if not is_running_from_reloader() and self._gui._get_config("run_browser", False):
             webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
         if _is_in_notebook() or run_in_thread:
-            self._host = host
-            self._port = port
             self._thread = KThread(target=self._run_notebook)
             self._thread.start()
             return
@@ -298,3 +313,7 @@ class _Server:
                     self._thread.kill()
             while self._is_port_open(self._host, self._port):
                 time.sleep(0.1)
+
+    def stop_proxy(self):
+        if hasattr(self, "_proxy"):
+            self._proxy.stop()

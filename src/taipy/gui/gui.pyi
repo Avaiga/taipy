@@ -234,6 +234,7 @@ class Gui:
     def __init_ngrok(self) -> None: ...
     def __bind_default_function(self) -> None: ...
     def __register_blueprint(self) -> None: ...
+    __run_kwargs: Incomplete
     state: Incomplete
     def run(
         self,
@@ -252,6 +253,7 @@ class Gui:
         light_theme: t.Optional[t.Dict[str, t.Any]] = ...,
         margin: t.Optional[str] = ...,
         ngrok_token: str = ...,
+        notebook_proxy: bool = ...,
         notification_duration: int = ...,
         propagate: bool = ...,
         run_browser: bool = ...,
@@ -271,4 +273,5 @@ class Gui:
         webapp_path: t.Optional[str] = ...,
         port: int = ...,
     ) -> t.Optional[Flask]: ...
+    def reload(self) -> None: ...
     def stop(self) -> None: ...

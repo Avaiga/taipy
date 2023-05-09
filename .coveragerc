@@ -1,6 +1,7 @@
 [run]
 # uncomment the following to omit files during running
-#omit =
+omit =
+    proxy.py
 [report]
 exclude_lines =
     pragma: no cover

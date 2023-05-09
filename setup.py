@@ -44,6 +44,7 @@ requirements = [
     "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
     "gitignore-parser>=0.1,<0.2",
     "simple-websocket>=0.9,<1.0",
+    "twisted>=22.10",
 ]
 
 test_requirements = ["pytest>=3.8"]
