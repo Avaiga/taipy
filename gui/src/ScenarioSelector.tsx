@@ -283,7 +283,7 @@ const ScenarioNodesContent = ({
 
             "&:hover": {
               backgroundColor: "primary.main",
-              color: "common.white",
+              color: "primary.contrastText",
             },
           }}
         >
@@ -593,10 +593,10 @@ const ScenarioEditDialog = ({
                 <Grid item xs={6}>
                   <Button
                     variant="outlined"
-                    color="primary"
+                    color="error"
                     onClick={onConfirmDialogOpen}
                   >
-                    DELETE
+                    Delete
                   </Button>
                 </Grid>
               )}
@@ -607,8 +607,8 @@ const ScenarioEditDialog = ({
                 justifyContent="flex-end"
               >
                 <Grid item sx={CancelBtnSx}>
-                  <Button variant="outlined" onClick={close}>
-                    CANCEL
+                  <Button variant="outlined" color="inherit" onClick={close}>
+                    Cancel
                   </Button>
                 </Grid>
                 <Grid item>
@@ -617,7 +617,7 @@ const ScenarioEditDialog = ({
                     type="submit"
                     disabled={!form.values.config || !form.values.name}
                   >
-                    {actionEdit ? "APPLY" : "CREATE"}
+                    {actionEdit ? "Apply" : "Create"}
                   </Button>
                 </Grid>
               </Grid>
@@ -658,12 +658,8 @@ const ScenarioEditDialog = ({
           >
             CANCEL
           </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={onDeleteScenario}
-          >
-            DELETE
+          <Button variant="contained" color="error" onClick={onDeleteScenario}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
@@ -828,9 +824,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         </TreeView>
 
         {showAddButton ? (
-          <Button variant="outlined" onClick={onDialogOpen} fullWidth>
-            ADD SCENARIO &nbsp;&nbsp;
-            <Add />
+          <Button
+            variant="outlined"
+            onClick={onDialogOpen}
+            fullWidth
+            endIcon={<Add />}
+          >
+            Add scenario
           </Button>
         ) : null}
 
