@@ -54,6 +54,8 @@ import {
   useDispatchRequestUpdateOnFirstRender,
   createSendUpdateAction,
 } from "taipy-gui";
+import { ScenarioIcon } from "./icons";
+import { alpha, useTheme } from "@mui/material";
 
 enum NodeType {
   CYCLE = 0,
@@ -120,6 +122,7 @@ interface ScenarioNodesProps {
 interface ScenarioNodesContentProps {
   scenarioId?: string;
   label?: string;
+  isPrimary?: boolean;
   openEditDialog: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
@@ -145,7 +148,7 @@ const BadgePos = {
 } as BadgeOrigin;
 
 const BadgeSx = {
-  width: "100%",
+  flex: "0 0 auto",
 
   "& .MuiBadge-badge": {
     fontSize: "1rem",
@@ -161,6 +164,18 @@ const FlagSx = {
   fontSize: "0.75em",
 };
 
+const tinyIconButtonSx = {
+  display: "flex",
+  width: "1rem",
+  height: "1rem",
+  fontSize: "0.750rem",
+
+  "& .MuiSvgIcon-root": {
+    color: "inherit",
+    fontSize: "inherit",
+  },
+};
+
 const ActionContentSx = { mr: 2, ml: 2 };
 
 const MainBoxSx = {
@@ -170,6 +185,15 @@ const MainBoxSx = {
 
 const TreeViewSx = {
   mb: 2,
+
+  "& .MuiTreeItem-root .MuiTreeItem-content": {
+    py: 1,
+    px: 2,
+  },
+
+  "& .MuiTreeItem-iconContainer:empty": {
+    display: "none",
+  },
 };
 
 const CycleSx = {
@@ -211,21 +235,50 @@ const IconButtonSx = {
 const ScenarioNodesContent = ({
   scenarioId,
   label,
+  isPrimary,
   openEditDialog,
 }: ScenarioNodesContentProps) => {
+  const theme = useTheme();
+
   return (
     <Grid
       container
       alignItems="center"
       direction="row"
       flexWrap="nowrap"
-      justifyContent="space-between"
       spacing={1}
     >
-      <Grid item>{label}</Grid>
-      <Grid item>
-        <IconButton data-id={scenarioId} onClick={openEditDialog}>
-          <EditOutlined fontSize="small" color="primary" />
+      <Grid item xs sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        {isPrimary ? (
+          <Badge
+            badgeContent={<FlagOutlined sx={FlagSx} />}
+            color="primary"
+            anchorOrigin={BadgePos}
+            sx={BadgeSx}
+          >
+            <ScenarioIcon fontSize="small" color="primary" />
+          </Badge>
+        ) : (
+          <ScenarioIcon fontSize="small" color="primary" />
+        )}
+        {label}
+      </Grid>
+      <Grid item xs="auto">
+        <IconButton
+          data-id={scenarioId}
+          onClick={openEditDialog}
+          sx={{
+            ...tinyIconButtonSx,
+            backgroundColor: alpha(theme.palette.text.primary, 0.15),
+            color: "text.primary",
+
+            "&:hover": {
+              backgroundColor: "primary.main",
+              color: "common.white",
+            },
+          }}
+        >
+          <EditOutlined />
         </IconButton>
       </Grid>
     </Grid>
@@ -250,26 +303,12 @@ const ScenarioNodes = ({
           key={id}
           nodeId={id}
           label={
-            showPrimary && primary ? (
-              <Badge
-                badgeContent={<FlagOutlined sx={FlagSx} />}
-                color="primary"
-                anchorOrigin={BadgePos}
-                sx={BadgeSx}
-              >
-                <ScenarioNodesContent
-                  scenarioId={id}
-                  label={label}
-                  openEditDialog={openEditDialog}
-                />
-              </Badge>
-            ) : (
-              <ScenarioNodesContent
-                scenarioId={id}
-                label={label}
-                openEditDialog={openEditDialog}
-              />
-            )
+            <ScenarioNodesContent
+              scenarioId={id}
+              label={label}
+              isPrimary={showPrimary ? primary : undefined}
+              openEditDialog={openEditDialog}
+            />
           }
         />
       ))}
