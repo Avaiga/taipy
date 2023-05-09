@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -23,8 +23,6 @@ import Dialog from "@mui/material/Dialog";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
-  ChevronRight,
-  ExpandMore,
   FlagOutlined,
   Close,
   DeleteOutline,
@@ -32,50 +30,20 @@ import {
   Send,
   CheckCircle,
   Cancel,
+  ArrowForwardIosSharp,
 } from "@mui/icons-material";
-import TreeItem from "@mui/lab/TreeItem";
-import TreeView from "@mui/lab/TreeView";
 
 import {
-  useDynamicProperty,
-  useDispatch,
-  useModule,
-  createRequestUpdateAction,
-  getUpdateVar,
-  createSendActionNameAction,
-  useDispatchRequestUpdateOnFirstRender,
-  createSendUpdateAction,
-} from "taipy-gui";
-import { Autocomplete, Chip, Divider, InputAdornment } from "@mui/material";
-
-type Property = {
-  id: string;
-  key: string;
-  value: string;
-};
-
-type Scenario = [string, string, undefined, number, boolean];
-type Scenarios = Array<Scenario>;
-type Cycles = Array<[string, string, Scenarios, number, boolean]>;
-
-// id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags
-type ScenarioFull = [
-  string,
-  boolean,
-  string,
-  string,
-  string,
-  string[],
-  Array<[string, string]>,
-  Array<[string, string]>,
-  string[]
-];
-interface ScenarioDict {
-  config: string;
-  name: string;
-  date: string;
-  properties: Array<[string, string]>;
-}
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  AccordionSummaryProps,
+  Autocomplete,
+  Chip,
+  Divider,
+  styled,
+} from "@mui/material";
+import { Cycles, Property, Scenarios } from "./utils";
 
 interface ScenarioVisualizerProps {
   id?: string;
@@ -114,10 +82,6 @@ const FlagSx = {
 const MainBoxSx = {
   maxWidth: 600,
   overflowY: "auto",
-};
-
-const TreeViewSx = {
-  mb: 2,
 };
 
 const IconButtonSx = {
@@ -196,7 +160,6 @@ const ScenarioNodesContent = ({
       flexWrap="nowrap"
       justifyContent="space-between"
       spacing={1}
-      sx={{ pt: 1, pb: 1 }}
     >
       <Grid item>
         {label}
@@ -236,9 +199,6 @@ const ScenarioVisualizer = (props: ScenarioVisualizerProps) => {
     ],
   } = props;
 
-  const dispatch = useDispatch();
-  const module = useModule();
-
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [action, setAction] = useState<string>("EDIT");
@@ -249,11 +209,6 @@ const ScenarioVisualizer = (props: ScenarioVisualizerProps) => {
     value: "",
   });
   const [label, setLabel] = useState<string>();
-
-  const onSelect = useCallback(
-    (e: React.SyntheticEvent, nodeIds: Array<string> | string) => {},
-    []
-  );
 
   const sendScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {},
   []);
@@ -305,32 +260,40 @@ const ScenarioVisualizer = (props: ScenarioVisualizerProps) => {
     []
   );
 
+  const MuiAccordionSummary = styled((props: AccordionSummaryProps) => (
+    <AccordionSummary
+      expandIcon={<ArrowForwardIosSharp sx={{ fontSize: "0.9rem" }} />}
+      {...props}
+    />
+  ))(({ theme }) => ({
+    flexDirection: "row-reverse",
+    "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
+      transform: "rotate(90deg)",
+      marginRight: theme.spacing(1),
+    },
+    "& .MuiAccordionSummary-content": {
+      marginLeft: theme.spacing(1),
+    },
+  }));
+
   return (
     <div>
       <Box sx={MainBoxSx}>
-        <TreeView
-          defaultCollapseIcon={<ExpandMore />}
-          defaultExpandIcon={<ChevronRight />}
-          sx={TreeViewSx}
-          onNodeSelect={onSelect}
-        >
-          {scenarios
-            ? scenarios.map((item) => {
-                const [id, label, _, nodeType, primary] = item;
-                return (
-                  <TreeItem
-                    key={id}
-                    nodeId={id}
-                    label={
-                      <ScenarioNodesContent
-                        scenarioId={id}
-                        label={label}
-                        primary={primary}
-                        sendScenario={sendScenario}
-                      />
-                    }
-                  >
-                    <Grid container rowSpacing={2} sx={{ mt: 2 }}>
+        {scenarios
+          ? scenarios.map((item) => {
+              const [id, label, _, nodeType, primary] = item;
+              return (
+                <Accordion>
+                  <MuiAccordionSummary id={`panel-${id}`}>
+                    <ScenarioNodesContent
+                      scenarioId={id}
+                      label={label}
+                      primary={primary}
+                      sendScenario={sendScenario}
+                    />
+                  </MuiAccordionSummary>
+                  <AccordionDetails>
+                    <Grid container rowSpacing={2}>
                       <Grid
                         item
                         xs={12}
@@ -595,6 +558,7 @@ const ScenarioVisualizer = (props: ScenarioVisualizerProps) => {
                           </Grid>
                         </Grid>
                       )}
+
                       <Grid item xs={12}>
                         <Divider />
                       </Grid>
@@ -633,11 +597,11 @@ const ScenarioVisualizer = (props: ScenarioVisualizerProps) => {
                         </Button>
                       </Grid>
                     </Grid>
-                  </TreeItem>
-                );
-              })
-            : null}
-        </TreeView>
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })
+          : null}
         <Box>{props.error}</Box>
       </Box>
 

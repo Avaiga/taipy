@@ -57,6 +57,7 @@ import {
     useDispatchRequestUpdateOnFirstRender,
     createSendUpdateAction,
 } from "taipy-gui";
+import { Cycles, Property, Scenario, ScenarioDict, ScenarioFull, Scenarios } from "./utils";
 
 import { Cycle, Scenario } from "./icons";
 
