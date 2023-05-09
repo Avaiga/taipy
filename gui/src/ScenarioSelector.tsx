@@ -165,10 +165,21 @@ const FlagSx = {
 };
 
 const tinyIconButtonSx = {
+  position: "relative",
   display: "flex",
   width: "1rem",
   height: "1rem",
   fontSize: "0.750rem",
+
+  "&::before": {
+    content: "''",
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%,-50%)",
+    width: "2rem",
+    height: "2rem",
+  },
 
   "& .MuiSvgIcon-root": {
     color: "inherit",
@@ -189,6 +200,7 @@ const TreeViewSx = {
   "& .MuiTreeItem-root .MuiTreeItem-content": {
     py: 1,
     px: 2,
+    backgroundColor: "background.paper",
   },
 
   "& .MuiTreeItem-iconContainer:empty": {
