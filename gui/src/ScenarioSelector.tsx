@@ -54,7 +54,7 @@ import {
   useDispatchRequestUpdateOnFirstRender,
   createSendUpdateAction,
 } from "taipy-gui";
-import { ScenarioIcon } from "./icons";
+import { CycleIcon, ScenarioIcon } from "./icons";
 import { alpha, useTheme } from "@mui/material";
 
 enum NodeType {
@@ -198,8 +198,10 @@ const TreeViewSx = {
   mb: 2,
 
   "& .MuiTreeItem-root .MuiTreeItem-content": {
+    mb: 0.5,
     py: 1,
     px: 2,
+    borderRadius: 0.5,
     backgroundColor: "background.paper",
   },
 
@@ -209,15 +211,10 @@ const TreeViewSx = {
 };
 
 const CycleSx = {
-  ".MuiTreeItem-content": {
-    padding: "4px 8px",
-    gap: "4px",
-    borderRadius: "4px",
-    mb: "5px",
-  },
-  ".MuiTreeItem-label": {
-    fontWeight: "700",
-    fontSize: "16px",
+  "& > .MuiTreeItem-content": {
+    ".MuiTreeItem-label": {
+      fontWeight: "fontWeightBold",
+    },
   },
 };
 
@@ -783,7 +780,18 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                         <TreeItem
                           key={id}
                           nodeId={id}
-                          label={label}
+                          label={
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <CycleIcon fontSize="small" color="primary" />
+                              {label}
+                            </Box>
+                          }
                           sx={CycleSx}
                           data-cycle
                         >
