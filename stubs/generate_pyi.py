@@ -14,8 +14,6 @@ import re
 from pathlib import Path
 from typing import List
 
-__FCT_WHITELIST = ["data_nodes", "tasks", "pipelines", "scenarios", "job_config"]
-
 
 def _get_function_delimiters(initial_line, lines):
     begin = end = initial_line
@@ -82,7 +80,7 @@ def _build_entity_config_pyi(base_pyi, filename, entity_map):
 
     for f in ast.walk(tree):
         if isinstance(f, ast.FunctionDef):
-            if "_configure" in f.name and not f.name.startswith("__") or f.name in __FCT_WHITELIST:
+            if "_configure" in f.name and not f.name.startswith("__"):
                 functions[f.name] = f.lineno
 
     for k, v in functions.items():
@@ -119,6 +117,15 @@ def _generate_entity_map(filename):
     return entities_map
 
 
+def _generate_acessors(base_pyi):
+    fct_whitelist = ["data_nodes", "tasks", "pipelines", "scenarios", "job_config"]
+
+    for fct in fct_whitelist:
+        template = f'\tdef {fct}():\n\t\t""""""\n'.replace("\t", "    ")
+        base_pyi += template + "\n"
+    return base_pyi
+
+
 def _build_header(filename):
     _file = Path(filename)
     return _file.read_text() + "\n\n"
@@ -138,6 +145,7 @@ if __name__ == "__main__":
     entities_map = _generate_entity_map(config_init)
     pyi = _build_header(header_file)
     pyi = _build_base_config_pyi(base_config, pyi)
+    pyi = _generate_acessors(pyi)
     pyi = _build_entity_config_pyi(pyi, scenario_filename, entities_map["ScenarioConfig"])
     pyi = _build_entity_config_pyi(pyi, pipeline_filename, entities_map["PipelineConfig"])
     pyi = _build_entity_config_pyi(pyi, dn_filename, entities_map["DataNodeConfig"])
