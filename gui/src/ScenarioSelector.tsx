@@ -43,7 +43,6 @@ import TreeView from "@mui/lab/TreeView";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
-
 import {
   useDynamicProperty,
   useDispatch,
@@ -54,7 +53,7 @@ import {
   useDispatchRequestUpdateOnFirstRender,
   createSendUpdateAction,
 } from "taipy-gui";
-import { CycleIcon, ScenarioIcon } from "./icons";
+import { Cycle, Scenario } from "./icons";
 import { alpha, useTheme } from "@mui/material";
 
 enum NodeType {
@@ -286,10 +285,10 @@ const ScenarioNodesContent = ({
             anchorOrigin={BadgePos}
             sx={BadgeSx}
           >
-            <ScenarioIcon fontSize="small" color="primary" />
+            <Scenario fontSize="small" color="primary" />
           </Badge>
         ) : (
-          <ScenarioIcon fontSize="small" color="primary" />
+          <Scenario fontSize="small" color="primary" />
         )}
         {label}
       </Grid>
@@ -785,7 +784,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                           nodeId={id}
                           label={
                             <Box sx={treeItemLabelSx}>
-                              <CycleIcon fontSize="small" color="primary" />
+                              <Cycle fontSize="small" color="primary" />
                               {label}
                             </Box>
                           }

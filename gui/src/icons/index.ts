@@ -1,6 +1,6 @@
-export { CycleIcon } from "./cycle-icon.component";
-export { DatanodeIcon } from "./datanode-icon.component";
-export { JobIcon } from "./job-icon.component";
-export { PipelineIcon } from "./pipeline-icon.component";
-export { ScenarioIcon } from "./scenario-icon.component";
-export { TaskIcon } from "./task-icon.component";
+export { Cycle } from "./cycle.component";
+export { Datanode } from "./datanode.component";
+export { Job } from "./job.component";
+export { Pipeline } from "./pipeline.component";
+export { Scenario } from "./scenario.component";
+export { Task } from "./task.component";
