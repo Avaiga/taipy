@@ -210,6 +210,12 @@ const TreeViewSx = {
   },
 };
 
+const treeItemLabelSx = {
+  display: "flex",
+  alignItems: "center",
+  gap: 1,
+};
+
 const CycleSx = {
   "& > .MuiTreeItem-content": {
     ".MuiTreeItem-label": {
@@ -225,6 +231,8 @@ const DialogContentSx = {
     maxWidth: "100%",
   },
 };
+
+const configHelperTextSx = { pl: 12 };
 
 const SquareButtonSx = {
   mb: 0,
@@ -249,6 +257,19 @@ const ScenarioNodesContent = ({
 }: ScenarioNodesContentProps) => {
   const theme = useTheme();
 
+  const tinyEditIconButtonSx = React.useMemo(
+    () => ({
+      backgroundColor: alpha(theme.palette.text.primary, 0.15),
+      color: "text.primary",
+
+      "&:hover": {
+        backgroundColor: "primary.main",
+        color: "primary.contrastText",
+      },
+    }),
+    [theme]
+  );
+
   return (
     <Grid
       container
@@ -257,7 +278,7 @@ const ScenarioNodesContent = ({
       flexWrap="nowrap"
       spacing={1}
     >
-      <Grid item xs sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Grid item xs sx={treeItemLabelSx}>
         {isPrimary ? (
           <Badge
             badgeContent={<FlagOutlined sx={FlagSx} />}
@@ -278,13 +299,7 @@ const ScenarioNodesContent = ({
           onClick={openEditDialog}
           sx={{
             ...tinyIconButtonSx,
-            backgroundColor: alpha(theme.palette.text.primary, 0.15),
-            color: "text.primary",
-
-            "&:hover": {
-              backgroundColor: "primary.main",
-              color: "primary.contrastText",
-            },
+            ...tinyEditIconButtonSx,
           }}
         >
           <EditOutlined />
@@ -315,7 +330,7 @@ const ScenarioNodes = ({
             <ScenarioNodesContent
               scenarioId={id}
               label={label}
-              isPrimary={showPrimary ? primary : undefined}
+              isPrimary={showPrimary && primary}
               openEditDialog={openEditDialog}
             />
           }
@@ -461,7 +476,7 @@ const ScenarioEditDialog = ({
                     </Select>
                     <FormHelperText
                       error={!!form.errors.config && form.touched.config}
-                      sx={{ pl: 12 }}
+                      sx={configHelperTextSx}
                     >
                       {form.errors.config}
                     </FormHelperText>
@@ -526,11 +541,7 @@ const ScenarioEditDialog = ({
                           onChange={updatePropertyField}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        xs="auto"
-                        sx={{ display: "flex", alignItems: "flex-end" }}
-                      >
+                      <Grid item xs="auto">
                         <Button
                           variant="outlined"
                           color="inherit"
@@ -569,11 +580,7 @@ const ScenarioEditDialog = ({
                     variant="outlined"
                   />
                 </Grid>
-                <Grid
-                  item
-                  xs="auto"
-                  sx={{ display: "flex", alignItems: "flex-end" }}
-                >
+                <Grid item xs="auto">
                   <Button
                     variant="outlined"
                     onClick={propertyAdd}
@@ -777,13 +784,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                           key={id}
                           nodeId={id}
                           label={
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                              }}
-                            >
+                            <Box sx={treeItemLabelSx}>
                               <CycleIcon fontSize="small" color="primary" />
                               {label}
                             </Box>
