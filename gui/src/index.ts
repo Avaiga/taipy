@@ -1,5 +1,5 @@
 import ScenarioSelector from "./ScenarioSelector";
-import ScenarioVisualizer from "./ScenarioVisualizer";
+import ScenarioViewer from "./ScenarioViewer";
 import ScenarioDag from "./ScenarioDag";
 
-export { ScenarioSelector, ScenarioDag as Dag, ScenarioVisualizer };
+export { ScenarioSelector, ScenarioDag as Dag, ScenarioViewer };

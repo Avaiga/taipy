@@ -36,7 +36,3 @@ export type Property = {
   key: string;
   value: string;
 };
-
-export type Scenario = [string, string, undefined, number, boolean];
-export type Scenarios = Array<Scenario>;
-export type Cycles = Array<[string, string, Scenarios, number, boolean]>;
