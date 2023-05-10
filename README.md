@@ -65,7 +65,9 @@ $ pip install taipy
 ### Tiny Taipy GUI Demo
 
 ```python
-excitement_page="""
+from taipy import Gui
+
+excitement_page = """
 # Welcome to Taipy
 ## Getting started with Taipy GUI
 ### How excited are you to try Taipy?
@@ -74,9 +76,9 @@ excitement_page="""
 
 My excitement level: <|{excitement}|text|>
 """
-excitement=100
+excitement = 100
 
-Gui(page=my_page).run()
+Gui(page=excitement_page).run()
 ```
 *RUN*🏃🏽‍♀️  
 <div align="center">🎊 TA-DA! 🎊</div>  
