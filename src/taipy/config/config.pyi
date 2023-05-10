@@ -157,6 +157,10 @@ class Config:
     def _from_json(cls, config_as_str: str) -> _Config:
         """"""
 
+    @property
+    def pipelines(self) -> List[PipelineConfig]:
+        """"""
+
     @staticmethod
     def configure_scenario(
         id: str,
@@ -257,6 +261,10 @@ class Config:
         Returns:
             The new default scenario configuration.
         """
+
+    @property
+    def tasks(self) -> List[TaskConfig]:
+        """"""
 
     @staticmethod
     def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":

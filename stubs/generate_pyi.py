@@ -14,6 +14,8 @@ import re
 from pathlib import Path
 from typing import List
 
+__FCT_WHITELIST = ["data_nodes", "tasks", "pipelines", "scenarios", "job_config"]
+
 
 def _get_function_delimiters(initial_line, lines):
     begin = end = initial_line
@@ -61,26 +63,35 @@ def _build_base_config_pyi(filename, base_pyi):
         begin_line, end_line = _get_function_delimiters(ln - 1, lines)
         base_pyi += "".join(lines[begin_line:end_line])
 
-        if '"""' not in lines[end_line - 1]:
-            base_pyi += '\t\t""""""\n'.replace("\t", "    ")
+        base_pyi = __add_docstring(base_pyi, lines, end_line)
         base_pyi += "\n"
 
+    return base_pyi
+
+
+def __add_docstring(base_pyi, lines, end_line):
+    if '"""' not in lines[end_line - 1]:
+        base_pyi += '\t\t""""""\n'.replace("\t", "    ")
     return base_pyi
 
 
 def _build_entity_config_pyi(base_pyi, filename, entity_map):
     lines = _get_file_lines(filename)
     tree = _get_file_ast(filename)
-    functions = {
-        f.name: f.lineno
-        for f in ast.walk(tree)
-        if isinstance(f, ast.FunctionDef) and "_configure" in f.name and not f.name.startswith("__")
-    }
+    functions = {}
+
+    for f in ast.walk(tree):
+        if isinstance(f, ast.FunctionDef):
+            if "_configure" in f.name and not f.name.startswith("__") or f.name in __FCT_WHITELIST:
+                functions[f.name] = f.lineno
 
     for k, v in functions.items():
         begin_line, end_line = _get_function_delimiters(v - 1, lines)
         try:
-            base_pyi += "".join(lines[begin_line:end_line]).replace(k, entity_map.get(k)) + "\n"
+            func = "".join(lines[begin_line:end_line])
+            func = func if not k.startswith("_") else func.replace(k, entity_map.get(k))
+            func = __add_docstring(func, lines, end_line) + "\n"
+            base_pyi += func
         except Exception:
             print(f"key={k}")
             raise
