@@ -40,7 +40,7 @@
     
 | TAIPY GUI - the frond-end  | TAIPY Core - the back-end |
 | --------  | -------- |
-|<img src="readme_img/readme_gui_intro.gif" alt="Taipy GUI Gif"  width="100%"/> | <img src="readme_img/readme_core_intro.gif" alt="Taipy Core Gif"  width="100%"/>
+|<img src="readme_img/readme_gui_intro.gif" alt="Taipy GUI Animation"  width="100%"/> | <img src="readme_img/readme_core_intro.gif" alt="Taipy Core Animation"  width="100%"/>
 
     
 </div> 
