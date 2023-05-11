@@ -80,7 +80,7 @@ class Html(Page):
 
     # Modify path routes
     def modify_taipy_base_url(self, base_url):
-        self._content = self._content.replace("{{taipy_base_url}}", f"/{base_url}")
+        self._content = self._content.replace("{{taipy_base_url}}", f"{base_url}")
 
     # Generate JSX from HTML
     def render(self, gui) -> str:

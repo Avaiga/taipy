@@ -43,6 +43,7 @@ import ErrorFallback from "../utils/ErrorBoundary";
 import MainPage from "./pages/MainPage";
 import TaipyRendered from "./pages/TaipyRendered";
 import NotFound404 from "./pages/NotFound404";
+import { getBaseURL } from "../utils";
 
 interface AxiosRouter {
     router: string;
@@ -60,6 +61,7 @@ const Router = () => {
     const [routes, setRoutes] = useState<Record<string, string>>({});
     const refresh = !!Object.keys(routes).length;
     const themeClass = "taipy-" + state.theme.palette.mode;
+    const baseURL = getBaseURL();
 
     useEffect(() => {
         if (refresh) {
@@ -73,7 +75,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get<AxiosRouter>("/taipy-init", { params: { client_id: state.id || "", v: window.taipyVersion } })
+            .get<AxiosRouter>("taipy-init", { params: { client_id: state.id || "", v: window.taipyVersion } })
             .then((result) => {
                 dispatch(createSetLocationsAction(result.data.locations));
                 setRoutes(result.data.locations);
@@ -108,7 +110,7 @@ const Router = () => {
                                                 {Object.keys(routes).length ? (
                                                     <Routes>
                                                         <Route
-                                                            path="/"
+                                                            path={baseURL}
                                                             element={
                                                                 <MainPage
                                                                     path={routes["/"]}

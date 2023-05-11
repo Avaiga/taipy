@@ -77,7 +77,7 @@ def test_slider_input_reload(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="page1", page=page_md)
     helpers.run_e2e_multi_client(gui)
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#val1")
     edit_and_assert_page(page)

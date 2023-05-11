@@ -29,7 +29,7 @@ def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
         page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
     )
     helpers.run_e2e(gui, use_arrow=False)
-    page.goto("/test")
+    page.goto("./test")
     page.expect_websocket()
     page.wait_for_selector("#table1 tr:nth-child(32)")  # wait for data to be loaded (30 rows of skeleton while loading)
     assert_table_content(page)
@@ -45,7 +45,7 @@ def test_accessor_arrow(page: "Page", gui: Gui, csvdata, helpers):
             page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
         )
         helpers.run_e2e(gui, use_arrow=True)
-        page.goto("/test")
+        page.goto("./test")
         page.expect_websocket()
         page.wait_for_selector(
             "#table1 tr:nth-child(32)"

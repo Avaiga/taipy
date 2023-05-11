@@ -38,7 +38,7 @@ def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", markdown_content, style=style)
     helpers.run_e2e(gui)
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     page.wait_for_selector("#Taipy_style", state="attached")

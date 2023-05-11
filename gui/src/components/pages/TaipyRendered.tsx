@@ -23,6 +23,7 @@ import { getRegisteredComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 import { createPartialAction } from "../../context/taipyReducers";
 import ErrorFallback from "../../utils/ErrorBoundary";
+import { getBaseURL } from "../../utils";
 
 interface TaipyRenderedProps {
     path?: string;
@@ -74,7 +75,9 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     const [head, setHead] = useState<HeadProps[]>([]);
     const { state, dispatch } = useContext(TaipyContext);
 
-    const path = props.path || (state.locations && state.locations[location.pathname]) || location.pathname;
+    const baseURL = getBaseURL();
+    const pathname = baseURL == "/" ? location.pathname : location.pathname.replace(baseURL, "/");
+    const path = props.path || (state.locations && pathname in state.locations && state.locations[pathname]) || pathname;
 
     useEffect(() => {
         // Fetch JSX Flask Backend Render
@@ -82,7 +85,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
             dispatch(createPartialAction(path.slice(1), false));
         } else {
             axios
-                .get<AxiosRenderer>(`/taipy-jsx${path}`, {
+                .get<AxiosRenderer>(`taipy-jsx${path}`, {
                     params: { client_id: state.id || "", v: window.taipyVersion },
                 })
                 .then((result) => {
@@ -99,12 +102,12 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     setPageState({
                         jsx: `<h1>${
                             error.response?.data ||
-                            `No data fetched from backend from ${path === "/TaiPy_root_page" ? "/" : path}`
+                            `No data fetched from backend from ${path === "/TaiPy_root_page" ? baseURL : baseURL + path}`
                         }</h1><br></br>${error}`,
                     })
                 );
         }
-    }, [path, state.id, dispatch, partial, fromBlock]);
+    }, [path, state.id, dispatch, partial, fromBlock, baseURL]);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>

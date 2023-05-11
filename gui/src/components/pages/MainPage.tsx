@@ -15,6 +15,7 @@ import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import TaipyRendered from "./TaipyRendered";
+import { getBaseURL } from "../../utils";
 
 interface MainPageProps {
     path: string;
@@ -26,7 +27,7 @@ const MainPage = (props: MainPageProps) => {
     const location = useLocation();
 
     useEffect(() => {
-        if (props.route && location.pathname == "/") {
+        if (props.route && getBaseURL().includes(location.pathname)) {
            navigate(props.route.substring(1));
         }
     }, [location.pathname, navigate, props.route]);

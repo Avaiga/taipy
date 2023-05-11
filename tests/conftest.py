@@ -9,27 +9,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import inspect
-from importlib import util
-
 import pytest
 
-if util.find_spec("playwright"):
-    from playwright._impl._page import Page
 
-from taipy.gui import Gui
+def pytest_addoption(parser):
+    parser.addoption("--e2e-base-url", action="store", default="/", help="base url for e2e testing")
+    parser.addoption("--e2e-port", action="store", default="5000", help="port for e2e testing")
 
 
-@pytest.mark.teste2e
-def test_redirect(page: "Page", gui: Gui, helpers):
-    page_md = """
-<|Redirect Successfully|id=text1|>
-"""
-    gui._set_frame(inspect.currentframe())
-    gui.add_page(name="test", page=page_md)
-    helpers.run_e2e(gui)
-    page.goto("./")
-    page.expect_websocket()
-    page.wait_for_selector("#text1")
-    text1 = page.query_selector("#text1")
-    assert text1.inner_text() == "Redirect Successfully"
+@pytest.fixture(scope="session")
+def e2e_base_url(request):
+    return request.config.getoption("--e2e-base-url")
+
+
+@pytest.fixture(scope="session")
+def e2e_port(request):
+    return request.config.getoption("--e2e-port")

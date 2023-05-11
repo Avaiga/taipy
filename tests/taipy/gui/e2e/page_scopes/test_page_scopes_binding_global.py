@@ -43,7 +43,7 @@ def test_page_scopes_binding(page: "Page", gui: Gui, helpers):
     gui.add_page("page2", page2)
     helpers.run_e2e(gui)
 
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#s1")
     helpers_assert_value(page, "0", "0", "0")
@@ -70,7 +70,7 @@ def test_page_scopes_binding(page: "Page", gui: Gui, helpers):
         return
     helpers_assert_value(page, "15", "20", "35")
 
-    page.goto("/page2")
+    page.goto("./page2")
     page.expect_websocket()
     page.wait_for_selector("#s1")
     helpers_assert_value(page, "15", "0", "0")
@@ -97,7 +97,7 @@ def test_page_scopes_binding(page: "Page", gui: Gui, helpers):
         return
     helpers_assert_value(page, "17", "5", "85")
 
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#s1")
     helpers_assert_value(page, "17", "20", "37")

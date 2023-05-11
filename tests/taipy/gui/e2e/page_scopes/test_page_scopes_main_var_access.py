@@ -45,7 +45,7 @@ def test_page_scopes_main_var_access(page: "Page", gui: Gui, helpers):
     gui.add_pages({"/": root_md, "page1": page1})
     helpers.run_e2e(gui)
 
-    page.goto("/")
+    page.goto("./")
     page.expect_websocket()
     page.wait_for_selector("#t1")
     page.wait_for_selector("#i1")

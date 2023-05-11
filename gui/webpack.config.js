@@ -50,7 +50,8 @@ module.exports = (env, options) => {
             output: {
                 filename: reactBundle + ".dll.js",
                 path: webAppPath,
-                library: reactBundleName
+                library: reactBundleName,
+                publicPath: "",
             },
             plugins: [
                 new webpack.DllPlugin({
@@ -69,7 +70,8 @@ module.exports = (env, options) => {
                 library: {
                     name: taipyBundleName,
                     type: "umd"
-                }
+                },
+                publicPath: "",
             },
             dependencies: [reactBundleName],
             devtool: options.mode === "development" && "inline-source-map",
@@ -113,7 +115,7 @@ module.exports = (env, options) => {
             output: {
                 filename: "taipy-gui-dom.js",
                 path: webAppPath,
-                publicPath: "/"
+                publicPath: "",
             },
             dependencies: [taipyBundleName, reactBundleName],
             externals: {"taipy-gui": taipyBundleName},

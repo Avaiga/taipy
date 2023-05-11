@@ -28,7 +28,7 @@ def test_theme_light(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=False)
-    page.goto("/")
+    page.goto("./")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     background_color = page.evaluate(
@@ -45,7 +45,7 @@ def test_theme_dark(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=True)
-    page.goto("/")
+    page.goto("./")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     background_color = page.evaluate(

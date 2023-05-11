@@ -47,7 +47,7 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", Html(html_content))
     helpers.run_e2e(gui)
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     retry = 0
@@ -69,12 +69,14 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_html_render_bind_assets(page: "Page", gui: Gui, helpers):
+def test_html_render_bind_assets(page: "Page", gui: Gui, helpers, e2e_base_url, e2e_port):
     gui._set_frame(inspect.currentframe())
     gui.add_pages(pages=f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets")
     helpers.run_e2e(gui)
-    assert ".taipy-text" in urlopen("http://127.0.0.1:5000/test-assets/style/style.css").read().decode("utf-8")
-    page.goto("/test-assets/page1")
+    assert ".taipy-text" in urlopen(
+        f"http://127.0.0.1:{e2e_port}{e2e_base_url}test-assets/style/style.css"
+    ).read().decode("utf-8")
+    page.goto("./test-assets/page1")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     retry = 0
@@ -96,7 +98,7 @@ def test_html_render_bind_assets(page: "Page", gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_html_render_path_mapping(page: "Page", gui: Gui, helpers):
+def test_html_render_path_mapping(page: "Page", gui: Gui, helpers, e2e_base_url, e2e_port):
     gui._server = _Server(
         gui,
         path_mapping={"style": f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets{os.path.sep}style"},
@@ -105,8 +107,8 @@ def test_html_render_path_mapping(page: "Page", gui: Gui, helpers):
     )
     gui.add_page("page1", Html(f"{Path(Path(__file__).parent.resolve())}{os.path.sep}page1.html"))
     helpers.run_e2e(gui)
-    assert ".taipy-text" in urlopen("http://127.0.0.1:5000/style/style.css").read().decode("utf-8")
-    page.goto("/page1")
+    assert ".taipy-text" in urlopen(f"http://127.0.0.1:{e2e_port}{e2e_base_url}/style/style.css").read().decode("utf-8")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     retry = 0

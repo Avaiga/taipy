@@ -56,7 +56,7 @@ const NavBar = (props: LovProps) => {
     const linkChange = useCallback(
         (evt: React.SyntheticEvent, val: string) => {
             if (Object.keys(state.locations || {}).some((route) => val === route)) {
-                navigate(val);
+                navigate(val.substring(1));
             } else {
                 window.open(val, "_blank")?.focus();
             }

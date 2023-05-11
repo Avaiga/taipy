@@ -18,7 +18,7 @@ import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import merge from "lodash/merge";
 
-import { TIMEZONE_CLIENT } from "../utils";
+import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { FilterDesc } from "../components/Taipy/TableFilter";
@@ -200,7 +200,7 @@ export const INITIAL_STATE: TaipyState = {
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
     isSocketConnected: false,
-    socket: io("/", { autoConnect: false }),
+    socket: io("/", { autoConnect: false, path:`${getBaseURL()}socket.io` }),
 });
 
 const storeClientId = (id: string) => localStorage && localStorage.setItem("TaipyClientId", id);

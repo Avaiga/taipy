@@ -41,7 +41,7 @@ def test_dict(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
-    page.goto("/test")
+    page.goto("./test")
     page.expect_websocket()
     page.wait_for_selector("#inp1")
 

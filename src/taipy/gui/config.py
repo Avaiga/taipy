@@ -32,6 +32,7 @@ ConfigParameter = t.Literal[
     "async_mode",
     "change_delay",
     "chart_dark_template",
+    "base_url",
     "dark_mode",
     "dark_theme",
     "data_url_max_size",
@@ -102,6 +103,7 @@ Config = t.TypedDict(
         "async_mode": str,
         "change_delay": t.Optional[int],
         "chart_dark_template": t.Optional[t.Dict[str, t.Any]],
+        "base_url": t.Optional[str],
         "dark_mode": bool,
         "dark_theme": t.Optional[t.Dict[str, t.Any]],
         "data_url_max_size": t.Optional[int],
@@ -294,6 +296,7 @@ class _Config(object):
 
         self._resolve_notebook_proxy()
         self._resolve_stylekit()
+        self._resolve_url_prefix()
 
     def _resolve_stylekit(self):
         app_config = self.config
@@ -310,6 +313,16 @@ class _Config(object):
             ):
                 app_config["stylekit"]["root_margin"] = str(app_config["margin"])
             app_config["margin"] = None
+
+    def _resolve_url_prefix(self):
+        app_config = self.config
+        base_url = app_config.get("base_url")
+        if base_url is None:
+            app_config["base_url"] = "/"
+        else:
+            base_url = f"{'' if base_url.startswith('/') else '/'}{base_url}"
+            base_url = f"{base_url}{'' if base_url.endswith('/') else '/'}"
+            app_config["base_url"] = base_url
 
     def _resolve_notebook_proxy(self):
         app_config = self.config

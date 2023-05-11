@@ -138,6 +138,7 @@ class _Server:
         client_config: t.Dict[str, t.Any],
         watermark: t.Optional[str],
         css_vars: str,
+        base_url: str,
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
@@ -157,6 +158,7 @@ class _Server:
                     styles=styles,
                     version=version,
                     css_vars=css_vars,
+                    base_url=base_url,
                 )
             if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))

@@ -29,7 +29,7 @@ const Navigate = ({ to, tab }: NavigateProps) => {
         if (to) {
             const tos = "/" + to;
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
-                navigate(tos);
+                navigate(tos.substring(1));
             } else {
                 window.open(to, tab || "_blank")?.focus();
             }

@@ -39,7 +39,7 @@ def test_page_scopes(page: "Page", gui: Gui, helpers):
     gui.add_page("page3", page3)
     helpers.run_e2e(gui)
 
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#x1")
     assert page.query_selector("#x1").inner_text() == "10"
@@ -47,7 +47,7 @@ def test_page_scopes(page: "Page", gui: Gui, helpers):
     assert page.query_selector("#y1").inner_text() == "20"
     assert page.query_selector("#y2").inner_text() == "40"
 
-    page.goto("/page2")
+    page.goto("./page2")
     page.expect_websocket()
     page.wait_for_selector("#x1")
     assert page.query_selector("#x1").inner_text() == "20"
@@ -55,13 +55,13 @@ def test_page_scopes(page: "Page", gui: Gui, helpers):
     assert page.query_selector("#y1").inner_text() == "10"
     assert page.query_selector("#y2").inner_text() == "20"
 
-    page.goto("/page3")
+    page.goto("./page3")
     page.expect_websocket()
     page.wait_for_selector("#x1")
     assert page.query_selector("#x1").inner_text() == "50"
     assert page.query_selector("#x2").inner_text() == "100"
 
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#x1")
     page.fill("#xinput", "15")
@@ -79,7 +79,7 @@ def test_page_scopes(page: "Page", gui: Gui, helpers):
     assert page.query_selector("#y1").inner_text() == "45"
     assert page.query_selector("#y2").inner_text() == "90"
 
-    page.goto("/page2")
+    page.goto("./page2")
     page.expect_websocket()
     page.wait_for_selector("#x1")
     assert page.query_selector("#x1").inner_text() == "45"
@@ -101,7 +101,7 @@ def test_page_scopes(page: "Page", gui: Gui, helpers):
     assert page.query_selector("#y1").inner_text() == "185"
     assert page.query_selector("#y2").inner_text() == "370"
 
-    page.goto("/page1")
+    page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#x1")
     assert page.query_selector("#x1").inner_text() == "185"
@@ -109,7 +109,7 @@ def test_page_scopes(page: "Page", gui: Gui, helpers):
     assert page.query_selector("#y1").inner_text() == "37"
     assert page.query_selector("#y2").inner_text() == "74"
 
-    page.goto("/page3")
+    page.goto("./page3")
     page.expect_websocket()
     page.wait_for_selector("#x1")
     assert page.query_selector("#x1").inner_text() == "50"
