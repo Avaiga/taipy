@@ -1,7 +1,7 @@
 <br>
 <br>
 
-<img align="left" src="readme_img/readme_logo.png" alt="Taipy Logo" width="150" height="150" ></img>
+<img align="left" src="readme_img/readme_logo.png" alt="Taipy Logo" width="20%" ></img>
 <br>
 #  Welcome to Taipy 
 <p align="left">
@@ -40,7 +40,7 @@
     
 | TAIPY GUI - the frond-end  | TAIPY Core - the back-end |
 | --------  | -------- |
-|<img src="readme_img/readme_gui_intro.gif" alt="Taipy Logo"  width="350" height="300"/> | <img src="readme_img/readme_core_intro.gif" alt="Taipy Logo"  width="350" height="300"/>
+|<img src="readme_img/readme_gui_intro.gif" alt="Taipy GUI Animation"  width="100%"/> | <img src="readme_img/readme_core_intro.gif" alt="Taipy Core Animation"  width="100%"/>
 
     
 </div> 
@@ -65,7 +65,9 @@ $ pip install taipy
 ### Tiny Taipy GUI Demo
 
 ```python
-excitement_page="""
+from taipy import Gui
+
+excitement_page = """
 # Welcome to Taipy
 ## Getting started with Taipy GUI
 ### How excited are you to try Taipy?
@@ -74,14 +76,14 @@ excitement_page="""
 
 My excitement level: <|{excitement}|text|>
 """
-excitement=100
+excitement = 100
 
-Gui(page=my_page).run()
+Gui(page=excitement_page).run()
 ```
 *RUN*🏃🏽‍♀️  
 <div align="center">🎊 TA-DA! 🎊</div>  
 <br>
-<div align="center"><img src="readme_img/readme_gui_app.gif" width=600 height=400 alt="GUI demo"></img></div>  
+<div align="center"><img src="readme_img/readme_gui_app.gif" width="60%" alt="GUI demo"></img></div>  
 
 <br>
 <br>
@@ -107,13 +109,13 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/readme_exec_g.png" alt="Taipy Logo"  width="400" height="300"/></div> 
+<div align="center"><img src="readme_img/readme_exec_g.png" alt="Taipy Core Graph"  width="60%"/></div> 
 
 
 ### Taipy Studio - The easy peasy way
 *You can use the Taipy Studio extension in VSCode to configure your pipeline with no code* 
 
-<div align="center"><img src="readme_img/readme_studio.gif" width=600 height=400 alt="GUI demo"></img></div> 
+<div align="center"><img src="readme_img/readme_studio.gif" width="80%" alt="GUI demo"></img></div> 
 
 *Your configuration is automatically saved as a TOML file* 
 
@@ -210,7 +212,7 @@ Gui(page=my_page).run()
 
 <div align="center">🎊TA-DA!🎊</div>  
 <br>
-<div align="center"><img src="readme_img/readme_app.gif" width=700 height=500 alt="GUI demo"></img></div> 
+<div align="center"><img src="readme_img/readme_app.gif" width="80%" alt="GUI demo"></img></div> 
 
 <br>
 
