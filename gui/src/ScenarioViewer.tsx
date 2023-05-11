@@ -95,15 +95,16 @@ const tagsAutocompleteSx = {
 const PipelinesRow = ({ action, number, value }: PipelinesRowProps) => {
   const [pipeline, setPipeline] = useState<string>(value);
 
+  const index = number + 1;
   return (
     <Grid item xs={12} container justifyContent="space-between">
-      <Grid item container xs={9}>
+      <Grid item container xs={10}>
         {action === "EDIT" && (
           <TextField
-            data-name={`pipe${number}`}
-            label={"Pipeline " + number}
+            data-name={`pipe${index}`}
+            label={"Pipeline " + index}
             variant="outlined"
-            name={`pipeline${number}`}
+            name={`pipeline${index}`}
             sx={{
               maxWidth: "none",
             }}
@@ -134,17 +135,37 @@ const PipelinesRow = ({ action, number, value }: PipelinesRowProps) => {
           <Typography variant="subtitle2">{pipeline}</Typography>
         )}
       </Grid>
-      <Grid item xs={2}>
-        <Button variant="outlined" component="label" size="small" disabled>
+      <Grid
+        item
+        xs={2}
+        container
+        alignContent="center"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <IconButton component="label" size="small">
           <Send color="info" />
-        </Button>
+        </IconButton>
       </Grid>
     </Grid>
   );
 };
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
-  const { id = "", scenario = ["", false, "", "", "", [], [], [], []] } = props;
+  const {
+    id = "",
+    scenario = [
+      "test12",
+      true,
+      "test",
+      "test",
+      "test",
+      ["tags"],
+      [["key", "value"]],
+      [["key", "value"]],
+      ["test123"],
+    ],
+  } = props;
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -262,7 +283,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
               <Grid item>
                 <IconButton
                   data-id={scenarioId}
-                  sx={{ padding: 0 }}
+                  sx={IconPaddingSx}
                   onClick={sendScenario}
                 >
                   <Send fontSize="small" color="info" />
@@ -273,7 +294,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
           <AccordionDetails>
             <Grid container rowSpacing={2}>
               <Grid item xs={12} container justifyContent="space-between">
-                <Grid item xs={4}>
+                <Grid item xs={4} pb={2}>
                   <Typography variant="subtitle2">Config ID</Typography>
                 </Grid>
                 <Grid item xs={8}>
@@ -403,10 +424,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                       <Grid
                         item
                         xs={12}
+                        spacing={1}
                         container
                         justifyContent="space-between"
                       >
-                        <Grid item xs={4}>
+                        <Grid item xs={5}>
                           {action !== "EDIT" && (
                             <Typography variant="subtitle2">{key}</Typography>
                           )}
@@ -430,18 +452,22 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             />
                           )}
                         </Grid>
-                        <Grid item xs={2}>
+                        <Grid
+                          item
+                          xs={2}
+                          container
+                          alignContent="center"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
                           {action !== "VIEW" && (
-                            <Button
-                              variant="outlined"
-                              component="label"
+                            <IconButton
                               sx={DeleteIconSx}
-                              color="inherit"
                               data-id={index}
                               onClick={propertyDelete}
                             >
-                              <DeleteOutline fontSize="small" color="inherit" />
-                            </Button>
+                              <DeleteOutline fontSize="small" color="primary" />
+                            </IconButton>
                           )}
                         </Grid>
                       </Grid>
@@ -449,8 +475,14 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                   })
                 : null}
               {action !== "VIEW" && (
-                <Grid item xs={12} container justifyContent="space-between">
-                  <Grid item xs={4}>
+                <Grid
+                  item
+                  xs={12}
+                  spacing={1}
+                  container
+                  justifyContent="space-between"
+                >
+                  <Grid item xs={5}>
                     <TextField
                       value={newProp.key}
                       data-name="key"
@@ -468,15 +500,20 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                       variant="outlined"
                     />
                   </Grid>
-                  <Grid item xs={2}>
-                    <Button
-                      variant="outlined"
-                      component="label"
+                  <Grid
+                    item
+                    xs={2}
+                    container
+                    alignContent="center"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <IconButton
                       onClick={propertyAdd}
                       disabled={!newProp.key || !newProp.value}
                     >
-                      <Add />
-                    </Button>
+                      <Add color="primary" />
+                    </IconButton>
                   </Grid>
                 </Grid>
               )}
