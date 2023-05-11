@@ -15,8 +15,7 @@ from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from sqlalchemy.exc import NoResultFound
 
-from src.taipy.core.common.typing import Converter, Entity, ModelType
-
+from ...common.typing import Converter, Entity, ModelType
 from ...exceptions import ModelNotFound
 from ._abstract_repository import _AbstractRepository
 from .db._init_db import init_db

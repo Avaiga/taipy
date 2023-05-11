@@ -15,9 +15,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.taipy.core.exceptions import MissingRequiredProperty
 from taipy.config.config import Config
 
+from ....exceptions import MissingRequiredProperty
 from .._decoder import loads
 from .._encoder import dumps
 
