@@ -25,6 +25,7 @@ from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
 from ._data_repository_factory import _DataRepositoryFactory
+from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId
 from .pickle import PickleDataNode
@@ -101,35 +102,46 @@ class _DataManager(_Manager[DataNode]):
             raise InvalidDataNodeType(data_node_config.storage_type)
 
     @classmethod
-    def _clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId]):
-        data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
+    def _clean_pickle_file(cls, data_node: DataNode):
         if not isinstance(data_node, PickleDataNode):
             return
         if data_node.is_generated and os.path.exists(data_node.path):
             os.remove(data_node.path)
 
     @classmethod
-    def _clean_pickle_files(cls, data_nodes: Iterable[Union[DataNode, DataNodeId]]):
+    def _clean_preserve_file(cls, data_node: DataNode):
+        if isinstance(data_node, _AbstractFileDataNode):
+            _AbstractFileDataNode._check_and_update_preserve_file(old_path=data_node.path)
+
+    @classmethod
+    def _update_preserve_file_and_clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId]):
+        data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
+        cls._clean_pickle_file(data_node)
+        cls._clean_preserve_file(data_node)
+
+    @classmethod
+    def _update_preserve_files_and_clean_pickle_files(cls, data_nodes: Iterable[Union[DataNode, DataNodeId]]):
         for data_node in data_nodes:
-            cls._clean_pickle_file(data_node)
+            data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
+            cls._update_preserve_file_and_clean_pickle_file(data_node)
 
     @classmethod
     def _delete(cls, data_node_id: DataNodeId):
-        cls._clean_pickle_file(data_node_id)
+        cls._update_preserve_file_and_clean_pickle_file(data_node_id)
         super()._delete(data_node_id)
 
     @classmethod
     def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
-        cls._clean_pickle_files(data_node_ids)
+        cls._update_preserve_files_and_clean_pickle_files(data_node_ids)
         super()._delete_many(data_node_ids)
 
     @classmethod
     def _delete_all(cls):
-        cls._clean_pickle_files(cls._get_all())
+        cls._update_preserve_files_and_clean_pickle_files(cls._get_all())
         super()._delete_all()
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
-        cls._clean_pickle_files(cls._get_all(version_number))
+        cls._update_preserve_files_and_clean_pickle_files(cls._get_all(version_number))
         cls._repository._delete_by(attribute="version", value=version_number, version_number="all")
         _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
