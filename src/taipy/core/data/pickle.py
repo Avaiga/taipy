@@ -100,6 +100,8 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         )
         if self._path is None:
             self._path = self._build_path(self.storage_type())
+        _AbstractFileDataNode._check_and_update_preserve_file(new_path=self._path)
+
         if not self._last_edit_date and os.path.exists(self._path):
             self.last_edit_date = datetime.now()  # type: ignore
         if default_value is not None and not os.path.exists(self._path):
@@ -116,9 +118,11 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
 
     @path.setter  # type: ignore
     def path(self, value):
+        tmp_old_path = self._path
         self._path = value
         self.properties[self.__PATH_KEY] = value
         self.properties[self.__IS_GENERATED_KEY] = False
+        _AbstractFileDataNode._check_and_update_preserve_file(old_path=tmp_old_path, new_path=self._path)
 
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)
