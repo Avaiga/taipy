@@ -12,22 +12,21 @@
 import argparse
 from typing import Dict
 
-from ._argparse import _ArgumentParser
-
 
 class _CLI:
     """Argument parser for Taipy application."""
 
     # The conflict_handler is set to "resolve" to override conflict arguments
-    _main_parser = _ArgumentParser(conflict_handler="resolve")
-    _subparser_action = _main_parser.add_subparsers()
+    _parser = argparse.ArgumentParser(conflict_handler="resolve")
+    _subparser_action = _parser.add_subparsers()
 
-    sub_taipyparsers: Dict[str, argparse.ArgumentParser] = {}
+    _sub_taipyparsers: Dict[str, argparse.ArgumentParser] = {}
+    _arg_groups: Dict[str, argparse._ArgumentGroup] = {}
 
     @classmethod
     def _add_subparser(cls, name: str, **kwargs) -> argparse.ArgumentParser:
         """Create a new subparser and return a argparse handler."""
-        if subparser := cls.sub_taipyparsers.get(name):
+        if subparser := cls._sub_taipyparsers.get(name):
             return subparser
 
         subparser = cls._subparser_action.add_parser(
@@ -35,20 +34,30 @@ class _CLI:
             conflict_handler="resolve",
             **kwargs,
         )
-        cls.sub_taipyparsers[name] = subparser
+        cls._sub_taipyparsers[name] = subparser
         subparser.set_defaults(which=name)
         return subparser
 
     @classmethod
+    def _add_groupparser(cls, title: str, description: str = "") -> argparse._ArgumentGroup:
+        """Create a new group for arguments and return a argparser handler."""
+        if groupparser := cls._arg_groups.get(title):
+            return groupparser
+
+        groupparser = cls._parser.add_argument_group(title=title, description=description)
+        cls._arg_groups[title] = groupparser
+        return groupparser
+
+    @classmethod
     def _parse(cls):
         """Parse and return only known arguments."""
-        args, _ = cls._main_parser.parse_known_args()
+        args, _ = cls._parser.parse_known_args()
         return args
 
     @classmethod
     def _remove_subparser(cls, name: str):
         """Remove a subparser from argparse."""
-        cls.sub_taipyparsers.pop(name, None)
+        cls._sub_taipyparsers.pop(name, None)
 
         cls._subparser_action._name_parser_map.pop(name, None)
 
