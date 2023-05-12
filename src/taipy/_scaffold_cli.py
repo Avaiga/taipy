@@ -13,7 +13,7 @@ import sys
 
 from cookiecutter.main import cookiecutter
 
-from taipy.config._cli._cli import _CLI
+from taipy.cli import _CLI
 
 
 class _ScaffoldCLI:
