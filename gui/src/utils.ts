@@ -36,3 +36,8 @@ export type Property = {
   key: string;
   value: string;
 };
+
+export const FlagSx = {
+  color: "common.white",
+  fontSize: "0.75em",
+};

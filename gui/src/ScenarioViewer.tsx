@@ -43,7 +43,7 @@ import {
   Divider,
   styled,
 } from "@mui/material";
-import { Property, ScenarioFull } from "./utils";
+import { FlagSx, Property, ScenarioFull } from "./utils";
 
 interface ScenarioViewerProps {
   id?: string;
@@ -69,14 +69,12 @@ interface PipelinesRowProps {
   value: string;
 }
 
-const FlagSx = {
-  color: "#FFFFFF",
-  fontSize: "11px",
+const MainBoxSx = {
+  overflowY: "auto",
 };
 
-const MainBoxSx = {
-  maxWidth: 600,
-  overflowY: "auto",
+const FieldNoMaxWidth = {
+  maxWidth: "none",
 };
 
 const AccordionSummarySx = { fontSize: "0.9rem" };
@@ -92,8 +90,10 @@ const tagsAutocompleteSx = {
   maxWidth: "none",
 };
 
-const PipelinesRow = ({ action, number, value }: PipelinesRowProps) => {
+const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
   const [pipeline, setPipeline] = useState<string>(value);
+
+  const onFieldBlur = useCallback((e: any) => setPipeline(e.target.value), []);
 
   const index = number + 1;
   return (
@@ -105,27 +105,19 @@ const PipelinesRow = ({ action, number, value }: PipelinesRowProps) => {
             label={"Pipeline " + index}
             variant="outlined"
             name={`pipeline${index}`}
-            sx={{
-              maxWidth: "none",
-            }}
             value={pipeline}
-            onBlur={(e: any) => {
-              setPipeline(e.target.value);
-            }}
+            onBlur={onFieldBlur}
+            sx={FieldNoMaxWidth}
             fullWidth
             InputProps={{
               endAdornment: (
                 <>
-                  {pipeline && (
-                    <IconButton sx={{ padding: 0 }}>
-                      <CheckCircle color="primary" />
-                    </IconButton>
-                  )}
-                  {!pipeline && (
-                    <IconButton sx={{ padding: 0 }}>
-                      <Cancel color="inherit" />
-                    </IconButton>
-                  )}
+                  <IconButton sx={IconPaddingSx}>
+                    <CheckCircle color="primary" />
+                  </IconButton>
+                  <IconButton sx={IconPaddingSx}>
+                    <Cancel color="inherit" />
+                  </IconButton>
                 </>
               ),
             }}
@@ -152,20 +144,7 @@ const PipelinesRow = ({ action, number, value }: PipelinesRowProps) => {
 };
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
-  const {
-    id = "",
-    scenario = [
-      "test12",
-      true,
-      "test",
-      "test",
-      "test",
-      ["tags"],
-      [["key", "value"]],
-      [["key", "value"]],
-      ["test123"],
-    ],
-  } = props;
+  const { id = "", scenario = ["", false, "", "", "", [], [], [], []] } = props;
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -225,6 +204,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
   const onConfirmDialogClose = useCallback(
     () => setConfirmDialogOpen(false),
+    []
+  );
+
+  const onLabelChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLabel(e.target.value);
+    },
     []
   );
 
@@ -317,25 +303,18 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     label="Label"
                     variant="outlined"
                     fullWidth
-                    sx={{
-                      maxWidth: "none",
-                    }}
+                    sx={FieldNoMaxWidth}
                     value={label}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setLabel(e.target.value);
-                    }}
+                    onChange={onLabelChange}
                     InputProps={{
                       endAdornment: (
                         <>
-                          {label ? (
-                            <IconButton sx={IconPaddingSx}>
-                              <CheckCircle color="primary" />
-                            </IconButton>
-                          ) : (
-                            <IconButton sx={IconPaddingSx}>
-                              <Cancel color="inherit" />
-                            </IconButton>
-                          )}
+                          <IconButton sx={IconPaddingSx}>
+                            <CheckCircle color="primary" />
+                          </IconButton>
+                          <IconButton sx={IconPaddingSx}>
+                            <Cancel color="inherit" />
+                          </IconButton>
                         </>
                       ),
                     }}
@@ -394,15 +373,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                           ...params.InputProps,
                           endAdornment: (
                             <>
-                              {tags && tags.length > 0 ? (
-                                <IconButton sx={IconPaddingSx}>
-                                  <CheckCircle color="primary" />
-                                </IconButton>
-                              ) : (
-                                <IconButton sx={IconPaddingSx}>
-                                  <Cancel color="inherit" />
-                                </IconButton>
-                              )}
+                              <IconButton sx={IconPaddingSx}>
+                                <CheckCircle color="primary" />
+                              </IconButton>
+                              <IconButton sx={IconPaddingSx}>
+                                <Cancel color="inherit" />
+                              </IconButton>
                             </>
                           ),
                         }}
@@ -429,26 +405,26 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         justifyContent="space-between"
                       >
                         <Grid item xs={5}>
-                          {action !== "EDIT" && (
+                          {action !== "EDIT" ? (
                             <Typography variant="subtitle2">{key}</Typography>
-                          )}
-                          {action === "EDIT" && (
+                          ) : (
                             <TextField
                               label="Key"
                               variant="outlined"
                               value={key}
+                              sx={FieldNoMaxWidth}
                             />
                           )}
                         </Grid>
                         <Grid item xs={5}>
-                          {action !== "EDIT" && (
+                          {action !== "EDIT" ? (
                             <Typography variant="subtitle2">{value}</Typography>
-                          )}
-                          {action === "EDIT" && (
+                          ) : (
                             <TextField
                               label="Value"
                               variant="outlined"
                               value={value}
+                              sx={FieldNoMaxWidth}
                             />
                           )}
                         </Grid>
@@ -489,6 +465,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                       onChange={updatePropertyField}
                       label="Key"
                       variant="outlined"
+                      sx={FieldNoMaxWidth}
                     />
                   </Grid>
                   <Grid item xs={5}>
@@ -498,6 +475,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                       onChange={updatePropertyField}
                       label="Value"
                       variant="outlined"
+                      sx={FieldNoMaxWidth}
                     />
                   </Grid>
                   <Grid
@@ -530,7 +508,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 pipelines.map((item, index) => {
                   const [key, value] = item;
                   return (
-                    <PipelinesRow
+                    <PipelineRow
                       action={action}
                       number={index}
                       value={value}
