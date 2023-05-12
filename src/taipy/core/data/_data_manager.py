@@ -72,6 +72,8 @@ class _DataManager(_Manager[DataNode]):
     ) -> DataNode:
         data_node = cls.__create(data_node_config, owner_id, parent_ids)
         cls._set(data_node)
+        if isinstance(data_node, _AbstractFileDataNode):
+            _AbstractFileDataNode._check_and_update_preserve_file(new_path=data_node._path)
         _publish_event(cls._EVENT_ENTITY_TYPE, data_node.id, EventOperation.CREATION, None)
         return data_node
 
@@ -109,7 +111,7 @@ class _DataManager(_Manager[DataNode]):
             os.remove(data_node.path)
 
     @classmethod
-    def _clean_preserve_file(cls, data_node: DataNode):
+    def _update_preserve_files(cls, data_node: DataNode):
         if isinstance(data_node, _AbstractFileDataNode):
             _AbstractFileDataNode._check_and_update_preserve_file(old_path=data_node.path)
 
@@ -117,7 +119,7 @@ class _DataManager(_Manager[DataNode]):
     def _update_preserve_file_and_clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId]):
         data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
         cls._clean_pickle_file(data_node)
-        cls._clean_preserve_file(data_node)
+        cls._update_preserve_files(data_node)
 
     @classmethod
     def _update_preserve_files_and_clean_pickle_files(cls, data_nodes: Iterable[Union[DataNode, DataNodeId]]):

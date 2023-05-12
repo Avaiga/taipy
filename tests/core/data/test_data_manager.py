@@ -417,7 +417,7 @@ class TestDataManager:
         _DataManager._clean_pickle_file(user_pickle_dn.id)
         assert file_exists(user_pickle_dn.path)
 
-        _DataManager._clean_pickle_files([generated_pickle_dn_1.id, generated_pickle_dn_2])
+        _DataManager._update_preserve_files_and_clean_pickle_files([generated_pickle_dn_1.id, generated_pickle_dn_2])
         assert not file_exists(generated_pickle_dn_1.path)
         assert not file_exists(generated_pickle_dn_2.path)
 

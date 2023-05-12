@@ -31,14 +31,16 @@ class _AbstractFileDataNode(object):
 
     @staticmethod
     def _check_and_update_preserve_file(old_path: Optional[str] = None, new_path: Optional[str] = None):
-        if preserve_file_path := os.getenv("SOME_ENVIRONMENT_VARIABLE"):
+        if preserve_file_path := os.getenv("TAIPY_PRESERVE_FILE_PATH"):
             if old_path and pathlib.Path(preserve_file_path).is_file():
                 with open(preserve_file_path, "r+") as f:
                     lines = f.readlines()
-                    f.seek(0)
-                    f.truncate()
-                    lines.remove(f"{old_path}\n")
-                    f.writelines(lines)
+                    old_path = f"{old_path}\n"
+                    if old_path in lines:
+                        f.seek(0)
+                        f.truncate()
+                        lines.remove(old_path)
+                        f.writelines(lines)
             if new_path:
                 with open(preserve_file_path, "a") as f:
                     f.write(f"{new_path}\n")

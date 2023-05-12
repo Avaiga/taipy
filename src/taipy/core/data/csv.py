@@ -115,7 +115,6 @@ class CSVDataNode(DataNode, _AbstractFileDataNode):
         if not self._path:
             self._path = self._build_path(self.storage_type())
         properties[self.__PATH_KEY] = self._path
-        _AbstractFileDataNode._check_and_update_preserve_file(new_path=self._path)
 
         if not self._last_edit_date and isfile(self._path):
             self.last_edit_date = datetime.now()  # type: ignore
