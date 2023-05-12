@@ -17,8 +17,8 @@ class _CLI:
     """Argument parser for Taipy application."""
 
     # The conflict_handler is set to "resolve" to override conflict arguments
+    _subparser_action = None
     _parser = argparse.ArgumentParser(conflict_handler="resolve")
-    _subparser_action = _parser.add_subparsers()
 
     _sub_taipyparsers: Dict[str, argparse.ArgumentParser] = {}
     _arg_groups: Dict[str, argparse._ArgumentGroup] = {}
@@ -28,6 +28,9 @@ class _CLI:
         """Create a new subparser and return a argparse handler."""
         if subparser := cls._sub_taipyparsers.get(name):
             return subparser
+
+        if not cls._subparser_action:
+            cls._subparser_action = cls._parser.add_subparsers()
 
         subparser = cls._subparser_action.add_parser(
             name=name,
@@ -59,8 +62,9 @@ class _CLI:
         """Remove a subparser from argparse."""
         cls._sub_taipyparsers.pop(name, None)
 
-        cls._subparser_action._name_parser_map.pop(name, None)
+        if cls._subparser_action:
+            cls._subparser_action._name_parser_map.pop(name, None)
 
-        for action in cls._subparser_action._choices_actions:
-            if action.dest == name:
-                cls._subparser_action._choices_actions.remove(action)
+            for action in cls._subparser_action._choices_actions:
+                if action.dest == name:
+                    cls._subparser_action._choices_actions.remove(action)
