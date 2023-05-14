@@ -97,8 +97,9 @@ def _build_entity_config_pyi(base_pyi, filename, entity_map):
     return base_pyi
 
 
-def _generate_entity_map(filename):
+def _generate_entity_and_property_maps(filename):
     entities_map = {}
+    property_map = {}
     entity_tree = _get_file_ast(filename)
     functions = [
         f for f in ast.walk(entity_tree) if isinstance(f, ast.Call) and getattr(f.func, "id", "") == "_inject_section"
@@ -107,6 +108,7 @@ def _generate_entity_map(filename):
     for f in functions:
         entity = ast.unparse(f.args[0])
         entities_map[entity] = {}
+        property_map[eval(ast.unparse(f.args[1]))] = entity
         # Remove class name from function map
         text = ast.unparse(f.args[-1]).replace(f"{entity}.", "")
         matches = re.findall(r"\((.*?)\)", text)
@@ -114,14 +116,14 @@ def _generate_entity_map(filename):
         for m in matches:
             v, k = m.replace("'", "").split(",")
             entities_map[entity][k.strip()] = v
-    return entities_map
+    return entities_map, property_map
 
 
-def _generate_acessors(base_pyi):
-    fct_whitelist = ["data_nodes", "tasks", "pipelines", "scenarios", "job_config"]
+def _generate_acessors(base_pyi, property_map):
 
-    for fct in fct_whitelist:
-        template = f'\tdef {fct}():\n\t\t""""""\n'.replace("\t", "    ")
+    for property, cls in property_map.items():
+        return_template = f"Dict[str, {cls}]" if property != "job_config" else f"{cls}"
+        template = f'\tdef {property}(cls) -> {return_template}:\n\t\t""""""\n'.replace("\t", "    ")
         base_pyi += template + "\n"
     return base_pyi
 
@@ -142,10 +144,10 @@ if __name__ == "__main__":
     scenario_filename = "taipy-core/src/taipy/core/config/scenario_config.py"
     task_filename = "taipy-core/src/taipy/core/config/task_config.py"
 
-    entities_map = _generate_entity_map(config_init)
+    entities_map, property_map = _generate_entity_and_property_maps(config_init)
     pyi = _build_header(header_file)
     pyi = _build_base_config_pyi(base_config, pyi)
-    pyi = _generate_acessors(pyi)
+    pyi = _generate_acessors(pyi, property_map)
     pyi = _build_entity_config_pyi(pyi, scenario_filename, entities_map["ScenarioConfig"])
     pyi = _build_entity_config_pyi(pyi, pipeline_filename, entities_map["PipelineConfig"])
     pyi = _build_entity_config_pyi(pyi, dn_filename, entities_map["DataNodeConfig"])
