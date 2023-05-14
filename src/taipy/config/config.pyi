@@ -157,19 +157,19 @@ class Config:
     def _from_json(cls, config_as_str: str) -> _Config:
         """"""
 
-    def data_nodes():
+    def job_config(cls) -> JobConfig:
         """"""
 
-    def tasks():
+    def data_nodes(cls) -> Dict[str, DataNodeConfig]:
         """"""
 
-    def pipelines():
+    def tasks(cls) -> Dict[str, TaskConfig]:
         """"""
 
-    def scenarios():
+    def pipelines(cls) -> Dict[str, PipelineConfig]:
         """"""
 
-    def job_config():
+    def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """"""
 
     @staticmethod
