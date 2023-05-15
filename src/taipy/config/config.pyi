@@ -157,6 +157,21 @@ class Config:
     def _from_json(cls, config_as_str: str) -> _Config:
         """"""
 
+    def job_config(cls) -> JobConfig:
+        """"""
+
+    def data_nodes(cls) -> Dict[str, DataNodeConfig]:
+        """"""
+
+    def tasks(cls) -> Dict[str, TaskConfig]:
+        """"""
+
+    def pipelines(cls) -> Dict[str, PipelineConfig]:
+        """"""
+
+    def scenarios(cls) -> Dict[str, ScenarioConfig]:
+        """"""
+
     @staticmethod
     def configure_scenario(
         id: str,
