@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import pathlib
 import sys
 
 from cookiecutter.main import cookiecutter
@@ -17,8 +18,10 @@ from taipy.cli import _CLI
 
 
 class _ScaffoldCLI:
+    __TAIPY_PATH = pathlib.Path(__file__).parent.resolve() / "templates"
+
     __TEMPLATE_MAP = {
-        "default": "https://github.com/Avaiga/scaffold-default",
+        "default": str(__TAIPY_PATH / "taipy-default-template"),
     }
 
     @classmethod
