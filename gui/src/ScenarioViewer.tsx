@@ -92,8 +92,12 @@ const tagsAutocompleteSx = {
 
 const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
   const [pipeline, setPipeline] = useState<string>(value);
+  const [focus, setFocus] = useState(false);
 
-  const onFieldBlur = useCallback((e: any) => setPipeline(e.target.value), []);
+  const onFieldBlur = useCallback((e: any) => {
+    setPipeline(e.target.value);
+    setFocus(false);
+  }, []);
 
   const index = number + 1;
   return (
@@ -108,9 +112,10 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
             value={pipeline}
             onBlur={onFieldBlur}
             sx={FieldNoMaxWidth}
+            onFocus={(e) => setFocus(true)}
             fullWidth
             InputProps={{
-              endAdornment: (
+              endAdornment: focus && (
                 <>
                   <IconButton sx={IconPaddingSx}>
                     <CheckCircle color="primary" />
@@ -144,7 +149,20 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
 };
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
-  const { id = "", scenario = ["", false, "", "", "", [], [], [], []] } = props;
+  const {
+    id = "",
+    scenario = [
+      "test12",
+      true,
+      "test",
+      "test",
+      "test",
+      ["tags"],
+      [["key", "value"]],
+      [["key", "value"]],
+      ["test123"],
+    ],
+  } = props;
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -156,6 +174,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     value: "",
   });
   const [label, setLabel] = useState<string>();
+
+  const [labelFocus, setLabelFocus] = useState(false);
+  const [tagsFocus, setTagsFocus] = useState(false);
 
   const sendScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {},
   []);
@@ -306,13 +327,21 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     sx={FieldNoMaxWidth}
                     value={label}
                     onChange={onLabelChange}
+                    onFocus={(e) => setLabelFocus(true)}
+                    onBlur={(e) => setLabelFocus(false)}
                     InputProps={{
-                      endAdornment: (
+                      endAdornment: labelFocus && (
                         <>
-                          <IconButton sx={IconPaddingSx}>
+                          <IconButton
+                            sx={IconPaddingSx}
+                            onClick={() => console.log("1")}
+                          >
                             <CheckCircle color="primary" />
                           </IconButton>
-                          <IconButton sx={IconPaddingSx}>
+                          <IconButton
+                            sx={IconPaddingSx}
+                            onClick={() => console.log("2")}
+                          >
                             <Cancel color="inherit" />
                           </IconButton>
                         </>
@@ -361,6 +390,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         />
                       ))
                     }
+                    onFocus={(e) => setTagsFocus(true)}
+                    onBlur={(e) => setTagsFocus(false)}
                     fullWidth
                     renderInput={(params) => (
                       <TextField
@@ -371,7 +402,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         fullWidth
                         InputProps={{
                           ...params.InputProps,
-                          endAdornment: (
+                          endAdornment: tagsFocus && (
                             <>
                               <IconButton sx={IconPaddingSx}>
                                 <CheckCircle color="primary" />
