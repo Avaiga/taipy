@@ -15,7 +15,7 @@ import sys
 
 import pytest
 
-from src.taipy.cli._cli import _CLI
+from src.taipy._cli._base_cli import _CLI
 
 if sys.version_info >= (3, 10):
     argparse_options_str = "options:"
@@ -28,13 +28,25 @@ def preprocess_stdout(stdout):
     return re.sub(" +", " ", stdout)
 
 
+def remove_subparser(name: str):
+    """Remove a subparser from argparse."""
+    _CLI._sub_taipyparsers.pop(name, None)
+
+    if _CLI._subparser_action:
+        _CLI._subparser_action._name_parser_map.pop(name, None)
+
+        for action in _CLI._subparser_action._choices_actions:
+            if action.dest == name:
+                _CLI._subparser_action._choices_actions.remove(action)
+
+
 @pytest.fixture(autouse=True, scope="function")
 def clean_argparser():
     _CLI._parser = argparse.ArgumentParser(conflict_handler="resolve")
     _CLI._arg_groups = {}
     _CLI._sub_taipyparsers = {}
-    _CLI._remove_subparser("subcommand_1")
-    _CLI._remove_subparser("subcommand_2")
+    for subcommand in _CLI._sub_taipyparsers.keys():
+        remove_subparser(subcommand)
 
     yield
 
