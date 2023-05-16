@@ -140,20 +140,7 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
 };
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
-    const {
-        id = "",
-        scenario = [
-            "test12",
-            true,
-            "test",
-            "test",
-            "test",
-            ["tags"],
-            [["key", "value"]],
-            [["key", "value"]],
-            ["test123"],
-        ],
-    } = props;
+    const { id = "", scenario = ["", false, "", "", "", [], [], [], []] } = props;
 
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [properties, setProperties] = useState<Property[]>([]);
