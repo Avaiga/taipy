@@ -44,17 +44,15 @@ import {
     styled,
 } from "@mui/material";
 import { FlagSx, Property, ScenarioFull } from "./utils";
+import { useDynamicProperty } from "taipy-gui";
 
 interface ScenarioViewerProps {
     id?: string;
     expandable?: boolean;
     expanded?: boolean;
-    label?: string;
+    defaultExpanded?: boolean;
     buttonToSubmitScenario?: boolean;
     buttonToDeleteScenario?: boolean;
-    primary?: boolean;
-    configIdNotEditable?: boolean;
-    frequencyNotEditable?: boolean;
     cycleNotEditable?: boolean;
     updateVarName?: string;
     tags?: Array<string>;
@@ -67,6 +65,7 @@ interface PipelinesRowProps {
     action: string;
     number: number;
     value: string;
+    submitEntity: () => void;
 }
 
 const MainBoxSx = {
@@ -142,6 +141,8 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
 const ScenarioViewer = (props: ScenarioViewerProps) => {
     const { id = "", scenario = ["", false, "", "", "", [], [], [], []] } = props;
 
+    const expanded = useDynamicProperty(props.expanded, props.defaultExpanded, true);
+
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [properties, setProperties] = useState<Property[]>([]);
     const [action, setAction] = useState<string>("EDIT");
@@ -156,7 +157,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const [labelFocus, setLabelFocus] = useState(false);
     const [tagsFocus, setTagsFocus] = useState(false);
 
-    const sendScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {}, []);
+    const onConfirmPromoteToPrimary = useCallback(() => {}, []);
+
+    const submitPipeline = useCallback(() => {}, []);
 
     const updateScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {}, []);
 
@@ -314,26 +317,26 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     />
                                 </Grid>
                             )}
-                            {action !== "EDIT" && (
-                                <Grid item xs={12} container justifyContent="space-between">
-                                    <Grid item xs={4}>
-                                        <Typography variant="subtitle2">Label</Typography>
-                                    </Grid>
-                                    <Grid item xs={8}>
-                                        <Typography variant="subtitle2">Scenario 3</Typography>
-                                    </Grid>
-                                </Grid>
-                            )}
                             {action !== "EDIT" ? (
-                                <Grid item xs={12} container justifyContent="space-between">
-                                    <Grid item xs={4}>
-                                        <Typography variant="subtitle2">Tags</Typography>
+                                <Grid item xs={12}>
+                                    <Grid item xs={12} container justifyContent="space-between">
+                                        <Grid item xs={4}>
+                                            <Typography variant="subtitle2">Label</Typography>
+                                        </Grid>
+                                        <Grid item xs={8}>
+                                            <Typography variant="subtitle2">{scenarioLabel}</Typography>
+                                        </Grid>
                                     </Grid>
-                                    <Grid item xs={8}>
-                                        {tags &&
-                                            tags.map((tag, index) => (
-                                                <Chip key={index} label={tag} variant="outlined" />
-                                            ))}
+                                    <Grid item xs={12} container justifyContent="space-between">
+                                        <Grid item xs={4}>
+                                            <Typography variant="subtitle2">Tags</Typography>
+                                        </Grid>
+                                        <Grid item xs={8}>
+                                            {tags &&
+                                                tags.map((tag, index) => (
+                                                    <Chip key={index} label={tag} variant="outlined" />
+                                                ))}
+                                        </Grid>
                                     </Grid>
                                 </Grid>
                             ) : (
@@ -486,7 +489,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             {pipelines &&
                                 pipelines.map((item, index) => {
                                     const [key, value] = item;
-                                    return <PipelineRow action={action} number={index} value={value} key={key} />;
+                                    return (
+                                        <PipelineRow
+                                            action={action}
+                                            number={index}
+                                            value={value}
+                                            key={key}
+                                            submitEntity={submitPipeline}
+                                        />
+                                    );
                                 })}
 
                             <Grid item xs={12}>
@@ -501,7 +512,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 >
                                     DELETE
                                 </Button>
-                                <Button variant="outlined" color="primary" disabled>
+                                <Button variant="outlined" color="primary" disabled onClick={onConfirmPromoteToPrimary}>
                                     PROMOTE TO PRIMARY
                                 </Button>
                             </Grid>
