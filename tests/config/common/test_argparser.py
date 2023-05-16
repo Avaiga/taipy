@@ -44,8 +44,8 @@ def remove_subparser(name: str):
 def clean_argparser():
     _CLI._parser = argparse.ArgumentParser(conflict_handler="resolve")
     _CLI._arg_groups = {}
-    _CLI._sub_taipyparsers = {}
-    for subcommand in _CLI._sub_taipyparsers.keys():
+    subcommands = list(_CLI._sub_taipyparsers.keys())
+    for subcommand in subcommands:
         remove_subparser(subcommand)
 
     yield
