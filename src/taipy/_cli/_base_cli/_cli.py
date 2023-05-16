@@ -58,18 +58,6 @@ class _CLI:
         return args
 
     @classmethod
-    def _remove_subparser(cls, name: str):
-        """Remove a subparser from argparse."""
-        cls._sub_taipyparsers.pop(name, None)
-
-        if cls._subparser_action:
-            cls._subparser_action._name_parser_map.pop(name, None)
-
-            for action in cls._subparser_action._choices_actions:
-                if action.dest == name:
-                    cls._subparser_action._choices_actions.remove(action)
-
-    @classmethod
     def _remove_argument(cls, arg: str):
         """Remove an argument from the parser. Note that the `arg` must be without --.
 
