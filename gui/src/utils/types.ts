@@ -1,0 +1,1 @@
+export type DisplayModel = { nodes: Record<string, Record<string, string>>; links: Array<[string, string, string, string]> };

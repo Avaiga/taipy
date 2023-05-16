@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-from urllib.parse import urlencode
 
 from dateutil import parser
 
@@ -49,6 +48,36 @@ class GuiCoreScenarioAdapter(_TaipyBase):
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Sc"
 
+
+class GuiCoreScenarioIdAdapter(_TaipyBase):
+    def get(self):
+        data = super().get()
+        if isinstance(data, Scenario):
+            return data.id
+        return data
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScI"
+
+class GuiCoreScenarioGraphAdapter(_TaipyBase):
+    def get(self):
+        data = super().get()
+        if isinstance(data, Scenario):
+            dag = data._get_dag()
+            nodes = dict()
+            for id, node in dag.nodes.items():
+                cat = nodes.get(node.type)
+                if cat is None:
+                    cat = dict()
+                    nodes[node.type] = cat
+                cat[id] = {"name": node.entity.get_simple_label()}
+            return {"nodes": nodes, "links": [(e.src.type, e.src.entity.id, e.dest.type, e.dest.entity.id) for e in dag.edges]}
+        return None
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScG"
 
 class GuiCoreContext(CoreEventConsumerBase):
     __PROP_SCENARIO_ID = "id"
@@ -99,8 +128,7 @@ class GuiCoreContext(CoreEventConsumerBase):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) == 0:
             return
-        scenario_id = args[0]
-        state.assign(GuiCoreContext._SCENARIO_SELECTOR_ID_VAR, scenario_id)
+        state.assign(GuiCoreContext._SCENARIO_SELECTOR_ID_VAR, args[0])
 
     def get_scenario_by_id(self, id: str) -> t.Optional[Scenario]:
         if not id:
@@ -238,6 +266,15 @@ class GuiCore(ElementLibrary):
                 "error": ElementProperty(PropertyType.react, f"{{{GuiCoreContext._SCENARIO_VIZ_ERROR_VAR}}}"),
             },
         ),
+        "graph": Element(
+            "scenario",
+            {
+                "scenario": ElementProperty(GuiCoreScenarioGraphAdapter),
+            },
+            inner_properties={
+                "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
+            },
+        ),
     }
 
     def get_name(self) -> str:
@@ -258,8 +295,7 @@ class GuiCore(ElementLibrary):
             GuiCoreContext._SCENARIO_SELECTOR_ID_VAR,
             GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
         ]:
-            state._add_attribute(var)
-            state._gui._bind_var_val(var, "")
+            state._add_attribute(var, "")
 
     def get_version(self) -> str:
         if not hasattr(self, "version"):
