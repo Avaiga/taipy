@@ -88,7 +88,7 @@
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
-    "add-asset-html-webpack-plugin": "^5.0.2",
+    "add-asset-html-webpack-plugin": "^6.0.0",
     "autoprefixer": "^10.4.0",
     "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
