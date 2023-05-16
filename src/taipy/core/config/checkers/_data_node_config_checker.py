@@ -53,6 +53,12 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 f"`{data_node_config._SCOPE_KEY}` field of DataNodeConfig `{data_node_config_id}` must be"
                 f" populated with a Scope value.",
             )
+        if data_node_config.scope == Scope.PIPELINE:
+            self._warning(
+                data_node_config._SCOPE_KEY,
+                data_node_config.scope,
+                f"`{Scope.PIPELINE}` is deprecated. Please use other `Scope` value instead.",
+            )
 
     def _check_required_properties(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if storage_type := data_node_config.storage_type:
