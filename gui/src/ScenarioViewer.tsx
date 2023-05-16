@@ -302,10 +302,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         InputProps={{
                                             endAdornment: labelFocus && (
                                                 <>
-                                                    <IconButton sx={IconPaddingSx} onClick={() => console.log("1")}>
+                                                    <IconButton sx={IconPaddingSx}>
                                                         <CheckCircle color="primary" />
                                                     </IconButton>
-                                                    <IconButton sx={IconPaddingSx} onClick={() => console.log("2")}>
+                                                    <IconButton sx={IconPaddingSx}>
                                                         <Cancel color="inherit" />
                                                     </IconButton>
                                                 </>
