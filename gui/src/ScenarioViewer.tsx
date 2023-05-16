@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -167,7 +167,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [action, setAction] = useState<string>("EDIT");
-  const [tags, setTags] = useState<string[]>(scenario[5]);
+  const [tags, setTags] = useState<string[]>();
   const [newProp, setNewProp] = useState<Property>({
     id: "",
     key: "",
@@ -179,6 +179,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
   const [tagsFocus, setTagsFocus] = useState(false);
 
   const sendScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {},
+  []);
+
+  const updateScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {},
   []);
 
   const updatePropertyField = useCallback(
@@ -257,17 +260,30 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     config,
     date,
     scenarioLabel,
-    _scenarios,
+    scenarioTags,
     scenarioProperties,
     pipelines,
-    scenarioTags,
+    authorizedTags,
   ] = scenario;
+
+  useEffect(() => {
+    setTags(scenario ? scenarioTags : []);
+    setProperties(
+      scenario
+        ? scenarioProperties.map(([k, v], i) => ({
+            id: i + "",
+            key: k,
+            value: v,
+          }))
+        : []
+    );
+  }, []);
 
   return (
     <div>
       <Box sx={MainBoxSx}>
         <Accordion>
-          <MuiAccordionSummary id={`panel-${id}`}>
+          <MuiAccordionSummary id={`panel-${scenarioId}`}>
             <Grid
               container
               alignItems="center"
@@ -291,7 +307,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 <IconButton
                   data-id={scenarioId}
                   sx={IconPaddingSx}
-                  onClick={sendScenario}
+                  onClick={updateScenario}
                 >
                   <Send fontSize="small" color="info" />
                 </IconButton>
@@ -360,25 +376,24 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                   </Grid>
                 </Grid>
               )}
-              {action !== "EDIT" && (
+              {action !== "EDIT" ? (
                 <Grid item xs={12} container justifyContent="space-between">
                   <Grid item xs={4}>
                     <Typography variant="subtitle2">Tags</Typography>
                   </Grid>
                   <Grid item xs={8}>
-                    <Chip label="Tag1" variant="outlined" />
-                    <Chip label="Tag2" variant="outlined" />
-                    <Chip label="Tag3" variant="outlined" />
+                    {tags &&
+                      tags.map((tag, index) => (
+                        <Chip key={index} label={tag} variant="outlined" />
+                      ))}
                   </Grid>
                 </Grid>
-              )}
-              {action === "EDIT" && (
+              ) : (
                 <Grid item xs={11} container justifyContent="space-between">
                   <Autocomplete
                     multiple
                     id="tags-filled"
-                    options={tags.map((tag) => tag)}
-                    defaultValue={[tags[0]]}
+                    options={[]}
                     freeSolo
                     renderTags={(value: readonly string[], getTagProps) =>
                       value.map((option: string, index: number) => (
