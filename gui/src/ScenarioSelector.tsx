@@ -57,7 +57,6 @@ import {
     useDispatchRequestUpdateOnFirstRender,
     createSendUpdateAction,
 } from "taipy-gui";
-import { Cycles, Property, Scenario, ScenarioDict, ScenarioFull, Scenarios } from "./utils";
 
 import { Cycle, Scenario } from "./icons";
 
@@ -66,28 +65,6 @@ enum NodeType {
     SCENARIO = 1,
 }
 
-type Property = {
-    id: string;
-    key: string;
-    value: string;
-};
-
-type Scenario = [string, string, undefined, number, boolean];
-type Scenarios = Array<Scenario>;
-type Cycles = Array<[string, string, Scenarios, number, boolean]>;
-
-// id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags
-type ScenarioFull = [
-    string,
-    boolean,
-    string,
-    string,
-    string,
-    string[],
-    Array<[string, string]>,
-    Array<[string, string]>,
-    string[]
-];
 interface ScenarioDict {
     config: string;
     name: string;
