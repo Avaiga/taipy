@@ -15,7 +15,7 @@ import sys
 
 import pytest
 
-from src.taipy.cli import _CLI
+from src.taipy.cli._cli import _CLI
 
 if sys.version_info >= (3, 10):
     argparse_options_str = "options:"
