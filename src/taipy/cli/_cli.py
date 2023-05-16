@@ -68,3 +68,22 @@ class _CLI:
             for action in cls._subparser_action._choices_actions:
                 if action.dest == name:
                     cls._subparser_action._choices_actions.remove(action)
+
+    @classmethod
+    def _remove_argument(cls, arg: str):
+        """Remove an argument from the parser. Note that the `arg` must be without --.
+
+        Source: https://stackoverflow.com/questions/32807319/disable-remove-argument-in-argparse
+        """
+        for action in cls._parser._actions:
+            opts = action.option_strings
+            if (opts and opts[0] == arg) or action.dest == arg:
+                cls._parser._remove_action(action)
+                break
+
+        for argument_group in cls._parser._action_groups:
+            for group_action in argument_group._group_actions:
+                opts = group_action.option_strings
+                if (opts and opts[0] == arg) or group_action.dest == arg:
+                    argument_group._group_actions.remove(group_action)
+                    return
