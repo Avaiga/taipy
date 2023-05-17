@@ -27,6 +27,8 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
+from ...conftest import init_config
+
 
 def test_delete_version(caplog, tmp_sqlite):
     Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
@@ -207,6 +209,55 @@ def test_rename_version(caplog, tmp_sqlite):
     assert len(_PipelineManager._get_all("2.1")) == 1
     assert len(_ScenarioManager._get_all("2.1")) == 1
     assert len(_JobManager._get_all("2.1")) == 1
+
+
+def test_compare_version_config(caplog, tmp_sqlite):
+    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    _ScenarioManagerFactory._build_manager()
+
+    scenario_config_1 = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config_1)
+        _ScenarioManager._submit(scenario)
+
+    init_config()
+    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    _ScenarioManagerFactory._build_manager()
+
+    scenario_config_2 = config_scenario()
+    Config.configure_data_node(id="d2", storage_type="csv", default_path="bar.csv")
+
+    with patch("sys.argv", ["prog", "--experiment", "2.0"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config_2)
+        _ScenarioManager._submit(scenario)
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "non_exist_version", "2.0"]):
+            # This should raise an exception since version "non_exist_version" does not exist
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "non_exist_version"]):
+            # This should raise an exception since 2.0 already exists
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "1.0"]):
+            _VersionCLI.parse_arguments()
+    assert "There is no difference between version 1.0 Configuration and version 1.0 Configuration." in caplog.text
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "2.0"]):
+            _VersionCLI.parse_arguments()
+    expected_message = """Differences between version 1.0 Configuration and version 2.0 Configuration:
+\tDATA_NODE "d2" has attribute "default_path" modified: foo.csv -> bar.csv"""
+    assert expected_message in caplog.text
 
 
 def twice(a):

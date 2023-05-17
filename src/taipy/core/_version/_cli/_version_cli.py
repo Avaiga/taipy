@@ -12,6 +12,7 @@
 import sys
 
 from taipy._cli._base_cli import _CLI
+from taipy.config import Config
 from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 from taipy.logger._taipy_logger import _TaipyLogger
 
@@ -41,6 +42,13 @@ class _VersionCLI:
 
         version_parser.add_argument(
             "--rename", nargs=2, metavar=("OLD_VERSION", "NEW_VERSION"), help="Rename a Taipy version."
+        )
+
+        version_parser.add_argument(
+            "--compare-config",
+            nargs=2,
+            metavar=("VERSION_1", "VERSION_2"),
+            help="Compare the Configuration of 2 Taipy versions.",
         )
 
         version_parser.add_argument(
@@ -77,6 +85,10 @@ class _VersionCLI:
                 sys.exit(1)
 
             cls.__logger.info(f"Successfully renamed version '{args.rename[0]}' to '{args.rename[1]}'.")
+            sys.exit(0)
+
+        if args.compare_config:
+            cls.__compare_version_config(args.compare_config[0], args.compare_config[1])
             sys.exit(0)
 
         if args.delete_production:
@@ -187,3 +199,22 @@ class _VersionCLI:
             pass
         version_entity.id = new_version
         _version_manager._set(version_entity)
+
+    @classmethod
+    def __compare_version_config(cls, version_1: str, version_2: str):
+        version_entity_1 = _VersionManagerFactory._build_manager()._get(version_1)
+        if version_entity_1 is None:
+            cls.__logger.error(f"Version '{version_1}' does not exist.")
+            sys.exit(1)
+
+        version_entity_2 = _VersionManagerFactory._build_manager()._get(version_2)
+        if version_entity_2 is None:
+            cls.__logger.error(f"Version '{version_2}' does not exist.")
+            sys.exit(1)
+
+        Config._comparator._compare(
+            version_entity_1.config,
+            version_entity_2.config,
+            version_1,
+            version_2,
+        )
