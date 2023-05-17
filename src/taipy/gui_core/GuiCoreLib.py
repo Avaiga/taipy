@@ -11,6 +11,7 @@
 
 import typing as t
 from datetime import datetime
+
 from dateutil import parser
 
 import taipy as tp
