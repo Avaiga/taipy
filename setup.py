@@ -18,8 +18,8 @@ from pathlib import Path
 from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
 
-with open("README.md") as readme_file:
-    readme = readme_file.read()
+with open("README.md", "rb") as readme_file:
+    readme = readme_file.read().decode("UTF-8")
 
 with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
     version = json.load(version_file)
