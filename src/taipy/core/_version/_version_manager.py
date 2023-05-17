@@ -51,7 +51,7 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _get_or_create(cls, id: str, force: bool) -> _Version:
         if version := cls._get(id):
-            comparator_result = Config._comparator._compare(version.config, Config._applied_config, id)
+            comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
                 if force:
                     _TaipyLogger._get_logger().warning(f"Overriding version {id} ...")
@@ -128,7 +128,7 @@ class _VersionManager(_Manager[_Version]):
                 continue
 
             if version := cls._get(production_version):
-                comparator_result = Config._comparator._compare(
+                comparator_result = Config._comparator._find_conflict_config(
                     version.config, Config._applied_config, production_version
                 )
                 if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):

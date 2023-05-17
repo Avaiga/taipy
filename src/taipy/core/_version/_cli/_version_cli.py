@@ -12,6 +12,7 @@
 import sys
 
 from taipy._cli._base_cli import _CLI
+from taipy.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...exceptions.exceptions import VersionIsNotProductionVersion
@@ -31,6 +32,13 @@ class _VersionCLI:
 
         version_parser.add_argument(
             "-l", "--list", action="store_true", help="List all existing versions of the Taipy application."
+        )
+
+        version_parser.add_argument(
+            "--compare-config",
+            nargs=2,
+            metavar=("VERSION_1", "VERSION_2"),
+            help="Compare the Configuration of 2 Taipy versions.",
         )
 
         version_parser.add_argument(
@@ -91,6 +99,10 @@ class _VersionCLI:
             print(list_version_message)
             sys.exit(0)
 
+        if args.compare_config:
+            cls.__compare_version_config(args.compare_config[0], args.compare_config[1])
+            sys.exit(0)
+
         if args.delete_production:
             try:
                 _VersionManagerFactory._build_manager()._delete_production_version(args.delete_production)
@@ -106,3 +118,22 @@ class _VersionCLI:
                 sys.exit(1)
 
             sys.exit(0)
+
+    @classmethod
+    def __compare_version_config(cls, version_1: str, version_2: str):
+        version_entity_1 = _VersionManagerFactory._build_manager()._get(version_1)
+        if version_entity_1 is None:
+            cls.__logger.error(f"Version '{version_1}' does not exist.")
+            sys.exit(1)
+
+        version_entity_2 = _VersionManagerFactory._build_manager()._get(version_2)
+        if version_entity_2 is None:
+            cls.__logger.error(f"Version '{version_2}' does not exist.")
+            sys.exit(1)
+
+        Config._comparator._compare(
+            version_entity_1.config,
+            version_entity_2.config,
+            version_1,
+            version_2,
+        )
