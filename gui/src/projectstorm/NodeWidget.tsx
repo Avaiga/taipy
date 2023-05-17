@@ -12,89 +12,133 @@
  */
 
 import { useCallback } from "react";
-import { DiagramEngine } from "@projectstorm/react-diagrams-core";
 import styled from "@emotion/styled";
-import { DefaultNodeModel, DefaultPortLabel, DefaultPortModel } from "@projectstorm/react-diagrams";
+import { DefaultPortModel, PortWidget } from "@projectstorm/react-diagrams";
+import { DiagramEngine } from "@projectstorm/react-diagrams-core";
+import { Output } from "@mui/icons-material";
 
-import { getNodeContext } from "../utils/diagram";
-import { getNodeIcon } from "../utils/config";
+import { DataNode, Task, Pipeline } from "../utils/names";
+import { Datanode as DIcon, Task as TIcon, Pipeline as PIcon, Scenario as SIcon } from "../icons";
+import { TaipyNodeModel } from "./models";
+import { IN_PORT_NAME } from "../utils/diagram";
+import { Input } from "../icons";
 
 namespace S {
-  export const Node = styled.div<{ background?: string; selected?: boolean }>`
-    background-color: ${(p) => p.background};
-    border-radius: 5px;
-    color: white;
-    border: solid 2px black;
-    overflow: visible;
-    border: solid 2px ${(p) => (p.selected ? "rgb(0,192,255)" : "black")};
-  `;
-  export const Title = styled.div`
-    background: rgba(0, 0, 0, 0.3);
-    display: flex;
-    white-space: nowrap;
-    justify-items: center;
-  `;
+    export const Node = styled.div<{ background?: string; selected?: boolean }>`
+        background-color: ${(p) => p.background};
+        border-radius: 5px;
+        color: white;
+        border: solid 2px black;
+        overflow: visible;
+        border: solid 2px ${(p) => (p.selected ? "rgb(0,192,255)" : "black")};
+    `;
+    export const Title = styled.div`
+        background: rgba(0, 0, 0, 0.3);
+        display: flex;
+        white-space: nowrap;
+        justify-items: center;
+    `;
 
-  export const TitleName = styled.div`
-    flex-grow: 1;
-    padding: 5px 5px;
-  `;
+    export const TitleName = styled.div`
+        flex-grow: 1;
+        padding: 5px 5px;
+    `;
 
-  export const TitleIcon = styled.div`
-    padding: 5px 0 5px 5px;
-  `;
+    export const SubTitleName = styled.span`
+        font-size: smaller;
+        padding-left: 0.7em;
+    `;
 
-  export const Ports = styled.div`
-    display: flex;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
-  `;
+    export const TitleIcon = styled.div`
+        padding: 5px 0 5px 5px;
+    `;
 
-  export const PortsContainer = styled.div`
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    &:first-of-type {
-      margin-right: 10px;
-    }
-    &:only-child {
-      margin-right: 0px;
-    }
-  `;
+    export const Ports = styled.div`
+        display: flex;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
+    `;
+
+    export const PortsContainer = styled.div`
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        &:first-of-type {
+            margin-right: 10px;
+        }
+        &:only-child {
+            margin-right: 0px;
+        }
+    `;
+
+    export const OutPortLabel = styled.div`
+        display: flex;
+        margin-top: 1px;
+        align-items: center;
+        justify-content: end;
+        margin-right: 5px;
+    `;
+
+    export const InPortLabel = styled.div`
+        display: flex;
+        margin-top: 1px;
+        align-items: center;
+        margin-left: 5px;
+    `;
 }
 
 interface NodeProps {
-  node: DefaultNodeModel;
-  engine: DiagramEngine;
-  baseUri: string;
+    node: TaipyNodeModel;
+    engine: DiagramEngine;
 }
 
-const NodeWidget = ({ node, baseUri, engine }: NodeProps) => {
-  const generatePort = useCallback(
-    (port: DefaultPortModel) => {
-      return <DefaultPortLabel engine={engine} port={port} key={port.getID()} />;
-    },
-    [engine]
-  );
+const NodeWidget = ({ node, engine }: NodeProps) => {
+    const generatePort = useCallback(
+        (port: DefaultPortModel) =>
+            port.getName() == IN_PORT_NAME ? (
+                <S.InPortLabel>
+                    <PortWidget engine={engine} port={port} key={port.getID()}>
+                        <Input />
+                    </PortWidget>
+                </S.InPortLabel>
+            ) : (
+                <S.OutPortLabel>
+                    <PortWidget engine={engine} port={port} key={port.getID()}>
+                        <Output />
+                    </PortWidget>
+                </S.OutPortLabel>
+            ),
+        [engine]
+    );
 
-  return (
-    <S.Node
-      data-default-node-name={node.getOptions().name}
-      data-vscode-context={getNodeContext(node, baseUri)}
-      selected={node.isSelected()}
-      background={node.getOptions().color}
-    >
-      <S.Title>
-        <S.TitleIcon className="icon" title={node.getType()}>
-          <i className={getNodeIcon(node.getType())}></i>
-        </S.TitleIcon>
-        <S.TitleName>{node.getOptions().name}</S.TitleName>
-      </S.Title>
-      <S.Ports>
-        <S.PortsContainer>{node.getInPorts().map(generatePort)}</S.PortsContainer>
-        <S.PortsContainer>{node.getOutPorts().map(generatePort)}</S.PortsContainer>
-      </S.Ports>
-    </S.Node>
-  );
+    return (
+        <S.Node
+            data-default-node-name={node.getOptions().name}
+            selected={node.isSelected()}
+            background={node.getOptions().color}
+        >
+            <S.Title>
+                <S.TitleIcon className="icon" title={node.getType()}>
+                    {node.getType() == DataNode ? (
+                        <DIcon />
+                    ) : node.getType() == Task ? (
+                        <TIcon />
+                    ) : node.getType() == Pipeline ? (
+                        <PIcon />
+                    ) : (
+                        <SIcon />
+                    )}
+                </S.TitleIcon>
+                <S.TitleName>
+                    {node.getOptions().name}
+                    {node.subtype ? <S.SubTitleName>{node.subtype}</S.SubTitleName> : null}
+                </S.TitleName>
+            </S.Title>
+            <S.Ports>
+                <S.PortsContainer>{node.getInPorts().map(generatePort)}</S.PortsContainer>
+                <S.PortsContainer>{node.getOutPorts().map(generatePort)}</S.PortsContainer>
+            </S.Ports>
+        </S.Node>
+    );
 };
 
 export default NodeWidget;

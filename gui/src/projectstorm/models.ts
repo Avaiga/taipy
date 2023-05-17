@@ -11,13 +11,24 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { DefaultPortModel, DefaultPortModelOptions, DiagramModel, PortModelAlignment } from "@projectstorm/react-diagrams";
+import { DefaultNodeModel, DefaultNodeModelOptions, DefaultPortModel, DefaultPortModelOptions, DiagramModel, PortModelAlignment } from "@projectstorm/react-diagrams";
 
 import { IN_PORT_NAME, OUT_PORT_NAME } from "../utils/diagram";
 import { getChildType } from "../utils/childtype";
 import { DataNode, Task } from "../utils/names";
 
 export class TaipyDiagramModel extends DiagramModel {}
+
+export interface TaipyNodeModelOptions extends DefaultNodeModelOptions {
+    subtype?: string;
+}
+export class TaipyNodeModel extends DefaultNodeModel {
+    subtype: string | undefined;
+    constructor(options?: TaipyNodeModelOptions) {
+        super(options);
+        this.subtype = options?.subtype;
+    }
+}
 
 export class TaipyPortModel extends DefaultPortModel {
   static createInPort() {

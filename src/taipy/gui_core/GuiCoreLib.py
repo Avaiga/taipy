@@ -12,9 +12,10 @@
 import typing as t
 
 from dateutil import parser
+from datetime import datetime
 
 import taipy as tp
-from taipy.core import Cycle, Scenario
+from taipy.core import Cycle, Scenario, DataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -60,24 +61,43 @@ class GuiCoreScenarioIdAdapter(_TaipyBase):
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "ScI"
 
+
 class GuiCoreScenarioGraphAdapter(_TaipyBase):
+    @staticmethod
+    def get_entity_type(node: t.Any):
+        return DataNode.__name__ if isinstance(node.entity, DataNode) else node.type
+
     def get(self):
         data = super().get()
         if isinstance(data, Scenario):
             dag = data._get_dag()
             nodes = dict()
             for id, node in dag.nodes.items():
-                cat = nodes.get(node.type)
+                entityType = GuiCoreScenarioGraphAdapter.get_entity_type(node)
+                cat = nodes.get(entityType)
                 if cat is None:
                     cat = dict()
-                    nodes[node.type] = cat
-                cat[id] = {"name": node.entity.get_simple_label()}
-            return {"nodes": nodes, "links": [(e.src.type, e.src.entity.id, e.dest.type, e.dest.entity.id) for e in dag.edges]}
+                    nodes[entityType] = cat
+                cat[id] = {"name": node.entity.get_simple_label(), "type": node.entity.storage_type() if hasattr(node.entity, "storage_type") else None}
+            return {
+                "label": data.get_label(),
+                "nodes": nodes,
+                "links": [
+                    (
+                        GuiCoreScenarioGraphAdapter.get_entity_type(e.src),
+                        e.src.entity.id,
+                        GuiCoreScenarioGraphAdapter.get_entity_type(e.dest),
+                        e.dest.entity.id,
+                    )
+                    for e in dag.edges
+                ],
+            }
         return None
 
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "ScG"
+
 
 class GuiCoreContext(CoreEventConsumerBase):
     __PROP_SCENARIO_ID = "id"
@@ -269,7 +289,9 @@ class GuiCore(ElementLibrary):
         "graph": Element(
             "scenario",
             {
+                "id": ElementProperty(PropertyType.string),
                 "scenario": ElementProperty(GuiCoreScenarioGraphAdapter),
+                "button_label": ElementProperty(PropertyType.dynamic_string),
             },
             inner_properties={
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
@@ -299,5 +321,5 @@ class GuiCore(ElementLibrary):
 
     def get_version(self) -> str:
         if not hasattr(self, "version"):
-            self.version = _get_version()
+            self.version = _get_version() + str(datetime.now().timestamp())
         return self.version
