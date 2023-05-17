@@ -92,7 +92,7 @@ class _VersionManager(_Manager[_Version]):
             return cls._set_development_version(str(uuid.uuid4()))
 
     @classmethod
-    def _set_experiment_version(cls, version_number: str, force: bool) -> str:
+    def _set_experiment_version(cls, version_number: str, force: bool = False) -> str:
         if version_number == cls._get_development_version():
             raise SystemExit(
                 f"Version number {version_number} is already a development version. Please choose a different version "
@@ -119,7 +119,7 @@ class _VersionManager(_Manager[_Version]):
             return cls._set_development_version(str(uuid.uuid4()))
 
     @classmethod
-    def _set_production_version(cls, version_number: str, force: bool) -> str:
+    def _set_production_version(cls, version_number: str, force: bool = False) -> str:
         production_versions = cls._get_production_versions()
 
         # Check if all previous production versions are compatible with current Python Config
