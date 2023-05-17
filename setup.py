@@ -28,6 +28,7 @@ with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
+    "cookiecutter>=2.1.1,<2.2",
     "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
 ]

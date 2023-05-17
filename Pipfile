@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+cookiecutter = "==2.1.1"
 taipy-gui = {git="https://git@github.com/Avaiga/taipy-gui.git@develop"}
 taipy-rest = {git="https://git@github.com/Avaiga/taipy-rest.git@develop"}
 
