@@ -21,6 +21,7 @@ from openpyxl import load_workbook
 
 from taipy.config.common.scope import Scope
 
+from .._backup._backup import replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import ExposedTypeLengthMismatch, InvalidExposedType, NonExistingExcelSheet
@@ -98,7 +99,6 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode):
         default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
         properties[self.__PATH_KEY] = self._path
-        _AbstractFileDataNode._check_and_update_preserve_file(new_path=self._path)
 
         if self.__SHEET_NAME_PROPERTY not in properties.keys():
             properties[self.__SHEET_NAME_PROPERTY] = None
@@ -142,7 +142,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode):
         tmp_old_path = self._path
         self._path = value
         self.properties[self.__PATH_KEY] = value
-        _AbstractFileDataNode._check_and_update_preserve_file(old_path=tmp_old_path, new_path=self._path)
+        replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
 
     @classmethod
     def storage_type(cls) -> str:

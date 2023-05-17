@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from taipy.config.common.scope import Scope
 
+from .._backup._backup import replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from .abstract_file import _AbstractFileDataNode
@@ -100,7 +101,6 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         if not self._path:
             self._path = self._build_path(self.storage_type())
         properties[self.__PATH_KEY] = self._path
-        _AbstractFileDataNode._check_and_update_preserve_file(new_path=self._path)
 
         self._decoder = self._properties.get(self._DECODER_KEY, _DefaultJSONDecoder)
         self._encoder = self._properties.get(self._ENCODER_KEY, _DefaultJSONEncoder)
@@ -125,7 +125,7 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         tmp_old_path = self._path
         self._path = value
         self.properties[self.__PATH_KEY] = value
-        _AbstractFileDataNode._check_and_update_preserve_file(old_path=tmp_old_path, new_path=self._path)
+        replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
 
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)

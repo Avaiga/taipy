@@ -20,6 +20,7 @@ import pandas as pd
 
 from taipy.config.common.scope import Scope
 
+from .._backup._backup import replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import InvalidExposedType
@@ -135,7 +136,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode):
         tmp_old_path = self._path
         self._path = value
         self.properties[self.__PATH_KEY] = value
-        _AbstractFileDataNode._check_and_update_preserve_file(old_path=tmp_old_path, new_path=self._path)
+        replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
 
     def _check_exposed_type(self, exposed_type):
         if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
