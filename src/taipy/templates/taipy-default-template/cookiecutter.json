@@ -1,5 +1,5 @@
 {
-    "app_name": "taipy_application",
+    "application_name": "taipy_application",
     "application_main_file": "main.py",
     "application_title": "Default title"
 }
