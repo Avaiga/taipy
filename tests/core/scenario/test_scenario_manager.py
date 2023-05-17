@@ -58,8 +58,8 @@ def test_set_and_get_scenario(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
-    output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
+    input_2 = InMemoryDataNode("foo", Scope.SCENARIO)
+    output_2 = InMemoryDataNode("foo", Scope.SCENARIO)
     task_name = "task"
     task_2 = Task(task_name, {}, print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"
@@ -388,7 +388,7 @@ def test_notification_subscribe(mocker):
                     Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
@@ -444,7 +444,7 @@ def test_notification_subscribe_multiple_params(mocker):
                     Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
@@ -490,7 +490,7 @@ def test_notification_unsubscribe(mocker):
                     Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
@@ -528,7 +528,7 @@ def test_notification_unsubscribe_multi_param():
                     Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
@@ -574,7 +574,7 @@ def test_scenario_notification_subscribe_all():
                     Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
@@ -887,14 +887,14 @@ def test_submit():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
 
-    data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
-    data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
-    data_node_3 = InMemoryDataNode("baz", Scope.PIPELINE, "s3")
-    data_node_4 = InMemoryDataNode("qux", Scope.PIPELINE, "s4")
-    data_node_5 = InMemoryDataNode("quux", Scope.PIPELINE, "s5")
-    data_node_6 = InMemoryDataNode("quuz", Scope.PIPELINE, "s6")
-    data_node_7 = InMemoryDataNode("corge", Scope.PIPELINE, "s7")
-    data_node_8 = InMemoryDataNode("fum", Scope.PIPELINE, "s8")
+    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
+    data_node_3 = InMemoryDataNode("baz", Scope.SCENARIO, "s3")
+    data_node_4 = InMemoryDataNode("qux", Scope.SCENARIO, "s4")
+    data_node_5 = InMemoryDataNode("quux", Scope.SCENARIO, "s5")
+    data_node_6 = InMemoryDataNode("quuz", Scope.SCENARIO, "s6")
+    data_node_7 = InMemoryDataNode("corge", Scope.SCENARIO, "s7")
+    data_node_8 = InMemoryDataNode("fum", Scope.SCENARIO, "s8")
     task_1 = Task(
         "grault",
         {},
@@ -1059,7 +1059,7 @@ def test_scenarios_comparison_development_mode():
                     Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
@@ -1113,7 +1113,7 @@ def test_scenarios_comparison_standalone_mode():
                     Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],

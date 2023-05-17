@@ -15,32 +15,32 @@ from taipy.config.common.scope import Scope
 
 class TestConfig:
     def test_configure_csv_data_node(self):
-        a, b, c, d, e = "foo", "path", True, Scope.PIPELINE, "numpy"
+        a, b, c, d, e = "foo", "path", True, Scope.SCENARIO, "numpy"
         Config.configure_csv_data_node(a, b, c, d, e)
         assert len(Config.data_nodes) == 2
 
     def test_configure_excel_data_node(self):
-        a, b, c, d, e, f = "foo", "path", True, "Sheet1", Scope.PIPELINE, "numpy"
+        a, b, c, d, e, f = "foo", "path", True, "Sheet1", Scope.SCENARIO, "numpy"
         Config.configure_excel_data_node(a, b, c, d, e, f)
         assert len(Config.data_nodes) == 2
 
     def test_configure_generic_data_node(self):
-        a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, tuple([]), tuple([]), "qux"
+        a, b, c, d, e, f, g = "foo", print, print, Scope.SCENARIO, tuple([]), tuple([]), "qux"
         Config.configure_generic_data_node(a, b, c, e, f, d, property=g)
         assert len(Config.data_nodes) == 2
 
     def test_configure_in_memory_data_node(self):
-        a, b, c, d = "foo", 0, Scope.PIPELINE, "qux"
+        a, b, c, d = "foo", 0, Scope.SCENARIO, "qux"
         Config.configure_in_memory_data_node(a, b, c, property=d)
         assert len(Config.data_nodes) == 2
 
     def test_configure_pickle_data_node(self):
-        a, b, c, d = "foo", 0, Scope.PIPELINE, "path"
+        a, b, c, d = "foo", 0, Scope.SCENARIO, "path"
         Config.configure_pickle_data_node(a, b, c, path=d)
         assert len(Config.data_nodes) == 2
 
     def test_configure_json_data_node(self):
-        a, dp, ec, dc, sc, p = "foo", "path", "ec", "dc", Scope.PIPELINE, "qux"
+        a, dp, ec, dc, sc, p = "foo", "path", "ec", "dc", Scope.SCENARIO, "qux"
         Config.configure_json_data_node(a, dp, ec, dc, sc, path=p)
         assert len(Config.data_nodes) == 2
 
@@ -57,7 +57,7 @@ class TestConfig:
             "driver",
             {"foo": "bar"},
             "exposed_type",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             "qux",
         )
         Config.configure_sql_table_data_node(
@@ -79,7 +79,7 @@ class TestConfig:
             "driver",
             {"foo": "bar"},
             "exposed_type",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             "qux",
         )
         Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope=scope, property=k)

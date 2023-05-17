@@ -25,7 +25,7 @@ from taipy.config.config import Config
 class TestDataRepository:
     data_node = CSVDataNode(
         "test_data_node",
-        Scope.PIPELINE,
+        Scope.SCENARIO,
         DataNodeId("my_dn_id"),
         "name",
         "owner_id",

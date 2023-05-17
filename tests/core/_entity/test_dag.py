@@ -86,12 +86,12 @@ class TestDAG:
         assert_edge_exists("t4", "s7", dag)
 
     def test_get_dag_2(self):
-        data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
-        data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
-        data_node_4 = DataNode("qux", Scope.PIPELINE, "s4")
-        data_node_5 = DataNode("quux", Scope.PIPELINE, "s5")
-        data_node_6 = DataNode("quuz", Scope.PIPELINE, "s6")
-        data_node_7 = DataNode("corge", Scope.PIPELINE, "s7")
+        data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+        data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+        data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+        data_node_5 = DataNode("quux", Scope.SCENARIO, "s5")
+        data_node_6 = DataNode("quuz", Scope.SCENARIO, "s6")
+        data_node_7 = DataNode("corge", Scope.SCENARIO, "s7")
         task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
         task_2 = Task("garply", {}, print, None, [data_node_5], TaskId("t2"))
         task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
@@ -132,13 +132,13 @@ class TestDAG:
         assert_edge_exists("t4", "s7", dag)
 
     def test_get_dag_3(self):
-        data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
-        data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
-        data_node_3 = DataNode("quuz", Scope.PIPELINE, "s3")
-        data_node_4 = DataNode("qux", Scope.PIPELINE, "s4")
-        data_node_5 = DataNode("quux", Scope.PIPELINE, "s5")
-        data_node_6 = DataNode("corge", Scope.PIPELINE, "s6")
-        data_node_7 = DataNode("hugh", Scope.PIPELINE, "s7")
+        data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+        data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+        data_node_3 = DataNode("quuz", Scope.SCENARIO, "s3")
+        data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+        data_node_5 = DataNode("quux", Scope.SCENARIO, "s5")
+        data_node_6 = DataNode("corge", Scope.SCENARIO, "s6")
+        data_node_7 = DataNode("hugh", Scope.SCENARIO, "s7")
 
         task_1 = Task("grault", {}, print, [data_node_1, data_node_2, data_node_3], [data_node_4], TaskId("t1"))
         task_2 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t2"))
@@ -189,12 +189,12 @@ class TestDAG:
         assert_edge_exists("s7", "t5", dag)
 
     def test_get_dag_4(self):
-        data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
-        data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
-        data_node_3 = DataNode("quuz", Scope.PIPELINE, "s3")
-        data_node_4 = DataNode("qux", Scope.PIPELINE, "s4")
-        data_node_5 = DataNode("quux", Scope.PIPELINE, "s5")
-        data_node_6 = DataNode("corge", Scope.PIPELINE, "s6")
+        data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+        data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+        data_node_3 = DataNode("quuz", Scope.SCENARIO, "s3")
+        data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+        data_node_5 = DataNode("quux", Scope.SCENARIO, "s5")
+        data_node_6 = DataNode("corge", Scope.SCENARIO, "s6")
 
         task_1 = Task("grault", {}, print, [data_node_1, data_node_2, data_node_3], [data_node_4], TaskId("t1"))
         task_2 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t2"))

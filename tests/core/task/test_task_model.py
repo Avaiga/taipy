@@ -103,7 +103,7 @@ def test_skippable_compatibility_with_no_output():
 
 def test_skippable_compatibility_with_one_cacheable_output():
     manager = _DataManagerFactory._build_manager()
-    manager._set(InMemoryDataNode("cfg_id", Scope.PIPELINE, id="dn_id", properties={"cacheable": True}))
+    manager._set(InMemoryDataNode("cfg_id", Scope.SCENARIO, id="dn_id", properties={"cacheable": True}))
 
     model = _TaskModel.from_dict(
         {
@@ -123,7 +123,7 @@ def test_skippable_compatibility_with_one_cacheable_output():
 
 def test_skippable_compatibility_with_one_non_cacheable_output():
     manager = _DataManagerFactory._build_manager()
-    manager._set(InMemoryDataNode("cfg_id", Scope.PIPELINE, id="dn_id", properties={"cacheable": False}))
+    manager._set(InMemoryDataNode("cfg_id", Scope.SCENARIO, id="dn_id", properties={"cacheable": False}))
     model = _TaskModel.from_dict(
         {
             "id": "id",
@@ -142,7 +142,7 @@ def test_skippable_compatibility_with_one_non_cacheable_output():
 
 def test_skippable_compatibility_with_one_non_cacheable_existing_output():
     manager = _DataManagerFactory._build_manager()
-    manager._set(InMemoryDataNode("cfg_id", Scope.PIPELINE, id="dn_id"))
+    manager._set(InMemoryDataNode("cfg_id", Scope.SCENARIO, id="dn_id"))
     model = _TaskModel.from_dict(
         {
             "id": "id",
@@ -161,8 +161,8 @@ def test_skippable_compatibility_with_one_non_cacheable_existing_output():
 
 def test_skippable_compatibility_with_all_cacheable_outputs():
     manager = _DataManagerFactory._build_manager()
-    manager._set(InMemoryDataNode("cfg_id", Scope.PIPELINE, id="dn_id", properties={"cacheable": True}))
-    manager._set(InMemoryDataNode("cfg_id_2", Scope.PIPELINE, id="dn_2_id", properties={"cacheable": True}))
+    manager._set(InMemoryDataNode("cfg_id", Scope.SCENARIO, id="dn_id", properties={"cacheable": True}))
+    manager._set(InMemoryDataNode("cfg_id_2", Scope.SCENARIO, id="dn_2_id", properties={"cacheable": True}))
     model = _TaskModel.from_dict(
         {
             "id": "id",
@@ -181,8 +181,8 @@ def test_skippable_compatibility_with_all_cacheable_outputs():
 
 def test_skippable_compatibility_with_one_cacheable_output_over_two():
     manager = _DataManagerFactory._build_manager()
-    manager._set(InMemoryDataNode("cfg_id", Scope.PIPELINE, id="dn_id", properties={"cacheable": True}))
-    manager._set(InMemoryDataNode("cfg_id_2", Scope.PIPELINE, id="dn_2_id", properties={"cacheable": False}))
+    manager._set(InMemoryDataNode("cfg_id", Scope.SCENARIO, id="dn_id", properties={"cacheable": True}))
+    manager._set(InMemoryDataNode("cfg_id_2", Scope.SCENARIO, id="dn_2_id", properties={"cacheable": False}))
 
     model = _TaskModel.from_dict(
         {
@@ -202,8 +202,8 @@ def test_skippable_compatibility_with_one_cacheable_output_over_two():
 
 def test_skippable_compatibility_with_one_cacheable_output_and_one_non_cacheable_existing():
     manager = _DataManagerFactory._build_manager()
-    manager._set(InMemoryDataNode("cfg_id", Scope.PIPELINE, id="dn_id", properties={"cacheable": True}))
-    manager._set(InMemoryDataNode("cfg_id_2", Scope.PIPELINE, id="dn_2_id"))
+    manager._set(InMemoryDataNode("cfg_id", Scope.SCENARIO, id="dn_id", properties={"cacheable": True}))
+    manager._set(InMemoryDataNode("cfg_id_2", Scope.SCENARIO, id="dn_2_id"))
 
     model = _TaskModel.from_dict(
         {

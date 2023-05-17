@@ -27,7 +27,7 @@ from taipy.config.config import Config
 
 data_node = CSVDataNode(
     "test_data_node",
-    Scope.PIPELINE,
+    Scope.SCENARIO,
     DataNodeId("dn_id"),
     "name",
     "owner_id",

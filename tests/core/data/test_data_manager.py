@@ -250,7 +250,7 @@ class TestDataManager:
     def test_set(self):
         dn = InMemoryDataNode(
             "config_id",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             id=DataNodeId("id"),
             owner_id=None,
             parent_ids={"task_id_1"},
@@ -272,9 +272,9 @@ class TestDataManager:
         assert _DataManager._get(dn.id).config_id == "foo"
 
     def test_delete(self):
-        dn_1 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_1")
-        dn_2 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_2")
-        dn_3 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_3")
+        dn_1 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_1")
+        dn_2 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_2")
+        dn_3 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_3")
         assert len(_DataManager._get_all()) == 0
         _DataManager._set(dn_1)
         _DataManager._set(dn_2)

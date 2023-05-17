@@ -55,7 +55,7 @@ def test_create_task():
         Task("foo bar", {}, print, [], [])
 
     path = "my/csv/path"
-    foo_dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
+    foo_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "has_header": True})
     task = Task("name_1", {}, print, [foo_dn], [])
     assert task.config_id == "name_1"
     assert task.id is not None

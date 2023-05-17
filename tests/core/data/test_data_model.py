@@ -19,7 +19,7 @@ class TestDataModel:
             {
                 "id": "id",
                 "config_id": "config_id",
-                "scope": repr(Scope.PIPELINE),
+                "scope": repr(Scope.SCENARIO),
                 "storage_type": "pickle",
                 "name": "name",
                 "parent_id": "owner_id",
@@ -49,7 +49,7 @@ class TestDataModel:
             {
                 "id": "id",
                 "config_id": "config_id",
-                "scope": repr(Scope.PIPELINE),
+                "scope": repr(Scope.SCENARIO),
                 "storage_type": "pickle",
                 "name": "name",
                 "parent_id": "parent_id",
@@ -80,7 +80,7 @@ class TestDataModel:
         legacy_data_model_dict = {
             "id": "id",
             "config_id": "config_id",
-            "scope": repr(Scope.PIPELINE),
+            "scope": repr(Scope.SCENARIO),
             "storage_type": "pickle",
             "name": "name",
             "parent_id": "parent_id",

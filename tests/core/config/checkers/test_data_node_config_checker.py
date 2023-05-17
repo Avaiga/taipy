@@ -257,11 +257,6 @@ class TestDataNodeConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
 
-        config._sections[DataNodeConfig.name]["default"].scope = Scope.PIPELINE
-        Config._collector = IssueCollector()
-        Config.check()
-        assert len(Config._collector.errors) == 0
-
     def test_check_required_properties(self, caplog):
         config = Config._default_config
         config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])

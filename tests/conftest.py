@@ -214,7 +214,7 @@ def scenario(cycle):
 
 @pytest.fixture(scope="function")
 def data_node():
-    return InMemoryDataNode("data_node_config_id", Scope.PIPELINE, version="random_version_number")
+    return InMemoryDataNode("data_node_config_id", Scope.SCENARIO, version="random_version_number")
 
 
 @pytest.fixture(scope="function")
@@ -222,7 +222,7 @@ def data_node_model():
     return _DataNodeModel(
         "my_dn_id",
         "test_data_node",
-        Scope.PIPELINE,
+        Scope.SCENARIO,
         "csv",
         "name",
         "owner_id",
@@ -239,7 +239,7 @@ def data_node_model():
 
 @pytest.fixture(scope="function")
 def task(data_node):
-    dn = InMemoryDataNode("dn_config_id", Scope.PIPELINE, version="random_version_number")
+    dn = InMemoryDataNode("dn_config_id", Scope.SCENARIO, version="random_version_number")
     return Task("task_config_id", {}, print, [data_node], [dn])
 
 

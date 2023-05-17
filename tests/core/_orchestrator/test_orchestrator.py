@@ -96,8 +96,8 @@ def test_submit_task():
 
 
 def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
-    dn_1 = InMemoryDataNode("dn_config_id_1", Scope.PIPELINE)
-    dn_2 = InMemoryDataNode("dn_config_id_2", Scope.PIPELINE)
+    dn_1 = InMemoryDataNode("dn_config_id_1", Scope.SCENARIO)
+    dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
     task_1 = Task("task_config_id_1", {}, print, [dn_1])
     task_2 = Task("task_config_id_2", {}, print, [dn_2])
     pipeline.tasks = [task_1, task_2]
@@ -120,9 +120,9 @@ def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
 
 
 def test_submit_scenario_generate_unique_submit_id():
-    dn_1 = InMemoryDataNode("dn_config_id_1", Scope.PIPELINE)
-    dn_2 = InMemoryDataNode("dn_config_id_2", Scope.PIPELINE)
-    dn_3 = InMemoryDataNode("dn_config_id_3", Scope.PIPELINE)
+    dn_1 = InMemoryDataNode("dn_config_id_1", Scope.SCENARIO)
+    dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
+    dn_3 = InMemoryDataNode("dn_config_id_3", Scope.SCENARIO)
     task_1 = Task("task_config_id_1", {}, print, [dn_1])
     task_2 = Task("task_config_id_2", {}, print, [dn_2])
     task_3 = Task("task_config_id_3", {}, print, [dn_3])
@@ -217,9 +217,9 @@ def test_scenario_only_submit_same_task_once():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
 
-    dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
-    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
-    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
+    dn_0 = InMemoryDataNode("dn_config_0", Scope.SCENARIO, properties={"default_data": 0})
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
@@ -247,9 +247,9 @@ def test_update_status_fail_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
 
-    dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
-    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
-    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
+    dn_0 = InMemoryDataNode("dn_config_0", Scope.SCENARIO, properties={"default_data": 0})
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
     task_0 = Task("task_config_0", {}, _error, output=[dn_0], id="task_0")
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
@@ -302,9 +302,9 @@ def test_update_status_fail_job_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _OrchestratorFactory._build_dispatcher()
 
-    dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
-    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
-    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
+    dn_0 = InMemoryDataNode("dn_config_0", Scope.SCENARIO, properties={"default_data": 0})
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
     task_0 = Task("task_config_0", {}, _error, output=[dn_0], id="task_0")
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
@@ -859,7 +859,7 @@ def test_can_exec_task_with_modified_config():
         storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property"
     )
 
-    dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
+    dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
     task_config = Config.configure_task("task_config", modified_config_task, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
@@ -901,7 +901,7 @@ def test_cannot_exec_task_that_update_config():
     """
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
-    dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
+    dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
     task_config = Config.configure_task("task_config", update_config_task, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
@@ -919,7 +919,7 @@ def test_cannot_exec_task_that_update_config():
 def test_can_execute_task_with_development_mode():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
+    dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
     task_config = Config.configure_task("task_config", mult_by_2, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
@@ -1037,11 +1037,11 @@ def test_need_to_run_skippable_task_with_validity_period_obsolete_on_output():
 def _create_task(function, nb_outputs=1):
     output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     dn_input_configs = [
-        Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21),
-        Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2),
+        Config.configure_data_node("input1", "pickle", Scope.SCENARIO, default_data=21),
+        Config.configure_data_node("input2", "pickle", Scope.SCENARIO, default_data=2),
     ]
     dn_output_configs = [
-        Config.configure_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
+        Config.configure_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.SCENARIO, default_data=0)
         for i in range(nb_outputs)
     ]
     input_dn = _DataManager._bulk_get_or_create(dn_input_configs).values()

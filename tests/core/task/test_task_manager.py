@@ -68,9 +68,9 @@ def test_do_not_recreate_existing_data_node():
 
 
 def test_assign_task_as_parent_of_datanode():
-    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
-    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
-    dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.PIPELINE)
+    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
+    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
+    dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("task_1", print, dn_config_1, dn_config_2)
     task_config_2 = Config.configure_task("task_2", print, dn_config_2, dn_config_3)
     tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_2], "scenario_id", "pipeline_id")
@@ -251,11 +251,11 @@ def test_set_and_get_task():
 
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
-    embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
-    embedded_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
-    embedded_3 = Config.configure_data_node("a_dn_3", "in_memory", scope=Scope.PIPELINE)
-    embedded_4 = Config.configure_data_node("dn_4", "in_memory", scope=Scope.PIPELINE)
-    embedded_5 = Config.configure_data_node("dn_5", "in_memory", scope=Scope.PIPELINE)
+    embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
+    embedded_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
+    embedded_3 = Config.configure_data_node("a_dn_3", "in_memory", scope=Scope.SCENARIO)
+    embedded_4 = Config.configure_data_node("dn_4", "in_memory", scope=Scope.SCENARIO)
+    embedded_5 = Config.configure_data_node("dn_5", "in_memory", scope=Scope.SCENARIO)
 
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
@@ -274,7 +274,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
 
 def test_delete_raise_exception():
     dn_input_config_1 = Config.configure_data_node(
-        "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+        "my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing"
     )
     dn_output_config_1 = Config.configure_data_node("my_output_1", "in_memory")
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
@@ -287,7 +287,7 @@ def test_delete_raise_exception():
 
 def test_hard_delete():
     dn_input_config_1 = Config.configure_data_node(
-        "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+        "my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing"
     )
     dn_output_config_1 = Config.configure_data_node("my_output_1", "in_memory")
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
@@ -301,8 +301,8 @@ def test_hard_delete():
 
 
 def test_submit_task():
-    data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
-    data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
+    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
     task_1 = Task(
         "grault",
         {},

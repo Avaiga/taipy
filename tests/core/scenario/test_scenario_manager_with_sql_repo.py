@@ -56,8 +56,8 @@ def test_set_and_get_scenario(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
-    output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
+    input_2 = InMemoryDataNode("foo", Scope.SCENARIO)
+    output_2 = InMemoryDataNode("foo", Scope.SCENARIO)
     task_name = "task"
     task_2 = Task(task_name, {}, print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"

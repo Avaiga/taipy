@@ -164,13 +164,13 @@ class TestSQLDataNode:
     def test_create(self, pandas_properties, modin_properties):
         dn = SQLDataNode(
             "foo_bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=pandas_properties,
         )
         assert isinstance(dn, SQLDataNode)
         assert dn.storage_type() == "sql"
         assert dn.config_id == "foo_bar"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.job_ids == []
@@ -181,13 +181,13 @@ class TestSQLDataNode:
 
         dn = SQLDataNode(
             "foo_bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=modin_properties,
         )
         assert isinstance(dn, SQLDataNode)
         assert dn.storage_type() == "sql"
         assert dn.config_id == "foo_bar"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.job_ids == []
@@ -211,16 +211,16 @@ class TestSQLDataNode:
     )
     def test_create_with_missing_parameters(self, properties):
         with pytest.raises(MissingRequiredProperty):
-            SQLDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
+            SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         with pytest.raises(MissingRequiredProperty):
-            SQLDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+            SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     @pytest.mark.parametrize("modin_properties", __pandas_properties)
     def test_write_query_builder(self, pandas_properties, modin_properties):
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
-        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
@@ -230,7 +230,7 @@ class TestSQLDataNode:
             )
 
         custom_properties["write_query_builder"] = single_write_query_builder
-        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
@@ -239,7 +239,7 @@ class TestSQLDataNode:
 
         custom_properties = modin_properties.copy()
         custom_properties.pop("db_extra_args")
-        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(modin_pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
@@ -249,7 +249,7 @@ class TestSQLDataNode:
             )
 
         custom_properties["write_query_builder"] = single_write_query_builder
-        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
@@ -275,7 +275,7 @@ class TestSQLDataNode:
             "sqlite_file_extension": file_extension,
         }
 
-        dn = SQLDataNode("sqlite_dn", Scope.PIPELINE, properties=properties)
+        dn = SQLDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
         data = dn.read()
 
         assert data.equals(pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]))

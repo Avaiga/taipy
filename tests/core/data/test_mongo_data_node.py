@@ -70,13 +70,13 @@ class TestMongoCollectionDataNode:
     def test_create(self, properties):
         mongo_dn = MongoCollectionDataNode(
             "foo_bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=properties,
         )
         assert isinstance(mongo_dn, MongoCollectionDataNode)
         assert mongo_dn.storage_type() == "mongo_collection"
         assert mongo_dn.config_id == "foo_bar"
-        assert mongo_dn.scope == Scope.PIPELINE
+        assert mongo_dn.scope == Scope.SCENARIO
         assert mongo_dn.id is not None
         assert mongo_dn.owner_id is None
         assert mongo_dn.job_ids == []
@@ -94,9 +94,9 @@ class TestMongoCollectionDataNode:
     )
     def test_create_with_missing_parameters(self, properties):
         with pytest.raises(MissingRequiredProperty):
-            MongoCollectionDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
+            MongoCollectionDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         with pytest.raises(MissingRequiredProperty):
-            MongoCollectionDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+            MongoCollectionDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
     @pytest.mark.parametrize("properties", __properties)
     def test_raise_error_invalid_custom_document(self, properties):
@@ -105,7 +105,7 @@ class TestMongoCollectionDataNode:
         with pytest.raises(InvalidCustomDocument):
             MongoCollectionDataNode(
                 "foo",
-                Scope.PIPELINE,
+                Scope.SCENARIO,
                 properties=custom_properties,
             )
 
@@ -126,7 +126,7 @@ class TestMongoCollectionDataNode:
 
         mongo_dn = MongoCollectionDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=properties,
         )
 
@@ -159,7 +159,7 @@ class TestMongoCollectionDataNode:
     def test_read_empty_as(self, properties):
         mongo_dn = MongoCollectionDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=properties,
         )
         data = mongo_dn.read()
@@ -180,7 +180,7 @@ class TestMongoCollectionDataNode:
         custom_properties["custom_document"] = CustomObjectWithoutArgs
         mongo_dn = MongoCollectionDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=custom_properties,
         )
         mongo_dn.write(data)
@@ -198,7 +198,7 @@ class TestMongoCollectionDataNode:
         ],
     )
     def test_write(self, properties, data, written_data):
-        mongo_dn = MongoCollectionDataNode("foo", Scope.PIPELINE, properties=properties)
+        mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
         mongo_dn.write(data)
 
         read_objects = mongo_dn.read()
@@ -219,7 +219,7 @@ class TestMongoCollectionDataNode:
     def test_write_empty_list(self, properties, data):
         mongo_dn = MongoCollectionDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=properties,
         )
         mongo_dn.write(data)
@@ -229,7 +229,7 @@ class TestMongoCollectionDataNode:
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
     def test_write_non_serializable(self, properties):
-        mongo_dn = MongoCollectionDataNode("foo", Scope.PIPELINE, properties=properties)
+        mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
         data = {"a": 1, "b": mongo_dn}
         with pytest.raises(InvalidDocument):
             mongo_dn.write(data)
@@ -239,7 +239,7 @@ class TestMongoCollectionDataNode:
     def test_write_custom_encoder(self, properties):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithCustomEncoder
-        mongo_dn = MongoCollectionDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=custom_properties)
         data = [
             CustomObjectWithCustomEncoder("1", 1, "abc", datetime.now()),
             CustomObjectWithCustomEncoder("2", 2, "def", datetime.now()),
@@ -264,7 +264,7 @@ class TestMongoCollectionDataNode:
     def test_write_custom_encoder_decoder(self, properties):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithCustomEncoderDecoder
-        mongo_dn = MongoCollectionDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=custom_properties)
         data = [
             CustomObjectWithCustomEncoderDecoder("1", 1, "abc", datetime.now()),
             CustomObjectWithCustomEncoderDecoder("2", 2, "def", datetime.now()),

@@ -107,13 +107,13 @@ def test_configure_default_csv_data_node():
         id="dn3",
         storage_type="csv",
         default_path="dn3.csv",
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
     )
     assert dn3.storage_type == "csv"
     assert dn3.default_path == "dn3.csv"
     assert dn3.has_header is False
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
 
 
 def test_configure_default_json_data_node():
@@ -207,7 +207,7 @@ def test_configure_default_parquet_data_node():
         storage_type="parquet",
         default_path="dn3.parquet",
         read_kwargs={"filter": "foo"},
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
     )
     assert dn3.storage_type == "parquet"
     assert dn3.default_path == "dn3.parquet"
@@ -216,7 +216,7 @@ def test_configure_default_parquet_data_node():
     assert dn3.read_kwargs == {"filter": "foo"}
     assert dn3.write_kwargs is None
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
 
 
 def test_configure_default_excel_data_node():
@@ -254,14 +254,14 @@ def test_configure_default_excel_data_node():
         id="dn3",
         storage_type="excel",
         default_path="dn3.xlsx",
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
     )
     assert dn3.storage_type == "excel"
     assert dn3.default_path == "dn3.xlsx"
     assert dn3.has_header is False
     assert dn3.sheet_name is None
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
 
 
 def test_configure_default_pickle_data_node():
@@ -296,13 +296,13 @@ def test_configure_default_pickle_data_node():
         id="dn3",
         storage_type="pickle",
         default_path="dn3.pkl",
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
     )
     assert dn3.storage_type == "pickle"
     assert dn3.default_path == "dn3.pkl"
     assert dn3.default_data == 1
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
 
 
 def test_configure_default_sql_table_data_node():

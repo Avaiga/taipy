@@ -247,7 +247,7 @@ def test_block_datanode_config_update_in_development_mode():
         data_node_config.storage_type = "foo"
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        data_node_config.scope = Scope.PIPELINE
+        data_node_config.scope = Scope.SCENARIO
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.cacheable = True
@@ -284,7 +284,7 @@ def test_block_datanode_config_update_in_standalone_mode():
         data_node_config.storage_type = "foo"
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        data_node_config.scope = Scope.PIPELINE
+        data_node_config.scope = Scope.SCENARIO
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.cacheable = True
