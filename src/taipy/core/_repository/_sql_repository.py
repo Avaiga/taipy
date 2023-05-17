@@ -439,7 +439,7 @@ class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
         version = self.__get_by_id(version_number)
 
         if not version or not version.is_production:
-            raise VersionIsNotProductionVersion(f"Version {version_number} is not a production version.")
+            raise VersionIsNotProductionVersion(f"Version '{version_number}' is not a production version.")
         version.is_production = False
 
         self.session.commit()

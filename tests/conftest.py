@@ -23,6 +23,7 @@ from src.taipy.core import CycleId, PipelineId, ScenarioId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core.config import (
+    CoreSection,
     DataNodeConfig,
     JobConfig,
     PipelineConfig,
@@ -316,6 +317,13 @@ def init_config():
 
     _inject_section(
         JobConfig, "job_config", JobConfig("development"), [("configure_job_executions", JobConfig._configure)], True
+    )
+    _inject_section(
+        CoreSection,
+        "core",
+        CoreSection.default_config(),
+        [("configure_core", CoreSection._configure)],
+        add_to_unconflicted_sections=True,
     )
     _inject_section(
         DataNodeConfig,

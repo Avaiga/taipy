@@ -26,6 +26,8 @@ from ._version_repository_factory import _VersionRepositoryFactory
 class _VersionManager(_Manager[_Version]):
     _ENTITY_NAME = _Version.__name__
 
+    __logger = _TaipyLogger._get_logger()
+
     __DEVELOPMENT_VERSION = ["development", "dev"]
     __LATEST_VERSION = "latest"
     __PRODUCTION_VERSION = "production"
@@ -50,14 +52,12 @@ class _VersionManager(_Manager[_Version]):
     def _get_or_create(cls, id: str, force: bool) -> _Version:
         if version := cls._get(id):
             comparator_result = Config._comparator._compare(version.config, Config._applied_config, id)
-
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
                 if force:
                     _TaipyLogger._get_logger().warning(f"Overriding version {id} ...")
                     version.config = Config._applied_config
                 else:
                     raise SystemExit("The application is stopped. Please check the error log for more information.")
-
         else:
             version = _Version(id=id, config=Config._applied_config)
 
@@ -186,3 +186,33 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _delete_entities_of_multiple_types(cls, _entity_ids):
         return NotImplementedError
+
+    @classmethod
+    def _manage_version(cls):
+        from ..taipy import clean_all_entities_by_version
+
+        if Config.core.mode == "development":
+            current_version_number = cls._get_development_version()
+            cls.__logger.info(f"Development mode: Clean all entities of version {current_version_number}")
+            clean_all_entities_by_version(current_version_number)
+            cls._set_development_version(current_version_number)
+
+        elif Config.core.mode in ["experiment", "production"]:
+            default_version_number = {
+                "experiment": str(uuid.uuid4()),
+                "production": cls._get_latest_version(),
+            }
+            version_setter = {
+                "experiment": cls._set_experiment_version,
+                "production": cls._set_production_version,
+            }
+            if Config.core.version_number:
+                current_version_number = Config.core.version_number
+            else:
+                current_version_number = default_version_number[Config.core.mode]
+            if Config.core.clean_entities:
+                if clean_all_entities_by_version(current_version_number):
+                    cls.__logger.info(f"Clean all entities of version {current_version_number}")
+            version_setter[Config.core.mode](current_version_number, Config.core.force)
+        else:
+            raise SystemExit(f"Undefined execution mode: {Config.core.mode}.")

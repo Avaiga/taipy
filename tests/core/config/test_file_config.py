@@ -31,6 +31,12 @@ repository_type = "filesystem"
 mode = "standalone"
 max_nb_of_workers = "2:int"
 
+[core]
+mode = "development"
+version_number = ""
+taipy_force = "False:bool"
+clean_entities = "False:bool"
+
 [DATA_NODE.default]
 storage_type = "in_memory"
 custom = "default_custom_prop"

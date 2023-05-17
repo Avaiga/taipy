@@ -516,13 +516,18 @@ def clean_all_entities() -> bool:
     return True
 
 
-def clean_all_entities_by_version(version_number):
-    """Delete all entities belongs to a version from the Taipy data folder."""
+def clean_all_entities_by_version(version_number) -> bool:
+    """Delete all entities belongs to a version from the Taipy data folder.
+
+    Returns:
+        True if the operation succeeded, False otherwise.
+    """
     version_manager = _VersionManagerFactory._build_manager()
     try:
         version_number = version_manager._replace_version_number(version_number)
     except NonExistingVersion as e:
-        raise SystemExit(e.message)
+        __logger.warning(f"{e.message} Abort cleaning the entities of version '{version_number}'.")
+        return False
 
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
     _ScenarioManagerFactory._build_manager()._delete_by_version(version_number)
@@ -535,6 +540,8 @@ def clean_all_entities_by_version(version_number):
         version_manager._delete_production_version(version_number)
     except VersionIsNotProductionVersion:
         pass
+
+    return True
 
 
 def export_scenario(

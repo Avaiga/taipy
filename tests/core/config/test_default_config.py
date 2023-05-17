@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+from src.taipy.core.config import CoreSection
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.pipeline_config import PipelineConfig
@@ -23,6 +23,11 @@ from taipy.config.global_app.global_app_config import GlobalAppConfig
 def _test_default_job_config(job_config: JobConfig):
     assert job_config is not None
     assert job_config.mode == JobConfig._DEFAULT_MODE
+
+
+def _test_default_core_section(core_section: CoreSection):
+    assert core_section is not None
+    assert core_section.mode == CoreSection._DEFAULT_MODE
 
 
 def _test_default_data_node_config(dn_config: DataNodeConfig):
@@ -75,12 +80,16 @@ def test_default_configuration():
     _test_default_global_app_config(GlobalAppConfig().default_config())
 
     assert default_config._unique_sections is not None
-    assert len(default_config._unique_sections) == 1
+    assert len(default_config._unique_sections) == 2
     assert len(default_config._sections) == 4
 
     _test_default_job_config(default_config._unique_sections[JobConfig.name])
     _test_default_job_config(Config.job_config)
     _test_default_job_config(JobConfig().default_config())
+
+    _test_default_core_section(default_config._unique_sections[CoreSection.name])
+    _test_default_core_section(Config.core)
+    _test_default_core_section(CoreSection().default_config())
 
     _test_default_data_node_config(default_config._sections[DataNodeConfig.name][_Config.DEFAULT_KEY])
     _test_default_data_node_config(Config.data_nodes[_Config.DEFAULT_KEY])

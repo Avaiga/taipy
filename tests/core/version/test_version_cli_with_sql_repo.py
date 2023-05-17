@@ -15,6 +15,7 @@ from unittest.mock import patch
 import pytest
 
 from src.taipy.core import Core
+from src.taipy.core._version._cli._version_cli import _VersionCLI
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.config.common.frequency import Frequency
@@ -67,29 +68,39 @@ def test_delete_version(caplog, tmp_sqlite):
     assert "2.0" in all_versions
     assert "2.1" in all_versions and "2.1" in production_version
 
-    with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--delete-version", "1.0"]):
-            Core().run()
-    assert str(e.value) == "Successfully delete version 1.0."
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--delete", "1.0"]):
+            _VersionCLI.parse_arguments()
+
+    assert "Successfully delete version 1.0." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
     assert len(all_versions) == 4
     assert "1.0" not in all_versions
 
+    # Test delete a non-existed version
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--delete", "non_exist_version"]):
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
     # Test delete production version will change the version from production to experiment
-    with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--delete-production-version", "1.1"]):
-            Core().run()
-    assert str(e.value) == "Successfully delete version 1.1 from production version list."
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "1.1"]):
+            _VersionCLI.parse_arguments()
+
+    assert "Successfully delete version 1.1 from production version list." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
     production_version = _VersionManager._get_production_versions()
     assert len(all_versions) == 4
     assert "1.1" in all_versions and "1.1" not in production_version
 
-    # Test delete a wrong production version
+    # Test delete a non-existed production version
     with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--delete-production-version", "non_exist_version"]):
-            Core().run()
-    assert str(e.value) == "Version non_exist_version is not a production version."
+        with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "non_exist_version"]):
+            _VersionCLI.parse_arguments()
+
+    assert str(e.value) == "Version 'non_exist_version' is not a production version."
 
 
 def test_list_version(capsys, tmp_sqlite):
@@ -116,11 +127,13 @@ def test_list_version(capsys, tmp_sqlite):
     with patch("sys.argv", ["prog", "--production", "2.1"]):
         Core().run()
 
-    with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--list-versions"]):
-            Core().run()
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--list"]):
+            _VersionCLI.parse_arguments()
 
-    version_list = str(e.value).strip().split("\n")
+    out, _ = capsys.readouterr()
+    version_list = str(out).strip().split("\n")
     assert len(version_list) == 6  # 5 versions with the header
     assert all(column in version_list[0] for column in ["Version number", "Mode", "Creation date"])
     assert all(column in version_list[1] for column in ["2.1", "Production", "latest"])
