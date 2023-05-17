@@ -14,13 +14,13 @@ import sys
 
 from cookiecutter.main import cookiecutter
 
-from taipy.cli import _CLI
+from taipy._cli._base_cli import _CLI
 
 
 class _ScaffoldCLI:
-    __TAIPY_PATH = pathlib.Path(__file__).parent.resolve() / "templates"
+    __TAIPY_PATH = pathlib.Path(__file__).parent.parent.resolve() / "templates"
 
-    __TEMPLATE_MAP = {
+    _TEMPLATE_MAP = {
         "default": str(__TAIPY_PATH / "taipy-default-template"),
     }
 
@@ -39,5 +39,5 @@ class _ScaffoldCLI:
         args = _CLI._parse()
 
         if getattr(args, "which", None) == "create":
-            cookiecutter(cls.__TEMPLATE_MAP[args.template])
+            cookiecutter(cls._TEMPLATE_MAP[args.template])
             sys.exit(0)
