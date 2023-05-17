@@ -24,11 +24,19 @@ class _GlobalConfigChecker(_ConfigChecker):
     def _check(self) -> IssueCollector:
         global_config = self._config._global_config
         self._check_clean_entities_enabled_type(global_config)
+        self._check_repository_type(global_config)
         return self._collector
 
+    def _check_repository_type(self, global_config: GlobalAppConfig):
+        value = global_config.repository_type
+        if value != "filesystem" and value != "sql":
+            self._warning(
+                global_config._REPOSITORY_TYPE_KEY,
+                value,
+                f"unknown value: {value} for field {global_config._REPOSITORY_TYPE_KEY}. Default value 'filesystem' is applied.")
+            
     def _check_clean_entities_enabled_type(self, global_config: GlobalAppConfig):
         value = global_config._clean_entities_enabled
-
         if isinstance(global_config._clean_entities_enabled, str):
             try:
                 value = tpl._replace_templates(
