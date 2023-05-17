@@ -179,7 +179,7 @@ class DataNode(_Entity, _Labeled):
     @_self_reload(_MANAGER_NAME)
     def scope(self):
         if self._scope == Scope.PIPELINE:
-            _warn_deprecated(f"{Scope.PIPELINE}")
+            _warn_deprecated(f"`{Scope.PIPELINE}`", suggest="other `Scope` value")
         return self._scope
 
     @scope.setter  # type: ignore

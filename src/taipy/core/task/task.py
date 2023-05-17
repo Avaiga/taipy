@@ -170,7 +170,7 @@ class Task(_Entity, _Labeled):
         data_nodes = list(self.__input.values()) + list(self.__output.values())
         scope = Scope(min(dn.scope for dn in data_nodes)) if len(data_nodes) != 0 else Scope.GLOBAL
         if scope == Scope.PIPELINE:
-            _warn_deprecated(f"{Scope.PIPELINE}")
+            _warn_deprecated(f"`{Scope.PIPELINE}`", suggest="other `Scope` value")
         return scope
 
     @property  # type: ignore

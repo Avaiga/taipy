@@ -210,7 +210,7 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
 
         if model.scope == Scope.PIPELINE:
-            _warn_deprecated(Scope.PIPELINE, Scope.SCENARIO)
+            _warn_deprecated(f"`{Scope.PIPELINE}`", suggest="other `Scope` value")
 
         return self.class_map[model.storage_type](
             config_id=model.config_id,
