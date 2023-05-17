@@ -17,7 +17,11 @@ import pytest
 from src.taipy.core import Core
 from src.taipy.core._version._cli._version_cli import _VersionCLI
 from src.taipy.core._version._version_manager import _VersionManager
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -101,7 +105,7 @@ def test_delete_version(caplog):
     assert str(e.value) == "Version 'non_exist_version' is not a production version."
 
 
-def test_list_version(capsys):
+def test_list_versions(capsys):
     with patch("sys.argv", ["prog", "--development"]):
         Core().run()
     sleep(0.05)
@@ -137,6 +141,61 @@ def test_list_version(capsys):
     assert all(column in version_list[3] for column in ["1.1", "Production"]) and "latest" not in version_list[3]
     assert all(column in version_list[4] for column in ["1.0", "Experiment"]) and "latest" not in version_list[4]
     assert "Development" in version_list[5] and "latest" not in version_list[5]
+
+
+def test_rename_version(caplog):
+    scenario_config = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+    with patch("sys.argv", ["prog", "--production", "2.0"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+    dev_ver = _VersionManager._get_development_version()
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "non_exist_version", "1.1"]):
+            # This should raise an exception since version "non_exist_version" does not exist
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "2.0"]):
+            # This should raise an exception since 2.0 already exists
+            _VersionCLI.parse_arguments()
+    assert "Version name '2.0' is already used." in caplog.text
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "1.1"]):
+            _VersionCLI.parse_arguments()
+    assert _VersionManager._get("1.0") is None
+    assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.0"].sort()
+    # All entities are assigned to the new version
+    assert len(_DataManager._get_all("1.1")) == 2
+    assert len(_TaskManager._get_all("1.1")) == 1
+    assert len(_PipelineManager._get_all("1.1")) == 1
+    assert len(_ScenarioManager._get_all("1.1")) == 1
+    assert len(_JobManager._get_all("1.1")) == 1
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "2.0", "2.1"]):
+            _VersionCLI.parse_arguments()
+    assert _VersionManager._get("2.0") is None
+    assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.1"].sort()
+    assert _VersionManager._get_production_versions() == ["2.1"]
+    # All entities are assigned to the new version
+    assert len(_DataManager._get_all("2.1")) == 2
+    assert len(_TaskManager._get_all("2.1")) == 1
+    assert len(_PipelineManager._get_all("2.1")) == 1
+    assert len(_ScenarioManager._get_all("2.1")) == 1
+    assert len(_JobManager._get_all("2.1")) == 1
 
 
 def twice(a):
