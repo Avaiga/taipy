@@ -10,12 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-
-from dateutil import parser
 from datetime import datetime
+from dateutil import parser
 
 import taipy as tp
-from taipy.core import Cycle, Scenario, DataNode
+from taipy.core import Cycle, DataNode, Scenario
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -78,7 +77,10 @@ class GuiCoreScenarioGraphAdapter(_TaipyBase):
                 if cat is None:
                     cat = dict()
                     nodes[entityType] = cat
-                cat[id] = {"name": node.entity.get_simple_label(), "type": node.entity.storage_type() if hasattr(node.entity, "storage_type") else None}
+                cat[id] = {
+                    "name": node.entity.get_simple_label(),
+                    "type": node.entity.storage_type() if hasattr(node.entity, "storage_type") else None,
+                }
             return {
                 "label": data.get_label(),
                 "nodes": nodes,
