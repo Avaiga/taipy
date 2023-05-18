@@ -83,6 +83,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         while entity := self._search(attribute, value):
             self._delete(entity.id)
 
+    def _get_by_config_id(self, config_id: str) -> List[Entity]:
+        return self._load_all([{"config_id": config_id}])
+
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
         query = self.db.query(self.model_type).filter_by(**{attribute: value})
 
