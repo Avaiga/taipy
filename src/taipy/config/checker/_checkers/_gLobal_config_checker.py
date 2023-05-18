@@ -33,7 +33,9 @@ class _GlobalConfigChecker(_ConfigChecker):
             self._warning(
                 global_config._REPOSITORY_TYPE_KEY,
                 value,
-                f"unknown value: {value} for field {global_config._REPOSITORY_TYPE_KEY}. Default value 'filesystem' is applied.")
+                f'Unknown value "{value}" for field {global_config._REPOSITORY_TYPE_KEY} of GlobalAppConfig. '
+                f'Default value "filesystem" is applied.'
+            )
             
     def _check_clean_entities_enabled_type(self, global_config: GlobalAppConfig):
         value = global_config._clean_entities_enabled
