@@ -17,7 +17,7 @@ __BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME = "TAIPY_BACKUP_FILE_PATH"
 
 
 def append_to_backup_file(new_file_path: str):
-    if preserve_file_path := os.getenv(__BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME, None):
+    if preserve_file_path := os.getenv(__BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME):
         with open(preserve_file_path, "a") as f:
             f.write(f"{new_file_path}\n")
 
