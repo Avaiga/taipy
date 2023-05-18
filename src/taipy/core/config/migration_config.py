@@ -19,7 +19,7 @@ from taipy.config.config import Config
 from taipy.config.section import Section
 from taipy.config.unique_section import UniqueSection
 
-from .._version._version_manager import _VersionManager
+from .._version._version_manager_factory import _VersionManagerFactory
 
 
 class MigrationConfig(UniqueSection):
@@ -114,7 +114,7 @@ class MigrationConfig(UniqueSection):
     def _get_migration_fcts_to_latest(cls, source_version: str, config_id: str) -> List[Callable]:
         migration_fcts_to_latest: List[Callable] = []
 
-        production_versions = _VersionManager._get_production_versions()
+        production_versions = _VersionManagerFactory._build_manager()._get_production_versions()
         try:
             start_index = production_versions.index(source_version) + 1
         except ValueError:

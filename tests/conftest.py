@@ -25,12 +25,14 @@ from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core._version._version_model import _VersionModel
 from src.taipy.core.config import (
+    CoreSection,
     DataNodeConfig,
     JobConfig,
     MigrationConfig,
     PipelineConfig,
     ScenarioConfig,
     TaskConfig,
+    _ConfigIdChecker,
     _DataNodeConfigChecker,
     _JobConfigChecker,
     _PipelineConfigChecker,
@@ -358,6 +360,13 @@ def init_config():
         JobConfig, "job_config", JobConfig("development"), [("configure_job_executions", JobConfig._configure)], True
     )
     _inject_section(
+        CoreSection,
+        "core",
+        CoreSection.default_config(),
+        [("configure_core", CoreSection._configure)],
+        add_to_unconflicted_sections=True,
+    )
+    _inject_section(
         DataNodeConfig,
         "data_nodes",
         DataNodeConfig.default_config(),
@@ -407,6 +416,7 @@ def init_config():
         [("add_migration_function", MigrationConfig._add_migration_function)],
         True,
     )
+    _Checker.add_checker(_ConfigIdChecker)
     _Checker.add_checker(_JobConfigChecker)
     _Checker.add_checker(_DataNodeConfigChecker)
     _Checker.add_checker(_TaskConfigChecker)

@@ -135,7 +135,7 @@ class _VersionFSRepository(_VersionRepository):
                 file_content = json.load(f)
 
             if version_number not in file_content[self._PRODUCTION_VERSION_KEY]:
-                raise VersionIsNotProductionVersion(f"Version {version_number} is not a production version.")
+                raise VersionIsNotProductionVersion(f"Version '{version_number}' is not a production version.")
 
             file_content[self._PRODUCTION_VERSION_KEY].remove(version_number)
 
@@ -148,4 +148,4 @@ class _VersionFSRepository(_VersionRepository):
             )
 
         except FileNotFoundError:
-            raise VersionIsNotProductionVersion(f"Version {version_number} is not a production version.")
+            raise VersionIsNotProductionVersion(f"Version '{version_number}' is not a production version.")

@@ -248,3 +248,35 @@ class TestDataManager:
         assert cycle_dn_2.id == cycle_dn_3.id
         assert cycle_dn_3.id == cycle_dn_4.id
         assert cycle_dn_4.id == cycle_dn_5.id
+
+    def test_get_tasks_by_config_id(self):
+        Config.configure_global_app(repository_type="sql")
+        init_managers()
+
+        dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.PIPELINE)
+        dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.PIPELINE)
+        dn_config_3 = Config.configure_data_node("dn_3", scope=Scope.PIPELINE)
+
+        dn_1_1 = _DataManager._create_and_set(dn_config_1, None, None)
+        dn_1_2 = _DataManager._create_and_set(dn_config_1, None, None)
+        dn_1_3 = _DataManager._create_and_set(dn_config_1, None, None)
+        assert len(_DataManager._get_all()) == 3
+
+        dn_2_1 = _DataManager._create_and_set(dn_config_2, None, None)
+        dn_2_2 = _DataManager._create_and_set(dn_config_2, None, None)
+        assert len(_DataManager._get_all()) == 5
+
+        dn_3_1 = _DataManager._create_and_set(dn_config_3, None, None)
+        assert len(_DataManager._get_all()) == 6
+
+        dn_1_datanodes = _DataManager._get_by_config_id(dn_config_1.id)
+        assert len(dn_1_datanodes) == 3
+        assert sorted([dn_1_1.id, dn_1_2.id, dn_1_3.id]) == sorted([pipeline.id for pipeline in dn_1_datanodes])
+
+        dn_2_datanodes = _DataManager._get_by_config_id(dn_config_2.id)
+        assert len(dn_2_datanodes) == 2
+        assert sorted([dn_2_1.id, dn_2_2.id]) == sorted([pipeline.id for pipeline in dn_2_datanodes])
+
+        dn_3_datanodes = _DataManager._get_by_config_id(dn_config_3.id)
+        assert len(dn_3_datanodes) == 1
+        assert sorted([dn_3_1.id]) == sorted([pipeline.id for pipeline in dn_3_datanodes])

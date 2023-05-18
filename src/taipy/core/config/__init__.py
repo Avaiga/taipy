@@ -16,6 +16,8 @@ from taipy.config.common.scope import Scope  # type: ignore
 from taipy.config.config import Config  # type: ignore
 from taipy.config.global_app.global_app_config import GlobalAppConfig  # type: ignore
 
+from ._core_section import CoreSection
+from .checkers._config_id_checker import _ConfigIdChecker
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
 from .checkers._job_config_checker import _JobConfigChecker
 from .checkers._pipeline_config_checker import _PipelineConfigChecker
@@ -86,7 +88,15 @@ _inject_section(
     [("add_migration_function", MigrationConfig._add_migration_function)],
     add_to_unconflicted_sections=True,
 )
+_inject_section(
+    CoreSection,
+    "core",
+    CoreSection.default_config(),
+    [("configure_core", CoreSection._configure)],
+    add_to_unconflicted_sections=True,
+)
 
+_Checker.add_checker(_ConfigIdChecker)
 _Checker.add_checker(_JobConfigChecker)
 _Checker.add_checker(_DataNodeConfigChecker)
 _Checker.add_checker(_TaskConfigChecker)

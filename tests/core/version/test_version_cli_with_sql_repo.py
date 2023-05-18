@@ -15,15 +15,24 @@ from unittest.mock import patch
 import pytest
 
 from src.taipy.core import Core
+from src.taipy.core._version._cli._version_cli import _VersionCLI
 from src.taipy.core._version._version_manager import _VersionManager
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
+from ...conftest import init_config
+
 
 def test_delete_version(caplog, tmp_sqlite):
     Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    _ScenarioManagerFactory._build_manager()
 
     scenario_config = config_scenario()
 
@@ -67,33 +76,44 @@ def test_delete_version(caplog, tmp_sqlite):
     assert "2.0" in all_versions
     assert "2.1" in all_versions and "2.1" in production_version
 
-    with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--delete-version", "1.0"]):
-            Core().run()
-    assert str(e.value) == "Successfully delete version 1.0."
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--delete", "1.0"]):
+            _VersionCLI.parse_arguments()
+
+    assert "Successfully delete version 1.0." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
     assert len(all_versions) == 4
     assert "1.0" not in all_versions
 
+    # Test delete a non-existed version
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--delete", "non_exist_version"]):
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
     # Test delete production version will change the version from production to experiment
-    with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--delete-production-version", "1.1"]):
-            Core().run()
-    assert str(e.value) == "Successfully delete version 1.1 from production version list."
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "1.1"]):
+            _VersionCLI.parse_arguments()
+
+    assert "Successfully delete version 1.1 from production version list." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
     production_version = _VersionManager._get_production_versions()
     assert len(all_versions) == 4
     assert "1.1" in all_versions and "1.1" not in production_version
 
-    # Test delete a wrong production version
+    # Test delete a non-existed production version
     with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--delete-production-version", "non_exist_version"]):
-            Core().run()
-    assert str(e.value) == "Version non_exist_version is not a production version."
+        with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "non_exist_version"]):
+            _VersionCLI.parse_arguments()
+
+    assert str(e.value) == "Version 'non_exist_version' is not a production version."
 
 
-def test_list_version(capsys, tmp_sqlite):
+def test_list_versions(capsys, tmp_sqlite):
     Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    _ScenarioManagerFactory._build_manager()
 
     with patch("sys.argv", ["prog", "--development"]):
         Core().run()
@@ -116,11 +136,13 @@ def test_list_version(capsys, tmp_sqlite):
     with patch("sys.argv", ["prog", "--production", "2.1"]):
         Core().run()
 
-    with pytest.raises(SystemExit) as e:
-        with patch("sys.argv", ["prog", "--list-versions"]):
-            Core().run()
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--list"]):
+            _VersionCLI.parse_arguments()
 
-    version_list = str(e.value).strip().split("\n")
+    out, _ = capsys.readouterr()
+    version_list = str(out).strip().split("\n")
     assert len(version_list) == 6  # 5 versions with the header
     assert all(column in version_list[0] for column in ["Version number", "Mode", "Creation date"])
     assert all(column in version_list[1] for column in ["2.1", "Production", "latest"])
@@ -128,6 +150,114 @@ def test_list_version(capsys, tmp_sqlite):
     assert all(column in version_list[3] for column in ["1.1", "Production"]) and "latest" not in version_list[3]
     assert all(column in version_list[4] for column in ["1.0", "Experiment"]) and "latest" not in version_list[4]
     assert "Development" in version_list[5] and "latest" not in version_list[5]
+
+
+def test_rename_version(caplog, tmp_sqlite):
+    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    _ScenarioManagerFactory._build_manager()
+
+    scenario_config = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Core().run()
+
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+    with patch("sys.argv", ["prog", "--production", "2.0"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+    dev_ver = _VersionManager._get_development_version()
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "non_exist_version", "1.1"]):
+            # This should raise an exception since version "non_exist_version" does not exist
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "2.0"]):
+            # This should raise an exception since 2.0 already exists
+            _VersionCLI.parse_arguments()
+    assert "Version name '2.0' is already used." in caplog.text
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "1.0", "1.1"]):
+            _VersionCLI.parse_arguments()
+    assert _VersionManager._get("1.0") is None
+    assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.0"].sort()
+    # All entities are assigned to the new version
+    assert len(_DataManager._get_all("1.1")) == 2
+    assert len(_TaskManager._get_all("1.1")) == 1
+    assert len(_PipelineManager._get_all("1.1")) == 1
+    assert len(_ScenarioManager._get_all("1.1")) == 1
+    assert len(_JobManager._get_all("1.1")) == 1
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--rename", "2.0", "2.1"]):
+            _VersionCLI.parse_arguments()
+    assert _VersionManager._get("2.0") is None
+    assert [version.id for version in _VersionManager._get_all()].sort() == [dev_ver, "1.1", "2.1"].sort()
+    assert _VersionManager._get_production_versions() == ["2.1"]
+    # All entities are assigned to the new version
+    assert len(_DataManager._get_all("2.1")) == 2
+    assert len(_TaskManager._get_all("2.1")) == 1
+    assert len(_PipelineManager._get_all("2.1")) == 1
+    assert len(_ScenarioManager._get_all("2.1")) == 1
+    assert len(_JobManager._get_all("2.1")) == 1
+
+
+def test_compare_version_config(caplog, tmp_sqlite):
+    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    _ScenarioManagerFactory._build_manager()
+
+    scenario_config_1 = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config_1)
+        _ScenarioManager._submit(scenario)
+
+    init_config()
+    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    _ScenarioManagerFactory._build_manager()
+
+    scenario_config_2 = config_scenario()
+    Config.configure_data_node(id="d2", storage_type="csv", default_path="bar.csv")
+
+    with patch("sys.argv", ["prog", "--experiment", "2.0"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config_2)
+        _ScenarioManager._submit(scenario)
+
+    _VersionCLI.create_parser()
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "non_exist_version", "2.0"]):
+            # This should raise an exception since version "non_exist_version" does not exist
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "non_exist_version"]):
+            # This should raise an exception since 2.0 already exists
+            _VersionCLI.parse_arguments()
+    assert "Version 'non_exist_version' does not exist." in caplog.text
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "1.0"]):
+            _VersionCLI.parse_arguments()
+    assert "There is no difference between version 1.0 Configuration and version 1.0 Configuration." in caplog.text
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "manage-versions", "--compare-config", "1.0", "2.0"]):
+            _VersionCLI.parse_arguments()
+    expected_message = """Differences between version 1.0 Configuration and version 2.0 Configuration:
+\tDATA_NODE "d2" has attribute "default_path" modified: foo.csv -> bar.csv"""
+    assert expected_message in caplog.text
 
 
 def twice(a):

@@ -1364,3 +1364,33 @@ def test_scenario_create_from_task_config():
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 2
     assert scenario_config_2.pipeline_configs[0].id == pipeline_name
+
+
+def test_get_scenarios_by_config_id():
+    scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
+    scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+    scenario_config_3 = Config.configure_scenario("s3", pipeline_configs=[])
+
+    s_1_1 = _ScenarioManager._create(scenario_config_1)
+    s_1_2 = _ScenarioManager._create(scenario_config_1)
+    s_1_3 = _ScenarioManager._create(scenario_config_1)
+    assert len(_ScenarioManager._get_all()) == 3
+
+    s_2_1 = _ScenarioManager._create(scenario_config_2)
+    s_2_2 = _ScenarioManager._create(scenario_config_2)
+    assert len(_ScenarioManager._get_all()) == 5
+
+    s_3_1 = _ScenarioManager._create(scenario_config_3)
+    assert len(_ScenarioManager._get_all()) == 6
+
+    s1_scenarios = _ScenarioManager._get_by_config_id(scenario_config_1.id)
+    assert len(s1_scenarios) == 3
+    assert sorted([s_1_1.id, s_1_2.id, s_1_3.id]) == sorted([scenario.id for scenario in s1_scenarios])
+
+    s2_scenarios = _ScenarioManager._get_by_config_id(scenario_config_2.id)
+    assert len(s2_scenarios) == 2
+    assert sorted([s_2_1.id, s_2_2.id]) == sorted([scenario.id for scenario in s2_scenarios])
+
+    s3_scenarios = _ScenarioManager._get_by_config_id(scenario_config_3.id)
+    assert len(s3_scenarios) == 1
+    assert sorted([s_3_1.id]) == sorted([scenario.id for scenario in s3_scenarios])

@@ -112,6 +112,12 @@ repository_type = "filesystem"
 mode = "development"
 max_nb_of_workers = "1:int"
 
+[core]
+mode = "development"
+version_number = ""
+taipy_force = "False:bool"
+clean_entities = "False:bool"
+
 [DATA_NODE.default]
 storage_type = "pickle"
 scope = "SCENARIO:SCOPE"
@@ -179,7 +185,7 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert actual_config_2 == expected_toml_config
 
     assert Config.unique_sections is not None
-    assert len(Config.unique_sections) == 2
+    assert len(Config.unique_sections) == 3
 
     assert Config.unique_sections[JobConfig.name].mode == "development"
     assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1
@@ -254,6 +260,12 @@ def test_read_write_json_configuration_file():
 "JOB": {
 "mode": "development",
 "max_nb_of_workers": "1:int"
+},
+"core": {
+"mode": "development",
+"version_number": "",
+"taipy_force": "False:bool",
+"clean_entities": "False:bool"
 },
 "VERSION_MIGRATION": {
 "migration_fcts": {
@@ -348,7 +360,7 @@ def test_read_write_json_configuration_file():
     assert actual_config_2 == expected_json_config
 
     assert Config.unique_sections is not None
-    assert len(Config.unique_sections) == 2
+    assert len(Config.unique_sections) == 3
 
     assert Config.unique_sections[JobConfig.name].mode == "development"
     assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1
