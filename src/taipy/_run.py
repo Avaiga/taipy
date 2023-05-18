@@ -42,11 +42,11 @@ def _run(*apps: t.List[_AppType], **kwargs) -> t.Optional[Flask]:
     core = __get_app(apps, Core)
 
     if gui and core:
-        from taipy.core._version._version_cli import _VersioningCLI
+        from taipy.core._version._cli._core_cli import _CoreCLI
         from taipy.gui._gui_cli import _GuiCLI
 
-        _VersioningCLI._create_parser()
-        _GuiCLI._create_parser()
+        _CoreCLI.create_parser()
+        _GuiCLI.create_parser()
 
     if rest or core:
         if not core:

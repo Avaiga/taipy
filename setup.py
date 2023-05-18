@@ -28,6 +28,7 @@ with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
+    "cookiecutter>=2.1.1,<2.2",
     "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
 ]
@@ -74,6 +75,11 @@ setup(
     ],
     description="A 360° open-source platform from Python pilots to production-ready web apps.",
     install_requires=requirements,
+    entry_points={
+        "console_scripts": [
+            "taipy = taipy._entrypoint:_entrypoint",
+        ]
+    },
     license="Apache License 2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
