@@ -102,4 +102,5 @@ if find_spec("taipy") and find_spec("taipy.config"):
         "gui_config",
         _GuiSection(property_list=list(default_config)),
         [("configure_gui", _GuiSection._configure)],
+        add_to_unconflicted_sections=True,
     )

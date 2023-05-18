@@ -9,15 +9,15 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config.common._argparser import _Argparser
+from taipy._cli._base_cli import _CLI
 
 
 class _GuiCLI:
     """Command-line interface of GUI."""
 
     @classmethod
-    def _create_parser(cls):
-        gui_parser = _Argparser._add_groupparser("GUI", "Optional arguments for GUI service")
+    def create_parser(cls):
+        gui_parser = _CLI._add_groupparser("Taipy GUI", "Optional arguments for Taipy GUI service")
 
         gui_parser.add_argument("-P", "--port", nargs="?", default="", const="", help="Specify server port")
         gui_parser.add_argument("-H", "--host", nargs="?", default="", const="", help="Specify server host")
@@ -40,5 +40,5 @@ class _GuiCLI:
         reloader_group.add_argument("--no-reloader", help="No reload on code changes", action="store_true")
 
     @classmethod
-    def _parse_arguments(cls):
-        return _Argparser._parse()
+    def parse_arguments(cls):
+        return _CLI._parse()

@@ -184,8 +184,8 @@ class _Config(object):
         return tz
 
     def _handle_argparse(self):
-        _GuiCLI._create_parser()
-        args = _GuiCLI._parse_arguments()
+        _GuiCLI.create_parser()
+        args = _GuiCLI.parse_arguments()
 
         config = self.config
         if args.port:
@@ -244,9 +244,6 @@ class _Config(object):
                             f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type:\n{e}"
                         )
 
-        # Load from system arguments
-        self._handle_argparse()
-
         # Taipy-config
         if find_spec("taipy") and find_spec("taipy.config"):
             from taipy.config import Config as TaipyConfig
@@ -256,6 +253,9 @@ class _Config(object):
                 self.config.update(section._to_dict())
             except KeyError:
                 _warn("taipy-config section for taipy-gui is not initialized.")
+
+        # Load from system arguments
+        self._handle_argparse()
 
     def __log_outside_reloader(self, logger, msg):
         if not is_running_from_reloader():
