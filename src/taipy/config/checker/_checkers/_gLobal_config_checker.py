@@ -18,6 +18,9 @@ from ._config_checker import _ConfigChecker
 
 
 class _GlobalConfigChecker(_ConfigChecker):
+    
+    _ACCEPTED_REPOSITORY_TYPES = ["filesystem", "sql"]
+    
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
 
@@ -29,7 +32,7 @@ class _GlobalConfigChecker(_ConfigChecker):
 
     def _check_repository_type(self, global_config: GlobalAppConfig):
         value = global_config.repository_type
-        if value != "filesystem" and value != "sql":
+        if value not in self._ACCEPTED_REPOSITORY_TYPES:
             self._warning(
                 global_config._REPOSITORY_TYPE_KEY,
                 value,
