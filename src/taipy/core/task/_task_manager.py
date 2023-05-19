@@ -54,16 +54,13 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         task_configs: List[TaskConfig],
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
-        pipeline_id: Optional[PipelineId] = None,
     ) -> List[Task]:
         data_node_configs = set()
         for task_config in task_configs:
             data_node_configs.update(task_config.input_configs)
             data_node_configs.update(task_config.output_configs)
 
-        data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(
-            data_node_configs, cycle_id, scenario_id, pipeline_id
-        )
+        data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(data_node_configs, cycle_id, scenario_id)
 
         tasks_configs_and_owner_id = []
         for task_config in task_configs:
@@ -71,9 +68,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
             scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
             owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
-            if scope == Scope.PIPELINE:
-                owner_id = pipeline_id
-            elif scope == Scope.SCENARIO:
+            if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:
                 owner_id = cycle_id

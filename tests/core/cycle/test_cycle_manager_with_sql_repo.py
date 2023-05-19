@@ -199,7 +199,7 @@ def test_get_cycle_start_date_and_end_date():
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_config_4 = Config.configure_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
@@ -231,8 +231,8 @@ def test_hard_delete_shared_entities():
 
     assert len(_ScenarioManager._get_all()) == 3
     assert len(_PipelineManager._get_all()) == 6
-    assert len(_TaskManager._get_all()) == 8
-    assert len(_DataManager._get_all()) == 9
+    assert len(_TaskManager._get_all()) == 6
+    assert len(_DataManager._get_all()) == 7
     assert len(_JobManager._get_all()) == 11
     assert len(_CycleManager._get_all()) == 1
     _CycleManager._hard_delete(scenario_1.cycle.id)

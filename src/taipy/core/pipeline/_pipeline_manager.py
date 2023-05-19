@@ -96,12 +96,10 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         pipeline_id = Pipeline._new_id(str(pipeline_config.id))
 
         task_manager = _TaskManagerFactory._build_manager()
-        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id, pipeline_id)
+        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id)
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
-        if scope == Scope.PIPELINE:
-            owner_id = pipeline_id
-        elif scope == Scope.SCENARIO:
+        if scope == Scope.SCENARIO:
             owner_id = scenario_id
         elif scope == Scope.CYCLE:
             owner_id = cycle_id

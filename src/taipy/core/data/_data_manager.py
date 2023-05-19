@@ -45,15 +45,12 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         data_node_configs: Set[DataNodeConfig],
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
-        pipeline_id: Optional[PipelineId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
             scope = dn_config.scope
             owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
-            if scope == Scope.PIPELINE:
-                owner_id = pipeline_id
-            elif scope == Scope.SCENARIO:
+            if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:
                 owner_id = cycle_id

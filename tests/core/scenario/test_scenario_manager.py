@@ -334,10 +334,10 @@ def mult_by_4(nb: int):
 def test_scenario_manager_only_creates_data_node_once():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
-    dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
-    dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
-    dn_config_4 = Config.configure_data_node("qux", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.GLOBAL, default_data=1)
+    dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.CYCLE, default_data=0)
+    dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.CYCLE, default_data=0)
+    dn_config_4 = Config.configure_data_node("qux", "in_memory", Scope.SCENARIO, default_data=0)
 
     task_mult_by_2_config = Config.configure_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
     task_mult_by_3_config = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
@@ -358,20 +358,27 @@ def test_scenario_manager_only_creates_data_node_once():
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_CycleManager._get_all()) == 0
 
-    scenario = _ScenarioManager._create(scenario_config)
+    scenario_1 = _ScenarioManager._create(scenario_config)
 
-    assert len(_DataManager._get_all()) == 5
+    assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 3
     assert len(_PipelineManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 1
-    assert scenario.foo.read() == 1
-    assert scenario.bar.read() == 0
-    assert scenario.baz.read() == 0
-    assert scenario.qux.read() == 0
-    assert scenario.by_6._get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.id
-    assert scenario.by_6._get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.id
-    assert scenario.by_4._get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
-    assert scenario.cycle.frequency == Frequency.DAILY
+    assert scenario_1.foo.read() == 1
+    assert scenario_1.bar.read() == 0
+    assert scenario_1.baz.read() == 0
+    assert scenario_1.qux.read() == 0
+    assert scenario_1.by_6._get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.id
+    assert scenario_1.by_6._get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.id
+    assert scenario_1.by_4._get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
+    assert scenario_1.cycle.frequency == Frequency.DAILY
+
+    scenario_2 = _ScenarioManager._create(scenario_config)
+
+    assert len(_DataManager._get_all()) == 5
+    assert len(_TaskManager._get_all()) == 4
+    assert len(_PipelineManager._get_all()) == 3
+    assert len(_ScenarioManager._get_all()) == 2
 
 
 def test_notification_subscribe(mocker):
@@ -660,132 +667,6 @@ def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
     assert len(_JobManager._get_all()) == 0
 
 
-def test_hard_delete_one_single_scenario_with_pipeline_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
-    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
-    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
-
-    _OrchestratorFactory._build_dispatcher()
-
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario.id)
-
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 1
-    _ScenarioManager._hard_delete(scenario.id)
-    assert len(_ScenarioManager._get_all()) == 0
-    assert len(_PipelineManager._get_all()) == 0
-    assert len(_TaskManager._get_all()) == 0
-    assert len(_DataManager._get_all()) == 0
-    assert len(_JobManager._get_all()) == 0
-
-
-def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_scenario_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
-    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
-    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
-
-    _OrchestratorFactory._build_dispatcher()
-
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario.id)
-
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 1
-    _ScenarioManager._hard_delete(scenario.id)
-    assert len(_ScenarioManager._get_all()) == 0
-    assert len(_PipelineManager._get_all()) == 0
-    assert len(_TaskManager._get_all()) == 0
-    assert len(_DataManager._get_all()) == 0
-    assert len(_JobManager._get_all()) == 0
-
-
-def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_global_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
-    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
-    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
-
-    _OrchestratorFactory._build_dispatcher()
-
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario.id)
-
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 1
-    _ScenarioManager._hard_delete(scenario.id)
-    assert len(_ScenarioManager._get_all()) == 0
-    assert len(_PipelineManager._get_all()) == 0
-    assert len(_TaskManager._get_all()) == 0
-    assert len(_DataManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 0
-
-    scenario_2 = _ScenarioManager._create(scenario_config)
-    scenario_2.submit()
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 1
-
-    _ScenarioManager._hard_delete(scenario_2.id)
-    assert len(_ScenarioManager._get_all()) == 0
-    assert len(_PipelineManager._get_all()) == 0
-    assert len(_TaskManager._get_all()) == 0
-    assert len(_DataManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 0
-
-
-def test_hard_delete_one_scenario_among_two_with_one_pipeline_and_one_global_data_nodes():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
-    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
-    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
-
-    _OrchestratorFactory._build_dispatcher()
-
-    scenario_1 = _ScenarioManager._create(scenario_config)
-    scenario_2 = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario_1.id)
-    _ScenarioManager._submit(scenario_2.id)
-
-    assert len(_ScenarioManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 2
-    assert len(_TaskManager._get_all()) == 2
-    assert len(_DataManager._get_all()) == 3
-    assert len(_JobManager._get_all()) == 2
-    _ScenarioManager._hard_delete(scenario_1.id)
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 1
-    assert _ScenarioManager._get(scenario_2.id) is not None
-
-
 def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
@@ -849,18 +730,22 @@ def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     dn_config_4 = Config.configure_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     task_config_1 = Config.configure_task("task_config_1", print, dn_config_1, dn_config_2)
     task_config_2 = Config.configure_task("task_config_2", print, dn_config_2, dn_config_3)
     task_config_3 = Config.configure_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
+    task_config_4 = Config.configure_task("task_config_4", print, dn_config_1)  # scope = cycle
     pipeline_config_1 = Config.configure_pipeline("pipeline_config_1", [task_config_1, task_config_2])
     pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_1, task_config_2])
     pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])  # scope = global
+    pipeline_config_4 = Config.configure_pipeline("pipeline_config_4", [task_config_4])  # scope = cycle
     scenario_config_1 = Config.configure_scenario(
-        "scenario_config_1", [pipeline_config_1, pipeline_config_2, pipeline_config_3]
+        "scenario_config_1",
+        [pipeline_config_1, pipeline_config_2, pipeline_config_3, pipeline_config_4],
+        frequency=Frequency.WEEKLY,
     )
 
     _OrchestratorFactory._build_dispatcher()
@@ -870,17 +755,19 @@ def test_hard_delete_shared_entities():
     scenario_1.submit()
     scenario_2.submit()
 
+    assert len(_CycleManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 5
-    assert len(_TaskManager._get_all()) == 7
-    assert len(_DataManager._get_all()) == 8
-    assert len(_JobManager._get_all()) == 10
-    _ScenarioManager._hard_delete(scenario_1.id)
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 3
-    assert len(_TaskManager._get_all()) == 4
+    assert len(_PipelineManager._get_all()) == 6
+    assert len(_TaskManager._get_all()) == 6
     assert len(_DataManager._get_all()) == 5
-    assert len(_JobManager._get_all()) == 6
+    assert len(_JobManager._get_all()) == 12
+    _ScenarioManager._hard_delete(scenario_2.id)
+    assert len(_CycleManager._get_all()) == 1
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 4
+    assert len(_TaskManager._get_all()) == 4
+    assert len(_DataManager._get_all()) == 4
+    assert len(_JobManager._get_all()) == 8
 
 
 def test_submit():
