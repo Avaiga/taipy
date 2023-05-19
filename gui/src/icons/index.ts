@@ -1,6 +1,7 @@
-export { Cycle } from "./cycle.component";
-export { Datanode } from "./datanode.component";
-export { Job } from "./job.component";
-export { Pipeline } from "./pipeline.component";
-export { Scenario } from "./scenario.component";
-export { Task } from "./task.component";
+export { Cycle } from "./cycle";
+export { Datanode } from "./datanode";
+export { Job } from "./job";
+export { Pipeline } from "./pipeline";
+export { Scenario } from "./scenario";
+export { Task } from "./task";
+export { Input } from "./input";

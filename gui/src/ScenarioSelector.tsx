@@ -260,7 +260,7 @@ const ScenarioItem = ({ scenarioId, label, isPrimary, openEditDialog }: Scenario
 
     return (
         <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-            <Grid item xs sx={treeItemLabelSx}>
+            <Grid item xs sx={treeItemLabelSx} key="label">
                 {isPrimary ? (
                     <Badge
                         badgeContent={<FlagOutlined sx={FlagSx} />}
@@ -275,7 +275,7 @@ const ScenarioItem = ({ scenarioId, label, isPrimary, openEditDialog }: Scenario
                 )}
                 {label}
             </Grid>
-            <Grid item xs="auto">
+            <Grid item xs="auto" key="button">
                 <IconButton data-id={scenarioId} onClick={openEditDialog} sx={tinyEditIconButtonSx}>
                     <EditOutlined />
                 </IconButton>
@@ -616,7 +616,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     );
 
     const onSubmit = useCallback(
-        (...values: any[]) => dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values)),
+        (...values: any[]) => {
+            dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values));
+            if (values.length > 1 && values[1]) {
+                // delete requested => unselect current node
+                onSelect(undefined, []);
+            }
+        },
         [id, module, props.onScenarioCrud]
     );
 
@@ -629,8 +635,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     }, [props.coreChanged, props.updateVars, module, dispatch]);
 
     const onSelect = useCallback(
-        (e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
-            const { cycle = false } = (e.currentTarget as HTMLElement)?.parentElement?.dataset || {};
+        (e: React.SyntheticEvent | undefined, nodeIds: Array<string> | string) => {
+            const { cycle = false } = (e?.currentTarget as HTMLElement)?.parentElement?.dataset || {};
             if (cycle) {
                 return;
             }
@@ -654,49 +660,48 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                     {scenarios
                         ? scenarios.map((item) => {
                               const [id, label, scenarios, nodeType, _] = item;
-                              return (
-                                  <>
-                                      {displayCycles ? (
-                                          nodeType === NodeType.CYCLE ? (
-                                              <TreeItem
-                                                  key={id}
-                                                  nodeId={id}
-                                                  label={
-                                                      <Box sx={treeItemLabelSx}>
-                                                          <Cycle fontSize="small" color="primary" />
-                                                          {label}
-                                                      </Box>
-                                                  }
-                                                  sx={CycleSx}
-                                                  data-cycle
-                                              >
-                                                  <ScenarioNodes
-                                                      scenarios={scenarios}
-                                                      showPrimary={showPrimaryFlag}
-                                                      openEditDialog={openEditDialog}
-                                                  />
-                                              </TreeItem>
-                                          ) : (
-                                              <ScenarioNodes
-                                                  scenarios={item as Scenario}
-                                                  showPrimary={showPrimaryFlag}
-                                                  openEditDialog={openEditDialog}
-                                              />
-                                          )
-                                      ) : nodeType === NodeType.SCENARIO ? (
-                                          <ScenarioNodes
-                                              scenarios={item as Scenario}
-                                              showPrimary={showPrimaryFlag}
-                                              openEditDialog={openEditDialog}
-                                          />
-                                      ) : (
+                              return displayCycles ? (
+                                  nodeType === NodeType.CYCLE ? (
+                                      <TreeItem
+                                          key={id}
+                                          nodeId={id}
+                                          label={
+                                              <Box sx={treeItemLabelSx}>
+                                                  <Cycle fontSize="small" color="primary" />
+                                                  {label}
+                                              </Box>
+                                          }
+                                          sx={CycleSx}
+                                          data-cycle
+                                      >
                                           <ScenarioNodes
                                               scenarios={scenarios}
                                               showPrimary={showPrimaryFlag}
                                               openEditDialog={openEditDialog}
                                           />
-                                      )}
-                                  </>
+                                      </TreeItem>
+                                  ) : (
+                                      <ScenarioNodes
+                                          key={id}
+                                          scenarios={item as Scenario}
+                                          showPrimary={showPrimaryFlag}
+                                          openEditDialog={openEditDialog}
+                                      />
+                                  )
+                              ) : nodeType === NodeType.SCENARIO ? (
+                                  <ScenarioNodes
+                                      key={id}
+                                      scenarios={item as Scenario}
+                                      showPrimary={showPrimaryFlag}
+                                      openEditDialog={openEditDialog}
+                                  />
+                              ) : (
+                                  <ScenarioNodes
+                                      key={id}
+                                      scenarios={scenarios}
+                                      showPrimary={showPrimaryFlag}
+                                      openEditDialog={openEditDialog}
+                                  />
                               );
                           })
                         : null}

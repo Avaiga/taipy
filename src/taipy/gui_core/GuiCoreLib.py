@@ -10,12 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-from urllib.parse import urlencode
+from datetime import datetime
 
 from dateutil import parser
 
 import taipy as tp
-from taipy.core import Cycle, Scenario
+from taipy.core import Cycle, DataNode, Scenario
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -48,6 +48,58 @@ class GuiCoreScenarioAdapter(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Sc"
+
+
+class GuiCoreScenarioIdAdapter(_TaipyBase):
+    def get(self):
+        data = super().get()
+        if isinstance(data, Scenario):
+            return data.id
+        return data
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScI"
+
+
+class GuiCoreScenarioGraphAdapter(_TaipyBase):
+    @staticmethod
+    def get_entity_type(node: t.Any):
+        return DataNode.__name__ if isinstance(node.entity, DataNode) else node.type
+
+    def get(self):
+        data = super().get()
+        if isinstance(data, Scenario):
+            dag = data._get_dag()
+            nodes = dict()
+            for id, node in dag.nodes.items():
+                entityType = GuiCoreScenarioGraphAdapter.get_entity_type(node)
+                cat = nodes.get(entityType)
+                if cat is None:
+                    cat = dict()
+                    nodes[entityType] = cat
+                cat[id] = {
+                    "name": node.entity.get_simple_label(),
+                    "type": node.entity.storage_type() if hasattr(node.entity, "storage_type") else None,
+                }
+            return {
+                "label": data.get_label(),
+                "nodes": nodes,
+                "links": [
+                    (
+                        GuiCoreScenarioGraphAdapter.get_entity_type(e.src),
+                        e.src.entity.id,
+                        GuiCoreScenarioGraphAdapter.get_entity_type(e.dest),
+                        e.dest.entity.id,
+                    )
+                    for e in dag.edges
+                ],
+            }
+        return None
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "ScG"
 
 
 class GuiCoreContext(CoreEventConsumerBase):
@@ -99,8 +151,7 @@ class GuiCoreContext(CoreEventConsumerBase):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) == 0:
             return
-        scenario_id = args[0]
-        state.assign(GuiCoreContext._SCENARIO_SELECTOR_ID_VAR, scenario_id)
+        state.assign(GuiCoreContext._SCENARIO_SELECTOR_ID_VAR, args[0])
 
     def get_scenario_by_id(self, id: str) -> t.Optional[Scenario]:
         if not id:
@@ -238,6 +289,17 @@ class GuiCore(ElementLibrary):
                 "error": ElementProperty(PropertyType.react, f"{{{GuiCoreContext._SCENARIO_VIZ_ERROR_VAR}}}"),
             },
         ),
+        "graph": Element(
+            "scenario",
+            {
+                "id": ElementProperty(PropertyType.string),
+                "scenario": ElementProperty(GuiCoreScenarioGraphAdapter),
+                "button_label": ElementProperty(PropertyType.dynamic_string),
+            },
+            inner_properties={
+                "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
+            },
+        ),
     }
 
     def get_name(self) -> str:
@@ -258,10 +320,9 @@ class GuiCore(ElementLibrary):
             GuiCoreContext._SCENARIO_SELECTOR_ID_VAR,
             GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
         ]:
-            state._add_attribute(var)
-            state._gui._bind_var_val(var, "")
+            state._add_attribute(var, "")
 
     def get_version(self) -> str:
         if not hasattr(self, "version"):
-            self.version = _get_version()
+            self.version = _get_version() + str(datetime.now().timestamp())
         return self.version
