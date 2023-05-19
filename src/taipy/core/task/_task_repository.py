@@ -60,6 +60,3 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)
-
-    def _get_by_config_id(self, config_id: str) -> List[Task]:
-        return self.repo._get_by_config_id(config_id)
