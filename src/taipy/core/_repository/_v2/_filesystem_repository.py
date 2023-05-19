@@ -100,15 +100,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         while entity := self._search(attribute, value):
             self._delete(entity.id)  # type: ignore
 
-    def _get_by_config_id(self, config_id: str) -> List[Entity]:
-        entities: List[Entity] = []
-        for f in filter(lambda f: config_id in f.name, self.dir_path.iterdir()):
-            with open(f, "r") as f:
-                contents = f.read()
-            if entity := self.__file_content_to_entity(contents):
-                entities.append(entity)
-        return entities
-
     def _search(self, attribute: str, value: Any, filters: List[Dict] = None) -> Optional[Entity]:
         return next(self.__search(attribute, value), None)
 

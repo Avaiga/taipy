@@ -164,3 +164,10 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         job = cls._orchestrator().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)
         _publish_event(cls._EVENT_ENTITY_TYPE, task.id, EventOperation.SUBMISSION, None)
         return job
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[Task]:
+        """
+        Get all tasks by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])

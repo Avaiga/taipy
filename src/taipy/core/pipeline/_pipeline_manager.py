@@ -191,3 +191,10 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
         return entity_ids
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[Pipeline]:
+        """
+        Get all pipelines by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])

@@ -144,3 +144,10 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         cls._clean_pickle_files(cls._get_all(version_number))
         cls._repository._delete_by(attribute="version", value=version_number)
         _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[DataNode]:
+        """
+        Get all datanodes by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])
