@@ -16,29 +16,35 @@ from src.taipy.config.common.scope import Scope
 
 def test_scope():
     # Test __ge__ method
-    assert Scope.SCENARIO >= Scope.PIPELINE
+    assert Scope.GLOBAL >= Scope.GLOBAL
+    assert Scope.GLOBAL >= Scope.CYCLE
+    assert Scope.CYCLE >= Scope.CYCLE
+    assert Scope.GLOBAL >= Scope.SCENARIO
+    assert Scope.CYCLE >= Scope.SCENARIO
     assert Scope.SCENARIO >= Scope.SCENARIO
-    assert Scope.PIPELINE >= Scope.PIPELINE
     with pytest.raises(TypeError):
-        assert Scope.PIPELINE >= "testing string"
+        assert Scope.SCENARIO >= "testing string"
 
     # Test __gt__ method
-    assert Scope.GLOBAL > Scope.PIPELINE
+    assert Scope.GLOBAL > Scope.CYCLE
     assert Scope.GLOBAL > Scope.SCENARIO
-    assert Scope.GLOBAL > Scope.PIPELINE
+    assert Scope.CYCLE > Scope.SCENARIO
     with pytest.raises(TypeError):
-        assert Scope.PIPELINE > "testing string"
+        assert Scope.SCENARIO > "testing string"
 
     # Test __le__ method
-    assert Scope.PIPELINE <= Scope.SCENARIO
-    assert Scope.PIPELINE <= Scope.PIPELINE
-    assert Scope.PIPELINE <= Scope.SCENARIO
+    assert Scope.GLOBAL <= Scope.GLOBAL
+    assert Scope.CYCLE <= Scope.GLOBAL
+    assert Scope.CYCLE <= Scope.CYCLE
+    assert Scope.SCENARIO <= Scope.GLOBAL
+    assert Scope.SCENARIO <= Scope.CYCLE
+    assert Scope.SCENARIO <= Scope.SCENARIO
     with pytest.raises(TypeError):
-        assert Scope.PIPELINE <= "testing string"
+        assert Scope.SCENARIO <= "testing string"
 
     # Test __lt__ method
-    assert Scope.PIPELINE < Scope.SCENARIO
-    assert Scope.PIPELINE < Scope.SCENARIO
     assert Scope.SCENARIO < Scope.GLOBAL
+    assert Scope.SCENARIO < Scope.GLOBAL
+    assert Scope.SCENARIO < Scope.CYCLE
     with pytest.raises(TypeError):
-        assert Scope.PIPELINE < "testing string"
+        assert Scope.SCENARIO < "testing string"
