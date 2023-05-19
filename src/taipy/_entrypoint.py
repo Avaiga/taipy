@@ -25,14 +25,15 @@ def _entrypoint():
     sys.path.append(os.path.normpath(os.getcwd()))
 
     _CLI._parser.add_argument("-v", "--version", action="store_true", help="Print the current Taipy version and exit.")
-    args = _CLI._parse()
-    if args.version:
-        print(f"Taipy {_get_version()}")
-        sys.exit(0)
 
     _VersionCLI.create_parser()
     _ScaffoldCLI.create_parser()
     _HelpCLI.create_parser()
+
+    args = _CLI._parse()
+    if args.version:
+        print(f"Taipy {_get_version()}")
+        sys.exit(0)
 
     _HelpCLI.parse_arguments()
     _VersionCLI.parse_arguments()
