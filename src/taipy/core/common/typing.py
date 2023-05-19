@@ -11,7 +11,10 @@
 
 from typing import TypeVar, Union
 
-ModelType = TypeVar("ModelType")
+from .._repository._v2._abstract_converter import _AbstractConverter
+from .._repository._v2._base_taipy_model import _BaseModel
+
+ModelType = TypeVar("ModelType", bound=_BaseModel)
 Entity = TypeVar("Entity")
-Converter = TypeVar("Converter")
+Converter = TypeVar("Converter", bound=_AbstractConverter)
 Json = Union[dict, list, str, int, float, bool, None]
