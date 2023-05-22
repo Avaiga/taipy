@@ -177,8 +177,8 @@ def test_to_scope():
     with pytest.raises(InconsistentEnvVariableError):
         _TemplateHandler._to_scope("plop")
 
-    assert Scope.PIPELINE == _TemplateHandler._to_scope("pipeline")
-    assert Scope.PIPELINE == _TemplateHandler._to_scope("PIPELINE")
+    assert Scope.GLOBAL == _TemplateHandler._to_scope("global")
+    assert Scope.GLOBAL == _TemplateHandler._to_scope("GLOBAL")
     assert Scope.SCENARIO == _TemplateHandler._to_scope("SCENARIO")
     assert Scope.CYCLE == _TemplateHandler._to_scope("cycle")
 
