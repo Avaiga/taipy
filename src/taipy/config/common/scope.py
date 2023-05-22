@@ -42,7 +42,6 @@ class Scope(_OrderedEnum):
     - `GLOBAL`
     - `CYCLE`
     - `SCENARIO`
-    - `PIPELINE`
     """
 
     GLOBAL = 3
