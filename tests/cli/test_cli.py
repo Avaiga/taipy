@@ -9,18 +9,43 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import argparse
 import re
-from argparse import Namespace
 from unittest.mock import patch
 
 import pytest
 
 from src.taipy._entrypoint import _entrypoint
+from taipy._cli._base_cli import _CLI
 
 
 def preprocess_stdout(stdout):
     stdout = stdout.replace("\n", " ").replace("\t", " ")
     return re.sub(" +", " ", stdout)
+
+
+def remove_subparser(name: str):
+    """Remove a subparser from the _CLI class."""
+    _CLI._sub_taipyparsers.pop(name, None)
+
+    if _CLI._subparser_action:
+        _CLI._subparser_action._name_parser_map.pop(name, None)
+
+        for action in _CLI._subparser_action._choices_actions:
+            if action.dest == name:
+                _CLI._subparser_action._choices_actions.remove(action)
+
+
+@pytest.fixture(autouse=True, scope="function")
+def clean_argparser():
+    _CLI._parser = argparse.ArgumentParser(conflict_handler="resolve")
+    _CLI._subparser_action = None
+    _CLI._arg_groups = {}
+    subcommands = list(_CLI._sub_taipyparsers.keys())
+    for subcommand in subcommands:
+        remove_subparser(subcommand)
+
+    yield
 
 
 def test_taipy_help(capsys):
@@ -52,8 +77,7 @@ positional arguments:
 
 
 def test_help_non_existed_command(caplog):
-    # with patch("sys.argv", ["prog", "help", "non_existed_command"]):
-    with patch("taipy._cli._base_cli._CLI._parse", return_value=Namespace(which="help", command="non_existed_command")):
+    with patch("sys.argv", ["prog", "help", "non_existed_command"]):
         with pytest.raises(SystemExit):
             _entrypoint()
         assert "non_existed_command is not a valid command." in caplog.text
@@ -62,14 +86,13 @@ def test_help_non_existed_command(caplog):
 def test_taipy_create_help(capsys):
     expected_help = "create [-h] [--template"
 
-    with patch("sys.argv", ["prog", "create", "--help"]):
+    with patch("sys.argv", ["prog", "help", "create"]):
         with pytest.raises(SystemExit):
             _entrypoint()
         out, _ = capsys.readouterr()
         assert preprocess_stdout(expected_help) in preprocess_stdout(out)
 
-    # with patch("sys.argv", ["prog", "help", "create"]):
-    with patch("taipy._cli._base_cli._CLI._parse", return_value=Namespace(which="help", command="create")):
+    with patch("sys.argv", ["prog", "create", "--help"]):
         with pytest.raises(SystemExit):
             _entrypoint()
         out, _ = capsys.readouterr()

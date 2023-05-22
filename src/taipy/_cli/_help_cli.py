@@ -31,7 +31,6 @@ class _HelpCLI:
 
         if getattr(args, "which", None) == "help":
             if args.command:
-                _CLI._sub_taipyparsers.keys()
                 if args.command in _CLI._sub_taipyparsers.keys():
                     _CLI._sub_taipyparsers.get(args.command).print_help()
                 else:

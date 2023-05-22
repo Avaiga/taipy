@@ -17,15 +17,23 @@ from taipy.core._version._cli._version_cli import _VersionCLI
 
 from ._cli._help_cli import _HelpCLI
 from ._cli._scaffold_cli import _ScaffoldCLI
+from .version import _get_version
 
 
 def _entrypoint():
     # Add the current working directory to path to execute version command on FS repo
     sys.path.append(os.path.normpath(os.getcwd()))
 
+    _CLI._parser.add_argument("-v", "--version", action="store_true", help="Print the current Taipy version and exit.")
+
     _VersionCLI.create_parser()
     _ScaffoldCLI.create_parser()
     _HelpCLI.create_parser()
+
+    args = _CLI._parse()
+    if args.version:
+        print(f"Taipy {_get_version()}")
+        sys.exit(0)
 
     _HelpCLI.parse_arguments()
     _VersionCLI.parse_arguments()
