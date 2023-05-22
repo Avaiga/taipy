@@ -37,7 +37,7 @@ def remove_from_backup_file(to_remove_file_path: str):
                     f.seek(0)
                     f.write(new_backup)
                     f.truncate()
-        except:
+        except Exception:
             pass
 
 
