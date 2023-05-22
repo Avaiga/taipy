@@ -109,7 +109,7 @@ max_nb_of_workers = "1:int"
 [core]
 mode = "development"
 version_number = ""
-taipy_force = "False:bool"
+force = "False:bool"
 clean_entities = "False:bool"
 
 [DATA_NODE.default]
@@ -251,7 +251,7 @@ def test_read_write_json_configuration_file():
 "core": {
 "mode": "development",
 "version_number": "",
-"taipy_force": "False:bool",
+"force": "False:bool",
 "clean_entities": "False:bool"
 },
 "DATA_NODE": {
