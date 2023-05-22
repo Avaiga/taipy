@@ -153,8 +153,8 @@ export const populateModel = (displayModel: DisplayModel, model: TaipyDiagramMod
     const linkModels: DefaultLinkModel[] = [];
     const nodeModels: Record<string, Record<string, DefaultNodeModel>> = {};
 
-    displayModel.nodes &&
-        Object.entries(displayModel.nodes).forEach(([nodeType, n]) => {
+    displayModel[1] &&
+        Object.entries(displayModel[1]).forEach(([nodeType, n]) => {
             Object.entries(n).forEach(([id, detail]) => {
                 const node = createNode(nodeType, id, detail.name, detail.type);
                 nodeModels[nodeType] = nodeModels[nodeType] || {};
@@ -162,8 +162,8 @@ export const populateModel = (displayModel: DisplayModel, model: TaipyDiagramMod
             });
         });
 
-    Array.isArray(displayModel.links) &&
-        displayModel.links.forEach(([nodeType, nodeId, childType, childId]) => {
+    Array.isArray(displayModel[2]) &&
+        displayModel[2].forEach(([nodeType, nodeId, childType, childId]) => {
             const parentNode = nodeModels[nodeType] && nodeModels[nodeType][nodeId];
             const childNode = nodeModels[childType] && nodeModels[childType][childId];
             if (parentNode && childNode) {

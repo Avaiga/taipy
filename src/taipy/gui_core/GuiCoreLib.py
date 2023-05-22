@@ -62,7 +62,7 @@ class GuiCoreScenarioIdAdapter(_TaipyBase):
         return _TaipyBase._HOLDER_PREFIX + "ScI"
 
 
-class GuiCoreScenarioGraphAdapter(_TaipyBase):
+class GuiCoreScenarioDagAdapter(_TaipyBase):
     @staticmethod
     def get_entity_type(node: t.Any):
         return DataNode.__name__ if isinstance(node.entity, DataNode) else node.type
@@ -73,7 +73,7 @@ class GuiCoreScenarioGraphAdapter(_TaipyBase):
             dag = data._get_dag()
             nodes = dict()
             for id, node in dag.nodes.items():
-                entityType = GuiCoreScenarioGraphAdapter.get_entity_type(node)
+                entityType = GuiCoreScenarioDagAdapter.get_entity_type(node)
                 cat = nodes.get(entityType)
                 if cat is None:
                     cat = dict()
@@ -82,19 +82,19 @@ class GuiCoreScenarioGraphAdapter(_TaipyBase):
                     "name": node.entity.get_simple_label(),
                     "type": node.entity.storage_type() if hasattr(node.entity, "storage_type") else None,
                 }
-            return {
-                "label": data.get_label(),
-                "nodes": nodes,
-                "links": [
+            return [
+                data.get_label(),
+                nodes,
+                [
                     (
-                        GuiCoreScenarioGraphAdapter.get_entity_type(e.src),
+                        GuiCoreScenarioDagAdapter.get_entity_type(e.src),
                         e.src.entity.id,
-                        GuiCoreScenarioGraphAdapter.get_entity_type(e.dest),
+                        GuiCoreScenarioDagAdapter.get_entity_type(e.dest),
                         e.dest.entity.id,
                     )
                     for e in dag.edges
                 ],
-            }
+            ]
         return None
 
     @staticmethod
@@ -289,12 +289,16 @@ class GuiCore(ElementLibrary):
                 "error": ElementProperty(PropertyType.react, f"{{{GuiCoreContext._SCENARIO_VIZ_ERROR_VAR}}}"),
             },
         ),
-        "graph": Element(
+        "dag": Element(
             "scenario",
             {
                 "id": ElementProperty(PropertyType.string),
-                "scenario": ElementProperty(GuiCoreScenarioGraphAdapter),
+                "scenario": ElementProperty(GuiCoreScenarioDagAdapter),
                 "button_label": ElementProperty(PropertyType.dynamic_string),
+                "show": ElementProperty(PropertyType.dynamic_boolean, True),
+                "with_button": ElementProperty(PropertyType.boolean, True),
+                "width": ElementProperty(PropertyType.string),
+                "height": ElementProperty(PropertyType.string),
             },
             inner_properties={
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),

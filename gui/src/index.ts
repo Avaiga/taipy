@@ -1,4 +1,4 @@
 import ScenarioSelector from "./ScenarioSelector";
-import ScenarioGraph from "./ScenarioGraph";
+import ScenarioDag from "./ScenarioDag";
 
-export { ScenarioSelector, ScenarioGraph as Graph };
+export { ScenarioSelector, ScenarioDag as Dag };
