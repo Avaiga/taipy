@@ -70,21 +70,31 @@ class State:
     """
 
     __gui_attr = "_gui"
-    __attrs = (__gui_attr, "_user_var_list")
+    __attrs = (
+        __gui_attr,
+        "_user_var_list",
+        "_context_list",
+    )
     __methods = (
         "assign",
         "refresh",
+        "_set_context",
+        "_reset_context",
         "_get_placeholder",
         "_set_placeholder",
         "_get_gui_attr",
         "_get_placeholder_attrs",
         "_add_attribute",
     )
-    __placeholder_attrs = ("_taipy_p1",)
+    __placeholder_attrs = (
+        "_taipy_p1",
+        "_current_context",
+    )
     __excluded_attrs = __attrs + __methods + __placeholder_attrs
 
-    def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
+    def __init__(self, gui: "Gui", var_list: t.Iterable[str], context_list: t.Iterable[str]) -> None:
         super().__setattr__(State.__attrs[1], list(State.__filter_var_list(var_list, State.__excluded_attrs)))
+        super().__setattr__(State.__attrs[2], list(context_list))
         super().__setattr__(State.__attrs[0], gui)
 
     @staticmethod
@@ -101,36 +111,51 @@ class State:
             raise AttributeError(f"Variable '{name}' is protected and is not accessible.")
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
-        set_context = False
-        if len(inspect.stack()) > 1:
-            current_context = _get_module_name_from_frame(
-                t.cast(FrameType, t.cast(FrameType, inspect.stack()[1].frame))
-            )
-            if current_context != gui._get_locals_context():
-                gui._set_locals_context(current_context)
-                set_context = True
+        set_context = self._set_context(gui)
         encoded_name = gui._bind_var(name)
         attr = getattr(gui._bindings(), encoded_name)
-        if set_context:
-            gui._reset_locals_context()
+        self._reset_context(gui, set_context)
         return attr
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not accessible.")
         gui: "Gui" = super().__getattribute__(State.__gui_attr)
-        set_context = False
+        set_context = self._set_context(gui)
+        encoded_name = gui._bind_var(name)
+        setattr(gui._bindings(), encoded_name, value)
+        self._reset_context(gui, set_context)
+
+    def __getitem__(self, key: str):
+        context = key if key in super().__getattribute__(State.__attrs[2]) else None
+        if context is None:
+            gui: "Gui" = super().__getattribute__(State.__gui_attr)
+            page_ctx = gui._get_page_context(key)
+            context = page_ctx if page_ctx is not None else None
+        if context is None:
+            raise RuntimeError(f"Can't resolve context '{key}' from state object")
+        self._set_placeholder(State.__placeholder_attrs[1], context)
+        return self
+
+    def _set_context(self, gui: "Gui") -> bool:
+        if (pl_ctx := self._get_placeholder(State.__placeholder_attrs[1])) is not None:
+            self._set_placeholder(State.__placeholder_attrs[1], None)
+            if pl_ctx != gui._get_locals_context():
+                gui._set_locals_context(pl_ctx)
+                return True
         if len(inspect.stack()) > 1:
             current_context = _get_module_name_from_frame(
-                t.cast(FrameType, t.cast(FrameType, inspect.stack()[1].frame))
+                t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame))
             )
             if current_context != gui._get_locals_context():
                 gui._set_locals_context(current_context)
-                set_context = True
-        encoded_name = gui._bind_var(name)
-        setattr(gui._bindings(), encoded_name, value)
-        if set_context:
-            gui._reset_locals_context()
+                return True
+        return False
+
+    def _reset_context(self, gui: "Gui", set_context: bool) -> None:
+        if not set_context:
+            return
+        gui._reset_locals_context()
 
     def _get_placeholder(self, name: str):
         if name in State.__placeholder_attrs:

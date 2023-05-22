@@ -33,8 +33,13 @@ def test_page_scopes_state_runtime(page: "Page", gui: Gui, helpers):
     def test(state):
         reset_d(state)
 
+    def test2(state):
+        state["page1"].d = 30
+
     page_md = """
 <|button|on_action=test|id=btn1|>
+
+<|button|on_action=test2|id=btn2|>
 """
     gui.add_page("page1", page1)
     gui.add_page(name=Gui._get_root_page_name(), page=page_md)
@@ -57,6 +62,7 @@ def test_page_scopes_state_runtime(page: "Page", gui: Gui, helpers):
         return
     text1 = page.query_selector("#t1")
     assert text1.inner_text() == "21"
+
     page.click("#btn1")
     try:
         page.wait_for_function("document.querySelector('#t1').innerText !== '21'")
@@ -68,3 +74,15 @@ def test_page_scopes_state_runtime(page: "Page", gui: Gui, helpers):
         return
     text1 = page.query_selector("#t1")
     assert text1.inner_text() == "20"
+
+    page.click("#btn2")
+    try:
+        page.wait_for_function("document.querySelector('#t1').innerText !== '20'")
+        function_evaluated = True
+    except Exception as e:
+        function_evaluated = False
+        logging.getLogger().debug(f"Function evaluation timeout.\n{e}")
+    if not function_evaluated:
+        return
+    text1 = page.query_selector("#t1")
+    assert text1.inner_text() == "30"

@@ -26,6 +26,8 @@ def test_state(gui: Gui):
     state = gui._Gui__state
     with gui.get_flask_app().app_context():
         assert state.a == 10
+        assert state["page1"].a == 20
+        assert state["tests.taipy.gui.gui_specific.state_asset.page1"].a == 20
         assert state._gui == gui
         with pytest.raises(Exception) as e:
             state.b
@@ -51,7 +53,10 @@ def test_state(gui: Gui):
 
         assert state._get_gui_attr() == "_gui"
 
-        assert state._get_placeholder_attrs() == ("_taipy_p1",)
+        assert state._get_placeholder_attrs() == (
+            "_taipy_p1",
+            "_current_context",
+        )
 
         assert get_a(state) == 20
 

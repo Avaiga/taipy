@@ -1241,6 +1241,21 @@ class Gui:
     def _reset_locals_context(self) -> None:
         self.__locals_context.reset_locals_context()
 
+    def _get_page_context(self, page_name: str) -> str | None:
+        if page_name not in self._config.routes:
+            return None
+        page = None
+        for p in self._config.pages:
+            if p._route == page_name:
+                page = p
+        if page is None:
+            return None
+        return (
+            (page._renderer._get_module_name() or self.__default_module_name)
+            if page._renderer is not None
+            else self.__default_module_name
+        )
+
     @staticmethod
     def _get_root_page_name():
         return Gui.__root_page_name
@@ -1936,7 +1951,7 @@ class Gui:
         self.__var_dir.set_default(self.__frame)
 
         if self.__state is None:
-            self.__state = State(self, self.__locals_context.get_all_keys())
+            self.__state = State(self, self.__locals_context.get_all_keys(), self.__locals_context.get_all_context())
 
         if _is_in_notebook():
             # to allow gui.state.x in notebook mode
