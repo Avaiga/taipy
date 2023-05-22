@@ -1,1 +1,1 @@
-export type DisplayModel = { nodes: Record<string, Record<string, {name: string, type: string}>>; links: Array<[string, string, string, string]> };
+export type DisplayModel = [string, Record<string, Record<string, {name: string, type: string}>>, Array<[string, string, string, string]>];
