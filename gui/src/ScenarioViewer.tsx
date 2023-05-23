@@ -44,7 +44,7 @@ import {
     styled,
 } from "@mui/material";
 import { FlagSx, Property, ScenarioFull } from "./utils";
-import { useDynamicProperty } from "taipy-gui";
+import { createRequestUpdateAction, useDispatch, useDynamicProperty, useModule } from "taipy-gui";
 
 interface ScenarioViewerProps {
     id?: string;
@@ -59,6 +59,7 @@ interface ScenarioViewerProps {
     scenario?: ScenarioFull;
     onSubmit: string;
     error?: string;
+    coreChanged?: Record<string, unknown>;
 }
 
 interface PipelinesRowProps {
@@ -141,6 +142,8 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
 const ScenarioViewer = (props: ScenarioViewerProps) => {
     const { id = "", scenario = ["", false, "", "", "", [], [], [], []] } = props;
 
+    const dispatch = useDispatch();
+    const module = useModule();
     const expanded = useDynamicProperty(props.expanded, props.defaultExpanded, true);
 
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -218,16 +221,16 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     }));
 
     const [
-        scenarioId,
-        primary,
-        config,
-        date,
-        scenarioLabel,
-        scenarioTags,
-        scenarioProperties,
-        pipelines,
-        authorizedTags,
-    ] = scenario;
+        scenarioId = '',
+        primary = false,
+        config = '',
+        date = '',
+        scenarioLabel = '',
+        scenarioTags = [],
+        scenarioProperties = [],
+        pipelines = [],
+        authorizedTags = [],
+    ] = scenario || [];
 
     useEffect(() => {
         setTags(scenario ? scenarioTags : []);
@@ -240,7 +243,25 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                   }))
                 : []
         );
-    }, []);
+    }, [scenario]);
+
+    // Refresh on broadcast
+    useEffect(() => {
+        if (props.coreChanged?.scenario) {
+            props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
+
+            setTags(scenario ? scenarioTags : []);
+            setProperties(
+                scenario
+                    ? scenarioProperties.map(([k, v], i) => ({
+                        id: i + "",
+                        key: k,
+                        value: v,
+                    }))
+                    : []
+            );
+        }
+    }, [props.coreChanged, props.updateVarName, module, dispatch]);
 
     return (
         <div>
