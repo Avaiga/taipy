@@ -928,13 +928,13 @@
           },
           {
             "name": "width",
-            "type": "str|int|float",
-            "default_value": "\"100vw\"",
+            "type": "str",
+            "default_value": "\"100%\"",
             "doc": "The width, in CSS units, of this table control."
           },
           {
             "name": "height",
-            "type": "str|int|float",
+            "type": "str",
             "default_value": "\"80vh\"",
             "doc": "The height, in CSS units, of this table control."
           },

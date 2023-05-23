@@ -280,7 +280,9 @@ class Gui:
         if css_file is None:
             script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
             if script_file.with_suffix(".css").exists():
-                css_file = f'{script_file.stem or "Taipy"}.css'
+                css_file = f"{script_file.stem}.css"
+            elif script_file.is_dir() and (script_file / "taipy.css").exists():
+                css_file = "taipy.css"
         self.__css_file = css_file
 
         self._config = _Config()

@@ -90,7 +90,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         onDelete = "",
         onAdd = "",
         onAction = "",
-        width = "100vw",
+        width = "100%",
         size = DEFAULT_SIZE,
     } = props;
     const pageSize = (props.pageSize === undefined || props.pageSize < 1) ? 100 : Math.round(props.pageSize);

@@ -165,8 +165,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const {
         id,
         updateVarName,
-        height = "60vh",
-        width = "100vw",
+        height = "80vh",
+        width = "100%",
         updateVars,
         selected = [],
         pageSize = 100,

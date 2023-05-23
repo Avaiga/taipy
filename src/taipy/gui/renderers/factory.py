@@ -435,7 +435,7 @@ class _Factory:
                 ("allow_all_rows", PropertyType.boolean),
                 ("show_all", PropertyType.boolean),
                 ("auto_loading", PropertyType.boolean),
-                ("width", PropertyType.string_or_number, "100vw"),
+                ("width", PropertyType.string_or_number, "100%"),
                 ("height", PropertyType.string_or_number, "80vh"),
                 ("id",),
                 ("active", PropertyType.dynamic_boolean, True),
