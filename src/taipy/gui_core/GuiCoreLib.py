@@ -26,18 +26,6 @@ from taipy.gui.utils import _TaipyBase
 from ..version import _get_version
 
 
-class GuiCoreScenarioIdAdapter(_TaipyBase):
-    def get(self):
-        data = super().get()
-        if isinstance(data, Scenario):
-            return data.id
-        return data
-
-    @staticmethod
-    def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "ScI"
-
-
 class GuiCoreScenarioAdapter(_TaipyBase):
     __INNER_PROPS = ["name"]
 
