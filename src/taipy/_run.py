@@ -37,9 +37,9 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
         **kwargs: Other parameters to provide to the services.
     """
 
-    gui = __get_app(apps, Gui)
-    rest = __get_app(apps, Rest)
-    core = __get_app(apps, Core)
+    gui = __get_app(services, Gui)
+    rest = __get_app(services, Rest)
+    core = __get_app(services, Core)
 
     if gui and core:
         from taipy.core._version._cli._core_cli import _CoreCLI
