@@ -11,6 +11,8 @@
 
 import os
 
+import pytest
+
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.excel import ExcelDataNode
@@ -26,18 +28,23 @@ def read_backup_file(path):
     return lines
 
 
-def check_and_remove_existing_backup_file(backup_file_path):
-    if os.path.exists(backup_file_path):
-        os.remove(backup_file_path)
+@pytest.fixture(scope="function", autouse=True)
+def init_backup_file():
+    os.environ["TAIPY_BACKUP_FILE_PATH"] = ".taipy_backups"
+    if os.path.exists(os.environ["TAIPY_BACKUP_FILE_PATH"]):
+        os.remove(os.environ["TAIPY_BACKUP_FILE_PATH"])
+
+    yield
+
+    if os.path.exists(".taipy_backups"):
+        os.remove(".taipy_backups")
+    del os.environ["TAIPY_BACKUP_FILE_PATH"]
+
+
+backup_file_path = ".taipy_backups"
 
 
 def test_backup_csv_files():
-
-    backup_file_path = "./tests/core/data/data_sample/.taipy_backups"
-    os.environ["TAIPY_BACKUP_FILE_PATH"] = backup_file_path
-
-    check_and_remove_existing_backup_file(backup_file_path)
-
     dn_cfg_1 = Config.configure_data_node("dn_cfg_1", "csv", path="example_1.csv")
     dn_cfg_2 = Config.configure_data_node("dn_cfg_2", "csv", path="example_2.csv")
 
@@ -83,16 +90,8 @@ def test_backup_csv_files():
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == []
 
-    os.remove(backup_file_path)
-
 
 def test_backup_excel_files():
-
-    backup_file_path = "./tests/core/data/data_sample/.taipy_backups"
-    os.environ["TAIPY_BACKUP_FILE_PATH"] = backup_file_path
-
-    check_and_remove_existing_backup_file(backup_file_path)
-
     dn_cfg_1 = Config.configure_data_node("dn_cfg_1", "excel", path="example_1.xlsx")
     dn_cfg_2 = Config.configure_data_node("dn_cfg_2", "excel", path="example_2.xlsx")
 
@@ -138,16 +137,8 @@ def test_backup_excel_files():
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == []
 
-    os.remove(backup_file_path)
-
 
 def test_backup_pickle_files():
-
-    backup_file_path = "./tests/core/data/data_sample/.taipy_backups"
-    os.environ["TAIPY_BACKUP_FILE_PATH"] = backup_file_path
-
-    check_and_remove_existing_backup_file(backup_file_path)
-
     dn_cfg_1 = Config.configure_data_node("dn_cfg_1", "pickle", path="example_1.p")
     dn_cfg_2 = Config.configure_data_node("dn_cfg_2", "pickle", path="example_2.p")
 
@@ -193,16 +184,8 @@ def test_backup_pickle_files():
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == []
 
-    os.remove(backup_file_path)
-
 
 def test_backup_json_files():
-
-    backup_file_path = "./tests/core/data/data_sample/.taipy_backups"
-    os.environ["TAIPY_BACKUP_FILE_PATH"] = backup_file_path
-
-    check_and_remove_existing_backup_file(backup_file_path)
-
     dn_cfg_1 = Config.configure_data_node("dn_cfg_1", "json", path="example_1.json")
     dn_cfg_2 = Config.configure_data_node("dn_cfg_2", "json", path="example_2.json")
 
@@ -248,16 +231,8 @@ def test_backup_json_files():
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == []
 
-    os.remove(backup_file_path)
-
 
 def test_backup_parquet_files():
-
-    backup_file_path = "./tests/core/data/data_sample/.taipy_backups"
-    os.environ["TAIPY_BACKUP_FILE_PATH"] = backup_file_path
-
-    check_and_remove_existing_backup_file(backup_file_path)
-
     dn_cfg_1 = Config.configure_data_node("dn_cfg_1", "parquet", path="example_1.parquet")
     dn_cfg_2 = Config.configure_data_node("dn_cfg_2", "parquet", path="example_2.parquet")
 
@@ -303,4 +278,7 @@ def test_backup_parquet_files():
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == []
 
-    os.remove(backup_file_path)
+
+def test_no_backup_if_no_env_var():
+    dn_cfg_1 = Config.configure_data_node("dn_cfg_1", "csv", path="example_1.csv")
+    _DataManager._create_and_set(dn_cfg_1, None, None)
