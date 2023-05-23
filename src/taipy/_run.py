@@ -25,13 +25,13 @@ _AppType = t.Union[Gui, Rest, Core]
 _AppTypeT = t.TypeVar("_AppTypeT", Gui, Rest, Core)
 
 
-def _run(*apps: t.List[_AppType], **kwargs) -> t.Optional[Flask]:
+def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
     """Run one or multiple Taipy services.
 
     A Taipy service is an instance of a class that runs code as a Web application.
 
     Parameters:
-        *args (Union[`Gui^`, `Rest^`, `Core^`]): Services to run, as separate arguments.<br/>
+        *services (Union[`Gui^`, `Rest^`, `Core^`]): Services to run, as separate arguments.<br/>
             If several services are provided, all the services run simultaneously.<br/>
             If this is empty or set to None, this method does nothing.
         **kwargs: Other parameters to provide to the services.
