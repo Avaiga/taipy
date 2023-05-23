@@ -26,7 +26,7 @@ class CoreSection(UniqueSection):
     _DEFAULT_MODE = _DEVELOPMENT_MODE
     _VERSION_NUMBER_KEY = "version_number"
     _DEFAULT_VERSION_NUMBER = ""
-    _TAIPY_FORCE_KEY = "taipy_force"
+    _TAIPY_FORCE_KEY = "force"
     _DEFAULT_TAIPY_FORCE = False
     _CLEAN_ENTITIES_KEY = "clean_entities"
     _DEFAULT_CLEAN_ENTITIES = False
