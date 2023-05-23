@@ -15,13 +15,12 @@ import { useCallback } from "react";
 import styled from "@emotion/styled";
 import { DefaultPortModel, PortWidget } from "@projectstorm/react-diagrams";
 import { DiagramEngine } from "@projectstorm/react-diagrams-core";
-import { Output } from "@mui/icons-material";
 
 import { DataNode, Task, Pipeline } from "../utils/names";
 import { Datanode as DIcon, Task as TIcon, Pipeline as PIcon, Scenario as SIcon } from "../icons";
 import { TaipyNodeModel } from "./models";
 import { IN_PORT_NAME } from "../utils/diagram";
-import { Input } from "../icons";
+import { Input, Output } from "../icons";
 
 namespace S {
     export const Node = styled.div<{ background?: string; selected?: boolean }>`
@@ -62,27 +61,23 @@ namespace S {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-        &:first-of-type {
-            margin-right: 10px;
-        }
-        &:only-child {
-            margin-right: 0px;
-        }
     `;
 
     export const OutPortLabel = styled.div`
         display: flex;
-        margin-top: 1px;
-        align-items: center;
+        align-items: end;
         justify-content: end;
-        margin-right: 5px;
+        & svg {
+            display: block;
+        }
     `;
 
     export const InPortLabel = styled.div`
         display: flex;
-        margin-top: 1px;
-        align-items: center;
-        margin-left: 5px;
+        align-items: end;
+        & svg {
+            display: block;
+        }
     `;
 }
 

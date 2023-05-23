@@ -45,7 +45,7 @@ export const initDiagram = (): [DiagramEngine, DagreEngine, TaipyDiagramModel] =
             marginx: 25,
             marginy: 25,
         },
-        includeLinks: true,
+        includeLinks: false,
     });
     const model = new TaipyDiagramModel();
     engine.setModel(model);
@@ -57,40 +57,23 @@ export const getModelLinks = (model: TaipyDiagramModel) => Object.values(model.g
 export const IN_PORT_NAME = "In";
 export const OUT_PORT_NAME = "Out";
 
-const nodePorts: Record<string, [boolean, boolean]> = {
-    [DataNode]: [true, true],
-    [Task]: [true, true],
-    [Pipeline]: [true, true],
-    [Scenario]: [false, true],
-};
-const setPorts = (node: DefaultNodeModel) => {
-    const [inPort, outPort] = nodePorts[node.getType()];
-    inPort && node.addPort(TaipyPortModel.createInPort());
-    outPort && node.addPort(TaipyPortModel.createOutPort());
-};
-
 export const getLinkId = (link: LinkModel) =>
     `LINK.${getNodeId(link.getSourcePort().getNode() as DefaultNodeModel)}.${getNodeId(
         link.getTargetPort().getNode() as DefaultNodeModel
     )}`;
 export const getNodeId = (node: DefaultNodeModel) => `${node.getType()}.${node.getID()}`;
 
-export const createNode = (nodeType: string, id: string, name: string, subtype: string, createPorts = true) => {
-    const node = new TaipyNodeModel({
+export const createNode = (nodeType: string, id: string, name: string, subtype: string, createPorts = true) =>
+    new TaipyNodeModel({
         id: id,
         type: nodeType,
         name: name,
         color: getNodeColor(nodeType),
         subtype: subtype,
     });
-    //createPorts && setPorts(node);
-    return node;
-};
 
-export const createLink = (outPort: DefaultPortModel, inPort: DefaultPortModel) => {
-    const link = outPort.link<DefaultLinkModel>(inPort);
-    return link;
-};
+export const createLink = (outPort: DefaultPortModel, inPort: DefaultPortModel) =>
+    outPort.link<DefaultLinkModel>(inPort);
 
 const isInLine = (pnt: PointModel, startLine: PointModel, endLine: PointModel) => {
     const L2 =
