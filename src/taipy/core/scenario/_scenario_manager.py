@@ -339,3 +339,10 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                 entity_ids.job_ids.add(job.id)
 
         return entity_ids
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[Scenario]:
+        """
+        Get all scenarios by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])

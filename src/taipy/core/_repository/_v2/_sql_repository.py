@@ -51,8 +51,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             return
         self.__insert_model(obj)
 
-    def _load(self, entity_id: Any) -> Optional[ModelType]:
-        if entry := self.db.query(self.model_type).filter(self.model_type.id == entity_id).first():
+    def _load(self, entity_id: Any) -> Entity:
+        if entry := self.db.query(self.model_type).filter(self.model_type.id == entity_id).first():  # type: ignore
             return self.converter._model_to_entity(entry)
         raise ModelNotFound(str(self.model_type.__name__), entity_id)
 
@@ -81,7 +81,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _delete_by(self, attribute: str, value: str):
         while entity := self._search(attribute, value):
-            self._delete(entity.id)
+            self._delete(entity.id)  # type: ignore
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
         query = self.db.query(self.model_type).filter_by(**{attribute: value})
@@ -99,7 +99,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         else:
             folder = folder_path
 
-        export_dir = folder / self.model_type.__table__.name
+        export_dir = folder / self.model_type.__table__.name  # type: ignore
         if not export_dir.exists():
             export_dir.mkdir(parents=True)
 
@@ -119,7 +119,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         return self.db.query(self.model_type).offset(skip).limit(limit).all()
 
     def _get_by_config(self, config_id: Any) -> Optional[ModelType]:
-        return self.db.query(self.model_type).filter(self.model_type.config_id == config_id).first()
+        return self.db.query(self.model_type).filter(self.model_type.config_id == config_id).first()  # type: ignore
 
     def _get_by_config_and_owner_id(
         self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
@@ -158,7 +158,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         else:
             query = self.db.query(self.model_type).filter_by(config_id=config_id).filter_by(owner_id=None)
         if versions:
-            query = query.filter(self.model_type.version.in_(versions))
+            query = query.filter(self.model_type.version.in_(versions))  # type: ignore
         return query.first()
 
     #############################
