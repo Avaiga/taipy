@@ -16,7 +16,7 @@ import { Close, ZoomIn } from "@mui/icons-material";
 import { DisplayModel } from "./utils/types";
 import { initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
 import { TaipyDiagramModel } from "./projectstorm/models";
-import { createRequestUpdateAction, useDispatch, useDynamicProperty, useModule } from "taipy-gui";
+import { createRequestUpdateAction, createSendUpdateAction, getUpdateVar, useDispatch, useDynamicProperty, useModule } from "taipy-gui";
 
 interface ScenarioDagProps {
     id?: string;
@@ -30,6 +30,7 @@ interface ScenarioDagProps {
     withButton?: boolean;
     width?: string;
     height?: string;
+    updateVars: string;
 }
 
 const boxSx = { "&>div": { height: "100%", width: "100%" }, height: "100%", width: "100%" };
@@ -111,16 +112,17 @@ const ScenarioDag = (props: ScenarioDagProps) => {
                 : undefined
             : undefined;
 
-        if (!displayModel || !props.scenario) {
-            setDisabled(true);
-            return;
-        }
-        setDisabled(false);
-        setTitle(displayModel[0]);
         // clear model
         const model = new TaipyDiagramModel();
-        // populate model
-        populateModel(displayModel, model);
+        if (!displayModel || !props.scenario) {
+            setDisabled(true);
+            setTitle("");
+        } else {
+            setDisabled(false);
+            setTitle(displayModel[0]);
+            // populate model
+            populateModel(displayModel, model);
+        }
         engine.setModel(model);
         // Block deletion
         //engine.getActionEventBus().registerAction(new DeleteItemsAction({ keyCodes: [1] }));
@@ -134,6 +136,13 @@ const ScenarioDag = (props: ScenarioDagProps) => {
             setOpen(!!show);
         }
     }, [show, withButton]);
+
+    useEffect(() => {
+        const showVar = getUpdateVar(props.updateVars, "show");
+        showVar && dispatch(
+            createSendUpdateAction(showVar, show, module)
+        );
+    }, [show, props.updateVars]);
 
     return withButton ? (
         <>

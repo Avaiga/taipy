@@ -637,12 +637,9 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const onSelect = useCallback(
         (e: React.SyntheticEvent | undefined, nodeIds: Array<string> | string) => {
             const { cycle = false } = (e?.currentTarget as HTMLElement)?.parentElement?.dataset || {};
-            if (cycle) {
-                return;
-            }
             const scenariosVar = getUpdateVar(props.updateVars, "scenarios");
             dispatch(
-                createSendUpdateAction(props.updateVarName, nodeIds, module, props.onChange, propagate, scenariosVar)
+                createSendUpdateAction(props.updateVarName, cycle ? undefined : nodeIds, module, props.onChange, propagate, scenariosVar)
             );
         },
         [props.updateVarName, props.updateVars, props.onChange, propagate, module]
