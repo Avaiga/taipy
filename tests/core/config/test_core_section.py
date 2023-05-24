@@ -41,7 +41,7 @@ def test_core_section():
 [core]
 mode = "production"
 version_number = "test_num_2"
-taipy_force = "true:bool"
+force = "true:bool"
 clean_entities = "false:bool"
         """
     )

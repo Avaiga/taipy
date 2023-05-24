@@ -16,6 +16,7 @@ from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
+from .._backup._backup import append_to_backup_file, remove_from_backup_file
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
 from ..config.data_node_config import DataNodeConfig
@@ -25,6 +26,7 @@ from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
 from ._data_fs_repository_v2 import _DataFSRepository
+from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId
 from .pickle import PickleDataNode
@@ -74,6 +76,8 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     ) -> DataNode:
         data_node = cls.__create(data_node_config, owner_id, parent_ids)
         cls._set(data_node)
+        if isinstance(data_node, _AbstractFileDataNode):
+            append_to_backup_file(new_file_path=data_node._path)
         _publish_event(cls._EVENT_ENTITY_TYPE, data_node.id, EventOperation.CREATION, None)
         return data_node
 
@@ -112,37 +116,59 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId]):
-        data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
+    def _clean_pickle_file(cls, data_node: DataNode):
         if not isinstance(data_node, PickleDataNode):
             return
         if data_node.is_generated and os.path.exists(data_node.path):
             os.remove(data_node.path)
 
     @classmethod
-    def _clean_pickle_files(cls, data_nodes: Iterable[Union[DataNode, DataNodeId]]):
+    def _clean_pickle_files(cls, data_nodes: Iterable[DataNode]):
         for data_node in data_nodes:
             cls._clean_pickle_file(data_node)
 
     @classmethod
+    def _remove_dn_file_path_in_backup_file(cls, data_node: DataNode):
+        if isinstance(data_node, _AbstractFileDataNode):
+            remove_from_backup_file(to_remove_file_path=data_node.path)
+
+    @classmethod
+    def _remove_dn_file_paths_in_backup_file(cls, data_nodes: Iterable[DataNode]):
+        for data_node in data_nodes:
+            if isinstance(data_node, _AbstractFileDataNode):
+                remove_from_backup_file(to_remove_file_path=data_node.path)
+
+    @classmethod
     def _delete(cls, data_node_id: DataNodeId):
-        cls._clean_pickle_file(data_node_id)
+        data_node = cls._get(data_node_id, None)
         super()._delete(data_node_id)
+        if data_node:
+            cls._clean_pickle_file(data_node)
+            cls._remove_dn_file_path_in_backup_file(data_node)
 
     @classmethod
     def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
-        cls._clean_pickle_files(data_node_ids)
+        data_nodes = []
+        for data_node_id in data_node_ids:
+            if data_node := cls._get(data_node_id):
+                data_nodes.append(data_node)
         super()._delete_many(data_node_ids)
+        cls._clean_pickle_files(data_nodes)
+        cls._remove_dn_file_paths_in_backup_file(data_nodes)
 
     @classmethod
     def _delete_all(cls):
-        cls._clean_pickle_files(cls._get_all())
+        data_nodes = cls._get_all()
         super()._delete_all()
+        cls._clean_pickle_files(data_nodes)
+        cls._remove_dn_file_paths_in_backup_file(data_nodes)
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
-        cls._clean_pickle_files(cls._get_all(version_number))
+        data_nodes = cls._get_all(version_number)
         cls._repository._delete_by(attribute="version", value=version_number)
+        cls._clean_pickle_files(data_nodes)
+        cls._remove_dn_file_paths_in_backup_file(data_nodes)
         _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
 
     @classmethod

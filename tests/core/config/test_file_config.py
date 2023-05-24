@@ -34,7 +34,7 @@ max_nb_of_workers = "2:int"
 [core]
 mode = "development"
 version_number = ""
-taipy_force = "False:bool"
+force = "False:bool"
 clean_entities = "False:bool"
 
 [VERSION_MIGRATION.migration_fcts]
