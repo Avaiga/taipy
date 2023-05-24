@@ -227,9 +227,9 @@ class TestDataManager:
         Config.configure_global_app(repository_type="sql")
         init_managers()
 
-        dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.PIPELINE)
-        dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.PIPELINE)
-        dn_config_3 = Config.configure_data_node("dn_3", scope=Scope.PIPELINE)
+        dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)
+        dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.SCENARIO)
+        dn_config_3 = Config.configure_data_node("dn_3", scope=Scope.SCENARIO)
 
         dn_1_1 = _DataManager._create_and_set(dn_config_1, None, None)
         dn_1_2 = _DataManager._create_and_set(dn_config_1, None, None)

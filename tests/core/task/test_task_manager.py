@@ -368,21 +368,21 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
 
 
 def test_get_tasks_by_config_id():
-    dn_config = Config.configure_data_node("dn", scope=Scope.PIPELINE)
+    dn_config = Config.configure_data_node("dn", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("t1", print, dn_config)
     task_config_2 = Config.configure_task("t2", print, dn_config)
     task_config_3 = Config.configure_task("t3", print, dn_config)
 
-    t_1_1 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p1")[0]
-    t_1_2 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p2")[0]
-    t_1_3 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p3")[0]
+    t_1_1 = _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_1")[0]
+    t_1_2 = _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_2")[0]
+    t_1_3 = _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_3")[0]
     assert len(_TaskManager._get_all()) == 3
 
-    t_2_1 = _TaskManager._bulk_get_or_create([task_config_2], pipeline_id="p4")[0]
-    t_2_2 = _TaskManager._bulk_get_or_create([task_config_2], pipeline_id="p5")[0]
+    t_2_1 = _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_4")[0]
+    t_2_2 = _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_5")[0]
     assert len(_TaskManager._get_all()) == 5
 
-    t_3_1 = _TaskManager._bulk_get_or_create([task_config_3], pipeline_id="p6")[0]
+    t_3_1 = _TaskManager._bulk_get_or_create([task_config_3], scenario_id="scenario_6")[0]
     assert len(_TaskManager._get_all()) == 6
 
     t1_tasks = _TaskManager._get_by_config_id(task_config_1.id)

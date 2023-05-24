@@ -467,22 +467,22 @@ def test_get_pipelines_by_config_id():
 
     init_managers()
 
-    dn_config = Config.configure_data_node("dn", scope=Scope.PIPELINE)
+    dn_config = Config.configure_data_node("dn", scope=Scope.SCENARIO)
     task_config = Config.configure_task("t", print, dn_config)
     pipeline_config_1 = Config.configure_pipeline("p1", task_configs=task_config)
     pipeline_config_2 = Config.configure_pipeline("p2", task_configs=task_config)
     pipeline_config_3 = Config.configure_pipeline("p3", task_configs=task_config)
 
-    p_1_1 = _PipelineManager._get_or_create(pipeline_config_1)
-    p_1_2 = _PipelineManager._get_or_create(pipeline_config_1)
-    p_1_3 = _PipelineManager._get_or_create(pipeline_config_1)
+    p_1_1 = _PipelineManager._get_or_create(pipeline_config_1, scenario_id="scenario_1")
+    p_1_2 = _PipelineManager._get_or_create(pipeline_config_1, scenario_id="scenario_2")
+    p_1_3 = _PipelineManager._get_or_create(pipeline_config_1, scenario_id="scenario_3")
     assert len(_PipelineManager._get_all()) == 3
 
-    p_2_1 = _PipelineManager._get_or_create(pipeline_config_2)
-    p_2_2 = _PipelineManager._get_or_create(pipeline_config_2)
+    p_2_1 = _PipelineManager._get_or_create(pipeline_config_2, scenario_id="scenario_4")
+    p_2_2 = _PipelineManager._get_or_create(pipeline_config_2, scenario_id="scenario_5")
     assert len(_PipelineManager._get_all()) == 5
 
-    p_3_1 = _PipelineManager._get_or_create(pipeline_config_3)
+    p_3_1 = _PipelineManager._get_or_create(pipeline_config_3, scenario_id="scenario_6")
     assert len(_PipelineManager._get_all()) == 6
 
     p1_pipelines = _PipelineManager._get_by_config_id(pipeline_config_1.id)
