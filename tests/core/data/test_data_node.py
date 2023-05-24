@@ -569,6 +569,14 @@ class TestDataNode:
                 dn.unlock_edition(datetime.now(), None)
                 unlock_edit.assert_called_once_with()
 
+    def test_scope_pipeline_deprecated(self):
+        dn = FakeDataNode("foo")
+        _DataManager._set(dn)
+        with pytest.warns(DeprecationWarning):
+            _DataManager._get(dn)
+        with pytest.warns(DeprecationWarning):
+            dn.scope
+
     def test_lock_edition_deprecated(self):
         dn = FakeDataNode("foo")
 

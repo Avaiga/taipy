@@ -246,16 +246,19 @@ class TestDataNodeConfigChecker:
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[DataNodeConfig.name]["default"].scope = Scope.CYCLE
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
         config._sections[DataNodeConfig.name]["default"].scope = Scope.SCENARIO
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
     def test_check_required_properties(self, caplog):
         config = Config._default_config
