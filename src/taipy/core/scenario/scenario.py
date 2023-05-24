@@ -233,7 +233,6 @@ class Scenario(_Entity, _Submittable, _Labeled):
         return self._properties.get("name")
 
     @name.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
     def name(self, val):
         self._properties["name"] = val
 
