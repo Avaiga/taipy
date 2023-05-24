@@ -14,9 +14,12 @@ from datetime import datetime, timedelta
 from pydoc import locate
 from typing import Any, Dict, Iterable, List, Optional, Union
 
+from taipy.config.common.scope import Scope
+
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _load_fct
+from ..common._warnings import _warn_deprecated
 from ._data_model import _DataNodeModel
 from .data_node import DataNode
 from .generic import GenericDataNode
@@ -205,6 +208,10 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
+
+        if model.scope == Scope.PIPELINE:
+            _warn_deprecated(f"`{Scope.PIPELINE}`", suggest="other `Scope` value")
+
         return self.class_map[model.storage_type](
             config_id=model.config_id,
             scope=model.scope,
