@@ -108,6 +108,17 @@ def test_parent_id_deprecated():
     assert task.owner_id == "owner_id_2"
 
 
+def test_scope_pipeline_deprecated():
+    dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": "path.csv", "has_header": True})
+    task = Task("name_1", {}, print, [dn], [])
+    _DataManager._set(dn)
+    _TaskManager._set(task)
+    with pytest.warns(DeprecationWarning):
+        _TaskManager._get(task)
+    with pytest.warns(DeprecationWarning):
+        task.scope
+
+
 def test_can_not_change_task_output(output):
     task = Task("name_1", {}, print, output=output)
 
