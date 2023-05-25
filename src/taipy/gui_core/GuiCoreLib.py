@@ -352,6 +352,15 @@ class GuiCore(ElementLibrary):
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
             },
         ),
+        "data_node_explorer": Element(
+            "value",
+            {
+                "id": ElementProperty(PropertyType.string),
+            },
+            inner_properties={
+                "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
+            },
+        ),
     }
 
     def get_name(self) -> str:
