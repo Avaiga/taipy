@@ -246,7 +246,11 @@ def test_publish_event():
     dn_config = Config.configure_data_node("dn_config")
     task_config = Config.configure_task("task_config", print, [dn_config])
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
-    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config], frequency=Frequency.DAILY)
+    scenario_config = Config.configure_scenario(
+        "scenario_config", [pipeline_config], frequency=Frequency.DAILY, flag="test"
+    )
+
+    # Test CREATION Event
 
     scenario = tp.create_scenario(scenario_config)
     cycle = scenario.cycle
@@ -279,17 +283,34 @@ def test_publish_event():
         ]
     )
 
+    # Test UPDATE Event
+
     scenario.is_primary = True
     assert registration_queue.qsize() == 1
 
-    cycle.name = "new cycle name"
+    scenario.properties["flag"] = "production"
     assert registration_queue.qsize() == 2
 
-    task.skippable = True
+    scenario.name = "my_scenario"
     assert registration_queue.qsize() == 3
 
-    dn.name = "new datanode name"
+    cycle.name = "new cycle name"
     assert registration_queue.qsize() == 4
+
+    cycle.properties["valid"] = True
+    assert registration_queue.qsize() == 5
+
+    task.skippable = True
+    assert registration_queue.qsize() == 6
+
+    task.properties["number_of_run"] = 2
+    assert registration_queue.qsize() == 7
+
+    dn.name = "new datanode name"
+    assert registration_queue.qsize() == 8
+
+    dn.properties["sorted"] = True
+    assert registration_queue.qsize() == 9
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -297,12 +318,37 @@ def test_publish_event():
 
     expected_event_types = [
         EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.CYCLE,
         EventEntityType.CYCLE,
         EventEntityType.TASK,
+        EventEntityType.TASK,
+        EventEntityType.DATA_NODE,
         EventEntityType.DATA_NODE,
     ]
-    expected_attribute_names = ["is_primary", "name", "skippable", "name"]
-    expected_event_entity_id = [scenario.id, cycle.id, task.id, dn.id]
+    expected_attribute_names = [
+        "is_primary",
+        "flag",
+        "name",
+        "name",
+        "valid",
+        "skippable",
+        "number_of_run",
+        "name",
+        "sorted",
+    ]
+    expected_event_entity_id = [
+        scenario.id,
+        scenario.id,
+        scenario.id,
+        cycle.id,
+        cycle.id,
+        task.id,
+        task.id,
+        dn.id,
+        dn.id,
+    ]
 
     assert all(
         [
@@ -313,6 +359,8 @@ def test_publish_event():
             for i, event in enumerate(published_events)
         ]
     )
+
+    # Test SUBMISSION Event
 
     job = scenario.submit()[0]
 
@@ -334,6 +382,8 @@ def test_publish_event():
             for i, event in enumerate(published_events)
         ]
     )
+
+    # Test DELETION Event
 
     tp.delete(scenario.id)
     assert registration_queue.qsize() == 6
