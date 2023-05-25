@@ -212,10 +212,10 @@ def test_force_deleting_unfinished_job():
 
 
 def _create_task(function, nb_outputs=1, name=None):
-    input1_dn_config = Config.configure_data_node("input1", scope=Scope.PIPELINE, default_data=21)
-    input2_dn_config = Config.configure_data_node("input2", scope=Scope.PIPELINE, default_data=2)
+    input1_dn_config = Config.configure_data_node("input1", scope=Scope.SCENARIO, default_data=21)
+    input2_dn_config = Config.configure_data_node("input2", scope=Scope.SCENARIO, default_data=2)
     output_dn_configs = [
-        Config.configure_data_node(f"output{i}", scope=Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
+        Config.configure_data_node(f"output{i}", scope=Scope.SCENARIO, default_data=0) for i in range(nb_outputs)
     ]
     _DataManager._bulk_get_or_create({cfg for cfg in output_dn_configs})
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))

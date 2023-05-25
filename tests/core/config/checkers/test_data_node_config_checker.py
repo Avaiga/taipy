@@ -260,14 +260,6 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 0
 
-        config._sections[DataNodeConfig.name]["default"].scope = Scope.PIPELINE
-        Config._collector = IssueCollector()
-        Config.check()
-        assert len(Config._collector.errors) == 0
-        assert len(Config._collector.warnings) == 1
-        expected_warning_message = "`Scope.PIPELINE` is deprecated. Please use other `Scope` value instead."
-        assert expected_warning_message in caplog.text
-
     def test_check_required_properties(self, caplog):
         config = Config._default_config
         config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])

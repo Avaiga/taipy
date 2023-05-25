@@ -45,7 +45,7 @@ custom = "default_custom_prop"
 
 [DATA_NODE.dn1]
 storage_type = "pickle"
-scope = "PIPELINE:SCOPE"
+scope = "SCENARIO:SCOPE"
 custom = "custom property"
 default_data = "dn1"
 
@@ -99,7 +99,7 @@ owner = "Raymond Kopa"
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
         Config.configure_default_data_node(storage_type="in_memory", custom="default_custom_prop")
         dn1_cfg_v2 = Config.configure_data_node(
-            "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
+            "dn1", storage_type="pickle", scope=Scope.SCENARIO, default_data="dn1", custom="custom property"
         )
         dn2_cfg_v2 = Config.configure_data_node(
             "dn2",

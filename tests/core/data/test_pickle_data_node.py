@@ -45,12 +45,12 @@ class TestPickleDataNodeEntity:
             os.remove(f)
 
     def test_create(self):
-        dn = PickleDataNode("foobar_bazxyxea", Scope.PIPELINE, properties={"default_data": "Data"})
+        dn = PickleDataNode("foobar_bazxyxea", Scope.SCENARIO, properties={"default_data": "Data"})
         assert os.path.isfile(Config.global_config.storage_folder + "pickles/" + dn.id + ".p")
         assert isinstance(dn, PickleDataNode)
         assert dn.storage_type() == "pickle"
         assert dn.config_id == "foobar_bazxyxea"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.name is None
         assert dn.owner_id is None
@@ -62,7 +62,7 @@ class TestPickleDataNodeEntity:
         assert dn.job_ids == []
 
         with pytest.raises(InvalidConfigurationId):
-            PickleDataNode("foobar bazxyxea", Scope.PIPELINE, properties={"default_data": "Data"})
+            PickleDataNode("foobar bazxyxea", Scope.SCENARIO, properties={"default_data": "Data"})
 
     def test_new_pickle_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node("not_ready_data_node_config_id", "pickle", path="NOT_EXISTING.p")
@@ -75,7 +75,7 @@ class TestPickleDataNodeEntity:
         assert dns[ready_dn_cfg].is_ready_for_reading
 
     def test_create_with_file_name(self):
-        dn = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar", "path": "foo.FILE.p"})
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": "bar", "path": "foo.FILE.p"})
         assert os.path.isfile("foo.FILE.p")
         assert dn.read() == "bar"
         dn.write("qux")
@@ -84,11 +84,11 @@ class TestPickleDataNodeEntity:
         assert dn.read() == 1998
 
     def test_read_and_write(self):
-        no_data_dn = PickleDataNode("foo", Scope.PIPELINE)
+        no_data_dn = PickleDataNode("foo", Scope.SCENARIO)
         with pytest.raises(NoData):
             assert no_data_dn.read() is None
             no_data_dn.read_or_raise()
-        pickle_str = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar"})
+        pickle_str = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": "bar"})
         assert isinstance(pickle_str.read(), str)
         assert pickle_str.read() == "bar"
         pickle_str.properties["default_data"] = "baz"  # this modifies the default data value but not the data itself
@@ -98,11 +98,11 @@ class TestPickleDataNodeEntity:
         pickle_str.write(1998)
         assert pickle_str.read() == 1998
         assert isinstance(pickle_str.read(), int)
-        pickle_int = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": 197})
+        pickle_int = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": 197})
         assert isinstance(pickle_int.read(), int)
         assert pickle_int.read() == 197
         pickle_dict = PickleDataNode(
-            "foo", Scope.PIPELINE, properties={"default_data": {"bar": 12, "baz": "qux", "quux": [13]}}
+            "foo", Scope.SCENARIO, properties={"default_data": {"bar": 12, "baz": "qux", "quux": [13]}}
         )
         assert isinstance(pickle_dict.read(), dict)
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
@@ -113,7 +113,7 @@ class TestPickleDataNodeEntity:
         default_modin = modin_pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         new_modin_df = modin_pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]})
 
-        pickle_pandas = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": default_pandas})
+        pickle_pandas = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": default_pandas})
         assert isinstance(pickle_pandas.read(), pd.DataFrame)
         assert default_pandas.equals(pickle_pandas.read())
         pickle_pandas.write(new_pandas_df)
@@ -126,7 +126,7 @@ class TestPickleDataNodeEntity:
         assert pickle_pandas.read() == 1998
         assert isinstance(pickle_pandas.read(), int)
 
-        pickle_modin = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": default_modin})
+        pickle_modin = PickleDataNode("foo", Scope.SCENARIO, properties={"default_data": default_modin})
         assert isinstance(pickle_modin.read(), modin_pd.DataFrame)
         assert default_modin.equals(pickle_modin.read())
         pickle_modin.write(new_modin_df)
@@ -142,7 +142,7 @@ class TestPickleDataNodeEntity:
     def test_path_overrides_default_path(self):
         dn = PickleDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "default_data": "bar",
                 "default_path": "foo.FILE.p",
@@ -152,13 +152,13 @@ class TestPickleDataNodeEntity:
         assert dn.path == "bar.FILE.p"
 
     def test_set_path(self):
-        dn = PickleDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.p"})
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"default_path": "foo.p"})
         assert dn.path == "foo.p"
         dn.path = "bar.p"
         assert dn.path == "bar.p"
 
     def test_is_generated(self):
-        dn = PickleDataNode("foo", Scope.PIPELINE, properties={})
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={})
         assert dn.is_generated
         dn.path = "bar.p"
         assert not dn.is_generated
@@ -166,7 +166,7 @@ class TestPickleDataNodeEntity:
     def test_read_write_after_modify_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
         new_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.p")
-        dn = PickleDataNode("foo", Scope.PIPELINE, properties={"default_path": path})
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"default_path": path})
         read_data = dn.read()
         assert read_data is not None
         dn.path = new_path
@@ -178,7 +178,7 @@ class TestPickleDataNodeEntity:
     def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.pickle"))
         pd.DataFrame([]).to_pickle(temp_file_path)
-        dn = PickleDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
+        dn = PickleDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
         dn.write(pd.DataFrame([1, 2, 3]))
         previous_edit_date = dn.last_edit_date
