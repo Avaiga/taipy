@@ -11,8 +11,20 @@
 
 from collections import UserDict
 
+from ..notification import EventEntityType, EventOperation, _publish_event
+
 
 class _Properties(UserDict):
+
+    __ENTITY_TO_EVENT_ENTITY_TYPE = {
+        "scenario": EventEntityType.SCENARIO,
+        "pipeline": EventEntityType.PIPELINE,
+        "task": EventEntityType.TASK,
+        "data": EventEntityType.DATA_NODE,
+        "job": EventEntityType.JOB,
+        "cycle": EventEntityType.CYCLE,
+    }
+
     def __init__(self, entity_owner, **kwargs):
         super().__init__(**kwargs)
         self._entity_owner = entity_owner
@@ -23,7 +35,12 @@ class _Properties(UserDict):
 
         if hasattr(self, "_entity_owner"):
             tp.set(self._entity_owner)
-            # TODO: publish event of changing attributes in properties (use key)
+            _publish_event(
+                self.__ENTITY_TO_EVENT_ENTITY_TYPE[self._entity_owner._MANAGER_NAME],
+                self._entity_owner.id,
+                EventOperation.UPDATE,
+                key,
+            )
 
     def __getitem__(self, key):
         from taipy.config.common._template_handler import _TemplateHandler as _tpl
