@@ -13,13 +13,12 @@
       "additionalProperties": {
         "properties": {
           "scope": {
-            "description": "An enum value among GLOBAL, CYCLE, SCENARIO or PIPELINE that represents the visibility of the data node in the graph of entities.",
+            "description": "An enum value among GLOBAL, CYCLE, SCENARIO that represents the visibility of the data node in the graph of entities.",
             "type": "string",
             "enum": [
               "GLOBAL:SCOPE",
               "CYCLE:SCOPE",
               "SCENARIO:SCOPE",
-              "PIPELINE:SCOPE",
               ""
             ],
             "default": "SCENARIO:SCOPE"
