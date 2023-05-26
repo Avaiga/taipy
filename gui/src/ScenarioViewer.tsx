@@ -44,11 +44,16 @@ import {
     styled,
 } from "@mui/material";
 import { FlagSx, Property, ScenarioFull } from "./utils";
-import { createRequestUpdateAction, useDispatch, useDynamicProperty, useModule } from "taipy-gui";
+import {
+    createRequestUpdateAction,
+    createSendActionNameAction,
+    useDispatch,
+    useDynamicProperty,
+    useModule,
+} from "taipy-gui";
 
 interface ScenarioViewerProps {
     id?: string;
-    expandable?: boolean;
     expanded?: boolean;
     defaultExpanded?: boolean;
     buttonToSubmitScenario?: boolean;
@@ -65,8 +70,9 @@ interface ScenarioViewerProps {
 interface PipelinesRowProps {
     action: string;
     number: number;
+    pipelineId: string;
     value: string;
-    submitEntity: () => void;
+    submitEntity: (id: string) => void;
 }
 
 const MainBoxSx = {
@@ -90,13 +96,29 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
-const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
+const PipelineRow = ({ action, number, pipelineId, value, submitEntity }: PipelinesRowProps) => {
     const [pipeline, setPipeline] = useState<string>(value);
     const [focus, setFocus] = useState(false);
 
-    const onFieldBlur = useCallback((e: any) => {
+    const onPipelineBlur = useCallback((e: any) => {
         setPipeline(e.target.value);
         setFocus(false);
+    }, []);
+
+    const onPipelineFocus = useCallback((e: any) => {
+        setFocus(true);
+    }, []);
+
+    const onSaveField = useCallback((e: any) => {
+        //TODO: save field
+    }, []);
+
+    const onCancelField = useCallback((e: any) => {
+        //TODO: cancel field
+    }, []);
+
+    const onSubmitPipeline = useCallback((e: any) => {
+        submitEntity(pipelineId);
     }, []);
 
     const index = number + 1;
@@ -110,17 +132,17 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
                         variant="outlined"
                         name={`pipeline${index}`}
                         value={pipeline}
-                        onBlur={onFieldBlur}
+                        onBlur={onPipelineBlur}
                         sx={FieldNoMaxWidth}
-                        onFocus={(e) => setFocus(true)}
+                        onFocus={onPipelineFocus}
                         fullWidth
                         InputProps={{
                             endAdornment: focus && (
                                 <>
-                                    <IconButton sx={IconPaddingSx}>
+                                    <IconButton sx={IconPaddingSx} onClick={onSaveField}>
                                         <CheckCircle color="primary" />
                                     </IconButton>
-                                    <IconButton sx={IconPaddingSx}>
+                                    <IconButton sx={IconPaddingSx} onClick={onCancelField}>
                                         <Cancel color="inherit" />
                                     </IconButton>
                                 </>
@@ -131,7 +153,7 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
                 {action !== "EDIT" && <Typography variant="subtitle2">{pipeline}</Typography>}
             </Grid>
             <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
-                <IconButton component="label" size="small">
+                <IconButton component="label" size="small" onClick={onSubmitPipeline}>
                     <Send color="info" />
                 </IconButton>
             </Grid>
@@ -140,7 +162,7 @@ const PipelineRow = ({ action, number, value }: PipelinesRowProps) => {
 };
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
-    const { id = "", scenario = ["", false, "", "", "", [], [], [], []] } = props;
+    const { id = "", scenario } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -162,9 +184,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     const onConfirmPromoteToPrimary = useCallback(() => {}, []);
 
-    const submitPipeline = useCallback(() => {}, []);
+    const submitPipeline = useCallback((pipelineId: string) => {
+        dispatch(createSendActionNameAction(id, module, props.onSubmit, pipelineId));
+    }, []);
 
-    const updateScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {}, []);
+    const sendScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {
+        if (scenario && scenario.length > 1) {
+            dispatch(createSendActionNameAction(id, module, props.onSubmit, scenario[0]));
+        }
+    }, []);
 
     const updatePropertyField = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { idx = "", name = "" } = e.currentTarget.parentElement?.parentElement?.dataset || {};
@@ -221,11 +249,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     }));
 
     const [
-        scenarioId = '',
+        scenarioId = "",
         primary = false,
-        config = '',
-        date = '',
-        scenarioLabel = '',
+        config = "",
+        date = "",
+        scenarioLabel = "",
         scenarioTags = [],
         scenarioProperties = [],
         pipelines = [],
@@ -254,17 +282,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             setProperties(
                 scenario
                     ? scenarioProperties.map(([k, v], i) => ({
-                        id: i + "",
-                        key: k,
-                        value: v,
-                    }))
+                          id: i + "",
+                          key: k,
+                          value: v,
+                      }))
                     : []
             );
         }
     }, [props.coreChanged, props.updateVarName, module, dispatch]);
 
     return (
-        <div>
+        <>
             <Box sx={MainBoxSx}>
                 <Accordion>
                     <MuiAccordionSummary id={`panel-${scenarioId}`}>
@@ -288,7 +316,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 )}
                             </Grid>
                             <Grid item>
-                                <IconButton sx={IconPaddingSx} onClick={updateScenario}>
+                                <IconButton sx={IconPaddingSx} onClick={sendScenario}>
                                     <Send fontSize="small" color="info" />
                                 </IconButton>
                             </Grid>
@@ -514,6 +542,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         <PipelineRow
                                             action={action}
                                             number={index}
+                                            pipelineId={key}
                                             value={value}
                                             key={key}
                                             submitEntity={submitPipeline}
@@ -565,7 +594,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </>
     );
 };
 export default ScenarioViewer;
