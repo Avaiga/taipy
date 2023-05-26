@@ -172,6 +172,9 @@ class Config:
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """"""
 
+    def core(cls) -> Dict[str, CoreSection]:
+        """"""
+
     @staticmethod
     def configure_scenario(
         id: str,
