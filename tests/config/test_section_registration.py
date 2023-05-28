@@ -166,4 +166,4 @@ def test_block_registration():
 
     # mySection stay the same
     assert mySection.attribute == "my_attribute"
-    assert mySection.properties == {"prop": "my_prop", "foo": "bar"}
+    assert mySection.properties == {"prop": "my_prop", "foo": "bar", "prop_int": 0}
