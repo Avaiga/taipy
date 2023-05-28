@@ -33,9 +33,9 @@ class Config:
     __logger = _TaipyLogger._get_logger()
     _default_config = _Config._default_config()
     _python_config = _Config()
-    _file_config = None
-    _env_file_config = None
-    _applied_config = _Config._default_config()
+    _file_config = _Config()
+    _env_file_config = _Config()
+    _applied_config = _Config()
     _collector = IssueCollector()
     _serializer = _TomlSerializer()
     __json_serializer = _JsonSerializer()
@@ -226,7 +226,7 @@ class Config:
     @classmethod
     def __compile_configs(cls):
         Config._override_env_file()
-        cls._applied_config = _Config._default_config()
+        cls._applied_config.clear()
         if cls._default_config:
             cls._applied_config._update(cls._default_config)
         if cls._python_config:
