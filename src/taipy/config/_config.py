@@ -25,13 +25,13 @@ class _Config:
         self._unique_sections: Dict[str, UniqueSection] = {}
         self._global_config: GlobalAppConfig = GlobalAppConfig()
 
-    def clear(self):
-        self._global_config.clear()
+    def _clean(self):
+        self._global_config._clean()
         for unique_section in self._unique_sections.values():
-            unique_section.clear()
+            unique_section._clean()
         for sections in self._sections.values():
             for section in sections.values():
-                section.clear()
+                section._clean()
 
     @classmethod
     def _default_config(cls):

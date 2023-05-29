@@ -226,7 +226,7 @@ class Config:
     @classmethod
     def __compile_configs(cls):
         Config._override_env_file()
-        cls._applied_config.clear()
+        cls._applied_config._clean()
         if cls._default_config:
             cls._applied_config._update(cls._default_config)
         if cls._python_config:

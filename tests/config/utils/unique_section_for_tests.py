@@ -39,7 +39,7 @@ class UniqueSectionForTest(UniqueSection):
     def attribute(self, val):
         self._attribute = val
 
-    def clear(self):
+    def _clean(self):
         self._attribute = None
         self._properties.clear()
 

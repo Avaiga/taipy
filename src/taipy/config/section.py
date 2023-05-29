@@ -40,7 +40,7 @@ class Section:
         raise NotImplementedError
 
     @abstractmethod
-    def clear(self):
+    def _clean(self):
         raise NotImplementedError
 
     @abstractmethod
