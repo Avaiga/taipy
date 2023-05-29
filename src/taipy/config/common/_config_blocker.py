@@ -11,12 +11,14 @@
 
 import functools
 
+from ...logger._taipy_logger import _TaipyLogger
 from ..exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 class _ConfigBlocker:
     """Configuration blocker singleton."""
 
+    __logger = _TaipyLogger._get_logger()
     __block_config_update = False
 
     @classmethod
@@ -33,7 +35,13 @@ class _ConfigBlocker:
             @functools.wraps(f)
             def _check_if_is_blocking(*args, **kwargs):
                 if cls.__block_config_update:
-                    raise ConfigurationUpdateBlocked()
+                    error_message = (
+                        "The Core service should be stopped by running core.stop() before"
+                        " modifying the Configuration. For more information, please refer to:"
+                        " https://docs.taipy.io/en/latest/manuals/running_services/#running-core."
+                    )
+                    cls.__logger.error("ConfigurationUpdateBlocked: " + error_message)
+                    raise ConfigurationUpdateBlocked(error_message)
 
                 return f(*args, **kwargs)
 
