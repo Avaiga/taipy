@@ -60,7 +60,6 @@ interface ScenarioViewerProps {
     buttonToDeleteScenario?: boolean;
     cycleNotEditable?: boolean;
     updateVarName?: string;
-    tags?: Array<string>;
     scenario?: ScenarioFull;
     onSubmit: string;
     error?: string;
