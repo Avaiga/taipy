@@ -18,17 +18,30 @@ from ._config_checker import _ConfigChecker
 
 
 class _GlobalConfigChecker(_ConfigChecker):
+    
+    _ACCEPTED_REPOSITORY_TYPES = ["filesystem", "sql"]
+    
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
         global_config = self._config._global_config
         self._check_clean_entities_enabled_type(global_config)
+        self._check_repository_type(global_config)
         return self._collector
 
+    def _check_repository_type(self, global_config: GlobalAppConfig):
+        value = global_config.repository_type
+        if value not in self._ACCEPTED_REPOSITORY_TYPES:
+            self._warning(
+                global_config._REPOSITORY_TYPE_KEY,
+                value,
+                f'Unknown value "{value}" for field {global_config._REPOSITORY_TYPE_KEY} of GlobalAppConfig. '
+                f'Default value "filesystem" is applied.'
+            )
+            
     def _check_clean_entities_enabled_type(self, global_config: GlobalAppConfig):
         value = global_config._clean_entities_enabled
-
         if isinstance(global_config._clean_entities_enabled, str):
             try:
                 value = tpl._replace_templates(
