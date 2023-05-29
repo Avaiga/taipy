@@ -36,11 +36,11 @@ class _ConfigBlocker:
             def _check_if_is_blocking(*args, **kwargs):
                 if cls.__block_config_update:
                     error_message = (
-                        "ConfigurationUpdateBlocked: config service should be stopped by running core.stop() before"
-                        " modifying it. For more information, please refer to:"
+                        "The Core service should be stopped by running core.stop() before"
+                        " modifying the Configuration. For more information, please refer to:"
                         " https://docs.taipy.io/en/latest/manuals/running_services/#running-core."
                     )
-                    cls.__logger.error(error_message)
+                    cls.__logger.error("ConfigurationUpdateBlocked: " + error_message)
                     raise ConfigurationUpdateBlocked(error_message)
 
                 return f(*args, **kwargs)
