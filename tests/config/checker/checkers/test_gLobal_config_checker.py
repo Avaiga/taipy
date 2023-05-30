@@ -22,13 +22,22 @@ class TestGlobalConfigChecker:
     
     _GlobalConfigChecker._ACCEPTED_REPOSITORY_TYPES.update(["mock_repo_type"])
         
-    def test_check_repository_type_mock_value(self):
+    def test_check_repository_type_mock_value_for_expansion(self):
         config = _Config()
         config._global_config.clean_entities_enabled = False
         config._global_config.repository_type = "mock_repo_type"
         collector = IssueCollector()
         _GlobalConfigChecker(config, collector)._check()
         assert len(collector.warnings) == 0
+        
+    def test_check_repository_type_value_filesystem(self):
+        config = _Config()
+        config._global_config.clean_entities_enabled = False
+        config._global_config.repository_type = "filesystem"
+        collector = IssueCollector()
+        _GlobalConfigChecker(config, collector)._check()
+        assert len(collector.warnings) == 0
+
 
     def test_check_repository_type_value_wrong_str(self):
         config = _Config()
@@ -38,7 +47,7 @@ class TestGlobalConfigChecker:
         _GlobalConfigChecker(config, collector)._check()
         assert len(collector.warnings) == 1
         assert collector.warnings[0].field == GlobalAppConfig._REPOSITORY_TYPE_KEY
-        assert collector.warnings[0].value is "any"
+        assert collector.warnings[0].value == "any"
 
     def test_check_repository_type_value_wrong_type(self):
         config = _Config()
@@ -48,7 +57,7 @@ class TestGlobalConfigChecker:
         _GlobalConfigChecker(config, collector)._check()
         assert len(collector.warnings) == 1
         assert collector.warnings[0].field == GlobalAppConfig._REPOSITORY_TYPE_KEY
-        assert collector.warnings[0].value is 1    
+        assert collector.warnings[0].value == 1    
         
     def test_check_boolean_field_is_bool(self):
         collector = IssueCollector()
