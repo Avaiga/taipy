@@ -21,21 +21,6 @@ from src.taipy.config.global_app.global_app_config import GlobalAppConfig
 class TestGlobalConfigChecker:
     
     _GlobalConfigChecker._ACCEPTED_REPOSITORY_TYPES.update(["mock_repo_type"])
-
-    # def test_check_repository_type_value_sql(self):
-    #     config = _Config()
-    #     config._global_config.repository_type = "sql"
-    #     collector = IssueCollector()
-    #     _GlobalConfigChecker(config, collector)._check()
-    #     assert len(collector.warnings) == 0
-
-    # def test_check_repository_type_value_filesystem(self):
-    #     config = _Config()
-    #     config._global_config.clean_entities_enabled = False
-    #     config._global_config.repository_type = "filesystem"
-    #     collector = IssueCollector()
-    #     _GlobalConfigChecker(config, collector)._check()
-    #     assert len(collector.warnings) == 0
         
     def test_check_repository_type_mock_value(self):
         config = _Config()
