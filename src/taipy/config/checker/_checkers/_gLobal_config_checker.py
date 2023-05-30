@@ -19,7 +19,7 @@ from ._config_checker import _ConfigChecker
 
 class _GlobalConfigChecker(_ConfigChecker):
     
-    _ACCEPTED_REPOSITORY_TYPES = ["filesystem", "sql"]
+    _ACCEPTED_REPOSITORY_TYPES: set[str] = {"filesystem"}
     
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
