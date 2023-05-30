@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import Set
+
 from ..._config import _Config
 from ...common._template_handler import _TemplateHandler as tpl
 from ...exceptions.exceptions import InconsistentEnvVariableError
@@ -19,7 +21,7 @@ from ._config_checker import _ConfigChecker
 
 class _GlobalConfigChecker(_ConfigChecker):
     
-    _ACCEPTED_REPOSITORY_TYPES: set[str] = set(["filesystem"])
+    _ACCEPTED_REPOSITORY_TYPES: Set[str] = {"filesystem"}
     
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
