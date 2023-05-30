@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 apispec = {extras = ["yaml"], version = "==5.0"}
 apispec-webframeworks = "==0.5.2"
-flask = "==2.2.2"
+flask = "==2.2.5"
 Flask-JWT-Extended = "==4.3"
 Flask-Migrate = "==3.0"
 Flask-RESTful = "==0.3.9"
