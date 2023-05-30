@@ -57,7 +57,9 @@ interface ScenarioViewerProps {
     expanded?: boolean;
     defaultExpanded?: boolean;
     buttonToSubmitScenario?: boolean;
+    defaultButtonToSubmitScenario?: boolean;
     buttonToDeleteScenario?: boolean;
+    defaultButtonToDeleteScenario?: boolean;
     cycleNotEditable?: boolean;
     updateVarName?: string;
     scenario?: ScenarioFull;
@@ -71,6 +73,7 @@ interface PipelinesRowProps {
     number: number;
     pipelineId: string;
     value: string;
+    enableScenarioFields: boolean;
     submitEntity: (id: string) => void;
 }
 
@@ -95,7 +98,7 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
-const PipelineRow = ({ action, number, pipelineId, value, submitEntity }: PipelinesRowProps) => {
+const PipelineRow = ({ action, number, pipelineId, value, submitEntity, enableScenarioFields }: PipelinesRowProps) => {
     const [pipeline, setPipeline] = useState<string>(value);
     const [focus, setFocus] = useState(false);
 
@@ -134,6 +137,7 @@ const PipelineRow = ({ action, number, pipelineId, value, submitEntity }: Pipeli
                         onBlur={onPipelineBlur}
                         sx={FieldNoMaxWidth}
                         onFocus={onPipelineFocus}
+                        disabled={!enableScenarioFields}
                         fullWidth
                         InputProps={{
                             endAdornment: focus && (
@@ -152,7 +156,7 @@ const PipelineRow = ({ action, number, pipelineId, value, submitEntity }: Pipeli
                 {action !== "EDIT" && <Typography variant="subtitle2">{pipeline}</Typography>}
             </Grid>
             <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
-                <IconButton component="label" size="small" onClick={onSubmitPipeline}>
+                <IconButton component="label" size="small" onClick={onSubmitPipeline} disabled={!enableScenarioFields}>
                     <Send color="info" />
                 </IconButton>
             </Grid>
@@ -161,11 +165,21 @@ const PipelineRow = ({ action, number, pipelineId, value, submitEntity }: Pipeli
 };
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
-    const { id = "", scenario } = props;
+    const { id = "", scenario, buttonToSubmitScenario, buttonToDeleteScenario } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
-    const expanded = useDynamicProperty(props.expanded, props.defaultExpanded, true);
+    const expanded = useDynamicProperty(props.expanded, props.defaultExpanded, false);
+    const submitScenarioBtn = useDynamicProperty(
+        props.buttonToSubmitScenario,
+        props.defaultButtonToSubmitScenario,
+        true
+    );
+    const deleteScenarioBtn = useDynamicProperty(
+        props.buttonToDeleteScenario,
+        props.defaultButtonToDeleteScenario,
+        true
+    );
 
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [properties, setProperties] = useState<Property[]>([]);
@@ -180,6 +194,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     const [labelFocus, setLabelFocus] = useState(false);
     const [tagsFocus, setTagsFocus] = useState(false);
+    const [enableScenarioFields, setEnableScenarioFields] = useState(false);
 
     const onConfirmPromoteToPrimary = useCallback(() => {}, []);
 
@@ -188,6 +203,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     }, []);
 
     const sendScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
         if (scenario && scenario.length > 1) {
             dispatch(createSendActionNameAction(id, module, props.onSubmit, scenario[0]));
         }
@@ -270,6 +286,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                   }))
                 : []
         );
+        setEnableScenarioFields(scenario != undefined && scenario.length > 1);
     }, [scenario]);
 
     // Refresh on broadcast
@@ -293,7 +310,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     return (
         <>
             <Box sx={MainBoxSx}>
-                <Accordion>
+                <Accordion defaultExpanded={expanded}>
                     <MuiAccordionSummary id={`panel-${scenarioId}`}>
                         <Grid
                             container
@@ -315,9 +332,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 )}
                             </Grid>
                             <Grid item>
-                                <IconButton sx={IconPaddingSx} onClick={sendScenario}>
-                                    <Send fontSize="small" color="info" />
-                                </IconButton>
+                                {submitScenarioBtn ? (
+                                    <IconButton
+                                        sx={IconPaddingSx}
+                                        onClick={sendScenario}
+                                        disabled={!enableScenarioFields}
+                                    >
+                                        <Send fontSize="medium" color={enableScenarioFields ? "info" : "disabled"} />
+                                    </IconButton>
+                                ) : null}
                             </Grid>
                         </Grid>
                     </MuiAccordionSummary>
@@ -339,32 +362,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     <Typography variant="subtitle2">{date}</Typography>
                                 </Grid>
                             </Grid>
-                            {action === "EDIT" && (
-                                <Grid item xs={11} container justifyContent="space-between">
-                                    <TextField
-                                        label="Label"
-                                        variant="outlined"
-                                        fullWidth
-                                        sx={FieldNoMaxWidth}
-                                        value={label}
-                                        onChange={onLabelChange}
-                                        onFocus={(e) => setLabelFocus(true)}
-                                        onBlur={(e) => setLabelFocus(false)}
-                                        InputProps={{
-                                            endAdornment: labelFocus && (
-                                                <>
-                                                    <IconButton sx={IconPaddingSx}>
-                                                        <CheckCircle color="primary" />
-                                                    </IconButton>
-                                                    <IconButton sx={IconPaddingSx}>
-                                                        <Cancel color="inherit" />
-                                                    </IconButton>
-                                                </>
-                                            ),
-                                        }}
-                                    />
-                                </Grid>
-                            )}
                             {action !== "EDIT" ? (
                                 <Grid item xs={12}>
                                     <Grid item xs={12} container justifyContent="space-between">
@@ -388,48 +385,76 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
                                 </Grid>
                             ) : (
-                                <Grid item xs={11} container justifyContent="space-between">
-                                    <Autocomplete
-                                        multiple
-                                        id="scenario-tags"
-                                        options={[]}
-                                        freeSolo
-                                        renderTags={(value: readonly string[], getTagProps) =>
-                                            value.map((option: string, index: number) => (
-                                                <Chip
+                                <Grid item xs={11} container justifyContent="space-between" spacing={1}>
+                                    <Grid item xs={12} container justifyContent="space-between">
+                                        <TextField
+                                            label="Label"
+                                            variant="outlined"
+                                            fullWidth
+                                            sx={FieldNoMaxWidth}
+                                            value={label}
+                                            onChange={onLabelChange}
+                                            onFocus={(e) => setLabelFocus(true)}
+                                            onBlur={(e) => setLabelFocus(false)}
+                                            InputProps={{
+                                                endAdornment: labelFocus && (
+                                                    <>
+                                                        <IconButton sx={IconPaddingSx}>
+                                                            <CheckCircle color="primary" />
+                                                        </IconButton>
+                                                        <IconButton sx={IconPaddingSx}>
+                                                            <Cancel color="inherit" />
+                                                        </IconButton>
+                                                    </>
+                                                ),
+                                            }}
+                                            disabled={!enableScenarioFields}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} container justifyContent="space-between">
+                                        <Autocomplete
+                                            multiple
+                                            id="scenario-tags"
+                                            options={[]}
+                                            freeSolo
+                                            renderTags={(value: readonly string[], getTagProps) =>
+                                                value.map((option: string, index: number) => (
+                                                    <Chip
+                                                        variant="outlined"
+                                                        label={option}
+                                                        sx={IconPaddingSx}
+                                                        {...getTagProps({ index })}
+                                                    />
+                                                ))
+                                            }
+                                            onFocus={(e) => setTagsFocus(true)}
+                                            onBlur={(e) => setTagsFocus(false)}
+                                            fullWidth
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
                                                     variant="outlined"
-                                                    label={option}
-                                                    sx={IconPaddingSx}
-                                                    {...getTagProps({ index })}
+                                                    label="Tags"
+                                                    sx={tagsAutocompleteSx}
+                                                    fullWidth
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        endAdornment: tagsFocus && (
+                                                            <>
+                                                                <IconButton sx={IconPaddingSx}>
+                                                                    <CheckCircle color="primary" />
+                                                                </IconButton>
+                                                                <IconButton sx={IconPaddingSx}>
+                                                                    <Cancel color="inherit" />
+                                                                </IconButton>
+                                                            </>
+                                                        ),
+                                                    }}
                                                 />
-                                            ))
-                                        }
-                                        onFocus={(e) => setTagsFocus(true)}
-                                        onBlur={(e) => setTagsFocus(false)}
-                                        fullWidth
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                variant="outlined"
-                                                label="Tags"
-                                                sx={tagsAutocompleteSx}
-                                                fullWidth
-                                                InputProps={{
-                                                    ...params.InputProps,
-                                                    endAdornment: tagsFocus && (
-                                                        <>
-                                                            <IconButton sx={IconPaddingSx}>
-                                                                <CheckCircle color="primary" />
-                                                            </IconButton>
-                                                            <IconButton sx={IconPaddingSx}>
-                                                                <Cancel color="inherit" />
-                                                            </IconButton>
-                                                        </>
-                                                    ),
-                                                }}
-                                            />
-                                        )}
-                                    />
+                                            )}
+                                            disabled={!enableScenarioFields}
+                                        />
+                                    </Grid>
                                 </Grid>
                             )}
                             <Grid item xs={12}>
@@ -452,6 +477,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                           variant="outlined"
                                                           value={key}
                                                           sx={FieldNoMaxWidth}
+                                                          disabled={!enableScenarioFields}
                                                       />
                                                   )}
                                               </Grid>
@@ -464,6 +490,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                           variant="outlined"
                                                           value={value}
                                                           sx={FieldNoMaxWidth}
+                                                          disabled={!enableScenarioFields}
                                                       />
                                                   )}
                                               </Grid>
@@ -480,6 +507,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                           sx={DeleteIconSx}
                                                           data-id={index}
                                                           onClick={propertyDelete}
+                                                          disabled={!enableScenarioFields}
                                                       >
                                                           <DeleteOutline fontSize="small" color="primary" />
                                                       </IconButton>
@@ -499,6 +527,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             label="Key"
                                             variant="outlined"
                                             sx={FieldNoMaxWidth}
+                                            disabled={!enableScenarioFields}
                                         />
                                     </Grid>
                                     <Grid item xs={5}>
@@ -509,6 +538,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             label="Value"
                                             variant="outlined"
                                             sx={FieldNoMaxWidth}
+                                            disabled={!enableScenarioFields}
                                         />
                                     </Grid>
                                     <Grid
@@ -519,8 +549,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         alignItems="center"
                                         justifyContent="center"
                                     >
-                                        <IconButton onClick={propertyAdd} disabled={!newProp.key || !newProp.value}>
-                                            <Add color="primary" />
+                                        <IconButton
+                                            onClick={propertyAdd}
+                                            disabled={!newProp.key || !newProp.value || !enableScenarioFields}
+                                        >
+                                            <Add color={enableScenarioFields ? "primary" : "disabled"} />
                                         </IconButton>
                                     </Grid>
                                 </Grid>
@@ -545,6 +578,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             value={value}
                                             key={key}
                                             submitEntity={submitPipeline}
+                                            enableScenarioFields={enableScenarioFields}
                                         />
                                     );
                                 })}
@@ -553,14 +587,16 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 <Divider />
                             </Grid>
                             <Grid item xs={12} container justifyContent="space-between">
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    disabled={action === "VIEW"}
-                                    onClick={onConfirmDialogOpen}
-                                >
-                                    DELETE
-                                </Button>
+                                {deleteScenarioBtn ? (
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        disabled={action === "VIEW" || !enableScenarioFields}
+                                        onClick={onConfirmDialogOpen}
+                                    >
+                                        DELETE
+                                    </Button>
+                                ) : null}
                                 <Button variant="outlined" color="primary" disabled onClick={onConfirmPromoteToPrimary}>
                                     PROMOTE TO PRIMARY
                                 </Button>
@@ -588,6 +624,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     <Button variant="outlined" color="inherit" onClick={onConfirmDialogClose}>
                         CANCEL
                     </Button>
+
                     <Button variant="contained" color="primary" onClick={onDeleteScenario}>
                         DELETE
                     </Button>
