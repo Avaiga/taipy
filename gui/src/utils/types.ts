@@ -4,8 +4,8 @@ export type DisplayModel = [
     Array<[string, string, string, string]>
 ];
 
-export type Node = [string];
-export type Scenario = [string, string, undefined, number, boolean];
+export type Node = Record<string, { name: string; type: string }>;
+export type Scenario = [string, string, undefined, number, boolean, Node];
 export type Scenarios = Array<Scenario>;
 export type Cycles = Array<[string, string, Scenario, number, boolean]>;
 

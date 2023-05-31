@@ -11,16 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
 import { useDispatch, useModule, createSendActionNameAction } from "taipy-gui";
-import { Cycles, NodeType, Scenarios } from "./utils/types";
+import { Cycles, DisplayModel, NodeType, Scenarios } from "./utils/types";
 import { Cycle, Datanode, Pipeline, Scenario as ScenarioIcon } from "./icons";
 
-interface DataNodeExplorerProps {
+interface NodeSelectorProps {
     id?: string;
     updateVarName?: string;
     scenarios?: Cycles | Scenarios;
@@ -29,6 +29,7 @@ interface DataNodeExplorerProps {
     configs?: Array<[string, string]>;
     onDataNodeSelect?: string;
     error?: string;
+    scenario?: Cycles | Scenarios;
 }
 
 const MainBoxSx = {
@@ -151,8 +152,8 @@ const CycleItem = ({ item }: { item: any[] }) => {
     );
 };
 
-const DataNodeExplorer = (props: DataNodeExplorerProps) => {
-    const { id = "", scenarios = [] } = props;
+const NodeSelector = (props: NodeSelectorProps) => {
+    const { id = "", scenarios } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -166,7 +167,7 @@ const DataNodeExplorer = (props: DataNodeExplorerProps) => {
     }, []);
 
     return (
-        <div>
+        <>
             <Box sx={MainBoxSx}>
                 <TreeView
                     defaultCollapseIcon={<ExpandMore />}
@@ -189,8 +190,8 @@ const DataNodeExplorer = (props: DataNodeExplorerProps) => {
                 </TreeView>
                 <Box>{props.error}</Box>
             </Box>
-        </div>
+        </>
     );
 };
 
-export default DataNodeExplorer;
+export default NodeSelector;

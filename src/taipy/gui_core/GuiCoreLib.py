@@ -353,11 +353,12 @@ class GuiCore(ElementLibrary):
             },
         ),
         "data_node_explorer": Element(
-            "value",
+            "val",
             {
-                "id": ElementProperty(PropertyType.string),
+                "val": ElementProperty(GuiCoreScenarioDagAdapter),
             },
             inner_properties={
+                "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
             },
         ),
