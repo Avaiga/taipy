@@ -66,7 +66,7 @@ class Config:
         """
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
         cls._python_config = cls._serializer._read(filename)
-        cls.__compile_configs()
+        cls._compile_configs()
         cls.__logger.info(f"Configuration '{filename}' successfully loaded.")
 
     @classmethod
@@ -124,7 +124,7 @@ class Config:
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
         cls._file_config = cls._serializer._read(filename)
         cls.__logger.info("Overriding configuration.'")
-        cls.__compile_configs()
+        cls._compile_configs()
         cls.__logger.info(f"Configuration '{filename}' successfully loaded.")
 
     @classmethod
@@ -163,7 +163,7 @@ class Config:
             cls._python_config._global_config = glob_cfg
         else:
             cls._python_config._global_config._update(glob_cfg._to_dict())
-        cls.__compile_configs()
+        cls._compile_configs()
         return cls._applied_config._global_config
 
     @classmethod
@@ -194,7 +194,7 @@ class Config:
                 cls._default_config._sections[default_section.name] = {default_section.id: default_section}
         cls._serializer._section_class[default_section.name] = default_section.__class__  # type: ignore
         cls.__json_serializer._section_class[default_section.name] = default_section.__class__  # type: ignore
-        cls.__compile_configs()
+        cls._compile_configs()
 
     @classmethod
     @_ConfigBlocker._check()
@@ -214,7 +214,7 @@ class Config:
                 cls._python_config._sections[section.name] = {section.id: section}
         cls._serializer._section_class[section.name] = section.__class__
         cls.__json_serializer._section_class[section.name] = section.__class__
-        cls.__compile_configs()
+        cls._compile_configs()
 
     @classmethod
     def _override_env_file(cls):
@@ -224,7 +224,7 @@ class Config:
             cls.__logger.info(f"Configuration '{config_filename}' successfully loaded.")
 
     @classmethod
-    def __compile_configs(cls):
+    def _compile_configs(cls):
         Config._override_env_file()
         cls._applied_config = _Config._default_config()
         if cls._default_config:
