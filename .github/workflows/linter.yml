@@ -15,7 +15,7 @@ jobs:
         language: [ 'python' ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - uses: ricardochaves/python-lint@v1.4.0
         with:
           use-pylint: false
