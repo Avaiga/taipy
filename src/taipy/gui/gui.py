@@ -1149,7 +1149,7 @@ class Gui:
                     )
                     _enhance_columns(attributes, hashes, col_dict, "table(cols)")
 
-                    return json.dumps(col_dict)
+                    return json.dumps(col_dict, cls=_TaipyJsonEncoder)
             except Exception as e:  # pragma: no cover
                 _warn(f"Exception while rebuilding table columns {e}.")
         return Gui.__DO_NOT_UPDATE_VALUE
@@ -1169,7 +1169,7 @@ class Gui:
                         self._accessors._get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash)),
                     )
 
-                    return json.dumps(config)
+                    return json.dumps(config, cls=_TaipyJsonEncoder)
             except Exception as e:  # pragma: no cover
                 _warn(f"Exception while rebuilding chart config {e}.")
         return Gui.__DO_NOT_UPDATE_VALUE
