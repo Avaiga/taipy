@@ -9,12 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 import typing as t
 from abc import ABC
 from datetime import datetime
 
 from .._warnings import _warn
-from . import _date_to_ISO, _ISO_to_date, _variable_decode
+from . import _date_to_ISO, _ISO_to_date, _MapDict, _variable_decode
 
 
 class _TaipyBase(ABC):
@@ -137,3 +138,13 @@ class _TaipyContentImage(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Ci"
+
+
+class _TaipyDict(_TaipyBase):
+    def get(self):
+        val = super().get()
+        return json.dumps(val._dict if isinstance(val, _MapDict) else val)
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Di"

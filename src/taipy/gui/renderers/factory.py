@@ -92,7 +92,7 @@ class _Factory:
                 ("title",),
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
-                ("layout", PropertyType.dict),
+                ("layout", PropertyType.dynamic_dict),
                 ("plot_config", PropertyType.dict),
                 ("on_range_change", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),

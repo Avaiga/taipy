@@ -215,7 +215,7 @@ class _Builder:
 
         Arguments:
             name (str): The property name.
-            default value (dict): iused if no value is specified
+            default value (dict): used if no value is specified.
         """
         dict_attr = self.__attributes.get(name)
         if dict_attr is None:
@@ -228,6 +228,34 @@ class _Builder:
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
                 _warn(f"{self.__element_name}: {name} should be a dict: '{str(dict_attr)}'.")
+        return self
+
+    def set_dynamic_dict_attribute(self, name: str, default_value: t.Optional[t.Dict[str, t.Any]] = None):
+        """
+        TODO
+        Defines a React attribute as a stringified json dict.
+        The original property can be a dict or a string formed as <key 1>:<value 1>;<key 2>:<value 2>.
+
+        Arguments:
+            name (str): The property name.
+            default value (dict): used if no value is specified.
+        """
+        dict_attr = self.__attributes.get(name)
+        if dict_attr is None:
+            dict_attr = default_value
+        if dict_attr is not None:
+            if isinstance(dict_attr, str):
+                vals = [x.strip().split(":") for x in dict_attr.split(";")]
+                dict_attr = {val[0].strip(): val[1].strip() for val in vals if len(val) > 1}
+            if isinstance(dict_attr, (dict, _MapDict)):
+                self.__set_json_attribute(_to_camel_case("default_" + name), dict_attr)
+            else:
+                _warn(f"{self.__element_name}: {name} should be a dict: '{str(dict_attr)}'.")
+        if dict_hash := self.__hashes.get(name):
+            dict_hash = self.__get_typed_hash_name(dict_hash, PropertyType.dynamic_dict)
+            prop_name = _to_camel_case(name)
+            self.__update_vars.append(f"{prop_name}={dict_hash}")
+            self.__set_react_attribute(prop_name, dict_hash)
         return self
 
     def __set_json_attribute(self, name, value):
@@ -287,13 +315,12 @@ class _Builder:
         with_update: t.Optional[bool] = False,
         dynamic_property_name: t.Optional[str] = None,
     ):
-        hash_name = self.__hashes.get(name)
         str_val = self.__attributes.get(name, default_value)
         if str_val is not None:
             self.set_attribute(
                 _to_camel_case(f"default_{name}" if dynamic_property_name is None else name), str(str_val)
             )
-        if hash_name:
+        if hash_name := self.__hashes.get(name):
             prop_name = _to_camel_case(name if dynamic_property_name is None else dynamic_property_name)
             if with_update:
                 self.__update_vars.append(f"{prop_name}={hash_name}")
@@ -853,6 +880,8 @@ class _Builder:
                 self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.dict:
                 self.set_dict_attribute(attr[0], _get_tuple_val(attr, 2, None))
+            elif var_type == PropertyType.dynamic_dict:
+                self.set_dynamic_dict_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.dynamic_list:
                 self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.boolean_or_list:

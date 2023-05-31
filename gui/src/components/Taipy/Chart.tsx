@@ -52,6 +52,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     defaultConfig: string;
     config?: string;
     data?: Record<string, TraceValueType>;
+    defaultLayout?: string;
     layout?: string;
     plotConfig?: string;
     onRangeChange?: string;
@@ -210,6 +211,7 @@ const Chart = (props: ChartProp) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", {} as Record<string, any>);
 
     // get props.selected[i] values
     useEffect(() => {
@@ -278,14 +280,6 @@ const Chart = (props: ChartProp) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
     const layout = useMemo(() => {
-        let playout = {} as Layout;
-        if (props.layout) {
-            try {
-                playout = JSON.parse(props.layout);
-            } catch (e) {
-                console.info(`Error while parsing Chart.layout\n${(e as Error).message || e}`);
-            }
-        }
         let template = undefined;
         try {
             const tpl = props.template && JSON.parse(props.template);
@@ -300,24 +294,24 @@ const Chart = (props: ChartProp) => {
             console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
         }
         if (template) {
-            playout.template = template;
+            baseLayout.template = template;
         }
         return {
-            ...playout,
-            title: title || playout.title,
+            ...baseLayout,
+            title: title || baseLayout.title,
             xaxis: {
                 title:
                     config.traces.length && config.traces[0].length && config.traces[0][0]
                         ? getColNameFromIndexed(config.columns[config.traces[0][0]].dfid)
                         : undefined,
-                ...playout.xaxis,
+                ...baseLayout.xaxis,
             },
             yaxis: {
                 title:
                     config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
                         ? getColNameFromIndexed(config.columns[config.traces[0][1]].dfid)
                         : undefined,
-                ...playout.yaxis,
+                ...baseLayout.yaxis,
             },
             clickmode: "event+select",
         } as Layout;
@@ -326,7 +320,7 @@ const Chart = (props: ChartProp) => {
         title,
         config.columns,
         config.traces,
-        props.layout,
+        baseLayout,
         props.template,
         props.template_Dark_,
         props.template_Light_,

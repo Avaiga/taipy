@@ -421,7 +421,7 @@
           },
           {
             "name": "layout",
-            "type": "dict[str, any]",
+            "type": "dynamic(dict[str, any])",
             "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
           },
           {
