@@ -13,7 +13,7 @@ import os
 from unittest import mock
 
 from src.taipy.config._config import _Config
-from src.taipy.config.checker._checkers._gLobal_config_checker import _GlobalConfigChecker
+from src.taipy.config.checker._checkers._global_config_checker import _GlobalConfigChecker
 from src.taipy.config.checker.issue_collector import IssueCollector
 from src.taipy.config.global_app.global_app_config import GlobalAppConfig
 

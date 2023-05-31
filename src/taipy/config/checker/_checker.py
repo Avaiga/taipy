@@ -11,7 +11,7 @@
 from typing import List
 
 from ._checkers._config_checker import _ConfigChecker
-from ._checkers._gLobal_config_checker import _GlobalConfigChecker
+from ._checkers._global_config_checker import _GlobalConfigChecker
 from .issue_collector import IssueCollector
 
 
