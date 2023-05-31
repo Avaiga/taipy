@@ -10,7 +10,7 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(Any)",
+            "type": "dynamic(any)",
             "default_value": "\"\"",
             "doc": "The value displayed as text by this control."
           },
@@ -64,7 +64,7 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(Any)",
+            "type": "dynamic(any)",
             "default_value": "None",
             "doc": "The value represented by this control."
           },
@@ -107,7 +107,7 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(Any)",
+            "type": "dynamic(any)",
             "doc": "The numerical value represented by this control."
           },
           {
@@ -130,18 +130,18 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(int | float | str)",
+            "type": "dynamic(int|float|str)",
             "doc": "The value that is set for this slider.<br/>It would be a <i>lov</i> label if it is used."
           },
           {
             "name": "min",
-            "type": "int | float",
+            "type": "int|float",
             "default_value": "0",
             "doc": "The minimum value.<br/>This is ignored when <i>lov</i> is defined."
           },
           {
             "name": "max",
-            "type": "int | float",
+            "type": "int|float",
             "default_value": "100",
             "doc": "The maximum value.<br/>This is ignored when <i>lov</i> is defined."
           },
@@ -260,7 +260,7 @@
             "name": "data",
             "default_property": true,
             "required": true,
-            "type": "dynamic(Any)",
+            "type": "dynamic(any)",
             "doc": "The data object bound to this chart control.<br/>See the section on the <a href=\"#the-data-property\"><i>data</i> property</a> below for details."
           },
           {
@@ -369,15 +369,15 @@
           {
             "name": "on_range_change",
             "type": "Callback",
-            "doc": "Callback function called when the visible part of the x axis changes.<br/>The function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
+            "doc": "The callback function that is invoked when the visible part of the x axis changes.<br/>The function receives four parameters:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the chart control.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li>\n</ul>",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
 
           },
           {
             "name": "columns",
-            "type": "str|List[str]|dict[str, dict[str, str]]",
+            "type": "str|list[str]|dict[str, dict[str, str]]",
             "default_value": "_All columns_",
-            "doc": "List of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>List[str]: list of names</li>\n<li>dict: {\"col_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
+            "doc": "The list of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"col_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
           },
           {
             "name": "label",
@@ -392,7 +392,7 @@
           {
             "name": "selected",
             "type": "indexed(dynamic(list[int]|str))",
-            "doc": "List of the selected point indices."
+            "doc": "The list of the selected point indices  ."
           },
           {
             "name": "color",
@@ -406,32 +406,32 @@
           },
           {
             "name": "marker",
-            "type": "indexed(dict[str, Any])",
+            "type": "indexed(dict[str, any])",
             "doc": "The type of markers used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-marker\">marker</a> for details.<br/>Color, opacity, size and symbol can be column name."
           },
           {
             "name": "line",
-            "type": "indexed(str|dict[str, Any])",
+            "type": "indexed(str|dict[str, any])",
             "doc": "The configuration of the line used for the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-line\">line</a> for details.<br/>If the value is a string, it must be a dash type or pattern (see <a href=\"https://plotly.com/python/reference/scatter/#scatter-line-dash\">dash style of lines</a> for details)."
           },
           {
             "name": "selected_marker",
-            "type": "indexed(dict[str, Any])",
+            "type": "indexed(dict[str, any])",
             "doc": "The type of markers used for selected points in the indicated trace.<br/>See <a href=\"https://plotly.com/javascript/reference/scatter/#scatter-selected-marker\">selected marker for details."
           },
           {
             "name": "layout",
-            "type": "dict[str, Any]",
+            "type": "dict[str, any]",
             "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/layout/\">layout object</a>."
           },
           {
             "name": "plot_config",
-            "type": "dict[str, Any]",
+            "type": "dict[str, any]",
             "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/configuration-options/\"> configuration options object</a>."
           },
           {
             "name": "options",
-            "type": "indexed(dict[str, Any])",
+            "type": "indexed(dict[str, any])",
             "doc": "The <i>plotly.js</i> compatible <a href=\"https://plotly.com/javascript/reference/\">data object where dynamic data will be overridden.</a>."
           },
           {
@@ -505,7 +505,7 @@
           {
             "name": "content",
             "default_property": true,
-            "type": "dynamic(url | path | file | ReadableBuffer)",
+            "type": "dynamic(url|path|file|ReadableBuffer)",
             "doc": "The content of the file.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the data is transferred depends on the the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary file.</li>\n</ul>"
           },
           {
@@ -602,7 +602,7 @@
           {
             "name": "content",
             "default_property": true,
-            "type": "dynamic(url | path | file | ReadableBuffer)",
+            "type": "dynamic(url|path|file|ReadableBuffer)",
             "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
           },
           {
@@ -640,7 +640,7 @@
           {
             "name": "display",
             "default_property": true,
-            "type": "dynamic(Any)",
+            "type": "dynamic(any)",
             "doc": "The label to be displayed.<br/>This can be formatted if it is a numerical value."
           },
           {
@@ -697,7 +697,7 @@
           {
             "name": "lov",
             "default_property": true,
-            "type": "dynamic(str|List[str|Icon|Any])",
+            "type": "dynamic(str|list[str|Icon|any])",
             "doc": "The list of menu option values."
           },
           {
@@ -748,7 +748,7 @@
           "properties": [
             {
                 "name": "lov",
-                "type": "dict[str, Any]",
+                "type": "dict[str, any]",
                 "doc": "The list of pages. The keys should be page id and start with \"/\", the values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
             }
         ]
@@ -810,14 +810,14 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dict|list[dict]|tuple|list[tuple]",
-            "doc": "The different statuses to represent. See below."
+            "type": "tuple|dict|list[dict]|list[tuple]",
+            "doc": "The different status items to represent. See below."
           },
           {
             "name": "without_close",
             "type": "bool",
             "default_value": "False",
-            "doc": "If True, the user cannot hide the child statuses."
+            "doc": "If True, the user cannot remove the status items from the list."
           }
         ]
       }
@@ -834,7 +834,7 @@
             "name": "data",
             "default_property": true,
             "required": true,
-            "type": "Any",
+            "type": "any",
             "doc": "The data to be represented in this table."
           },
           {
@@ -873,15 +873,15 @@
           },
           {
             "name": "page_size_options",
-            "type": "List[int]|str",
+            "type": "list[int]|str",
             "default_value": "[50, 100, 500]",
             "doc": "The list of available page sizes that users can choose."
           },
           {
             "name": "columns",
-            "type": "str|List[str]|Dict[str, Dict[str, str|int]]",
+            "type": "str|list[str]|dict[str, dict[str, str|int]]",
             "default_value": "<i>shows all columns when empty</i>",
-            "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>List[str]: list of column names</li>\n<li>dict: a dictionary with entries matching: {\"col name\": {format: \"format\", index: 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of the columns.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul>"
+            "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: list of column names</li>\n<li>dict: a dictionary with entries matching: {\"col name\": {format: \"format\", index: 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of the columns.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul>"
           },
           {
             "name": "date_format",
@@ -977,7 +977,7 @@
           {
             "name": "on_edit",
             "type": "Callback",
-            "doc": "The name of a function that is to be triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (Any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value as entered by the user.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
+            "doc": "The name of a function that is to be triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value as entered by the user.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
             "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
@@ -1112,7 +1112,7 @@
             "name": "class_name",
             "default_property": true,
             "type": "dynamic(str)",
-            "doc": "List of CSS class names that will be associated with the generated HTML Element.<br/>This class names will be added to the default <code>taipy-part</code>."
+            "doc": "A list of CSS class names, separated by white spaces, that will be associated with the generated HTML Element.<br/>These class names are added to the default <code>taipy-part</code>."
           },
           {
             "name": "page",
@@ -1250,12 +1250,12 @@
           {
             "name": "value",
             "default_property": true,
-            "type": "dynamic(Any)",
+            "type": "dynamic(any)",
             "doc": "Bound to the selection value."
           },
           {
             "name": "lov",
-            "type": "dict[str, Any]",
+            "type": "dict[str, any]",
             "doc": "The list of values. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
           },
           {
@@ -1286,7 +1286,7 @@
           {
             "name": "on_change",
             "type": "Callback",
-            "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (Any): the new value.</li>\n</ul>",
+            "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (any): the new value.</li>\n</ul>",
             "signature": [["state", "State"], ["var_name", "str"], ["value", ""]]
           }
         ]
@@ -1339,7 +1339,7 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "Name of a function that is triggered when a specific key is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the input.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args (List):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>",
+            "doc": "Name of a function that is triggered when a specific key is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the input.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args (list):\n<ul><li>key name</li><li>variable name</li><li>current value</li></ul>\n</li>\n</ul>\n</li>\n</ul>",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
@@ -1362,18 +1362,18 @@
           },
           {
             "name": "properties",
-            "type": "dict[str, Any]",
+            "type": "dict[str, any]",
             "doc": "Bound to a dictionary that contains additional properties for this element."
           },
           {
             "name": "class_name",
             "type": "dynamic(str)",
-            "doc": "List of CSS class names that will be associated with the generated HTML Element.<br/>This class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
+            "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>This class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
           },
           {
             "name": "hover_text",
             "type": "dynamic(str)",
-            "doc": "Information that is displayed when the user hovers over this element."
+            "doc": "The information that is displayed when the user hovers over this element."
           }
         ]
       }
