@@ -75,7 +75,7 @@ def datanode_data():
     return {
         "name": "foo",
         "storage_type": "in_memory",
-        "scope": "pipeline",
+        "scope": "scenario",
         "default_data": ["1991-01-01T00:00:00"],
     }
 
@@ -134,14 +134,14 @@ def default_df_datanode():
 
 @pytest.fixture
 def default_datanode_config():
-    return Config.configure_data_node(f"taipy_{uuid.uuid4().hex}", "in_memory", Scope.PIPELINE)
+    return Config.configure_data_node(f"taipy_{uuid.uuid4().hex}", "in_memory", Scope.SCENARIO)
 
 
 @pytest.fixture
 def default_datanode_config_list():
     configs = []
     for i in range(10):
-        configs.append(Config.configure_data_node(id=f"ds_{i}", storage_type="in_memory", scope=Scope.PIPELINE))
+        configs.append(Config.configure_data_node(id=f"ds_{i}", storage_type="in_memory", scope=Scope.SCENARIO))
     return configs
 
 
