@@ -278,9 +278,10 @@ class GuiCore(ElementLibrary):
                 "on_scenario_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_scenario}}"),
             },
         ),
-        "scenario_visualizer": Element(
+        "scenario": Element(
             "scenario",
             {
+                "id": ElementProperty(PropertyType.string),
                 "scenario": ElementProperty(GuiCoreScenarioAdapter),
             },
             inner_properties={
