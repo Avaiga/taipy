@@ -4,7 +4,7 @@ const { existsSync, writeFileSync, appendFileSync } = require("fs");
 const { sep } = require("path");
 
 const getGuiEnv = () =>
-  execSync(process.platform === "win32" ? 'pipenv run pip show taipy-gui | findStr "Location:"' : "pipenv run pip show taipy-gui | grep Location:", {
+  execSync(process.platform === "win32" ? 'pip show taipy-gui | findStr "Location:"' : "pip show taipy-gui | grep Location:", {
     stdio: ["pipe", "pipe", "pipe"],
   })
     .toString()
