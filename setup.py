@@ -47,7 +47,7 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     install_requires=[
-        "flask>=2.2,<3.0",
+        "flask>=2.2,<2.3",
         "flask-restful>=0.3.9,<0.4",
         "flask-migrate>=3.1,<4.0",
         "flask-jwt-extended>=4.3,<5.0",
