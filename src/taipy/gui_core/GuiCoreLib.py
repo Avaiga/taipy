@@ -15,7 +15,7 @@ from datetime import datetime
 from dateutil import parser
 
 import taipy as tp
-from taipy.core import Cycle, DataNode, Scenario
+from taipy.core import Cycle, DataNode, Scenario, Pipeline
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -103,13 +103,13 @@ class GuiCoreScenarioDagAdapter(_TaipyBase):
 
 
 class GuiCoreContext(CoreEventConsumerBase):
-    __PROP_SCENARIO_ID = "id"
+    __PROP_ENTITY_ID = "id"
     __PROP_SCENARIO_CONFIG_ID = "config"
     __PROP_SCENARIO_DATE = "date"
-    __PROP_SCENARIO_NAME = "name"
+    __PROP_ENTITY_NAME = "name"
     __PROP_SCENARIO_PRIMARY = "primary"
     __PROP_SCENARIO_TAGS = "tags"
-    __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_SCENARIO_NAME)
+    __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_ENTITY_NAME)
     _CORE_CHANGED_NAME = "core_changed"
     _SCENARIO_SELECTOR_ERROR_VAR = "gui_core_sc_error"
     _SCENARIO_SELECTOR_ID_VAR = "gui_core_sc_id"
@@ -182,10 +182,10 @@ class GuiCoreContext(CoreEventConsumerBase):
         update = args[0]
         delete = args[1]
         data = args[2]
-        name = data.get(GuiCoreContext.__PROP_SCENARIO_NAME)
         scenario = None
+        name = data.get(GuiCoreContext.__PROP_ENTITY_NAME)
         if update:
-            scenario_id = data.get(GuiCoreContext.__PROP_SCENARIO_ID)
+            scenario_id = data.get(GuiCoreContext.__PROP_ENTITY_ID)
             if delete:
                 try:
                     tp.delete(scenario_id)
@@ -211,7 +211,7 @@ class GuiCoreContext(CoreEventConsumerBase):
                 state.assign(GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
             with scenario as sc:
-                sc._properties[GuiCoreContext.__PROP_SCENARIO_NAME] = name
+                sc._properties[GuiCoreContext.__PROP_ENTITY_NAME] = name
                 if props := data.get("properties"):
                     try:
                         for prop in props:
@@ -222,28 +222,61 @@ class GuiCoreContext(CoreEventConsumerBase):
                     except Exception as e:
                         state.assign(GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
 
-    def edit_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def edit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
         data = args[0]
-        scenario_id = data.get(GuiCoreContext.__PROP_SCENARIO_ID)
-        scenario: Scenario = tp.get(scenario_id)
-        if scenario:
-            with scenario as sc:
+        scenario_id = data.get(GuiCoreContext.__PROP_ENTITY_ID)
+        entity: Scenario | Pipeline = tp.get(scenario_id)
+        if entity:
+            with entity as ent:
                 try:
-                    if data.get(GuiCoreContext.__PROP_SCENARIO_PRIMARY, False):
-                        tp.set_primary(sc)
-                    sc.tags = {t for t in data.get(GuiCoreContext.__PROP_SCENARIO_TAGS, [])}
-                    sc._properties[GuiCoreContext.__PROP_SCENARIO_NAME] = data.get(GuiCoreContext.__PROP_SCENARIO_NAME)
-                    if props := data.get("properties"):
+                    if isinstance(entity, Scenario):
+                        primary = data.get(GuiCoreContext.__PROP_SCENARIO_PRIMARY)
+                        if primary is True:
+                            tp.set_primary(ent)
+                        tags = data.get(GuiCoreContext.__PROP_SCENARIO_TAGS)
+                        if isinstance(tags, (list, tuple)):
+                            ent.tags = {t for t in tags}
+                    name = data.get(GuiCoreContext.__PROP_ENTITY_NAME)
+                    if isinstance(name, str):
+                        ent.properties[GuiCoreContext.__PROP_ENTITY_NAME] = name
+                    props = data.get("properties")
+                    if isinstance(props, (list, tuple)):
                         for prop in props:
                             key = prop.get("key")
                             if key and key not in GuiCoreContext.__SCENARIO_PROPS:
-                                sc._properties[key] = prop.get("value")
-                        state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
+                                ent.properties[key] = prop.get("value")
+                    deleted_props = data.get("deleted_properties")
+                    if isinstance(deleted_props, (list, tuple)):
+                        for prop in deleted_props:
+                            key = prop.get("key")
+                            if key and key not in GuiCoreContext.__SCENARIO_PROPS:
+                                ent.properties.pop(key, None)
+                    props = data.get("properties")
+                    if isinstance(props, (list, tuple)):
+                        for prop in props:
+                            key = prop.get("key")
+                            if key and key not in GuiCoreContext.__SCENARIO_PROPS:
+                                ent.properties[key] = prop.get("value")
+                    state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
                 except Exception as e:
                     state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
+
+    def submit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+            return
+        data = args[0]
+        entity_id = data.get(GuiCoreContext.__PROP_ENTITY_ID)
+        entity = tp.get(entity_id)
+        if entity:
+                try:
+                    tp.submit(entity)
+                    state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
+                except Exception as e:
+                    state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
     def broadcast_core_changed(self):
         self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, "")
@@ -283,9 +316,22 @@ class GuiCore(ElementLibrary):
             {
                 "id": ElementProperty(PropertyType.string),
                 "scenario": ElementProperty(GuiCoreScenarioAdapter),
+                "active": ElementProperty(PropertyType.dynamic_boolean, True),
+                "expandable": ElementProperty(PropertyType.boolean, True),
+                "expanded": ElementProperty(PropertyType.dynamic_boolean, False),
+                "submit": ElementProperty(PropertyType.boolean, True),
+                "delete": ElementProperty(PropertyType.boolean, True),
+                "config": ElementProperty(PropertyType.boolean, False),
+                "cycle": ElementProperty(PropertyType.boolean, False),
+                "tags": ElementProperty(PropertyType.boolean, False),
+                "properties": ElementProperty(PropertyType.boolean, True),
+                "pipelines": ElementProperty(PropertyType.boolean, True),
+                "submit_pipelines": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
-                "on_scenario_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_scenario}}"),
+                "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_entity}}"),
+                "on_submit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.submit_entity}}"),
+                "on_delete": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
                 "error": ElementProperty(PropertyType.react, f"{{{GuiCoreContext._SCENARIO_VIZ_ERROR_VAR}}}"),
             },
