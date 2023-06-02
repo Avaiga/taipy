@@ -160,13 +160,13 @@
             "name": "continuous",
             "type": "bool",
             "default_value": "True",
-            "doc": "If set to False, the control emits an on_change notification only when the mouse button is released, otherwise notifications are emitted during the cursor movements. \nIf <i>lov</i> is defined, the default value is False."
+            "doc": "If set to False, the control emits an on_change notification only when the mouse button is released, otherwise notifications are emitted during the cursor movements.<br/>If <i>lov</i> is defined, the default value is False."
           },
           {
             "name": "change_delay",
             "type": "int",
             "default_value": "<i>App config</i>",
-            "doc": "Minimum time between triggering two <i>on_change</i> calls.\nThe default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None or 0, there's no delay."
+            "doc": "Minimum time between triggering two <i>on_change</i> calls.<br/>The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None or 0, there's no delay."
           },
           {
             "name": "width",
@@ -177,13 +177,13 @@
           {
             "name": "height",
             "type": "str",
-            "doc": "The height, in CSS units, of this element.\nIt defaults to the <i>width</i> value when using the vertical orientation."
+            "doc": "The height, in CSS units, of this element.<br/>It defaults to the <i>width</i> value when using the vertical orientation."
           },
           {
             "name": "orientation",
             "type": "str",
             "default_value": "\"horizontal\"",
-            "doc": "The orientation of this slider.\nValid values are \"horizontal\" or \"vertical\"."
+            "doc": "The orientation of this slider.<br/>Valid values are \"horizontal\" or \"vertical\"."
           }
         ]
       }
@@ -226,7 +226,7 @@
             "name": "date",
             "default_property": true,
             "type": "dynamic(datetime)",
-            "doc": "The date that this control represents and can modify.\nIt is typically bound to a <code>datetime</code> object."
+            "doc": "The date that this control represents and can modify.<br/>It is typically bound to a <code>datetime</code> object."
           },
           {
             "name": "with_time",
@@ -237,7 +237,7 @@
           {
             "name": "format",
             "type": "str",
-            "doc": "The format to apply to the value.\nSee below."
+            "doc": "The format to apply to the value. See below."
           },
           {
             "name": "editable",
@@ -377,7 +377,7 @@
             "name": "columns",
             "type": "str|list[str]|dict[str, dict[str, str]]",
             "default_value": "_All columns_",
-            "doc": "The list of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"col_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
+            "doc": "The list of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
           },
           {
             "name": "label",
@@ -732,7 +732,7 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "The name of the function that will be triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
+            "doc": "The name of the function that is triggered when a menu option is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the button.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: List where the first element contains the id of the selected option.</li>\n</ul>\n</li>\n</ul>",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           }
         ]
@@ -841,67 +841,67 @@
             "name": "page_size",
             "type": "int",
             "default_value": "100",
-            "doc": "For paginated table, the number of rows displayed."
+            "doc": "For a paginated table, the number of visible rows."
           },
           {
             "name": "allow_all_rows",
             "type": "bool",
             "default_value": "False",
-            "doc": "For paginated table, adds an option to show all rows."
+            "doc": "For a paginated table, adds an option to show all the rows."
           },
           {
             "name": "show_all",
             "type": "bool",
             "default_value": "False",
-            "doc": "For paginated table, show all rows."
+            "doc": "For a paginated table, show all the rows."
           },
           {
             "name": "auto_loading",
             "type": "bool",
             "default_value": "False",
-            "doc": "data will be loaded on demand."
+            "doc": "If True, the data will be loaded on demand."
           },
           {
-            "name": "width[<i>col_name</i>]",
+            "name": "width[<i>column_name</i>]",
             "type": "str",
             "doc": "The width, in CSS units, of the indicated column."
           },
           {
             "name": "selected",
             "type": "list[int]|str",
-            "doc": "The list of the indices of the rows to show as selected."
+            "doc": "The list of the indices of the rows to be displayed as selected."
           },
           {
             "name": "page_size_options",
             "type": "list[int]|str",
             "default_value": "[50, 100, 500]",
-            "doc": "The list of available page sizes that users can choose."
+            "doc": "The list of available page sizes that users can choose from."
           },
           {
             "name": "columns",
             "type": "str|list[str]|dict[str, dict[str, str|int]]",
             "default_value": "<i>shows all columns when empty</i>",
-            "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: list of column names</li>\n<li>dict: a dictionary with entries matching: {\"col name\": {format: \"format\", index: 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of the columns.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul>"
+            "doc": "The list of the column names to display.\n<ul>\n<li>str: Semicolon (';')-separated list of column names.</li>\n<li>list[str]: The list of column names.</li>\n<li>dict: A dictionary with entries matching: {\"col name\": {format: \"format\", index: 1}}.<br/>\nif <i>index</i> is specified, it represents the display order of the columns.\nIf <i>index</i> is not specified, the list order defines the index.<br/>\nIf <i>format</i> is specified, it is used for numbers or dates.</li>\n</ul>"
           },
           {
             "name": "date_format",
             "type": "str",
             "default_value": "\"MM/dd/yyyy\"",
-            "doc": "The date format that is used for all date columns when format is not specifically defined."
+            "doc": "The date format used for all date columns when the format is not specifically defined."
           },
           {
             "name": "number_format",
             "type": "str",
-            "doc": "The number format that is used for all number columns when format is not specifically defined."
+            "doc": "The number format used for all number columns when the format is not specifically defined."
           },
           {
-            "name": "group_by[<i>col_name</i>]",
+            "name": "group_by[<i>column_name</i>]",
             "type": "bool",
             "default_value": "False",
             "doc": "Indicates, if True, that the given column can be aggregated.<br/>See <a href=\"#aggregation\">below</a> for details."
           },
           {
-            "name": "apply[<i>col_name</i>]",
+            "name": "apply[<i>column_name</i>]",
             "type": "str",
             "default_value": "\"first\"",
             "doc": "The name of the aggregation function to use.<br/>This is used only if <i>group_by[column_name]</i> is set to True.<br/>See <a href=\"#aggregation\">below</a> for details."
@@ -909,12 +909,12 @@
           {
             "name": "style",
             "type": "str",
-            "doc": "Allows the styling of table lines.<br/>See <a href=\"#styling\">below</a> for details."
+            "doc": "Allows the styling of table lines.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
           },
           {
-            "name": "style[<i>col_name</i>]",
+            "name": "style[<i>column_name</i>]",
             "type": "str",
-            "doc": "Allows the styling of table cells.<br/>See <a href=\"#styling\">below</a> for details."
+            "doc": "Allows the styling of table cells.<br/>See <a href=\"#dynamic-styling\">below</a> for details."
           },
           {
             "name": "tooltip",
@@ -922,7 +922,7 @@
             "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell%20tooltip\">below</a> for details."
           },
           {
-            "name": "tooltip[<i>col_name</i>]",
+            "name": "tooltip[<i>column_name</i>]",
             "type": "str",
             "doc": "The name of the function that must return a tooltip text for a cell.<br/>See <a href=\"#cell%20tooltip\">below</a> for details."
           },
@@ -945,7 +945,7 @@
             "doc": "Indicates, if True, that all columns can be filtered."
           },
           {
-            "name": "filter[<i>col_name</i>]",
+            "name": "filter[<i>column_name</i>]",
             "type": "bool",
             "default_value": "False",
             "doc": "Indicates, if True, that the indicated column can be filtered."
@@ -957,7 +957,7 @@
             "doc": "The replacement text for NaN (not-a-number) values."
           },
           {
-            "name": "nan_value[<i>col_name</i>]",
+            "name": "nan_value[<i>column_name</i>]",
             "type": "str",
             "default_value": "\"\"",
             "doc": "The replacement text for NaN (not-a-number) values for the indicated column."
@@ -969,7 +969,7 @@
             "doc": "Indicates, if True, that all columns can be edited."
           },
           {
-            "name": "editable[<i>col_name</i>]",
+            "name": "editable[<i>column_name</i>]",
             "type": "bool",
             "default_value": "editable",
             "doc": "Indicates, if False, that the indicated column cannot be edited when editable is True."
@@ -977,38 +977,38 @@
           {
             "name": "on_edit",
             "type": "Callback",
-            "doc": "The name of a function that is to be triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value as entered by the user.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
+            "doc": "The name of a function that is triggered when a cell edition is validated.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n<li>col (str): the column name.</li>\n<li>value (any): the new cell value cast to the type of the column.</li>\n<li>user_value (str): the new cell value, as it was provided by the user.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot edit cells.",
             "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "on_delete",
             "type": "str",
-            "doc": "The name of a function that is to be triggered when a row is deleted.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot delete rows.",
+            "doc": "The name of a function that is triggered when a row is deleted.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot delete rows.",
             "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "on_add",
             "type": "str",
-            "doc": "The name of a function that is to be triggered when the user requests a row to be added.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot add rows.",
+            "doc": "The name of a function that is triggered when the user requests a row to be added.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li>\n</ul>\n</li>\n</ul><br/>If this property is not set, the user cannot add rows.",
             "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "on_action",
             "type": "str",
-            "doc": "The name of a function that is to be triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li></ul></li></ul>.",
+            "doc": "The name of a function that is triggered when the user selects a row.<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the name of the tabular data variable.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>index (int): the row index.</li></ul></li></ul>.",
             "signature": [["state", "State"], ["var_name", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "size",
             "type": "str",
             "default_value": "\"small\"",
-            "doc": "The size of the rows, valid values are \"small\" and \"medium\"."
+            "doc": "The size of the rows.<br/>Valid values are \"small\" and \"medium\"."
           },
           {
             "name": "rebuild",
             "type": "dynamic(bool)",
             "default_value": "False",
-            "doc": "Allows dynamic columns refresh if set to True."
+            "doc": "If set to True, this allows to dynamically refresh the  columns."
           }
         ]
       }
@@ -1032,7 +1032,7 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "Name of a function that is triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
+            "doc": "Name of a function triggered when a button is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the dialog.</li>\n<li>action (str): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul>\n<li>args: a list where the first element contains the index of the selected label.</li>\n</ul>\n</li>\n</ul>",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
@@ -1195,7 +1195,7 @@
           {
             "name": "on_close",
             "type": "Callback",
-            "doc": "The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
+            "doc": "The name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>All parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul><br/>If this property is not set, no function is called when this pane is closed.",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"]]
           },
           {
@@ -1368,7 +1368,7 @@
           {
             "name": "class_name",
             "type": "dynamic(str)",
-            "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>This class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
+            "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
           },
           {
             "name": "hover_text",
