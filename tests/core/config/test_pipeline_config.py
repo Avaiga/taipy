@@ -12,6 +12,8 @@
 import os
 from unittest import mock
 
+import pytest
+
 from taipy.config.config import Config
 
 
@@ -69,3 +71,11 @@ def test_pipeline_config_with_env_variable_value():
         assert Config.pipelines["pipeline_name"].prop == "bar"
         assert Config.pipelines["pipeline_name"].properties["prop"] == "bar"
         assert Config.pipelines["pipeline_name"]._properties["prop"] == "ENV[FOO]"
+
+
+def test_pipeline_config_configure_deprecated():
+    with pytest.warns(DeprecationWarning):
+        Config.configure_pipeline("pipeline_id", [])
+
+    with pytest.warns(DeprecationWarning):
+        Config.configure_default_pipeline([])

@@ -45,9 +45,11 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         edits (List[Edit^]): The ordered list of edits for that job.
         version (str): The string indicates the application version of the data node to instantiate. If not provided,
             the current version is used.
-        validity_period (Optional[timedelta]): The validity period of a data node.
-            Implemented as a timedelta. If *validity_period* is set to None, the data_node is
-            always up-to-date.
+        validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
+            which the data node can be considered up-to-date. Once the validity period has passed, the data node is
+            considered stale and relevant tasks will run even if they are skippable (see the
+            [Task management page](https://docs.taipy.io/en/latest/manuals/core/entities/task-mgt) for more details).
+            If _validity_period_ is set to `None`, the data node is always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
         path (str): The path to the Parquet file.

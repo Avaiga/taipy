@@ -20,6 +20,7 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
 from taipy.config.section import Section
 
+from ..common._warnings import _warn_deprecated
 from .pipeline_config import PipelineConfig
 from .task_config import TaskConfig
 
@@ -72,10 +73,12 @@ class ScenarioConfig(Section):
 
     @property
     def pipeline_configs(self) -> List[PipelineConfig]:
+        _warn_deprecated("PipelineConfig")
         return self._pipelines
 
     @property
     def pipelines(self) -> List[PipelineConfig]:
+        _warn_deprecated("PipelineConfig")
         return self._pipelines
 
     @classmethod

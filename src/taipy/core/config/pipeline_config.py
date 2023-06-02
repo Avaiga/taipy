@@ -17,6 +17,7 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.config import Config
 from taipy.config.section import Section
 
+from ..common._warnings import _warn_deprecated
 from .task_config import TaskConfig
 
 
@@ -96,6 +97,7 @@ class PipelineConfig(Section):
         """
         section = PipelineConfig(id, task_configs, **properties)
         Config._register(section)
+        _warn_deprecated("PipelineConfig")
         return Config.sections[PipelineConfig.name][id]
 
     @staticmethod
@@ -116,4 +118,5 @@ class PipelineConfig(Section):
         """
         section = PipelineConfig(_Config.DEFAULT_KEY, task_configs, **properties)
         Config._register(section)
+        _warn_deprecated("PipelineConfig")
         return Config.sections[PipelineConfig.name][_Config.DEFAULT_KEY]

@@ -12,6 +12,8 @@
 import os
 from unittest import mock
 
+import pytest
+
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -134,3 +136,12 @@ def test_scenario_create_from_task_config():
         "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
     )
     assert scenario_config_2.pipeline_configs[0].id == pipeline_name
+
+
+def test_pipeline_config_configure_deprecated():
+    pipeline_config = Config.configure_default_pipeline([])
+    scenario_config = Config.configure_scenario("scenario_id", pipeline_configs=[pipeline_config])
+    with pytest.warns(DeprecationWarning):
+        scenario_config.pipelines
+    with pytest.warns(DeprecationWarning):
+        scenario_config.pipeline_configs
