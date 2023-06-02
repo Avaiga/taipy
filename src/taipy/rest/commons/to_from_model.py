@@ -9,20 +9,20 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
-from taipy.core.data._data_repository_factory import _DataRepositoryFactory
-from taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
-from taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
-from taipy.core.task._task_repository_factory import _TaskRepositoryFactory
+from taipy.core.cycle._cycle_converter import _CycleConverter
+from taipy.core.data._data_converter import _DataNodeConverter
+from taipy.core.pipeline._pipeline_converter import _PipelineConverter
+from taipy.core.scenario._scenario_converter import _ScenarioConverter
+from taipy.core.task._task_converter import _TaskConverter
 
-repositories = {
-    "scenario": _ScenarioRepositoryFactory._build_repository,
-    "pipeline": _PipelineRepositoryFactory._build_repository,
-    "task": _TaskRepositoryFactory._build_repository,
-    "data": _DataRepositoryFactory._build_repository,
-    "cycle": _CycleRepositoryFactory._build_repository,
+entity_to_models = {
+    "scenario": _ScenarioConverter._entity_to_model,
+    "pipeline": _PipelineConverter._entity_to_model,
+    "task": _TaskConverter._entity_to_model,
+    "data": _DataNodeConverter._entity_to_model,
+    "cycle": _CycleConverter._entity_to_model,
 }
 
 
 def _to_model(repository, entity, **kwargs):
-    return repositories[repository](**kwargs)._to_model(entity)
+    return entity_to_models[repository](entity)
