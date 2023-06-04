@@ -16,7 +16,7 @@ from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
-from .._backup._backup import append_to_backup_file, remove_from_backup_file
+from .._backup._backup import _append_to_backup_file, _remove_from_backup_file
 from .._manager._manager import _Manager
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..config.data_node_config import DataNodeConfig
@@ -74,7 +74,7 @@ class _DataManager(_Manager[DataNode]):
         data_node = cls.__create(data_node_config, owner_id, parent_ids)
         cls._set(data_node)
         if isinstance(data_node, _AbstractFileDataNode):
-            append_to_backup_file(new_file_path=data_node._path)
+            _append_to_backup_file(new_file_path=data_node._path)
         _publish_event(cls._EVENT_ENTITY_TYPE, data_node.id, EventOperation.CREATION, None)
         return data_node
 
@@ -119,13 +119,13 @@ class _DataManager(_Manager[DataNode]):
     @classmethod
     def _remove_dn_file_path_in_backup_file(cls, data_node: DataNode):
         if isinstance(data_node, _AbstractFileDataNode):
-            remove_from_backup_file(to_remove_file_path=data_node.path)
+            _remove_from_backup_file(to_remove_file_path=data_node.path)
 
     @classmethod
     def _remove_dn_file_paths_in_backup_file(cls, data_nodes: Iterable[DataNode]):
         for data_node in data_nodes:
             if isinstance(data_node, _AbstractFileDataNode):
-                remove_from_backup_file(to_remove_file_path=data_node.path)
+                _remove_from_backup_file(to_remove_file_path=data_node.path)
 
     @classmethod
     def _delete(cls, data_node_id: DataNodeId):

@@ -11,18 +11,17 @@
 
 
 import os
-import pathlib
 
 __BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME = "TAIPY_BACKUP_FILE_PATH"
 
 
-def append_to_backup_file(new_file_path: str):
+def _append_to_backup_file(new_file_path: str):
     if preserve_file_path := os.getenv(__BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME):
         with open(preserve_file_path, "a") as f:
             f.write(f"{new_file_path}\n")
 
 
-def remove_from_backup_file(to_remove_file_path: str):
+def _remove_from_backup_file(to_remove_file_path: str):
     preserve_file_path = os.getenv(__BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME, None)
     if preserve_file_path:
         try:
@@ -45,6 +44,6 @@ def remove_from_backup_file(to_remove_file_path: str):
             pass
 
 
-def replace_in_backup_file(old_file_path: str, new_file_path: str):
-    remove_from_backup_file(old_file_path)
-    append_to_backup_file(new_file_path)
+def _replace_in_backup_file(old_file_path: str, new_file_path: str):
+    _remove_from_backup_file(old_file_path)
+    _append_to_backup_file(new_file_path)
