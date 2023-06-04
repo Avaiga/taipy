@@ -18,7 +18,7 @@ import modin.pandas as pd
 
 from taipy.config.common.scope import Scope
 
-from .._backup._backup import replace_in_backup_file
+from .._backup._backup import _replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from .abstract_file import _AbstractFileDataNode
@@ -45,7 +45,7 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
             which the data node can be considered up-to-date. Once the validity period has passed, the data node is
             considered stale and relevant tasks will run even if they are skippable (see the
-            [Task management page](https://docs.taipy.io/en/latest/manuals/core/entities/task-mgt) for more details).
+            [Task management page](../core/entities/task-mgt.md) for more details).
             If _validity_period_ is set to `None`, the data node is always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
@@ -123,7 +123,7 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         self._path = value
         self.properties[self.__PATH_KEY] = value
         self.properties[self.__IS_GENERATED_KEY] = False
-        replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
+        _replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
 
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)

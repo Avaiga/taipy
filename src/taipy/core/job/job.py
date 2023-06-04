@@ -25,6 +25,7 @@ from ..common._utils import _fcts_to_dict, _load_fct
 from ..exceptions.exceptions import InvalidSubscriber
 from ..task.task import Task
 from ._job_model import _JobModel
+from ._utils import _migrate_subscriber
 from .job_id import JobId
 from .status import Status
 
@@ -347,7 +348,9 @@ class Job(_Entity, _Labeled):
         job.creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
         for it in model.subscribers:
             try:
-                job._subscribers.append(_load_fct(it.get("fct_module"), it.get("fct_name")))  # type:ignore
+                # Migrate from taipy-core 2.2 to taipy-core 2.3
+                fct_module, fct_name = _migrate_subscriber(it.get("fct_module"), it.get("fct_name"))
+                job._subscribers.append(_load_fct(fct_module, fct_name))  # type:ignore
             except AttributeError:
                 raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
         job._stacktrace = model.stacktrace
