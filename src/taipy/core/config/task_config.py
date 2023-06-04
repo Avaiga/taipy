@@ -105,6 +105,13 @@ class TaskConfig(Section):
     def default_config(cls):
         return TaskConfig(cls._DEFAULT_KEY, None, [], [], False)
 
+    def _clean(self):
+        self.function = None
+        self._inputs = []
+        self._outputs = []
+        self._skippable = False
+        self._properties.clear()
+
     def _to_dict(self):
         return {
             self._INPUT_KEY: self._inputs,

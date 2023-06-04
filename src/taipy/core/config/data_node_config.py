@@ -306,6 +306,11 @@ class DataNodeConfig(Section):
             cls._DEFAULT_KEY, cls._DEFAULT_STORAGE_TYPE, cls._DEFAULT_SCOPE, cls._DEFAULT_VALIDITY_PERIOD
         )
 
+    def _clean(self):
+        self._storage_type = self._DEFAULT_STORAGE_TYPE
+        self._scope = self._DEFAULT_SCOPE
+        self._properties.clear()
+
     def _to_dict(self):
         as_dict = {}
         if self._storage_type is not None:

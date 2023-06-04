@@ -52,6 +52,10 @@ class JobConfig(UniqueSection):
     def default_config(cls):
         return JobConfig(cls._DEFAULT_MODE)
 
+    def _clean(self):
+        self.mode = self._DEFAULT_MODE
+        self._config = self._create_config(self.mode)
+
     def _to_dict(self):
         as_dict = {}
         if self.mode is not None:
