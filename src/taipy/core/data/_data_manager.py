@@ -130,10 +130,10 @@ class _DataManager(_Manager[DataNode]):
     @classmethod
     def _delete(cls, data_node_id: DataNodeId):
         data_node = cls._get(data_node_id, None)
-        super()._delete(data_node_id)
         if data_node:
             cls._clean_pickle_file(data_node)
             cls._remove_dn_file_path_in_backup_file(data_node)
+        super()._delete(data_node_id)
 
     @classmethod
     def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):
@@ -141,21 +141,21 @@ class _DataManager(_Manager[DataNode]):
         for data_node_id in data_node_ids:
             if data_node := cls._get(data_node_id):
                 data_nodes.append(data_node)
-        super()._delete_many(data_node_ids)
         cls._clean_pickle_files(data_nodes)
         cls._remove_dn_file_paths_in_backup_file(data_nodes)
+        super()._delete_many(data_node_ids)
 
     @classmethod
     def _delete_all(cls):
         data_nodes = cls._get_all()
-        super()._delete_all()
         cls._clean_pickle_files(data_nodes)
         cls._remove_dn_file_paths_in_backup_file(data_nodes)
+        super()._delete_all()
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
         data_nodes = cls._get_all(version_number)
-        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")
         cls._clean_pickle_files(data_nodes)
         cls._remove_dn_file_paths_in_backup_file(data_nodes)
+        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")
         _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
