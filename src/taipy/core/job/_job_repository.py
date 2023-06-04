@@ -15,6 +15,7 @@ from typing import Any, Iterable, List, Optional, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._orchestrator.utils import migrate_subscriber
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _fcts_to_dict, _load_fct
@@ -59,11 +60,12 @@ class _JobRepository(_AbstractRepository[_JobModel, Job]):  # type: ignore
         job._creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
         for it in model.subscribers:
             try:
-                job._subscribers.append(_load_fct(it.get("fct_module"), it.get("fct_name")))  # type:ignore
+                # Migrate from taipy-core 2.2 to taipy-core 2.3
+                fct_module, fct_name = migrate_subscriber(it.get("fct_module"), it.get("fct_name"))
+                job._subscribers.append(_load_fct(fct_module, fct_name))  # type:ignore
             except AttributeError:
                 raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
         job._stacktrace = model.stacktrace
-
         return job
 
     def load(self, model_id: str) -> Job:

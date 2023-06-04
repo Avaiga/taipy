@@ -11,9 +11,11 @@
 
 import datetime
 import traceback
+from unittest import mock
 
 import pytest
 
+from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
@@ -27,6 +29,7 @@ from src.taipy.core.job.job_id import JobId
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
+from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
@@ -147,3 +150,32 @@ class TestJobRepository:
         _DataManager._set(data_node)
         _TaskManager._set(task)
         assert repository._from_model(job_model).id == job.id
+
+    def test_from_model_version_2_2(self):
+        _TaskRepositoryFactory._build_repository()._save(Task("task_config_id", {}, print, id="tid"))
+        repository = _JobRepositoryFactory._build_repository()
+        subscribers = [
+            {
+                "fct_name": "_Scheduler._on_status_change",
+                "fct_params": [],
+                "fct_module": "taipy.core._scheduler._scheduler",
+            }
+        ]
+        job_model = _JobModel(
+            JobId("jid"),
+            "tid",
+            Status.COMPLETED,
+            False,
+            "sid",
+            datetime.datetime.now().isoformat(),
+            subscribers,
+            [],
+            "version",
+        )
+        with mock.patch("src.taipy.core.job._job_repository._load_fct") as mck:
+            mck.return_value = _Orchestrator._on_status_change
+            job = repository._from_model(job_model)
+            assert job._subscribers[0] == _Orchestrator._on_status_change
+            repository._save(job)
+        job = repository.load("jid")
+        assert job._subscribers[0] == _Orchestrator._on_status_change
