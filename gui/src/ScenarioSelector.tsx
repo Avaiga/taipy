@@ -59,6 +59,7 @@ import {
 } from "taipy-gui";
 
 import { Cycle, Scenario } from "./icons";
+import ConfirmDialog from "./utils/ConfirmDialog";
 
 enum NodeType {
     CYCLE = 0,
@@ -544,7 +545,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                         <Grid container justifyContent="space-between" sx={ActionContentSx}>
                             {actionEdit && (
                                 <Grid item xs={6}>
-                                    <Button variant="outlined" color="error" onClick={onConfirmDialogOpen}>
+                                    <Button variant="outlined" color="error" onClick={onConfirmDialogOpen} disabled={!scenario || scenario[1]}>
                                         Delete
                                     </Button>
                                 </Grid>
@@ -570,28 +571,14 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                 </form>
             </Dialog>
 
-            <Dialog onClose={onConfirmDialogClose} open={confirmDialogOpen}>
-                <DialogTitle>
-                    <Grid container direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h5">Delete Scenario</Typography>
-                        <IconButton aria-label="close" onClick={onConfirmDialogClose} sx={IconButtonSx}>
-                            <Close />
-                        </IconButton>
-                    </Grid>
-                </DialogTitle>
-                <DialogContent dividers>
-                    <Typography>Are you sure you want to delete this scenario?</Typography>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button variant="outlined" color="inherit" onClick={onConfirmDialogClose}>
-                        CANCEL
-                    </Button>
-                    <Button variant="contained" color="error" onClick={onDeleteScenario}>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ConfirmDialog
+                title="Delete Scenario"
+                message="Are you sure you want to delete this scenario?"
+                confirm="Delete"
+                open={confirmDialogOpen}
+                onClose={onConfirmDialogClose}
+                onConfirm={onDeleteScenario}
+            />
         </>
     );
 };

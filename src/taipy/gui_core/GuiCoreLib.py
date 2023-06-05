@@ -127,7 +127,7 @@ class GuiCoreContext(CoreEventConsumerBase):
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO or event.entity_type == EventEntityType.CYCLE:
             self.cycles_scenarios = None
-            self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": True})
+            self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": event.entity_id if event.entity_type == EventEntityType.SCENARIO else True or True})
 
     @staticmethod
     def scenario_adapter(data):
@@ -227,8 +227,8 @@ class GuiCoreContext(CoreEventConsumerBase):
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
         data = args[0]
-        scenario_id = data.get(GuiCoreContext.__PROP_ENTITY_ID)
-        entity: Scenario | Pipeline = tp.get(scenario_id)
+        entity_id = data.get(GuiCoreContext.__PROP_ENTITY_ID)
+        entity: Scenario | Pipeline = tp.get(entity_id)
         if entity:
             with entity as ent:
                 try:
@@ -254,12 +254,6 @@ class GuiCoreContext(CoreEventConsumerBase):
                             key = prop.get("key")
                             if key and key not in GuiCoreContext.__SCENARIO_PROPS:
                                 ent.properties.pop(key, None)
-                    props = data.get("properties")
-                    if isinstance(props, (list, tuple)):
-                        for prop in props:
-                            key = prop.get("key")
-                            if key and key not in GuiCoreContext.__SCENARIO_PROPS:
-                                ent.properties[key] = prop.get("value")
                     state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
                 except Exception as e:
                     state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")

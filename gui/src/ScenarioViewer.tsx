@@ -11,7 +11,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, ChangeEvent, SyntheticEvent } from "react";
+import React, {
+    useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    ChangeEvent,
+    SyntheticEvent,
+    MouseEvent,
+    FocusEvent,
+} from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";
@@ -66,11 +75,14 @@ interface ScenarioViewerProps {
 interface PipelinesRowProps {
     active: boolean;
     number: number;
-    pipelineId: string;
-    value: string;
+    id: string;
+    label: string;
     enableScenarioFields: boolean;
     submitEntity: (id: string) => void;
     submit: boolean;
+    editLabel: (id: string, label: string) => void;
+    onFocus: (e: FocusEvent) => void;
+    focusName: string;
 }
 
 const MainBoxSx = {
@@ -93,36 +105,31 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
+const disableColor = <T,>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
+
 const PipelineRow = ({
     active,
     number,
-    pipelineId,
-    value,
+    id,
+    label,
     submitEntity,
     enableScenarioFields,
     submit,
+    editLabel,
+    onFocus,
+    focusName
 }: PipelinesRowProps) => {
-    const [pipeline, setPipeline] = useState<string>(value);
-    const [focus, setFocus] = useState(false);
+    const [pipeline, setPipeline] = useState<string>(label);
 
-    const onPipelineBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-        setPipeline(e.currentTarget.value);
-        setFocus(false);
-    }, []);
+    const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setPipeline(e.currentTarget.value), []);
+    const onSaveField = useCallback((e: MouseEvent<HTMLElement>) => editLabel(id, pipeline), [id, pipeline]);
+    const onCancelField = useCallback((e: MouseEvent<HTMLElement>) => setPipeline(label), [label]);
+    const onSubmitPipeline = useCallback(() => submitEntity(id), [submitEntity, id]);
 
-    const onPipelineFocus = useCallback(() => setFocus(true), []);
+    useEffect(() => setPipeline(label), [label]);
 
-    const onSaveField = useCallback((e: React.MouseEvent<HTMLElement>) => {
-        //TODO: save field
-    }, []);
-
-    const onCancelField = useCallback((e: any) => {
-        //TODO: cancel field
-    }, []);
-
-    const onSubmitPipeline = useCallback(() => {
-        submitEntity(pipelineId);
-    }, []);
+    const name = `pipeline${number}`;
+    const focus = focusName === name;
 
     const index = number + 1;
     return (
@@ -130,26 +137,25 @@ const PipelineRow = ({
             <Grid item container xs={10}>
                 {active ? (
                     <TextField
-                        data-name={`pipe${index}`}
                         label={"Pipeline " + index}
+                        name={name}
                         variant="outlined"
-                        name={`pipeline${index}`}
                         value={pipeline}
-                        onBlur={onPipelineBlur}
+                        onChange={onChange}
+                        onFocus={onFocus}
                         sx={FieldNoMaxWidth}
-                        onFocus={onPipelineFocus}
                         disabled={!enableScenarioFields}
                         fullWidth
                         InputProps={{
                             endAdornment: focus ? (
-                                <>
+                                <InputAdornment position="end">
                                     <IconButton sx={IconPaddingSx} onClick={onSaveField}>
                                         <CheckCircle color="primary" />
                                     </IconButton>
                                     <IconButton sx={IconPaddingSx} onClick={onCancelField}>
                                         <Cancel color="inherit" />
                                     </IconButton>
-                                </>
+                                </InputAdornment>
                             ) : null,
                         }}
                     />
@@ -267,27 +273,26 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         }
     }, []);
 
+    // focus
+    const [focusName, setFocusName] = useState("");
+    const onFocus = useCallback((e: FocusEvent) => setFocusName((e.currentTarget as HTMLInputElement).name), []);
+
     // Label
     const [label, setLabel] = useState<string>();
-    const [labelFocus, setLabelFocus] = useState(false);
     const editLabel = useCallback(() => {
         if (isScenario) {
-            dispatch(
-                createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, name: "name", value: label })
-            );
+            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, name: label }));
         }
     }, [isScenario, props.onEdit, scenarioId, label]);
     const cancelLabel = useCallback(() => setLabel(scLabel), [scLabel]);
-    const onLabelChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
+    const onLabelChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
+    const labelFocus = focusName === "label";
 
     // tags
     const [scTags, setTags] = useState<string[]>([]);
-    const [tagsFocus, setTagsFocus] = useState(false);
     const editTags = useCallback(() => {
         if (isScenario) {
-            dispatch(
-                createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, name: "tags", value: tags })
-            );
+            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, tags: tags }));
         }
     }, [isScenario, props.onEdit, scenarioId, tags]);
     const cancelTags = useCallback(() => setTags(scenarioTags), [scenarioTags]);
@@ -300,7 +305,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         ) => setTags(tags),
         []
     );
+    const tagsFocus = focusName === "tags";
 
+    // Properties
     const updatePropertyField = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { id = "", name = "" } = e.currentTarget.parentElement?.parentElement?.dataset || {};
         if (name) {
@@ -329,6 +336,16 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         setNewProp({ id: "", key: "", value: "" });
     };
 
+    // pipelines
+    const editPipeline = useCallback(
+        (id: string, label: string) => {
+            if (isScenario) {
+                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: id, name: label }));
+            }
+        },
+        [isScenario, props.onEdit]
+    );
+
     // on scenario change
     useEffect(() => {
         tags && setTags(scenarioTags);
@@ -345,12 +362,14 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        if (props.coreChanged?.scenario) {
-            setTags([]);
-            setProperties([]);
+        if (
+            typeof props.coreChanged?.scenario === "string"
+                ? props.coreChanged?.scenario === scenarioId
+                : props.coreChanged?.scenario
+        ) {
             props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
-    }, [props.coreChanged, props.updateVarName, module, dispatch]);
+    }, [props.coreChanged, props.updateVarName, module, dispatch, scenarioId]);
 
     return (
         <>
@@ -417,12 +436,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         <TextField
                                             label="Label"
                                             variant="outlined"
+                                            name="label"
                                             fullWidth
                                             sx={FieldNoMaxWidth}
-                                            value={label}
+                                            value={label || ""}
                                             onChange={onLabelChange}
-                                            onFocus={(e) => setLabelFocus(true)}
-                                            onBlur={(e) => setLabelFocus(false)}
+                                            onFocus={onFocus}
                                             InputProps={{
                                                 endAdornment: labelFocus && (
                                                     <InputAdornment position="end">
@@ -454,16 +473,16 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         />
                                                     ))
                                                 }
-                                                onFocus={(e) => setTagsFocus(true)}
-                                                onBlur={(e) => setTagsFocus(false)}
                                                 value={scTags}
                                                 onChange={onChangeTags}
                                                 fullWidth
                                                 renderInput={(params) => (
                                                     <TextField
+                                                        name="tags"
                                                         {...params}
                                                         variant="outlined"
                                                         label="Tags"
+                                                        onFocus={onFocus}
                                                         sx={tagsAutocompleteSx}
                                                         fullWidth
                                                         InputProps={{
@@ -535,6 +554,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                   label="Key"
                                                                   variant="outlined"
                                                                   value={property.key}
+                                                                  onFocus={onFocus}
                                                                   sx={FieldNoMaxWidth}
                                                                   disabled={!isScenario}
                                                                   data-name="key"
@@ -553,6 +573,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                   label="Value"
                                                                   variant="outlined"
                                                                   value={property.value}
+                                                                  onFocus={onFocus}
                                                                   sx={FieldNoMaxWidth}
                                                                   disabled={!isScenario}
                                                                   data-name="value"
@@ -578,11 +599,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                   sx={DeleteIconSx}
                                                                   data-id={property.id}
                                                                   onClick={propertyDelete}
+                                                                  onFocus={onFocus}
                                                                   disabled={!isScenario}
                                                               >
                                                                   <DeleteOutline
                                                                       fontSize="small"
-                                                                      color={isScenario ? "primary" : "disabled"}
+                                                                      color={disableColor("primary", !isScenario)}
                                                                   />
                                                               </IconButton>
                                                           ) : null}
@@ -598,6 +620,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     value={newProp.key}
                                                     data-name="key"
                                                     onChange={updatePropertyField}
+                                                    onFocus={onFocus}
                                                     label="Key"
                                                     variant="outlined"
                                                     sx={FieldNoMaxWidth}
@@ -609,6 +632,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     value={newProp.value}
                                                     data-name="value"
                                                     onChange={updatePropertyField}
+                                                    onFocus={onFocus}
                                                     label="Value"
                                                     variant="outlined"
                                                     sx={FieldNoMaxWidth}
@@ -625,9 +649,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             >
                                                 <IconButton
                                                     onClick={propertyAdd}
+                                                    onFocus={onFocus}
                                                     disabled={!newProp.key || !newProp.value || !isScenario}
                                                 >
-                                                    <Add color={isScenario ? "primary" : "disabled"} />
+                                                    <Add color={disableColor("primary", !isScenario)} />
                                                 </IconButton>
                                             </Grid>
                                         </Grid>
@@ -651,12 +676,15 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 <PipelineRow
                                                     active={active}
                                                     number={index}
-                                                    pipelineId={key}
-                                                    value={value}
+                                                    id={key}
+                                                    label={value}
                                                     key={key}
                                                     submitEntity={submitPipeline}
                                                     enableScenarioFields={isScenario}
                                                     submit={submitPipelines}
+                                                    editLabel={editPipeline}
+                                                    onFocus={onFocus}
+                                                    focusName={focusName}
                                                 />
                                             );
                                         })}
@@ -671,8 +699,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     <Button
                                         variant="outlined"
                                         color="primary"
-                                        disabled={!active || !isScenario}
+                                        disabled={!active || !isScenario || primary}
                                         onClick={openDeleteDialog}
+                                        onFocus={onFocus}
                                     >
                                         DELETE
                                     </Button>
@@ -682,6 +711,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     color="primary"
                                     disabled={!active || !isScenario || primary}
                                     onClick={openPrimaryDialog}
+                                    onFocus={onFocus}
                                 >
                                     PROMOTE TO PRIMARY
                                 </Button>
