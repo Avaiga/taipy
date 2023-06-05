@@ -16,6 +16,9 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
       - name: Extract branch name
         shell: bash
@@ -51,7 +54,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install build
-          pip install git+https://git@github.com/Avaiga/taipy-gui.git@develop
+          pip install taipy-gui>=2.3.0.dev0
 
       - name: Build and test the package
         run: |
