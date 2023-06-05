@@ -128,6 +128,9 @@ class GuiCoreContext(CoreEventConsumerBase):
         if event.entity_type == EventEntityType.SCENARIO or event.entity_type == EventEntityType.CYCLE:
             self.cycles_scenarios = None
             self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": event.entity_id if event.entity_type == EventEntityType.SCENARIO else True or True})
+        elif event.entity_type == EventEntityType.PIPELINE and event.entity_id:
+            pipeline = tp.get(event.entity_id)
+            self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids] })
 
     @staticmethod
     def scenario_adapter(data):

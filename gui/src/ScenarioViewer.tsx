@@ -24,7 +24,7 @@ import React, {
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";
-import Autocomplete, { AutocompleteChangeReason, AutocompleteChangeDetails } from "@mui/material/Autocomplete";
+import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -117,7 +117,7 @@ const PipelineRow = ({
     submit,
     editLabel,
     onFocus,
-    focusName
+    focusName,
 }: PipelinesRowProps) => {
     const [pipeline, setPipeline] = useState<string>(label);
 
@@ -292,19 +292,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const [scTags, setTags] = useState<string[]>([]);
     const editTags = useCallback(() => {
         if (isScenario) {
-            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, tags: tags }));
+            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, tags: scTags }));
         }
-    }, [isScenario, props.onEdit, scenarioId, tags]);
+    }, [isScenario, props.onEdit, scenarioId, scTags]);
     const cancelTags = useCallback(() => setTags(scenarioTags), [scenarioTags]);
-    const onChangeTags = useCallback(
-        (
-            e: SyntheticEvent,
-            tags: string[],
-            reason: AutocompleteChangeReason,
-            details?: AutocompleteChangeDetails<string>
-        ) => setTags(tags),
-        []
-    );
+    const onChangeTags = useCallback((_: SyntheticEvent, tags: string[]) => setTags(tags), []);
     const tagsFocus = focusName === "tags";
 
     // Properties
@@ -362,11 +354,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        if (
-            typeof props.coreChanged?.scenario === "string"
-                ? props.coreChanged?.scenario === scenarioId
-                : props.coreChanged?.scenario
-        ) {
+        const ids = props.coreChanged?.scenario;
+        if (typeof ids === "string" ? ids === scenarioId : Array.isArray(ids) ? ids.includes(scenarioId) : ids) {
             props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
     }, [props.coreChanged, props.updateVarName, module, dispatch, scenarioId]);
