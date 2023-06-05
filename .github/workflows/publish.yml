@@ -54,7 +54,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install build
-          pip install taipy-gui>=2.3.0.dev0
+          pip install taipy-gui==2.3.0.dev2
 
       - name: Build and test the package
         run: |
@@ -81,6 +81,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install build
+          pip install taipy-gui==2.3.0.dev2
 
       - name: Build package
         run: python setup.py build_py && python -m build
