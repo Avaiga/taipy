@@ -264,14 +264,14 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // submits
     const submitPipeline = useCallback((pipelineId: string) => {
         dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: pipelineId }));
-    }, []);
+    }, [props.onSubmit]);
 
     const submitScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
         if (isScenario) {
             dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scenarioId }));
         }
-    }, []);
+    }, [isScenario, props.onSubmit]);
 
     // focus
     const [focusName, setFocusName] = useState("");
