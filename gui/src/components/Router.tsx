@@ -92,6 +92,16 @@ const Router = () => {
         initializeWebSocket(state.socket, dispatch);
     }, [state.socket]);
 
+    useEffect(() => {
+        const classes = [themeClass];
+        document.body.classList.forEach((cls) => {
+            if (!cls.startsWith("taipy-")) {
+                classes.push(cls);
+            }
+        });
+        document.body.className = classes.join(" ");
+    }, [themeClass]);
+
     return (
         <TaipyContext.Provider value={{ state, dispatch }}>
             <HelmetProvider>
@@ -100,7 +110,7 @@ const Router = () => {
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <PageContext.Provider value={pageStore}>
                                 <BrowserRouter>
-                                    <Box style={containerSx} className={themeClass}>
+                                    <Box style={containerSx}>
                                         <CssBaseline />
                                         <ErrorBoundary FallbackComponent={ErrorFallback}>
                                             <Menu {...state.menu} />

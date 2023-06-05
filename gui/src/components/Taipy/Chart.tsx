@@ -211,7 +211,7 @@ const Chart = (props: ChartProp) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", {} as Record<string, any>);
+    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", {} as Record<string, Record<string, unknown>>);
 
     // get props.selected[i] values
     useEffect(() => {
