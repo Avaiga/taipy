@@ -234,7 +234,7 @@ class GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(GuiCoreContext.__PROP_ENTITY_ID)
-        entity: Scenario | Pipeline = tp.get(entity_id)
+        entity: t.Union[Scenario, Pipeline] = tp.get(entity_id)
         if entity:
             with entity as ent:
                 try:
