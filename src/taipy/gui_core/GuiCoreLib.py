@@ -15,7 +15,7 @@ from datetime import datetime
 from dateutil import parser
 
 import taipy as tp
-from taipy.core import Cycle, DataNode, Scenario, Pipeline
+from taipy.core import Cycle, DataNode, Pipeline, Scenario
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -127,10 +127,13 @@ class GuiCoreContext(CoreEventConsumerBase):
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO or event.entity_type == EventEntityType.CYCLE:
             self.cycles_scenarios = None
-            self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": event.entity_id if event.entity_type == EventEntityType.SCENARIO else True or True})
+            self.gui.broadcast(
+                GuiCoreContext._CORE_CHANGED_NAME,
+                {"scenario": event.entity_id if event.entity_type == EventEntityType.SCENARIO else True or True},
+            )
         elif event.entity_type == EventEntityType.PIPELINE and event.entity_id:
             pipeline = tp.get(event.entity_id)
-            self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids] })
+            self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids]})
 
     @staticmethod
     def scenario_adapter(data):
@@ -269,11 +272,11 @@ class GuiCoreContext(CoreEventConsumerBase):
         entity_id = data.get(GuiCoreContext.__PROP_ENTITY_ID)
         entity = tp.get(entity_id)
         if entity:
-                try:
-                    tp.submit(entity)
-                    state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
-                except Exception as e:
-                    state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
+            try:
+                tp.submit(entity)
+                state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
+            except Exception as e:
+                state.assign(GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
     def broadcast_core_changed(self):
         self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, "")
