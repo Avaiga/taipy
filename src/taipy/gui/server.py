@@ -147,19 +147,25 @@ class _Server:
         @taipy_bp.route("/<path:path>")
         def my_index(path):
             if path == "" or path == "index.html" or "." not in path:
-                return render_template(
-                    "index.html",
-                    title=title,
-                    favicon=favicon,
-                    root_margin=root_margin,
-                    watermark=watermark,
-                    config=client_config,
-                    scripts=scripts,
-                    styles=styles,
-                    version=version,
-                    css_vars=css_vars,
-                    base_url=base_url,
-                )
+                try:
+                    return render_template(
+                        "index.html",
+                        title=title,
+                        favicon=favicon,
+                        root_margin=root_margin,
+                        watermark=watermark,
+                        config=client_config,
+                        scripts=scripts,
+                        styles=styles,
+                        version=version,
+                        css_vars=css_vars,
+                        base_url=base_url,
+                    )
+                except Exception:  # pragma: no cover
+                    raise RuntimeError(
+                        "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."
+                    )
+
             if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))
             if str(os.path.normpath(file_path := ((base_path := static_folder + os.path.sep) + path))).startswith(
@@ -196,10 +202,6 @@ class _Server:
             ):
                 return send_from_directory(base_path, path)
             return ("", 404)
-
-        @taipy_bp.errorhandler(404)
-        def page_not_found(e):
-            return f"{e.message}, {e.description}"
 
         return taipy_bp
 
