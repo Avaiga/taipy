@@ -13,13 +13,14 @@ import sys
 import typing as t
 import xml.etree.ElementTree as etree
 from abc import ABC, abstractmethod
+from inspect import isclass
 from pathlib import Path
 from urllib.parse import urlencode
 
 from .._warnings import _warn
 from ..renderers.builder import _Builder
 from ..types import PropertyType
-from ..utils import _get_broadcast_var_name, _to_camel_case
+from ..utils import _get_broadcast_var_name, _TaipyBase, _to_camel_case
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -66,7 +67,9 @@ class ElementProperty:
     def check(self, element_name: str, prop_name: str):
         if not isinstance(prop_name, str) or not prop_name or not prop_name.isidentifier():
             _warn(f"Property name '{prop_name}' is invalid for element '{element_name}'.")
-        if not isinstance(self.property_type, PropertyType):
+        if not isinstance(self.property_type, PropertyType) and not (
+            isclass(self.property_type) and issubclass(self.property_type, _TaipyBase)
+        ):
             _warn(f"Property type '{self.property_type}' is invalid for element property '{element_name}.{prop_name}'.")
 
     def _get_tuple(self, name: str) -> tuple:
