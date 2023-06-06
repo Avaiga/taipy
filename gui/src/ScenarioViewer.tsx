@@ -53,12 +53,6 @@ interface ScenarioViewerProps {
     expandable?: boolean;
     expanded?: boolean;
     defaultExpanded?: boolean;
-    submit?: boolean;
-    delete?: boolean;
-    submitPipelines?: boolean;
-    tags?: boolean;
-    properties?: boolean;
-    pipelines?: boolean;
     updateVarName?: string;
     scenario?: ScenarioFull | Array<ScenarioFull>;
     onSubmit?: string;
@@ -68,8 +62,14 @@ interface ScenarioViewerProps {
     coreChanged?: Record<string, unknown>;
     defaultActive: boolean;
     active: boolean;
-    config?: boolean;
-    cycle?: boolean;
+    showConfig?: boolean;
+    showCycle?: boolean;
+    showDelete?: boolean;
+    showPipelines?: boolean;
+    showProperties?: boolean;
+    showSubmit?: boolean;
+    showSubmitPipelines?: boolean;
+    showTags?: boolean;
 }
 
 interface PipelinesRowProps {
@@ -195,15 +195,15 @@ const MuiAccordionSummary = styled((props: AccordionSummaryProps) => (
 const ScenarioViewer = (props: ScenarioViewerProps) => {
     const {
         id = "",
-        delete: deleteSc = true,
-        submit = true,
         expandable = true,
-        tags = false,
-        properties = true,
-        pipelines = true,
-        submitPipelines = true,
-        config = false,
-        cycle = false,
+        showConfig = false,
+        showCycle = false,
+        showDelete = true,
+        showProperties = true,
+        showPipelines = true,
+        showSubmit = true,
+        showSubmitPipelines = true,
+        showTags = false,
     } = props;
 
     const dispatch = useDispatch();
@@ -340,8 +340,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     // on scenario change
     useEffect(() => {
-        tags && setTags(scenarioTags);
-        properties &&
+        showTags && setTags(scenarioTags);
+        showProperties &&
             setProperties(
                 scenarioProperties.map(([k, v], i) => ({
                     id: i + "",
@@ -385,7 +385,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 )}
                             </Grid>
                             <Grid item>
-                                {submit ? (
+                                {showSubmit ? (
                                     <IconButton
                                         sx={IconPaddingSx}
                                         onClick={submitScenario}
@@ -399,7 +399,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     </MuiAccordionSummary>
                     <AccordionDetails>
                         <Grid container rowSpacing={2}>
-                            {config ? (
+                            {showConfig ? (
                                 <Grid item xs={12} container justifyContent="space-between">
                                     <Grid item xs={4} pb={2}>
                                         <Typography variant="subtitle2">Config ID</Typography>
@@ -409,7 +409,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
                                 </Grid>
                             ) : null}
-                            {cycle ? (
+                            {showCycle ? (
                                 <Grid item xs={12} container justifyContent="space-between">
                                     <Grid item xs={4}>
                                         <Typography variant="subtitle2">Cycle / Frequency</Typography>
@@ -446,7 +446,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             disabled={!isScenario}
                                         />
                                     </Grid>
-                                    {tags ? (
+                                    {showTags ? (
                                         <Grid item xs={12} container justifyContent="space-between">
                                             <Autocomplete
                                                 multiple
@@ -504,7 +504,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             <Typography variant="subtitle2">{scLabel}</Typography>
                                         </Grid>
                                     </Grid>
-                                    {tags ? (
+                                    {showTags ? (
                                         <Grid item xs={12} container justifyContent="space-between">
                                             <Grid item xs={4}>
                                                 <Typography variant="subtitle2">Tags</Typography>
@@ -521,7 +521,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             <Grid item xs={12}>
                                 <Divider />
                             </Grid>
-                            {properties ? (
+                            {showProperties ? (
                                 <>
                                     <Grid item xs={12} container justifyContent="space-between">
                                         <Typography variant="h6">Custom Properties</Typography>
@@ -652,7 +652,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
                                 </>
                             ) : null}
-                            {pipelines ? (
+                            {showPipelines ? (
                                 <>
                                     <Grid item xs={12} container justifyContent="space-between">
                                         <Typography variant="h6">Pipelines</Typography>
@@ -670,7 +670,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     key={key}
                                                     submitEntity={submitPipeline}
                                                     enableScenarioFields={isScenario}
-                                                    submit={submitPipelines}
+                                                    submit={showSubmitPipelines}
                                                     editLabel={editPipeline}
                                                     onFocus={onFocus}
                                                     focusName={focusName}
@@ -684,7 +684,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 </>
                             ) : null}
                             <Grid item xs={12} container justifyContent="space-between">
-                                {deleteSc ? (
+                                {showDelete ? (
                                     <Button
                                         variant="outlined"
                                         color="primary"

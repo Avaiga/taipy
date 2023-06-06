@@ -129,7 +129,7 @@ class GuiCoreContext(CoreEventConsumerBase):
             self.cycles_scenarios = None
             self.gui.broadcast(
                 GuiCoreContext._CORE_CHANGED_NAME,
-                {"scenario": event.entity_id if event.entity_type == EventEntityType.SCENARIO else True or True},
+                {"scenario": (event.entity_id if event.entity_type == EventEntityType.SCENARIO else True) or True},
             )
         elif event.entity_type == EventEntityType.PIPELINE and event.entity_id:
             pipeline = tp.get(event.entity_id)
@@ -319,14 +319,14 @@ class GuiCore(ElementLibrary):
                 "active": ElementProperty(PropertyType.dynamic_boolean, True),
                 "expandable": ElementProperty(PropertyType.boolean, True),
                 "expanded": ElementProperty(PropertyType.dynamic_boolean, False),
-                "submit": ElementProperty(PropertyType.boolean, True),
-                "delete": ElementProperty(PropertyType.boolean, True),
-                "config": ElementProperty(PropertyType.boolean, False),
-                "cycle": ElementProperty(PropertyType.boolean, False),
-                "tags": ElementProperty(PropertyType.boolean, False),
-                "properties": ElementProperty(PropertyType.boolean, True),
-                "pipelines": ElementProperty(PropertyType.boolean, True),
-                "submit_pipelines": ElementProperty(PropertyType.boolean, True),
+                "show_submit": ElementProperty(PropertyType.boolean, True),
+                "show_delete": ElementProperty(PropertyType.boolean, True),
+                "show_config": ElementProperty(PropertyType.boolean, False),
+                "show_cycle": ElementProperty(PropertyType.boolean, False),
+                "show_tags": ElementProperty(PropertyType.boolean, False),
+                "show_properties": ElementProperty(PropertyType.boolean, True),
+                "show_pipelines": ElementProperty(PropertyType.boolean, True),
+                "show_submit_pipelines": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_entity}}"),

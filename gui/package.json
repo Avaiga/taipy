@@ -28,8 +28,7 @@
     "date-fns": "^2.29.3",
     "formik": "^2.2.9",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "taipy-gui": "file:../../../.virtualenvs/taipy-OW_uNObx/Lib/site-packages/taipy/gui/webapp"
+    "react-dom": "^18.2.0"
   },
   "scripts": {
     "postinstall": "node scripts/install.js",
