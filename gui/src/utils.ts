@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-// id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags
+// id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags, deletable
 export type ScenarioFull = [
   string,
   boolean,
@@ -21,8 +21,14 @@ export type ScenarioFull = [
   string[],
   Array<[string, string]>,
   Array<[string, string]>,
-  string[]
+  string[],
+  boolean
 ];
+
+export enum ScFProps {
+    id, is_primary, config_id, creation_date, label, tags, properties, pipelines, authorized_tags, deletable
+}
+export const ScenarioFullLength = Object.keys(ScFProps).length / 2;
 
 export interface ScenarioDict {
   config: string;

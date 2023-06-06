@@ -45,7 +45,7 @@ import {
     useModule,
 } from "taipy-gui";
 
-import { FlagSx, Property, ScenarioFull } from "./utils";
+import { FlagSx, Property, ScFProps, ScenarioFull, ScenarioFullLength } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 
 interface ScenarioViewerProps {
@@ -219,10 +219,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scenarioProperties = [],
         scPipelines = [],
         authorizedTags = [],
+        deletable = false,
         isScenario = false,
     ] = useMemo(() => {
         const sc = Array.isArray(props.scenario)
-            ? props.scenario.length == 9 && typeof props.scenario[0] === "string"
+            ? props.scenario.length == ScenarioFullLength && typeof props.scenario[ScFProps.id] === "string"
                 ? (props.scenario as ScenarioFull)
                 : props.scenario.length == 1
                 ? (props.scenario[0] as ScenarioFull)
@@ -688,7 +689,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     <Button
                                         variant="outlined"
                                         color="primary"
-                                        disabled={!active || !isScenario || primary}
+                                        disabled={!active || !isScenario || !deletable}
                                         onClick={openDeleteDialog}
                                         onFocus={onFocus}
                                     >

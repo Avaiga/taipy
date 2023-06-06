@@ -60,6 +60,7 @@ import {
 
 import { Cycle, Scenario } from "./icons";
 import ConfirmDialog from "./utils/ConfirmDialog";
+import { ScFProps, ScenarioFull } from "./utils";
 
 enum NodeType {
     CYCLE = 0,
@@ -83,18 +84,6 @@ type Scenario = [string, string, undefined, number, boolean];
 type Scenarios = Array<Scenario>;
 type Cycles = Array<[string, string, Scenarios, number, boolean]>;
 
-// id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags
-type ScenarioFull = [
-    string,
-    boolean,
-    string,
-    string,
-    string,
-    string[],
-    Array<[string, string]>,
-    Array<[string, string]>,
-    string[]
-];
 interface ScenarioDict {
     config: string;
     name: string;
@@ -371,21 +360,21 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
         form.setValues(
             scenario
                 ? {
-                      config: scenario[2],
-                      name: scenario[4],
-                      date: scenario[3],
-                      properties: scenario[6],
+                      config: scenario[ScFProps.config_id],
+                      name: scenario[ScFProps.label],
+                      date: scenario[ScFProps.creation_date],
+                      properties: scenario[ScFProps.properties],
                   }
                 : emptyScenario
         );
-        setProperties(scenario ? scenario[6].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : []);
+        setProperties(scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : []);
     }, [scenario]);
 
     const form = useFormik({
         initialValues: emptyScenario,
         onSubmit: (values: any) => {
             values.properties = [...properties];
-            actionEdit && scenario && (values.id = scenario[0]);
+            actionEdit && scenario && (values.id = scenario[ScFProps.id]);
             setProperties([]);
             submit(actionEdit, false, values);
             form.resetForm();
@@ -394,7 +383,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
     });
 
     const onDeleteScenario = useCallback(() => {
-        submit(actionEdit, true, { id: scenario && scenario[0] });
+        submit(actionEdit, true, { id: scenario && scenario[ScFProps.id] });
         setConfirmDialogOpen(false);
         close();
     }, [close, actionEdit, scenario]);
@@ -545,7 +534,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                         <Grid container justifyContent="space-between" sx={ActionContentSx}>
                             {actionEdit && (
                                 <Grid item xs={6}>
-                                    <Button variant="outlined" color="error" onClick={onConfirmDialogOpen} disabled={!scenario || scenario[1]}>
+                                    <Button variant="outlined" color="error" onClick={onConfirmDialogOpen} disabled={!scenario || !scenario[ScFProps.deletable]}>
                                         Delete
                                     </Button>
                                 </Grid>
@@ -609,13 +598,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const openEditDialog = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
             const { id: scenId } = e.currentTarget?.dataset || {};
             scenId &&
                 props.onScenarioSelect &&
                 dispatch(createSendActionNameAction(id, module, props.onScenarioSelect, scenId));
             setOpen(true);
             setActionEdit(true);
-            return false;
         },
         [props.onScenarioSelect]
     );
