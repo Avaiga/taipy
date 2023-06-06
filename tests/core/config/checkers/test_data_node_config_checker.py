@@ -289,8 +289,8 @@ class TestDataNodeConfigChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "`validity_period` field of DataNodeConfig `default` must be populated with a timedelta"
-            " value. Current value of property `validity_period` is 1."
+            "`validity_period` field of DataNodeConfig `default` must be populated with None or"
+            " a timedelta value. Current value of property `validity_period` is 1."
         )
         assert expected_error_message in caplog.text
 
