@@ -18,10 +18,13 @@ from src.taipy._cli._scaffold_cli import _ScaffoldCLI
 
 def test_create_call_to_cookiecutter():
     assert os.path.exists(_ScaffoldCLI._TEMPLATE_MAP["default"])
-    assert os.listdir(_ScaffoldCLI._TEMPLATE_MAP["default"]).sort() == [
-        "cookiecutter.json",
-        "{{cookiecutter.application_name}}",
-    ].sort()
+    assert (
+        os.listdir(_ScaffoldCLI._TEMPLATE_MAP["default"]).sort()
+        == [
+            "cookiecutter.json",
+            "{{cookiecutter.application_name}}",
+        ].sort()
+    )
 
 
 def test_static_and_templates(tmpdir):
