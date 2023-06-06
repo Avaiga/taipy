@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+from datetime import timedelta
 from unittest import mock
 
 from src.taipy.core.config import DataNodeConfig, PipelineConfig, ScenarioConfig, TaskConfig
@@ -39,17 +40,20 @@ clean_entities = "False:bool"
 
 [DATA_NODE.default]
 storage_type = "in_memory"
+validity_period = "1d0h0m0s:timedelta"
 custom = "default_custom_prop"
 
 [DATA_NODE.dn1]
 storage_type = "pickle"
 scope = "PIPELINE:SCOPE"
+validity_period = "1d0h0m0s:timedelta"
 custom = "custom property"
 default_data = "dn1"
 
 [DATA_NODE.dn2]
 storage_type = "ENV[FOO]"
 scope = "SCENARIO:SCOPE"
+validity_period = "2d0h0m0s:timedelta"
 foo = "bar"
 default_data = "dn2"
 baz = "ENV[QUX]"
@@ -95,13 +99,18 @@ owner = "Raymond Kopa"
     ):
         Config.configure_global_app(clean_entities_enabled=True)
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
-        Config.configure_default_data_node(storage_type="in_memory", custom="default_custom_prop")
+        Config.configure_default_data_node(
+            storage_type="in_memory",
+            custom="default_custom_prop",
+            validity_period=timedelta(1),
+        )
         dn1_cfg_v2 = Config.configure_data_node(
             "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
         )
         dn2_cfg_v2 = Config.configure_data_node(
             "dn2",
             storage_type="ENV[FOO]",
+            validity_period=timedelta(2),
             foo="bar",
             default_data="dn2",
             baz="ENV[QUX]",
@@ -132,6 +141,7 @@ def test_read_configuration_file():
 
         [DATA_NODE.my_datanode]
         path = "/data/csv"
+        validity_period = "1d0h0m0s:timedelta"
 
         [DATA_NODE.my_datanode2]
         path = "/data2/csv"
@@ -160,6 +170,7 @@ def test_read_configuration_file():
     assert Config.data_nodes["my_datanode2"].path == "/data2/csv"
     assert Config.data_nodes["my_datanode"].id == "my_datanode"
     assert Config.data_nodes["my_datanode2"].id == "my_datanode2"
+    assert Config.data_nodes["my_datanode"].validity_period == timedelta(1)
 
     assert len(Config.tasks) == 2
     assert type(Config.tasks["my_task"]) == TaskConfig

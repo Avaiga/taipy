@@ -85,7 +85,6 @@ class _DataManager(_Manager[DataNode]):
         try:
             version = _VersionManagerFactory._build_manager()._get_latest_version()
             props = data_node_config._properties.copy()
-            validity_period = props.pop("validity_period", None)
 
             if data_node_config.storage_type:
                 storage_type = data_node_config.storage_type
@@ -95,10 +94,10 @@ class _DataManager(_Manager[DataNode]):
             return cls.__DATA_NODE_CLASS_MAP[storage_type](
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
+                validity_period=data_node_config.validity_period,
                 owner_id=owner_id,
                 parent_ids=parent_ids,
                 version=version,
-                validity_period=validity_period,
                 properties=props,
             )
         except KeyError:

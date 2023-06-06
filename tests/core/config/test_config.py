@@ -9,43 +9,45 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from datetime import timedelta
+
 from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 
 class TestConfig:
     def test_configure_csv_data_node(self):
-        a, b, c, d, e = "foo", "path", True, Scope.PIPELINE, "numpy"
-        Config.configure_csv_data_node(a, b, c, d, e)
+        a, b, c, d, e, f = "foo", "path", True, "numpy", Scope.PIPELINE, timedelta(1)
+        Config.configure_csv_data_node(a, b, c, d, e, f)
         assert len(Config.data_nodes) == 2
 
     def test_configure_excel_data_node(self):
-        a, b, c, d, e, f = "foo", "path", True, "Sheet1", Scope.PIPELINE, "numpy"
-        Config.configure_excel_data_node(a, b, c, d, e, f)
+        a, b, c, d, e, f, g = "foo", "path", True, "Sheet1", "numpy", Scope.PIPELINE, timedelta(1)
+        Config.configure_excel_data_node(a, b, c, d, e, f, g)
         assert len(Config.data_nodes) == 2
 
     def test_configure_generic_data_node(self):
-        a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, tuple([]), tuple([]), "qux"
-        Config.configure_generic_data_node(a, b, c, e, f, d, property=g)
+        a, b, c, d, e, f, g, h = "foo", print, print, tuple([]), tuple([]), Scope.PIPELINE, timedelta(1), "qux"
+        Config.configure_generic_data_node(a, b, c, d, e, f, g, property=h)
         assert len(Config.data_nodes) == 2
 
     def test_configure_in_memory_data_node(self):
-        a, b, c, d = "foo", 0, Scope.PIPELINE, "qux"
-        Config.configure_in_memory_data_node(a, b, c, property=d)
+        a, b, c, d, e = "foo", 0, Scope.PIPELINE, timedelta(1), "qux"
+        Config.configure_in_memory_data_node(a, b, c, d, property=e)
         assert len(Config.data_nodes) == 2
 
     def test_configure_pickle_data_node(self):
-        a, b, c, d = "foo", 0, Scope.PIPELINE, "path"
-        Config.configure_pickle_data_node(a, b, c, path=d)
+        a, b, c, d, e = "foo", 0, Scope.PIPELINE, timedelta(1), "path"
+        Config.configure_pickle_data_node(a, b, c, d, path=e)
         assert len(Config.data_nodes) == 2
 
     def test_configure_json_data_node(self):
-        a, dp, ec, dc, sc, p = "foo", "path", "ec", "dc", Scope.PIPELINE, "qux"
-        Config.configure_json_data_node(a, dp, ec, dc, sc, path=p)
+        a, dp, ec, dc, sc, f, p = "foo", "path", "ec", "dc", Scope.PIPELINE, timedelta(1), "qux"
+        Config.configure_json_data_node(a, dp, ec, dc, sc, f, path=p)
         assert len(Config.data_nodes) == 2
 
     def test_configure_sql_table_data_node(self):
-        a, b, c, d, e, f, g, h, i, extra_args, exposed_type, scope, k = (
+        a, b, c, d, e, f, g, h, i, extra_args, exposed_type, scope, vp, k = (
             "foo",
             "user",
             "pwd",
@@ -58,15 +60,14 @@ class TestConfig:
             {"foo": "bar"},
             "exposed_type",
             Scope.PIPELINE,
+            timedelta(1),
             "qux",
         )
-        Config.configure_sql_table_data_node(
-            a, b, c, d, e, f, g, h, i, extra_args, exposed_type, scope=scope, property=k
-        )
+        Config.configure_sql_table_data_node(a, b, c, d, e, f, g, h, i, extra_args, exposed_type, scope, vp, property=k)
         assert len(Config.data_nodes) == 2
 
     def test_configure_sql_data_node(self):
-        a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope, k = (
+        a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope, vp, k = (
             "foo",
             "user",
             "pwd",
@@ -80,7 +81,26 @@ class TestConfig:
             {"foo": "bar"},
             "exposed_type",
             Scope.PIPELINE,
+            timedelta(1),
             "qux",
         )
-        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope=scope, property=k)
+        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope, vp, property=k)
+        assert len(Config.data_nodes) == 2
+
+    def test_configure_mongo_data_node(self):
+        a, b, c, d, e, f, g, h, extra_args, scope, vp, k = (
+            "foo",
+            "db_name",
+            "collection_name",
+            None,
+            "user",
+            "pwd",
+            "host",
+            "port",
+            {"foo": "bar"},
+            Scope.PIPELINE,
+            timedelta(1),
+            "qux",
+        )
+        Config.configure_mongo_collection_data_node(a, b, c, d, e, f, g, h, extra_args, scope, vp, property=k)
         assert len(Config.data_nodes) == 2

@@ -29,29 +29,36 @@ def test_data_node_config_default_parameter():
     assert csv_dn_cfg.scope == Scope.SCENARIO
     assert csv_dn_cfg.has_header is True
     assert csv_dn_cfg.exposed_type == "pandas"
+    assert csv_dn_cfg.validity_period is None
 
     json_dn_cfg = Config.configure_data_node("data_node_2", "json")
     assert json_dn_cfg.scope == Scope.SCENARIO
+    assert json_dn_cfg.validity_period is None
 
     parquet_dn_cfg = Config.configure_data_node("data_node_3", "parquet")
     assert parquet_dn_cfg.scope == Scope.SCENARIO
     assert parquet_dn_cfg.engine == "pyarrow"
     assert parquet_dn_cfg.compression == "snappy"
     assert parquet_dn_cfg.exposed_type == "pandas"
+    assert parquet_dn_cfg.validity_period is None
 
     excel_dn_cfg = Config.configure_data_node("data_node_4", "excel")
     assert excel_dn_cfg.scope == Scope.SCENARIO
     assert excel_dn_cfg.has_header is True
     assert excel_dn_cfg.exposed_type == "pandas"
+    assert excel_dn_cfg.validity_period is None
 
     generic_dn_cfg = Config.configure_data_node("data_node_5", "generic")
     assert generic_dn_cfg.scope == Scope.SCENARIO
+    assert generic_dn_cfg.validity_period is None
 
     in_memory_dn_cfg = Config.configure_data_node("data_node_6", "in_memory")
     assert in_memory_dn_cfg.scope == Scope.SCENARIO
+    assert in_memory_dn_cfg.validity_period is None
 
     pickle_dn_cfg = Config.configure_data_node("data_node_7", "pickle")
     assert pickle_dn_cfg.scope == Scope.SCENARIO
+    assert pickle_dn_cfg.validity_period is None
 
     sql_table_dn_cfg = Config.configure_data_node(
         "data_node_8", "sql_table", db_name="test", db_engine="mssql", table_name="test"
@@ -62,6 +69,7 @@ def test_data_node_config_default_parameter():
     assert sql_table_dn_cfg.db_driver == ""
     assert sql_table_dn_cfg.sqlite_file_extension == ".db"
     assert sql_table_dn_cfg.exposed_type == "pandas"
+    assert sql_table_dn_cfg.validity_period is None
 
     sql_dn_cfg = Config.configure_data_node(
         "data_node_9", "sql", db_name="test", db_engine="mssql", read_query="test", write_query_builder=print
@@ -72,17 +80,18 @@ def test_data_node_config_default_parameter():
     assert sql_dn_cfg.db_driver == ""
     assert sql_dn_cfg.sqlite_file_extension == ".db"
     assert sql_dn_cfg.exposed_type == "pandas"
+    assert sql_dn_cfg.validity_period is None
 
     mongo_dn_cfg = Config.configure_data_node(
         "data_node_10", "mongo_collection", db_name="test", collection_name="test"
     )
-    print(vars(mongo_dn_cfg))
     assert mongo_dn_cfg.scope == Scope.SCENARIO
     assert mongo_dn_cfg.db_host == "localhost"
     assert mongo_dn_cfg.db_port == 27017
     assert mongo_dn_cfg.custom_document == DefaultCustomDocument
     assert mongo_dn_cfg.db_username == ""
     assert mongo_dn_cfg.db_password == ""
+    assert mongo_dn_cfg.validity_period is None
 
 
 def test_data_node_config_check(caplog):
