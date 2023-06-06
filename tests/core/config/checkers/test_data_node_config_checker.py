@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
+from datetime import timedelta
 
 import pytest
 
@@ -267,6 +268,43 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.warnings) == 1
         expected_warning_message = "`Scope.PIPELINE` is deprecated. Please use other `Scope` value instead."
         assert expected_warning_message in caplog.text
+
+    def test_check_validity_period(self, caplog):
+        config = Config._default_config
+
+        config._sections[DataNodeConfig.name]["default"].validity_period = "bar"
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "`validity_period` field of DataNodeConfig `default` must be None or populated with"
+            ' a timedelta value. Current value of property `validity_period` is "bar".'
+        )
+        assert expected_error_message in caplog.text
+
+        config._sections[DataNodeConfig.name]["default"].validity_period = 1
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "`validity_period` field of DataNodeConfig `default` must be None or populated with"
+            " a timedelta value. Current value of property `validity_period` is 1."
+        )
+        assert expected_error_message in caplog.text
+
+        config._sections[DataNodeConfig.name]["default"].validity_period = None
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+
+        config._sections[DataNodeConfig.name]["default"].validity_period = timedelta(1)
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
     def test_check_required_properties(self, caplog):
         config = Config._default_config

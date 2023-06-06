@@ -69,6 +69,7 @@ def config_test_scenario():
         path="./test.csv",
         exposed_type=CustomClass,
         scope=Scope.GLOBAL,
+        validity_period=datetime.timedelta(1),
     )
 
     test_json_dn_cfg = Config.configure_json_data_node(
@@ -119,6 +120,7 @@ scope = "SCENARIO:SCOPE"
 [DATA_NODE.test_csv_dn]
 storage_type = "csv"
 scope = "GLOBAL:SCOPE"
+validity_period = "1d0h0m0s:timedelta"
 path = "./test.csv"
 exposed_type = "tests.core.config.test_config_serialization.CustomClass:class"
 has_header = "True:bool"
@@ -189,6 +191,7 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].storage_type == "csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].scope == Scope.GLOBAL
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].validity_period == datetime.timedelta(1)
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
@@ -262,6 +265,7 @@ def test_read_write_json_configuration_file():
 "test_csv_dn": {
 "storage_type": "csv",
 "scope": "GLOBAL:SCOPE",
+"validity_period": "1d0h0m0s:timedelta",
 "path": "./test.csv",
 "exposed_type": "tests.core.config.test_config_serialization.CustomClass:class",
 "has_header": "True:bool"
@@ -353,6 +357,7 @@ def test_read_write_json_configuration_file():
     assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].storage_type == "csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].scope == Scope.GLOBAL
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].validity_period == datetime.timedelta(1)
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
