@@ -68,7 +68,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 data_node_config._VALIDITY_PERIOD_KEY,
                 data_node_config.validity_period,
                 f"`{data_node_config._VALIDITY_PERIOD_KEY}` field of DataNodeConfig `{data_node_config_id}` must be"
-                f" populated with a timedelta value.",
+                f" None or populated with a timedelta value.",
             )
 
     def _check_required_properties(self, data_node_config_id: str, data_node_config: DataNodeConfig):

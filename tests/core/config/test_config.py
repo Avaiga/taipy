@@ -98,7 +98,7 @@ class TestConfig:
             "host",
             "port",
             {"foo": "bar"},
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             timedelta(1),
             "qux",
         )
