@@ -42,7 +42,7 @@ class GuiCoreScenarioAdapter(_TaipyBase):
                 [(k, v) for k, v in data.properties.items() if k not in GuiCoreScenarioAdapter.__INNER_PROPS],
                 [(p.id, p.get_simple_label()) for p in data.pipelines.values()],
                 list(data.properties.get("authorized_tags", set())),
-                not data.is_primary # deletable
+                not data.is_primary,  # deletable
             ]
         return data
 
