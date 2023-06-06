@@ -19,6 +19,7 @@ from ._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from ._orchestrator._orchestrator import _Orchestrator
 from ._orchestrator._orchestrator_factory import _OrchestratorFactory
 from ._version._version_manager_factory import _VersionManagerFactory
+from .config import CoreSection
 
 
 class Core:
@@ -63,7 +64,7 @@ class Core:
     @staticmethod
     def __update_and_check_config():
         _CoreCLI.create_parser()
-        Config._applied_config._unique_sections["core"]._update(_CoreCLI.parse_arguments())
+        Config._applied_config._unique_sections[CoreSection.name]._update(_CoreCLI.parse_arguments())
         Config.check()
         Config.block_update()
 

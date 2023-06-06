@@ -38,7 +38,7 @@ def test_core_section():
         content="""
 [TAIPY]
 
-[core]
+[CORE]
 mode = "production"
 version_number = "test_num_2"
 force = "true:bool"

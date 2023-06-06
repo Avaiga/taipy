@@ -18,7 +18,7 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 
 
 class CoreSection(UniqueSection):
-    name = "core"
+    name = "CORE"
     _MODE_KEY = "mode"
     _DEVELOPMENT_MODE = "development"
     _EXPERIMENT_MODE = "experiment"

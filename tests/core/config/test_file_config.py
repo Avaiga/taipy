@@ -31,7 +31,7 @@ repository_type = "filesystem"
 mode = "standalone"
 max_nb_of_workers = "2:int"
 
-[core]
+[CORE]
 mode = "development"
 version_number = ""
 force = "False:bool"
