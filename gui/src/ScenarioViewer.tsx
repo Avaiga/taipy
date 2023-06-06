@@ -11,16 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    useState,
-    useCallback,
-    useEffect,
-    useMemo,
-    ChangeEvent,
-    SyntheticEvent,
-    MouseEvent,
-    FocusEvent,
-} from "react";
+import React, { useState, useCallback, useEffect, useMemo, ChangeEvent, SyntheticEvent, MouseEvent } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";
@@ -81,8 +72,9 @@ interface PipelinesRowProps {
     submitEntity: (id: string) => void;
     submit: boolean;
     editLabel: (id: string, label: string) => void;
-    onFocus: (e: FocusEvent) => void;
+    onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
+    setFocusName: (name: string) => void;
 }
 
 const MainBoxSx = {
@@ -105,6 +97,14 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
+const hoverSx = {
+    "&:hover": {
+        bgcolor: "action.hover",
+        cursor: "text",
+    },
+    mt: 0,
+};
+
 const disableColor = <T,>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
 
 const PipelineRow = ({
@@ -118,36 +118,47 @@ const PipelineRow = ({
     editLabel,
     onFocus,
     focusName,
+    setFocusName,
 }: PipelinesRowProps) => {
     const [pipeline, setPipeline] = useState<string>(label);
 
     const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setPipeline(e.currentTarget.value), []);
-    const onSaveField = useCallback((e: MouseEvent<HTMLElement>) => editLabel(id, pipeline), [id, pipeline]);
-    const onCancelField = useCallback((e: MouseEvent<HTMLElement>) => setPipeline(label), [label]);
+    const onSaveField = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            editLabel(id, pipeline);
+        },
+        [id, pipeline]
+    );
+    const onCancelField = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            setPipeline(label);
+            setFocusName("");
+        },
+        [label]
+    );
     const onSubmitPipeline = useCallback(() => submitEntity(id), [submitEntity, id]);
 
     useEffect(() => setPipeline(label), [label]);
 
     const name = `pipeline${number}`;
-    const focus = focusName === name;
 
     const index = number + 1;
     return (
-        <Grid item xs={12} container justifyContent="space-between">
+        <Grid item xs={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
             <Grid item container xs={10}>
-                {active ? (
+                {active && focusName === name ? (
                     <TextField
-                        label={"Pipeline " + index}
-                        name={name}
+                        label={`Pipeline ${index}`}
                         variant="outlined"
                         value={pipeline}
                         onChange={onChange}
-                        onFocus={onFocus}
                         sx={FieldNoMaxWidth}
                         disabled={!enableScenarioFields}
                         fullWidth
                         InputProps={{
-                            endAdornment: focus ? (
+                            endAdornment: (
                                 <InputAdornment position="end">
                                     <IconButton sx={IconPaddingSx} onClick={onSaveField}>
                                         <CheckCircle color="primary" />
@@ -156,7 +167,7 @@ const PipelineRow = ({
                                         <Cancel color="inherit" />
                                     </IconButton>
                                 </InputAdornment>
-                            ) : null,
+                            ),
                         }}
                     />
                 ) : (
@@ -165,13 +176,8 @@ const PipelineRow = ({
             </Grid>
             <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
                 {submit ? (
-                    <IconButton
-                        component="label"
-                        size="small"
-                        onClick={onSubmitPipeline}
-                        disabled={!enableScenarioFields}
-                    >
-                        <Send color="info" />
+                    <IconButton size="small" onClick={onSubmitPipeline} disabled={!enableScenarioFields || !active}>
+                        <Send color={disableColor("info", !enableScenarioFields)} />
                     </IconButton>
                 ) : null}
             </Grid>
@@ -263,42 +269,73 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     });
 
     // submits
-    const submitPipeline = useCallback((pipelineId: string) => {
-        dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: pipelineId }));
-    }, [props.onSubmit]);
+    const submitPipeline = useCallback(
+        (pipelineId: string) => {
+            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: pipelineId }));
+        },
+        [props.onSubmit]
+    );
 
-    const submitScenario = useCallback((e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        if (isScenario) {
-            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scenarioId }));
-        }
-    }, [isScenario, props.onSubmit]);
+    const submitScenario = useCallback(
+        (e: React.MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            if (isScenario) {
+                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scenarioId }));
+            }
+        },
+        [isScenario, props.onSubmit]
+    );
 
     // focus
     const [focusName, setFocusName] = useState("");
-    const onFocus = useCallback((e: FocusEvent) => setFocusName((e.currentTarget as HTMLInputElement).name), []);
+    const onFocus = useCallback((e: MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        setFocusName(e.currentTarget.dataset.focus || "");
+    }, []);
 
     // Label
     const [label, setLabel] = useState<string>();
-    const editLabel = useCallback(() => {
-        if (isScenario) {
-            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, name: label }));
-        }
-    }, [isScenario, props.onEdit, scenarioId, label]);
-    const cancelLabel = useCallback(() => setLabel(scLabel), [scLabel]);
+    const editLabel = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            if (isScenario) {
+                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, name: label }));
+                setFocusName("");
+            }
+        },
+        [isScenario, props.onEdit, scenarioId, label]
+    );
+    const cancelLabel = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            setLabel(scLabel);
+            setFocusName("");
+        },
+        [scLabel]
+    );
     const onLabelChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
-    const labelFocus = focusName === "label";
 
     // tags
     const [scTags, setTags] = useState<string[]>([]);
-    const editTags = useCallback(() => {
-        if (isScenario) {
-            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, tags: scTags }));
-        }
-    }, [isScenario, props.onEdit, scenarioId, scTags]);
-    const cancelTags = useCallback(() => setTags(scenarioTags), [scenarioTags]);
+    const editTags = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            if (isScenario) {
+                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, tags: scTags }));
+                setFocusName("");
+            }
+        },
+        [isScenario, props.onEdit, scenarioId, scTags]
+    );
+    const cancelTags = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            setTags(scenarioTags);
+            setFocusName("");
+        },
+        [scenarioTags]
+    );
     const onChangeTags = useCallback((_: SyntheticEvent, tags: string[]) => setTags(tags), []);
-    const tagsFocus = focusName === "tags";
 
     // Properties
     const updatePropertyField = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -319,21 +356,61 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         }
     }, []);
 
-    const propertyDelete = useCallback((e: React.MouseEvent<HTMLElement>) => {
-        const { id = "-1" } = e.currentTarget.dataset;
-        setProperties((props) => props.filter((item) => item.id !== id));
-    }, []);
+    const editProperty = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            if (isScenario) {
+                const { id: propId = "" } = e.currentTarget.dataset || {};
+                const property = propId ? scProperties.find((p) => p.id === propId) : newProp;
+                property &&
+                    dispatch(
+                        createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, properties: [property] })
+                    );
+                setNewProp((np) => ({ ...np, key: "", value: "" }));
+                setFocusName("");
+            }
+        },
+        [isScenario, props.onEdit, scenarioId, scProperties, newProp]
+    );
+    const cancelProperty = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            if (isScenario) {
+                const { id: propId = "" } = e.currentTarget.dataset || {};
+                const propertyIdx = scProperties.findIndex((p) => p.id === propId);
+                propertyIdx > -1 &&
+                    propertyIdx < scenarioProperties.length &&
+                    setProperties((props) =>
+                        props.map((p, idx) =>
+                            idx == propertyIdx
+                                ? { ...p, key: scenarioProperties[idx][0], value: scenarioProperties[idx][1] }
+                                : p
+                        )
+                    );
+                setFocusName("");
+            }
+        },
+        [isScenario, props.onEdit, scenarioId, scProperties]
+    );
 
-    const propertyAdd = () => {
-        setProperties((props) => [...props, { ...newProp, id: props.length + 1 + "" }]);
-        setNewProp({ id: "", key: "", value: "" });
-    };
+    const deleteProperty = useCallback((e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        const { id: propId = "-1" } = e.currentTarget.dataset;
+        setProperties((props) => props.filter((item) => item.id !== propId));
+        const property = scProperties.find((p) => p.id === propId);
+        property &&
+            dispatch(
+                createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, deleted_properties: [property] })
+            );
+        setFocusName("");
+    }, []);
 
     // pipelines
     const editPipeline = useCallback(
         (id: string, label: string) => {
             if (isScenario) {
                 dispatch(createSendActionNameAction(id, module, props.onEdit, { id: id, name: label }));
+                setFocusName("");
             }
         },
         [isScenario, props.onEdit]
@@ -363,7 +440,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     return (
         <>
-            <Box sx={MainBoxSx} id={id}>
+            <Box sx={MainBoxSx} id={id} onClick={onFocus}>
                 <Accordion defaultExpanded={expandable ? expanded : isScenario} disabled={!isScenario}>
                     <MuiAccordionSummary>
                         <Grid
@@ -392,7 +469,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         onClick={submitScenario}
                                         disabled={!isScenario || !active}
                                     >
-                                        <Send fontSize="medium" color={isScenario && active ? "info" : "disabled"} />
+                                        <Send fontSize="medium" color={disableColor("info", !isScenario || !active)} />
                                     </IconButton>
                                 ) : null}
                             </Grid>
@@ -420,20 +497,26 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
                                 </Grid>
                             ) : null}
-                            {active ? (
-                                <Grid item xs={11} container justifyContent="space-between" spacing={1}>
-                                    <Grid item xs={12} container justifyContent="space-between">
+                            <Grid item xs={12} container justifyContent="space-between" spacing={1}>
+                                <Grid
+                                    item
+                                    xs={12}
+                                    container
+                                    justifyContent="space-between"
+                                    data-focus="label"
+                                    onClick={onFocus}
+                                    sx={hoverSx}
+                                >
+                                    {active && focusName === "label" ? (
                                         <TextField
                                             label="Label"
                                             variant="outlined"
-                                            name="label"
                                             fullWidth
                                             sx={FieldNoMaxWidth}
                                             value={label || ""}
                                             onChange={onLabelChange}
-                                            onFocus={onFocus}
                                             InputProps={{
-                                                endAdornment: labelFocus && (
+                                                endAdornment: (
                                                     <InputAdornment position="end">
                                                         <IconButton sx={IconPaddingSx} onClick={editLabel}>
                                                             <CheckCircle color="primary" />
@@ -446,9 +529,28 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             }}
                                             disabled={!isScenario}
                                         />
-                                    </Grid>
-                                    {showTags ? (
-                                        <Grid item xs={12} container justifyContent="space-between">
+                                    ) : (
+                                        <>
+                                            <Grid item xs={4}>
+                                                <Typography variant="subtitle2">Label</Typography>
+                                            </Grid>
+                                            <Grid item xs={8}>
+                                                <Typography variant="subtitle2">{scLabel}</Typography>
+                                            </Grid>
+                                        </>
+                                    )}{" "}
+                                </Grid>
+                                {showTags ? (
+                                    <Grid
+                                        item
+                                        xs={12}
+                                        container
+                                        justifyContent="space-between"
+                                        data-focus="tags"
+                                        onClick={onFocus}
+                                        sx={hoverSx}
+                                    >
+                                        {active && focusName === "tags" ? (
                                             <Autocomplete
                                                 multiple
                                                 options={authorizedTags}
@@ -468,16 +570,14 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 fullWidth
                                                 renderInput={(params) => (
                                                     <TextField
-                                                        name="tags"
                                                         {...params}
                                                         variant="outlined"
                                                         label="Tags"
-                                                        onFocus={onFocus}
                                                         sx={tagsAutocompleteSx}
                                                         fullWidth
                                                         InputProps={{
                                                             ...params.InputProps,
-                                                            endAdornment: tagsFocus && (
+                                                            endAdornment: (
                                                                 <>
                                                                     <IconButton sx={IconPaddingSx} onClick={editTags}>
                                                                         <CheckCircle color="primary" />
@@ -492,162 +592,202 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 )}
                                                 disabled={!isScenario}
                                             />
-                                        </Grid>
-                                    ) : null}
-                                </Grid>
-                            ) : (
-                                <Grid item xs={12}>
-                                    <Grid item xs={12} container justifyContent="space-between">
-                                        <Grid item xs={4}>
-                                            <Typography variant="subtitle2">Label</Typography>
-                                        </Grid>
-                                        <Grid item xs={8}>
-                                            <Typography variant="subtitle2">{scLabel}</Typography>
-                                        </Grid>
+                                        ) : (
+                                            <>
+                                                <Grid item xs={4}>
+                                                    <Typography variant="subtitle2">Tags</Typography>
+                                                </Grid>
+                                                <Grid item xs={8}>
+                                                    {scTags.map((tag, index) => (
+                                                        <Chip key={index} label={tag} variant="outlined" />
+                                                    ))}
+                                                </Grid>
+                                            </>
+                                        )}
                                     </Grid>
-                                    {showTags ? (
-                                        <Grid item xs={12} container justifyContent="space-between">
-                                            <Grid item xs={4}>
-                                                <Typography variant="subtitle2">Tags</Typography>
-                                            </Grid>
-                                            <Grid item xs={8}>
-                                                {scTags.map((tag, index) => (
-                                                    <Chip key={index} label={tag} variant="outlined" />
-                                                ))}
-                                            </Grid>
-                                        </Grid>
-                                    ) : null}
-                                </Grid>
-                            )}
+                                ) : null}
+                            </Grid>
+
                             <Grid item xs={12}>
                                 <Divider />
                             </Grid>
                             {showProperties ? (
                                 <>
-                                    <Grid item xs={12} container justifyContent="space-between">
+                                    <Grid item xs={12} container>
                                         <Typography variant="h6">Custom Properties</Typography>
                                     </Grid>
-                                    {scProperties
-                                        ? scProperties.map((property, index) => {
-                                              return (
-                                                  <Grid
-                                                      item
-                                                      xs={12}
-                                                      spacing={1}
-                                                      container
-                                                      justifyContent="space-between"
-                                                      key={property.key}
-                                                  >
-                                                      <Grid item xs={5}>
-                                                          {active ? (
-                                                              <TextField
-                                                                  label="Key"
-                                                                  variant="outlined"
-                                                                  value={property.key}
-                                                                  onFocus={onFocus}
-                                                                  sx={FieldNoMaxWidth}
-                                                                  disabled={!isScenario}
-                                                                  data-name="key"
-                                                                  data-id={property.id}
-                                                                  onChange={updatePropertyField}
-                                                              />
-                                                          ) : (
-                                                              <Typography variant="subtitle2">
-                                                                  {property.key}
-                                                              </Typography>
-                                                          )}
-                                                      </Grid>
-                                                      <Grid item xs={5}>
-                                                          {active ? (
-                                                              <TextField
-                                                                  label="Value"
-                                                                  variant="outlined"
-                                                                  value={property.value}
-                                                                  onFocus={onFocus}
-                                                                  sx={FieldNoMaxWidth}
-                                                                  disabled={!isScenario}
-                                                                  data-name="value"
-                                                                  data-id={property.id}
-                                                                  onChange={updatePropertyField}
-                                                              />
-                                                          ) : (
-                                                              <Typography variant="subtitle2">
-                                                                  {property.value}
-                                                              </Typography>
-                                                          )}
-                                                      </Grid>
+                                    <Grid item xs={12} container rowSpacing={2}>
+                                        {scProperties
+                                            ? scProperties.map((property) => {
+                                                  const propName = `property-${property.id}`;
+                                                  return (
                                                       <Grid
                                                           item
-                                                          xs={2}
+                                                          xs={12}
+                                                          spacing={1}
                                                           container
-                                                          alignContent="center"
-                                                          alignItems="center"
-                                                          justifyContent="center"
+                                                          justifyContent="space-between"
+                                                          key={property.key}
+                                                          data-focus={propName}
+                                                          onClick={onFocus}
+                                                          sx={hoverSx}
                                                       >
-                                                          {active ? (
-                                                              <IconButton
-                                                                  sx={DeleteIconSx}
-                                                                  data-id={property.id}
-                                                                  onClick={propertyDelete}
-                                                                  onFocus={onFocus}
-                                                                  disabled={!isScenario}
-                                                              >
-                                                                  <DeleteOutline
-                                                                      fontSize="small"
-                                                                      color={disableColor("primary", !isScenario)}
-                                                                  />
-                                                              </IconButton>
-                                                          ) : null}
+                                                          {active && focusName === propName ? (
+                                                              <>
+                                                                  <Grid item xs={4}>
+                                                                      <TextField
+                                                                          label="Key"
+                                                                          variant="outlined"
+                                                                          value={property.key}
+                                                                          sx={FieldNoMaxWidth}
+                                                                          disabled={!isScenario}
+                                                                          data-name="key"
+                                                                          data-id={property.id}
+                                                                          onChange={updatePropertyField}
+                                                                      />
+                                                                  </Grid>
+                                                                  <Grid item xs={6}>
+                                                                      <TextField
+                                                                          label="Value"
+                                                                          variant="outlined"
+                                                                          value={property.value}
+                                                                          sx={FieldNoMaxWidth}
+                                                                          disabled={!isScenario}
+                                                                          data-name="value"
+                                                                          data-id={property.id}
+                                                                          onChange={updatePropertyField}
+                                                                      />
+                                                                  </Grid>
+                                                                  <Grid
+                                                                      item
+                                                                      xs={1}
+                                                                      container
+                                                                      alignContent="center"
+                                                                      alignItems="center"
+                                                                      justifyContent="center"
+                                                                  >
+                                                                      <IconButton
+                                                                          sx={IconPaddingSx}
+                                                                          data-id={property.id}
+                                                                          onClick={editProperty}
+                                                                      >
+                                                                          <CheckCircle color="primary" />
+                                                                      </IconButton>
+                                                                      <IconButton
+                                                                          sx={IconPaddingSx}
+                                                                          data-id={property.id}
+                                                                          onClick={cancelProperty}
+                                                                      >
+                                                                          <Cancel color="inherit" />
+                                                                      </IconButton>
+                                                                  </Grid>
+                                                                  <Grid
+                                                                      item
+                                                                      xs={1}
+                                                                      container
+                                                                      alignContent="center"
+                                                                      alignItems="center"
+                                                                      justifyContent="center"
+                                                                  >
+                                                                      <IconButton
+                                                                          sx={DeleteIconSx}
+                                                                          data-id={property.id}
+                                                                          onClick={deleteProperty}
+                                                                          disabled={!isScenario}
+                                                                      >
+                                                                          <DeleteOutline
+                                                                              fontSize="small"
+                                                                              color={disableColor(
+                                                                                  "primary",
+                                                                                  !isScenario
+                                                                              )}
+                                                                          />
+                                                                      </IconButton>
+                                                                  </Grid>
+                                                              </>
+                                                          ) : (
+                                                              <>
+                                                                  <Grid item xs={4}>
+                                                                      <Typography variant="subtitle2">
+                                                                          {property.key}
+                                                                      </Typography>
+                                                                  </Grid>
+                                                                  <Grid item xs={6}>
+                                                                      <Typography variant="subtitle2">
+                                                                          {property.value}
+                                                                      </Typography>
+                                                                  </Grid>{" "}
+                                                                  <Grid item xs={2} />
+                                                              </>
+                                                          )}
                                                       </Grid>
-                                                  </Grid>
-                                              );
-                                          })
-                                        : null}
-                                    {active ? (
-                                        <Grid item xs={12} spacing={1} container justifyContent="space-between">
-                                            <Grid item xs={5}>
-                                                <TextField
-                                                    value={newProp.key}
-                                                    data-name="key"
-                                                    onChange={updatePropertyField}
-                                                    onFocus={onFocus}
-                                                    label="Key"
-                                                    variant="outlined"
-                                                    sx={FieldNoMaxWidth}
-                                                    disabled={!isScenario}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={5}>
-                                                <TextField
-                                                    value={newProp.value}
-                                                    data-name="value"
-                                                    onChange={updatePropertyField}
-                                                    onFocus={onFocus}
-                                                    label="Value"
-                                                    variant="outlined"
-                                                    sx={FieldNoMaxWidth}
-                                                    disabled={!isScenario}
-                                                />
-                                            </Grid>
-                                            <Grid
-                                                item
-                                                xs={2}
-                                                container
-                                                alignContent="center"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                            >
-                                                <IconButton
-                                                    onClick={propertyAdd}
-                                                    onFocus={onFocus}
-                                                    disabled={!newProp.key || !newProp.value || !isScenario}
-                                                >
-                                                    <Add color={disableColor("primary", !isScenario)} />
-                                                </IconButton>
-                                            </Grid>
+                                                  );
+                                              })
+                                            : null}
+                                        <Grid
+                                            item
+                                            xs={12}
+                                            spacing={1}
+                                            container
+                                            justifyContent="space-between"
+                                            data-focus="property-new"
+                                            onClick={onFocus}
+                                            sx={hoverSx}
+                                        >
+                                            {active && focusName == "property-new" ? (
+                                                <>
+                                                    <Grid item xs={4}>
+                                                        <TextField
+                                                            value={newProp.key}
+                                                            data-name="key"
+                                                            onChange={updatePropertyField}
+                                                            label="Key"
+                                                            variant="outlined"
+                                                            sx={FieldNoMaxWidth}
+                                                            disabled={!isScenario}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <TextField
+                                                            value={newProp.value}
+                                                            data-name="value"
+                                                            onChange={updatePropertyField}
+                                                            label="Value"
+                                                            variant="outlined"
+                                                            sx={FieldNoMaxWidth}
+                                                            disabled={!isScenario}
+                                                        />
+                                                    </Grid>
+                                                    <Grid
+                                                        item
+                                                        xs={1}
+                                                        container
+                                                        alignContent="center"
+                                                        alignItems="center"
+                                                        justifyContent="center"
+                                                    >
+                                                        <IconButton sx={IconPaddingSx} onClick={editProperty}>
+                                                            <CheckCircle color="primary" />
+                                                        </IconButton>
+                                                        <IconButton sx={IconPaddingSx} onClick={cancelProperty}>
+                                                            <Cancel color="inherit" />
+                                                        </IconButton>
+                                                    </Grid>
+                                                    <Grid item xs={1} />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Grid item xs={4}>
+                                                        <Typography variant="subtitle2">New Property Key</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <Typography variant="subtitle2">Value</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2} />
+                                                </>
+                                            )}
                                         </Grid>
-                                    ) : null}
-
+                                    </Grid>
                                     <Grid item xs={12}>
                                         <Divider />
                                     </Grid>
@@ -675,6 +815,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     editLabel={editPipeline}
                                                     onFocus={onFocus}
                                                     focusName={focusName}
+                                                    setFocusName={setFocusName}
                                                 />
                                             );
                                         })}
@@ -691,7 +832,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         color="primary"
                                         disabled={!active || !isScenario || !deletable}
                                         onClick={openDeleteDialog}
-                                        onFocus={onFocus}
                                     >
                                         DELETE
                                     </Button>
@@ -701,7 +841,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     color="primary"
                                     disabled={!active || !isScenario || primary}
                                     onClick={openPrimaryDialog}
-                                    onFocus={onFocus}
                                 >
                                     PROMOTE TO PRIMARY
                                 </Button>
