@@ -19,7 +19,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
-from .common._warnings import _warn_no_core_service
+from .common._warnings import _warn_deprecated, _warn_no_core_service
 from .config.pipeline_config import PipelineConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
@@ -490,6 +490,7 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     Returns:
         The new pipeline.
     """
+    _warn_deprecated("create_pipeline")
     return _PipelineManagerFactory._build_manager()._get_or_create(config)
 
 
