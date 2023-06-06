@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from datetime import timedelta
 from typing import Dict
 
 from taipy.config._config import _Config
@@ -30,6 +31,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_if_entity_property_key_used_is_predefined(data_node_config)
             self._check_storage_type(data_node_config_id, data_node_config)
             self._check_scope(data_node_config_id, data_node_config)
+            self._check_validity_period(data_node_config_id, data_node_config)
             self._check_required_properties(data_node_config_id, data_node_config)
             self._check_callable(data_node_config_id, data_node_config)
             self._check_generic_read_write_fct_and_args(data_node_config_id, data_node_config)
@@ -58,6 +60,15 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 data_node_config._SCOPE_KEY,
                 data_node_config.scope,
                 f"`{Scope.PIPELINE}` is deprecated. Please use other `Scope` value instead.",
+            )
+
+    def _check_validity_period(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+        if data_node_config.validity_period and not isinstance(data_node_config.validity_period, timedelta):
+            self._error(
+                data_node_config._VALIDITY_PERIOD_KEY,
+                data_node_config.validity_period,
+                f"`{data_node_config._VALIDITY_PERIOD_KEY}` field of DataNodeConfig `{data_node_config_id}` must be"
+                f" populated with a timedelta value.",
             )
 
     def _check_required_properties(self, data_node_config_id: str, data_node_config: DataNodeConfig):
