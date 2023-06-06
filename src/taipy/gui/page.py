@@ -17,6 +17,9 @@ from types import FrameType
 
 from .utils import _filter_locals, _get_module_name_from_frame, _is_in_notebook, _varname_from_content
 
+if t.TYPE_CHECKING:
+    from .renderers import ElementApi
+
 
 class Page(ABC):
     """Generic page generator.
@@ -30,7 +33,7 @@ class Page(ABC):
     your application variables and interact with them.
     """
 
-    def __init__(self, content: str, **kwargs) -> None:
+    def __init__(self, content: t.Union[str, "ElementApi"], **kwargs) -> None:
         """Initialize a new Page with the indicated content.
 
         Arguments:
@@ -39,6 +42,7 @@ class Page(ABC):
         If _content_ is a path to a readable file, the file is read entirely as the text template.
         """
         self._content = ""
+        self._base_element: t.Optional[ElementApi] = None
         self._filepath = ""
         self._frame: t.Optional[FrameType] = None
         if "frame" in kwargs:
@@ -46,7 +50,10 @@ class Page(ABC):
         else:
             # Get the correct frame from Markdown, Html class by going back 2 stacks
             self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame))
-        self.__process_content(content)
+        if isinstance(content, str):
+            self.__process_content(content)
+        else:
+            self._base_element = content
 
     def __process_content(self, content: str) -> None:
         if path.exists(content) and path.isfile(content):

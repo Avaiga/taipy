@@ -12,6 +12,7 @@
 import typing as t
 
 from ..page import Page
+from ._class_api import ElementApi
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
@@ -88,3 +89,18 @@ class Html(Page):
         parser.feed_data(self._content)
         self.head = parser.head
         return parser.get_jsx()
+
+
+class ClassApi(Page):
+    """
+    Page generator for Element Api.
+    """
+
+    def __init__(self, content: ElementApi, **kwargs) -> None:
+        super().__init__(content, **kwargs)
+
+    # Generate JSX from Element Object
+    def render(self, gui) -> str:
+        if self._base_element is None:
+            return "<h1>No Base Element found for ClassApi</h1>"
+        return self._base_element._render(gui)
