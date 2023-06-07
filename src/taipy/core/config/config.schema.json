@@ -41,6 +41,10 @@
             ],
             "default": "pickle"
           },
+          "validity_period": {
+            "description": "A timedelta value as a string: The duration since the last edit date for which the data node can be considered up-to-date. If *validity_period* is set to None, the data node is always up-to-date.",
+            "type": "string"
+          },
           "default_path": {
             "description": "storage_type: pickle, csv, excel, json, parquet specific.",
             "type": "string"

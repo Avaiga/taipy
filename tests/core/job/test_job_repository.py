@@ -19,7 +19,7 @@ from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.csv import CSVDataNode
-from src.taipy.core.data.data_node_id import DataNodeId
+from src.taipy.core.data.data_node_id import DataNodeId, Edit
 from src.taipy.core.exceptions.exceptions import ModelNotFound
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job._job_model import _JobModel
@@ -39,9 +39,9 @@ data_node = CSVDataNode(
     DataNodeId("dn_id"),
     "name",
     "owner_id",
-    "task_id",
+    {"task_id"},
     datetime.datetime(1985, 10, 14, 2, 30, 0),
-    [dict(timestamp=datetime.datetime(1985, 10, 14, 2, 30, 0), job_id="job_id")],
+    [Edit(dict(timestamp=datetime.datetime(1985, 10, 14, 2, 30, 0), job_id="job_id"))],
     "latest",
     None,
     False,
@@ -139,10 +139,12 @@ class TestJobRepository:
             [],
             "version",
         )
-        with mock.patch("src.taipy.core.job._job_repository._load_fct") as mck:
-            mck.return_value = _Orchestrator._on_status_change
-            job = repository._from_model(job_model)
-            assert job._subscribers[0] == _Orchestrator._on_status_change
-            repository._save(job)
-        job = repository.load("jid")
+        with mock.patch.object(_JobModel, "from_dict") as from_dict_mck:
+            from_dict_mck.return_value = job_model
+            with mock.patch("src.taipy.core.job._job_converter._load_fct") as mck:
+                mck.return_value = _Orchestrator._on_status_change
+                job = repository.converter._model_to_entity(job_model)
+                assert job._subscribers[0] == _Orchestrator._on_status_change
+                repository._save(job)
+        job = repository._load("jid")
         assert job._subscribers[0] == _Orchestrator._on_status_change

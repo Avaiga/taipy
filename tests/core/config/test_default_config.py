@@ -36,6 +36,7 @@ def _test_default_data_node_config(dn_config: DataNodeConfig):
     assert dn_config.id is not None
     assert dn_config.storage_type == "pickle"
     assert dn_config.scope == Scope.SCENARIO
+    assert dn_config.validity_period is None
     assert len(dn_config.properties) == 0  # type: ignore
 
 

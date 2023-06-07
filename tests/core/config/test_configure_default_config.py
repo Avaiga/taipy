@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import json
+from datetime import timedelta
 
 from src.taipy.core.common.mongo_default_document import MongoDefaultDocument
 from taipy.config.common.scope import Scope
@@ -20,16 +21,25 @@ def test_configure_default_data_node():
     data_node1 = Config.configure_data_node(id="input_data1")
     assert data_node1.storage_type == "pickle"
     assert data_node1.scope == Scope.SCENARIO
+    assert data_node1.validity_period is None
 
     Config.configure_default_data_node("in_memory", scope=Scope.GLOBAL)
     data_node2 = Config.configure_data_node(id="input_data2")
     assert data_node2.storage_type == "in_memory"
     assert data_node2.scope == Scope.GLOBAL
+    assert data_node2.validity_period is None
 
     Config.configure_default_data_node("csv")
     data_node3 = Config.configure_data_node(id="input_data3")
     assert data_node3.storage_type == "csv"
     assert data_node3.scope == Scope.SCENARIO
+    assert data_node3.validity_period is None
+
+    Config.configure_default_data_node("json", validity_period=timedelta(1))
+    data_node4 = Config.configure_data_node(id="input_data4")
+    assert data_node4.storage_type == "json"
+    assert data_node4.scope == Scope.SCENARIO
+    assert data_node4.validity_period == timedelta(1)
 
 
 def test_configure_default_data_node_replace_old_default_config():
@@ -81,6 +91,7 @@ def test_configure_default_csv_data_node():
         has_header=False,
         exposed_type="numpy",
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -91,6 +102,7 @@ def test_configure_default_csv_data_node():
     assert dn1.default_path == "default.csv"
     assert dn1.has_header is False
     assert dn1.exposed_type == "numpy"
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -100,6 +112,7 @@ def test_configure_default_csv_data_node():
     assert dn2.has_header is False
     assert dn2.exposed_type == "numpy"
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "csv"
     # should use properties from the default datanode
@@ -108,12 +121,14 @@ def test_configure_default_csv_data_node():
         storage_type="csv",
         default_path="dn3.csv",
         scope=Scope.SCENARIO,
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "csv"
     assert dn3.default_path == "dn3.csv"
     assert dn3.has_header is False
     assert dn3.exposed_type == "numpy"
     assert dn3.scope == Scope.SCENARIO
+    assert dn3.validity_period == timedelta(1)
 
 
 def test_configure_default_json_data_node():
@@ -128,6 +143,7 @@ def test_configure_default_json_data_node():
         default_path="default.json",
         encoder=MyCustomEncoder,
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -138,6 +154,7 @@ def test_configure_default_json_data_node():
     assert dn1.encoder == MyCustomEncoder
     assert dn1.decoder is None
     assert dn1.scope == Scope.GLOBAL
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -147,6 +164,7 @@ def test_configure_default_json_data_node():
     assert dn2.encoder == MyCustomEncoder
     assert dn2.decoder is None
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "json"
     # should use properties from the default datanode
@@ -155,12 +173,14 @@ def test_configure_default_json_data_node():
         storage_type="json",
         default_path="dn3.json",
         decoder=MyCustomDecoder,
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "json"
     assert dn3.default_path == "dn3.json"
     assert dn3.encoder == MyCustomEncoder
     assert dn3.decoder == MyCustomDecoder
     assert dn3.scope == Scope.GLOBAL
+    assert dn3.validity_period == timedelta(1)
 
 
 def test_configure_default_parquet_data_node():
@@ -170,6 +190,7 @@ def test_configure_default_parquet_data_node():
         compression="gzip",
         exposed_type="numpy",
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -183,6 +204,7 @@ def test_configure_default_parquet_data_node():
     assert dn1.write_kwargs is None
     assert dn1.exposed_type == "numpy"
     assert dn1.scope == Scope.GLOBAL
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -199,6 +221,7 @@ def test_configure_default_parquet_data_node():
     assert dn2.write_kwargs is None
     assert dn2.exposed_type == "numpy"
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "parquet"
     # should use properties from the default datanode
@@ -208,6 +231,7 @@ def test_configure_default_parquet_data_node():
         default_path="dn3.parquet",
         read_kwargs={"filter": "foo"},
         scope=Scope.SCENARIO,
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "parquet"
     assert dn3.default_path == "dn3.parquet"
@@ -217,6 +241,7 @@ def test_configure_default_parquet_data_node():
     assert dn3.write_kwargs is None
     assert dn3.exposed_type == "numpy"
     assert dn3.scope == Scope.SCENARIO
+    assert dn3.validity_period == timedelta(1)
 
 
 def test_configure_default_excel_data_node():
@@ -226,6 +251,7 @@ def test_configure_default_excel_data_node():
         has_header=False,
         exposed_type="numpy",
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -237,6 +263,7 @@ def test_configure_default_excel_data_node():
     assert dn1.has_header is False
     assert dn1.sheet_name is None
     assert dn1.exposed_type == "numpy"
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -247,6 +274,7 @@ def test_configure_default_excel_data_node():
     assert dn2.sheet_name == "sheet_1"
     assert dn2.exposed_type == "numpy"
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "excel"
     # should use properties from the default datanode
@@ -255,6 +283,7 @@ def test_configure_default_excel_data_node():
         storage_type="excel",
         default_path="dn3.xlsx",
         scope=Scope.SCENARIO,
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "excel"
     assert dn3.default_path == "dn3.xlsx"
@@ -262,6 +291,7 @@ def test_configure_default_excel_data_node():
     assert dn3.sheet_name is None
     assert dn3.exposed_type == "numpy"
     assert dn3.scope == Scope.SCENARIO
+    assert dn3.validity_period == timedelta(1)
 
 
 def test_configure_default_pickle_data_node():
@@ -270,6 +300,7 @@ def test_configure_default_pickle_data_node():
         default_data=1,
         exposed_type="numpy",
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -280,6 +311,7 @@ def test_configure_default_pickle_data_node():
     assert dn1.default_path is None
     assert dn1.default_data == 1
     assert dn1.exposed_type == "numpy"
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -289,6 +321,7 @@ def test_configure_default_pickle_data_node():
     assert dn2.default_data == 2
     assert dn2.exposed_type == "numpy"
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "pickle"
     # should use properties from the default datanode
@@ -297,12 +330,14 @@ def test_configure_default_pickle_data_node():
         storage_type="pickle",
         default_path="dn3.pkl",
         scope=Scope.SCENARIO,
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "pickle"
     assert dn3.default_path == "dn3.pkl"
     assert dn3.default_data == 1
     assert dn3.exposed_type == "numpy"
     assert dn3.scope == Scope.SCENARIO
+    assert dn3.validity_period == timedelta(1)
 
 
 def test_configure_default_sql_table_data_node():
@@ -318,6 +353,7 @@ def test_configure_default_sql_table_data_node():
         db_driver="default server",
         db_extra_args={"default": "default"},
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -334,6 +370,7 @@ def test_configure_default_sql_table_data_node():
     assert dn1.db_driver == "default server"
     assert dn1.db_extra_args == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -354,6 +391,7 @@ def test_configure_default_sql_table_data_node():
     assert dn2.db_driver == "default server"
     assert dn2.db_extra_args == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "sql_table"
     # should use properties from the default datanode
@@ -365,6 +403,7 @@ def test_configure_default_sql_table_data_node():
         db_name="db_3",
         db_engine="postgresql",
         table_name="table_3",
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "sql_table"
     assert dn3.db_username == "user_3"
@@ -377,6 +416,7 @@ def test_configure_default_sql_table_data_node():
     assert dn3.db_driver == "default server"
     assert dn3.db_extra_args == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
+    assert dn3.validity_period == timedelta(1)
 
 
 def test_configure_default_sql_data_node():
@@ -396,6 +436,7 @@ def test_configure_default_sql_data_node():
         db_driver="default server",
         db_extra_args={"default": "default"},
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -413,6 +454,7 @@ def test_configure_default_sql_data_node():
     assert dn1.db_driver == "default server"
     assert dn1.db_extra_args == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -431,6 +473,7 @@ def test_configure_default_sql_data_node():
     assert dn2.db_driver == "default server"
     assert dn2.db_extra_args == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "sql"
     # should use properties from the default datanode
@@ -443,6 +486,7 @@ def test_configure_default_sql_data_node():
         db_engine="postgresql",
         read_query="SELECT * FROM table_3",
         write_query_builder=query_builder,
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "sql"
     assert dn3.db_username == "user_3"
@@ -456,6 +500,7 @@ def test_configure_default_sql_data_node():
     assert dn3.db_driver == "default server"
     assert dn3.db_extra_args == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
+    assert dn3.validity_period == timedelta(1)
 
 
 def test_configure_default_mongo_collection_data_node():
@@ -468,6 +513,7 @@ def test_configure_default_mongo_collection_data_node():
         db_driver="default server",
         db_extra_args={"default": "default"},
         scope=Scope.GLOBAL,
+        validity_period=timedelta(2),
     )
 
     # Config with generic config_data_node without storage_type
@@ -483,6 +529,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn1.db_port == 1010
     assert dn1.db_extra_args == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
+    assert dn1.validity_period == timedelta(2)
 
     # Config with generic config_data_node without storage_type
     # with custom properties
@@ -502,6 +549,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn2.db_port == 2020
     assert dn2.db_extra_args == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
+    assert dn2.validity_period == timedelta(2)
 
     # Config a datanode with specific "storage_type" = "mongo_collection"
     # should use properties from the default datanode
@@ -512,6 +560,7 @@ def test_configure_default_mongo_collection_data_node():
         collection_name="collection_3",
         db_username="user_3",
         db_password="pwd_3",
+        validity_period=timedelta(1),
     )
     assert dn3.storage_type == "mongo_collection"
     assert dn3.db_username == "user_3"
@@ -524,3 +573,4 @@ def test_configure_default_mongo_collection_data_node():
     assert dn3.db_driver == "default server"
     assert dn3.db_extra_args == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
+    assert dn3.validity_period == timedelta(1)
