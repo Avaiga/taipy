@@ -101,6 +101,14 @@ class CoreSection(UniqueSection):
         """Configure the Core service.
 
         Parameters:
+            mode (Optional[str], optional): Indicates the mode of the version management system.
+                Possible values are *"development"*, *"experiment"*, or *"production"*.
+            version_number (Optional[str], optional): The string identifier of the version.
+                 In development mode, the version number is ignored.
+            force (Optional[bool], optional): If True, Taipy will override a version even if the configuration
+                has changed and run the application.
+            clean_entities (Optional[bool], optional): If True, running a Taipy Core service will clean all current
+                version entities before running the application.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
                 behavior of the `Core^` service.
         Returns:
