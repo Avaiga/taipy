@@ -90,13 +90,13 @@ const NodeWidget = ({ node, engine }: NodeProps) => {
     const generatePort = useCallback(
         (port: DefaultPortModel) =>
             port.getName() == IN_PORT_NAME ? (
-                <S.InPortLabel>
+                <S.InPortLabel key="inlabel">
                     <PortWidget engine={engine} port={port} key={port.getID()}>
                         <Input />
                     </PortWidget>
                 </S.InPortLabel>
             ) : (
-                <S.OutPortLabel>
+                <S.OutPortLabel key="outlabel">
                     <PortWidget engine={engine} port={port} key={port.getID()}>
                         <Output />
                     </PortWidget>
