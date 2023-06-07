@@ -313,6 +313,13 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert scenario_1.name == "qux"
 
 
+def test_is_deletable():
+    with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mock_submit:
+        scenario = Scenario("foo", [], {})
+        scenario.is_deletable()
+        mock_submit.assert_called_once_with(scenario)
+
+
 def test_submit_scenario():
     with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mock_submit:
         scenario = Scenario("foo", [], {})

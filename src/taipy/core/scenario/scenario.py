@@ -363,6 +363,16 @@ class Scenario(_Entity, _Submittable, _Labeled):
 
         return tp.untag(self, tag)
 
+    def is_deletable(self) -> bool:
+        """Indicate if the scenario can be deleted.
+
+        Returns:
+            True if the scenario can be deleted. False otherwise.
+        """
+        from ... import core as tp
+
+        return tp.is_deletable(self)
+
     def __get_pipelines(self):
         pipelines = {}
         pipeline_manager = _PipelineManagerFactory._build_manager()

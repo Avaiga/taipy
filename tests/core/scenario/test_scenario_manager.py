@@ -247,6 +247,30 @@ def test_create_and_delete_scenario():
     assert len(_ScenarioManager._get_all()) == 0
 
 
+def test_is_deletable():
+    assert len(_ScenarioManager._get_all()) == 0
+    scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
+    creation_date = datetime.now()
+    scenario_1_primary = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="1")
+    scenario_2 = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="2")
+
+    assert len(_ScenarioManager._get_all()) == 2
+    assert scenario_1_primary.is_primary
+    assert not _ScenarioManager._is_deletable(scenario_1_primary)
+    assert not _ScenarioManager._is_deletable(scenario_1_primary.id)
+    assert not scenario_2.is_primary
+    assert _ScenarioManager._is_deletable(scenario_2)
+    assert _ScenarioManager._is_deletable(scenario_2.id)
+
+    _ScenarioManager._hard_delete(scenario_2.id)
+    del scenario_2
+
+    assert len(_ScenarioManager._get_all()) == 1
+    assert scenario_1_primary.is_primary
+    assert _ScenarioManager._is_deletable(scenario_1_primary)
+    assert _ScenarioManager._is_deletable(scenario_1_primary.id)
+
+
 def test_assign_scenario_as_parent_of_pipeline():
     dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
     dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
@@ -926,7 +950,6 @@ def test_submit():
             return super()._submit_task(task, submit_id, callbacks, force)
 
     with patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
-
         with pytest.raises(NonExistingScenario):
             _ScenarioManager._submit(scenario.id)
         with pytest.raises(NonExistingScenario):

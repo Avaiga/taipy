@@ -171,6 +171,15 @@ def get_tasks() -> List[Task]:
     return _TaskManagerFactory._build_manager()._get_all()
 
 
+def is_deletable(scenario: Union[Scenario, ScenarioId]) -> bool:
+    """Indicate if a scenario can be deleted.
+
+    Returns:
+        True if the given scenario can be deleted. False otherwise.
+    """
+    return _ScenarioManagerFactory._build_manager()._is_deletable(scenario)
+
+
 def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
     """Delete an entity and its nested entities.
 
@@ -179,8 +188,9 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
 
     - If a `CycleId^` is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
     - If a `ScenarioId^` is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
-    - If the scenario is primary, it can only be deleted if it is the only scenario in the cycle. In that case, its
-        cycle is also deleted.
+        If the scenario is primary, it can only be deleted if it is the only scenario in the cycle.
+        In that case, its cycle is also deleted. Please use the `is_deletable()` function to check if
+        the scenario can be deleted.
     - If a `PipelineId^` is provided, the nested tasks, data nodes, and jobs are deleted.
     - If a `TaskId^` is provided, the nested data nodes, and jobs are deleted.
 
