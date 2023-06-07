@@ -62,6 +62,7 @@ export interface TaipyState {
     block?: BlockMessage;
     navigateTo?: string;
     navigateTab?: string;
+    navigateForce?: boolean;
     id: string;
     menu: MenuProps;
     download?: FileDownloadProps;
@@ -116,6 +117,7 @@ interface TaipyBlockAction extends TaipyBaseAction, BlockMessage {}
 interface NavigateMessage {
     to?: string;
     tab?: string;
+    force?: boolean;
 }
 
 interface TaipyNavigateAction extends TaipyBaseAction, NavigateMessage {}
@@ -200,7 +202,7 @@ export const INITIAL_STATE: TaipyState = {
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
     isSocketConnected: false,
-    socket: io("/", { autoConnect: false, path:`${getBaseURL()}socket.io` }),
+    socket: io("/", { autoConnect: false, path: `${getBaseURL()}socket.io` }),
 });
 
 const storeClientId = (id: string) => localStorage && localStorage.setItem("TaipyClientId", id);
@@ -218,7 +220,8 @@ const messageToAction = (message: WsMessage) => {
         } else if (message.type === "NA") {
             return createNavigateAction(
                 (message as unknown as NavigateMessage).to,
-                (message as unknown as NavigateMessage).tab
+                (message as unknown as NavigateMessage).tab,
+                (message as unknown as NavigateMessage).force
             );
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
@@ -377,6 +380,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 ...state,
                 navigateTo: (action as unknown as TaipyNavigateAction).to,
                 navigateTab: (action as unknown as TaipyNavigateAction).tab,
+                navigateForce: (action as unknown as TaipyNavigateAction).force,
             };
         case Types.ClientId:
             const id = (action as unknown as TaipyIdAction).id;
@@ -690,7 +694,12 @@ export const createRequestDataUpdateAction = (
  * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values
  * @returns The action fed to the reducer.
  */
-export const createRequestUpdateAction = (id: string | undefined, context: string | undefined, names: string[], forceRefresh = false): TaipyAction => ({
+export const createRequestUpdateAction = (
+    id: string | undefined,
+    context: string | undefined,
+    names: string[],
+    forceRefresh = false
+): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
     context: context,
@@ -753,10 +762,11 @@ export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
     message: block.message,
 });
 
-export const createNavigateAction = (to?: string, tab?: string): TaipyNavigateAction => ({
+export const createNavigateAction = (to?: string, tab?: string, force?: boolean): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,
     tab,
+    force,
 });
 
 export const createIdAction = (id: string): TaipyIdAction => ({

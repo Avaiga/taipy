@@ -12,30 +12,38 @@
  */
 
 import { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { TaipyContext } from "../../context/taipyContext";
 import { createNavigateAction } from "../../context/taipyReducers";
 
 interface NavigateProps {
     to?: string;
     tab?: string;
+    force?: boolean;
 }
 
-const Navigate = ({ to, tab }: NavigateProps) => {
+const Navigate = ({ to, tab, force }: NavigateProps) => {
     const { dispatch, state } = useContext(TaipyContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (to) {
-            const tos = "/" + to;
+            const tos = to === "/" ? to : "/" + to;
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
-                navigate(tos.substring(1));
+                if (force && location.pathname === tos) {
+                    navigate(0);
+                } else {
+                    navigate(to);
+                }
             } else {
                 window.open(to, tab || "_blank")?.focus();
             }
             dispatch(createNavigateAction());
         }
-    }, [to, tab, state.locations, dispatch, navigate]);
+        // we surely don't want to depend on location.pathname!
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [to, tab, force, state.locations, dispatch, navigate]);
 
     return null;
 };
