@@ -18,7 +18,7 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
-from src.taipy.core import Core, CycleId, JobId, PipelineId, ScenarioId, TaskId
+from src.taipy.core import Core, CycleId, JobId, PipelineId, Scenario, ScenarioId, TaskId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.job_config import JobConfig
@@ -105,6 +105,17 @@ class TestTaipy:
             task_id = TaskId("TASK_id")
             tp.get(task_id)
             mck.assert_called_once_with(task_id)
+
+    def test_is_deletable(self):
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.is_deletable(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
+            scenario = Scenario("config_id", [], {})
+            tp.is_deletable(scenario)
+            mck.assert_called_once_with(scenario)
 
     def test_delete_scenario(self):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._hard_delete") as mck:
