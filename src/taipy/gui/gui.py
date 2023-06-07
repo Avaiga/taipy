@@ -953,8 +953,9 @@ class Gui:
         self,
         to: str,
         tab: t.Optional[str],
+        force: bool,
     ):
-        self.__send_ws({"type": _WsType.NAVIGATE.value, "to": to, "tab": tab})
+        self.__send_ws({"type": _WsType.NAVIGATE.value, "to": to, "tab": tab, "force": force})
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
@@ -1575,12 +1576,12 @@ class Gui:
             _setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
         self.__send_ws_block(close=True)
 
-    def _navigate(self, to: t.Optional[str] = "", tab: t.Optional[str] = None):
+    def _navigate(self, to: t.Optional[str] = "", tab: t.Optional[str] = None, force: t.Optional[bool] = False):
         to = to or Gui.__root_page_name
         if not to.startswith("/") and to not in self._config.routes and not urlparse(to).netloc:
             _warn(f'Cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
             return False
-        self.__send_ws_navigate(to or Gui.__root_page_name, tab)
+        self.__send_ws_navigate(to if to != Gui.__root_page_name else "/", tab, force or False)
         return True
 
     def __init_route(self):
