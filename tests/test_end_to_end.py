@@ -37,6 +37,11 @@ def get(url, name, client) -> Dict:
     return returned_data
 
 
+def get_assert_status(url, client, status_code) -> None:
+    response = client.get(url)
+    assert response.status_code == status_code
+
+
 def get_all(url, expected_quantity, client):
     response = client.get(url)
 
@@ -66,7 +71,6 @@ def test_end_to_end(client, setup_end_to_end):
         "datanode",
         client,
     )
-
     # Get All
     get_all(url_for("api.scenarios"), 1, client)
     get_all(url_for("api.cycles"), 1, client)
@@ -80,3 +84,11 @@ def test_end_to_end(client, setup_end_to_end):
     delete(url_for("api.pipeline_by_id", pipeline_id=pipeline.get("id")), client)
     delete(url_for("api.task_by_id", task_id=task.get("id")), client)
     delete(url_for("api.datanode_by_id", datanode_id=datanode.get("id")), client)
+
+    # Check status code
+    # Non-existing entities should return 404
+    get_assert_status(url_for("api.cycle_by_id", cycle_id=9999999), client, 404)
+    get_assert_status(url_for("api.scenario_by_id", scenario_id=9999999), client, 404)
+    get_assert_status(url_for("api.pipeline_by_id", pipeline_id=9999999), client, 404)
+    get_assert_status(url_for("api.task_by_id", task_id=9999999), client, 404)
+    get_assert_status(url_for("api.datanode_by_id", datanode_id=9999999), client, 404)
