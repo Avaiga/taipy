@@ -1,0 +1,41 @@
+{
+  "controls": [
+    [
+      "scenario_selector",
+      {
+        "properties": [
+          {
+            "name": "value",
+            "default_property": true,
+            "type": "dynamic(List[Scenario])",
+            "default_value": "[]",
+            "doc": "TODO - The list of selected scenarios."
+          },
+          {
+            "name": "show_add_button",
+            "type": "dynamic(bool)",
+            "default_value": "True",
+            "doc": "TODO"
+          },
+          {
+            "name": "display_cycles",
+            "type": "dynamic(bool)",
+            "default_value": "True",
+            "doc": "TODO"
+          },
+          {
+            "name": "show_primary_flag",
+            "type": "dynamic(bool)",
+            "default_value": "True",
+            "doc": "TODO"
+          },
+          {
+            "name": "on_change",
+            "type": "Callback",
+            "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\nTODO",
+            "signature": [["TODO", ""]]
+          }
+        ]
+      }
+    ]
+}
