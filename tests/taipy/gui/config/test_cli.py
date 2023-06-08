@@ -161,3 +161,17 @@ use_reloader = "true:bool"
         assert not service_config["use_reloader"]
         assert service_config["debug"]
         gui.stop()
+
+
+def test_clean_config():
+    gui_config = Config.configure_gui(dark_mode=False)
+
+    assert Config.gui_config is gui_config
+
+    gui_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.gui_config is gui_config
+
+    assert gui_config.dark_mode is None
+    assert gui_config.properties == {}
