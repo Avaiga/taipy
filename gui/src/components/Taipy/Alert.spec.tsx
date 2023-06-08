@@ -20,7 +20,8 @@ import Alert from "./Alert";
 import { AlertMessage } from "../../context/taipyReducers";
 
 const defaultMessage = "message";
-const defaultAlert: AlertMessage = { atype: "success", message: defaultMessage, system: true, duration: 3000 };
+const defaultAlerts: AlertMessage[] = [{ atype: "success", message: defaultMessage, system: true, duration: 3000 }];
+const getAlertsWithType = (aType: string) => [{...defaultAlerts[0], atype: aType}];
 
 class myNotification {
     static requestPermission = jest.fn();
@@ -32,27 +33,27 @@ describe("Alert Component", () => {
         globalThis.Notification = myNotification as unknown as jest.Mocked<typeof Notification>;
     });
     it("renders", async () => {
-        const { getByText } = render(<SnackbarProvider><Alert alert={defaultAlert} /></SnackbarProvider>);
+        const { getByText } = render(<SnackbarProvider><Alert alerts={defaultAlerts} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
         expect(elt.tagName).toBe("DIV");
     });
     it("displays a success alert", async () => {
-        const { getByText } = render(<SnackbarProvider><Alert alert={defaultAlert} /></SnackbarProvider>);
+        const { getByText } = render(<SnackbarProvider><Alert alerts={defaultAlerts} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-success")).toBeInTheDocument()
     });
     it("displays an error alert", async () => {
-        const { getByText } = render(<SnackbarProvider><Alert alert={{...defaultAlert, atype:"error"}} /></SnackbarProvider>);
+        const { getByText } = render(<SnackbarProvider><Alert alerts={getAlertsWithType("error")} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-error")).toBeInTheDocument()
     });
     it("displays a warning alert", async () => {
-        const { getByText } = render(<SnackbarProvider><Alert alert={{...defaultAlert, atype:"warning"}} /></SnackbarProvider>);
+        const { getByText } = render(<SnackbarProvider><Alert alerts={getAlertsWithType("warning")} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-warning")).toBeInTheDocument()
     });
     it("displays an info alert", async () => {
-        const { getByText } = render(<SnackbarProvider><Alert alert={{...defaultAlert, atype:"info"}} /></SnackbarProvider>);
+        const { getByText } = render(<SnackbarProvider><Alert alerts={getAlertsWithType("info")} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-info")).toBeInTheDocument()
     });

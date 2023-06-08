@@ -16,16 +16,18 @@ import { SnackbarKey, useSnackbar, VariantType } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { AlertMessage } from "../../context/taipyReducers";
+import { AlertMessage, createDeleteAlertAction } from "../../context/taipyReducers";
+import { useDispatch } from "../../utils/hooks";
 
 interface AlertProps {
-    alert?: AlertMessage;
+    alerts: AlertMessage[];
 }
 
-const Alert = (props: AlertProps) => {
-    const { alert } = props;
+const Alert = ({ alerts }: AlertProps) => {
+    const alert = alerts.length ? alerts[0] : undefined;
     const lastKey = useRef<SnackbarKey>("");
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const dispatch = useDispatch();
 
     const resetAlert = useCallback(
         (key: SnackbarKey) => () => {
@@ -68,8 +70,9 @@ const Alert = (props: AlertProps) => {
                 });
                 alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
             }
+            dispatch(createDeleteAlertAction());
         }
-    }, [alert, enqueueSnackbar, closeSnackbar, notifAction, faviconUrl]);
+    }, [alert, enqueueSnackbar, closeSnackbar, notifAction, faviconUrl, dispatch]);
 
     useEffect(() => {
         alert?.system && window.Notification && Notification.requestPermission();
