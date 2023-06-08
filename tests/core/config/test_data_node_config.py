@@ -9,8 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import datetime
 import os
-from datetime import datetime
 from unittest import mock
 
 import pytest
@@ -177,13 +177,13 @@ def test_data_node_creation_no_duplication():
 def test_date_node_create_with_datetime():
     data_node_config = Config.configure_data_node(
         id="datetime_data",
-        my_property=datetime(1991, 1, 1),
+        my_property=datetime.datetime(1991, 1, 1),
         foo="hello",
         test=1,
         test_dict={"type": "Datetime", 2: "daw"},
     )
     assert data_node_config.foo == "hello"
-    assert data_node_config.my_property == datetime(1991, 1, 1)
+    assert data_node_config.my_property == datetime.datetime(1991, 1, 1)
     assert data_node_config.test == 1
     assert data_node_config.test_dict.get("type") == "Datetime"
 
@@ -306,6 +306,42 @@ def test_block_datanode_config_update_in_standalone_mode():
     assert Config.data_nodes[data_node_id].storage_type == "pickle"
     assert Config.data_nodes[data_node_id].scope == Scope.SCENARIO
     assert Config.data_nodes[data_node_id].properties == {"default_path": "foo.p"}
+
+
+def test_clean_config():
+    dn1_config = Config.configure_data_node(
+        id="id1",
+        storage_type="csv",
+        default_path="foo.p",
+        scope=Scope.GLOBAL,
+        validity_period=datetime.timedelta(2),
+    )
+    dn2_config = Config.configure_data_node(
+        id="id2",
+        storage_type="json",
+        default_path="bar.json",
+        scope=Scope.GLOBAL,
+        validity_period=datetime.timedelta(2),
+    )
+
+    assert Config.data_nodes["id1"] is dn1_config
+    assert Config.data_nodes["id2"] is dn2_config
+
+    dn1_config._clean()
+    dn2_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.data_nodes["id1"] is dn1_config
+    assert Config.data_nodes["id2"] is dn2_config
+
+    # Check if the value is similar to the default_config, but with difference instances
+    assert dn1_config.id == "id1"
+    assert dn2_config.id == "id2"
+    assert dn1_config.storage_type == dn2_config.storage_type == "pickle"
+    assert dn1_config.scope == dn2_config.scope == Scope.SCENARIO
+    assert dn1_config.validity_period is dn2_config.validity_period is None
+    assert dn1_config.default_path is dn2_config.default_path is None
+    assert dn1_config.properties == dn2_config.properties == {}
 
 
 def test_deprecated_cacheable_attribute_remains_compatible():

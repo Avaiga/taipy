@@ -78,6 +78,33 @@ def test_task_config_with_env_variable_value():
         assert Config.tasks["task_name"]._properties["prop"] == "ENV[BAR]"
 
 
+def test_clean_config():
+    dn1 = Config.configure_data_node("dn1")
+    dn2 = Config.configure_data_node("dn2")
+    task1_config = Config.configure_task("id1", print, dn1, dn2)
+    task2_config = Config.configure_task("id2", print, dn2, dn1)
+
+    assert Config.tasks["id1"] is task1_config
+    assert Config.tasks["id2"] is task2_config
+
+    task1_config._clean()
+    task2_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.tasks["id1"] is task1_config
+    assert Config.tasks["id2"] is task2_config
+
+    assert task1_config.id == "id1"
+    assert task2_config.id == "id2"
+    assert task1_config.function is task1_config.function is None
+    assert task1_config.inputs == task1_config.inputs == []
+    assert task1_config.input_configs == task1_config.input_configs == []
+    assert task1_config.outputs == task1_config.outputs == []
+    assert task1_config.output_configs == task1_config.output_configs == []
+    assert task1_config.skippable is task1_config.skippable is False
+    assert task1_config.properties == task1_config.properties == {}
+
+
 def test_deprecated_cacheable_attribute_remains_compatible():
     dn_1_id = "dn_1_id"
     dn_1_config = Config.configure_data_node(
