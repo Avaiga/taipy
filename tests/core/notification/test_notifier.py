@@ -285,32 +285,56 @@ def test_publish_event():
 
     # Test UPDATE Event
 
-    scenario.is_primary = True
+    scenario.is_primary = False
     assert registration_queue.qsize() == 1
 
-    scenario.properties["flag"] = "production"
+    tp.set_primary(scenario)
     assert registration_queue.qsize() == 2
 
-    scenario.name = "my_scenario"
+    tp.subscribe_scenario(print, None, scenario=scenario)
     assert registration_queue.qsize() == 3
 
-    cycle.name = "new cycle name"
+    tp.unsubscribe_scenario(print, None, scenario=scenario)
     assert registration_queue.qsize() == 4
 
-    cycle.properties["valid"] = True
+    tp.tag(scenario, "testing")
     assert registration_queue.qsize() == 5
 
-    task.skippable = True
+    tp.untag(scenario, "testing")
     assert registration_queue.qsize() == 6
 
-    task.properties["number_of_run"] = 2
+    scenario.properties["flag"] = "production"
     assert registration_queue.qsize() == 7
 
-    dn.name = "new datanode name"
+    scenario.name = "my_scenario"
     assert registration_queue.qsize() == 8
 
-    dn.properties["sorted"] = True
+    cycle.name = "new cycle name"
     assert registration_queue.qsize() == 9
+
+    cycle.properties["valid"] = True
+    assert registration_queue.qsize() == 10
+
+    pipeline.properties["name"] = "weather_forecast"
+    assert registration_queue.qsize() == 11
+
+    tp.subscribe_pipeline(print, None, pipeline)
+    assert registration_queue.qsize() == 12
+
+    tp.unsubscribe_pipeline(print, None, pipeline)
+    assert registration_queue.qsize() == 13
+
+    task.skippable = True
+    assert registration_queue.qsize() == 14
+
+    task.properties["number_of_run"] = 2
+    assert registration_queue.qsize() == 15
+
+    dn.name = "new datanode name"
+    assert registration_queue.qsize() == 16
+
+    dn.properties["sorted"] = True
+    assert registration_queue.qsize() == 17
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -320,8 +344,16 @@ def test_publish_event():
         EventEntityType.SCENARIO,
         EventEntityType.SCENARIO,
         EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
+        EventEntityType.PIPELINE,
+        EventEntityType.PIPELINE,
+        EventEntityType.PIPELINE,
         EventEntityType.TASK,
         EventEntityType.TASK,
         EventEntityType.DATA_NODE,
@@ -329,10 +361,18 @@ def test_publish_event():
     ]
     expected_attribute_names = [
         "is_primary",
+        "is_primary",
+        "subscribers",
+        "subscribers",
+        "tags",
+        "tags",
         "flag",
         "name",
         "name",
         "valid",
+        "name",
+        "subscribers",
+        "subscribers",
         "skippable",
         "number_of_run",
         "name",
@@ -342,8 +382,16 @@ def test_publish_event():
         scenario.id,
         scenario.id,
         scenario.id,
+        scenario.id,
+        scenario.id,
+        scenario.id,
+        scenario.id,
+        scenario.id,
         cycle.id,
         cycle.id,
+        pipeline.id,
+        pipeline.id,
+        pipeline.id,
         task.id,
         task.id,
         dn.id,

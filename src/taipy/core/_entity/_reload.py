@@ -11,7 +11,7 @@
 
 import functools
 
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import EventOperation, _publish_event
 
 
 @functools.lru_cache

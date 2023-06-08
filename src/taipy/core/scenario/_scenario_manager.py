@@ -82,12 +82,12 @@ class _ScenarioManager(_Manager[Scenario]):
     @classmethod
     def __add_subscriber(cls, callback, params, scenario):
         scenario._add_subscriber(callback, params)
-        cls._set(scenario)
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "subscribers")
 
     @classmethod
     def __remove_subscriber(cls, callback, params, scenario):
         scenario._remove_subscriber(callback, params)
-        cls._set(scenario)
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "subscribers")
 
     @classmethod
     def _create(
@@ -208,10 +208,8 @@ class _ScenarioManager(_Manager[Scenario]):
         if scenario.cycle:
             primary_scenario = cls._get_primary(scenario.cycle)
             if primary_scenario:
-                primary_scenario._primary_scenario = False
-                cls._set(primary_scenario)
-            scenario._primary_scenario = True
-            cls._set(scenario)
+                primary_scenario.is_primary = False  # type: ignore
+            scenario.is_primary = True  # type: ignore
         else:
             raise DoesNotBelongToACycle(
                 f"Can't set scenario {scenario.id} to primary because it doesn't belong to a cycle."
@@ -229,11 +227,13 @@ class _ScenarioManager(_Manager[Scenario]):
                 cls._set(old_tagged_scenario)
         scenario._add_tag(tag)
         cls._set(scenario)
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "tags")
 
     @classmethod
     def _untag(cls, scenario: Scenario, tag: str):
         scenario._remove_tag(tag)
         cls._set(scenario)
+        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "tags")
 
     @classmethod
     def _compare(cls, *scenarios: Scenario, data_node_config_id: Optional[str] = None):

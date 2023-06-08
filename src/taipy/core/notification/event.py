@@ -34,6 +34,14 @@ class EventEntityType(_ReprEnum):
 
 _NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION])
 _UNSUBMITTABLE_ENTITY_TYPES = (EventEntityType.CYCLE, EventEntityType.DATA_NODE, EventEntityType.JOB)
+_ENTITY_TO_EVENT_ENTITY_TYPE = {
+    "scenario": EventEntityType.SCENARIO,
+    "pipeline": EventEntityType.PIPELINE,
+    "task": EventEntityType.TASK,
+    "data": EventEntityType.DATA_NODE,
+    "job": EventEntityType.JOB,
+    "cycle": EventEntityType.CYCLE,
+}
 
 
 class Event:

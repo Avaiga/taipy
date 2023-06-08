@@ -70,12 +70,12 @@ class _PipelineManager(_Manager[Pipeline]):
     @classmethod
     def __add_subscriber(cls, callback, params, pipeline):
         pipeline._add_subscriber(callback, params)
-        cls._set(pipeline)
+        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.UPDATE, "subscribers")
 
     @classmethod
     def __remove_subscriber(cls, callback, params, pipeline):
         pipeline._remove_subscriber(callback, params)
-        cls._set(pipeline)
+        _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.UPDATE, "subscribers")
 
     @classmethod
     def _get_or_create(
