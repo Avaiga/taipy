@@ -40,6 +40,7 @@ clean_entities = "False:bool"
 
 [DATA_NODE.default]
 storage_type = "in_memory"
+scope = "SCENARIO:SCOPE"
 validity_period = "1d0h0m0s:timedelta"
 custom = "default_custom_prop"
 
@@ -66,8 +67,8 @@ outputs = []
 skippable = "False:bool"
 
 [TASK.t1]
-inputs = [ "dn1:SECTION",]
 function = "builtins.print:function"
+inputs = [ "dn1:SECTION",]
 outputs = [ "dn2:SECTION",]
 skippable = "False:bool"
 description = "t1 description"
@@ -126,7 +127,7 @@ owner = "Raymond Kopa"
         actual_config = tf.read().strip()
 
         assert actual_config == expected_config
-        Config.load(tf.filename)
+        Config.override(tf.filename)
         tf2 = NamedTemporaryFile()
         Config.backup(tf2.filename)
         actual_config_2 = tf2.read().strip()
@@ -161,7 +162,7 @@ def test_read_configuration_file():
         """
     )
     Config.configure_task("my_task", print)
-    Config.load(file_config.filename)
+    Config.override(file_config.filename)
 
     assert len(Config.data_nodes) == 3
     assert type(Config.data_nodes["my_datanode"]) == DataNodeConfig
