@@ -21,7 +21,8 @@ from taipy.config.config import Config
 
 class TestPipelineConfigChecker:
     def test_check_config_id(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
@@ -48,7 +49,8 @@ class TestPipelineConfigChecker:
 
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
 
@@ -74,7 +76,8 @@ class TestPipelineConfigChecker:
 
     def test_check_task(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 0

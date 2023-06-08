@@ -61,6 +61,10 @@ class PipelineConfig(Section):
     def default_config(cls):
         return PipelineConfig(cls._DEFAULT_KEY, [])
 
+    def _clean(self):
+        self._tasks = []
+        self._properties.clear()
+
     def _to_dict(self):
         return {self._TASK_KEY: self._tasks, **self._properties}
 

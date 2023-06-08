@@ -27,7 +27,8 @@ class MyCustomClass:
 class TestDataNodeConfigChecker:
     def test_check_config_id(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
 
@@ -46,7 +47,8 @@ class TestDataNodeConfigChecker:
 
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
 
@@ -72,7 +74,8 @@ class TestDataNodeConfigChecker:
 
     def test_check_storage_type(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
 
@@ -168,7 +171,8 @@ class TestDataNodeConfigChecker:
         assert all(message in caplog.text for message in expected_error_messages)
 
     def test_check_properties_of_sqlite_engine(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
 
         # Test SQLite engine
@@ -185,7 +189,8 @@ class TestDataNodeConfigChecker:
         assert all(message in caplog.text for message in expected_error_messages)
 
     def test_check_properties_of_not_sqlite_engine(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
 
         # Test other engines
@@ -219,7 +224,8 @@ class TestDataNodeConfigChecker:
         assert all(message in caplog.text for message in expected_error_messages)
 
     def test_check_scope(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         config._sections[DataNodeConfig.name]["default"].scope = "bar"
         with pytest.raises(SystemExit):
@@ -270,7 +276,8 @@ class TestDataNodeConfigChecker:
         assert expected_warning_message in caplog.text
 
     def test_check_validity_period(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         config._sections[DataNodeConfig.name]["default"].validity_period = "bar"
         with pytest.raises(SystemExit):
@@ -307,7 +314,8 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.warnings) == 0
 
     def test_check_required_properties(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
 
         config._sections[DataNodeConfig.name]["new"].storage_type = "csv"
@@ -411,7 +419,8 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.errors) == 0
 
     def test_required_properties_on_default_only_raise_warning(self):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
 
         config._sections[DataNodeConfig.name]["default"].storage_type = "generic"
@@ -427,7 +436,8 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.errors) == 1
 
     def test_check_callable_properties(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
 
         config._sections[DataNodeConfig.name]["new"].storage_type = "sql"
@@ -508,7 +518,8 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.errors) == 0
 
     def test_check_read_write_fct_args(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         config._sections[DataNodeConfig.name]["default"].storage_type = "generic"
         config._sections[DataNodeConfig.name]["default"].properties = {"write_fct": print, "read_fct": print}
@@ -579,7 +590,8 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.errors) == 0
 
     def test_check_exposed_types(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         config._sections[DataNodeConfig.name]["default"].storage_type = "csv"
         config._sections[DataNodeConfig.name]["default"].properties = {"exposed_type": "foo"}

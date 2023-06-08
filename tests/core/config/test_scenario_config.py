@@ -138,6 +138,34 @@ def test_scenario_create_from_task_config():
     assert scenario_config_2.pipeline_configs[0].id == pipeline_name
 
 
+def test_clean_config():
+    task1_config = Config.configure_task("task1", print, [], [])
+    task2_config = Config.configure_task("task2", print, [], [])
+    scenario1_config = Config.configure_scenario_from_tasks(
+        "id1", [task1_config, task2_config], Frequency.YEARLY, {"foo": "bar"}, prop="foo"
+    )
+    scenario2_config = Config.configure_scenario_from_tasks(
+        "id2", [task2_config, task1_config], Frequency.MONTHLY, {"foz": "baz"}, prop="bar"
+    )
+
+    assert Config.scenarios["id1"] is scenario1_config
+    assert Config.scenarios["id2"] is scenario2_config
+
+    scenario1_config._clean()
+    scenario2_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.scenarios["id1"] is scenario1_config
+    assert Config.scenarios["id2"] is scenario2_config
+
+    assert scenario1_config.id == "id1"
+    assert scenario2_config.id == "id2"
+    assert scenario1_config.pipelines == scenario1_config.pipelines == []
+    assert scenario1_config.frequency is scenario1_config.frequency is None
+    assert scenario1_config.comparators == scenario1_config.comparators == {}
+    assert scenario1_config.properties == scenario1_config.properties == {}
+
+
 def test_pipeline_config_configure_deprecated():
     pipeline_config = Config.configure_default_pipeline([])
     scenario_config = Config.configure_scenario("scenario_id", pipeline_configs=[pipeline_config])

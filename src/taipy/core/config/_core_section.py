@@ -54,6 +54,13 @@ class CoreSection(UniqueSection):
             cls._DEFAULT_MODE, cls._DEFAULT_VERSION_NUMBER, cls._DEFAULT_TAIPY_FORCE, cls._DEFAULT_CLEAN_ENTITIES
         )
 
+    def _clean(self):
+        self.mode = self._DEFAULT_MODE
+        self.version_number = self._DEFAULT_VERSION_NUMBER
+        self.force = self._DEFAULT_TAIPY_FORCE
+        self.clean_entities = self._DEFAULT_CLEAN_ENTITIES
+        self._properties.clear()
+
     def _to_dict(self):
         as_dict = {}
         if self.mode is not None:

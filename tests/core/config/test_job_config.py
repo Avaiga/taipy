@@ -28,6 +28,21 @@ def test_job_config():
     assert Config.job_config.foo == "bar"
 
 
+def test_clean_config():
+    job_config = Config.configure_job_executions(mode="standalone", max_nb_of_workers=2, prop="foo")
+
+    assert Config.job_config is job_config
+
+    job_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.job_config is job_config
+
+    assert job_config.mode == "development"
+    assert job_config._config == {"max_nb_of_workers": 1}
+    assert job_config.properties == {}
+
+
 def test_nb_of_workers_deprecated():
     with pytest.warns(DeprecationWarning):
         _ = Config.configure_job_executions(mode="standalone", nb_of_workers=2)

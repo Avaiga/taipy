@@ -62,3 +62,20 @@ clean_entities = "false:bool"
         assert not Config.core.force
         assert Config.core.clean_entities
         core.stop()
+
+
+def test_clean_config():
+    core_config = Config.configure_core(mode="experiment", version_number="test_num", force=True, clean_entities=True)
+
+    assert Config.core is core_config
+
+    core_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.core is core_config
+
+    assert core_config.mode == "development"
+    assert core_config.version_number == ""
+    assert core_config.force is False
+    assert core_config.clean_entities is False
+    assert core_config.properties == {}

@@ -85,6 +85,12 @@ class ScenarioConfig(Section):
     def default_config(cls):
         return ScenarioConfig(cls._DEFAULT_KEY, [], None, dict())
 
+    def _clean(self):
+        self._pipelines = []
+        self.frequency = None
+        self.comparators = dict()
+        self._properties.clear()
+
     def _to_dict(self):
         return {
             self._COMPARATOR_KEY: self.comparators,
