@@ -25,6 +25,14 @@ class _Config:
         self._unique_sections: Dict[str, UniqueSection] = {}
         self._global_config: GlobalAppConfig = GlobalAppConfig()
 
+    def _clean(self):
+        self._global_config._clean()
+        for unique_section in self._unique_sections.values():
+            unique_section._clean()
+        for sections in self._sections.values():
+            for section in sections.values():
+                section._clean()
+
     @classmethod
     def _default_config(cls):
         config = _Config()
@@ -38,13 +46,13 @@ class _Config:
                 if section := self._unique_sections.get(section_name, None):
                     section._update(other_section._to_dict())
                 else:
-                    self._unique_sections[section_name] = other_config._unique_sections[section_name]
+                    self._unique_sections[section_name] = copy(other_config._unique_sections[section_name])
         if other_config._sections:
             for section_name, other_non_unique_sections in other_config._sections.items():
                 if non_unique_sections := self._sections.get(section_name, None):
                     self.__update_sections(non_unique_sections, other_non_unique_sections, None)
                 else:
-                    self._sections[section_name] = other_non_unique_sections
+                    self._sections[section_name] = {k: copy(v) for k, v in other_non_unique_sections.items()}
 
     def __update_sections(self, entity_config, other_entity_configs, _class):
         if self.DEFAULT_KEY in other_entity_configs:

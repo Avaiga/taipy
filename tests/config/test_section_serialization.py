@@ -79,6 +79,7 @@ prop_int = "0:int"
 
 [section_name.my_id]
 attribute = "my_attribute"
+prop = "default_prop"
 prop_int = "1:int"
 prop_bool = "False:bool"
 prop_list = [ "unique_section_name:SECTION",]
@@ -147,6 +148,7 @@ prop_int = "0:int"
 
 [section_name.my_id]
 attribute = "my_attribute"
+prop = "default_prop"
 prop_int = "1:int"
 prop_bool = "False:bool"
 prop_list = [ "unique_section_name", "section_name.my_id",]
@@ -194,7 +196,7 @@ baz = "ENV[QUX]"
         assert Config.sections[SectionForTest.name]["default"].prop_int == 0
         assert Config.sections[SectionForTest.name]["my_id"] is not None
         assert Config.sections[SectionForTest.name]["my_id"].attribute == "my_attribute"
-        assert Config.sections[SectionForTest.name]["my_id"].prop is None
+        assert Config.sections[SectionForTest.name]["my_id"].prop == "default_prop"
         assert Config.sections[SectionForTest.name]["my_id"].prop_int == 1
         assert Config.sections[SectionForTest.name]["my_id"].prop_bool is False
         assert Config.sections[SectionForTest.name]["my_id"].prop_list == ["unique_section_name", "section_name.my_id"]
@@ -243,11 +245,15 @@ prop_int = "0:int"
 
 [section_name.my_id]
 attribute = "my_attribute"
+prop = "default_prop"
+prop_int = "0:int"
 prop_fct_list = [ "tests.config.test_section_serialization.add:function",]
 prop_class_list = [ "tests.config.test_section_serialization.CustomClass:class",]
 
 [section_name.my_id_2]
 attribute = "my_attribute_2"
+prop = "default_prop"
+prop_int = "0:int"
 prop_fct_list = [ "builtins.print:function", "builtins.pow:function",]
     """.strip()
 
@@ -313,6 +319,7 @@ def test_write_json_configuration_file():
 },
 "my_id": {
 "attribute": "my_attribute",
+"prop": "default_prop",
 "prop_int": "1:int",
 "prop_bool": "False:bool",
 "prop_list": [
@@ -381,6 +388,7 @@ def test_read_json_configuration_file():
 },
 "my_id": {
 "attribute": "my_attribute",
+"prop": "default_prop",
 "prop_int": "1:int",
 "prop_bool": "False:bool",
 "prop_list": [
@@ -420,7 +428,7 @@ def test_read_json_configuration_file():
     assert Config.sections[SectionForTest.name]["default"].prop_int == 0
     assert Config.sections[SectionForTest.name]["my_id"] is not None
     assert Config.sections[SectionForTest.name]["my_id"].attribute == "my_attribute"
-    assert Config.sections[SectionForTest.name]["my_id"].prop is None
+    assert Config.sections[SectionForTest.name]["my_id"].prop == "default_prop"
     assert Config.sections[SectionForTest.name]["my_id"].prop_int == 1
     assert Config.sections[SectionForTest.name]["my_id"].prop_bool is False
     assert Config.sections[SectionForTest.name]["my_id"].prop_list == ["unique_section_name"]
@@ -456,6 +464,8 @@ def test_read_write_json_configuration_file_with_function_and_class():
 },
 "my_id": {
 "attribute": "my_attribute",
+"prop": "default_prop",
+"prop_int": "0:int",
 "prop_fct_list": [
 "tests.config.test_section_serialization.add:function"
 ],
@@ -465,6 +475,8 @@ def test_read_write_json_configuration_file_with_function_and_class():
 },
 "my_id_2": {
 "attribute": "my_attribute_2",
+"prop": "default_prop",
+"prop_int": "0:int",
 "prop_fct_list": [
 "builtins.print:function",
 "builtins.pow:function"

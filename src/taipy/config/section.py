@@ -40,6 +40,10 @@ class Section:
         raise NotImplementedError
 
     @abstractmethod
+    def _clean(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def _to_dict(self):
         raise NotImplementedError
 
