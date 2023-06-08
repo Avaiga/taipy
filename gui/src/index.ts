@@ -3,4 +3,4 @@ import ScenarioViewer from "./ScenarioViewer";
 import ScenarioDag from "./ScenarioDag";
 import NodeSelector from "./NodeSelector";
 
-export { ScenarioSelector, NodeSelector as DataNodeExplorer, ScenarioDag as Dag };
+export { ScenarioSelector, ScenarioDag as Dag, ScenarioViewer as Scenario, NodeSelector as DataNodeSelector };

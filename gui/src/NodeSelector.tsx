@@ -17,19 +17,18 @@ import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
 import { useDispatch, useModule, createSendActionNameAction } from "taipy-gui";
-import { Cycles, DisplayModel, NodeType, Scenarios } from "./utils/types";
+import { Cycles, DataNodes, DisplayModel, NodeType, Scenarios } from "./utils/types";
 import { Cycle, Datanode, Pipeline, Scenario as ScenarioIcon } from "./icons";
 
 interface NodeSelectorProps {
     id?: string;
     updateVarName?: string;
-    scenarios?: Cycles | Scenarios;
+    datanodes?: Cycles | Scenarios | DataNodes;
     coreChanged?: Record<string, unknown>;
     updateVars?: string;
     configs?: Array<[string, string]>;
     onDataNodeSelect?: string;
     error?: string;
-    scenario?: Cycles | Scenarios;
 }
 
 const MainBoxSx = {
@@ -153,7 +152,7 @@ const CycleItem = ({ item }: { item: any[] }) => {
 };
 
 const NodeSelector = (props: NodeSelectorProps) => {
-    const { id = "", scenarios } = props;
+    const { id = "", datanodes } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -175,8 +174,8 @@ const NodeSelector = (props: NodeSelectorProps) => {
                     sx={TreeViewSx}
                     onNodeSelect={onSelect}
                 >
-                    {scenarios
-                        ? scenarios.map((item) => {
+                    {datanodes
+                        ? datanodes.map((item) => {
                               const [id, label, items = [], nodeType, _] = item;
                               return nodeType === NodeType.CYCLE ? (
                                   <CycleItem item={item} />

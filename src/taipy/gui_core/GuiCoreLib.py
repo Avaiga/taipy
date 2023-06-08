@@ -352,7 +352,7 @@ class GuiCore(ElementLibrary):
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
             },
         ),
-        "data_node_explorer": Element(
+        "data_node_selector": Element(
             "val",
             {
                 "val": ElementProperty(GuiCoreScenarioDagAdapter),
