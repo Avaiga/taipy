@@ -143,11 +143,6 @@ pickles
 
 # GUI generation
 taipy_webapp/
-# Doc generation
-docs/manuals/gui/user_controls.md
-docs/manuals/gui/user_blocks.md
-docs/manuals/gui/viselements/*.md
-!gui/doc/*.csv
 
 # Packaging
 gui/packaging/taipy-gui.gen.d.ts

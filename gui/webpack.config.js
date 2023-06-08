@@ -141,8 +141,7 @@ module.exports = (env, options) => {
                 new CopyWebpackPlugin({
                     patterns: [
                         { from: "../public", filter: (name) => !name.endsWith(".html") },
-                        { from: "../packaging", filter: (name) => !name.includes(".gen.") },
-                        { from: "../doc/viselements.json" }
+                        { from: "../packaging", filter: (name) => !name.includes(".gen.") }
                     ],
                 }),
                 new HtmlWebpackPlugin({
