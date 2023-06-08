@@ -123,8 +123,7 @@ class _DataManager(_Manager[DataNode]):
     @classmethod
     def _remove_dn_file_paths_in_backup_file(cls, data_nodes: Iterable[DataNode]):
         for data_node in data_nodes:
-            if isinstance(data_node, _AbstractFileDataNode):
-                _remove_from_backup_file(to_remove_file_path=data_node.path)
+            cls._remove_dn_file_path_in_backup_file(data_node)
 
     @classmethod
     def _delete(cls, data_node_id: DataNodeId):

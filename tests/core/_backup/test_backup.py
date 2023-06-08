@@ -13,6 +13,7 @@ import os
 
 import pytest
 
+from src.taipy.core import Core
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.excel import ExcelDataNode
@@ -42,6 +43,26 @@ def init_backup_file():
 
 
 backup_file_path = ".taipy_backups"
+
+
+def test_backup_storage_folder_when_core_run():
+    Core().run()
+    backup_files = read_backup_file(backup_file_path)
+    assert backup_files == [f"{Config.global_config.storage_folder}\n"]
+
+
+def test_no_new_entry_when_file_is_in_storage_folder():
+    dn_cfg_1 = Config.configure_data_node("dn_cfg_1", path="dn_1.pickle")
+    dn_cfg_2 = Config.configure_data_node("dn_cfg_2")  # stored in .data folder
+
+    dn_1 = _DataManager._create_and_set(dn_cfg_1, None, None)
+    dn_2 = _DataManager._create_and_set(dn_cfg_2, None, None)
+
+    dn_1.write("DN1_CONTENT")
+    dn_2.write("DN2_CONTENT")
+
+    backup_files = read_backup_file(backup_file_path)
+    assert backup_files == [f"{dn_1.path}\n"]
 
 
 def test_backup_csv_files():
