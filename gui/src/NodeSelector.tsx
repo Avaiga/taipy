@@ -17,18 +17,7 @@ import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
 import { useDispatch, useModule, createSendActionNameAction } from "taipy-gui";
-import {
-    Cycles,
-    Cycle,
-    DataNodes,
-    DisplayModel,
-    NodeType,
-    Pipelines,
-    Scenarios,
-    Scenario,
-    DataNode,
-    Pipeline,
-} from "./utils/types";
+import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Pipeline } from "./utils/types";
 import {
     Cycle as CycleIcon,
     Datanode as DatanodeIcon,
@@ -83,7 +72,7 @@ const NodeItem = (props: { item: DataNode }) => {
         <TreeItem
             key={id}
             nodeId={id}
-            datatype={NodeType.NODE.toString()}
+            data-nodetype={NodeType.NODE.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
                     <DatanodeIcon fontSize="small" color="primary" />
@@ -101,7 +90,7 @@ const PipelineItem = (props: { item: Pipeline }) => {
         <TreeItem
             key={id}
             nodeId={id}
-            datatype={NodeType.PIPELINE.toString()}
+            data-nodetype={NodeType.PIPELINE.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
                     <PipelineIcon fontSize="small" color="primary" />
@@ -125,7 +114,7 @@ const ScenarioItem = (props: { item: Scenario }) => {
         <TreeItem
             key={id}
             nodeId={id}
-            datatype={NodeType.SCENARIO.toString()}
+            data-nodetype={NodeType.SCENARIO.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
                     <ScenarioIcon fontSize="small" color="primary" />
@@ -150,7 +139,7 @@ const CycleItem = (props: { item: Cycle }) => {
         <TreeItem
             key={id}
             nodeId={id}
-            datatype={NodeType.CYCLE.toString()}
+            data-nodetype={NodeType.CYCLE.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
                     <CycleIcon fontSize="small" color="primary" />
@@ -176,10 +165,9 @@ const NodeSelector = (props: NodeSelectorProps) => {
     const module = useModule();
 
     const onSelect = useCallback((e: React.SyntheticEvent | undefined, nodeId: string) => {
-        console.log("e", e, nodeId);
-        const keyId = nodeId || e?.currentTarget.getAttribute("key");
-        const datatype = e?.currentTarget.getAttribute("datatype");
-        if (datatype === NodeType.NODE.toString()) {
+        const keyId = nodeId || "";
+        const { nodetype = "" } = e.currentTarget.dataset || {};
+        if (nodetype === NodeType.NODE.toString()) {
             //TODO: handle on select node
             dispatch(createSendActionNameAction(id, module, props.onDataNodeSelect, keyId));
         }
