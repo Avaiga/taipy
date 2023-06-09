@@ -20,12 +20,10 @@ import createEngine, {
     DiagramEngine,
     DagreEngine,
     PointModel,
-    DeleteItemsAction,
 } from "@projectstorm/react-diagrams";
 
-import { DataNode, Pipeline, Scenario, Task } from "./names";
 import { getNodeColor } from "./config";
-import { TaipyDiagramModel, TaipyNodeModel, TaipyPortModel } from "../projectstorm/models";
+import { TaipyDiagramModel, TaipyNodeModel } from "../projectstorm/models";
 import { TaipyNodeFactory, TaipyPortFactory } from "../projectstorm/factories";
 import { nodeTypes } from "./config";
 import { DisplayModel } from "./types";
@@ -63,7 +61,7 @@ export const getLinkId = (link: LinkModel) =>
     )}`;
 export const getNodeId = (node: DefaultNodeModel) => `${node.getType()}.${node.getID()}`;
 
-export const createNode = (nodeType: string, id: string, name: string, subtype: string, createPorts = true) =>
+export const createNode = (nodeType: string, id: string, name: string, subtype: string) =>
     new TaipyNodeModel({
         id: id,
         type: nodeType,

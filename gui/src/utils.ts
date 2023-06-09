@@ -13,37 +13,93 @@
 
 // id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags, deletable
 export type ScenarioFull = [
-  string,
-  boolean,
-  string,
-  string,
-  string,
-  string[],
-  Array<[string, string]>,
-  Array<[string, string]>,
-  string[],
-  boolean
+    string,
+    boolean,
+    string,
+    string,
+    string,
+    string[],
+    Array<[string, string]>,
+    Array<[string, string]>,
+    string[],
+    boolean
 ];
 
 export enum ScFProps {
-    id, is_primary, config_id, creation_date, label, tags, properties, pipelines, authorized_tags, deletable
+    id,
+    is_primary,
+    config_id,
+    creation_date,
+    label,
+    tags,
+    properties,
+    pipelines,
+    authorized_tags,
+    deletable,
 }
 export const ScenarioFullLength = Object.keys(ScFProps).length / 2;
 
 export interface ScenarioDict {
-  config: string;
-  name: string;
-  date: string;
-  properties: Array<[string, string]>;
+    config: string;
+    name: string;
+    date: string;
+    properties: Array<[string, string]>;
 }
 
 export type Property = {
-  id: string;
-  key: string;
-  value: string;
+    id: string;
+    key: string;
+    value: string;
 };
 
 export const FlagSx = {
-  color: "common.white",
-  fontSize: "0.75em",
+    color: "common.white",
+    fontSize: "0.75em",
+};
+
+export const BadgePos = {
+    vertical: "top",
+    horizontal: "left",
+};
+
+export const BadgeSx = {
+    flex: "0 0 auto",
+
+    "& .MuiBadge-badge": {
+        fontSize: "1rem",
+        width: "1em",
+        height: "1em",
+        p: 0,
+        minWidth: "0",
+    },
+};
+
+export const MainBoxSx = {
+    maxWidth: 300,
+    overflowY: "auto",
+};
+
+export const BaseTreeViewSx = {
+    mb: 2,
+
+    "& .MuiTreeItem-root .MuiTreeItem-content": {
+        mb: 0.5,
+        py: 1,
+        px: 2,
+        borderRadius: 0.5,
+        backgroundColor: "background.paper",
+    },
+
+    "& .MuiTreeItem-iconContainer:empty": {
+        display: "none",
+    },
+    maxHeight: "50vh"
+};
+
+export const ParentItemSx = {
+    "& > .MuiTreeItem-content": {
+        ".MuiTreeItem-label": {
+            fontWeight: "fontWeightBold",
+        },
+    },
 };

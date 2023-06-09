@@ -14,7 +14,7 @@
 import React, { useState, useCallback, useEffect, useMemo, ChangeEvent, SyntheticEvent, MouseEvent } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";
+import AccordionSummary from "@mui/material/AccordionSummary";
 import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
@@ -25,8 +25,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material";
-import { FlagOutlined, DeleteOutline, Add, Send, CheckCircle, Cancel, ArrowForwardIosSharp } from "@mui/icons-material";
+import { FlagOutlined, DeleteOutline, Send, CheckCircle, Cancel, ArrowForwardIosSharp } from "@mui/icons-material";
 
 import {
     createRequestUpdateAction,
@@ -85,7 +84,7 @@ const FieldNoMaxWidth = {
     maxWidth: "none",
 };
 
-const AccordionSummarySx = { fontSize: "0.9rem" };
+const AccordionIconSx = { fontSize: "0.9rem" };
 const ChipSx = { ml: 1 };
 const IconPaddingSx = { padding: 0 };
 const DeleteIconSx = { height: 50, width: 50, p: 0 };
@@ -103,6 +102,17 @@ const hoverSx = {
         cursor: "text",
     },
     mt: 0,
+};
+
+const AccordionSummarySx = {
+    flexDirection: "row-reverse",
+    "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
+        transform: "rotate(90deg)",
+        mr: 1,
+    },
+    "& .MuiAccordionSummary-content": {
+        mr: 1,
+    },
 };
 
 const disableColor = <T,>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
@@ -128,7 +138,7 @@ const PipelineRow = ({
             e.stopPropagation();
             editLabel(id, pipeline);
         },
-        [id, pipeline]
+        [id, pipeline, editLabel]
     );
     const onCancelField = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -136,7 +146,7 @@ const PipelineRow = ({
             setPipeline(label);
             setFocusName("");
         },
-        [label]
+        [label, setFocusName]
     );
     const onSubmitPipeline = useCallback(() => submitEntity(id), [submitEntity, id]);
 
@@ -185,19 +195,6 @@ const PipelineRow = ({
     );
 };
 
-const MuiAccordionSummary = styled((props: AccordionSummaryProps) => (
-    <AccordionSummary expandIcon={<ArrowForwardIosSharp sx={AccordionSummarySx} />} {...props} />
-))(({ theme }) => ({
-    flexDirection: "row-reverse",
-    "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
-        transform: "rotate(90deg)",
-        marginRight: theme.spacing(1),
-    },
-    "& .MuiAccordionSummary-content": {
-        marginLeft: theme.spacing(1),
-    },
-}));
-
 const ScenarioViewer = (props: ScenarioViewerProps) => {
     const {
         id = "",
@@ -216,17 +213,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const module = useModule();
 
     const [
-        scenarioId = "",
-        primary = false,
-        scConfig = "",
-        date = "",
-        scLabel = "",
-        scenarioTags = [],
-        scenarioProperties = [],
-        scPipelines = [],
-        authorizedTags = [],
-        deletable = false,
-        isScenario = false,
+        scId,
+        scPrimary,
+        scConfig,
+        scDate,
+        scLabel,
+        scTags,
+        scProperties,
+        scPipelines,
+        scAuthorizedTags,
+        scDeletable,
+        isScenario,
     ] = useMemo(() => {
         const sc = Array.isArray(props.scenario)
             ? props.scenario.length == ScenarioFullLength && typeof props.scenario[ScFProps.id] === "string"
@@ -235,7 +232,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 ? (props.scenario[0] as ScenarioFull)
                 : undefined
             : undefined;
-        return sc ? [...sc, true] : [];
+        return sc ? [...sc, true] : ["", false, "", "", "", [], [], [], [], false, false];
     }, [props.scenario]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -247,9 +244,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const onDeleteScenario = useCallback(() => {
         setDeleteDialogOpen(false);
         if (isScenario) {
-            dispatch(createSendActionNameAction(id, module, props.onDelete, true, true, { id: scenarioId }));
+            dispatch(createSendActionNameAction(id, module, props.onDelete, true, true, { id: scId }));
         }
-    }, [isScenario, props.onDelete, scenarioId]);
+    }, [isScenario, props.onDelete, scId, id, dispatch, module]);
 
     const [primaryDialog, setPrimaryDialog] = useState(false);
     const openPrimaryDialog = useCallback(() => setPrimaryDialog(true), []);
@@ -257,33 +254,37 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const onPromote = useCallback(() => {
         setPrimaryDialog(false);
         if (isScenario) {
-            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, primary: true }));
+            dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, primary: true }));
         }
-    }, [isScenario, props.onEdit, scenarioId]);
+    }, [isScenario, props.onEdit, scId, id, dispatch, module]);
 
-    const [scProperties, setProperties] = useState<Property[]>([]);
+    const [properties, setProperties] = useState<Property[]>([]);
     const [newProp, setNewProp] = useState<Property>({
         id: "",
         key: "",
         value: "",
     });
 
+    // userExpanded
+    const [userExpanded, setUserExpanded] = useState(false);
+    const onExpand = useCallback((e: SyntheticEvent, exp: boolean) => setUserExpanded(exp), []);
+
     // submits
     const submitPipeline = useCallback(
         (pipelineId: string) => {
             dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: pipelineId }));
         },
-        [props.onSubmit]
+        [props.onSubmit, id, dispatch, module]
     );
 
     const submitScenario = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (isScenario) {
-                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scenarioId }));
+                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scId }));
             }
         },
-        [isScenario, props.onSubmit]
+        [isScenario, props.onSubmit, id, scId, dispatch, module]
     );
 
     // focus
@@ -299,11 +300,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (isScenario) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, name: label }));
+                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, name: label }));
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit, scenarioId, label]
+        [isScenario, props.onEdit, scId, label, id, dispatch, module]
     );
     const cancelLabel = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -311,29 +312,29 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             setLabel(scLabel);
             setFocusName("");
         },
-        [scLabel]
+        [scLabel, setLabel, setFocusName]
     );
     const onLabelChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
 
     // tags
-    const [scTags, setTags] = useState<string[]>([]);
+    const [tags, setTags] = useState<string[]>([]);
     const editTags = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (isScenario) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, tags: scTags }));
+                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, tags: tags }));
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit, scenarioId, scTags]
+        [isScenario, props.onEdit, scId, tags, id, dispatch, module]
     );
     const cancelTags = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            setTags(scenarioTags);
+            setTags(scTags);
             setFocusName("");
         },
-        [scenarioTags]
+        [scTags]
     );
     const onChangeTags = useCallback((_: SyntheticEvent, tags: string[]) => setTags(tags), []);
 
@@ -342,8 +343,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         const { id = "", name = "" } = e.currentTarget.parentElement?.parentElement?.dataset || {};
         if (name) {
             if (id) {
-                setProperties((props) =>
-                    props.map((p) => {
+                setProperties((ps) =>
+                    ps.map((p) => {
                         if (id == p.id) {
                             p[name as keyof Property] = e.target.value;
                         }
@@ -361,49 +362,53 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             e.stopPropagation();
             if (isScenario) {
                 const { id: propId = "" } = e.currentTarget.dataset || {};
-                const property = propId ? scProperties.find((p) => p.id === propId) : newProp;
+                const property = propId ? properties.find((p) => p.id === propId) : newProp;
                 property &&
                     dispatch(
-                        createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, properties: [property] })
+                        createSendActionNameAction(id, module, props.onEdit, { id: scId, properties: [property] })
                     );
                 setNewProp((np) => ({ ...np, key: "", value: "" }));
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit, scenarioId, scProperties, newProp]
+        [isScenario, props.onEdit, scId, properties, newProp, id, dispatch, module]
     );
     const cancelProperty = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (isScenario) {
                 const { id: propId = "" } = e.currentTarget.dataset || {};
-                const propertyIdx = scProperties.findIndex((p) => p.id === propId);
+                const propertyIdx = properties.findIndex((p) => p.id === propId);
                 propertyIdx > -1 &&
-                    propertyIdx < scenarioProperties.length &&
-                    setProperties((props) =>
-                        props.map((p, idx) =>
-                            idx == propertyIdx
-                                ? { ...p, key: scenarioProperties[idx][0], value: scenarioProperties[idx][1] }
-                                : p
+                    propertyIdx < scProperties.length &&
+                    setProperties((ps) =>
+                        ps.map((p, idx) =>
+                            idx == propertyIdx ? { ...p, key: scProperties[idx][0], value: scProperties[idx][1] } : p
                         )
                     );
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit, scenarioId, scProperties]
+        [isScenario, properties, scProperties]
     );
 
-    const deleteProperty = useCallback((e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        const { id: propId = "-1" } = e.currentTarget.dataset;
-        setProperties((props) => props.filter((item) => item.id !== propId));
-        const property = scProperties.find((p) => p.id === propId);
-        property &&
-            dispatch(
-                createSendActionNameAction(id, module, props.onEdit, { id: scenarioId, deleted_properties: [property] })
-            );
-        setFocusName("");
-    }, []);
+    const deleteProperty = useCallback(
+        (e: React.MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            const { id: propId = "-1" } = e.currentTarget.dataset;
+            setProperties((ps) => ps.filter((item) => item.id !== propId));
+            const property = properties.find((p) => p.id === propId);
+            property &&
+                dispatch(
+                    createSendActionNameAction(id, module, props.onEdit, {
+                        id: scId,
+                        deleted_properties: [property],
+                    })
+                );
+            setFocusName("");
+        },
+        [props.onEdit, scId, id, dispatch, module, properties]
+    );
 
     // pipelines
     const editPipeline = useCallback(
@@ -413,36 +418,45 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit]
+        [isScenario, props.onEdit, dispatch, module]
     );
 
     // on scenario change
     useEffect(() => {
-        showTags && setTags(scenarioTags);
+        showTags && setTags(scTags);
         showProperties &&
             setProperties(
-                scenarioProperties.map(([k, v], i) => ({
+                scProperties.map(([k, v], i) => ({
                     id: i + "",
                     key: k,
                     value: v,
                 }))
             );
         setLabel(scLabel);
-    }, [scenarioTags, scenarioProperties, scLabel]);
+        isScenario || setUserExpanded(false);
+    }, [scTags, scProperties, scLabel, isScenario, showTags, showProperties]);
 
     // Refresh on broadcast
     useEffect(() => {
         const ids = props.coreChanged?.scenario;
-        if (typeof ids === "string" ? ids === scenarioId : Array.isArray(ids) ? ids.includes(scenarioId) : ids) {
+        if (typeof ids === "string" ? ids === scId : Array.isArray(ids) ? ids.includes(scId) : ids) {
             props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
-    }, [props.coreChanged, props.updateVarName, module, dispatch, scenarioId]);
+    }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
     return (
         <>
             <Box sx={MainBoxSx} id={id} onClick={onFocus}>
-                <Accordion defaultExpanded={expandable ? expanded : isScenario} disabled={!isScenario}>
-                    <MuiAccordionSummary>
+                <Accordion
+                    defaultExpanded={expandable && expanded}
+                    expanded={userExpanded}
+                    onChange={onExpand}
+                    disabled={!isScenario}
+                >
+                    <AccordionSummary
+                        expandIcon={<ArrowForwardIosSharp sx={AccordionIconSx} />}
+                        sx={AccordionSummarySx}
+                    >
                         <Grid
                             container
                             alignItems="center"
@@ -453,7 +467,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         >
                             <Grid item>
                                 {scLabel}
-                                {primary && (
+                                {scPrimary && (
                                     <Chip
                                         color="primary"
                                         label={<FlagOutlined sx={FlagSx} />}
@@ -474,7 +488,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 ) : null}
                             </Grid>
                         </Grid>
-                    </MuiAccordionSummary>
+                    </AccordionSummary>
                     <AccordionDetails>
                         <Grid container rowSpacing={2}>
                             {showConfig ? (
@@ -493,7 +507,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         <Typography variant="subtitle2">Cycle / Frequency</Typography>
                                     </Grid>
                                     <Grid item xs={8}>
-                                        <Typography variant="subtitle2">{date}</Typography>
+                                        <Typography variant="subtitle2">{scDate}</Typography>
                                     </Grid>
                                 </Grid>
                             ) : null}
@@ -553,19 +567,22 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         {active && focusName === "tags" ? (
                                             <Autocomplete
                                                 multiple
-                                                options={authorizedTags}
-                                                freeSolo={!authorizedTags.length}
+                                                options={scAuthorizedTags}
+                                                freeSolo={!scAuthorizedTags.length}
                                                 renderTags={(value: readonly string[], getTagProps) =>
-                                                    value.map((option: string, index: number) => (
-                                                        <Chip
-                                                            variant="outlined"
-                                                            label={option}
-                                                            sx={IconPaddingSx}
-                                                            {...getTagProps({ index })}
-                                                        />
-                                                    ))
+                                                    value.map((option: string, index: number) => {
+                                                        return (
+                                                            // eslint-disable-next-line react/jsx-key
+                                                            <Chip
+                                                                variant="outlined"
+                                                                label={option}
+                                                                sx={IconPaddingSx}
+                                                                {...getTagProps({ index })}
+                                                            />
+                                                        );
+                                                    })
                                                 }
-                                                value={scTags}
+                                                value={tags}
                                                 onChange={onChangeTags}
                                                 fullWidth
                                                 renderInput={(params) => (
@@ -598,7 +615,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     <Typography variant="subtitle2">Tags</Typography>
                                                 </Grid>
                                                 <Grid item xs={8}>
-                                                    {scTags.map((tag, index) => (
+                                                    {tags.map((tag, index) => (
                                                         <Chip key={index} label={tag} variant="outlined" />
                                                     ))}
                                                 </Grid>
@@ -617,8 +634,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         <Typography variant="h6">Custom Properties</Typography>
                                     </Grid>
                                     <Grid item xs={12} container rowSpacing={2}>
-                                        {scProperties
-                                            ? scProperties.map((property) => {
+                                        {properties
+                                            ? properties.map((property) => {
                                                   const propName = `property-${property.id}`;
                                                   return (
                                                       <Grid
@@ -830,7 +847,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     <Button
                                         variant="outlined"
                                         color="primary"
-                                        disabled={!active || !isScenario || !deletable}
+                                        disabled={!active || !isScenario || !scDeletable}
                                         onClick={openDeleteDialog}
                                     >
                                         DELETE
@@ -839,7 +856,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 <Button
                                     variant="outlined"
                                     color="primary"
-                                    disabled={!active || !isScenario || primary}
+                                    disabled={!active || !isScenario || scPrimary}
                                     onClick={openPrimaryDialog}
                                 >
                                     PROMOTE TO PRIMARY

@@ -1,12 +1,18 @@
 name: Publish pre-release to github
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      taipy-gui-version:
+        description: "The taipy-gui version to use (ex: 2.3.0.dev0)"
+        required: true
+      taipy-rest-version:
+        description: "The taipy-rest version to use (ex: 2.3.0.dev0)"
+        required: true
 
 jobs:
   publish:
     timeout-minutes: 20
-    environment: publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,11 +23,16 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Check dependencies are available
+        run: |
+          curl https://pypi.org/simple/taipy-gui/ | grep -o ">taipy-gui-${{ github.event.inputs.taipy-gui-version }}\.tar\.gz<"
+          curl https://pypi.org/simple/taipy-rest/ | grep -o ">taipy-rest-${{ github.event.inputs.taipy-rest-version }}\.tar\.gz<"
+
       - name: Ensure package version is properly set
-        id: current_version
+        id: current-version
         run: |
               echo """
-              import json, sys, os
+              import json, os
               with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
                   version_o = json.load(version_file)
               version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
@@ -35,14 +46,42 @@ jobs:
         run: |
             python -m pip install --upgrade pip
             pip install build
-            pip install git+https://git@github.com/Avaiga/taipy-gui.git@develop
+            pip install "taipy-gui==${{ github.event.inputs.taipy-gui-version }}"
+
+      - name: Update setup.py locally
+        run: |
+              mv setup.py setup.taipy.py
+              echo """
+              import sys
+              with open('setup.taipy.py', mode='r') as setup_r, open('setup.py', mode='w') as setup_w:
+                  in_requirements = False
+                  looking = True
+                  for line in setup_r:
+                      if looking:
+                          if line.lstrip().startswith('requirements') and line.rstrip().endswith('['):
+                              in_requirements = True
+                          elif in_requirements:
+                              if line.strip() == ']':
+                                  looking = False
+                              else:
+                                  if line.lstrip().startswith('\"taipy-gui@git+https'):
+                                      start = line.find('\"taipy-gui')
+                                      end = line.rstrip().find(',')
+                                      line = f'{line[:start]}\"taipy-gui=={sys.argv[1]}\"{line[end:]}'
+                                  elif line.lstrip().startswith('\"taipy-rest@git+https'):
+                                      start = line.find('\"taipy-rest')
+                                      end = line.rstrip().find(',')
+                                      line = f'{line[:start]}\"taipy-rest=={sys.argv[2]}\"{line[end:]}'
+                      setup_w.write(line)
+              """ > /tmp/write_setup_taipy.py
+              python /tmp/write_setup_taipy.py "${{ github.event.inputs.taipy-gui-version }}" "${{ github.event.inputs.taipy-rest-version }}"
 
       - name: Build package
         run: python setup.py build_py && python -m build
 
       - name: Create/update release and tag
         run: |
-            gh release delete dev-${{ steps.current_version.outputs.VERSION }} -y || true
-            gh release create dev-${{ steps.current_version.outputs.VERSION }} ./dist/taipy-${{ steps.current_version.outputs.VERSION }}.tar.gz --draft --prerelease --notes "Release Draft ${{ steps.current_version.outputs.VERSION }}"
+            gh release delete dev-${{ steps.current-version.outputs.VERSION }} -y || true
+            gh release create dev-${{ steps.current-version.outputs.VERSION }} ./dist/taipy-${{ steps.current-version.outputs.VERSION }}.tar.gz --draft --prerelease --notes "Release Draft ${{ steps.current-version.outputs.VERSION }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
