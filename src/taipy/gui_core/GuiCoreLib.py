@@ -352,6 +352,16 @@ class GuiCore(ElementLibrary):
                 "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
             },
         ),
+        "data_node_selector": Element(
+            "val",
+            {
+                "val": ElementProperty(GuiCoreScenarioDagAdapter),
+            },
+            inner_properties={
+                "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
+                "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
+            },
+        ),
     }
 
     def get_name(self) -> str:
