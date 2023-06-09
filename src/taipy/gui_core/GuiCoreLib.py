@@ -139,11 +139,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"scenario": event.entity_id if scenario else True},
             )
-        elif event.entity_type == EventEntityType.PIPELINE and event.entity_id: # TODO import EventOperation
+        elif event.entity_type == EventEntityType.PIPELINE and event.entity_id:  # TODO import EventOperation
             pipeline = tp.get(event.entity_id) if event.operation.value != 3 else None
             if pipeline:
                 if hasattr(pipeline, "parent_ids") and pipeline.parent_ids:
-                    self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids]})
+                    self.gui.broadcast(
+                        _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids]}
+                    )
 
     @staticmethod
     def scenario_adapter(data):
