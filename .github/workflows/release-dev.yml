@@ -69,7 +69,7 @@ jobs:
                                       end = line.rstrip().find(',')
                                       line = f'{line[:start]}\"taipy-gui=={sys.argv[1]}\"{line[end:]}'
                                   elif line.lstrip().startswith('\"taipy-rest@git+https'):
-                                      start = line.find('"\taipy-rest')
+                                      start = line.find('\"taipy-rest')
                                       end = line.rstrip().find(',')
                                       line = f'{line[:start]}\"taipy-rest=={sys.argv[2]}\"{line[end:]}'
                       setup_w.write(line)
