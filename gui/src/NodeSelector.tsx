@@ -166,7 +166,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
 
     const onSelect = useCallback((e: React.SyntheticEvent | undefined, nodeId: string) => {
         const keyId = nodeId || "";
-        const { nodetype = "" } = e.currentTarget.dataset || {};
+        const { nodetype = "" } = (e?.currentTarget as HTMLElement)?.parentElement?.dataset || {};
         if (nodetype === NodeType.NODE.toString()) {
             //TODO: handle on select node
             dispatch(createSendActionNameAction(id, module, props.onDataNodeSelect, keyId));
