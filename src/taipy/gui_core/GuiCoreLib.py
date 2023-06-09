@@ -461,6 +461,15 @@ class _GuiCore(ElementLibrary):
                 "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
             },
         ),
+        "job_selector": Element(
+            "val",
+            {
+                "val": ElementProperty(GuiCoreScenarioDagAdapter),
+            },
+            inner_properties={
+                "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
+            },
+        ),
     }
 
     def get_name(self) -> str:
