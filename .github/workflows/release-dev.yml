@@ -13,7 +13,6 @@ on:
 jobs:
   publish:
     timeout-minutes: 20
-    environment: publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
