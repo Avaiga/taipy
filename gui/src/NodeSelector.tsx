@@ -17,8 +17,24 @@ import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
 import { useDispatch, useModule, createSendActionNameAction } from "taipy-gui";
-import { Cycles, DataNodes, DisplayModel, NodeType, Scenarios } from "./utils/types";
-import { Cycle, Datanode, Pipeline, Scenario as ScenarioIcon } from "./icons";
+import {
+    Cycles,
+    Cycle,
+    DataNodes,
+    DisplayModel,
+    NodeType,
+    Pipelines,
+    Scenarios,
+    Scenario,
+    DataNode,
+    Pipeline,
+} from "./utils/types";
+import {
+    Cycle as CycleIcon,
+    Datanode as DatanodeIcon,
+    Pipeline as PipelineIcon,
+    Scenario as ScenarioIcon,
+} from "./icons";
 
 interface NodeSelectorProps {
     id?: string;
@@ -26,7 +42,6 @@ interface NodeSelectorProps {
     datanodes?: Cycles | Scenarios | DataNodes;
     coreChanged?: Record<string, unknown>;
     updateVars?: string;
-    configs?: Array<[string, string]>;
     onDataNodeSelect?: string;
     error?: string;
 }
@@ -62,19 +77,16 @@ const ParentTreeItemSx = {
     },
 };
 
-const buildId = (id: string, type: NodeType) => {
-    return JSON.stringify({ id: id, type: type });
-};
-
-const NodeItem = ({ item = [] }: { item: any[] }) => {
-    const [id, label, items = [], nodeType, _] = item;
+const NodeItem = (props: { item: DataNode }) => {
+    const [id, label, items = [], nodeType, _] = props.item;
     return (
         <TreeItem
             key={id}
-            nodeId={buildId(id, nodeType)}
+            nodeId={id}
+            datatype={NodeType.NODE.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
-                    <Datanode fontSize="small" color="primary" />
+                    <DatanodeIcon fontSize="small" color="primary" />
                     {label}
                 </Box>
             }
@@ -82,35 +94,38 @@ const NodeItem = ({ item = [] }: { item: any[] }) => {
     );
 };
 
-const PipelineItem = ({ item = [] }) => {
-    const [id, label, items = [], nodeType, _] = item;
+const PipelineItem = (props: { item: Pipeline }) => {
+    const [id, label, items = [], nodeType, _] = props.item;
 
     return (
         <TreeItem
             key={id}
-            nodeId={buildId(id, nodeType)}
+            nodeId={id}
+            datatype={NodeType.PIPELINE.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
-                    <Pipeline fontSize="small" color="primary" />
+                    <PipelineIcon fontSize="small" color="primary" />
                     {label}
                 </Box>
             }
             sx={ParentTreeItemSx}
         >
-            {items &&
-                items.map((item: any) => {
-                    return <NodeItem item={item} />;
-                })}
+            {items
+                ? items.map((item) => {
+                      return <NodeItem item={item} />;
+                  })
+                : null}
         </TreeItem>
     );
 };
 
-const ScenarioItem = ({ item = [] }: { item: any[] }) => {
-    const [id, label, items = [], nodeType, _] = item;
+const ScenarioItem = (props: { item: Scenario }) => {
+    const [id, label, items = [], nodeType, _] = props.item;
     return (
         <TreeItem
             key={id}
-            nodeId={buildId(id, nodeType)}
+            nodeId={id}
+            datatype={NodeType.SCENARIO.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
                     <ScenarioIcon fontSize="small" color="primary" />
@@ -119,34 +134,37 @@ const ScenarioItem = ({ item = [] }: { item: any[] }) => {
             }
             sx={ParentTreeItemSx}
         >
-            {items &&
-                items.map((item: any) => {
-                    const [id, label, items = [], nodeType, _] = item;
-                    return nodeType === NodeType.PIPELINE ? <PipelineItem item={item} /> : <NodeItem item={item} />;
-                })}
+            {items
+                ? items.map((item: any) => {
+                      const [id, label, items = [], nodeType, _] = item;
+                      return nodeType === NodeType.PIPELINE ? <PipelineItem item={item} /> : <NodeItem item={item} />;
+                  })
+                : null}
         </TreeItem>
     );
 };
 
-const CycleItem = ({ item }: { item: any[] }) => {
-    const [id, label, items = [], nodeType, _] = item;
+const CycleItem = (props: { item: Cycle }) => {
+    const [id, label, items = [], nodeType, _] = props.item;
     return (
         <TreeItem
             key={id}
-            nodeId={buildId(id, nodeType)}
+            nodeId={id}
+            datatype={NodeType.CYCLE.toString()}
             label={
                 <Box sx={treeItemLabelSx}>
-                    <Cycle fontSize="small" color="primary" />
+                    <CycleIcon fontSize="small" color="primary" />
                     {label}
                 </Box>
             }
             sx={ParentTreeItemSx}
         >
-            {items &&
-                items.map((item: any) => {
-                    const [id, label, items = [], nodeType, _] = item;
-                    return nodeType === NodeType.SCENARIO ? <ScenarioItem item={item} /> : <NodeItem item={item} />;
-                })}
+            {items
+                ? items.map((item: any) => {
+                      const [id, label, items = [], nodeType, _] = item;
+                      return nodeType === NodeType.SCENARIO ? <ScenarioItem item={item} /> : <NodeItem item={item} />;
+                  })
+                : null}
         </TreeItem>
     );
 };
@@ -157,11 +175,13 @@ const NodeSelector = (props: NodeSelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
-    const onSelect = useCallback((e: React.SyntheticEvent | undefined, nodeIds: string) => {
-        const selected = (nodeIds && JSON.parse(nodeIds)) || "";
-        if (selected && selected.type == NodeType.NODE) {
+    const onSelect = useCallback((e: React.SyntheticEvent | undefined, nodeId: string) => {
+        console.log("e", e, nodeId);
+        const keyId = nodeId || e?.currentTarget.getAttribute("key");
+        const datatype = e?.currentTarget.getAttribute("datatype");
+        if (datatype === NodeType.NODE.toString()) {
             //TODO: handle on select node
-            dispatch(createSendActionNameAction(id, module, props.onDataNodeSelect, selected.id));
+            dispatch(createSendActionNameAction(id, module, props.onDataNodeSelect, keyId));
         }
     }, []);
 
@@ -178,11 +198,11 @@ const NodeSelector = (props: NodeSelectorProps) => {
                         ? datanodes.map((item) => {
                               const [id, label, items = [], nodeType, _] = item;
                               return nodeType === NodeType.CYCLE ? (
-                                  <CycleItem item={item} />
+                                  <CycleItem item={item as Cycle} />
                               ) : nodeType === NodeType.SCENARIO ? (
-                                  <ScenarioItem item={item} />
+                                  <ScenarioItem item={item as Scenario} />
                               ) : (
-                                  <NodeItem item={item} />
+                                  <NodeItem item={item as DataNode} />
                               );
                           })
                         : null}

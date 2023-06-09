@@ -10,7 +10,8 @@ export type Pipeline = [string, string, DataNodes, number, boolean];
 export type Pipelines = Array<Pipeline>;
 export type Scenario = [string, string, DataNodes | Pipelines, number, boolean];
 export type Scenarios = Array<Scenario>;
-export type Cycles = Array<[string, string, Scenarios | DataNodes, number, boolean]>;
+export type Cycle = [string, string, Scenarios | DataNodes, number, boolean];
+export type Cycles = Array<Cycle>;
 
 export enum NodeType {
     CYCLE = 0,
