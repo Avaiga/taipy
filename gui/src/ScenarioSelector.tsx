@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Theme, alpha } from "@mui/material";
 import Badge, { BadgeOrigin } from "@mui/material/Badge";
 import Box from "@mui/material/Box";
@@ -49,7 +49,7 @@ import {
 
 import { Cycle, Scenario } from "./icons";
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { ScFProps, ScenarioFull } from "./utils";
+import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, MainBoxSx, ParentItemSx, ScFProps, ScenarioFull } from "./utils";
 
 enum NodeType {
     CYCLE = 0,
@@ -82,7 +82,6 @@ interface ScenarioSelectorProps {
     displayCycles?: boolean;
     defaultShowPrimaryFlag: boolean;
     showPrimaryFlag?: boolean;
-    value?: Record<string, unknown>;
     updateVarName?: string;
     scenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
@@ -94,6 +93,9 @@ interface ScenarioSelectorProps {
     propagate?: boolean;
     scenarioEdit?: ScenarioFull;
     onScenarioSelect: string;
+    value?: string;
+    defaultValue?: string;
+    height: string;
 }
 
 interface ScenarioNodesProps {
@@ -125,28 +127,6 @@ const emptyScenario: ScenarioDict = {
     properties: [],
 };
 
-const BadgePos = {
-    vertical: "top",
-    horizontal: "left",
-} as BadgeOrigin;
-
-const BadgeSx = {
-    flex: "0 0 auto",
-
-    "& .MuiBadge-badge": {
-        fontSize: "1rem",
-        width: "1em",
-        height: "1em",
-        p: 0,
-        minWidth: "0",
-    },
-};
-
-const FlagSx = {
-    color: "common.white",
-    fontSize: "0.75em",
-};
-
 const tinyIconButtonSx = {
     position: "relative",
     display: "flex",
@@ -172,39 +152,10 @@ const tinyIconButtonSx = {
 
 const ActionContentSx = { mr: 2, ml: 2 };
 
-const MainBoxSx = {
-    maxWidth: 300,
-    overflowY: "auto",
-};
-
-const TreeViewSx = {
-    mb: 2,
-
-    "& .MuiTreeItem-root .MuiTreeItem-content": {
-        mb: 0.5,
-        py: 1,
-        px: 2,
-        borderRadius: 0.5,
-        backgroundColor: "background.paper",
-    },
-
-    "& .MuiTreeItem-iconContainer:empty": {
-        display: "none",
-    },
-};
-
 const treeItemLabelSx = {
     display: "flex",
     alignItems: "center",
     gap: 1,
-};
-
-const CycleSx = {
-    "& > .MuiTreeItem-content": {
-        ".MuiTreeItem-label": {
-            fontWeight: "fontWeightBold",
-        },
-    },
 };
 
 const DialogContentSx = {
@@ -245,9 +196,14 @@ const tinyEditIconButtonSx = (theme: Theme) => ({
 
 const ScenarioItem = ({ scenarioId, label, isPrimary, openEditDialog }: ScenarioItemProps) => (
     <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-        <Grid item xs sx={treeItemLabelSx} key="label">
+        <Grid item xs sx={treeItemLabelSx}>
             {isPrimary ? (
-                <Badge badgeContent={<FlagOutlined sx={FlagSx} />} color="primary" anchorOrigin={BadgePos} sx={BadgeSx}>
+                <Badge
+                    badgeContent={<FlagOutlined sx={FlagSx} />}
+                    color="primary"
+                    anchorOrigin={BadgePos as BadgeOrigin}
+                    sx={BadgeSx}
+                >
                     <Scenario fontSize="small" color="primary" />
                 </Badge>
             ) : (
@@ -255,7 +211,7 @@ const ScenarioItem = ({ scenarioId, label, isPrimary, openEditDialog }: Scenario
             )}
             {label}
         </Grid>
-        <Grid item xs="auto" key="button">
+        <Grid item xs="auto">
             <IconButton data-id={scenarioId} onClick={openEditDialog} sx={tinyEditIconButtonSx}>
                 <EditOutlined />
             </IconButton>
@@ -555,7 +511,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-    const { id = "", scenarios = [], propagate = true } = props;
+    const { id = "", scenarios = [], propagate = true, defaultValue = "", value } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
     const [selected, setSelected] = useState("");
@@ -563,7 +519,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, "", module, props.updateVars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
 
     const showAddButton = useDynamicProperty(props.showAddButton, props.defaultShowAddButton, true);
     const displayCycles = useDynamicProperty(props.displayCycles, props.defaultDisplayCycles, true);
@@ -593,20 +549,20 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     );
 
     const onSelect = useCallback(
-        (e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
+        (e: React.SyntheticEvent, nodeId: string) => {
             const { cycle = false } = (e?.currentTarget as HTMLElement)?.parentElement?.dataset || {};
             const scenariosVar = getUpdateVar(props.updateVars, "scenarios");
             dispatch(
                 createSendUpdateAction(
                     props.updateVarName,
-                    cycle ? undefined : nodeIds,
+                    cycle ? undefined : nodeId,
                     module,
                     props.onChange,
                     propagate,
                     scenariosVar
                 )
             );
-            setSelected(nodeIds as string);
+            setSelected(nodeId);
         },
         [props.updateVarName, props.updateVars, props.onChange, propagate, dispatch, module]
     );
@@ -641,10 +597,20 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     }, [props.coreChanged, props.updateVars, module, dispatch, id]);
 
     useEffect(() => {
+        if (value !== undefined) {
+            setSelected(value);
+        } else if (defaultValue) {
+            setSelected(defaultValue);
+        }
+    }, [defaultValue, value]);
+
+    useEffect(() => {
         if (!scenarios.length) {
             unselect();
         }
     }, [scenarios, unselect]);
+
+    const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
 
     return (
         <div>
@@ -652,7 +618,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 <TreeView
                     defaultCollapseIcon={<ExpandMore />}
                     defaultExpandIcon={<ChevronRight />}
-                    sx={TreeViewSx}
+                    sx={treeViewSx}
                     onNodeSelect={onSelect}
                     selected={selected}
                 >
@@ -670,7 +636,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                                                   {label}
                                               </Box>
                                           }
-                                          sx={CycleSx}
+                                          sx={ParentItemSx}
                                           data-cycle
                                       >
                                           <ScenarioNodes

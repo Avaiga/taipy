@@ -11,6 +11,7 @@
 
 import typing as t
 from datetime import datetime
+from threading import Lock
 
 from dateutil import parser
 
@@ -51,20 +52,6 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Sc"
-
-
-class _GuiCoreScenarioIdAdapter(_TaipyBase):
-    def get(self):
-        data = super().get()
-        if isinstance(data, Scenario):
-            scenario = tp.get(data.id)
-            if scenario:
-                return scenario.id
-        return None
-
-    @staticmethod
-    def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "ScI"
 
 
 class _GuiCoreScenarioDagAdapter(_TaipyBase):
@@ -124,21 +111,24 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
-        self.cycles_scenarios: t.Optional[t.List[t.Union[Cycle, Scenario]]] = None
+        self.scenarios_base_level: t.Optional[t.List[t.Union[Cycle, Scenario]]] = None
+        self.data_nodes_base_level: t.Optional[t.List[t.Union[Cycle, Scenario, Pipeline, DataNode]]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
+        self.lock = Lock()
         super().__init__(reg_id, reg_queue)
         self.start()
 
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
-            self.cycles_scenarios = None
+            self.scenarios_base_level = None
             scenario = tp.get(event.entity_id) if event.operation.value != 3 else None
             self.gui.broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"scenario": event.entity_id if scenario else True},
             )
+            self.data_nodes_base_level = None
         elif event.entity_type == EventEntityType.PIPELINE and event.entity_id:  # TODO import EventOperation
             pipeline = tp.get(event.entity_id) if event.operation.value != 3 else None
             if pipeline:
@@ -157,14 +147,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def get_scenarios(self):
-        if self.cycles_scenarios is None:
-            self.cycles_scenarios = []
-            for cycle, scenarios in tp.get_cycles_scenarios().items():
-                if cycle is None:
-                    self.cycles_scenarios.extend(scenarios)
-                else:
-                    self.cycles_scenarios.append(cycle)
-        return self.cycles_scenarios
+        with self.lock:
+            if self.scenarios_base_level is None:
+                self.scenarios_base_level = []
+                for cycle, scenarios in tp.get_cycles_scenarios().items():
+                    if cycle is None:
+                        self.scenarios_base_level.extend(scenarios)
+                    else:
+                        self.scenarios_base_level.append(cycle)
+            return self.scenarios_base_level
 
     def select_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -181,11 +172,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return None
 
     def get_scenario_configs(self):
-        if self.scenario_configs is None:
-            configs = tp.Config.scenarios
-            if isinstance(configs, dict):
-                self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items()]
-        return self.scenario_configs
+        with self.lock:
+            if self.scenario_configs is None:
+                configs = tp.Config.scenarios
+                if isinstance(configs, dict):
+                    self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items()]
+            return self.scenario_configs
 
     def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -291,6 +283,51 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
+    def get_datanodes_tree(self):
+        with self.lock:
+            if self.data_nodes_base_level is None:
+                self.data_nodes_base_level = _GuiCoreContext.__get_data_nodes()
+                for cycle, scenarios in tp.get_cycles_scenarios().items():
+                    if cycle is None:
+                        self.data_nodes_base_level.extend(scenarios)
+                    else:
+                        self.data_nodes_base_level.append(cycle)
+            return self.data_nodes_base_level
+
+    @staticmethod
+    def __get_data_nodes(id: t.Optional[str] = None):
+        def from_parent(dn: DataNode):
+            if id is None and dn.owner_id is None:
+                return True
+            return False if id is None or dn.owner_id is None else dn.owner_id == id
+
+        return [x for x in tp.get_data_nodes() if from_parent(x)]
+
+    @staticmethod
+    def data_node_adapter(data):
+        if hasattr(data, "id") and tp.get(data.id) is not None:
+            if isinstance(data, Cycle):
+                return (
+                    data.id,
+                    data.get_simple_label(),
+                    _GuiCoreContext.__get_data_nodes(data.id) + tp.get_scenarios(data),
+                    0,
+                    False,
+                )
+            elif isinstance(data, Scenario):
+                return (
+                    data.id,
+                    data.get_simple_label(),
+                    _GuiCoreContext.__get_data_nodes(data.id) + [tp.get(p) for p in data._pipelines],
+                    1,
+                    data.is_primary,
+                )
+            elif isinstance(data, Pipeline):
+                return (data.id, data.get_simple_label(), _GuiCoreContext.__get_data_nodes(data.id), 2, False)
+            elif isinstance(data, DataNode):
+                return (data.id, data.get_simple_label(), None, 3, False)
+        return None
+
     def broadcast_core_changed(self):
         self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, "")
 
@@ -308,6 +345,7 @@ class GuiCore(ElementLibrary):
                 "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
                 "value": ElementProperty(PropertyType.lov_value),
                 "on_change": ElementProperty(PropertyType.function),
+                "height": ElementProperty(PropertyType.string, "50vh"),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
@@ -365,13 +403,19 @@ class GuiCore(ElementLibrary):
             },
         ),
         "data_node_selector": Element(
-            "val",
+            "value",
             {
-                "val": ElementProperty(GuiCoreScenarioDagAdapter),
+                "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
+                "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
+                "value": ElementProperty(PropertyType.lov_value),
+                "on_change": ElementProperty(PropertyType.function),
+                "height": ElementProperty(PropertyType.string, "50vh"),
             },
             inner_properties={
-                "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
-                "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
+                "datanodes": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_datanodes_tree()}}"),
+                "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "type": ElementProperty(PropertyType.inner, DataNode),
+                "adapter": ElementProperty(PropertyType.inner, _GuiCoreContext.data_node_adapter),
             },
         ),
     }
