@@ -11,31 +11,33 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { AbstractReactFactory, GenerateModelEvent, GenerateWidgetEvent, AbstractModelFactory } from "@projectstorm/react-canvas-core";
+import React from "react";
+import { AbstractReactFactory, GenerateWidgetEvent, AbstractModelFactory } from "@projectstorm/react-canvas-core";
 import { DiagramEngine } from "@projectstorm/react-diagrams-core";
 import { TaipyNodeModel, TaipyPortModel } from "./models";
 import NodeWidget from "./NodeWidget";
 
 export class TaipyNodeFactory extends AbstractReactFactory<TaipyNodeModel, DiagramEngine> {
-  constructor(nodeType: string) {
-    super(nodeType);
-  }
+    constructor(nodeType: string) {
+        super(nodeType);
+    }
 
-  generateReactWidget(event: GenerateWidgetEvent<TaipyNodeModel>): JSX.Element {
-    return <NodeWidget engine={this.engine} node={event.model} />;
-  }
+    generateReactWidget(event: GenerateWidgetEvent<TaipyNodeModel>): JSX.Element {
+        return <NodeWidget engine={this.engine} node={event.model} />;
+    }
 
-  generateModel(_: GenerateModelEvent): TaipyNodeModel {
-    return new TaipyNodeModel();
-  }
+    generateModel(): TaipyNodeModel {
+        return new TaipyNodeModel();
+    }
 }
 
 export class TaipyPortFactory extends AbstractModelFactory<TaipyPortModel, DiagramEngine> {
-  constructor() {
-    super("taipy-port");
-  }
+    constructor() {
+        super("taipy-port");
+    }
 
-  generateModel(_: GenerateModelEvent): TaipyPortModel {
-    return new TaipyPortModel({ type: "taipy-port", name: "fred" });
-  }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    generateModel(): TaipyPortModel {
+        return new TaipyPortModel({ type: "taipy-port", name: "fred" });
+    }
 }

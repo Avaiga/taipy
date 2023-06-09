@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import styled from "@emotion/styled";
 import { DefaultPortModel, PortWidget } from "@projectstorm/react-diagrams";
 import { DiagramEngine } from "@projectstorm/react-diagrams-core";
@@ -22,6 +22,7 @@ import { TaipyNodeModel } from "./models";
 import { IN_PORT_NAME } from "../utils/diagram";
 import { Input, Output } from "../icons";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace S {
     export const Node = styled.div<{ background?: string; selected?: boolean }>`
         background-color: ${(p) => p.background};

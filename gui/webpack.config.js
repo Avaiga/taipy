@@ -13,53 +13,59 @@
 
 const webpack = require("webpack");
 const path = require("path");
+const ESLintPlugin = require("eslint-webpack-plugin");
 require("dotenv").config();
 
 module.exports = (_env, options) => {
-  return {
-    mode: options.mode, // "development" | "production"
-    entry: ["./src/index.ts"],
-    output: {
-      filename: "taipy-gui-core.js",
-      path: path.resolve(__dirname, "../src/taipy/gui_core/lib"),
-      library: {
-        // Camel case transformation of the library name "example"
-        name: "TaipyGuiCore",
-        type: "umd",
-      },
-      publicPath: "/",
-    },
-    // The Taipy GUI library is indicated as external so that it is
-    // excluded from bundling.
-    externals: { "taipy-gui": "TaipyGui" },
-
-    // Enable sourcemaps for debugging webpack's output.
-    devtool: options.mode === "development" && "inline-source-map",
-    resolve: {
-      // All the code is TypeScript
-      extensions: [".ts", ".tsx", ".js"],
-    },
-
-    module: {
-      rules: [
-        {
-          test: /\.tsx?$/,
-          use: "ts-loader",
-          exclude: /node_modules/,
+    return {
+        mode: options.mode, // "development" | "production"
+        entry: ["./src/index.ts"],
+        output: {
+            filename: "taipy-gui-core.js",
+            path: path.resolve(__dirname, "../src/taipy/gui_core/lib"),
+            library: {
+                // Camel case transformation of the library name "example"
+                name: "TaipyGuiCore",
+                type: "umd",
+            },
+            publicPath: "/",
         },
-      ],
-    },
+        // The Taipy GUI library is indicated as external so that it is
+        // excluded from bundling.
+        externals: { "taipy-gui": "TaipyGui" },
 
-    plugins: [
-      new webpack.DllReferencePlugin({
-        // We assume the current directory is orignal directory in the taipy-gui repository.
-        // If this file is moved, this path must be updated
-        manifest: path.resolve(
-          __dirname,
-          `${process.env.TAIPY_GUI_DIR}/taipy/gui/webapp/taipy-gui-deps-manifest.json`
-        ),
-        name: "TaipyGuiDependencies",
-      }),
-    ],
-  };
+        // Enable sourcemaps for debugging webpack's output.
+        devtool: options.mode === "development" && "inline-source-map",
+        resolve: {
+            // All the code is TypeScript
+            extensions: [".ts", ".tsx", ".js"],
+        },
+
+        module: {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    use: "ts-loader",
+                    exclude: /node_modules/,
+                },
+            ],
+        },
+
+        plugins: [
+            new webpack.DllReferencePlugin({
+                // We assume the current directory is orignal directory in the taipy-gui repository.
+                // If this file is moved, this path must be updated
+                manifest: path.resolve(
+                    __dirname,
+                    `${process.env.TAIPY_GUI_DIR}/taipy/gui/webapp/taipy-gui-deps-manifest.json`
+                ),
+                name: "TaipyGuiDependencies",
+            }),
+            new ESLintPlugin({
+                extensions: [`ts`, `tsx`],
+                exclude: [`/node_modules/`],
+                eslintPath: require.resolve("eslint"),
+            }),
+        ],
+    };
 };

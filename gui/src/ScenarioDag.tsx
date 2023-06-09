@@ -16,7 +16,14 @@ import { Close, ZoomIn } from "@mui/icons-material";
 import { DisplayModel } from "./utils/types";
 import { initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
 import { TaipyDiagramModel } from "./projectstorm/models";
-import { createRequestUpdateAction, createSendUpdateAction, getUpdateVar, useDispatch, useDynamicProperty, useModule } from "taipy-gui";
+import {
+    createRequestUpdateAction,
+    createSendUpdateAction,
+    getUpdateVar,
+    useDispatch,
+    useDynamicProperty,
+    useModule,
+} from "taipy-gui";
 
 interface ScenarioDagProps {
     id?: string;
@@ -66,9 +73,11 @@ const DagTitle = (props: DagTitleProps) => (
             <IconButton edge="end" color="inherit" onClick={props.zoomToFit} title="zoom to fit">
                 <ZoomIn />
             </IconButton>{" "}
-            {props.hideDialog ? <IconButton edge="end" color="inherit" onClick={props.hideDialog} title="close">
-                <Close />
-            </IconButton>: null }
+            {props.hideDialog ? (
+                <IconButton edge="end" color="inherit" onClick={props.hideDialog} title="close">
+                    <Close />
+                </IconButton>
+            ) : null}
         </Toolbar>
     </AppBar>
 );
@@ -101,7 +110,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         if (props.coreChanged?.scenario) {
             props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
         }
-    }, [props.coreChanged, props.updateVarName, module, dispatch]);
+    }, [props.coreChanged, props.updateVarName, module, dispatch, props.id]);
 
     useEffect(() => {
         const displayModel = Array.isArray(props.scenario)
@@ -139,10 +148,8 @@ const ScenarioDag = (props: ScenarioDagProps) => {
 
     useEffect(() => {
         const showVar = getUpdateVar(props.updateVars, "show");
-        showVar && dispatch(
-            createSendUpdateAction(showVar, show, module)
-        );
-    }, [show, props.updateVars]);
+        showVar && dispatch(createSendUpdateAction(showVar, show, module));
+    }, [show, props.updateVars, dispatch, module]);
 
     return withButton ? (
         <>
