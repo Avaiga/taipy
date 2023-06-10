@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+cookiecutter = "==2.1.1"
+
+[dev-packages]
+autopep8 = "*"
+black = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
+tox = "*"
+types-python-dateutil = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
