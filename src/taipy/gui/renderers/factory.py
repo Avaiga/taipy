@@ -355,7 +355,12 @@ class _Factory:
         )
         ._set_partial()  # partial should be set before page
         .set_attributes(
-            [("id",), ("page", PropertyType.dynamic_string), ("render", PropertyType.dynamic_boolean, True)]
+            [
+                ("id",),
+                ("page", PropertyType.dynamic_string),
+                ("render", PropertyType.dynamic_boolean, True),
+                ("height", PropertyType.dynamic_string),
+            ]
         ),
         "selector": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="Selector", attributes=attrs, default_value=None

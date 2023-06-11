@@ -27,7 +27,14 @@ interface PartProps extends TaipyBaseProps {
     children?: ReactNode;
     defaultPartial?: boolean;
     partial?: boolean;
+    height?: string;
+    defaultHeight?: string;
 }
+
+const IframeStyle = {
+    width: "100%",
+    height: "100%",
+};
 
 const Part = (props: PartProps) => {
     const { id, children, partial, defaultPartial } = props;
@@ -35,6 +42,7 @@ const Part = (props: PartProps) => {
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const height = useDynamicProperty(props.height, props.defaultHeight, undefined);
     const page = useDynamicProperty(props.page, props.defaultPage, "");
     const iFrame = useMemo(() => {
         if (page && !defaultPartial) {
@@ -47,10 +55,11 @@ const Part = (props: PartProps) => {
         return false;
     }, [state.locations, page, defaultPartial]);
 
+    const boxSx = useMemo(() => (height ? { height: height } : undefined), [height]);
     return render ? (
-        <Box id={id} className={className}>
+        <Box id={id} className={className} sx={boxSx}>
             {iFrame ? (
-                <iframe src={page} />
+                <iframe src={page} style={IframeStyle} />
             ) : page ? (
                 <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} />
             ) : null}

@@ -1118,6 +1118,11 @@
             "name": "page",
             "type": "dynamic(str)",
             "doc": "The page to show as the content of the block (page name if defined or an URL in an <i>iframe</i>).<br/>This should not be defined if <i>partial</i> is set."
+          },
+          {
+            "name": "height",
+            "type": "dynamic(str)",
+            "doc": "The height, in CSS units, of this block."
           }
         ]
       }
