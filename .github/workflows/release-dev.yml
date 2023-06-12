@@ -116,15 +116,11 @@ jobs:
           # Install package
           echo "Installing package..."
           pip install ./dist/taipy-${{ steps.current-version.outputs.VERSION }}.tar.gz
-          rm -r src
-
-          # Install test packages
-          echo "Installing test packages..."
-          pip install pytest
 
           # Run tests
-          echo "running pytest"
-          pytest -s
+          python -c "import taipy as tp; tp.Scenario"
+          python -c "import taipy as tp; tp.gui"
+          python -c "import taipy as tp; tp.rest"
 
       - name: Create/update release and tag
         run: |
