@@ -27,7 +27,7 @@ class SectionForTest(Section):
         super().__init__(id, **properties)
 
     def __copy__(self):
-        return SectionForTest(self._attribute, **copy(self._properties))
+        return SectionForTest(self.id, self._attribute, **copy(self._properties))
 
     @property
     def attribute(self):
@@ -37,6 +37,10 @@ class SectionForTest(Section):
     @_ConfigBlocker._check()
     def attribute(self, val):
         self._attribute = val
+
+    def _clean(self):
+        self._attribute = None
+        self._properties.clear()
 
     def _to_dict(self):
         as_dict = {}
@@ -53,7 +57,11 @@ class SectionForTest(Section):
 
     def _update(self, as_dict: Dict[str, Any], default_section=None):
         self._attribute = as_dict.pop(self._MY_ATTRIBUTE_KEY, self._attribute)
+        if self._attribute is None and default_section:
+            self._attribute = default_section._attribute
         self._properties.update(as_dict)
+        if default_section:
+            self._properties = {**default_section.properties, **self._properties}
 
     @staticmethod
     def _configure(id: str, attribute: str, **properties):

@@ -33,9 +33,9 @@ class Config:
     __logger = _TaipyLogger._get_logger()
     _default_config = _Config._default_config()
     _python_config = _Config()
-    _file_config = None
-    _env_file_config = None
-    _applied_config = _Config._default_config()
+    _file_config = _Config()
+    _env_file_config = _Config()
+    _applied_config = _Config()
     _collector = IssueCollector()
     _serializer = _TomlSerializer()
     __json_serializer = _JsonSerializer()
@@ -59,7 +59,9 @@ class Config:
     @classmethod
     @_ConfigBlocker._check()
     def load(cls, filename):
-        """Load a configuration file to replace the current python config and trigger the Config compilation.
+        """Load a configuration file.
+
+        The current Python configuration is replaced and the Config compilation is triggered.
 
         Parameters:
             filename (Union[str, Path]): The path of the toml configuration file to load.
@@ -75,12 +77,12 @@ class Config:
 
         The export is done in a toml file.
 
-        The exported configuration is taken from the python code configuration.
+        The exported configuration is taken from the Python code configuration.
 
         Parameters:
             filename (Union[str, Path]): The path of the file to export.
         Note:
-            If _filename_ already exists, it is overwritten.
+            If *filename* already exists, it is overwritten.
         """
         cls._serializer._write(cls._python_config, filename)
 
@@ -91,13 +93,13 @@ class Config:
         The backup is done in a toml file.
 
         The backed up configuration is a compilation from the three possible methods to configure
-        the application: the python code configuration, the file configuration and the environment
+        the application: the Python code configuration, the file configuration and the environment
         configuration.
 
         Parameters:
             filename (Union[str, Path]): The path of the file to export.
         Note:
-            If _filename_ already exists, it is overwritten.
+            If *filename* already exists, it is overwritten.
         """
         cls._serializer._write(cls._applied_config, filename)
 
@@ -226,7 +228,7 @@ class Config:
     @classmethod
     def _compile_configs(cls):
         Config._override_env_file()
-        cls._applied_config = _Config._default_config()
+        cls._applied_config._clean()
         if cls._default_config:
             cls._applied_config._update(cls._default_config)
         if cls._python_config:

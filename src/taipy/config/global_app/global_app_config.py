@@ -135,6 +135,13 @@ class GlobalAppConfig:
         config._repository_properties = cls._DEFAULT_REPOSITORY_PROPERTIES.copy()
         return config
 
+    def _clean(self):
+        self._root_folder = self._DEFAULT_ROOT_FOLDER
+        self._storage_folder = self._DEFAULT_STORAGE_FOLDER
+        self._clean_entities_enabled = self._CLEAN_ENTITIES_ENABLED_TEMPLATE
+        self._repository_type = self._DEFAULT_REPOSITORY_TYPE
+        self._repository_properties = self._DEFAULT_REPOSITORY_PROPERTIES.copy()
+
     def _to_dict(self):
         as_dict = {}
         if self._root_folder:
