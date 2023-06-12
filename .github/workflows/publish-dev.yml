@@ -17,11 +17,6 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: setup node version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
       - name: Extract Github Tag Version
         id: vars
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT

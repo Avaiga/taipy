@@ -60,7 +60,7 @@ jobs:
           curl https://pypi.org/simple/taipy-gui/ | grep -o ">taipy-gui-${{ github.event.inputs.taipy-gui-version }}\.tar\.gz<"
           curl https://pypi.org/simple/taipy-rest/ | grep -o ">taipy-rest-${{ github.event.inputs.taipy-rest-version }}\.tar\.gz<"
 
-      - name: Ensure package version is properly set
+      - name: Grab the version of the package
         id: current-version
         run: |
               echo """
@@ -71,8 +71,8 @@ jobs:
               if vext := version_o.get(\"ext\"):
                   version = f'{version}.{vext}'
               print(f'VERSION={version}')
-              """ > /tmp/check1.py
-              python /tmp/check1.py >> $GITHUB_OUTPUT
+              """ > /tmp/check2.py
+              python /tmp/check2.py >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
