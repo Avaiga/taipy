@@ -40,7 +40,7 @@ jobs:
       - name: Checkout latest from branch
         uses: actions/checkout@v2
         with:
-          repository: dinhlongviolin1/taipy-gui
+          repository: Avaiga/taipy-gui
           ref: ${{ steps.extract_branch.outputs.branch }}
           path: './latest'
 
