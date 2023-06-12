@@ -82,7 +82,7 @@ jobs:
 
       - name: Update setup.py locally
         run: |
-             mv setup.py setup.taipy.py
+              mv setup.py setup.taipy.py
               echo """
               import sys
               with open('setup.taipy.py', mode='r') as setup_r, open('setup.py', mode='w') as setup_w:
@@ -128,7 +128,7 @@ jobs:
 
       - name: Create/update release and tag
         run: |
-            echo "Creating release dev-${{ steps.current-version.outputs.VERSION }}"
+            echo "Creating release ${{ steps.current-version.outputs.VERSION }}"
             gh release create ${{ steps.current-version.outputs.VERSION }} ./dist/taipy-${{ steps.current-version.outputs.VERSION }}.tar.gz --prerelease --notes "Release Draft ${{ steps.current-version.outputs.VERSION }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
