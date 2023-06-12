@@ -101,7 +101,7 @@ jobs:
 
       - name: Verify there is a release asset
         run: |
-          if [ ! -f dist/taipy-gui-${{ github.event.inputs.version }}.tar.gz ]; then
+          if [ ! -f dist/taipy-${{ github.event.inputs.version }}.tar.gz ]; then
             echo "No release asset found"
             exit 1
           fi
