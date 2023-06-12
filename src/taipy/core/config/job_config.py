@@ -38,9 +38,10 @@ class JobConfig(UniqueSection):
     _DEFAULT_MODE = _DEVELOPMENT_MODE
     _MODES = [_STANDALONE_MODE, _DEVELOPMENT_MODE]
 
-    def __init__(self, mode: str = None, **properties):
+    def __init__(self, mode: Optional[str] = None, **properties):
         self.mode = mode or self._DEFAULT_MODE
         self._config = self._create_config(self.mode, **properties)
+        super().__init__(**properties)
 
     def __copy__(self):
         return JobConfig(self.mode, **copy(self._properties))
@@ -51,6 +52,10 @@ class JobConfig(UniqueSection):
     @classmethod
     def default_config(cls):
         return JobConfig(cls._DEFAULT_MODE)
+
+    def _clean(self):
+        self.mode = self._DEFAULT_MODE
+        self._config = self._create_config(self.mode)
 
     def _to_dict(self):
         as_dict = {}
@@ -75,7 +80,10 @@ class JobConfig(UniqueSection):
 
     @staticmethod
     def _configure(
-        mode: str = None, nb_of_workers: Union[int, str] = None, max_nb_of_workers: Union[int, str] = None, **properties
+        mode: Optional[str] = None,
+        nb_of_workers: Optional[Union[int, str]] = None,
+        max_nb_of_workers: Optional[Union[int, str]] = None,
+        **properties
     ) -> "JobConfig":
         """Configure job execution.
 

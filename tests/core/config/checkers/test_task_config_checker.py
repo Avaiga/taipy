@@ -21,7 +21,8 @@ from taipy.config.config import Config
 
 class TestTaskConfigChecker:
     def test_check_config_id(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
@@ -50,7 +51,8 @@ class TestTaskConfigChecker:
 
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
 
@@ -79,7 +81,8 @@ class TestTaskConfigChecker:
         assert expected_error_message in caplog.text
 
     def test_check_inputs(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
@@ -138,7 +141,8 @@ class TestTaskConfigChecker:
         assert len(Config._collector.warnings) == 1
 
     def test_check_outputs(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         config._sections[TaskConfig.name]["default"]._outputs = "bar"
         Config._collector = IssueCollector()
@@ -194,7 +198,8 @@ class TestTaskConfigChecker:
         def mock_func():
             pass
 
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         Config._collector = IssueCollector()
         Config.check()

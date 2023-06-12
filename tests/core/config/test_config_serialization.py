@@ -144,8 +144,8 @@ outputs = []
 skippable = "False:bool"
 
 [TASK.test_task]
-inputs = [ "test_csv_dn:SECTION",]
 function = "tests.core.config.test_config_serialization.multiply:function"
+inputs = [ "test_csv_dn:SECTION",]
 outputs = [ "test_json_dn:SECTION",]
 skippable = "False:bool"
 
@@ -300,16 +300,16 @@ def test_read_write_json_configuration_file():
 },
 "TASK": {
 "default": {
-"inputs": [],
 "function": null,
+"inputs": [],
 "outputs": [],
 "skippable": "False:bool"
 },
 "test_task": {
+"function": "tests.core.config.test_config_serialization.multiply:function",
 "inputs": [
 "test_csv_dn:SECTION"
 ],
-"function": "tests.core.config.test_config_serialization.multiply:function",
 "outputs": [
 "test_json_dn:SECTION"
 ],
