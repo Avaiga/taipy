@@ -38,12 +38,13 @@ import {
     alpha,
 } from "@mui/material";
 
+import { FilterList } from "@mui/icons-material";
+
 interface JobSelectorProps {
     id?: string;
     updateVarName?: string;
     coreChanged?: Record<string, unknown>;
     updateVars?: string;
-    onDataNodeSelect?: string;
     error?: string;
     jobs?: any[];
 }
@@ -80,63 +81,63 @@ const JobSelector = (props: JobSelectorProps) => {
         id = "",
         jobs = [
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56621",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Completed",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56622",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Submitted",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56623",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Blocked",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56624",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Pending",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56625",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Running",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56626",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Canceled",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56627",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Failed",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56628",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
                 "Skipped",
             ],
             [
-                "JOB_5643_5764_6876_5662",
+                "JOB_5643_5764_6876_56629",
                 "SUBMIT_5643_5764_6876_5662",
                 "SCENARIO_5643_5764_6876_5662",
                 "2023/02/05, 14:43:43",
@@ -148,9 +149,42 @@ const JobSelector = (props: JobSelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
-    const [order, setOrder] = useState<string>("asc");
+    const [order, setOrder] = React.useState<"asc" | "desc">("asc");
     const [orderBy, setOrderBy] = useState<string>("calories");
     const [selected, setSelected] = useState<readonly string[]>([]);
+
+    const isSelected = (name: string) => selected.indexOf(name) !== -1;
+
+    const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
+        const selectedIndex = selected.indexOf(name);
+        let newSelected: readonly string[] = [];
+
+        if (selectedIndex === -1) {
+            newSelected = newSelected.concat(selected, name);
+        } else if (selectedIndex === 0) {
+            newSelected = newSelected.concat(selected.slice(1));
+        } else if (selectedIndex === selected.length - 1) {
+            newSelected = newSelected.concat(selected.slice(0, -1));
+        } else if (selectedIndex > 0) {
+            newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+        }
+        setSelected(newSelected);
+    };
+
+    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.checked) {
+            const newSelected = jobs.map((n) => n[0]);
+            setSelected(newSelected);
+            return;
+        }
+        setSelected([]);
+    };
+
+    const handleRequestSort = (property: string) => {
+        const isAsc = orderBy === property && order === "asc";
+        setOrder(isAsc ? "desc" : "asc");
+        setOrderBy(property);
+    };
 
     return (
         <Box>
@@ -171,16 +205,19 @@ const JobSelector = (props: JobSelectorProps) => {
                         </Typography>
                     ) : null}
                     {selected.length > 0 ? (
-                        <Tooltip title="Delete">
-                            <IconButton>
-                                <DeleteOutline />
-                            </IconButton>
-                        </Tooltip>
-                    ) : (
-                        <Tooltip title="Filter list">
-                            <IconButton>{/* <FilterListIcon /> */}</IconButton>
-                        </Tooltip>
-                    )}
+                        <>
+                            <Tooltip title="Stop">
+                                <IconButton>
+                                    <StopCircleOutlined />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                                <IconButton>
+                                    <DeleteOutline />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    ) : null}
                 </Toolbar>
                 <TableContainer>
                     <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium">
@@ -189,37 +226,55 @@ const JobSelector = (props: JobSelectorProps) => {
                                 <TableCell padding="checkbox">
                                     <Checkbox
                                         color="primary"
-                                        // indeterminate={numSelected > 0 && numSelected < rowCount}
-                                        // checked={rowCount > 0 && numSelected === rowCount}
-                                        // onChange={onSelectAllClick}
-                                        inputProps={{
-                                            "aria-label": "select all desserts",
-                                        }}
+                                        checked={jobs?.length === selected?.length}
+                                        onChange={handleSelectAllClick}
                                     />
                                 </TableCell>
-                                <TableCell
-                                    align={"left"}
-                                    padding={"normal"}
-                                    // sortDirection={orderBy === headCell.id ? order : false}
-                                >
+                                <TableCell sortDirection={orderBy === "jobId" ? order : false}>
                                     <TableSortLabel
-                                    // active={orderBy === headCell.id}
-                                    // direction={orderBy === headCell.id ? order : "asc"}
+                                        direction={orderBy === "jobId" ? order : "desc"}
+                                        IconComponent={FilterList}
+                                        onClick={() => handleRequestSort("jobId")}
                                     >
                                         <ListItemText primary="Job" secondary="ID" />
-                                        {/* {orderBy === headCell.id ? (
-                                            <Box component="span" sx={visuallyHidden}>
-                                                {order === "desc" ? "sorted descending" : "sorted ascending"}
-                                            </Box>
-                                        ) : null} */}
                                     </TableSortLabel>
                                 </TableCell>
-                                <TableCell>Submit ID</TableCell>
-                                <TableCell>
-                                    <ListItemText primary="Submitted entity" secondary="ID" />
+                                <TableCell sortDirection={orderBy === "submitID" ? order : false}>
+                                    <TableSortLabel
+                                        IconComponent={FilterList}
+                                        direction={orderBy === "submitID" ? order : "desc"}
+                                        onClick={() => handleRequestSort("submitID")}
+                                    >
+                                        Submit ID
+                                    </TableSortLabel>
                                 </TableCell>
-                                <TableCell>Creation date</TableCell>
-                                <TableCell>Status</TableCell>
+                                <TableCell sortDirection={orderBy === "submitEntity" ? order : false}>
+                                    <TableSortLabel
+                                        IconComponent={FilterList}
+                                        direction={orderBy === "submitEntity" ? order : "desc"}
+                                        onClick={() => handleRequestSort("submitEntity")}
+                                    >
+                                        <ListItemText primary="Submitted entity" secondary="ID" />
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell sortDirection={orderBy === "createdDt" ? order : false}>
+                                    <TableSortLabel
+                                        IconComponent={FilterList}
+                                        direction={orderBy === "createdDt" ? order : "desc"}
+                                        onClick={() => handleRequestSort("createdDt")}
+                                    >
+                                        Creation date
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell sortDirection={orderBy === "status" ? order : false}>
+                                    <TableSortLabel
+                                        IconComponent={FilterList}
+                                        direction={orderBy === "status" ? order : "desc"}
+                                        onClick={() => handleRequestSort("status")}
+                                    >
+                                        Status
+                                    </TableSortLabel>
+                                </TableCell>
                                 <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
@@ -227,27 +282,15 @@ const JobSelector = (props: JobSelectorProps) => {
                             {jobs
                                 ? jobs.map((row, index) => {
                                       const [id, submitID, entity, createdDt, status] = row;
-                                      const isItemSelected = false;
-                                      const labelId = `enhanced-table-checkbox-${index}`;
+                                      const isItemSelected = isSelected(id);
 
                                       return (
-                                          <TableRow
-                                              hover
-                                              // onClick={(event) => handleClick(event, row.name)}
-                                              role="checkbox"
-                                              aria-checked={isItemSelected}
-                                              tabIndex={-1}
-                                              key={row.name}
-                                              selected={isItemSelected}
-                                              sx={{ cursor: "pointer" }}
-                                          >
+                                          <TableRow hover role="checkbox" tabIndex={-1} key={id}>
                                               <TableCell padding="checkbox">
                                                   <Checkbox
                                                       color="primary"
                                                       checked={isItemSelected}
-                                                      inputProps={{
-                                                          "aria-labelledby": labelId,
-                                                      }}
+                                                      onClick={(event) => handleClick(event, id)}
                                                   />
                                               </TableCell>
                                               <TableCell component="th" id={id} scope="row" padding="none">
@@ -274,15 +317,6 @@ const JobSelector = (props: JobSelectorProps) => {
                                       );
                                   })
                                 : null}
-                            {/* {emptyRows > 0 && (
-                                <TableRow
-                                    style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
-                                    }}
-                                >
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}*/}
                         </TableBody>
                     </Table>
                 </TableContainer>
