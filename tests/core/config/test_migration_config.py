@@ -44,3 +44,22 @@ def test_migration_config():
     assert migration_cfg.migration_fcts == {
         "1.0": {"data_nodes1": migrate_pickle_path, "data_nodes2": migrate_pickle_path}
     }
+
+
+def test_clean_config():
+    assert Config.migration_functions.migration_fcts == {}
+
+    data_nodes1 = Config.configure_data_node("data_nodes1", "pickle")
+    migration_cfg = Config.add_migration_function(
+        target_version="1.0",
+        config=data_nodes1,
+        migration_fct=migrate_pickle_path,
+    )
+
+    assert migration_cfg.migration_fcts == {"1.0": {"data_nodes1": migrate_pickle_path}}
+    assert migration_cfg.properties == {}
+
+    migration_cfg._clean()
+
+    assert migration_cfg.migration_fcts == {}
+    assert migration_cfg._properties == {}
