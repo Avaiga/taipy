@@ -35,7 +35,7 @@ import {
     useModule,
 } from "taipy-gui";
 
-import { FlagSx, Property, ScFProps, ScenarioFull, ScenarioFullLength } from "./utils";
+import { FlagSx, Property, ScFProps, ScenarioFull, ScenarioFullLength, useClassNames } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 
 interface ScenarioViewerProps {
@@ -60,6 +60,9 @@ interface ScenarioViewerProps {
     showSubmit?: boolean;
     showSubmitPipelines?: boolean;
     showTags?: boolean;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
 }
 
 interface PipelinesRowProps {
@@ -237,6 +240,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const expanded = useDynamicProperty(props.expanded, props.defaultExpanded, false);
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const [deleteDialog, setDeleteDialogOpen] = useState(false);
     const openDeleteDialog = useCallback(() => setDeleteDialogOpen(true), []);
@@ -446,7 +450,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
     return (
         <>
-            <Box sx={MainBoxSx} id={id} onClick={onFocus}>
+            <Box sx={MainBoxSx} id={id} onClick={onFocus} className={className}>
                 <Accordion
                     defaultExpanded={expandable && expanded}
                     expanded={userExpanded}

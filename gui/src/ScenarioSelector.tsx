@@ -49,7 +49,17 @@ import {
 
 import { Cycle, Scenario } from "./icons";
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, MainBoxSx, ParentItemSx, ScFProps, ScenarioFull } from "./utils";
+import {
+    BadgePos,
+    BadgeSx,
+    BaseTreeViewSx,
+    FlagSx,
+    MainBoxSx,
+    ParentItemSx,
+    ScFProps,
+    ScenarioFull,
+    useClassNames,
+} from "./utils";
 
 enum NodeType {
     CYCLE = 0,
@@ -96,6 +106,9 @@ interface ScenarioSelectorProps {
     value?: string;
     defaultValue?: string;
     height: string;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
 }
 
 interface ScenarioNodesProps {
@@ -516,6 +529,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const [actionEdit, setActionEdit] = useState<boolean>(false);
     const [selected, setSelected] = useState("");
 
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
+
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -613,8 +628,8 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
 
     return (
-        <div>
-            <Box sx={MainBoxSx}>
+        <>
+            <Box sx={MainBoxSx} id={props.id} className={className}>
                 <TreeView
                     defaultCollapseIcon={<ExpandMore />}
                     defaultExpandIcon={<ChevronRight />}
@@ -689,7 +704,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                 scenario={props.scenarioEdit}
                 submit={onSubmit}
             ></ScenarioEditDialog>
-        </div>
+        </>
     );
 };
 
