@@ -323,8 +323,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     data.is_primary,
                 )
             elif isinstance(data, Pipeline):
-                dn = _GuiCoreContext.__get_data_nodes(data.id)
-                if dn:
+                if dn:= _GuiCoreContext.__get_data_nodes(data.id):
                     return (data.id, data.get_simple_label(), dn, 2, False)
             elif isinstance(data, DataNode):
                 return (data.id, data.get_simple_label(), None, 3, False)
