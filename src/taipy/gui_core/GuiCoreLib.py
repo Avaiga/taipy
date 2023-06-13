@@ -246,12 +246,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
         entity: t.Union[Scenario, Pipeline] = tp.get(entity_id)
         if entity:
-            if isinstance(entity, Scenario):
-                primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
-                if primary is True:
-                    tp.set_primary(entity)
-            with entity as ent:
-                try:
+            try:
+                if isinstance(entity, Scenario):
+                    primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
+                    if primary is True:
+                        tp.set_primary(entity)
+                with entity as ent:
                     if isinstance(ent, Scenario):
                         tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                         if isinstance(tags, (list, tuple)):
@@ -272,8 +272,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             if key and key not in _GuiCoreContext.__SCENARIO_PROPS:
                                 ent.properties.pop(key, None)
                     state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
-                except Exception as e:
-                    state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
+            except Exception as e:
+                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
 
     def submit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
