@@ -341,7 +341,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, "")
 
 
-class GuiCore(ElementLibrary):
+class _GuiCore(ElementLibrary):
     __LIB_NAME = "taipy_gui_core"
     __CTX_VAR_NAME = f"__{__LIB_NAME}_Ctx"
     __SCENARIO_ADAPTER = "tgc_scenario"
@@ -430,18 +430,18 @@ class GuiCore(ElementLibrary):
     }
 
     def get_name(self) -> str:
-        return GuiCore.__LIB_NAME
+        return _GuiCore.__LIB_NAME
 
     def get_elements(self) -> t.Dict[str, Element]:
-        return GuiCore.__elts
+        return _GuiCore.__elts
 
     def get_scripts(self) -> t.List[str]:
         return ["lib/taipy-gui-core.js"]
 
     def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
-        gui._add_adapter_for_type(GuiCore.__SCENARIO_ADAPTER, _GuiCoreContext.scenario_adapter)
-        gui._add_adapter_for_type(GuiCore.__DATANODE_ADAPTER, _GuiCoreContext.data_node_adapter)
-        return GuiCore.__CTX_VAR_NAME, _GuiCoreContext(gui)
+        gui._add_adapter_for_type(_GuiCore.__SCENARIO_ADAPTER, _GuiCoreContext.scenario_adapter)
+        gui._add_adapter_for_type(_GuiCore.__DATANODE_ADAPTER, _GuiCoreContext.data_node_adapter)
+        return _GuiCore.__CTX_VAR_NAME, _GuiCoreContext(gui)
 
     def on_user_init(self, state: State):
         for var in [
