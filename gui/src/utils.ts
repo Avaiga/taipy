@@ -96,6 +96,7 @@ export const BaseTreeViewSx = {
         display: "none",
     },
     maxHeight: "50vh",
+    overflowY: "auto",
 };
 
 export const ParentItemSx = {
