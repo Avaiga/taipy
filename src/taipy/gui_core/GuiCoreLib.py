@@ -126,7 +126,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.start()
 
     def process_event(self, event: Event):
-        print(f"process_event({event})")
         if event.entity_type == EventEntityType.SCENARIO:
             self.scenarios_base_level = None
             scenario = tp.get(event.entity_id) if event.operation.value != 3 else None
@@ -250,7 +249,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if isinstance(entity, Scenario):
                 primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
                 if primary is True:
-                    print(f"edit_entity(): promoting {entity.id} to primary")
                     tp.set_primary(entity)
             with entity as ent:
                 try:
