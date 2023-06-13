@@ -50,6 +50,10 @@ class MigrationConfig(UniqueSection):
             deepcopy(self.migration_fcts),
             **deepcopy(self._properties),
         )
+        
+    def _clean(self):
+        self.migration_fcts.clear()
+        self._properties.clear()
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return _tpl._replace_templates(self._properties.get(item))  # type: ignore
