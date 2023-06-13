@@ -13,7 +13,12 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
+<<<<<<< HEAD
 import { DeleteOutline, StopCircleOutlined, Add } from "@mui/icons-material";
+=======
+import { useDispatch, useModule } from "taipy-gui";
+import { DeleteOutline, StopCircleOutlined } from "@mui/icons-material";
+>>>>>>> 0d49a5f (feat: Job selector update, fix sorting, code cleanup.)
 import {
     Button,
     Checkbox,
@@ -621,6 +626,16 @@ const JobSelector = (props: JobSelectorProps) => {
 
     const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
+    const headerToolbarSx = {
+        pl: { sm: 2 },
+        pr: { xs: 1, sm: 1 },
+        ...(selected.length > 0 && {
+            bgcolor: "rgba(0, 0, 0, 0.05)",
+        }),
+    };
+    const selectedSx = { flex: "1 1 100%" };
+    const containerSx = { width: "100%", mb: 2 };
+
     const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
         const selectedIndex = selected.indexOf(name);
         let newSelected: readonly string[] = [];
@@ -637,20 +652,36 @@ const JobSelector = (props: JobSelectorProps) => {
         setSelected(newSelected);
     };
 
-    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSelectAllClick = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
             const newSelected = jobs.map((n) => n[0]);
             setSelected(newSelected);
             return;
         }
         setSelected([]);
-    };
+    }, []);
 
-    const handleRequestSort = (property: string) => {
+    const handleRequestSort = (property: string, columnIndex: number) => {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
+
+        const sortedJobs = jobs.sort((a, b) => {
+            return isAsc ? a[columnIndex].localeCompare(b[columnIndex]) : b[columnIndex].localeCompare(a[columnIndex]);
+        });
+        setJobRows(sortedJobs);
     };
+
+    const handleDeleteJob = useCallback((id: string[]) => {
+        //TODO: delete job
+    }, []);
+    const handleStopJob = useCallback((id: string[]) => {
+        //TODO: stop job
+    }, []);
+
+    useEffect(() => {
+        setJobRows(jobs);
+    }, []);
 
     return (
         <Box className={className}>
