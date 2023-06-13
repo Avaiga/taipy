@@ -28,8 +28,12 @@ from taipy.gui.utils import _TaipyBase
 from ..version import _get_version
 
 # prevent gui from trying to push scenario instances to the front-end
-Scenario.__bases__ += (_DoNotUpdate,)
-DataNode.__bases__ += (_DoNotUpdate,)
+class DoNotUpdate(_DoNotUpdate):
+    def __repr__(self):
+        return self.get_label() if hasattr(self, "get_label") else super().__repr__()
+
+Scenario.__bases__ += (DoNotUpdate,)
+DataNode.__bases__ += (DoNotUpdate,)
 
 
 class _GuiCoreScenarioAdapter(_TaipyBase):
