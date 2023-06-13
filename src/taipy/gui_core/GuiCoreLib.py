@@ -323,7 +323,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     data.is_primary,
                 )
             elif isinstance(data, Pipeline):
-                return (data.id, data.get_simple_label(), _GuiCoreContext.__get_data_nodes(data.id), 2, False)
+                if dn := _GuiCoreContext.__get_data_nodes(data.id):
+                    return (data.id, data.get_simple_label(), dn, 2, False)
             elif isinstance(data, DataNode):
                 return (data.id, data.get_simple_label(), None, 3, False)
         return None
@@ -335,6 +336,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
 class GuiCore(ElementLibrary):
     __LIB_NAME = "taipy_gui_core"
     __CTX_VAR_NAME = f"__{__LIB_NAME}_Ctx"
+    __SCENARIO_ADAPTER = "tgc_scenario"
+    __DATANODE_ADAPTER = "tgc_datanode"
 
     __elts = {
         "scenario_selector": Element(
@@ -353,8 +356,7 @@ class GuiCore(ElementLibrary):
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
                 "error": ElementProperty(PropertyType.react, f"{{{_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR}}}"),
-                "type": ElementProperty(PropertyType.inner, Scenario),
-                "adapter": ElementProperty(PropertyType.inner, _GuiCoreContext.scenario_adapter),
+                "type": ElementProperty(PropertyType.inner, __SCENARIO_ADAPTER),
                 "scenario_edit": ElementProperty(
                     _GuiCoreScenarioAdapter,
                     f"{{{__CTX_VAR_NAME}.get_scenario_by_id({_GuiCoreContext._SCENARIO_SELECTOR_ID_VAR})}}",
@@ -414,8 +416,7 @@ class GuiCore(ElementLibrary):
             inner_properties={
                 "datanodes": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_datanodes_tree()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
-                "type": ElementProperty(PropertyType.inner, DataNode),
-                "adapter": ElementProperty(PropertyType.inner, _GuiCoreContext.data_node_adapter),
+                "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
             },
         ),
     }
@@ -430,6 +431,8 @@ class GuiCore(ElementLibrary):
         return ["lib/taipy-gui-core.js"]
 
     def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
+        gui._add_adapter_for_type(GuiCore.__SCENARIO_ADAPTER, _GuiCoreContext.scenario_adapter)
+        gui._add_adapter_for_type(GuiCore.__DATANODE_ADAPTER, _GuiCoreContext.data_node_adapter)
         return GuiCore.__CTX_VAR_NAME, _GuiCoreContext(gui)
 
     def on_user_init(self, state: State):
