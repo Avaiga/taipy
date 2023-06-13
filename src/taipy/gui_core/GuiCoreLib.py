@@ -88,7 +88,7 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
                         "type": node.entity.storage_type() if hasattr(node.entity, "storage_type") else None,
                     }
                 return [
-                    data.get_label(),
+                    data.id,
                     nodes,
                     [
                         (
@@ -401,14 +401,13 @@ class _GuiCore(ElementLibrary):
                 "error": ElementProperty(PropertyType.react, f"{{{_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR}}}"),
             },
         ),
-        "dag": Element(
+        "scenario_dag": Element(
             "scenario",
             {
                 "id": ElementProperty(PropertyType.string),
                 "scenario": ElementProperty(_GuiCoreScenarioDagAdapter),
-                "button_label": ElementProperty(PropertyType.dynamic_string),
-                "show": ElementProperty(PropertyType.dynamic_boolean, True),
-                "with_button": ElementProperty(PropertyType.boolean, True),
+                "render": ElementProperty(PropertyType.dynamic_boolean, True),
+                "show_toolbar": ElementProperty(PropertyType.boolean, True),
                 "width": ElementProperty(PropertyType.string),
                 "height": ElementProperty(PropertyType.string),
             },
