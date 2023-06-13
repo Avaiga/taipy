@@ -22,9 +22,20 @@ from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
+from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
 
 from ..version import _get_version
+
+
+# prevent gui from trying to push scenario instances to the front-end
+class DoNotUpdate(_DoNotUpdate):
+    def __repr__(self):
+        return self.get_label() if hasattr(self, "get_label") else super().__repr__()
+
+
+Scenario.__bases__ += (DoNotUpdate,)
+DataNode.__bases__ += (DoNotUpdate,)
 
 
 class _GuiCoreScenarioAdapter(_TaipyBase):
@@ -141,9 +152,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def scenario_adapter(data):
         if hasattr(data, "id") and tp.get(data.id) is not None:
             if isinstance(data, Cycle):
-                return (data.id, data.name, tp.get_scenarios(data), 0, False)
+                return (data.id, data.get_simple_label(), tp.get_scenarios(data), 0, False)
             elif isinstance(data, Scenario):
-                return (data.id, data.name, None, 1, data.is_primary)
+                return (data.id, data.get_simple_label(), None, 1, data.is_primary)
         return None
 
     def get_scenarios(self):
@@ -241,12 +252,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
         entity: t.Union[Scenario, Pipeline] = tp.get(entity_id)
         if entity:
-            with entity as ent:
-                try:
-                    if isinstance(entity, Scenario):
-                        primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
-                        if primary is True:
-                            tp.set_primary(ent)
+            try:
+                if isinstance(entity, Scenario):
+                    primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
+                    if primary is True:
+                        tp.set_primary(entity)
+                with entity as ent:
+                    if isinstance(ent, Scenario):
                         tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                         if isinstance(tags, (list, tuple)):
                             ent.tags = {t for t in tags}
@@ -266,8 +278,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             if key and key not in _GuiCoreContext.__SCENARIO_PROPS:
                                 ent.properties.pop(key, None)
                     state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
-                except Exception as e:
-                    state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
+            except Exception as e:
+                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
 
     def submit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -333,7 +345,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, "")
 
 
-class GuiCore(ElementLibrary):
+class _GuiCore(ElementLibrary):
     __LIB_NAME = "taipy_gui_core"
     __CTX_VAR_NAME = f"__{__LIB_NAME}_Ctx"
     __SCENARIO_ADAPTER = "tgc_scenario"
@@ -422,18 +434,18 @@ class GuiCore(ElementLibrary):
     }
 
     def get_name(self) -> str:
-        return GuiCore.__LIB_NAME
+        return _GuiCore.__LIB_NAME
 
     def get_elements(self) -> t.Dict[str, Element]:
-        return GuiCore.__elts
+        return _GuiCore.__elts
 
     def get_scripts(self) -> t.List[str]:
         return ["lib/taipy-gui-core.js"]
 
     def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
-        gui._add_adapter_for_type(GuiCore.__SCENARIO_ADAPTER, _GuiCoreContext.scenario_adapter)
-        gui._add_adapter_for_type(GuiCore.__DATANODE_ADAPTER, _GuiCoreContext.data_node_adapter)
-        return GuiCore.__CTX_VAR_NAME, _GuiCoreContext(gui)
+        gui._add_adapter_for_type(_GuiCore.__SCENARIO_ADAPTER, _GuiCoreContext.scenario_adapter)
+        gui._add_adapter_for_type(_GuiCore.__DATANODE_ADAPTER, _GuiCoreContext.data_node_adapter)
+        return _GuiCore.__CTX_VAR_NAME, _GuiCoreContext(gui)
 
     def on_user_init(self, state: State):
         for var in [
