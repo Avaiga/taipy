@@ -33,7 +33,7 @@ jobs:
         id: extract_branch
 
       - name: Checkout latest from branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: Avaiga/taipy-config
           ref: ${{ steps.extract_branch.outputs.branch }}
@@ -96,7 +96,7 @@ jobs:
 
       - name: Verify there is a release asset
         run: |
-          if [ ! -f dist/taipy-${{ github.event.inputs.version }}.tar.gz ]; then
+          if [ ! -f dist/taipy-config-${{ github.event.inputs.version }}.tar.gz ]; then
             echo "No release asset found"
             exit 1
           fi
@@ -130,7 +130,7 @@ jobs:
         os: [ubuntu-latest,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
