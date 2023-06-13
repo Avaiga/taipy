@@ -37,7 +37,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    description="A open-source repository contains Taipy templates and scaffoldings.",
+    description="An open-source repository contains Taipy templates and scaffoldings.",
     install_requires=requirements,
     license="Apache License 2.0",
     long_description=readme,
@@ -49,6 +49,5 @@ setup(
     include_package_data=True,
     test_suite="tests",
     url="https://github.com/avaiga/taipy-templates",
-    version="develop",
     zip_safe=False,
 )
