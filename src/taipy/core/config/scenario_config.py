@@ -80,10 +80,12 @@ class ScenarioConfig(Section):
 
     @property
     def task_and_data_node_configs(self) -> List[Union[TaskConfig, DataNodeConfig]]:
+        # TODO: return also dn that already defined in task?
         return self._tasks_and_data_nodes
 
     @property
     def tasks_and_data_nodes(self) -> List[Union[TaskConfig, DataNodeConfig]]:
+        # TODO: return also dn that already defined in task?
         return self._tasks_and_data_nodes
 
     @classmethod
@@ -91,7 +93,7 @@ class ScenarioConfig(Section):
         return ScenarioConfig(cls._DEFAULT_KEY, [], None, dict())
 
     def _clean(self):
-        self._pipelines = []
+        self._tasks_and_data_nodes = []
         self.frequency = None
         self.comparators = dict()
         self._properties.clear()

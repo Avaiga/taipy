@@ -29,16 +29,17 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 self._check_if_entity_property_key_used_is_predefined(scenario_config)
                 self._check_existing_config_id(scenario_config)
                 self._check_frequency(scenario_config_id, scenario_config)
-                self._check_pipelines(scenario_config_id, scenario_config)
+                self._check_task_and_data_node_configs(scenario_config_id, scenario_config)
                 self._check_comparators(scenario_config_id, scenario_config)
         return self._collector
 
-    def _check_pipelines(self, scenario_config_id: str, scenario_config: ScenarioConfig):
+    def _check_task_and_data_node_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
+        # TODO: children of classes TaskConfig or DataNodeConfig
         self._check_children(
             ScenarioConfig,
             scenario_config_id,
-            scenario_config._PIPELINE_KEY,
-            scenario_config.pipeline_configs,
+            scenario_config._TASKS_AND_DATANODES_KEY,
+            scenario_config.tasks_and_data_nodes,
             PipelineConfig,
         )
 

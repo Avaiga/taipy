@@ -50,17 +50,11 @@ def _test_default_task_config(task_config: TaskConfig):
     assert len(task_config.properties) == 0  # type: ignore
 
 
-def _test_default_pipeline_config(pipeline_config: PipelineConfig):
-    assert pipeline_config is not None
-    assert pipeline_config.id is not None
-    assert pipeline_config.task_configs == []
-    assert len(pipeline_config.properties) == 0  # type: ignore
-
-
 def _test_default_scenario_config(scenario_config: ScenarioConfig):
     assert scenario_config is not None
     assert scenario_config.id is not None
-    assert scenario_config.pipeline_configs == []
+    assert scenario_config.tasks_and_data_nodes == []
+    assert scenario_config.task_and_data_node_configs == []
     assert len(scenario_config.properties) == 0  # type: ignore
 
 
@@ -114,12 +108,6 @@ def test_default_configuration():
     _test_default_task_config(TaskConfig.default_config())
     assert len(default_config._sections[TaskConfig.name]) == 1
     assert len(Config.tasks) == 1
-
-    _test_default_pipeline_config(default_config._sections[PipelineConfig.name][_Config.DEFAULT_KEY])
-    _test_default_pipeline_config(Config.pipelines[_Config.DEFAULT_KEY])
-    _test_default_pipeline_config(PipelineConfig.default_config())
-    assert len(default_config._sections[PipelineConfig.name]) == 1
-    assert len(Config.pipelines) == 1
 
     _test_default_scenario_config(default_config._sections[ScenarioConfig.name][_Config.DEFAULT_KEY])
     _test_default_scenario_config(Config.scenarios[_Config.DEFAULT_KEY])

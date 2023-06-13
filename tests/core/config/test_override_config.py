@@ -23,15 +23,13 @@ def test_override_default_configuration_with_code_configuration():
     assert not Config.global_config.root_folder == "foo"
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
-    assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
     Config.configure_job_executions(max_nb_of_workers=-1)
     Config.configure_global_app(root_folder="foo")
     foo_config = Config.configure_data_node("foo", "in_memory")
     bar_config = Config.configure_task("bar", print, [foo_config], [])
-    baz_config = Config.configure_pipeline("baz", [bar_config])
-    qux_config = Config.configure_scenario("qux", [baz_config])
+    qux_config = Config.configure_scenario("qux", [bar_config])
 
     assert Config.job_config.max_nb_of_workers == -1
     assert Config.global_config.root_folder == "foo"
@@ -46,16 +44,14 @@ def test_override_default_configuration_with_code_configuration():
     assert Config.tasks[bar_config.id].input_configs[0].id == foo_config.id
     assert len(Config.tasks[bar_config.id].output_configs) == 0
     assert Config.tasks[bar_config.id].function == print
-    assert len(Config.pipelines) == 2
+    # TODO: TBD
+    assert len(Config.pipelines) == 1
     assert "default" in Config.pipelines
-    assert baz_config.id in Config.pipelines
-    assert len(Config.pipelines[baz_config.id].task_configs) == 1
-    assert Config.pipelines[baz_config.id].task_configs[0].id == bar_config.id
     assert len(Config.scenarios) == 2
     assert "default" in Config.scenarios
     assert qux_config.id in Config.scenarios
-    assert len(Config.scenarios[qux_config.id].pipeline_configs) == 1
-    assert Config.scenarios[qux_config.id].pipeline_configs[0].id == baz_config.id
+    assert len(Config.scenarios[qux_config.id].task_and_data_node_configs) == 1
+    assert Config.scenarios[qux_config.id].task_and_data_node_configs[0].id == bar_config.id
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():
@@ -91,8 +87,6 @@ max_nb_of_workers = -1
 
 [TASK.bar]
 
-[PIPELINE.baz]
-
 [SCENARIO.qux]
 """
     )
@@ -101,7 +95,6 @@ max_nb_of_workers = -1
     assert not Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
-    assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
     Config.override(tf.filename)
@@ -114,11 +107,10 @@ max_nb_of_workers = -1
     assert len(Config.tasks) == 2
     assert "default" in Config.tasks
     assert "bar" in Config.tasks
-    assert len(Config.pipelines) == 2
+    assert len(Config.pipelines) == 1
     assert "default" in Config.pipelines
     assert "default" in Config.scenarios
     assert len(Config.scenarios) == 2
-    assert "baz" in Config.pipelines
     assert "qux" in Config.scenarios
 
 

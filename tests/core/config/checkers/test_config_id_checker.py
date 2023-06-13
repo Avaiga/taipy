@@ -23,7 +23,7 @@ class TestConfigIdChecker:
         assert len(Config._collector.errors) == 0
 
         Config.configure_data_node(id="foo", storage_type="in_memory")
-        Config.configure_scenario(id="bar", pipeline_configs=[])
+        Config.configure_scenario(id="bar", task_and_data_node_configs=[])
 
         Config._collector = IssueCollector()
         Config.check()

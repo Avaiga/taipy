@@ -80,7 +80,10 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
 
-    def test_check_pipelines(self, caplog):
+    def test_check_task_and_data_node_configs(self, caplog):
+
+        # TODO: check child type task and data node
+
         Config._collector = IssueCollector()
         config = Config._applied_config
         Config._compile_configs()

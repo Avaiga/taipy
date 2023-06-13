@@ -79,7 +79,6 @@ _inject_section(
     [
         ("configure_scenario", ScenarioConfig._configure),
         ("configure_default_scenario", ScenarioConfig._configure_default),
-        ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
     ],
 )
 _inject_section(
