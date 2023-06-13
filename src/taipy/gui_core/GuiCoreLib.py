@@ -355,12 +355,14 @@ class _GuiCore(ElementLibrary):
         "scenario_selector": Element(
             "value",
             {
+                "id": ElementProperty(PropertyType.string),
                 "show_add_button": ElementProperty(PropertyType.dynamic_boolean, True),
                 "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
                 "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
                 "value": ElementProperty(PropertyType.lov_value),
                 "on_change": ElementProperty(PropertyType.function),
                 "height": ElementProperty(PropertyType.string, "50vh"),
+                "class_name": ElementProperty(PropertyType.dynamic_string),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
@@ -392,6 +394,7 @@ class _GuiCore(ElementLibrary):
                 "show_properties": ElementProperty(PropertyType.boolean, True),
                 "show_pipelines": ElementProperty(PropertyType.boolean, True),
                 "show_submit_pipelines": ElementProperty(PropertyType.boolean, True),
+                "class_name": ElementProperty(PropertyType.dynamic_string),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_entity}}"),
@@ -410,6 +413,7 @@ class _GuiCore(ElementLibrary):
                 "show_toolbar": ElementProperty(PropertyType.boolean, True),
                 "width": ElementProperty(PropertyType.string),
                 "height": ElementProperty(PropertyType.string),
+                "class_name": ElementProperty(PropertyType.dynamic_string),
             },
             inner_properties={
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
@@ -418,11 +422,13 @@ class _GuiCore(ElementLibrary):
         "data_node_selector": Element(
             "value",
             {
+                "id": ElementProperty(PropertyType.string),
                 "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
                 "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
                 "value": ElementProperty(PropertyType.lov_value),
                 "on_change": ElementProperty(PropertyType.function),
                 "height": ElementProperty(PropertyType.string, "50vh"),
+                "class_name": ElementProperty(PropertyType.dynamic_string),
             },
             inner_properties={
                 "datanodes": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_datanodes_tree()}}"),

@@ -17,6 +17,7 @@ import {
     useDynamicProperty,
     useModule,
 } from "taipy-gui";
+import { useClassNames } from "./utils";
 
 interface ScenarioDagProps {
     id?: string;
@@ -29,6 +30,9 @@ interface ScenarioDagProps {
     width?: string;
     height?: string;
     updateVars: string;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
 }
 
 const boxSx = { "&>div": { height: "100%", width: "100%" }, height: "100%", width: "100%" };
@@ -62,6 +66,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const module = useModule();
 
     const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const sizeSx = useMemo(
         () => ({ width: props.width || "50vw", height: props.height || "50vh" }),
@@ -105,14 +110,12 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     }, [render, props.updateVars, dispatch, module]);
 
     return render ? (
-        <>
-            <Box sx={sizeSx}>
-                {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
-                <Box sx={boxSx}>
-                    <CanvasWidget engine={engine} />
-                </Box>
+        <Box sx={sizeSx} id={props.id} className={className}>
+            {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
+            <Box sx={boxSx}>
+                <CanvasWidget engine={engine} />
             </Box>
-        </>
+        </Box>
     ) : null;
 };
 

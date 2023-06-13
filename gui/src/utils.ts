@@ -11,6 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
+import { useDynamicProperty } from "taipy-gui";
+
 // id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags, deletable
 export type ScenarioFull = [
     string,
@@ -93,7 +95,7 @@ export const BaseTreeViewSx = {
     "& .MuiTreeItem-iconContainer:empty": {
         display: "none",
     },
-    maxHeight: "50vh"
+    maxHeight: "50vh",
 };
 
 export const ParentItemSx = {
@@ -103,3 +105,6 @@ export const ParentItemSx = {
         },
     },
 };
+
+export const useClassNames = (libClassName?: string, dynamicClassName?: string, className?: string) =>
+    ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();

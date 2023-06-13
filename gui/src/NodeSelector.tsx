@@ -35,7 +35,7 @@ import {
     Pipeline as PipelineIcon,
     Scenario as ScenarioIcon,
 } from "./icons";
-import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, MainBoxSx, ParentItemSx,  } from "./utils";
+import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, MainBoxSx, ParentItemSx, useClassNames } from "./utils";
 
 interface NodeSelectorProps {
     id?: string;
@@ -53,6 +53,9 @@ interface NodeSelectorProps {
     value?: string;
     defaultValue?: string;
     height: string;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
 }
 
 const treeItemLabelSx = {
@@ -117,6 +120,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
     const { id = "", datanodes = [], propagate = true } = props;
 
     const [selected, setSelected] = useState("");
+    const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -180,7 +184,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
     const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
 
     return (
-        <Box sx={MainBoxSx}>
+        <Box sx={MainBoxSx} id={props.id} className={className}>
             <TreeView
                 defaultCollapseIcon={<ExpandMore />}
                 defaultExpandIcon={<ChevronRight />}
