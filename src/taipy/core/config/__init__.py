@@ -16,7 +16,6 @@ from taipy.config.common.scope import Scope  # type: ignore
 from taipy.config.config import Config  # type: ignore
 from taipy.config.global_app.global_app_config import GlobalAppConfig  # type: ignore
 
-from ._core_section import CoreSection
 from .checkers import _global_config_checker
 from .checkers._config_id_checker import _ConfigIdChecker
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
@@ -24,6 +23,7 @@ from .checkers._job_config_checker import _JobConfigChecker
 from .checkers._pipeline_config_checker import _PipelineConfigChecker
 from .checkers._scenario_config_checker import _ScenarioConfigChecker
 from .checkers._task_config_checker import _TaskConfigChecker
+from .core_section import CoreSection
 from .data_node_config import DataNodeConfig
 from .job_config import JobConfig
 from .migration_config import MigrationConfig

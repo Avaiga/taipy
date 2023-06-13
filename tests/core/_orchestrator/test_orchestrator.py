@@ -1046,7 +1046,6 @@ def _create_task(function, nb_outputs=1):
     ]
     input_dn = _DataManager._bulk_get_or_create(dn_input_configs).values()
     output_dn = _DataManager._bulk_get_or_create(dn_output_configs).values()
-
     return Task(
         output_dn_config_id,
         {},
