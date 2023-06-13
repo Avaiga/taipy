@@ -17,10 +17,6 @@ from setuptools import find_namespace_packages, find_packages, setup
 with open("README.md", "rb") as readme_file:
     readme = readme_file.read().decode("UTF-8")
 
-requirements = [
-    "cookiecutter>=2.1.1,<2.2",
-]
-
 test_requirements = ["pytest>=3.8"]
 
 setup(
@@ -38,7 +34,6 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     description="An open-source repository contains Taipy templates and scaffoldings.",
-    install_requires=requirements,
     license="Apache License 2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
