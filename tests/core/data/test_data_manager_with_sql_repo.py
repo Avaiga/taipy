@@ -177,6 +177,9 @@ class TestDataManager:
         pipeline_dn_config = Config.configure_data_node(
             id="test_data_node3", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
         )
+        pipeline_dn_config_bis = Config.configure_data_node(
+            id="test_data_node4", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
+        )
 
         _DataManager._delete_all()
 
@@ -217,8 +220,7 @@ class TestDataManager:
         assert pipeline_dn_bis.id != pipeline_dn_ter.id
         assert pipeline_dn_ter.id == pipeline_dn_quater.id
 
-        pipeline_dn_config.id = "test_data_node4"
-        pipeline_dn_quinquies = _get_or_create_dn(pipeline_dn_config, None)
+        pipeline_dn_quinquies = _get_or_create_dn(pipeline_dn_config_bis, None)
         assert len(_DataManager._get_all()) == 6
         assert pipeline_dn.id == pipeline_dn_bis.id
         assert pipeline_dn_bis.id != pipeline_dn_ter.id

@@ -11,6 +11,7 @@
 
 from typing import Callable, List, Optional, Type, Union
 
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds
@@ -57,16 +58,17 @@ class _TaskManager(_Manager[Task]):
     ) -> List[Task]:
         data_node_configs = set()
         for task_config in task_configs:
-            data_node_configs.update(task_config.input_configs)
-            data_node_configs.update(task_config.output_configs)
+            data_node_configs.update([Config.data_nodes[dnc.id] for dnc in task_config.input_configs])
+            data_node_configs.update([Config.data_nodes[dnc.id] for dnc in task_config.output_configs])
 
         data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(
-            data_node_configs, cycle_id, scenario_id, pipeline_id
+            list(data_node_configs), cycle_id, scenario_id, pipeline_id
         )
-
         tasks_configs_and_owner_id = []
         for task_config in task_configs:
-            task_dn_configs = task_config.output_configs + task_config.input_configs
+            task_dn_configs = [Config.data_nodes[dnc.id] for dnc in task_config.output_configs] + [
+                Config.data_nodes[dnc.id] for dnc in task_config.input_configs
+            ]
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
             scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
             owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
@@ -89,8 +91,14 @@ class _TaskManager(_Manager[Task]):
                 tasks.append(task)
             else:
                 version = _VersionManagerFactory._build_manager()._get_latest_version()
-                inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
-                outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
+                inputs = [
+                    data_nodes[input_config]
+                    for input_config in [Config.data_nodes[dnc.id] for dnc in task_config.input_configs]
+                ]
+                outputs = [
+                    data_nodes[output_config]
+                    for output_config in [Config.data_nodes[dnc.id] for dnc in task_config.output_configs]
+                ]
                 skippable = task_config.skippable
                 task = Task(
                     str(task_config.id),
