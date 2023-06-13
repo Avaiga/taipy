@@ -50,7 +50,7 @@ class MigrationConfig(UniqueSection):
             deepcopy(self.migration_fcts),
             **deepcopy(self._properties),
         )
-        
+
     def _clean(self):
         self.migration_fcts.clear()
         self._properties.clear()
