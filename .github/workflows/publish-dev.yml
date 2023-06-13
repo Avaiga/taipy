@@ -130,7 +130,11 @@ jobs:
         os: [ubuntu-latest,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v3
+=======
+      - uses: actions/checkout@v2
+>>>>>>> b077cef (Add new dev release process (#637))
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
