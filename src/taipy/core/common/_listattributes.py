@@ -28,7 +28,6 @@ class _ListAttributes(UserList):
             tp.set(self._parent)
 
     def __add__(self, value):
-        # TODO: publish event of changing attributes
         if hasattr(value, "__iter__"):
             self.__add_iterable(value)
         else:

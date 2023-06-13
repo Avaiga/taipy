@@ -11,5 +11,5 @@
 
 
 from .core_event_consumer import CoreEventConsumerBase
-from .event import EventEntityType, EventOperation
+from .event import _ENTITY_TO_EVENT_ENTITY_TYPE, EventEntityType, EventOperation
 from .notifier import _publish_event

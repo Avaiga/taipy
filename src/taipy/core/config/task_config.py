@@ -76,7 +76,9 @@ class TaskConfig(Section):
         super().__init__(id, **properties)
 
     def __copy__(self):
-        return TaskConfig(self.id, copy(self._inputs), self.function, copy(self._outputs), **copy(self._properties))
+        return TaskConfig(
+            self.id, self.function, copy(self._inputs), copy(self._outputs), self.skippable, **copy(self._properties)
+        )
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return _tpl._replace_templates(self._properties.get(item))
@@ -105,10 +107,17 @@ class TaskConfig(Section):
     def default_config(cls):
         return TaskConfig(cls._DEFAULT_KEY, None, [], [], False)
 
+    def _clean(self):
+        self.function = None
+        self._inputs = []
+        self._outputs = []
+        self._skippable = False
+        self._properties.clear()
+
     def _to_dict(self):
         return {
-            self._INPUT_KEY: self._inputs,
             self._FUNCTION: self.function,
+            self._INPUT_KEY: self._inputs,
             self._OUTPUT_KEY: self._outputs,
             self._IS_SKIPPABLE_KEY: self._skippable,
             **self._properties,
@@ -129,15 +138,15 @@ class TaskConfig(Section):
         return TaskConfig(id=id, function=funct, inputs=inputs, outputs=outputs, skippable=skippable, **as_dict)
 
     def _update(self, as_dict, default_section=None):
+        function = as_dict.pop(self._FUNCTION, None)
+        if function is not None and type(function) is not str:
+            self.function = function
         self._inputs = as_dict.pop(self._INPUT_KEY, self._inputs)
         if self._inputs is None and default_section:
             self._inputs = default_section._inputs
         self._outputs = as_dict.pop(self._OUTPUT_KEY, self._outputs)
         if self._outputs is None and default_section:
             self._outputs = default_section._outputs
-        function = as_dict.pop(self._FUNCTION, None)
-        if function is not None and type(function) is not str:
-            self.function = function
         self._skippable = as_dict.pop(self._IS_SKIPPABLE_KEY, self._skippable)
         self._properties.update(as_dict)
         if default_section:

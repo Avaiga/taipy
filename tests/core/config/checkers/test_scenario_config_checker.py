@@ -23,7 +23,8 @@ from taipy.config.config import Config
 class TestScenarioConfigChecker:
     def test_check_config_id(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 0
@@ -54,7 +55,8 @@ class TestScenarioConfigChecker:
 
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
 
@@ -80,7 +82,8 @@ class TestScenarioConfigChecker:
 
     def test_check_pipelines(self, caplog):
         Config._collector = IssueCollector()
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 0
@@ -142,7 +145,8 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.infos) == 1
 
     def test_check_frequency(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         config._sections[ScenarioConfig.name]["default"].frequency = "bar"
         Config._collector = IssueCollector()
@@ -184,7 +188,8 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.infos) == 1
 
     def test_check_comparators(self, caplog):
-        config = Config._default_config
+        config = Config._applied_config
+        Config._compile_configs()
 
         Config._collector = IssueCollector()
         Config.check()

@@ -73,6 +73,28 @@ def test_pipeline_config_with_env_variable_value():
         assert Config.pipelines["pipeline_name"]._properties["prop"] == "ENV[FOO]"
 
 
+def test_clean_config():
+    task1_config = Config.configure_task("task1", print, [], [])
+    task2_config = Config.configure_task("task2", print, [], [])
+    pipeline1_config = Config.configure_pipeline("id1", [task1_config, task2_config])
+    pipeline2_config = Config.configure_pipeline("id2", [task2_config, task1_config])
+
+    assert Config.pipelines["id1"] is pipeline1_config
+    assert Config.pipelines["id2"] is pipeline2_config
+
+    pipeline1_config._clean()
+    pipeline2_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.pipelines["id1"] is pipeline1_config
+    assert Config.pipelines["id2"] is pipeline2_config
+
+    assert pipeline1_config.id == "id1"
+    assert pipeline2_config.id == "id2"
+    assert pipeline1_config.tasks == pipeline2_config.tasks == []
+    assert pipeline1_config.properties == pipeline2_config.properties == {}
+
+
 def test_pipeline_config_configure_deprecated():
     with pytest.warns(DeprecationWarning):
         Config.configure_pipeline("pipeline_id", [])
