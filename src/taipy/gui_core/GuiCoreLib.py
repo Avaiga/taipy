@@ -147,9 +147,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def scenario_adapter(data):
         if hasattr(data, "id") and tp.get(data.id) is not None:
             if isinstance(data, Cycle):
-                return (data.id, data.name, tp.get_scenarios(data), 0, False)
+                return (data.id, data.get_simple_label(), tp.get_scenarios(data), 0, False)
             elif isinstance(data, Scenario):
-                return (data.id, data.name, None, 1, data.is_primary)
+                return (data.id, data.get_simple_label(), None, 1, data.is_primary)
         return None
 
     def get_scenarios(self):
