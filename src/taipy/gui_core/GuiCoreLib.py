@@ -22,9 +22,14 @@ from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
+from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
 
 from ..version import _get_version
+
+# prevent gui from trying to push scenario instances to the front-end
+Scenario.__bases__ += (_DoNotUpdate,)
+DataNode.__bases__ += (_DoNotUpdate,)
 
 
 class _GuiCoreScenarioAdapter(_TaipyBase):
@@ -121,6 +126,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.start()
 
     def process_event(self, event: Event):
+        print(f"process_event({event})")
         if event.entity_type == EventEntityType.SCENARIO:
             self.scenarios_base_level = None
             scenario = tp.get(event.entity_id) if event.operation.value != 3 else None
@@ -241,12 +247,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
         entity: t.Union[Scenario, Pipeline] = tp.get(entity_id)
         if entity:
+            if isinstance(entity, Scenario):
+                primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
+                if primary is True:
+                    print(f"edit_entity(): promoting {entity.id} to primary")
+                    tp.set_primary(entity)
             with entity as ent:
                 try:
-                    if isinstance(entity, Scenario):
-                        primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
-                        if primary is True:
-                            tp.set_primary(ent)
+                    if isinstance(ent, Scenario):
                         tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                         if isinstance(tags, (list, tuple)):
                             ent.tags = {t for t in tags}
