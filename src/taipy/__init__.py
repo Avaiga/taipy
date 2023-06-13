@@ -69,9 +69,9 @@ if find_spec("taipy"):
         from taipy.gui import Gui
 
         if find_spec("taipy.gui_core"):
-            from taipy.gui_core.GuiCoreLib import GuiCore
+            from taipy.gui_core.GuiCoreLib import _GuiCore
 
-            Gui.add_library(GuiCore())
+            Gui.add_library(_GuiCore())
 
         if find_spec("taipy.enterprise") and find_spec("taipy.enterprise.gui"):
             from taipy.enterprise.gui import _init_gui_enterprise
