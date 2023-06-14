@@ -1,0 +1,41 @@
+
+[DATA_NODE.initial_dataset]
+storage_type = "csv"
+default_path = "data/data.csv"
+scope = "GLOBAL:SCOPE"
+
+[TASK.clean_data]
+inputs = [ "initial_dataset:SECTION" ]
+outputs = [ "cleaned_dataset:SECTION" ]
+function = ""
+skippable = "False:bool"
+
+[DATA_NODE.cleaned_dataset]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[TASK.predict]
+inputs = [ "cleaned_dataset:SECTION" ]
+outputs = [ "predictions:SECTION" ]
+function = ""
+skippable = "False:bool"
+
+[DATA_NODE.predictions]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[TASK.evaluate]
+inputs = [ "predictions:SECTION" ]
+outputs = [ "evaluation:SECTION" ]
+function = ""
+skippable = "False:bool"
+
+[DATA_NODE.evaluation]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[PIPELINE.pipeline]
+tasks = [ "clean_data:SECTION", "predict:SECTION", "evaluate:SECTION" ]
+
+[SCENARIO.scenario]
+pipelines = [ "pipeline:SECTION" ]
