@@ -111,7 +111,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
 
     return render ? (
         <Box sx={sizeSx} id={props.id} className={className}>
-            {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
+            {showToolbar && scenarioId ? <DagTitle zoomToFit={zoomToFit} /> : null}
             <Box sx={boxSx}>
                 <CanvasWidget engine={engine} />
             </Box>

@@ -12,10 +12,12 @@
 import typing as t
 from datetime import datetime
 from threading import Lock
+from enum import Enum
 
 from dateutil import parser
 
 import taipy as tp
+from taipy.config import Config
 from taipy.core import Cycle, DataNode, Pipeline, Scenario
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
@@ -36,6 +38,14 @@ class DoNotUpdate(_DoNotUpdate):
 
 Scenario.__bases__ += (DoNotUpdate,)
 DataNode.__bases__ += (DoNotUpdate,)
+
+Config.configure_global_app(read_entity_retry=3)
+
+class EntityType(Enum):
+    CYCLE = 0
+    SCENARIO = 1
+    PIPELINE = 2
+    DATANODE = 3
 
 
 class _GuiCoreScenarioAdapter(_TaipyBase):
@@ -152,9 +162,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def scenario_adapter(data):
         if hasattr(data, "id") and tp.get(data.id) is not None:
             if isinstance(data, Cycle):
-                return (data.id, data.get_simple_label(), tp.get_scenarios(data), 0, False)
+                return (data.id, data.get_simple_label(), tp.get_scenarios(data), EntityType.CYCLE.value, False)
             elif isinstance(data, Scenario):
-                return (data.id, data.get_simple_label(), None, 1, data.is_primary)
+                return (data.id, data.get_simple_label(), None, EntityType.SCENARIO.value, data.is_primary)
         return None
 
     def get_scenarios(self):
@@ -323,7 +333,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     data.id,
                     data.get_simple_label(),
                     _GuiCoreContext.__get_data_nodes(data.id) + tp.get_scenarios(data),
-                    0,
+                    EntityType.CYCLE.value,
                     False,
                 )
             elif isinstance(data, Scenario):
@@ -331,18 +341,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     data.id,
                     data.get_simple_label(),
                     _GuiCoreContext.__get_data_nodes(data.id) + [tp.get(p) for p in data._pipelines],
-                    1,
+                    EntityType.SCENARIO.value,
                     data.is_primary,
                 )
             elif isinstance(data, Pipeline):
                 if dn := _GuiCoreContext.__get_data_nodes(data.id):
-                    return (data.id, data.get_simple_label(), dn, 2, False)
+                    return (data.id, data.get_simple_label(), dn, EntityType.PIPELINE.value, False)
             elif isinstance(data, DataNode):
-                return (data.id, data.get_simple_label(), None, 3, False)
+                return (data.id, data.get_simple_label(), None, EntityType.DATANODE.value, False)
         return None
 
-    def broadcast_core_changed(self):
-        self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, "")
 
 
 class _GuiCore(ElementLibrary):
