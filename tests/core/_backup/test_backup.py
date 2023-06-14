@@ -64,6 +64,8 @@ def test_no_new_entry_when_file_is_in_storage_folder():
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == [f"{dn_1.path}\n"]
 
+    os.remove("dn_1.pickle")
+
 
 def test_backup_csv_files():
     dn_cfg_1 = Config.configure_data_node("dn_cfg_1", "csv", path="example_1.csv")
