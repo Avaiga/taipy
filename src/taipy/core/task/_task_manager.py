@@ -18,6 +18,7 @@ from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._orchestrator._abstract_orchestrator import _AbstractOrchestrator
 from .._repository._v2._abstract_repository import _AbstractRepository
+from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.task_config import TaskConfig
@@ -61,7 +62,8 @@ class _TaskManager(_Manager[Task], _VersionMixin):
             data_node_configs.update([Config.data_nodes[dnc.id] for dnc in task_config.input_configs])
             data_node_configs.update([Config.data_nodes[dnc.id] for dnc in task_config.output_configs])
 
-        data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(list(data_node_configs), cycle_id, scenario_id
+        data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(
+            list(data_node_configs), cycle_id, scenario_id
         )
         tasks_configs_and_owner_id = []
         for task_config in task_configs:
