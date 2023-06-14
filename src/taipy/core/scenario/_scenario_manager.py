@@ -207,7 +207,8 @@ class _ScenarioManager(_Manager[Scenario]):
     def _set_primary(cls, scenario: Scenario):
         if scenario.cycle:
             primary_scenario = cls._get_primary(scenario.cycle)
-            if primary_scenario:
+            # To prevent SAME scenario updating out of Context Manager
+            if primary_scenario and primary_scenario != scenario:
                 primary_scenario.is_primary = False  # type: ignore
             scenario.is_primary = True  # type: ignore
         else:
