@@ -11,8 +11,8 @@
 
 import typing as t
 from datetime import datetime
-from threading import Lock
 from enum import Enum
+from threading import Lock
 
 from dateutil import parser
 
@@ -40,6 +40,7 @@ Scenario.__bases__ += (DoNotUpdate,)
 DataNode.__bases__ += (DoNotUpdate,)
 
 Config.configure_global_app(read_entity_retry=3)
+
 
 class EntityType(Enum):
     CYCLE = 0
@@ -350,7 +351,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             elif isinstance(data, DataNode):
                 return (data.id, data.get_simple_label(), None, EntityType.DATANODE.value, False)
         return None
-
 
 
 class _GuiCore(ElementLibrary):
