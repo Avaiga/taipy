@@ -31,6 +31,7 @@ requirements = [
     "cookiecutter>=2.1.1,<2.2",
     "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
+    "taipy-templates@git+https://git@github.com/Avaiga/taipy-templates.git@develop",
 ]
 
 test_requirements = ["pytest>=3.8"]
