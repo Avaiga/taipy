@@ -202,6 +202,7 @@ def test_migrate_compatible_version():
         assert len(_DataManager._get_all(version_number="all")) == 2
 
     init_config()
+    scenario_cfg = config_scenario_v1()
 
     # Production 2.0 is a compatible version
     with patch("sys.argv", ["prog", "--production", "2.0"]):

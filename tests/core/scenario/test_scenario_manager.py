@@ -10,10 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from typing import Callable, Iterable, Optional
 from unittest.mock import ANY, patch
 
 import pytest
 
+from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common import _utils
@@ -397,7 +399,7 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario_1.by_4._get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
-    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._create(scenario_config)
 
     assert len(_DataManager._get_all()) == 5
     assert len(_TaskManager._get_all()) == 4
@@ -621,7 +623,7 @@ def test_scenario_notification_subscribe_all():
                     Config.configure_task(
                         "other_mult_by_2_2",
                         mult_by_2,
-                        [Config.configure_data_node("other_foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.configure_data_node("other_foo", "in_memory", Scope.SCENARIO, default_data=1)],
                         Config.configure_data_node("other_bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
@@ -841,7 +843,13 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def _submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False, wait=False, timeout=None):
+        def _submit_task(
+            cls,
+            task: Task,
+            submit_id: Optional[str] = None,
+            callbacks: Optional[Iterable[Callable]] = None,
+            force: bool = False,
+        ) -> Job:
             cls.submit_calls.append(task.id)
             return super()._submit_task(task, submit_id, callbacks, force)
 

@@ -8,12 +8,13 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+from typing import Callable, Iterable, Optional
 from unittest import mock
 from unittest.mock import ANY
 
 import pytest
 
+from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common import _utils
@@ -147,12 +148,17 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def _submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False, wait=False, timeout=None):
+        def _submit_task(
+            cls,
+            task: Task,
+            submit_id: Optional[str] = None,
+            callbacks: Optional[Iterable[Callable]] = None,
+            force: bool = False,
+        ) -> Job:
             cls.submit_calls.append(task)
             return None
 
     with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
-
         # pipeline does not exists. We expect an exception to be raised
         with pytest.raises(NonExistingPipeline):
             _PipelineManager._submit(pipeline.id)
