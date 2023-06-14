@@ -13,12 +13,8 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
-<<<<<<< HEAD
 import { DeleteOutline, StopCircleOutlined, Add } from "@mui/icons-material";
-=======
-import { useDispatch, useModule } from "taipy-gui";
 import { DeleteOutline, StopCircleOutlined } from "@mui/icons-material";
->>>>>>> 0d49a5f (feat: Job selector update, fix sorting, code cleanup.)
 import {
     Button,
     Checkbox,
@@ -652,14 +648,17 @@ const JobSelector = (props: JobSelectorProps) => {
         setSelected(newSelected);
     };
 
-    const handleSelectAllClick = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            const newSelected = jobs.map((n) => n[0]);
-            setSelected(newSelected);
-            return;
-        }
-        setSelected([]);
-    }, []);
+    const handleSelectAllClick = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            if (event.target.checked) {
+                const newSelected = jobs.map((n) => n[0]);
+                setSelected(newSelected);
+                return;
+            }
+            setSelected([]);
+        },
+        [jobs]
+    );
 
     const handleRequestSort = (property: string, columnIndex: number) => {
         const isAsc = orderBy === property && order === "asc";
@@ -677,10 +676,6 @@ const JobSelector = (props: JobSelectorProps) => {
     }, []);
     const handleStopJob = useCallback((id: string[]) => {
         //TODO: stop job
-    }, []);
-
-    useEffect(() => {
-        setJobRows(jobs);
     }, []);
 
     return (
