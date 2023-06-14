@@ -464,10 +464,10 @@ class _GuiCore(ElementLibrary):
         "job_selector": Element(
             "val",
             {
-                "val": ElementProperty(GuiCoreScenarioDagAdapter),
+                "onSelect": ElementProperty(PropertyType.function),
             },
             inner_properties={
-                "core_changed": ElementProperty(PropertyType.broadcast, GuiCoreContext._CORE_CHANGED_NAME),
+                "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
             },
         ),
     }

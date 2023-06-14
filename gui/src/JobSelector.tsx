@@ -13,7 +13,6 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import Box from "@mui/material/Box";
-import { useDispatch, useModule } from "taipy-gui";
 import { DeleteOutline, StopCircleOutlined } from "@mui/icons-material";
 import {
     Checkbox,
@@ -41,6 +40,7 @@ interface JobSelectorProps {
     updateVars?: string;
     error?: string;
     jobs?: any[];
+    onSelect?: string;
 }
 
 export enum JobStatus {
@@ -191,10 +191,7 @@ function JobSelectedTableRow({
 }
 
 const JobSelector = (props: JobSelectorProps) => {
-    const { jobs = [] } = props;
-
-    const dispatch = useDispatch();
-    const module = useModule();
+    const { jobs } = props;
 
     const [order, setOrder] = React.useState<"asc" | "desc">("asc");
     const [orderBy, setOrderBy] = useState<string>("");
@@ -229,14 +226,17 @@ const JobSelector = (props: JobSelectorProps) => {
         setSelected(newSelected);
     };
 
-    const handleSelectAllClick = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            const newSelected = jobs.map((n) => n[0]);
-            setSelected(newSelected);
-            return;
-        }
-        setSelected([]);
-    }, []);
+    const handleSelectAllClick = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            if (event.target.checked) {
+                const newSelected = jobs.map((n) => n[0]);
+                setSelected(newSelected);
+                return;
+            }
+            setSelected([]);
+        },
+        [jobs]
+    );
 
     const handleRequestSort = (property: string, columnIndex: number) => {
         const isAsc = orderBy === property && order === "asc";
@@ -254,10 +254,6 @@ const JobSelector = (props: JobSelectorProps) => {
     }, []);
     const handleStopJob = useCallback((id: string[]) => {
         //TODO: stop job
-    }, []);
-
-    useEffect(() => {
-        setJobRows(jobs);
     }, []);
 
     return (
@@ -296,8 +292,7 @@ const JobSelector = (props: JobSelectorProps) => {
                         <TableBody>
                             {jobRows
                                 ? jobRows.map((row, index) => {
-                                      const [id, submitID, entity, createdDt, status] = row;
-                                      const isItemSelected = isSelected(id);
+                                      const isItemSelected = isSelected(row[0]);
 
                                       return (
                                           <JobSelectedTableRow
