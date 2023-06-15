@@ -1,33 +1,65 @@
-# Copyright 2023 Avaiga Private Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
-# the License. You may obtain a copy of the License at
-#
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations under the License.
-
+from taipy import Core
 from taipy.gui import Gui
-from taipy.config import Config
 
 from pages.root.root import *
-from pages.page_1.page_1 import page_1_md
-from pages.page_2.page_2 import page_2_md
+from pages.scenario_page.scenario_page import scenario_page_md
+from pages.data_page.data_page import data_page_md
 
-Config.load("config/config.toml")
+from config.config import configure
 
-def on_change(state, var_name:str, var_value):
-    ...
 
-pages = {"/":root_md,
-         "page_1":page_1_md,
-         "page_2":page_2_md}
+def on_init(state):
+    state.scenario = None
+    state.is_scenario_selected = False
+    state.is_scenario_computed = False
+    state.input_csv_file = None
+    state.replacement_type = "NO VALUE"
+    state.results = None
 
+
+def on_change(state, var: str, val):
+    if var == "scenario":
+        if val is not None:
+            state.is_scenario_selected = True
+        else:
+            state.is_scenario_selected = False
+    if var == "replacement_type":
+        state.scenario.replacement_type.write(val)
+    if var == "is_scenario_selected":
+        if val:
+            state.is_scenario_computed = state.scenario.cleaned_dataset.is_ready_for_reading
+            state.input_csv_file = state.scenario.initial_dataset.path
+            state.inputs = state.scenario.initial_dataset.read()
+            if state.scenario.replacement_type.is_ready_for_reading:
+                state.replacement_type = state.scenario.replacement_type.read()
+            else:
+                state.replacement_type = "NO VALUE"
+                state.scenario.replacement_type.write(state.replacement_type)
+        else:
+            state.is_scenario_computed = False
+            state.input_csv_file = None
+            state.replacement_type = "NO VALUE"
+    if var == "is_scenario_computed":
+        if val:
+            state.results = state.scenario.cleaned_dataset.read()
+        else:
+            state.results = None
+
+
+scenario = None
+is_scenario_selected = False
+is_scenario_computed = False
+
+pages = {"/": root_md,
+         "scenario": scenario_page_md,
+         "data": data_page_md,
+         }
 
 if __name__ == "__main__":
+    configure()
     gui = Gui(pages=pages)
+    core = Core()
+    core.run()
     gui.run(
         title="{{cookiecutter.application_title}}",
         dark_mode=False,
