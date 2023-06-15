@@ -209,7 +209,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else:
                         self.scenarios_base_level.append(cycle)
             return self.scenarios_base_level
-
+    
     def select_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) == 0:
@@ -351,6 +351,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else:
                         self.data_nodes_base_level.append(cycle)
             return self.data_nodes_base_level
+
+    def get_jobs(self):
+        with self.lock:
+            if self.jobs is None:
+                self.jobs = []
+            return self.jobs
 
     @staticmethod
     def __get_data_nodes(id: t.Optional[str] = None):

@@ -14,7 +14,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
 import { DeleteOutline, StopCircleOutlined, Add } from "@mui/icons-material";
-import { DeleteOutline, StopCircleOutlined } from "@mui/icons-material";
 import {
     Button,
     Checkbox,
@@ -622,19 +621,25 @@ const JobSelector = (props: JobSelectorProps) => {
 
     const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
-    const headerToolbarSx = {
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(selected.length > 0 && {
-            bgcolor: "rgba(0, 0, 0, 0.05)",
+    const dispatch = useDispatch();
+    const module = useModule();
+
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
+
+    const headerToolbarSx = useMemo(
+        () => ({
+            pl: { sm: 2 },
+            pr: { xs: 1, sm: 1 },
+            ...(selected.length > 0 && {
+                bgcolor: "rgba(0, 0, 0, 0.05)",
+            }),
         }),
-    };
-    const selectedSx = { flex: "1 1 100%" };
-    const containerSx = { width: "100%", mb: 2 };
+        [selected]
+    );
 
     const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
         const selectedIndex = selected.indexOf(name);
-        let newSelected: readonly string[] = [];
+        let newSelected: string[] = [];
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, name);
@@ -651,13 +656,13 @@ const JobSelector = (props: JobSelectorProps) => {
     const handleSelectAllClick = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
             if (event.target.checked) {
-                const newSelected = jobs.map((n) => n[0]);
-                setSelected(newSelected);
+                const newSelected = jobRows?.map((n) => n[0]);
+                setSelected(newSelected || []);
                 return;
             }
             setSelected([]);
         },
-        [jobs]
+        [jobRows]
     );
 
     const handleRequestSort = (property: string, columnIndex: number) => {
@@ -665,8 +670,10 @@ const JobSelector = (props: JobSelectorProps) => {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
 
-        const sortedJobs = jobs.sort((a, b) => {
-            return isAsc ? a[columnIndex].localeCompare(b[columnIndex]) : b[columnIndex].localeCompare(a[columnIndex]);
+        const sortedJobs = jobRows?.sort((a, b) => {
+            return isAsc
+                ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
+                : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString());
         });
         setJobRows(sortedJobs);
     };
@@ -677,6 +684,10 @@ const JobSelector = (props: JobSelectorProps) => {
     const handleStopJob = useCallback((id: string[]) => {
         //TODO: stop job
     }, []);
+
+    useEffect(() => {
+        setJobRows(jobs);
+    }, [jobs]);
 
     return (
         <Box className={className}>
