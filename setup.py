@@ -13,8 +13,8 @@
 
 import json
 import os
-from setuptools import find_namespace_packages, find_packages, setup
 
+from setuptools import find_namespace_packages, find_packages, setup
 
 with open("README.md", "rb") as readme_file:
     readme = readme_file.read().decode("UTF-8")
