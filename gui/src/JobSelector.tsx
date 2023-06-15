@@ -637,21 +637,24 @@ const JobSelector = (props: JobSelectorProps) => {
         [selected]
     );
 
-    const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-        const selectedIndex = selected.indexOf(name);
-        let newSelected: string[] = [];
+    const handleClick = useCallback(
+        (event: React.MouseEvent<HTMLElement>, name: string) => {
+            const selectedIndex = selected.indexOf(name);
+            let newSelected: string[] = [];
 
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-        }
-        setSelected(newSelected);
-    };
+            if (selectedIndex === -1) {
+                newSelected = newSelected.concat(selected, name);
+            } else if (selectedIndex === 0) {
+                newSelected = newSelected.concat(selected.slice(1));
+            } else if (selectedIndex === selected.length - 1) {
+                newSelected = newSelected.concat(selected.slice(0, -1));
+            } else if (selectedIndex > 0) {
+                newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+            }
+            setSelected([...newSelected]);
+        },
+        [selected]
+    );
 
     const handleSelectAllClick = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -665,25 +668,51 @@ const JobSelector = (props: JobSelectorProps) => {
         [jobRows]
     );
 
-    const handleRequestSort = (property: string, columnIndex: number) => {
-        const isAsc = orderBy === property && order === "asc";
-        setOrder(isAsc ? "desc" : "asc");
-        setOrderBy(property);
+    const handleRequestSort = useCallback(
+        (property: string, columnIndex: number) => {
+            const isAsc = orderBy === property && order === "asc";
+            setOrder(isAsc ? "desc" : "asc");
+            setOrderBy(property);
 
-        const sortedJobs = jobRows?.sort((a, b) => {
-            return isAsc
-                ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
-                : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString());
-        });
-        setJobRows(sortedJobs);
-    };
+            const sortedJobs = jobRows?.sort((a, b) => {
+                return isAsc
+                    ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
+                    : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString());
+            });
+            setJobRows(sortedJobs);
+        },
+        [jobRows, order, orderBy]
+    );
 
-    const handleDeleteJob = useCallback((id: string[]) => {
+    const handleCancelJobs = useCallback((id: string[]) => {
+        //TODO: cancel job
+    }, []);
+    const handleDeleteJobs = useCallback((id: string[]) => {
         //TODO: delete job
     }, []);
-    const handleStopJob = useCallback((id: string[]) => {
-        //TODO: stop job
-    }, []);
+
+    const selectedAllowedCancelJobs = useMemo(
+        () =>
+            jobRows?.filter(
+                (job) =>
+                    selected.includes(job[0]) &&
+                    (job[6] === JobStatus.SUBMITTED || job[6] === JobStatus.BLOCKED || job[6] === JobStatus.PENDING)
+            ),
+        [jobRows, selected]
+    );
+
+    const selectedAllowedDeleteJobs = useMemo(
+        () =>
+            jobRows?.filter(
+                (job) =>
+                    selected.includes(job[0]) &&
+                    (job[6] === JobStatus.CANCELED ||
+                        job[6] === JobStatus.FAILED ||
+                        job[6] === JobStatus.SKIPPED ||
+                        job[6] === JobStatus.ABANDONED)
+            ),
+        [jobRows, selected]
+    );
 
     useEffect(() => {
         setJobRows(jobs);
