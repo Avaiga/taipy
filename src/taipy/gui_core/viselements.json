@@ -10,24 +10,24 @@
                     {
                         "name": "value",
                         "default_property": true,
-                        "type": "dynamic(Scenario)",
-                        "doc": "Bound to the selected scenario."
+                        "type": "dynamic(Scenario|list[Scenario])",
+                        "doc": "Bound to the selected scenario(s)."
                     },
                     {
                         "name": "show_add_button",
-                        "type": "dynamic(bool)",
+                        "type": "bool",
                         "default_value": "True",
                         "doc": "If True, the button to create a new scenario is visible.<br/>If False, the button is not displayed."
                     },
                     {
                         "name": "display_cycles",
-                        "type": "dynamic(bool)",
+                        "type": "bool",
                         "default_value": "True",
                         "doc": "If True, the cycles are show in the tree view.<br/>If False, the cycles are not shown."
                     },
                     {
                         "name": "show_primary_flag",
-                        "type": "dynamic(bool)",
+                        "type": "bool",
                         "default_value": "True",
                         "doc": "If True, the primary scenarios are identified by a specific visual identifier in the tree view.<br/>If False, all the scenarios are shown identically."
                     },
@@ -69,7 +69,7 @@
                     {
                         "name": "scenario",
                         "default_property": true,
-                        "type": "dynamic(Scenario)",
+                        "type": "dynamic(Scenario|list[Scenario])",
                         "doc": "The scenario to display/edit."
                     },
                     {
@@ -150,7 +150,7 @@
                 "properties": [
                     {
                         "name": "scenario",
-                        "type": "dynamic(Scenario)",
+                        "type": "dynamic(Scenario|list[Scenario])",
                         "doc": "The scenario to display."
                     },
                     {
@@ -190,18 +190,18 @@
                     {
                         "name": "value",
                         "default_property": true,
-                        "type": "dynamic(DataNode)",
-                        "doc": "Bound to the selected datanode."
+                        "type": "dynamic(DataNode|list[DataNode])",
+                        "doc": "Bound to the selected datanode(s)."
                     },
                     {
                         "name": "display_cycles",
-                        "type": "dynamic(bool)",
+                        "type": "bool",
                         "default_value": "True",
                         "doc": "If True, the cycles are show in the tree view.<br/>If False, the cycles are not shown."
                     },
                     {
                         "name": "show_primary_flag",
-                        "type": "dynamic(bool)",
+                        "type": "bool",
                         "default_value": "True",
                         "doc": "If True, the primary scenarios are identified by a specific visual identifier in the tree view.<br/>If False, all the scenarios are shown identically."
                     },
