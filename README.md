@@ -49,9 +49,12 @@ Want to be part of the _Taipy_ community? Check out our [`CODE_OF_CONDUCT.md`](C
 
 ## Directory Structure
 
-- `{{cookiecutter.app_name}}`:
-    - `{{cookiecutter.application_main_file}}`: The main python module of a Taipy application.
-    - `requirements.txt`: Contains required packages for the template.
+- `src/taipy/templates/`: Contains each template in a dedicated sub-folder with the following structure:
+  - `<template-name>/`: The main folder of the template named <template-name>.
+    - `{{cookiecutter.app_name}}`:
+        - `images/`: Folder containing the images of the template.
+        - `{{cookiecutter.application_main_file}}`: The main python module of a Taipy application.
+        - `requirements.txt`: Contains required packages for the template.
 - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy_.
 - `CONTRIBUTING.md`: Instructions to contribute to _taipy_.
 - `LICENSE`: The Apache 2.0 License.

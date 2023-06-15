@@ -41,7 +41,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    description="An open-source repository contains Taipy templates and scaffoldings.",
+    description="An open-source package holding Taipy application templates.",
     license="Apache License 2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
