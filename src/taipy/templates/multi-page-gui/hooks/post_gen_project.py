@@ -14,4 +14,4 @@ import os
 import taipy
 
 with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_file:
-    requirement_file.write(f"taipy == {taipy.version._get_version()}\n")
+    requirement_file.write(f"taipy=={taipy.version._get_version()}\n")
