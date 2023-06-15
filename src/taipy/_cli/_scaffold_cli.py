@@ -22,6 +22,7 @@ class _ScaffoldCLI:
 
     _TEMPLATE_MAP = {
         "default": str(__TAIPY_PATH / "taipy-default-template"),
+        "multi-page-gui": str(__TAIPY_PATH / "multi-page-gui"),
     }
 
     @classmethod
@@ -29,7 +30,7 @@ class _ScaffoldCLI:
         create_parser = _CLI._add_subparser("create", help="Create a new Taipy application.")
         create_parser.add_argument(
             "--template",
-            choices=["default"],
+            choices=["default", "multi-page-gui"],
             default="default",
             help="The Taipy template to create new application.",
         )
