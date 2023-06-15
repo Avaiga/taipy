@@ -20,11 +20,6 @@ repos:
     -   id: remove-crlf
     -   id: forbid-tabs
     -   id: remove-tabs
-    -   id: insert-license
-        files: \.py$
-        args:
-        - --license-filepath
-        - .license-header
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:

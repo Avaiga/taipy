@@ -1,0 +1,27 @@
+"""
+A multi-page Taipy application, which includes 3 pages:
+- A homepage.
+- Two pages named page_1 and page_2.
+
+Please refer to https://docs.taipy.io/en/latest/manuals/gui/pages for more details.
+"""
+
+from pages import page_1_md, page_2_md, root_md
+
+from taipy.gui import Gui
+
+
+def on_change(state, var_name: str, var_value):
+    ...
+
+
+pages = {
+    "/": root_md,
+    "page_1": page_1_md,
+    "page_2": page_2_md,
+}
+
+
+if __name__ == "__main__":
+    gui = Gui(pages=pages)
+    gui.run(title="{{cookiecutter.application_title}}")
