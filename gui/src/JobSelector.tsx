@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
 import { DeleteOutline, StopCircleOutlined } from "@mui/icons-material";
 import {
@@ -33,30 +33,26 @@ import {
 } from "@mui/material";
 
 import { FilterList } from "@mui/icons-material";
+import { Job, JobStatus, Jobs } from "./utils/types";
+import { useDispatch, useDispatchRequestUpdateOnFirstRender, useModule } from "taipy-gui";
 
 interface JobSelectorProps {
     updateVarName?: string;
     coreChanged?: Record<string, unknown>;
-    updateVars?: string;
     error?: string;
-    jobs?: any[];
+    jobs: Jobs;
     onSelect?: string;
+    updateVars: string;
+    id?: string;
 }
 
-export enum JobStatus {
-    COMPLETED = "Completed",
-    SUBMITTED = "Submitted",
-    BLOCKED = "Blocked",
-    PENDING = "Pending",
-    RUNNING = "Running",
-    CANCELED = "Canceled",
-    FAILED = "Failed",
-    SKIPPED = "Skipped",
-    ABANDONED = "Abandoned",
-}
+const selectedSx = { flex: "1 1 100%" };
+const containerSx = { width: "100%", mb: 2 };
 
-const ChipStatus = ({ status, label }: { status: JobStatus; label: string }) => {
+const ChipStatus = ({ status }: { status: number }) => {
+    const statusText = Object.keys(JobStatus)[Object.values(JobStatus).indexOf(status)];
     let colorFill: "warning" | "default" | "success" | "error" = "warning";
+
     if (status === JobStatus.COMPLETED || status === JobStatus.SKIPPED) {
         colorFill = "success";
     } else if (status === JobStatus.FAILED) {
@@ -67,7 +63,7 @@ const ChipStatus = ({ status, label }: { status: JobStatus; label: string }) => 
 
     const variant = status === JobStatus.FAILED || status === JobStatus.RUNNING ? "filled" : "outlined";
 
-    return <Chip label={label} variant={variant} color={colorFill} />;
+    return <Chip label={statusText} variant={variant} color={colorFill} />;
 };
 
 const JobSelectorColumns = [
@@ -75,23 +71,28 @@ const JobSelectorColumns = [
         id: "jobId",
         primaryLabel: "Job",
         secondaryLabel: "ID",
+        columnIndex: 1,
     },
     {
         id: "submitID",
         primaryLabel: "Submit ID",
+        columnIndex: 1,
     },
     {
         id: "submitEntity",
         primaryLabel: "Submitted entity",
         secondaryLabel: "ID",
+        columnIndex: 3,
     },
     {
         id: "createdDt",
         primaryLabel: "Creation date",
+        columnIndex: 5,
     },
     {
         id: "status",
         primaryLabel: "Status",
+        columnIndex: 6,
     },
 ];
 
@@ -121,7 +122,7 @@ function JobSelectedTableHead({
                             <TableSortLabel
                                 direction={orderBy === item.id ? order : "desc"}
                                 IconComponent={FilterList}
-                                onClick={() => handleRequestSort(item.id, index)}
+                                onClick={() => handleRequestSort(item.id, item.columnIndex)}
                             >
                                 {item.secondaryLabel ? (
                                     <ListItemText primary={item.primaryLabel} secondary={item.secondaryLabel} />
@@ -139,7 +140,7 @@ function JobSelectedTableHead({
 }
 
 interface JobSelectedTableRowProps {
-    row: any[];
+    row: Job;
     isItemSelected: boolean;
     handleCheckboxClick: (event: React.MouseEvent<unknown>, name: string) => void;
     handleStopJob: (id: string[]) => void;
@@ -152,7 +153,21 @@ function JobSelectedTableRow({
     handleStopJob,
     handleDeleteJob,
 }: JobSelectedTableRowProps) {
-    const [id, submitID, entity, createdDt, status] = row;
+    const [id, jobName, entityId, entityName, submitId, creationDate, status] = row;
+
+    const doDeleteJob = useCallback(
+        (id: string[]) => {
+            handleDeleteJob && handleDeleteJob(id);
+        },
+        [handleDeleteJob]
+    );
+    const doStopJob = useCallback(
+        (id: string[]) => {
+            handleStopJob && handleStopJob(id);
+        },
+        [handleStopJob]
+    );
+
     return (
         <TableRow hover role="checkbox" tabIndex={-1} key={id}>
             <TableCell padding="checkbox">
@@ -163,25 +178,25 @@ function JobSelectedTableRow({
                 />
             </TableCell>
             <TableCell component="th" id={id} scope="row" padding="none">
-                <ListItemText primary="Preprocess" secondary={id} />
+                <ListItemText primary={jobName} secondary={id} />
             </TableCell>
-            <TableCell>{submitID}</TableCell>
+            <TableCell>{submitId}</TableCell>
             <TableCell>
-                <ListItemText primary="Pipeline alpha" secondary={entity} />
+                <ListItemText primary={entityName} secondary={entityId} />
             </TableCell>
-            <TableCell>{createdDt}</TableCell>
+            <TableCell>{creationDate}</TableCell>
             <TableCell>
-                <ChipStatus label={status} status={status} />
+                <ChipStatus status={status} />
             </TableCell>
             <TableCell>
                 {status === JobStatus.RUNNING ? null : status === JobStatus.BLOCKED ||
                   status === JobStatus.PENDING ||
                   status === JobStatus.SUBMITTED ? (
-                    <IconButton onClick={() => handleStopJob([id])}>
+                    <IconButton onClick={() => doStopJob([id])}>
                         <StopCircleOutlined />
                     </IconButton>
                 ) : (
-                    <IconButton onClick={() => handleDeleteJob([id])}>
+                    <IconButton onClick={() => doDeleteJob([id])}>
                         <DeleteOutline color="primary" />
                     </IconButton>
                 )}
@@ -191,28 +206,33 @@ function JobSelectedTableRow({
 }
 
 const JobSelector = (props: JobSelectorProps) => {
-    const { jobs } = props;
-
+    const { id = "", jobs = [] } = props;
     const [order, setOrder] = React.useState<"asc" | "desc">("asc");
     const [orderBy, setOrderBy] = useState<string>("");
-    const [selected, setSelected] = useState<readonly string[]>([]);
-    const [jobRows, setJobRows] = useState<any[]>(jobs);
+    const [selected, setSelected] = useState<string[]>([]);
+    const [jobRows, setJobRows] = useState<Jobs>();
 
     const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
-    const headerToolbarSx = {
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(selected.length > 0 && {
-            bgcolor: "rgba(0, 0, 0, 0.05)",
+    const dispatch = useDispatch();
+    const module = useModule();
+
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
+
+    const headerToolbarSx = useMemo(
+        () => ({
+            pl: { sm: 2 },
+            pr: { xs: 1, sm: 1 },
+            ...(selected.length > 0 && {
+                bgcolor: "rgba(0, 0, 0, 0.05)",
+            }),
         }),
-    };
-    const selectedSx = { flex: "1 1 100%" };
-    const containerSx = { width: "100%", mb: 2 };
+        [selected]
+    );
 
     const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
         const selectedIndex = selected.indexOf(name);
-        let newSelected: readonly string[] = [];
+        let newSelected: string[] = [];
 
         if (selectedIndex === -1) {
             newSelected = newSelected.concat(selected, name);
@@ -229,13 +249,13 @@ const JobSelector = (props: JobSelectorProps) => {
     const handleSelectAllClick = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
             if (event.target.checked) {
-                const newSelected = jobs.map((n) => n[0]);
-                setSelected(newSelected);
+                const newSelected = jobRows?.map((n) => n[0]);
+                setSelected(newSelected || []);
                 return;
             }
             setSelected([]);
         },
-        [jobs]
+        [jobRows]
     );
 
     const handleRequestSort = (property: string, columnIndex: number) => {
@@ -243,8 +263,10 @@ const JobSelector = (props: JobSelectorProps) => {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
 
-        const sortedJobs = jobs.sort((a, b) => {
-            return isAsc ? a[columnIndex].localeCompare(b[columnIndex]) : b[columnIndex].localeCompare(a[columnIndex]);
+        const sortedJobs = jobRows?.sort((a, b) => {
+            return isAsc
+                ? a[columnIndex]?.toString().localeCompare(b[columnIndex]?.toString())
+                : b[columnIndex]?.toString().localeCompare(a[columnIndex]?.toString());
         });
         setJobRows(sortedJobs);
     };
@@ -255,6 +277,10 @@ const JobSelector = (props: JobSelectorProps) => {
     const handleStopJob = useCallback((id: string[]) => {
         //TODO: stop job
     }, []);
+
+    useEffect(() => {
+        setJobRows(jobs);
+    }, [jobs]);
 
     return (
         <Box>
@@ -283,7 +309,7 @@ const JobSelector = (props: JobSelectorProps) => {
                 <TableContainer>
                     <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium">
                         <JobSelectedTableHead
-                            selectAllTrue={jobs?.length === selected?.length}
+                            selectAllTrue={jobRows?.length === selected?.length}
                             order={order}
                             orderBy={orderBy}
                             handleSelectAllClick={handleSelectAllClick}
