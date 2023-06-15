@@ -112,7 +112,7 @@ jobs:
       - name: Create/update release and tag
         run: |
             echo "Creating release ${{ steps.current-version.outputs.VERSION }}"
-            gh release create ${{ steps.current-version.outputs.VERSION }} ./dist/taipy-rest-${{ steps.current-version.outputs.VERSION }}.tar.gz --prerelease --notes "Dev Release ${{ steps.current-version.outputs.VERSION }}"
+            gh release create ${{ steps.current-version.outputs.VERSION }} ./dist/taipy-rest-${{ steps.current-version.outputs.VERSION }}.tar.gz --prerelease --title ${{ steps.current-version.outputs.VERSION }} --notes "Dev Release ${{ steps.current-version.outputs.VERSION }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
