@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  release:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
