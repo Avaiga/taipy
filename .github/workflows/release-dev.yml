@@ -9,6 +9,9 @@ on:
       taipy-rest-version:
         description: "The taipy-rest version to use (ex: 2.3.0.dev0)"
         required: true
+      taipy-templates-version:
+        description: "The taipy-templates version to use (ex: 2.3.0.dev0)"
+        required: true
 
 jobs:
   publish:
@@ -59,6 +62,7 @@ jobs:
         run: |
           curl https://pypi.org/simple/taipy-gui/ | grep -o ">taipy-gui-${{ github.event.inputs.taipy-gui-version }}\.tar\.gz<"
           curl https://pypi.org/simple/taipy-rest/ | grep -o ">taipy-rest-${{ github.event.inputs.taipy-rest-version }}\.tar\.gz<"
+          curl https://pypi.org/simple/taipy-templates/ | grep -o ">taipy-templates-${{ github.event.inputs.taipy-templates-version }}\.tar\.gz<"
 
       - name: Grab the version of the package
         id: current-version
@@ -104,9 +108,13 @@ jobs:
                                       start = line.find('\"taipy-rest')
                                       end = line.rstrip().find(',')
                                       line = f'{line[:start]}\"taipy-rest=={sys.argv[2]}\"{line[end:]}'
+                                  elif line.lstrip().startswith('\"taipy-templates@git+https'):
+                                      start = line.find('\"taipy-templates')
+                                      end = line.rstrip().find(',')
+                                      line = f'{line[:start]}\"taipy-templates=={sys.argv[3]}\"{line[end:]}'
                       setup_w.write(line)
               """ > /tmp/write_setup_taipy.py
-              python /tmp/write_setup_taipy.py "${{ github.event.inputs.taipy-gui-version }}" "${{ github.event.inputs.taipy-rest-version }}"
+              python /tmp/write_setup_taipy.py "${{ github.event.inputs.taipy-gui-version }}" "${{ github.event.inputs.taipy-rest-version }}" "${{ github.event.inputs.taipy-templates-version }}"
 
       - name: Build package
         run: python setup.py build_py && python -m build
