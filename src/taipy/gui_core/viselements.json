@@ -3,50 +3,50 @@
         [
             "scenario_selector",
             {
+                "inherits": [
+                    "core_gui_shared"
+                ],
                 "properties": [
-                    {
-                      "name": "id",
-                      "type": "str",
-                      "doc": "The identifier that will be assigned to the rendered HTML component."
-                    },
-                    {
-                      "name": "class_name",
-                      "type": "dynamic(str)",
-                      "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
-                    },
                     {
                         "name": "value",
                         "default_property": true,
-                        "type": "dynamic(List[Scenario])",
-                        "default_value": "[]",
-                        "doc": "TODO - The list of selected scenarios."
+                        "type": "dynamic(Scenario)",
+                        "doc": "Bound to the selected scenario."
                     },
                     {
                         "name": "show_add_button",
                         "type": "dynamic(bool)",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the button to create a new scenario is visible.<br/>If False, the button is not displayed."
                     },
                     {
                         "name": "display_cycles",
                         "type": "dynamic(bool)",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the cycles are show in the tree view.<br/>If False, the cycles are not shown."
                     },
                     {
                         "name": "show_primary_flag",
                         "type": "dynamic(bool)",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the primary scenarios are identified by a specific visual identifier in the tree view.<br/>If False, all the scenarios are shown identically."
                     },
                     {
                         "name": "on_change",
-                        "type": "Callback",
-                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\nTODO",
+                        "type": "callback",
+                        "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (Scenario): the selected Scenario.</li>\n</ul>",
                         "signature": [
                             [
-                                "TODO",
-                                ""
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "value",
+                                "optional[Scenario]"
                             ]
                         ]
                     },
@@ -62,22 +62,15 @@
         [
             "scenario",
             {
+                "inherits": [
+                    "core_gui_shared"
+                ],
                 "properties": [
-                    {
-                      "name": "id",
-                      "type": "str",
-                      "doc": "The identifier that will be assigned to the rendered HTML component."
-                    },
-                    {
-                      "name": "class_name",
-                      "type": "dynamic(str)",
-                      "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
-                    },
                     {
                         "name": "scenario",
                         "default_property": true,
-                        "type": "Scenario",
-                        "doc": "TODO - The scenario to display/edit."
+                        "type": "dynamic(Scenario)",
+                        "doc": "The scenario to display/edit."
                     },
                     {
                         "name": "active",
@@ -101,49 +94,49 @@
                         "name": "show_submit",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario submit button is shown.<br/>If False, it is not visible."
                     },
                     {
                         "name": "show_delete",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario delete button is shown.<br/>If False, it is not visible."
                     },
                     {
                         "name": "show_config",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario config label is shown.<br/>If False, it is not visible."
                     },
                     {
                         "name": "show_cycle",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario cycle label is shown.<br/>If False, it is not visible."
                     },
                     {
                         "name": "show_tags",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario tags are visible/editable.<br/>If False, they are not visible."
                     },
                     {
                         "name": "show_properties",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario properties are visible/editable.<br/>If False, they are not visible."
                     },
                     {
                         "name": "show_pipelines",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario pipelines are visible/editable.<br/>If False, they are not visible."
                     },
                     {
                         "name": "show_submit_pipelines",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the scenario pipelines submit button are visible/editable.<br/>If False, they are not visible."
                     }
                 ]
             }
@@ -151,33 +144,26 @@
         [
             "scenario_dag",
             {
+                "inherits": [
+                    "core_gui_shared"
+                ],
                 "properties": [
                     {
-                      "name": "id",
-                      "type": "str",
-                      "doc": "The identifier that will be assigned to the rendered HTML component."
-                    },
-                    {
-                      "name": "class_name",
-                      "type": "dynamic(str)",
-                      "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
-                    },
-                    {
                         "name": "scenario",
-                        "type": "Scenario",
-                        "doc": "TODO - The selected scenario."
+                        "type": "dynamic(Scenario)",
+                        "doc": "The scenario to display."
                     },
                     {
                         "name": "render",
                         "type": "dynamic(bool)",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, this scenario DAG is visible on the page."
                     },
                     {
                         "name": "show_toolbar",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the DAG toolbar is visible.<br/>If False, it is not shown."
                     },
                     {
                         "name": "height",
@@ -197,43 +183,44 @@
         [
             "data_node_selector",
             {
+                "inherits": [
+                    "core_gui_shared"
+                ],
                 "properties": [
-                    {
-                      "name": "id",
-                      "type": "str",
-                      "doc": "The identifier that will be assigned to the rendered HTML component."
-                    },
-                    {
-                      "name": "class_name",
-                      "type": "dynamic(str)",
-                      "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
-                    },
                     {
                         "name": "value",
                         "default_property": true,
                         "type": "dynamic(DataNode)",
-                        "doc": "TODO - The selected datanode."
+                        "doc": "Bound to the selected datanode."
                     },
                     {
                         "name": "display_cycles",
                         "type": "dynamic(bool)",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the cycles are show in the tree view.<br/>If False, the cycles are not shown."
                     },
                     {
                         "name": "show_primary_flag",
                         "type": "dynamic(bool)",
                         "default_value": "True",
-                        "doc": "TODO"
+                        "doc": "If True, the primary scenarios are identified by a specific visual identifier in the tree view.<br/>If False, all the scenarios are shown identically."
                     },
                     {
                         "name": "on_change",
-                        "type": "Callback",
-                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\nTODO",
+                        "type": "callback",
+                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (DataNode): the selected Datanode.</li>\n</ul>",
                         "signature": [
                             [
-                                "TODO",
-                                ""
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "value",
+                                "optional[DataNode]"
                             ]
                         ]
                     },
@@ -242,6 +229,23 @@
                         "type": "str",
                         "default_value": "50vh",
                         "doc": "The maximum height (in CSS unit) of the tree."
+                    }
+                ]
+            }
+        ],
+        [
+            "core_gui_shared",
+            {
+                "properties": [
+                    {
+                        "name": "id",
+                        "type": "str",
+                        "doc": "The identifier that will be assigned to the rendered HTML component."
+                    },
+                    {
+                        "name": "class_name",
+                        "type": "dynamic(str)",
+                        "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
                     }
                 ]
             }
