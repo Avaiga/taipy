@@ -14,8 +14,9 @@ from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 
-from ..pipeline_config import PipelineConfig
+from ..data_node_config import DataNodeConfig
 from ..scenario_config import ScenarioConfig
+from ..task_config import TaskConfig
 
 
 class _ScenarioConfigChecker(_ConfigChecker):
@@ -29,18 +30,28 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 self._check_if_entity_property_key_used_is_predefined(scenario_config)
                 self._check_existing_config_id(scenario_config)
                 self._check_frequency(scenario_config_id, scenario_config)
-                self._check_task_and_data_node_configs(scenario_config_id, scenario_config)
+                self._check_task_configs(scenario_config_id, scenario_config)
+                self._check_addition_data_node_configs(scenario_config_id, scenario_config)
                 self._check_comparators(scenario_config_id, scenario_config)
         return self._collector
 
-    def _check_task_and_data_node_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
-        # TODO: children of classes TaskConfig or DataNodeConfig
+    def _check_task_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
         self._check_children(
             ScenarioConfig,
             scenario_config_id,
-            scenario_config._TASKS_AND_DATANODES_KEY,
-            scenario_config.tasks_and_data_nodes,
-            PipelineConfig,
+            scenario_config._TASKS_KEY,
+            scenario_config.tasks,
+            TaskConfig,
+        )
+
+    def _check_addition_data_node_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
+        self._check_children(
+            ScenarioConfig,
+            scenario_config_id,
+            scenario_config._ADDITIONAL_DATA_NODES_KEY,
+            scenario_config.additional_data_nodes,
+            DataNodeConfig,
+            can_be_empty=True,
         )
 
     def _check_frequency(self, scenario_config_id: str, scenario_config: ScenarioConfig):

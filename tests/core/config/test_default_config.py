@@ -53,8 +53,12 @@ def _test_default_task_config(task_config: TaskConfig):
 def _test_default_scenario_config(scenario_config: ScenarioConfig):
     assert scenario_config is not None
     assert scenario_config.id is not None
-    assert scenario_config.tasks_and_data_nodes == []
-    assert scenario_config.task_and_data_node_configs == []
+    assert scenario_config.tasks == []
+    assert scenario_config.task_configs == []
+    assert scenario_config.additional_data_nodes == []
+    assert scenario_config.additional_data_node_configs == []
+    assert scenario_config.data_nodes == set()
+    assert scenario_config.data_node_configs == set()
     assert len(scenario_config.properties) == 0  # type: ignore
 
 

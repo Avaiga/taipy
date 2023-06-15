@@ -11,7 +11,7 @@
 
 from collections import defaultdict
 from copy import copy
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
@@ -31,34 +31,48 @@ class ScenarioConfig(Section):
 
     Attributes:
         id (str): Identifier of the scenario config. It must be a valid Python variable name.
-        tasks_and_data_nodes (Union[TaskConfig, DataNodeConfig, List[Union[TaskConfig, DataNodeConfig]]]): List of task and data node configs.<br/>
-            The default value is [].
+        tasks (Optional[Union[TaskConfig, List[TaskConfig]]]): List of task configs.<br/>
+            The default value is None.
+        additional_data_nodes (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): <br/>
+            List of additional data node configs. The default value is None.
+        frequency (Optional[Frequency]): The frequency of the scenario's cycle. The default value is None.
+        comparators: Optional[Dict[str, Union[List[Callable], Callable]]]: Dictionary of the data node <br/>
+            config id as key and a list of Callable used to compare the data nodes as value.
         **properties (dict[str, any]): A dictionary of additional properties.
     """
 
     name = "SCENARIO"
 
-    _PIPELINE_KEY = "pipelines"
-    _TASKS_AND_DATANODES_KEY = "tasks_and_data_nodes"
+    _PIPELINES_KEY = "pipelines"
+    _TASKS_KEY = "tasks"
+    _ADDITIONAL_DATA_NODES_KEY = "additional_data_nodes"
     _FREQUENCY_KEY = "frequency"
     _COMPARATOR_KEY = "comparators"
 
     def __init__(
         self,
         id: str,
-        tasks_and_data_nodes: Union[TaskConfig, DataNodeConfig, List[Union[TaskConfig, DataNodeConfig]]] = None,
+        tasks: Optional[Union[TaskConfig, List[TaskConfig]]] = None,
+        additional_data_nodes: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ):
-        if tasks_and_data_nodes:
-            self._tasks_and_data_nodes = (
-                [tasks_and_data_nodes]
-                if isinstance(tasks_and_data_nodes, DataNodeConfig) or isinstance(tasks_and_data_nodes, TaskConfig)
-                else copy(tasks_and_data_nodes)
+
+        if tasks:
+            self._tasks = [tasks] if isinstance(tasks, TaskConfig) else copy(tasks)
+        else:
+            self._tasks = []  # TODO: should this be a set instead???
+
+        if additional_data_nodes:
+            self._additional_data_nodes = (
+                [additional_data_nodes]
+                if isinstance(additional_data_nodes, DataNodeConfig)
+                else copy(additional_data_nodes)
             )
         else:
-            self._tasks_and_data_nodes = []
+            self._additional_data_nodes = []  # TODO: should this be a set instead???
+
         self.frequency = frequency
         self.comparators = defaultdict(list)
         if comparators:
@@ -72,28 +86,56 @@ class ScenarioConfig(Section):
     def __copy__(self):
         comp = None if self.comparators is None else self.comparators
         return ScenarioConfig(
-            self.id, copy(self._tasks_and_data_nodes), self.frequency, copy(comp), **copy(self._properties)
+            self.id,
+            copy(self._tasks),
+            copy(self._additional_data_nodes),
+            self.frequency,
+            copy(comp),
+            **copy(self._properties),
         )
 
     def __getattr__(self, item: str) -> Optional[Any]:
-        return _tpl._replace_templates(self._properties.get(item))
+        return _tpl._replace_templates(self._properties.get(item))  # type: ignore
 
     @property
-    def task_and_data_node_configs(self) -> List[Union[TaskConfig, DataNodeConfig]]:
-        # TODO: return also dn that already defined in task?
-        return self._tasks_and_data_nodes
+    def task_configs(self) -> List[TaskConfig]:
+        return self._tasks
 
     @property
-    def tasks_and_data_nodes(self) -> List[Union[TaskConfig, DataNodeConfig]]:
-        # TODO: return also dn that already defined in task?
-        return self._tasks_and_data_nodes
+    def tasks(self) -> List[TaskConfig]:
+        return self._tasks
+
+    @property
+    def additional_data_node_configs(self) -> List[DataNodeConfig]:
+        return self._additional_data_nodes
+
+    @property
+    def additional_data_nodes(self) -> List[DataNodeConfig]:
+        return self._additional_data_nodes
+
+    @property
+    def data_node_configs(self) -> Set[DataNodeConfig]:
+        return self.__get_all_unique_data_nodes()
+
+    @property
+    def data_nodes(self) -> Set[DataNodeConfig]:
+        return self.__get_all_unique_data_nodes()
+
+    def __get_all_unique_data_nodes(self) -> set[DataNodeConfig]:
+        data_node_configs = set(self._additional_data_nodes)
+        for task in self._tasks:
+            data_node_configs.update(task.inputs)
+            data_node_configs.update(task.outputs)
+
+        return data_node_configs
 
     @classmethod
     def default_config(cls):
-        return ScenarioConfig(cls._DEFAULT_KEY, [], None, dict())
+        return ScenarioConfig(cls._DEFAULT_KEY, [], [], None, dict())
 
     def _clean(self):
-        self._tasks_and_data_nodes = []
+        self._tasks = []
+        self._additional_data_nodes = []
         self.frequency = None
         self.comparators = dict()
         self._properties.clear()
@@ -101,49 +143,70 @@ class ScenarioConfig(Section):
     def _to_dict(self):
         return {
             self._COMPARATOR_KEY: self.comparators,
-            self._TASKS_AND_DATANODES_KEY: self._tasks_and_data_nodes,
+            self._TASKS_KEY: self._tasks,
+            self._ADDITIONAL_DATA_NODES_KEY: self._additional_data_nodes,
             self._FREQUENCY_KEY: self.frequency,
             **self._properties,
         }
 
     @classmethod
-    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):  # type: ignore
+    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
-        tasks_and_data_nodes = []
-        if task_and_data_node_ids := as_dict.pop(cls._TASKS_AND_DATANODES_KEY, None):
-            task_configs = config._sections[TaskConfig.name]  # type: ignore
-            data_node_configs = config._sections[DataNodeConfig.name]  # type: ignore
-            for t_or_dn_ids in task_and_data_node_ids:
-                if task_config := task_configs.get(t_or_dn_ids, None):
-                    tasks_and_data_nodes.append(task_config)
-                if data_node_config := data_node_configs.get(t_or_dn_ids, None):
-                    tasks_and_data_nodes.append(data_node_config)
+
+        tasks = []
+        additional_data_nodes = []
+
+        if cls._TASKS_KEY in as_dict or cls._ADDITIONAL_DATA_NODES_KEY in as_dict:
+            if task_ids := as_dict.pop(cls._TASKS_KEY, None):
+                task_configs = config._sections[TaskConfig.name]  # type: ignore
+                for task_id in task_ids:
+                    if task_config := task_configs.get(task_id, None):
+                        tasks.append(task_config)
+            if additional_data_node_ids := as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, None):
+                data_node_configs = config._sections[DataNodeConfig.name]  # type: ignore
+                for additional_data_node_id in additional_data_node_ids:
+                    if additional_data_node_config := data_node_configs.get(additional_data_node_id, None):
+                        additional_data_nodes.append(additional_data_node_config)
         else:
             # Check if pipeline configs exist, if yes, migrate by getting all task configs and ignore pipeline configs
-            if pipeline_ids := as_dict.pop(cls._PIPELINE_KEY, None):
-                p_configs = config._sections[PipelineConfig.name]  # type: ignore
+            if pipeline_ids := as_dict.pop(cls._PIPELINES_KEY, None):
+                pipeline_configs = config._sections[PipelineConfig.name]  # type: ignore
                 for p_id in pipeline_ids:
-                    if pipeline_config := p_configs.get(p_id, None):
-                        tasks_and_data_nodes.extend(pipeline_config.tasks)
+                    if pipeline_config := pipeline_configs.get(p_id, None):
+                        tasks.extend(pipeline_config.tasks)
+
         frequency = as_dict.pop(cls._FREQUENCY_KEY, None)
         comparators = as_dict.pop(cls._COMPARATOR_KEY, dict())
+
         return ScenarioConfig(
-            id=id, tasks_and_data_nodes=tasks_and_data_nodes, frequency=frequency, comparators=comparators, **as_dict
+            id=id,
+            tasks=tasks,
+            additional_data_nodes=additional_data_nodes,
+            frequency=frequency,
+            comparators=comparators,
+            **as_dict,
         )
 
-    def _update(self, as_dict, default_section=None):
-        self._tasks_and_data_nodes = as_dict.pop(self._TASKS_AND_DATANODES_KEY, self._tasks_and_data_nodes)
-        if self._tasks_and_data_nodes is None and default_section:
-            self._tasks_and_data_nodes = default_section._tasks_and_data_nodes
+    def _update(self, as_dict: Dict[str, Any], default_section=None):
+        self._tasks = as_dict.pop(self._TASKS_KEY, self._tasks)
+        if self._tasks is None and default_section:
+            self._tasks = default_section._tasks
+
+        self._additional_data_nodes = as_dict.pop(self._ADDITIONAL_DATA_NODES_KEY, self._additional_data_nodes)
+        if self._additional_data_nodes is None and default_section:
+            self._additional_data_nodes = default_section._additional_data_nodes
+
         self.frequency = as_dict.pop(self._FREQUENCY_KEY, self.frequency)
         if self.frequency is None and default_section:
             self.frequency = default_section.frequency
+
         self.comparators = as_dict.pop(self._COMPARATOR_KEY, self.comparators)
         if self.comparators is None and default_section:
             self.comparators = default_section.comparators
-        self._properties.update(as_dict)
+
+        self._properties.update(as_dict)  # type: ignore
         if default_section:
-            self._properties = {**default_section.properties, **self._properties}
+            self._properties = {**default_section.properties, **self._properties}  # type: ignore
 
     def add_comparator(self, dn_config_id: str, comparator: Callable):
         self.comparators[dn_config_id].append(comparator)
@@ -155,7 +218,8 @@ class ScenarioConfig(Section):
     @staticmethod
     def _configure(
         id: str,
-        task_and_data_node_configs: List[Union[TaskConfig, DataNodeConfig]],
+        task_configs: Optional[List[TaskConfig]] = None,
+        additional_data_node_configs: Optional[List[DataNodeConfig]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
@@ -164,8 +228,10 @@ class ScenarioConfig(Section):
 
         Parameters:
             id (str): The unique identifier of the new scenario configuration.
-            task_and_data_node_configs (List[Union[TaskConfig^, DataNodeConfig^]]): The list of task and data node configurations used
-                by this new scenario configuration.
+            task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
+                scenario configuration. The default value is None.
+            additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
+                related to this scenario configuration. The default value is None.
             frequency (Optional[Frequency^]): The scenario frequency.<br/>
                 It corresponds to the recurrence of the scenarios instantiated from this
                 configuration. Based on this frequency each scenario will be attached to the
@@ -183,14 +249,15 @@ class ScenarioConfig(Section):
             The new scenario configuration.
         """
         section = ScenarioConfig(
-            id, task_and_data_node_configs, frequency=frequency, comparators=comparators, **properties
+            id, task_configs, additional_data_node_configs, frequency=frequency, comparators=comparators, **properties
         )
         Config._register(section)
         return Config.sections[ScenarioConfig.name][id]
 
     @staticmethod
     def _configure_default(
-        task_and_data_node_configs: List[Union[TaskConfig, DataNodeConfig]],
+        task_configs: Optional[List[TaskConfig]] = None,
+        additional_data_node_configs: List[DataNodeConfig] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
@@ -202,8 +269,10 @@ class ScenarioConfig(Section):
         values when needed.
 
         Parameters:
-            task_and_data_node_configs (List[Union[TaskConfig^, DataNodeConfig^]]): The list of task and data node configurations used
-                by this scenario configuration.
+            task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
+                scenario configuration.
+            additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
+                related to this scenario configuration.
             frequency (Optional[Frequency^]): The scenario frequency.
                 It corresponds to the recurrence of the scenarios instantiated from this
                 configuration. Based on this frequency each scenario will be attached to
@@ -221,7 +290,12 @@ class ScenarioConfig(Section):
             The new default scenario configuration.
         """
         section = ScenarioConfig(
-            _Config.DEFAULT_KEY, task_and_data_node_configs, frequency=frequency, comparators=comparators, **properties
+            _Config.DEFAULT_KEY,
+            task_configs,
+            additional_data_node_configs,
+            frequency=frequency,
+            comparators=comparators,
+            **properties,
         )
         Config._register(section)
         return Config.sections[ScenarioConfig.name][_Config.DEFAULT_KEY]

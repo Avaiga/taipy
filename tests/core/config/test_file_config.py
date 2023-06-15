@@ -87,12 +87,14 @@ description = "t1 description"
 tasks = []
 
 [SCENARIO.default]
-tasks_and_data_nodes = []
+tasks = []
+additional_data_nodes = []
 frequency = "QUARTERLY:FREQUENCY"
 owner = "Michel Platini"
 
 [SCENARIO.s1]
-tasks_and_data_nodes = [ "t1:SECTION", "dn3:SECTION",]
+tasks = [ "t1:SECTION",]
+additional_data_nodes = [ "dn3:SECTION",]
 frequency = "QUARTERLY:FREQUENCY"
 owner = "Raymond Kopa"
 
@@ -133,10 +135,16 @@ owner = "Raymond Kopa"
         )
         assert dn2_cfg_v2.scope == Scope.SCENARIO
         t1_cfg_v2 = Config.configure_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
-        Config.configure_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
-        Config.configure_scenario("s1", [t1_cfg_v2, dn3_cfg_v2], frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
+        Config.configure_default_scenario([], [], Frequency.QUARTERLY, owner="Michel Platini")
+        Config.configure_scenario(
+            "s1",
+            task_configs=[t1_cfg_v2],
+            additional_data_node_configs=[dn3_cfg_v2],
+            frequency=Frequency.QUARTERLY,
+            owner="Raymond Kopa",
+        )
         Config.backup(tf.filename)
-        actual_config = tf.read().strip()
+        actual_config = tf.read().strip()  # problem here
 
         assert actual_config == expected_config
         Config.override(tf.filename)
@@ -169,7 +177,8 @@ def test_read_configuration_file():
         description = "task description"
 
         [SCENARIO.my_scenario]
-        tasks_and_data_nodes = [ "my_task:SECTION", "my_datanode3:SECTION"]
+        tasks = [ "my_task:SECTION"]
+        additional_data_nodes = ["my_datanode3:SECTION"]
         owner = "John Doe"
         """
     )
@@ -209,10 +218,11 @@ def test_read_configuration_file():
     assert type(Config.scenarios["my_scenario"]) == ScenarioConfig
     assert Config.scenarios["my_scenario"].id == "my_scenario"
     assert Config.scenarios["my_scenario"].owner == "John Doe"
-    assert len(Config.scenarios["my_scenario"].tasks_and_data_nodes) == 2
-    assert type(Config.scenarios["my_scenario"].tasks_and_data_nodes[0]) == TaskConfig
-    assert type(Config.scenarios["my_scenario"].tasks_and_data_nodes[1]) == DataNodeConfig
-    assert Config.scenarios["my_scenario"].tasks_and_data_nodes[0].id == "my_task"
-    assert Config.scenarios["my_scenario"].tasks_and_data_nodes[0].description == "task description"
-    assert Config.scenarios["my_scenario"].tasks_and_data_nodes[1].id == "my_datanode3"
-    assert Config.scenarios["my_scenario"].tasks_and_data_nodes[1].source == "local"
+    assert len(Config.scenarios["my_scenario"].tasks) == 1
+    assert type(Config.scenarios["my_scenario"].tasks[0]) == TaskConfig
+    assert len(Config.scenarios["my_scenario"].additional_data_nodes) == 1
+    assert type(Config.scenarios["my_scenario"].additional_data_nodes[0]) == DataNodeConfig
+    assert Config.scenarios["my_scenario"].tasks[0].id == "my_task"
+    assert Config.scenarios["my_scenario"].tasks[0].description == "task description"
+    assert Config.scenarios["my_scenario"].additional_data_nodes[0].id == "my_datanode3"
+    assert Config.scenarios["my_scenario"].additional_data_nodes[0].source == "local"

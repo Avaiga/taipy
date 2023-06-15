@@ -83,13 +83,21 @@ def config_test_scenario():
         decoder=CustomDecoder,
     )
 
+    test_pickle_dn_cfg = Config.configure_pickle_data_node(
+        id="test_pickle_dn",
+        path="./test.p",
+        scope=Scope.SCENARIO,
+        validity_period=datetime.timedelta(1),
+    )
+
     test_task_cfg = Config.configure_task(
         id="test_task", input=test_csv_dn_cfg, function=multiply, output=test_json_dn_cfg
     )
 
     test_scenario_cfg = Config.configure_scenario(
         id="test_scenario",
-        task_and_data_node_configs=[test_task_cfg],
+        task_configs=[test_task_cfg],
+        additional_data_node_configs=[test_pickle_dn_cfg],
         comparators={test_json_dn_cfg.id: compare_function},
         frequency=Frequency.DAILY,
     )
@@ -136,6 +144,12 @@ default_path = "./test.json"
 encoder = "tests.core.config.test_config_serialization.CustomEncoder:class"
 decoder = "tests.core.config.test_config_serialization.CustomDecoder:class"
 
+[DATA_NODE.test_pickle_dn]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+validity_period = "1d0h0m0s:timedelta"
+path = "./test.p"
+
 [TASK.default]
 inputs = []
 outputs = []
@@ -151,10 +165,12 @@ skippable = "False:bool"
 tasks = []
 
 [SCENARIO.default]
-tasks_and_data_nodes = []
+tasks = []
+additional_data_nodes = []
 
 [SCENARIO.test_scenario]
-tasks_and_data_nodes = [ "test_task:SECTION",]
+tasks = [ "test_task:SECTION",]
+additional_data_nodes = [ "test_pickle_dn:SECTION",]
 frequency = "DAILY:FREQUENCY"
 
 [VERSION_MIGRATION.migration_fcts."1.0"]
@@ -193,7 +209,7 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert len(Config.sections) == 4
 
     assert Config.sections[DataNodeConfig.name] is not None
-    assert len(Config.sections[DataNodeConfig.name]) == 3
+    assert len(Config.sections[DataNodeConfig.name]) == 4
     assert Config.sections[DataNodeConfig.name]["default"] is not None
     assert Config.sections[DataNodeConfig.name]["default"].storage_type == "pickle"
     assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
@@ -208,6 +224,10 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].storage_type == "pickle"
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].validity_period == datetime.timedelta(1)
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].path == "./test.p"
 
     assert Config.sections[TaskConfig.name] is not None
     assert len(Config.sections[TaskConfig.name]) == 2
@@ -233,10 +253,21 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks_and_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
-    assert [pipeline.id for pipeline in Config.sections[ScenarioConfig.name]["test_scenario"].tasks_and_data_nodes] == [
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
+    ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == [Config.sections[DataNodeConfig.name]["test_pickle_dn"].id]
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
     ]
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
@@ -288,6 +319,12 @@ def test_read_write_json_configuration_file():
 "default_path": "./test.json",
 "encoder": "tests.core.config.test_config_serialization.CustomEncoder:class",
 "decoder": "tests.core.config.test_config_serialization.CustomDecoder:class"
+},
+"test_pickle_dn": {
+"storage_type": "pickle",
+"scope": "SCENARIO:SCOPE",
+"validity_period": "1d0h0m0s:timedelta",
+"path": "./test.p"
 }
 },
 "TASK": {
@@ -316,7 +353,8 @@ def test_read_write_json_configuration_file():
 "SCENARIO": {
 "default": {
 "comparators": {},
-"tasks_and_data_nodes": [],
+"tasks": [],
+"additional_data_nodes": [],
 "frequency": null
 },
 "test_scenario": {
@@ -325,8 +363,11 @@ def test_read_write_json_configuration_file():
 "tests.core.config.test_config_serialization.compare_function:function"
 ]
 },
-"tasks_and_data_nodes": [
+"tasks": [
 "test_task:SECTION"
+],
+"additional_data_nodes": [
+"test_pickle_dn:SECTION"
 ],
 "frequency": "DAILY:FREQUENCY"
 }
@@ -362,7 +403,7 @@ def test_read_write_json_configuration_file():
     assert len(Config.sections) == 4
 
     assert Config.sections[DataNodeConfig.name] is not None
-    assert len(Config.sections[DataNodeConfig.name]) == 3
+    assert len(Config.sections[DataNodeConfig.name]) == 4
     assert Config.sections[DataNodeConfig.name]["default"] is not None
     assert Config.sections[DataNodeConfig.name]["default"].storage_type == "pickle"
     assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
@@ -377,6 +418,10 @@ def test_read_write_json_configuration_file():
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].storage_type == "pickle"
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].validity_period == datetime.timedelta(1)
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].path == "./test.p"
 
     assert Config.sections[TaskConfig.name] is not None
     assert len(Config.sections[TaskConfig.name]) == 2
@@ -400,10 +445,21 @@ def test_read_write_json_configuration_file():
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks_and_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
-    assert [pipeline.id for pipeline in Config.sections[ScenarioConfig.name]["test_scenario"].tasks_and_data_nodes] == [
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
+    ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == [Config.sections[DataNodeConfig.name]["test_pickle_dn"].id]
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
     ]
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
@@ -543,11 +599,22 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks_and_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
-    assert [pipeline.id for pipeline in Config.sections[ScenarioConfig.name]["test_scenario"].tasks_and_data_nodes] == [
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
     ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == []
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
+    ]
+
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
     }
@@ -710,10 +777,20 @@ def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks_and_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
-    assert [pipeline.id for pipeline in Config.sections[ScenarioConfig.name]["test_scenario"].tasks_and_data_nodes] == [
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
+    ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == []
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
     ]
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]

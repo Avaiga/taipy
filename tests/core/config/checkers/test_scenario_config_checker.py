@@ -14,7 +14,8 @@ from copy import copy
 import pytest
 
 from src.taipy.core.config import ScenarioConfig
-from src.taipy.core.config.pipeline_config import PipelineConfig
+from src.taipy.core.config.data_node_config import DataNodeConfig
+from src.taipy.core.config.task_config import TaskConfig
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
@@ -38,7 +39,7 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.errors) == 1
         assert "config_id of ScenarioConfig `None` is empty" in caplog.text
         assert len(Config._collector.warnings) == 1
-        assert "pipelines field of ScenarioConfig `new` is empty." in caplog.text
+        assert "tasks field of ScenarioConfig `new` is empty." in caplog.text
         assert len(Config._collector.infos) == 1
         assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
 
@@ -49,7 +50,7 @@ class TestScenarioConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 1
-        assert "pipelines field of ScenarioConfig `new` is empty." in caplog.text
+        assert "tasks field of ScenarioConfig `new` is empty." in caplog.text
         assert len(Config._collector.infos) == 1
         assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
 
@@ -80,9 +81,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
 
-    def test_check_task_and_data_node_configs(self, caplog):
-
-        # TODO: check child type task and data node
+    def test_check_task_configs(self, caplog):
 
         Config._collector = IssueCollector()
         config = Config._applied_config
@@ -96,51 +95,117 @@ class TestScenarioConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 1
-        assert "pipelines field of ScenarioConfig `new` is empty." in caplog.text
+        assert "tasks field of ScenarioConfig `new` is empty." in caplog.text
         assert len(Config._collector.infos) == 1
         assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
 
-        config._sections[ScenarioConfig.name]["new"]._pipelines = "bar"
+        config._sections[ScenarioConfig.name]["new"]._tasks = "bar"
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "pipelines field of ScenarioConfig `new` must be populated with a list of"
-            ' PipelineConfig objects. Current value of property `pipelines` is "bar".'
+            "tasks field of ScenarioConfig `new` must be populated with a list of"
+            ' TaskConfig objects. Current value of property `tasks` is "bar".'
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
         assert len(Config._collector.infos) == 1
 
-        config._sections[ScenarioConfig.name]["new"]._pipelines = ["bar"]
+        config._sections[ScenarioConfig.name]["new"]._tasks = ["bar"]
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "pipelines field of ScenarioConfig `new` must be populated with a list of"
-            " PipelineConfig objects. Current value of property `pipelines` is ['bar']."
+            "tasks field of ScenarioConfig `new` must be populated with a list of"
+            " TaskConfig objects. Current value of property `tasks` is ['bar']."
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
         assert len(Config._collector.infos) == 1
 
-        config._sections[ScenarioConfig.name]["new"]._pipelines = ["bar", PipelineConfig("bar")]
+        config._sections[ScenarioConfig.name]["new"]._tasks = ["bar", TaskConfig("bar", print)]
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "pipelines field of ScenarioConfig `new` must be populated with a list of"
-            " PipelineConfig objects. Current value of property `pipelines` is"
-            " ['bar', <src.taipy.core.config.pipeline_config.PipelineConfig object at"
+            "tasks field of ScenarioConfig `new` must be populated with a list of"
+            " TaskConfig objects. Current value of property `tasks` is"
+            " ['bar', <src.taipy.core.config.task_config.TaskConfig object at"
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
         assert len(Config._collector.infos) == 1
 
-        config._sections[ScenarioConfig.name]["new"]._pipelines = [PipelineConfig("bar")]
+        config._sections[ScenarioConfig.name]["new"]._tasks = [TaskConfig("bar", print)]
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
+
+    def test_check_additional_data_node_configs(self, caplog):
+
+        Config._collector = IssueCollector()
+        config = Config._applied_config
+        Config._compile_configs()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
+        config._sections[ScenarioConfig.name]["new"]._tasks = [TaskConfig("bar", print)]
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
+        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
+
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = "bar"
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "additional_data_nodes field of ScenarioConfig `new` must be populated with a list of"
+            ' DataNodeConfig objects. Current value of property `additional_data_nodes` is "bar".'
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
+
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = ["bar"]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "additional_data_nodes field of ScenarioConfig `new` must be populated with a list of"
+            " DataNodeConfig objects. Current value of property `additional_data_nodes` is ['bar']."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
+
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = ["bar", DataNodeConfig("bar")]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "additional_data_nodes field of ScenarioConfig `new` must be populated with a list of"
+            " DataNodeConfig objects. Current value of property `additional_data_nodes` is"
+            " ['bar', <src.taipy.core.config.data_node_config.DataNodeConfig object at"
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 1
+
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [DataNodeConfig("bar")]
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
