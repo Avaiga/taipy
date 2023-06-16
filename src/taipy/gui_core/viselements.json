@@ -23,7 +23,7 @@
             "name": "display_cycles",
             "type": "bool",
             "default_value": "True",
-            "doc": "If False, the cycles are now shown."
+            "doc": "If False, the cycles are not shown."
           },
           {
             "name": "show_primary_flag",
@@ -38,7 +38,7 @@
             "signature": [
               [
                 "state",
-                "State^"
+                "State"
               ],
               [
                 "var_name",
@@ -82,7 +82,7 @@
             "name": "expandable",
             "type": "bool",
             "default_value": "True",
-            "doc": "If True, the scenario visualizer can be expanded.<br/>If False, the scenario visualizer is collapsed and only its name a <i>submit</i> button are visible."
+            "doc": "If True, the scenario visualizer can be expanded.<br/>If False, the scenario visualizer is always collapsed and only its name and the <i>submit</i> button are visible."
           },
           {
             "name": "expanded",
