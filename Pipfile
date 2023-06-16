@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 cookiecutter = "==2.1.1"
-taipy-gui = {git="https://git@github.com/Avaiga/taipy-gui.git@develop"}
-taipy-rest = {git="https://git@github.com/Avaiga/taipy-rest.git@develop"}
-taipy-templates = {git="https://git@github.com/Avaiga/taipy-templates.git@develop"}
+taipy-gui = "==2.3"
+taipy-rest = "==2.3"
+taipy-templates = "==2.3"
 
 [dev-packages]
 autopep8 = "*"

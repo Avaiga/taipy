@@ -3,7 +3,7 @@
 
 <img align="left" src="readme_img/readme_logo.png" alt="Taipy Logo" width="20%" ></img>
 <br>
-#  Welcome to Taipy 
+#  Welcome to Taipy
 <p align="left">
     <a href="https://pypi.python.org/pypi/taipy/" alt="Taipy version">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/taipy.svg?label=pip&logo=PyPI&color=ff462b&labelColor=283282"></a>
@@ -13,16 +13,14 @@
         <img src="https://img.shields.io/badge/youtube-click_to_watch_videos-red.svg?color=ff462b&labelColor=283282&logo=youtube" /></a>
      <a href="https://twitter.com/Taipy_io" alt="Twitter">
         <img src="https://img.shields.io/badge/twitter-click_for_tweets-red.svg?color=ff462b&labelColor=283282&logo=twitter" /></a>
-    <a href="https://github.com/Avaiga/taipy/actions/workflows/tests.yml" alt="tests">
-        <img alt="PyPI" src="https://github.com/Avaiga/taipy/actions/workflows/tests.yml/badge.svg"></a>
 
 
 <br>
 
-###  <div align="left">Turns Data and AI algorithms into full web applications in no time. 
-###  How? Taipy GUI with Taipy Core pops out as a 360° platform to build production-ready web applications</div>  
+###  <div align="left">Turns Data and AI algorithms into full web applications in no time.
+###  How? Taipy GUI with Taipy Core pops out as a 360° platform to build production-ready web applications</div>
 
- 
+
 
 <br>
 <br>
@@ -34,16 +32,16 @@
 <br>
 <br>
 
-#  <div align="center"> 📊 We make both ends meet ⚙️ </div>  
+#  <div align="center"> 📊 We make both ends meet ⚙️ </div>
 <br>
  <div align="center">
-    
+
 | TAIPY GUI - the frond-end  | TAIPY Core - the back-end |
 | --------  | -------- |
 |<img src="readme_img/readme_gui_intro.gif" alt="Taipy GUI Animation"  width="100%"/> | <img src="readme_img/readme_core_intro.gif" alt="Taipy Core Animation"  width="100%"/>
 
-    
-</div> 
+
+</div>
 
 <br>
 <br>
@@ -80,10 +78,10 @@ excitement = 100
 
 Gui(page=excitement_page).run()
 ```
-*RUN*🏃🏽‍♀️  
-<div align="center">🎊 TA-DA! 🎊</div>  
+*RUN*🏃🏽‍♀️
+<div align="center">🎊 TA-DA! 🎊</div>
 <br>
-<div align="center"><img src="readme_img/readme_gui_app.gif" width="60%" alt="GUI demo"></img></div>  
+<div align="center"><img src="readme_img/readme_gui_app.gif" width="60%" alt="GUI demo"></img></div>
 
 <br>
 <br>
@@ -96,7 +94,7 @@ Gui(page=excitement_page).run()
 
 ## EN-CORE?
 
-#### <div align="center">Let's create a back-end execution, also called *scenario* using Taipy Core. Our scenario will filter movie data based on the genre you choose. This scenario will be submitted (i.e., executed) each time the genre selection changes and output the seven most popular movies of that genre. </div>  
+#### <div align="center">Let's create a back-end execution, also called *scenario* using Taipy Core. Our scenario will filter movie data based on the genre you choose. This scenario will be submitted (i.e., executed) each time the genre selection changes and output the seven most popular movies of that genre. </div>
 <br>
 
 *Here is our filter function: a standard Python function that is used by the unique task in the scenario*
@@ -109,15 +107,15 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/readme_exec_g.png" alt="Taipy Core Graph"  width="60%"/></div> 
+<div align="center"><img src="readme_img/readme_exec_g.png" alt="Taipy Core Graph"  width="60%"/></div>
 
 
 ### Taipy Studio - The easy peasy way
-*You can use the Taipy Studio extension in VSCode to configure your pipeline with no code* 
+*You can use the Taipy Studio extension in VSCode to configure your pipeline with no code*
 
-<div align="center"><img src="readme_img/readme_studio.gif" width="80%" alt="GUI demo"></img></div> 
+<div align="center"><img src="readme_img/readme_studio.gif" width="80%" alt="GUI demo"></img></div>
 
-*Your configuration is automatically saved as a TOML file* 
+*Your configuration is automatically saved as a TOML file*
 
 <br>
 <br>
@@ -131,7 +129,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 <br>
 
 ### Taipy Core - a walk on the code side
-<div align="left">For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Taipy has your back! </div>   
+<div align="left">For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Taipy has your back! </div>
 
 *<div align="left">Check out the movie genre demo scenario creation with this [Demo](https://www.taipy.io/project/movie-genre-selector/) </div>*
 
@@ -180,7 +178,7 @@ scenario = tp.create_scenario(scenario_cfg)
 def on_genre_selected(state):
     scenario.selected_genre_node.write(state.selected_genre)
     tp.submit(scenario)
-    state.df = scenario.filtered_data.read()  
+    state.df = scenario.filtered_data.read()
 
 # Get list of genres
 genres = [
@@ -206,13 +204,13 @@ my_page = """
 Gui(page=my_page).run()
 
 ```
-*RUN*🏃🏽‍♀️ 
+*RUN*🏃🏽‍♀️
 
 <br>
 
-<div align="center">🎊TA-DA!🎊</div>  
+<div align="center">🎊TA-DA!🎊</div>
 <br>
-<div align="center"><img src="readme_img/readme_app.gif" width="80%" alt="GUI demo"></img></div> 
+<div align="center"><img src="readme_img/readme_app.gif" width="80%" alt="GUI demo"></img></div>
 
 <br>
 

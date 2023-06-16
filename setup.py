@@ -29,9 +29,9 @@ with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
 
 requirements = [
     "cookiecutter>=2.1.1,<2.2",
-    "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
-    "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
-    "taipy-templates@git+https://git@github.com/Avaiga/taipy-templates.git@develop",
+    "taipy-gui>=2.3,<2.4",
+    "taipy-rest>=2.3,<2.4",
+    "taipy-gui>=2.3,<2.4",
 ]
 
 test_requirements = ["pytest>=3.8"]
