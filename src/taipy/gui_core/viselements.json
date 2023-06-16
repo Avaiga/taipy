@@ -174,7 +174,7 @@
           {
             "name": "width",
             "type": "str",
-            "default_value": "50vw",
+            "default_value": "100%",
             "doc": "The maximum width, in CSS units, of the DAG."
           }
         ]

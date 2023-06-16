@@ -151,7 +151,13 @@ const PipelineRow = ({
         },
         [label, setFocusName]
     );
-    const onSubmitPipeline = useCallback(() => submitEntity(id), [submitEntity, id]);
+    const onSubmitPipeline = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            submitEntity(id);
+        },
+        [submitEntity, id]
+    );
 
     useEffect(() => setPipeline(label), [label]);
 

@@ -69,7 +69,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const sizeSx = useMemo(
-        () => ({ width: props.width || "50vw", height: props.height || "50vh" }),
+        () => ({ width: props.width || "100%", height: props.height || "50vh" }),
         [props.width, props.height]
     );
 
