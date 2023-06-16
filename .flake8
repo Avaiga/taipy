@@ -2,7 +2,7 @@
 # required by black, https://github.com/psf/black/blob/master/.flake8
 max-line-length = 120
 max-complexity = 18
-ignore = E203, E266, E501, E722, W503, F403, F401
+ignore = E203, E266, E501, E722, W503, F403, F401, F811
 select = B,C,E,F,W,T4,B9
 docstring-convention = google
 per-file-ignores =

@@ -1340,7 +1340,7 @@ class Gui:
         # Update variable directory
         self.__var_dir.add_frame(page._frame)
 
-    def add_pages(self, pages: t.Optional[t.Union[t.Dict[str, t.Union[str, Page]], str]] = None) -> None:
+    def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.
 
         Arguments:
