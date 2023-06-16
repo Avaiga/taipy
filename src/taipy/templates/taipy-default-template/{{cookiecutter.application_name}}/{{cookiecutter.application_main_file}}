@@ -1,23 +1,17 @@
-# Copyright 2023 Avaiga Private Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
-# the License. You may obtain a copy of the License at
-#
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations under the License.
+A single-page Taipy application.
+
+Please refer to https://docs.taipy.io/en/latest/manuals/gui/ for more details.
+"""
 
 import webbrowser
 
 from taipy.gui import Gui, Markdown, notify
 
-
 value = 0
 logo = "images/taipy_logo.jpg"
 
-page = Markdown("""
+page = Markdown(
+"""
 <center>
 <|navbar|lov={[("page1", "Homepage"), ("https://docs.taipy.io/en/latest/manuals/about/", "Taipy Docs"), ("https://docs.taipy.io/en/latest/getting_started/", "Getting Started")]}|>
 </center>
@@ -31,7 +25,8 @@ page = Markdown("""
 # Taipy Application
 
 <|{value}|slider|on_change=on_slider|> <|Push|button|on_action=on_push|>
-""")
+"""
+)
 
 
 def image_action(state):
@@ -47,13 +42,10 @@ def on_slider(state):
         notify(state, "success", "Taipy is running!")
 
 
-def on_change(state, var_name:str, var_value):
+def on_change(state, var_name: str, var_value):
     ...
 
 
 if __name__ == "__main__":
     gui = Gui(page=page)
-    gui.run(
-        title="{{cookiecutter.application_title}}",
-        dark_mode=False,
-    )
+    gui.run(title="{{cookiecutter.application_title}}")
