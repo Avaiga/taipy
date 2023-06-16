@@ -57,18 +57,22 @@ class _DAG:
         return len(self._sorted_nodes), max([len(i) for i in self._sorted_nodes])
 
     def __compute_grid_size(self) -> Tuple[int, int]:
-        grid_width = self.__lcm(*[len(i) + 1 if len(i) != self._width else len(i) - 1 for i in self._sorted_nodes]) + 1
-        return len(self._sorted_nodes), grid_width
+        if self._width == 1:
+            grd_wdt = 1
+        else:
+            grd_wdt = self.__lcm(*[len(i) + 1 if len(i) != self._width else len(i) - 1 for i in self._sorted_nodes]) + 1
+        return len(self._sorted_nodes), grd_wdt
 
     def __compute_nodes(self) -> Dict[str, _Node]:
         nodes = {}
         x = 0
         for same_lvl_nodes in self._sorted_nodes:
-            local_width = len(same_lvl_nodes)
-            is_max = local_width != self.width
-            y_incr = (
-                (self._grid_width - 1) / (local_width + 1) if is_max else (self._grid_width - 1) / (local_width - 1)
-            )
+            lcl_wdt = len(same_lvl_nodes)
+            is_max = lcl_wdt != self.width
+            if self.width != 1:
+                y_incr = (self._grid_width - 1) / (lcl_wdt + 1) if is_max else (self._grid_width - 1) / (lcl_wdt - 1)
+            else:
+                y_incr = 1
             y = 0 if is_max else -y_incr
             for node in same_lvl_nodes:
                 y += y_incr
@@ -86,4 +90,6 @@ class _DAG:
     def __lcm(*integers) -> int:
         # Function math.lcm is only implemented for Python 3.9+
         # For compatibility with Python 3.8 it has been re implemented.
+        if 0 in integers:
+            return 0
         return reduce(lambda x, y: (x * y) // math.gcd(x, y), integers)
