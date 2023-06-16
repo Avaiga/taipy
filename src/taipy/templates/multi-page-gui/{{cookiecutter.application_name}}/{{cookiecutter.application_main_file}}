@@ -1,6 +1,6 @@
 """
 A multi-page Taipy application, which includes 3 pages:
-- A homepage.
+- A rootpage which is shared by other pages.
 - Two pages named page_1 and page_2.
 
 Please refer to https://docs.taipy.io/en/latest/manuals/gui/pages for more details.
