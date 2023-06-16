@@ -8,7 +8,7 @@ on:
         required: true
 
 jobs:
-  publish:
+  release:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
