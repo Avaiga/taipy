@@ -31,7 +31,7 @@ requirements = [
     "cookiecutter>=2.1.1,<2.2",
     "taipy-gui>=2.3,<2.4",
     "taipy-rest>=2.3,<2.4",
-    "taipy-gui>=2.3,<2.4",
+    "taipy-templates>=2.3,<2.4",
 ]
 
 test_requirements = ["pytest>=3.8"]
