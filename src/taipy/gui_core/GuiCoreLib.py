@@ -30,6 +30,8 @@ from taipy.core import (
     set_primary,
 )
 from taipy.core import submit as core_submit
+import taipy as tp
+from taipy.core import Cycle, DataNode, Job, Pipeline, Scenario
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -54,6 +56,15 @@ Config.configure_global_app(read_entity_retry=3)
 
 
 class _EntityType(Enum):
+    CYCLE = 0
+    SCENARIO = 1
+    PIPELINE = 2
+    DATANODE = 3
+
+Config.configure_global_app(read_entity_retry=3)
+
+
+class EntityType(Enum):
     CYCLE = 0
     SCENARIO = 1
     PIPELINE = 2
@@ -139,16 +150,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
     __PROP_SCENARIO_PRIMARY = "primary"
     __PROP_SCENARIO_TAGS = "tags"
     __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_ENTITY_NAME)
+    __JOB_ACTION = "action"
     _CORE_CHANGED_NAME = "core_changed"
     _SCENARIO_SELECTOR_ERROR_VAR = "gui_core_sc_error"
     _SCENARIO_SELECTOR_ID_VAR = "gui_core_sc_id"
     _SCENARIO_VIZ_ERROR_VAR = "gui_core_sv_error"
+    _JOB_SELECTOR_ERROR_VAR = "gui_core_js_error"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
         self.scenarios_base_level: t.Optional[t.List[t.Union[Cycle, Scenario]]] = None
         self.data_nodes_base_level: t.Optional[t.List[t.Union[Cycle, Scenario, Pipeline, DataNode]]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
+        self.jobs_list: t.Optional[t.List[Job]] = None
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
         self.lock = Lock()
@@ -171,6 +185,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     self.gui.broadcast(
                         _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids]}
                     )
+        elif event.entity_type == EventEntityType.JOB:
+            self.jobs_list = None
+            self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
 
     @staticmethod
     def scenario_adapter(data):
@@ -191,7 +208,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else:
                         self.scenarios_base_level.append(cycle)
             return self.scenarios_base_level
-    
+
     def select_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) == 0:
@@ -334,12 +351,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         self.data_nodes_base_level.append(cycle)
             return self.data_nodes_base_level
 
-    def get_jobs(self):
-        with self.lock:
-            if self.jobs is None:
-                self.jobs = []
-            return self.jobs
-
     @staticmethod
     def __get_data_nodes(id: t.Optional[str] = None):
         def from_parent(dn: DataNode):
@@ -375,12 +386,48 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
         return None
 
+    def get_jobs_list(self):
+        with self.lock:
+            if self.jobs_list is None:
+                self.jobs_list = tp.get_jobs()
+            return self.data_nodes_base_level
+
+    @staticmethod
+    def job_adapter(data):
+        if hasattr(data, "id") and tp.get(data.id) is not None:
+            if isinstance(data, Job):
+                entity = tp.get(data.owner_id)
+                return (data.id, data.get_simple_label(), "", "", data.submit_id, data.creation_date, data.status.value)
+
+    def act_on_jobs(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+            return
+        data = args[0]
+        job_ids = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
+        if job_action := data.get(_GuiCoreContext.__JOB_ACTION) and isinstance(job_ids, list):
+            errs = []
+            if job_action == "delete":
+                for job_id in job_ids:
+                    try:
+                        tp.delete_job(tp.get(job_id))
+                    except Exception as e:
+                        errs.append(f"Error deleting job. {e}")
+            elif job_action == "cancel":
+                for job_id in job_ids:
+                    try:
+                        tp.cancel_job(job_id)
+                    except Exception as e:
+                        errs.append(f"Error canceling job. {e}")
+            state.assign(_GuiCoreContext._JOB_SELECTOR_ERROR_VAR, "<br/>".join(errs) if errs else "")
+
 
 class _GuiCore(ElementLibrary):
     __LIB_NAME = "taipy_gui_core"
     __CTX_VAR_NAME = f"__{__LIB_NAME}_Ctx"
     __SCENARIO_ADAPTER = "tgc_scenario"
     __DATANODE_ADAPTER = "tgc_datanode"
+    __JOB_ADAPTER = "tgc_job"
 
     __elts = {
         "scenario_selector": Element(
@@ -471,12 +518,22 @@ class _GuiCore(ElementLibrary):
             "value",
             {
                 "id": ElementProperty(PropertyType.string),
-                "onSelect": ElementProperty(PropertyType.function),
+                "class_name": ElementProperty(PropertyType.dynamic_string),
                 "value": ElementProperty(PropertyType.lov_value),
+                "display_job_id": ElementProperty(PropertyType.boolean, True),
+                "display_entity_label": ElementProperty(PropertyType.boolean, True),
+                "display_entity_id": ElementProperty(PropertyType.boolean, False),
+                "display_submit_id": ElementProperty(PropertyType.boolean, False),
+                "display_date": ElementProperty(PropertyType.boolean, True),
+                "on_change": ElementProperty(PropertyType.function),
+                "height": ElementProperty(PropertyType.string, "50vh"),
             },
             inner_properties={
-                "jobs": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_jobs()}}"),
+                "jobs": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_jobs_list()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
+                "on_job_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.act_on_jobs}}"),
+                "error": ElementProperty(PropertyType.dynamic_string, f"{{{_GuiCoreContext._JOB_SELECTOR_ERROR_VAR}}}"),
             },
         ),
     }
@@ -493,6 +550,7 @@ class _GuiCore(ElementLibrary):
     def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
         gui._add_adapter_for_type(_GuiCore.__SCENARIO_ADAPTER, _GuiCoreContext.scenario_adapter)
         gui._add_adapter_for_type(_GuiCore.__DATANODE_ADAPTER, _GuiCoreContext.data_node_adapter)
+        gui._add_adapter_for_type(_GuiCore.__JOB_ADAPTER, _GuiCoreContext.job_adapter)
         return _GuiCore.__CTX_VAR_NAME, _GuiCoreContext(gui)
 
     def on_user_init(self, state: State):
@@ -500,6 +558,7 @@ class _GuiCore(ElementLibrary):
             _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
             _GuiCoreContext._SCENARIO_SELECTOR_ID_VAR,
             _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
+            _GuiCoreContext._JOB_SELECTOR_ERROR_VAR,
         ]:
             state._add_attribute(var, "")
 
