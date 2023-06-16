@@ -9,7 +9,7 @@ networkx = "==2.6"
 openpyxl = "==3.0.7"
 pyarrow = "==10.0.1"
 pymongo = "==4.2.0"
-sqlalchemy = "==1.4.18"
+sqlalchemy = "==2.0.16"
 toml = "==0.10"
 taipy-config = {git = "https://git@github.com/avaiga/taipy-config.git@develop"}
 

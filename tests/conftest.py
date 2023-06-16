@@ -126,12 +126,12 @@ def tmp_sqlite_db_file_path(tmpdir_factory):
     fn = tmpdir_factory.mktemp("data")
     db_name = "df"
     file_extension = ".db"
-
     db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
     conn = db.connect()
     conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.commit()
     conn.close()
     db.dispose()
 
@@ -149,6 +149,7 @@ def tmp_sqlite_sqlite3_file_path(tmpdir_factory):
     conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.commit()
     conn.close()
     db.dispose()
 
