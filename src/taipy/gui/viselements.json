@@ -834,7 +834,7 @@
             "name": "data",
             "default_property": true,
             "required": true,
-            "type": "any",
+            "type": "dynamic(any)",
             "doc": "The data to be represented in this table."
           },
           {
