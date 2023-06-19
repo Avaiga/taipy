@@ -35,8 +35,19 @@ import {
     useModule,
 } from "taipy-gui";
 
-import { FlagSx, Property, ScFProps, ScenarioFull, ScenarioFullLength, useClassNames } from "./utils";
+import { FlagSx, ScFProps, ScenarioFull, ScenarioFullLength, useClassNames } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
+
+type Property = {
+    id: string;
+    key: string;
+    value: string;
+};
+type ScenarioEditPayload = {
+    id: string;
+    properties?: Property[];
+    deleted_properties?: Array<Partial<Property>>;
+};
 
 interface ScenarioViewerProps {
     id?: string;
@@ -353,14 +364,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         const { id = "", name = "" } = e.currentTarget.parentElement?.parentElement?.dataset || {};
         if (name) {
             if (id) {
-                setProperties((ps) =>
-                    ps.map((p) => {
-                        if (id == p.id) {
-                            p[name as keyof Property] = e.target.value;
-                        }
-                        return p;
-                    })
-                );
+                setProperties((ps) => ps.map((p) => (id === p.id ? { ...p, [name]: e.target.value } : p)));
             } else {
                 setNewProp((np) => ({ ...np, [name]: e.target.value }));
             }
@@ -373,10 +377,14 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             if (isScenario) {
                 const { id: propId = "" } = e.currentTarget.dataset || {};
                 const property = propId ? properties.find((p) => p.id === propId) : newProp;
-                property &&
-                    dispatch(
-                        createSendActionNameAction(id, module, props.onEdit, { id: scId, properties: [property] })
-                    );
+                if (property) {
+                    const oldId = property.id;
+                    const payload: ScenarioEditPayload = { id: scId, properties: [property] };
+                    if (oldId && oldId != property.key) {
+                        payload.deleted_properties = [{ key: oldId }];
+                    }
+                    dispatch(createSendActionNameAction(id, module, props.onEdit, payload));
+                }
                 setNewProp((np) => ({ ...np, key: "", value: "" }));
                 setFocusName("");
             }
@@ -388,24 +396,21 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             e.stopPropagation();
             if (isScenario) {
                 const { id: propId = "" } = e.currentTarget.dataset || {};
-                const propertyIdx = properties.findIndex((p) => p.id === propId);
-                propertyIdx > -1 &&
-                    propertyIdx < scProperties.length &&
+                const property = scProperties.find(([key]) => key === propId);
+                property &&
                     setProperties((ps) =>
-                        ps.map((p, idx) =>
-                            idx == propertyIdx ? { ...p, key: scProperties[idx][0], value: scProperties[idx][1] } : p
-                        )
+                        ps.map((p) => (p.id === property[0] ? { ...p, key: property[0], value: property[1] } : p))
                     );
                 setFocusName("");
             }
         },
-        [isScenario, properties, scProperties]
+        [isScenario, scProperties]
     );
 
     const deleteProperty = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            const { id: propId = "-1" } = e.currentTarget.dataset;
+            const { id: propId = "" } = e.currentTarget.dataset;
             setProperties((ps) => ps.filter((item) => item.id !== propId));
             const property = properties.find((p) => p.id === propId);
             property &&
@@ -436,8 +441,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showTags && setTags(scTags);
         showProperties &&
             setProperties(
-                scProperties.map(([k, v], i) => ({
-                    id: i + "",
+                scProperties.map(([k, v]) => ({
+                    id: k,
                     key: k,
                     value: v,
                 }))
@@ -654,7 +659,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                           spacing={1}
                                                           container
                                                           justifyContent="space-between"
-                                                          key={property.key}
+                                                          key={property.id}
                                                           data-focus={propName}
                                                           onClick={onFocus}
                                                           sx={hoverSx}
@@ -757,11 +762,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             spacing={1}
                                             container
                                             justifyContent="space-between"
-                                            data-focus="property-new"
+                                            data-focus="new-property"
                                             onClick={onFocus}
                                             sx={hoverSx}
                                         >
-                                            {active && focusName == "property-new" ? (
+                                            {active && focusName == "new-property" ? (
                                                 <>
                                                     <Grid item xs={4}>
                                                         <TextField
