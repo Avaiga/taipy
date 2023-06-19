@@ -201,7 +201,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items()]
             return self.scenario_configs
 
-    def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):  # noqa: C901
         args = payload.get("args")
         if (
             args is None
