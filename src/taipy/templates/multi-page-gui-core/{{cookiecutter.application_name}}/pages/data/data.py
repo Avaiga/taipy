@@ -1,3 +1,10 @@
+"""
+The data management page of the application.
+Page content is imported from the data.md file.
+
+Please refer to https://docs.taipy.io/en/latest/manuals/gui/pages for more details.
+"""
+
 from taipy.gui import Markdown, notify
 
 input_csv_file = None
@@ -16,7 +23,9 @@ def on_clean_data(state):
 def drop_csv(state):
     state.scenario.initial_dataset.path = state.input_csv_file
     state.inputs = state.scenario.initial_dataset.read()
-    notify(state, message=f"csv file `{state.input_csv_file}` loaded for scenario `{state.scenario.get_simple_label()}`")
+    notify(
+        state, message=f"csv file `{state.input_csv_file}` loaded for scenario `{state.scenario.get_simple_label()}`"
+    )
 
 
-data_page_md = Markdown("pages/data_page/data_page.md")
+data_page = Markdown("pages/data/data.md")

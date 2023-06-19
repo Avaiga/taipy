@@ -1,11 +1,8 @@
+from config.config import configure
+from pages import data_page, root_page, scenario_page
+
 from taipy import Core
 from taipy.gui import Gui
-
-from pages.root.root import *
-from pages.scenario_page.scenario_page import scenario_page_md
-from pages.data_page.data_page import data_page_md
-
-from config.config import configure
 
 
 def on_init(state):
@@ -46,21 +43,15 @@ def on_change(state, var: str, val):
             state.results = None
 
 
-scenario = None
-is_scenario_selected = False
-is_scenario_computed = False
-
-pages = {"/": root_md,
-         "scenario": scenario_page_md,
-         "data": data_page_md,
-         }
+pages = {
+    "/": root_page,
+    "scenario": scenario_page,
+    "data": data_page,
+}
 
 if __name__ == "__main__":
     configure()
     gui = Gui(pages=pages)
     core = Core()
     core.run()
-    gui.run(
-        title="{{cookiecutter.application_title}}",
-        dark_mode=False,
-    )
+    gui.run(title="{{cookiecutter.application_title}}")
