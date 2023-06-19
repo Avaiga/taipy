@@ -83,7 +83,6 @@ export const BaseTreeViewSx = {
         py: 1,
         px: 2,
         borderRadius: 0.5,
-        backgroundColor: "background.paper",
     },
 
     "& .MuiTreeItem-iconContainer:empty": {
