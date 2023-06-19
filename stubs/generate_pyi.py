@@ -51,11 +51,19 @@ def _build_base_config_pyi(filename, base_pyi):
     lines = _get_file_lines(filename)
     tree = _get_file_ast(filename)
 
-    class_lineno = [f.lineno for f in ast.walk(tree) if isinstance(f, ast.ClassDef) and f.name == "Config"]
+    class_lineno = [
+        f.lineno
+        for f in ast.walk(tree)
+        if isinstance(f, ast.ClassDef) and f.name == "Config"
+    ]
     begin_class, end_class = _get_function_delimiters(class_lineno[0] - 1, lines)
 
     base_pyi += "".join(lines[begin_class:end_class])
-    functions = [f.lineno for f in ast.walk(tree) if isinstance(f, ast.FunctionDef) and not f.name.startswith("__")]
+    functions = [
+        f.lineno
+        for f in ast.walk(tree)
+        if isinstance(f, ast.FunctionDef) and not f.name.startswith("__")
+    ]
 
     for ln in functions:
         begin_line, end_line = _get_function_delimiters(ln - 1, lines)
@@ -102,7 +110,9 @@ def _generate_entity_and_property_maps(filename):
     property_map = {}
     entity_tree = _get_file_ast(filename)
     functions = [
-        f for f in ast.walk(entity_tree) if isinstance(f, ast.Call) and getattr(f.func, "id", "") == "_inject_section"
+        f
+        for f in ast.walk(entity_tree)
+        if isinstance(f, ast.Call) and getattr(f.func, "id", "") == "_inject_section"
     ]
 
     for f in functions:
@@ -120,10 +130,12 @@ def _generate_entity_and_property_maps(filename):
 
 
 def _generate_acessors(base_pyi, property_map):
-
     for property, cls in property_map.items():
         return_template = f"Dict[str, {cls}]" if property != "job_config" else f"{cls}"
-        template = f'\tdef {property}(cls) -> {return_template}:\n\t\t""""""\n'.replace("\t", "    ")
+        template = (
+            "\t@classmethod\n\t@property\n"
+            + f'\tdef {property}(cls) -> {return_template}:\n\t\t""""""\n'
+        ).replace("\t", "    ")
         base_pyi += template + "\n"
     return base_pyi
 
@@ -148,8 +160,12 @@ if __name__ == "__main__":
     pyi = _build_header(header_file)
     pyi = _build_base_config_pyi(base_config, pyi)
     pyi = _generate_acessors(pyi, property_map)
-    pyi = _build_entity_config_pyi(pyi, scenario_filename, entities_map["ScenarioConfig"])
-    pyi = _build_entity_config_pyi(pyi, pipeline_filename, entities_map["PipelineConfig"])
+    pyi = _build_entity_config_pyi(
+        pyi, scenario_filename, entities_map["ScenarioConfig"]
+    )
+    pyi = _build_entity_config_pyi(
+        pyi, pipeline_filename, entities_map["PipelineConfig"]
+    )
     pyi = _build_entity_config_pyi(pyi, dn_filename, entities_map["DataNodeConfig"])
     pyi = _build_entity_config_pyi(pyi, task_filename, entities_map["TaskConfig"])
     pyi = _build_entity_config_pyi(pyi, job_filename, entities_map["JobConfig"])
