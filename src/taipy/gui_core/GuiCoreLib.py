@@ -244,9 +244,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
             with scenario as sc:
-                sc._properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
+                sc.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
                 if props := data.get("properties"):
                     try:
+                        new_keys = [prop.get("key") for prop in props]
+                        for key in t.cast(dict, sc.properties).keys():
+                            if key and key not in _GuiCoreContext.__SCENARIO_PROPS and key not in new_keys:
+                                t.cast(dict, sc.properties).pop(key, None)
                         for prop in props:
                             key = prop.get("key")
                             if key and key not in _GuiCoreContext.__SCENARIO_PROPS:

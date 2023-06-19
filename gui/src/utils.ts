@@ -48,12 +48,6 @@ export interface ScenarioDict {
     properties: Array<[string, string]>;
 }
 
-export type Property = {
-    id: string;
-    key: string;
-    value: string;
-};
-
 export const FlagSx = {
     color: "common.white",
     fontSize: "0.75em",
