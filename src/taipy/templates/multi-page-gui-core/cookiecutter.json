@@ -1,5 +1,6 @@
 {
     "application_name": "taipy_application",
     "application_main_file": "main.py",
-    "application_title": "Taipy Application"
+    "application_title": "Taipy Application",
+    "use_toml_config": "y/n"
 }
