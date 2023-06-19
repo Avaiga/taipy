@@ -31,18 +31,18 @@ from ..version import _get_version
 
 
 # prevent gui from trying to push scenario instances to the front-end
-class DoNotUpdate(_DoNotUpdate):
+class _GCDoNotUpdate(_DoNotUpdate):
     def __repr__(self):
         return self.get_label() if hasattr(self, "get_label") else super().__repr__()
 
 
-Scenario.__bases__ += (DoNotUpdate,)
-DataNode.__bases__ += (DoNotUpdate,)
+Scenario.__bases__ += (_GCDoNotUpdate,)
+DataNode.__bases__ += (_GCDoNotUpdate,)
 
 Config.configure_global_app(read_entity_retry=3)
 
 
-class EntityType(Enum):
+class _EntityType(Enum):
     CYCLE = 0
     SCENARIO = 1
     PIPELINE = 2
@@ -163,9 +163,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def scenario_adapter(data):
         if hasattr(data, "id") and tp.get(data.id) is not None:
             if isinstance(data, Cycle):
-                return (data.id, data.get_simple_label(), tp.get_scenarios(data), EntityType.CYCLE.value, False)
+                return (data.id, data.get_simple_label(), tp.get_scenarios(data), _EntityType.CYCLE.value, False)
             elif isinstance(data, Scenario):
-                return (data.id, data.get_simple_label(), None, EntityType.SCENARIO.value, data.is_primary)
+                return (data.id, data.get_simple_label(), None, _EntityType.SCENARIO.value, data.is_primary)
         return None
 
     def get_scenarios(self):
@@ -334,7 +334,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     data.id,
                     data.get_simple_label(),
                     _GuiCoreContext.__get_data_nodes(data.id) + tp.get_scenarios(data),
-                    EntityType.CYCLE.value,
+                    _EntityType.CYCLE.value,
                     False,
                 )
             elif isinstance(data, Scenario):
@@ -342,14 +342,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     data.id,
                     data.get_simple_label(),
                     _GuiCoreContext.__get_data_nodes(data.id) + [tp.get(p) for p in data._pipelines],
-                    EntityType.SCENARIO.value,
+                    _EntityType.SCENARIO.value,
                     data.is_primary,
                 )
             elif isinstance(data, Pipeline):
                 if dn := _GuiCoreContext.__get_data_nodes(data.id):
-                    return (data.id, data.get_simple_label(), dn, EntityType.PIPELINE.value, False)
+                    return (data.id, data.get_simple_label(), dn, _EntityType.PIPELINE.value, False)
             elif isinstance(data, DataNode):
-                return (data.id, data.get_simple_label(), None, EntityType.DATANODE.value, False)
+                return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
         return None
 
 
