@@ -198,10 +198,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if self.scenario_configs is None:
                 configs = tp.Config.scenarios
                 if isinstance(configs, dict):
-                    self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items()]
+                    self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items() if id != "default"]
             return self.scenario_configs
 
-    def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):  # noqa: C901
         args = payload.get("args")
         if (
             args is None
@@ -244,9 +244,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
             with scenario as sc:
-                sc._properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
+                sc.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
                 if props := data.get("properties"):
                     try:
+                        new_keys = [prop.get("key") for prop in props]
+                        for key in t.cast(dict, sc.properties).keys():
+                            if key and key not in _GuiCoreContext.__SCENARIO_PROPS and key not in new_keys:
+                                t.cast(dict, sc.properties).pop(key, None)
                         for prop in props:
                             key = prop.get("key")
                             if key and key not in _GuiCoreContext.__SCENARIO_PROPS:
