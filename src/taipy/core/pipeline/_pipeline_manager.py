@@ -12,6 +12,7 @@
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
+from taipy import Config
 from taipy.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds
@@ -86,8 +87,9 @@ class _PipelineManager(_Manager[Pipeline]):
     ) -> Pipeline:
         pipeline_id = Pipeline._new_id(str(pipeline_config.id))
 
+        task_configs = [Config.tasks[t.id] for t in pipeline_config.task_configs]
         task_manager = _TaskManagerFactory._build_manager()
-        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id, pipeline_id)
+        tasks = task_manager._bulk_get_or_create(task_configs, cycle_id, scenario_id, pipeline_id)
 
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]

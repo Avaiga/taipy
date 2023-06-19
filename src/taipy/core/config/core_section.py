@@ -104,7 +104,7 @@ class CoreSection(UniqueSection):
         force: Optional[bool] = None,
         clean_entities: Optional[bool] = None,
         **properties,
-    ):
+    ) -> "CoreSection":
         """Configure the Core service.
 
         Parameters:

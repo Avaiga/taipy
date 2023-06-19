@@ -605,18 +605,27 @@ def test_scenario_notification_subscribe_all():
             )
         ],
     )
-
+    other_scenario_config = Config.configure_scenario(
+        "other_scenario",
+        [
+            Config.configure_pipeline(
+                "other_by_6",
+                [
+                    Config.configure_task(
+                        "other_mult_by_2_2",
+                        mult_by_2,
+                        [Config.configure_data_node("other_foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("other_bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+    )
     _OrchestratorFactory._build_dispatcher()
-
     scenario = _ScenarioManager._create(scenario_config)
-    scenario_config.id = "other_scenario"
-
-    other_scenario = _ScenarioManager._create(scenario_config)
-
+    other_scenario = _ScenarioManager._create(other_scenario_config)
     notify_1 = NotifyMock(scenario)
-
     _ScenarioManager._subscribe(notify_1)
-
     assert len(_ScenarioManager._get(scenario.id).subscribers) == 1
     assert len(_ScenarioManager._get(other_scenario.id).subscribers) == 1
 

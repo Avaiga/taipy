@@ -50,24 +50,24 @@ Want to be part of the _Taipy Core_ community? Check out our [`CODE_OF_CONDUCT.m
 
 ## Directory Structure
 
-- `taipy/core`:
-    - `taipy/core`:
-        - `_manager`: Internal package for entity manager.
-        - `_repository`: Internal package for data storage.
-        - `_orchestrator`: Internal package for task orchestrating and execution.
-        - `_version`: Internal package for managing Taipy Core application version.
-        - `common`: Shared data structures, types, and functions.
-        - `config`: Configuration definition, management and implementation. `config.config.Config` is the main
-          entrypoint for configuring a Taipy Core application.
-        - `cycle`: Work cycle definition, management and implementation.
-        - `data`: Data Node definition, management and implementation.
-        - `exceptions`: _taipy-core_ exceptions.
-        - `job`: Job definition, management and implementation.
-        - `pipeline`: Pipeline definition, management and implementation.
-        - `scenario`: Scenario definition, management and implementation.
-        - `task`: Task definition, management and implementation.
-        - `taipy`: Main entrypoint for _taipy-core_ runtime features.
-    - `tests`: Unit tests following the `taipy/core` structure.
+- `src/`:
+  - `taipy/core/`:
+    - `_manager`: Internal package for entity manager.
+    - `_repository`: Internal package for data storage.
+    - `_orchestrator`: Internal package for task orchestrating and execution.
+    - `_version`: Internal package for managing Taipy Core application version.
+    - `common`: Shared data structures, types, and functions.
+    - `config`: Configuration definition, management and implementation. `config.config.Config` is the main
+      entrypoint for configuring a Taipy Core application.
+    - `cycle`: Work cycle definition, management and implementation.
+    - `data`: Data Node definition, management and implementation.
+    - `exceptions`: _taipy-core_ exceptions.
+    - `job`: Job definition, management and implementation.
+    - `pipeline`: Pipeline definition, management and implementation.
+    - `scenario`: Scenario definition, management and implementation.
+    - `task`: Task definition, management and implementation.
+    - `taipy`: Main entrypoint for _taipy-core_ runtime features.
+- `tests`: Unit tests following the `taipy/core/` structure.
 - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-core_.
 - `CONTRIBUTING.md`: Instructions to contribute to _taipy-core_.
 - `INSTALLATION.md`: Instructions to install _taipy-core_.
