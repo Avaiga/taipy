@@ -198,7 +198,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if self.scenario_configs is None:
                 configs = tp.Config.scenarios
                 if isinstance(configs, dict):
-                    self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items()]
+                    self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items() if id != "default"]
             return self.scenario_configs
 
     def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):  # noqa: C901
