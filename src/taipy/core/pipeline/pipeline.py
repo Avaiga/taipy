@@ -154,8 +154,14 @@ class Pipeline(_Entity, _Submittable, _Labeled):
 
     @property  # type: ignore
     def properties(self):
-        self._properties = _reload("pipeline", self)._properties
-        return self._properties
+        properties = _reload(self._MANAGER_NAME, self)._properties
+        if not self._is_in_context:
+            properties._entity_owner = self
+            self._properties = properties
+        else:
+            properties._entity_owner = None
+            properties._current_in_context_entity_owner = self
+        return properties
 
     def _is_consistent(self) -> bool:
         dag = self._build_dag()

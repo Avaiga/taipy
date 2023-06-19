@@ -155,6 +155,7 @@ def test_auto_set_and_reload(current_datetime):
         assert cycle.end_date == new_datetime
         assert cycle.name == "def"
         assert cycle._is_in_context
+        assert cycle.properties["qux"] == 5
 
         new_datetime_2 = new_datetime + timedelta(1)
         cycle.frequency = Frequency.YEARLY
@@ -162,11 +163,19 @@ def test_auto_set_and_reload(current_datetime):
         cycle.start_date = new_datetime_2
         cycle.end_date = new_datetime_2
         cycle.name = "abc"
-        assert cycle.name == "def"
-        assert cycle._name == "abc"
+        cycle.properties["qux"] = 9
 
-    assert cycle.frequency == Frequency.YEARLY
-    assert cycle.creation_date == new_datetime_2
-    assert cycle.start_date == new_datetime_2
-    assert cycle.end_date == new_datetime_2
-    assert cycle.name == "abc"
+        assert cycle.frequency == Frequency.MONTHLY
+        assert cycle.creation_date == new_datetime
+        assert cycle.start_date == new_datetime
+        assert cycle.end_date == new_datetime
+        assert cycle.name == "def"
+        assert cycle._is_in_context
+        assert cycle.properties["qux"] == 5
+
+    assert cycle_1.frequency == Frequency.YEARLY
+    assert cycle_1.creation_date == new_datetime_2
+    assert cycle_1.start_date == new_datetime_2
+    assert cycle_1.end_date == new_datetime_2
+    assert cycle_1.name == "abc"
+    assert cycle_1.properties["qux"] == 9

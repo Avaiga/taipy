@@ -280,9 +280,9 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
         assert scenario.name == "baz"
+        assert scenario.properties["qux"] == 5
 
         new_datetime_2 = new_datetime + timedelta(1)
-        scenario.config_id = "foo"
         scenario.pipelines = []
         scenario.creation_date = new_datetime_2
         scenario.cycle = None
@@ -290,8 +290,8 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         scenario.subscribers = [print]
         scenario.tags = None
         scenario.name = "qux"
+        scenario.properties["qux"] = 9
 
-        assert scenario.config_id == "foo"
         assert len(scenario.pipelines) == 1
         assert scenario.pipelines[pipeline.config_id] == pipeline
         assert scenario.creation_date == new_datetime
@@ -300,9 +300,9 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         assert len(scenario.subscribers) == 0
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
-        assert scenario.name == "qux"  # should be baz here
+        assert scenario.name == "baz"
+        assert scenario.properties["qux"] == 5
 
-    assert scenario_1.config_id == "foo"
     assert len(scenario_1.pipelines) == 0
     assert scenario_1.creation_date == new_datetime_2
     assert scenario_1.cycle is None
@@ -311,6 +311,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context
     assert scenario_1.name == "qux"
+    assert scenario_1.properties["qux"] == 9
 
 
 def test_is_deletable():

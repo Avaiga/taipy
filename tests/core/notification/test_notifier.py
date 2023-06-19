@@ -422,83 +422,77 @@ def test_publish_event():
         tp.set_primary(sc)
         assert registration_queue.qsize() == 0
 
-        # TODO: property will still update when in context
-        # sc.properties["flag"] = "production"
-        # assert registration_queue.qsize() == 0
+        sc.properties["flag"] = "production"
+        assert registration_queue.qsize() == 0
 
-        # TODO: property will still update when in context
-        # s.name = "my_scenario"
-        # assert registration_queue.qsize() == 0
+        sc.name = "my_scenario"
+        assert registration_queue.qsize() == 0
 
         c.name = "another new cycle name"
         assert registration_queue.qsize() == 0
 
-        # TODO: property will still update when in context
-        # c.properties["valid"] = True
-        # assert registration_queue.qsize() == 0
+        c.properties["valid"] = True
+        assert registration_queue.qsize() == 0
 
-        # TODO: property will still update when in context
-        # pl.properties["name"] = "weather_forecast"
-        # assert registration_queue.qsize() == 7
+        pl.properties["name"] = "weather_forecast"
+        assert registration_queue.qsize() == 0
 
         t.skippable = True
         assert registration_queue.qsize() == 0
 
-        # TODO: property will still update when in context
-        # t.properties["number_of_run"] = 2
-        # assert registration_queue.qsize() == 0
+        t.properties["number_of_run"] = 2
+        assert registration_queue.qsize() == 0
 
         d.name = "another new datanode name"
         assert registration_queue.qsize() == 0
 
-        # TODO: property will still update when in context
-        # d.properties["sorted"] = True
-        # assert registration_queue.qsize() == 0
+        d.properties["sorted"] = True
+        assert registration_queue.qsize() == 0
 
     published_events = []
 
-    assert registration_queue.qsize() == 5
+    assert registration_queue.qsize() == 11
     while registration_queue.qsize() != 0:
         published_events.append(registration_queue.get())
 
     expected_event_types = [
         EventEntityType.SCENARIO,
         EventEntityType.SCENARIO,
-        #     EventEntityType.SCENARIO,
-        #     EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
         EventEntityType.CYCLE,
-        #     EventEntityType.CYCLE,
-        #     EventEntityType.PIPELINE,
+        EventEntityType.CYCLE,
+        EventEntityType.PIPELINE,
         EventEntityType.TASK,
-        # EventEntityType.TASK,
+        EventEntityType.TASK,
         EventEntityType.DATA_NODE,
-        #     EventEntityType.DATA_NODE,
+        EventEntityType.DATA_NODE,
     ]
     expected_attribute_names = [
         "is_primary",
         "is_primary",
-        #     "flag",
-        # "name",
+        "flag",
         "name",
-        #     "valid",
-        #     "name",
+        "name",
+        "valid",
+        "name",
         "skippable",
-        #     "number_of_run",
+        "number_of_run",
         "name",
-        #     "sorted",
+        "sorted",
     ]
     expected_event_entity_id = [
         scenario.id,
         scenario.id,
-        # scenario.id,
-        # scenario.id,
+        scenario.id,
+        scenario.id,
         cycle.id,
-        # cycle.id,
-        # pipeline.id,
+        cycle.id,
+        pipeline.id,
         task.id,
-        # task.id,
+        task.id,
         dn.id,
-        # dn.id,
+        dn.id,
     ]
 
     assert all(
