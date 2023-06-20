@@ -14,6 +14,7 @@ from __future__ import annotations
 import typing as t
 from abc import ABC, abstractmethod
 
+from ...utils import _ElementApiManager
 from .factory import _ClassApiFactory
 
 if t.TYPE_CHECKING:
@@ -21,13 +22,56 @@ if t.TYPE_CHECKING:
 
 
 class ElementApi(ABC):
+    ELEMENT_NAME = ""
+
+    def __new__(cls, *args, **kwargs):
+        obj = super(ElementApi, cls).__new__(cls)
+        parent = _ElementApiManager().peek()
+        if parent is not None:
+            parent.add(obj)
+        return obj
+
     def __init__(self, **kwargs):
         self._properties = kwargs
-        self._children = []
+
+    def update(self, **kwargs):
+        self._properties.update(kwargs)
+
+    @abstractmethod
+    def _render(self, gui: "Gui") -> str:
+        pass
+
+
+class BlockElementApi(ElementApi):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._children: t.List[ElementApi] = []
 
     def add(self, *elements: ElementApi):
-        self._children.extend(elements)
+        for element in elements:
+            if element not in self._children:
+                self._children.append(element)
         return self
 
+    def __enter__(self):
+        _ElementApiManager().push(self)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        _ElementApiManager().pop()
+
     def _render(self, gui: "Gui") -> str:
-        return ""
+        el = _ClassApiFactory.create_element(gui, self.ELEMENT_NAME, self._properties)
+        return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
+
+    def _render_children(self, gui: "Gui") -> str:
+        return "\n".join([child._render(gui) for child in self._children])
+
+
+class ControlElementApi(ElementApi):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def _render(self, gui: "Gui") -> str:
+        el = _ClassApiFactory.create_element(gui, self.ELEMENT_NAME, self._properties)
+        return f"<div>{el[0]}</{el[1]}></div>"

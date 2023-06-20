@@ -87,7 +87,7 @@ from .gui_actions import (
 from .icon import Icon
 from .page import Page
 from .partial import Partial
-from .renderers import Html, Markdown
+from .renderers import ClassApi, Html, Markdown
 from .state import State
 from .utils import is_debugging
 
