@@ -455,8 +455,8 @@ class Scenario(_Entity, _Submittable, _Labeled):
         return _ScenarioModel(
             id=entity.id,
             config_id=entity.config_id,
-            tasks=list(entity._tasks),
-            additional_data_nodes=list(entity._additional_data_nodes),
+            tasks=cls.__to_task_ids(entity._tasks),
+            additional_data_nodes=cls.__to_data_node_ids(entity._additional_data_nodes),
             properties=entity._properties.data,
             creation_date=entity._creation_date.isoformat(),
             primary_scenario=entity._primary_scenario,
@@ -471,8 +471,8 @@ class Scenario(_Entity, _Submittable, _Labeled):
         scenario = Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
-            tasks=model.tasks,
-            additional_data_nodes=model.additional_data_nodes,
+            tasks=set(model.tasks),
+            additional_data_nodes=set(model.additional_data_nodes),
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
             is_primary=model.primary_scenario,
@@ -498,6 +498,14 @@ class Scenario(_Entity, _Submittable, _Labeled):
     @staticmethod
     def __to_cycle_id(cycle: Optional[Cycle] = None) -> Optional[CycleId]:
         return cycle.id if cycle else None
+
+    @staticmethod
+    def __to_task_ids(tasks) -> List[TaskId]:
+        return [t.id if isinstance(t, Task) else t for t in tasks]
+
+    @staticmethod
+    def __to_data_node_ids(data_nodes) -> List[DataNodeId]:
+        return [dn.id if isinstance(dn, DataNode) else dn for dn in data_nodes]
 
     def get_label(self) -> str:
         """Returns the scenario simple label prefixed by its owner label.
