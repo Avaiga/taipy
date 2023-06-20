@@ -26,4 +26,4 @@ if use_toml_config == "YES" or use_toml_config == "Y":
     )
 else:
     os.remove(os.path.join(os.getcwd(), "config", "config_with_toml.py"))
-    os.remove(os.path.join(os.getcwd(), "config", "config_file.toml"))
+    os.remove(os.path.join(os.getcwd(), "config", "config.toml"))
