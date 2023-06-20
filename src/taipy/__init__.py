@@ -51,6 +51,7 @@ if find_spec("taipy"):
             get_primary_scenarios,
             get_scenarios,
             get_tasks,
+            is_deletable,
             set,
             set_primary,
             submit,
@@ -66,6 +67,11 @@ if find_spec("taipy"):
 
     if find_spec("taipy.gui"):
         from taipy.gui import Gui
+
+        if find_spec("taipy.gui_core"):
+            from taipy.gui_core.GuiCoreLib import _GuiCore
+
+            Gui.add_library(_GuiCore())
 
         if find_spec("taipy.enterprise") and find_spec("taipy.enterprise.gui"):
             from taipy.enterprise.gui import _init_gui_enterprise

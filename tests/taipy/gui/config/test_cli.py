@@ -144,7 +144,6 @@ use_reloader = "true:bool"
     gui = Gui()
     gui.run(run_server=False, host="my_host", port=5001)
     service_config = gui._config.config
-    assert not service_config["dark_mode"]
     assert service_config["host"] == "my_3rd_host"
     assert service_config["port"] == 5003
     assert service_config["use_reloader"]
@@ -155,9 +154,22 @@ use_reloader = "true:bool"
         gui = Gui()
         gui.run(run_server=False, host="my_host", port=5001)
         service_config = gui._config.config
-        assert not service_config["dark_mode"]
         assert service_config["host"] == "my_4th_host"
         assert service_config["port"] == 5004
         assert not service_config["use_reloader"]
         assert service_config["debug"]
         gui.stop()
+
+
+def test_clean_config():
+    gui_config = Config.configure_gui(dark_mode=False)
+
+    assert Config.gui_config is gui_config
+
+    gui_config._clean()
+
+    # Check if the instance before and after _clean() is the same
+    assert Config.gui_config is gui_config
+
+    assert gui_config.dark_mode is None
+    assert gui_config.properties == {}

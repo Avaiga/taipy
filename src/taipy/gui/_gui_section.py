@@ -13,7 +13,7 @@ import typing as t
 from copy import copy
 
 from taipy.config import Config as TaipyConfig
-from taipy.config import UniqueSection, _inject_section
+from taipy.config import UniqueSection
 
 from ._default_config import default_config
 
@@ -27,6 +27,9 @@ class _GuiSection(UniqueSection):
 
     def __copy__(self):
         return _GuiSection(property_list=copy(self._property_list), **copy(self._properties))
+
+    def _clean(self):
+        self._properties.clear()
 
     def _to_dict(self):
         as_dict = {}

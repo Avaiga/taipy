@@ -36,6 +36,7 @@ enum Types {
     SetTheme = "SET_THEME",
     SetTimeZone = "SET_TIMEZONE",
     SetAlert = "SET_ALERT",
+    DeleteAlert = "DELETE_ALERT",
     SetBlock = "SET_BLOCK",
     Navigate = "NAVIGATE",
     ClientId = "CLIENT_ID",
@@ -58,7 +59,7 @@ export interface TaipyState {
     timeZone?: string;
     dateTimeFormat?: string;
     numberFormat?: string;
-    alert?: AlertMessage;
+    alerts: AlertMessage[];
     block?: BlockMessage;
     navigateTo?: string;
     navigateTab?: string;
@@ -197,6 +198,7 @@ export const INITIAL_STATE: TaipyState = {
     id: getLocalStorageValue("TaipyClientId", ""),
     menu: {},
     ackList: [],
+    alerts: [],
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -344,19 +346,23 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return { ...state, locations: action.payload.value as Record<string, string> };
         case Types.SetAlert:
             const alertAction = action as unknown as TaipyAlertAction;
-            if (alertAction) {
-                return {
-                    ...state,
-                    alert: {
+            return {
+                ...state,
+                alerts: [
+                    ...state.alerts,
+                    {
                         atype: alertAction.atype,
                         message: alertAction.message,
                         system: alertAction.system,
                         duration: alertAction.duration,
                     },
-                };
+                ],
+            };
+        case Types.DeleteAlert:
+            if (state.alerts.length) {
+                return { ...state, alerts: state.alerts.filter((_, i) => i) };
             }
-            delete state.alert;
-            return { ...state };
+            return state;
         case Types.SetBlock:
             const blockAction = action as unknown as TaipyBlockAction;
             if (blockAction.close) {
@@ -746,12 +752,16 @@ const getAlertType = (aType: string) => {
     return aType;
 };
 
-export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({
+export const createAlertAction = (alert: AlertMessage): TaipyAlertAction => ({
     type: Types.SetAlert,
-    atype: alert ? getAlertType(alert.atype) : "",
-    message: alert ? alert.message : "",
-    system: alert ? alert.system : false,
-    duration: alert ? alert.duration : 3000,
+    atype: getAlertType(alert.atype),
+    message: alert.message,
+    system: alert.system,
+    duration: alert.duration,
+});
+
+export const createDeleteAlertAction = (): TaipyBaseAction => ({
+    type: Types.DeleteAlert,
 });
 
 export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({

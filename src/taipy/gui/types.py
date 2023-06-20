@@ -128,10 +128,36 @@ class PropertyType(Enum):
     inner = "inner"
 
 
-def _get_taipy_type(a_type: t.Optional[PropertyType]) -> t.Optional[t.Type[_TaipyBase]]:
+@t.overload
+def _get_taipy_type(a_type: None) -> None:
+    ...
+
+
+@t.overload
+def _get_taipy_type(a_type: t.Type[_TaipyBase]) -> t.Type[_TaipyBase]:
+    ...
+
+
+@t.overload
+def _get_taipy_type(a_type: PropertyType) -> t.Type[_TaipyBase]:
+    ...
+
+
+@t.overload
+def _get_taipy_type(
+    a_type: t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]
+) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:
+    ...
+
+
+def _get_taipy_type(
+    a_type: t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]
+) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:
+    if a_type is None:
+        return None
     if isinstance(a_type, PropertyType) and not isinstance(a_type.value, str):
         return a_type.value
-    if isclass(a_type) and issubclass(a_type, _TaipyBase):
+    if isclass(a_type) and not isinstance(a_type, PropertyType) and issubclass(a_type, _TaipyBase):
         return a_type
     if a_type == PropertyType.boolean:
         return _TaipyBool

@@ -60,10 +60,11 @@ class _Adapter:
         for value in lov:
             try:
                 result = adapter(value._dict if isinstance(value, _MapDict) else value) if adapter else value
-                dict_res[self.__get_id(result)] = value
-                children = self.__get_children(result)
-                if children is not None:
-                    dict_res.update(self._get_elt_per_ids(var_name, children))
+                if result is not None:
+                    dict_res[self.__get_id(result)] = value
+                    children = self.__get_children(result)
+                    if children is not None:
+                        dict_res.update(self._get_elt_per_ids(var_name, children))
             except Exception as e:
                 _warn(f"Cannot run adapter for {var_name}:\n{e}")
         return dict_res
@@ -77,6 +78,8 @@ class _Adapter:
             result = value._dict if isinstance(value, _MapDict) else value
             if adapter:
                 result = adapter(result)
+                if result is None:
+                    return result
             elif isinstance(result, str):
                 return result
             tpl_res = self._get_valid_result(result, id_only)

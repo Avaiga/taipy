@@ -26,7 +26,7 @@ describe("reducer", () => {
         expect(taipyReducer({...INITIAL_STATE}, {type: "SET_LOCATIONS", payload: {value: {loc: "loc"}}} as TaipyBaseAction).locations).toBeDefined();
     });
     it("set alert", async () => {
-        expect(taipyReducer({...INITIAL_STATE}, {type: "SET_ALERT", atype: "i", message: "message", system: "system"} as TaipyBaseAction).alert).toBeDefined();
+        expect(taipyReducer({...INITIAL_STATE}, {type: "SET_ALERT", atype: "i", message: "message", system: "system"} as TaipyBaseAction).alerts).toHaveLength(1);
     });
     it("set show block", async () => {
         expect(taipyReducer({...INITIAL_STATE}, {type: "SET_BLOCK", action: "action", message: "message"} as TaipyBaseAction).block).toBeDefined();
