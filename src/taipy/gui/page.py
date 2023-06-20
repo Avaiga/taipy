@@ -42,7 +42,7 @@ class Page(ABC):
         If _content_ is a path to a readable file, the file is read entirely as the text template.
         """
         self._content = ""
-        self._base_element: t.Optional[ElementApi] = None
+        self._base_element: t.Optional["ElementApi"] = None
         self._filepath = ""
         self._frame: t.Optional[FrameType] = None
         if "frame" in kwargs:
