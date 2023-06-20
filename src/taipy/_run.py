@@ -42,7 +42,7 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
     core = __get_app(services, Core)
 
     if gui and core:
-        from taipy.core._version._cli._core_cli import _CoreCLI
+        from taipy.core._core_cli import _CoreCLI
         from taipy.gui._gui_cli import _GuiCLI
 
         _CoreCLI.create_parser()
