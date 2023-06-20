@@ -96,8 +96,8 @@ def config_test_scenario():
 
     test_scenario_cfg = Config.configure_scenario(
         id="test_scenario",
-        task_configs=[test_task_cfg],
-        additional_data_node_configs=[test_pickle_dn_cfg],
+        task_configs={test_task_cfg},
+        additional_data_node_configs={test_pickle_dn_cfg},
         comparators={test_json_dn_cfg.id: compare_function},
         frequency=Frequency.DAILY,
     )
@@ -253,8 +253,8 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
-    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == set()
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == set()
     assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
     assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
@@ -445,8 +445,8 @@ def test_read_write_json_configuration_file():
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
-    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == set()
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == set()
     assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
     assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
@@ -599,8 +599,8 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
-    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == set()
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == set()
     assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
     assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
@@ -777,8 +777,8 @@ def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
-    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == set()
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == set()
     assert Config.sections[ScenarioConfig.name]["default"].data_nodes == set()
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
     assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [

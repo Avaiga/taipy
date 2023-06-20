@@ -17,9 +17,10 @@ from .._version._utils import _migrate_entity
 from ..common import _utils
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle, CycleId
-from ..pipeline.pipeline import Pipeline
+from ..data.data_node import DataNode, DataNodeId
 from ..scenario._scenario_model import _ScenarioModel
 from ..scenario.scenario import Scenario
+from ..task.task import Task, TaskId
 
 
 class _ScenarioConverter(_AbstractConverter):
@@ -28,7 +29,10 @@ class _ScenarioConverter(_AbstractConverter):
         return _ScenarioModel(
             id=scenario.id,
             config_id=scenario.config_id,
-            pipelines=[p.id if isinstance(p, Pipeline) else p for p in scenario._pipelines],
+            tasks=[task.id if isinstance(task, Task) else TaskId(str(task)) for task in scenario._tasks],
+            additional_data_nodes=[
+                dn.id if isinstance(dn, DataNode) else DataNodeId(str(dn)) for dn in scenario._additional_data_nodes
+            ],
             properties=scenario._properties.data,
             creation_date=scenario._creation_date.isoformat(),
             primary_scenario=scenario._primary_scenario,
@@ -43,7 +47,8 @@ class _ScenarioConverter(_AbstractConverter):
         scenario = Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
-            pipelines=model.pipelines,
+            tasks=set(model.tasks),
+            additional_data_nodes=set(model.additional_data_nodes),
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
             is_primary=model.primary_scenario,

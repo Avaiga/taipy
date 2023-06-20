@@ -31,10 +31,10 @@ class ScenarioConfig(Section):
 
     Attributes:
         id (str): Identifier of the scenario config. It must be a valid Python variable name.
-        tasks (Optional[Union[TaskConfig, List[TaskConfig]]]): List of task configs.<br/>
+        tasks (Optional[Union[TaskConfig, Set[TaskConfig]]]): Set of task configs.<br/>
             The default value is None.
-        additional_data_nodes (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): <br/>
-            List of additional data node configs. The default value is None.
+        additional_data_nodes (Optional[Union[DataNodeConfig, Set[DataNodeConfig]]]): <br/>
+            Set of additional data node configs. The default value is None.
         frequency (Optional[Frequency]): The frequency of the scenario's cycle. The default value is None.
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]]: Dictionary of the data node <br/>
             config id as key and a list of Callable used to compare the data nodes as value.
@@ -52,26 +52,26 @@ class ScenarioConfig(Section):
     def __init__(
         self,
         id: str,
-        tasks: Optional[Union[TaskConfig, List[TaskConfig]]] = None,
-        additional_data_nodes: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        tasks: Optional[Union[TaskConfig, Set[TaskConfig]]] = None,
+        additional_data_nodes: Optional[Union[DataNodeConfig, Set[DataNodeConfig]]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ):
 
         if tasks:
-            self._tasks = [tasks] if isinstance(tasks, TaskConfig) else copy(tasks)
+            self._tasks = set(tasks) if isinstance(tasks, TaskConfig) else copy(tasks)
         else:
-            self._tasks = []  # TODO: should this be a set instead???
+            self._tasks = set()
 
         if additional_data_nodes:
             self._additional_data_nodes = (
-                [additional_data_nodes]
+                set(additional_data_nodes)
                 if isinstance(additional_data_nodes, DataNodeConfig)
                 else copy(additional_data_nodes)
             )
         else:
-            self._additional_data_nodes = []  # TODO: should this be a set instead???
+            self._additional_data_nodes = set()
 
         self.frequency = frequency
         self.comparators = defaultdict(list)
@@ -98,19 +98,19 @@ class ScenarioConfig(Section):
         return _tpl._replace_templates(self._properties.get(item))  # type: ignore
 
     @property
-    def task_configs(self) -> List[TaskConfig]:
+    def task_configs(self) -> Set[TaskConfig]:
         return self._tasks
 
     @property
-    def tasks(self) -> List[TaskConfig]:
+    def tasks(self) -> Set[TaskConfig]:
         return self._tasks
 
     @property
-    def additional_data_node_configs(self) -> List[DataNodeConfig]:
+    def additional_data_node_configs(self) -> Set[DataNodeConfig]:
         return self._additional_data_nodes
 
     @property
-    def additional_data_nodes(self) -> List[DataNodeConfig]:
+    def additional_data_nodes(self) -> Set[DataNodeConfig]:
         return self._additional_data_nodes
 
     @property
@@ -131,49 +131,49 @@ class ScenarioConfig(Section):
 
     @classmethod
     def default_config(cls):
-        return ScenarioConfig(cls._DEFAULT_KEY, [], [], None, dict())
+        return ScenarioConfig(cls._DEFAULT_KEY, set(), set(), None, dict())
 
     def _clean(self):
-        self._tasks = []
-        self._additional_data_nodes = []
+        self._tasks = set()
+        self._additional_data_nodes = set()
         self.frequency = None
         self.comparators = dict()
         self._properties.clear()
 
-    def _to_dict(self):
+    def _to_dict(self) -> Dict[str, Any]:
         return {
             self._COMPARATOR_KEY: self.comparators,
-            self._TASKS_KEY: self._tasks,
-            self._ADDITIONAL_DATA_NODES_KEY: self._additional_data_nodes,
+            self._TASKS_KEY: list(self._tasks),
+            self._ADDITIONAL_DATA_NODES_KEY: list(self._additional_data_nodes),
             self._FREQUENCY_KEY: self.frequency,
-            **self._properties,
+            **self._properties,  # type: ignore
         }
 
     @classmethod
     def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
 
-        tasks = []
-        additional_data_nodes = []
+        tasks = set()
+        additional_data_nodes = set()
 
         if cls._TASKS_KEY in as_dict or cls._ADDITIONAL_DATA_NODES_KEY in as_dict:
             if task_ids := as_dict.pop(cls._TASKS_KEY, None):
                 task_configs = config._sections[TaskConfig.name]  # type: ignore
                 for task_id in task_ids:
                     if task_config := task_configs.get(task_id, None):
-                        tasks.append(task_config)
+                        tasks.add(task_config)
             if additional_data_node_ids := as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, None):
                 data_node_configs = config._sections[DataNodeConfig.name]  # type: ignore
                 for additional_data_node_id in additional_data_node_ids:
                     if additional_data_node_config := data_node_configs.get(additional_data_node_id, None):
-                        additional_data_nodes.append(additional_data_node_config)
+                        additional_data_nodes.add(additional_data_node_config)
         else:
             # Check if pipeline configs exist, if yes, migrate by getting all task configs and ignore pipeline configs
             if pipeline_ids := as_dict.pop(cls._PIPELINES_KEY, None):
                 pipeline_configs = config._sections[PipelineConfig.name]  # type: ignore
                 for p_id in pipeline_ids:
                     if pipeline_config := pipeline_configs.get(p_id, None):
-                        tasks.extend(pipeline_config.tasks)
+                        tasks.update(pipeline_config.tasks)
 
         frequency = as_dict.pop(cls._FREQUENCY_KEY, None)
         comparators = as_dict.pop(cls._COMPARATOR_KEY, dict())
@@ -218,8 +218,8 @@ class ScenarioConfig(Section):
     @staticmethod
     def _configure(
         id: str,
-        task_configs: Optional[List[TaskConfig]] = None,
-        additional_data_node_configs: Optional[List[DataNodeConfig]] = None,
+        task_configs: Optional[Set[TaskConfig]] = None,
+        additional_data_node_configs: Optional[Set[DataNodeConfig]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
@@ -228,9 +228,9 @@ class ScenarioConfig(Section):
 
         Parameters:
             id (str): The unique identifier of the new scenario configuration.
-            task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
+            task_configs (Optional[Set[TaskConfig^]]): The set of task configurations used by this
                 scenario configuration. The default value is None.
-            additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
+            additional_data_node_configs (Optional[Set[DataNodeConfig^]]): The set of additional data nodes
                 related to this scenario configuration. The default value is None.
             frequency (Optional[Frequency^]): The scenario frequency.<br/>
                 It corresponds to the recurrence of the scenarios instantiated from this
@@ -256,8 +256,8 @@ class ScenarioConfig(Section):
 
     @staticmethod
     def _configure_default(
-        task_configs: Optional[List[TaskConfig]] = None,
-        additional_data_node_configs: List[DataNodeConfig] = None,
+        task_configs: Optional[Set[TaskConfig]] = None,
+        additional_data_node_configs: Set[DataNodeConfig] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
@@ -269,9 +269,9 @@ class ScenarioConfig(Section):
         values when needed.
 
         Parameters:
-            task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
+            task_configs (Optional[Set[TaskConfig^]]): The set of task configurations used by this
                 scenario configuration.
-            additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
+            additional_data_node_configs (Optional[Set[DataNodeConfig^]]): The set of additional data nodes
                 related to this scenario configuration.
             frequency (Optional[Frequency^]): The scenario frequency.
                 It corresponds to the recurrence of the scenarios instantiated from this

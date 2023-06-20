@@ -36,7 +36,7 @@ def test_scenario_creation():
 
     assert list(Config.scenarios) == ["default", scenario.id]
 
-    scenario2 = Config.configure_scenario("scenarios2", [task_config_1], Frequency.MONTHLY)
+    scenario2 = Config.configure_scenario("scenarios2", [task_config_1], frequency=Frequency.MONTHLY)
     assert list(Config.scenarios) == ["default", scenario.id, scenario2.id]
 
 
@@ -160,15 +160,15 @@ def test_clean_config():
 
     assert scenario1_config.id == "id1"
     assert scenario2_config.id == "id2"
-    assert scenario1_config.tasks == scenario1_config.task_configs == []
-    assert scenario1_config.additional_data_nodes == scenario1_config.additional_data_node_configs == []
+    assert scenario1_config.tasks == scenario1_config.task_configs == set()
+    assert scenario1_config.additional_data_nodes == scenario1_config.additional_data_node_configs == set()
     assert scenario1_config.data_nodes == scenario1_config.data_node_configs == set()
     assert scenario1_config.frequency is scenario1_config.frequency is None
     assert scenario1_config.comparators == scenario1_config.comparators == {}
     assert scenario1_config.properties == scenario1_config.properties == {}
 
-    assert scenario2_config.tasks == scenario2_config.task_configs == []
-    assert scenario2_config.additional_data_nodes == scenario2_config.additional_data_node_configs == []
+    assert scenario2_config.tasks == scenario2_config.task_configs == set()
+    assert scenario2_config.additional_data_nodes == scenario2_config.additional_data_node_configs == set()
     assert scenario2_config.data_nodes == scenario2_config.data_node_configs == set()
     assert scenario2_config.frequency is scenario2_config.frequency is None
     assert scenario2_config.comparators == scenario2_config.comparators == {}
