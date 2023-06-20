@@ -53,3 +53,11 @@ def test_run_pass_with_gui_and_rest(core_run, rest_run, gui_run):
     gui_run.assert_called_once()
     core_run.assert_called_once()
     rest_run.assert_not_called()
+
+
+@mock.patch("taipy.gui.Gui.run")
+@mock.patch("taipy.core.Core.run")
+def test_run_pass_with_gui_and_core(core_run, gui_run):
+    _run(Gui(), Core())
+    gui_run.assert_called_once()
+    core_run.assert_called_once()
