@@ -20,8 +20,7 @@ Taipy application in a more complex IT ecosystem.
 
 Please refer to [REST API](../../reference_rest/) page to get the exhaustive list of available APIs."""
 
-
-from .rest import Rest
+from ._init import *
 from .version import _get_version
 
 __version__ = _get_version()
