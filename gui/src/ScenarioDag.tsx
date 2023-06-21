@@ -21,6 +21,7 @@ import { useClassNames } from "./utils";
 
 interface ScenarioDagProps {
     id?: string;
+    defaultScenario?: string;
     scenario?: DisplayModel | DisplayModel[];
     coreChanged?: Record<string, unknown>;
     updateVarName?: string;
@@ -59,6 +60,13 @@ const DagTitle = (props: DagTitleProps) => (
     </AppBar>
 );
 
+const getValidScenario = (scenar: DisplayModel | DisplayModel[]) =>
+    scenar.length == 3 && typeof scenar[0] === "string"
+        ? (scenar as DisplayModel)
+        : scenar.length == 1
+        ? (scenar[0] as DisplayModel)
+        : undefined;
+
 const ScenarioDag = (props: ScenarioDagProps) => {
     const { showToolbar = true } = props;
     const [scenarioId, setScenarioId] = useState("");
@@ -81,18 +89,24 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         }
     }, [props.coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
 
-    useEffect(() => {
-        const displayModel = Array.isArray(props.scenario)
-            ? props.scenario.length == 3 && typeof props.scenario[0] === "string"
-                ? (props.scenario as DisplayModel)
-                : props.scenario.length == 1
-                ? (props.scenario[0] as DisplayModel)
-                : undefined
-            : undefined;
+    const displayModel = useMemo(() => {
+        let dm: DisplayModel | undefined = undefined;
+        if (Array.isArray(props.scenario)) {
+            dm = getValidScenario(props.scenario);
+        } else if (props.defaultScenario) {
+            try {
+                dm = getValidScenario(JSON.parse(props.defaultScenario));
+            } catch {
+                // Do nothing
+            }
+        }
+        return dm;
+    }, [props.scenario, props.defaultScenario]);
 
+    useEffect(() => {
         // clear model
         const model = new TaipyDiagramModel();
-        if (displayModel && props.scenario) {
+        if (displayModel) {
             setScenarioId(displayModel[0]);
             // populate model
             populateModel(displayModel, model);
@@ -102,16 +116,16 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         //engine.getActionEventBus().registerAction(new DeleteItemsAction({ keyCodes: [1] }));
         model.setLocked(true);
         setTimeout(relayout, 500);
-    }, [props.scenario]);
+    }, [displayModel]);
 
     useEffect(() => {
         const showVar = getUpdateVar(props.updateVars, "show");
         showVar && dispatch(createSendUpdateAction(showVar, render, module));
     }, [render, props.updateVars, dispatch, module]);
 
-    return render ? (
+    return render && scenarioId ? (
         <Box sx={sizeSx} id={props.id} className={className}>
-            {showToolbar && scenarioId ? <DagTitle zoomToFit={zoomToFit} /> : null}
+            {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
             <Box sx={boxSx}>
                 <CanvasWidget engine={engine} />
             </Box>

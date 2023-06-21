@@ -55,6 +55,7 @@ interface ScenarioViewerProps {
     expanded?: boolean;
     defaultExpanded?: boolean;
     updateVarName?: string;
+    defaultScenario?: string;
     scenario?: ScenarioFull | Array<ScenarioFull>;
     onSubmit?: string;
     onEdit?: string;
@@ -215,6 +216,13 @@ const PipelineRow = ({
     );
 };
 
+const getValidScenario = (scenar: ScenarioFull | ScenarioFull[]) =>
+    scenar.length == ScenarioFullLength && typeof scenar[ScFProps.id] === "string"
+        ? (scenar as ScenarioFull)
+        : scenar.length == 1
+        ? (scenar[0] as ScenarioFull)
+        : undefined;
+
 const ScenarioViewer = (props: ScenarioViewerProps) => {
     const {
         id = "",
@@ -245,15 +253,18 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scDeletable,
         isScenario,
     ] = useMemo(() => {
-        const sc = Array.isArray(props.scenario)
-            ? props.scenario.length == ScenarioFullLength && typeof props.scenario[ScFProps.id] === "string"
-                ? (props.scenario as ScenarioFull)
-                : props.scenario.length == 1
-                ? (props.scenario[0] as ScenarioFull)
-                : undefined
-            : undefined;
+        let sc: ScenarioFull | undefined = undefined;
+        if (Array.isArray(props.scenario)) {
+            sc = getValidScenario(props.scenario);
+        } else if (props.defaultScenario) {
+            try {
+                sc = getValidScenario(JSON.parse(props.defaultScenario));
+            } catch {
+                // DO nothing
+            }
+        }
         return sc ? [...sc, true] : ["", false, "", "", "", [], [], [], [], false, false];
-    }, [props.scenario]);
+    }, [props.scenario, props.defaultScenario]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const expanded = useDynamicProperty(props.expanded, props.defaultExpanded, false);
