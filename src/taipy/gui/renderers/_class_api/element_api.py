@@ -74,4 +74,14 @@ class ControlElementApi(ElementApi):
 
     def _render(self, gui: "Gui") -> str:
         el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._properties)
-        return f"<div>{el[0]}</{el[1]}></div>"
+        return (
+            f"<div>{el[0]}</{el[1]}></div>"
+            if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]
+            else f"<div>{el[0]}</div>"
+        )
+
+    def __enter__(self):
+        raise RuntimeError(f"Can't use context manager with control element '{self._ELEMENT_NAME}'")
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        raise RuntimeError(f"Can't use context manager with control element '{self._ELEMENT_NAME}'")

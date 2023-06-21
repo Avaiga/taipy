@@ -86,6 +86,7 @@ from .utils import (
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
+from .utils._element_api_generator import _ElementApiGenerator
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
@@ -371,6 +372,7 @@ class Gui:
                     Gui.__extensions[library_name] = [library]
                 else:
                     libs.append(library)
+                _ElementApiGenerator().add_library(library)
             else:
                 raise NameError(f"ElementLibrary passed to add_library() has an invalid name: '{library_name}'")
         else:  # pragma: no cover
