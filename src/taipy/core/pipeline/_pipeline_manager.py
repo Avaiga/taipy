@@ -12,7 +12,7 @@
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
-from taipy import Config
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds

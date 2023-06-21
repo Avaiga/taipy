@@ -12,7 +12,7 @@
 from unittest.mock import patch
 
 from src.taipy.core import Core
-from taipy import Config
+from taipy.config import Config
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 

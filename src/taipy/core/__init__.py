@@ -38,64 +38,23 @@ in the following [function](./#functions) section. In particular, the most used 
     [running services](../../../manuals/running_services/) page of the user manual for more details.
 
 """
-import json
-import os
 
-from ._core import Core
+from ._init import *
 from .common.default_custom_document import DefaultCustomDocument
-from .cycle.cycle import Cycle
-from .cycle.cycle_id import CycleId
-from .data.data_node import DataNode
-from .data.data_node_id import DataNodeId, Edit
+from .data.data_node_id import Edit
 from .exceptions import exceptions
-from .job.job import Job
-from .job.job_id import JobId
-from .job.status import Status
-from .pipeline.pipeline import Pipeline
-from .pipeline.pipeline_id import PipelineId
-from .scenario.scenario import Scenario
-from .scenario.scenario_id import ScenarioId
-from .taipy import (
-    cancel_job,
-    clean_all_entities,
-    clean_all_entities_by_version,
-    compare_scenarios,
-    create_pipeline,
-    create_scenario,
-    delete,
-    delete_job,
-    delete_jobs,
-    export_scenario,
-    get,
-    get_cycles,
-    get_cycles_scenarios,
-    get_data_nodes,
-    get_jobs,
-    get_latest_job,
-    get_parents,
-    get_pipelines,
-    get_primary,
-    get_primary_scenarios,
-    get_scenarios,
-    get_tasks,
-    is_deletable,
-    set,
-    set_primary,
-    submit,
-    subscribe_pipeline,
-    subscribe_scenario,
-    tag,
-    unsubscribe_pipeline,
-    unsubscribe_scenario,
-    untag,
-)
-from .task.task import Task
-from .task.task_id import TaskId
 
-with open(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}version.json") as version_file:
-    version = json.load(version_file)
-    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
-    if vext := version.get("ext"):
-        version_string = f"{version_string}.{vext}"
 
-__version__ = version_string
+def __init_version():
+    import json
+    import os
+
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}version.json") as version_file:
+        version = json.load(version_file)
+        version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+        if vext := version.get("ext"):
+            version_string = f"{version_string}.{vext}"
+    return version_string
+
+
+__version__ = __init_version()
