@@ -888,6 +888,14 @@ const JobSelector = (props: JobSelectorProps) => {
         setFilters(filters);
     }, []);
 
+    const handleFilterOpen = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    }, []);
+
+    const handleFilterClose = useCallback(() => {
+        setAnchorEl(null);
+    }, []);
+
     useEffect(() => {
         if (filters) {
             let filteredJobRows = jobs ? [...jobs] : [];
@@ -920,14 +928,6 @@ const JobSelector = (props: JobSelectorProps) => {
     useEffect(() => {
         setJobRows(jobs);
     }, [jobs]);
-
-    const handleFilterOpen = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    }, []);
-
-    const handleFilterClose = useCallback(() => {
-        setAnchorEl(null);
-    }, []);
 
     const open = Boolean(anchorEl);
 
