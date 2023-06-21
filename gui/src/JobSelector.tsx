@@ -41,7 +41,13 @@ import {
 
 import { FilterList } from "@mui/icons-material";
 import { Job, JobStatus, Jobs } from "./utils/types";
-import { useDispatch, useDispatchRequestUpdateOnFirstRender, useModule } from "taipy-gui";
+import {
+    createRequestUpdateAction,
+    getUpdateVar,
+    useDispatch,
+    useDispatchRequestUpdateOnFirstRender,
+    useModule,
+} from "taipy-gui";
 import { useFormik } from "formik";
 
 interface JobSelectorProps {
@@ -520,6 +526,13 @@ const JobSelector = (props: JobSelectorProps) => {
     useEffect(() => {
         setJobRows(jobs);
     }, [jobs]);
+
+    useEffect(() => {
+        if (props.coreChanged?.jobs) {
+            const updateVar = getUpdateVar(props.updateVars, "jobs");
+            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+        }
+    }, [props.coreChanged, props.updateVars, module, dispatch, id]);
 
     const open = Boolean(anchorEl);
 

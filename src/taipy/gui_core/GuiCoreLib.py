@@ -15,6 +15,7 @@ from enum import Enum
 from threading import Lock
 
 from dateutil import parser
+from enum import Enum
 
 from taipy.config import Config
 from taipy.core import Cycle, DataNode, Pipeline, Scenario, create_scenario
@@ -390,7 +391,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         with self.lock:
             if self.jobs_list is None:
                 self.jobs_list = tp.get_jobs()
-            return self.data_nodes_base_level
+            return self.jobs_list
 
     @staticmethod
     def job_adapter(data):
