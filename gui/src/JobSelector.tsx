@@ -929,6 +929,13 @@ const JobSelector = (props: JobSelectorProps) => {
         setJobRows(jobs);
     }, [jobs]);
 
+    useEffect(() => {
+        if (props.coreChanged?.jobs) {
+            const updateVar = getUpdateVar(props.updateVars, "jobs");
+            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+        }
+    }, [props.coreChanged, props.updateVars, module, dispatch, id]);
+
     const open = Boolean(anchorEl);
 
     return (
