@@ -14,7 +14,7 @@ from __future__ import annotations
 import typing as t
 from abc import ABC, abstractmethod
 
-from ...utils import _ElementApiManager
+from ...utils import _ElementApiContextManager
 from .factory import _ClassApiFactory
 
 if t.TYPE_CHECKING:
@@ -26,7 +26,7 @@ class ElementApi(ABC):
 
     def __new__(cls, *args, **kwargs):
         obj = super(ElementApi, cls).__new__(cls)
-        parent = _ElementApiManager().peek()
+        parent = _ElementApiContextManager().peek()
         if parent is not None:
             parent.add(obj)
         return obj
@@ -54,11 +54,11 @@ class BlockElementApi(ElementApi):
         return self
 
     def __enter__(self):
-        _ElementApiManager().push(self)
+        _ElementApiContextManager().push(self)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        _ElementApiManager().pop()
+        _ElementApiContextManager().pop()
 
     def _render(self, gui: "Gui") -> str:
         el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._properties)

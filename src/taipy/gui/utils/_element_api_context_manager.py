@@ -17,7 +17,7 @@ if t.TYPE_CHECKING:
     from ..renderers import BlockElementApi
 
 
-class _ElementApiManager(object, metaclass=_Singleton):
+class _ElementApiContextManager(object, metaclass=_Singleton):
     def __init__(self):
         self.__element_list: t.List["BlockElementApi"] = []
 
