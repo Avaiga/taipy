@@ -10,3 +10,4 @@
 # specific language governing permissions and limitations under the License.
 
 from .element_api import BlockElementApi, ControlElementApi, ElementApi
+from .generate_element_api import generate_element_api

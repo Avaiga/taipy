@@ -22,7 +22,7 @@ if t.TYPE_CHECKING:
 
 
 class ElementApi(ABC):
-    ELEMENT_NAME = ""
+    _ELEMENT_NAME = ""
 
     def __new__(cls, *args, **kwargs):
         obj = super(ElementApi, cls).__new__(cls)
@@ -61,7 +61,7 @@ class BlockElementApi(ElementApi):
         _ElementApiManager().pop()
 
     def _render(self, gui: "Gui") -> str:
-        el = _ClassApiFactory.create_element(gui, self.ELEMENT_NAME, self._properties)
+        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._properties)
         return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
 
     def _render_children(self, gui: "Gui") -> str:
@@ -73,5 +73,5 @@ class ControlElementApi(ElementApi):
         super().__init__(**kwargs)
 
     def _render(self, gui: "Gui") -> str:
-        el = _ClassApiFactory.create_element(gui, self.ELEMENT_NAME, self._properties)
+        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._properties)
         return f"<div>{el[0]}</{el[1]}></div>"

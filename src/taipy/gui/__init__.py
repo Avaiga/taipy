@@ -87,7 +87,7 @@ from .gui_actions import (
 from .icon import Icon
 from .page import Page
 from .partial import Partial
-from .renderers import ClassApi, Html, Markdown
+from .renderers import ClassApi, Html, Markdown, generate_element_api
 from .state import State
 from .utils import is_debugging
 
@@ -104,3 +104,5 @@ if find_spec("taipy") and find_spec("taipy.config"):
         [("configure_gui", _GuiSection._configure)],
         add_to_unconflicted_sections=True,
     )
+
+generate_element_api()

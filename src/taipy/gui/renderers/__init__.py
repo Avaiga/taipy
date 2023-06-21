@@ -12,7 +12,7 @@
 import typing as t
 
 from ..page import Page
-from ._class_api import BlockElementApi, ControlElementApi, ElementApi
+from ._class_api import BlockElementApi, ControlElementApi, ElementApi, generate_element_api
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
