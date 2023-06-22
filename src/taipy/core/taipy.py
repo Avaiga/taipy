@@ -686,7 +686,7 @@ def get_cycles_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
 def get_entities_by_config_id(
     config_id: str,
 ) -> Union[List, List[Task], List[DataNode], List[Pipeline], List[Scenario]]:
-    """Get the entities by its cofig id.
+    """Get the entities by its config id.
 
     Parameters:
         config_id (str): The config id of the entities
