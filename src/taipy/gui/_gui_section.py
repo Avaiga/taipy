@@ -46,7 +46,7 @@ class _GuiSection(UniqueSection):
         self._properties.update(as_dict)
 
     @staticmethod
-    def _configure(**properties):
+    def _configure(**properties) -> "_GuiSection":
         """NOT DOCUMENTED
         Configure the Graphical User Interface.
 
