@@ -117,6 +117,17 @@ class TestTaipy:
             tp.is_deletable(scenario)
             mck.assert_called_once_with(scenario)
 
+    def test_is_promotable(self):
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.is_promotable(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
+            scenario = Scenario("config_id", [], {})
+            tp.is_promotable(scenario)
+            mck.assert_called_once_with(scenario)
+
     def test_delete_scenario(self):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._hard_delete") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
