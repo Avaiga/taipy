@@ -301,7 +301,7 @@ class TestConfigComparator:
         Config._comparator._find_conflict_config(_config_1, _config_2)
 
         error_messages = caplog.text.strip().split("\n")
-        assert len(error_messages) == 6
+        assert len(error_messages) == 5
         assert all(
             t in error_messages[0]
             for t in [
@@ -319,20 +319,13 @@ class TestConfigComparator:
             ]
         )
         assert 'unique_section_name "prop" was modified: unique_prop_1 -> unique_prop_1b' in error_messages[4]
-        assert all(
-            t in error_messages[5]
-            for t in [
-                "ERROR",
-                "To force running the application with the changes, run your application with --taipy-force option.",
-            ]
-        )
 
         caplog.clear()
 
         Config._comparator._find_conflict_config(_config_1, _config_2, old_version_number="1.0")
 
         error_messages = caplog.text.strip().split("\n")
-        assert len(error_messages) == 6
+        assert len(error_messages) == 5
         assert all(
             t in error_messages[0]
             for t in [
