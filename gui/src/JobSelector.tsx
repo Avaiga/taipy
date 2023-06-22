@@ -312,8 +312,9 @@ interface FilterProps {
     anchorEl: HTMLButtonElement | null;
     handleFilterClose: () => void;
     handleApplyFilter: (filters: FilterData[]) => void;
+    columns: JobSelectorColumns[];
 }
-const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter }: FilterProps) => {
+const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns }: FilterProps) => {
     const form = useFormik({
         initialValues: {
             filters: [],
@@ -390,13 +391,15 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter }: Filter
                                                   label="Job Label"
                                                   {...form.getFieldProps(`filters.${index}.data`)}
                                               >
-                                                  {JobSelectorColumns.map((item, index) => {
-                                                      return (
-                                                          <MenuItem key={index} value={item.columnIndex}>
-                                                              {item.primaryLabel}
-                                                          </MenuItem>
-                                                      );
-                                                  })}
+                                                  {columns
+                                                      .filter((i) => i.showPrimaryLabel || i.showSecondayLabel)
+                                                      .map((item, index) => {
+                                                          return (
+                                                              <MenuItem key={index} value={item.columnIndex}>
+                                                                  {item.primaryLabel}
+                                                              </MenuItem>
+                                                          );
+                                                      })}
                                               </Select>
                                           </FormControl>
                                       </Grid>
@@ -440,13 +443,15 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter }: Filter
                                     label="Job Label"
                                     {...form.getFieldProps(`newData`)}
                                 >
-                                    {JobSelectorColumns.map((item, index) => {
-                                        return (
-                                            <MenuItem key={index} value={item.columnIndex}>
-                                                {item.primaryLabel}
-                                            </MenuItem>
-                                        );
-                                    })}
+                                    {columns
+                                        .filter((i) => i.showPrimaryLabel || i.showSecondayLabel)
+                                        .map((item, index) => {
+                                            return (
+                                                <MenuItem key={index} value={item.columnIndex}>
+                                                    {item.primaryLabel}
+                                                </MenuItem>
+                                            );
+                                        })}
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -812,6 +817,12 @@ const JobSelector = (props: JobSelectorProps) => {
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
 
+    const displayJobId = useDynamicProperty(props.displayJobId, props.defaultDisplayJobId, true);
+    const displayEntityLabel = useDynamicProperty(props.displayEntityLabel, props.defaultDisplayEntityLabel, true);
+    const displayEntityId = useDynamicProperty(props.displayEntityId, props.defaultDisplayEntityId, true);
+    const displaySubmitId = useDynamicProperty(props.displaySubmitId, props.defaultDisplaySubmitId, true);
+    const displayDate = useDynamicProperty(props.displayDate, props.defaultDisplayDate, true);
+
     const headerToolbarSx = useMemo(
         () => ({
             pl: { sm: 2 },
@@ -821,6 +832,49 @@ const JobSelector = (props: JobSelectorProps) => {
             }),
         }),
         [selected]
+    );
+
+    const jobSelectorColumns: JobSelectorColumns[] = useMemo(
+        () => [
+            {
+                id: "jobId",
+                primaryLabel: "Job",
+                showPrimaryLabel: displayJobId,
+                secondaryLabel: "ID",
+                showSecondayLabel: displayJobId,
+                columnIndex: 0,
+            },
+            {
+                id: "submitID",
+                primaryLabel: "Submit ID",
+                columnIndex: 4,
+                showPrimaryLabel: displaySubmitId,
+                showSecondayLabel: displaySubmitId,
+            },
+            {
+                id: "submitEntity",
+                primaryLabel: "Submitted entity",
+                secondaryLabel: "ID",
+                columnIndex: 3,
+                showPrimaryLabel: displayEntityLabel,
+                showSecondayLabel: displayEntityId,
+            },
+            {
+                id: "createdDt",
+                primaryLabel: "Creation date",
+                columnIndex: 5,
+                showPrimaryLabel: displayDate,
+                showSecondayLabel: displayDate,
+            },
+            {
+                id: "status",
+                primaryLabel: "Status",
+                columnIndex: 6,
+                showPrimaryLabel: true,
+                showSecondayLabel: true,
+            },
+        ],
+        [displayDate, displayEntityId, displayEntityLabel, displayJobId, displaySubmitId]
     );
 
     const handleClick = useCallback(
@@ -854,12 +908,18 @@ const JobSelector = (props: JobSelectorProps) => {
         [jobRows]
     );
 
-    const handleCancelJobs = useCallback((id: string[]) => {
-        //TODO: cancel job
-    }, []);
-    const handleDeleteJobs = useCallback((id: string[]) => {
-        //TODO: delete job
-    }, []);
+    const handleCancelJobs = useCallback(
+        (id: string[]) => {
+            dispatch(createSendActionNameAction(props.id, module, props.onJobAction, id));
+        },
+        [dispatch, module, props.id, props.onJobAction]
+    );
+    const handleDeleteJobs = useCallback(
+        (id: string[]) => {
+            dispatch(createSendActionNameAction(props.id, module, props.onJobAction, id));
+        },
+        [dispatch, module, props.id, props.onJobAction]
+    );
 
     const selectedAllowedCancelJobs = useMemo(
         () =>
@@ -937,6 +997,8 @@ const JobSelector = (props: JobSelectorProps) => {
     }, [props.coreChanged, props.updateVars, module, dispatch, id]);
 
     const open = Boolean(anchorEl);
+
+    const tableHeightSx = useMemo(() => ({ maxHeight: props.height || "50vh" }), [props.height]);
 
     return (
         <Box className={className}>
