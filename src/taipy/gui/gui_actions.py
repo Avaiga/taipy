@@ -23,8 +23,8 @@ def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action
     Arguments:
         state (State^): The current user state as received in any callback.
         content: File path or file content.
-        name: File name for the content on the client browser (default to content name).
-        on_action: Function called when the download starts.
+        name: File name for the content on the client browser (defaults to content name).
+        on_action: Name of the callback function to call when the download starts.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._download(content, name, on_action)
@@ -43,22 +43,22 @@ def notify(
 
     Arguments:
         state (State^): The current user state as received in any callback.
-        notification_type: The notification type. This can be one of _"success"_, _"info"_,
-            _"warning"_, or _"error"_.<br/>
+        notification_type: The notification type. This can be one of "success", "info",
+            "warning", or "error".<br/>
             To remove the last notification, set this parameter to the empty string.
         message: The text message to display.
-        system_notification: If True, the system will also show the notification.
+        system_notification: If True, the system will also show the notification.<br/>
             If not specified or set to None, this parameter will use the value of
-            _configuration[system_notification]_.
+            *configuration[system_notification]*.
         duration: The time, in milliseconds, during which the notification is shown.
             If not specified or set to None, this parameter will use the value of
-            _configuration[notification_duration]_.
+            *configuration[notification_duration]*.
 
-    Note that you can also call this function with _notification_type_ set to the first letter
-    or the alert type (ie setting _notification_type_ to "i" is equivalent to setting it to
+    Note that you can also call this function with *notification_type* set to the first letter
+    or the alert type (i.e. setting *notification_type* to "i" is equivalent to setting it to
     "info").
 
-    If _system_notification_ is set to True, then the browser requests the system
+    If *system_notification* is set to True, then the browser requests the system
     to display a notification as well. They usually appear in small windows that
     fly out of the system tray.<br/>
     The first time your browser is requested to show such a system notification for
@@ -116,10 +116,12 @@ def navigate(state: State, to: t.Optional[str] = "", tab: t.Optional[str] = None
 
     Arguments:
         state (State^): The current user state as received in any callback.
-        to: The name of the page to navigate to. This can be a page identifier (as created by `Gui.add_page()^` with no leading /) or an URL.
-            If ommitted, the application navigates to the root page.
-        tab: When navigating to a page that is not a known page, the page is opened in a tab identified by this (as in [window.open](https://developer.mozilla.org/en-US/docs/Web/API/Window/open)).
-            The default value creates a new tab for the page (which is equivalent to setting tab to "_blank").
+        to: The name of the page to navigate to. This can be a page identifier (as created by
+            `Gui.add_page()^` with no leading '/') or an URL.<br/>
+            If omitted, the application navigates to the root page.
+        tab: When navigating to a page that is not a known page, the page is opened in a tab identified by
+            *tab* (as in [window.open](https://developer.mozilla.org/en-US/docs/Web/API/Window/open)).<br/>
+            The default value creates a new tab for the page (which is equivalent to setting *tab* to "_blank").
         force: When navigating to a known page, the content is refreshed even it the page is already shown.
     """
     if state and isinstance(state._gui, Gui):
@@ -129,20 +131,26 @@ def navigate(state: State, to: t.Optional[str] = "", tab: t.Optional[str] = None
 
 
 def get_user_content_url(
-    state: State, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
+    state: State, path: t.Optional[str] = None, params: t.Optional[t.Dict[str, str]] = None
 ) -> t.Optional[str]:
     """Get a user content URL.
 
+    This function can be used if you need to deliver dynamic content to your page: you can create
+    a path at run-time that, when queried, will deliver some user-defined content defined in the
+    *on_user_content* callback (see the description of the `Gui^` class for more information).
+
     Arguments:
         state (State^): The current user state as received in any callback.
-        path: An optional additional path to the URL
-        query_args: An optional dict that will be adding to the arguments of the query string.
+        path: An optional additional path to the URL.
+        params: An optional dictionary sent to the *on_user_content* callback.<br/>
+           These arguments are added as query parameters to the generated URL and converted into
+           strings.
 
     Returns:
-        An URL that will allow the `on_user_content()^` to be fired.
+        An URL that, when queried, triggers the `on_user_content()^` callback.
     """
     if state and isinstance(state._gui, Gui):
-        return state._gui._get_user_content_url(path, query_args)
+        return state._gui._get_user_content_url(path, params)
     _warn("'get_user_content_url()' must be called in the context of a callback.")
     return None
 

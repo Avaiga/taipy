@@ -178,13 +178,13 @@ class _PandasDataAccessor(_DataAccessor):
             # Write data to table
             writer.write_table(table)
             writer.close()
-            # end buffer stream
+            # End buffer stream
             buf = sink.getvalue()
-            # convert buffer to python bytes and return
+            # Convert buffer to Python bytes and return
             ret["data"] = buf.to_pybytes()
             ret["orient"] = orient
         else:
-            # workaround for python built in json encoder that does not yet support ignore_nan
+            # Workaround for Python built in JSON encoder that does not yet support ignore_nan
             ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)  # type: ignore
         return ret
 

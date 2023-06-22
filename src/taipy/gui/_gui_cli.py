@@ -28,7 +28,7 @@ class _GuiCLI:
             nargs="?",
             default="",
             const="",
-            help="The path to the WebApp to be used. The default is the webapp directory under gui in the Taipy GUI package directory.",
+            help="The path to the web app to be used. The default is the webapp directory under gui in the Taipy GUI package directory.",
         )
 
         debug_group = gui_parser.add_mutually_exclusive_group()
