@@ -769,27 +769,28 @@ const JobSelector = (props: JobSelectorProps) => {
     useEffect(() => {
         if (filters) {
             let filteredJobRows = props.jobs ? [...props.jobs] : [];
-            filteredJobRows.length && filters.forEach((filter) => {
-                filteredJobRows = filteredJobRows?.filter((job) => {
-                    let rowColumnValue = "";
-                    if (filter.data === 6) {
-                        rowColumnValue =
-                            Object.keys(JobStatus)[Object.values(JobStatus).indexOf(job[6])]?.toLowerCase() || "";
-                    } else if (filter.data === 0) {
-                        rowColumnValue = `${job[0]?.toString()?.toLowerCase() || ""}${
-                            job[1]?.toString()?.toLowerCase() || ""
-                        }`;
-                    } else if (filter.data === 3) {
-                        rowColumnValue = `${job[2]?.toString()?.toLowerCase() || ""}${
-                            job[3]?.toString()?.toLowerCase() || ""
-                        }`;
-                    } else {
-                        rowColumnValue = job[filter.data]?.toString()?.toLowerCase() || "";
-                    }
-                    const includes = rowColumnValue.includes(filter.value.toLowerCase());
-                    return filter.operator === "is" ? includes : !includes;
+            filteredJobRows.length &&
+                filters.forEach((filter) => {
+                    filteredJobRows = filteredJobRows?.filter((job) => {
+                        let rowColumnValue = "";
+                        if (filter.data === 6) {
+                            rowColumnValue =
+                                Object.keys(JobStatus)[Object.values(JobStatus).indexOf(job[6])]?.toLowerCase() || "";
+                        } else if (filter.data === 0) {
+                            rowColumnValue = `${job[0]?.toString()?.toLowerCase() || ""}${
+                                job[1]?.toString()?.toLowerCase() || ""
+                            }`;
+                        } else if (filter.data === 3) {
+                            rowColumnValue = `${job[2]?.toString()?.toLowerCase() || ""}${
+                                job[3]?.toString()?.toLowerCase() || ""
+                            }`;
+                        } else {
+                            rowColumnValue = job[filter.data]?.toString()?.toLowerCase() || "";
+                        }
+                        const includes = rowColumnValue.includes(filter.value.toLowerCase());
+                        return filter.operator === "is" ? includes : !includes;
+                    });
                 });
-            });
             setJobRows(filteredJobRows);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
