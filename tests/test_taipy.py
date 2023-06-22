@@ -18,7 +18,7 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
-from src.taipy.core import Core, CycleId, JobId, PipelineId, Scenario, ScenarioId, TaskId
+from src.taipy.core import Core, Cycle, CycleId, JobId, Pipeline, PipelineId, Scenario, ScenarioId, Task, TaskId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.job_config import JobConfig
@@ -26,6 +26,7 @@ from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import InvalidExportPath
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job import Job
@@ -55,6 +56,61 @@ class TestTaipy:
         with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._set") as mck:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
+
+    def test_is_submittable_is_called(self):
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.is_submittable(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
+            scenario = Scenario("scenario_config_id", [], {})
+            tp.is_submittable(scenario)
+            mck.assert_called_once_with(scenario)
+
+        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._is_submittable") as mck:
+            pipeline_id = PipelineId("PIPELINE_id")
+            tp.is_submittable(pipeline_id)
+            mck.assert_called_once_with(pipeline_id)
+
+        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._is_submittable") as mck:
+            pipeline = Pipeline("pipeline_config_id", {}, [])
+            tp.is_submittable(pipeline)
+            mck.assert_called_once_with(pipeline)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
+            task_id = TaskId("TASK_id")
+            tp.is_submittable(task_id)
+            mck.assert_called_once_with(task_id)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
+            task = Task("task_config_id", {}, print)
+            tp.is_submittable(task)
+            mck.assert_called_once_with(task)
+
+    def test_is_submittable(self):
+        current_date = datetime.datetime.now()
+
+        cycle = Cycle(Frequency.DAILY, {}, current_date, current_date, current_date)
+        scenario = Scenario("scenario_config_id", [], {})
+        pipeline = Pipeline("pipeline_config_id", {}, [])
+        task = Task("task_config_id", {}, print)
+        job = Job("job_id", task, "submit_id")
+        dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
+
+        _CycleManager._set(cycle)
+        _ScenarioManager._set(scenario)
+        _PipelineManager._set(pipeline)
+        _TaskManager._set(task)
+        _JobManager._set(job)
+        _DataManager._set(dn)
+
+        assert tp.is_submittable(scenario)
+        assert tp.is_submittable(pipeline)
+        assert tp.is_submittable(task)
+        assert not tp.is_submittable(cycle)
+        assert not tp.is_submittable(job)
+        assert not tp.is_submittable(dn)
 
     def test_submit(self, scenario, pipeline, task):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:

@@ -47,6 +47,7 @@ from .taipy import (
     get_tasks,
     is_deletable,
     is_promotable,
+    is_submittable,
     set,
     set_primary,
     submit,

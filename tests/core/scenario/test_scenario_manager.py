@@ -942,6 +942,17 @@ def test_hard_delete_shared_entities():
     assert len(_JobManager._get_all()) == 6
 
 
+def test_is_submittable():
+    assert len(_ScenarioManager._get_all()) == 0
+    scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
+    scenario = _ScenarioManager._create(scenario_config)
+
+    assert len(_ScenarioManager._get_all()) == 1
+    assert _ScenarioManager._is_submittable(scenario)
+    assert _ScenarioManager._is_submittable(scenario.id)
+    assert not _ScenarioManager._is_submittable("Scenario_temp")
+
+
 def test_submit():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()

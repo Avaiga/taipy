@@ -129,6 +129,12 @@ class _PipelineManager(_Manager[Pipeline]):
             task_manager._set(i)
 
     @classmethod
+    def _is_submittable(cls, pipeline: Union[Pipeline, PipelineId]) -> bool:
+        if isinstance(pipeline, str):
+            pipeline = cls._get(pipeline)
+        return isinstance(pipeline, Pipeline)
+
+    @classmethod
     def _submit(
         cls,
         pipeline: Union[PipelineId, Pipeline],

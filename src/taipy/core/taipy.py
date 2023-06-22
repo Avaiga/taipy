@@ -64,6 +64,21 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
         return _DataManagerFactory._build_manager()._set(entity)
 
 
+def is_submittable(entity: Union[Scenario, ScenarioId, Pipeline, PipelineId, Task, TaskId]) -> bool:
+    """Indicate if an entity can be submitted.
+
+    Returns:
+        True if the given entity can be submitted. False otherwise.
+    """
+    if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
+        return _ScenarioManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    if isinstance(entity, Pipeline) or (isinstance(entity, str) and entity.startswith(Pipeline._ID_PREFIX)):
+        return _PipelineManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
+        return _TaskManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    return False
+
+
 @_warn_no_core_service()
 def submit(
     entity: Union[Scenario, Pipeline, Task],

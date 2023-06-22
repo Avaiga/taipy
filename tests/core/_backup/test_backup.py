@@ -63,6 +63,7 @@ def test_no_new_entry_when_file_is_in_storage_folder():
 
     backup_files = read_backup_file(backup_file_path)
     assert backup_files == [f"{dn_1.path}\n"]
+    os.remove(dn_1.path)
 
 
 def test_backup_csv_files():
