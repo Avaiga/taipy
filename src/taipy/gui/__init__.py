@@ -70,7 +70,7 @@ application.
 
 from importlib.util import find_spec
 
-from .gui import Gui
+from ._init import *
 from .gui_actions import (
     download,
     get_module_context,

@@ -665,21 +665,31 @@ class _Builder:
             self.__set_react_attribute(var_name, hash_name)
         return self
 
-    def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None, native_type: bool = False):
+    def __set_default_value(
+        self,
+        var_name: str,
+        value: t.Optional[t.Any] = None,
+        native_type: bool = False,
+        var_type: t.Optional[PropertyType] = None,
+    ):
         if value is None:
             value = self.__attributes.get(var_name)
         default_var_name = _to_camel_case(f"default_{var_name}")
         if isinstance(value, (datetime, date, time)):
-            self.set_attribute(default_var_name, _date_to_ISO(value))
+            return self.set_attribute(default_var_name, _date_to_ISO(value))
         elif isinstance(value, str):
-            self.set_attribute(default_var_name, value)
+            return self.set_attribute(default_var_name, value)
         elif native_type and isinstance(value, numbers.Number):
-            self.__set_react_attribute(default_var_name, value)
+            return self.__set_react_attribute(default_var_name, value)
         elif value is None:
-            self.__set_react_attribute(default_var_name, "null")
+            return self.__set_react_attribute(default_var_name, "null")
+        elif var_type == PropertyType.lov_value:
+            # Done by _get_adapter
+            return self
+        elif isclass(var_type) and issubclass(var_type, _TaipyBase):
+            return self.__set_default_value(var_name, t.cast(t.Callable, var_type)(value, "").get())
         else:
-            self.__set_json_attribute(default_var_name, value)
-        return self
+            return self.__set_json_attribute(default_var_name, value)
 
     def __set_update_var_name(self, hash_name: str):
         return self.set_attribute("updateVarName", hash_name)
@@ -728,7 +738,7 @@ class _Builder:
                             val = float(val)
                     self.__set_default_value(var_name, val, native_type=native_type)
                 else:
-                    self.__set_default_value(var_name)
+                    self.__set_default_value(var_name, var_type=var_type)
         else:
             value = self.__attributes.get(var_name)
             if value is not None:
