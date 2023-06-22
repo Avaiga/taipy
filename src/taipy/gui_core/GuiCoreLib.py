@@ -16,9 +16,12 @@ from threading import Lock
 
 from dateutil import parser
 
-import taipy as tp
 from taipy.config import Config
-from taipy.core import Cycle, DataNode, Pipeline, Scenario
+from taipy.core import Cycle, DataNode, Pipeline, Scenario, create_scenario
+from taipy.core import delete as core_delete
+from taipy.core import get as core_get
+from taipy.core import get_cycles_scenarios, get_data_nodes, get_scenarios, is_deletable, set_primary
+from taipy.core import submit as core_submit
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -55,7 +58,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
     def get(self):
         data = super().get()
         if isinstance(data, Scenario):
-            scenario = tp.get(data.id)
+            scenario = core_get(data.id)
             if scenario:
                 return [
                     scenario.id,
@@ -67,7 +70,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                     [(k, v) for k, v in scenario.properties.items() if k not in _GuiCoreScenarioAdapter.__INNER_PROPS],
                     [(p.id, p.get_simple_label()) for p in scenario.pipelines.values()],
                     list(scenario.properties.get("authorized_tags", set())),
-                    tp.is_deletable(scenario),  # deletable
+                    is_deletable(scenario),  # deletable
                 ]
         return None
 
@@ -84,7 +87,7 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
     def get(self):
         data = super().get()
         if isinstance(data, Scenario):
-            scenario = tp.get(data.id)
+            scenario = core_get(data.id)
             if scenario:
                 dag = data._get_dag()
                 nodes = dict()
@@ -145,14 +148,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
             self.scenarios_base_level = None
-            scenario = tp.get(event.entity_id) if event.operation.value != 3 else None
+            scenario = core_get(event.entity_id) if event.operation.value != 3 else None
             self.gui.broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"scenario": event.entity_id if scenario else True},
             )
             self.data_nodes_base_level = None
         elif event.entity_type == EventEntityType.PIPELINE and event.entity_id:  # TODO import EventOperation
-            pipeline = tp.get(event.entity_id) if event.operation.value != 3 else None
+            pipeline = core_get(event.entity_id) if event.operation.value != 3 else None
             if pipeline:
                 if hasattr(pipeline, "parent_ids") and pipeline.parent_ids:
                     self.gui.broadcast(
@@ -161,9 +164,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     @staticmethod
     def scenario_adapter(data):
-        if hasattr(data, "id") and tp.get(data.id) is not None:
+        if hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, Cycle):
-                return (data.id, data.get_simple_label(), tp.get_scenarios(data), _EntityType.CYCLE.value, False)
+                return (data.id, data.get_simple_label(), get_scenarios(data), _EntityType.CYCLE.value, False)
             elif isinstance(data, Scenario):
                 return (data.id, data.get_simple_label(), None, _EntityType.SCENARIO.value, data.is_primary)
         return None
@@ -172,7 +175,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         with self.lock:
             if self.scenarios_base_level is None:
                 self.scenarios_base_level = []
-                for cycle, scenarios in tp.get_cycles_scenarios().items():
+                for cycle, scenarios in get_cycles_scenarios().items():
                     if cycle is None:
                         self.scenarios_base_level.extend(scenarios)
                     else:
@@ -189,14 +192,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if not id:
             return None
         try:
-            return tp.get(id)
+            return core_get(id)
         except Exception:
             return None
 
     def get_scenario_configs(self):
         with self.lock:
             if self.scenario_configs is None:
-                configs = tp.Config.scenarios
+                configs = Config.scenarios
                 if isinstance(configs, dict):
                     self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items() if id != "default"]
             return self.scenario_configs
@@ -221,14 +224,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
             scenario_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
             if delete:
                 try:
-                    tp.delete(scenario_id)
+                    core_delete(scenario_id)
                 except Exception as e:
                     state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error deleting Scenario. {e}")
             else:
-                scenario = tp.get(scenario_id)
+                scenario = core_get(scenario_id)
         else:
             config_id = data.get(_GuiCoreContext.__PROP_SCENARIO_CONFIG_ID)
-            scenario_config = tp.Config.scenarios.get(config_id)
+            scenario_config = Config.scenarios.get(config_id)
             if scenario_config is None:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid configuration id ({config_id})")
                 return
@@ -239,7 +242,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
                 return
             try:
-                scenario = tp.create_scenario(scenario_config, date, name)
+                scenario = create_scenario(scenario_config, date, name)
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
@@ -265,13 +268,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        entity: t.Union[Scenario, Pipeline] = tp.get(entity_id)
+        entity: t.Union[Scenario, Pipeline] = core_get(entity_id)
         if entity:
             try:
                 if isinstance(entity, Scenario):
                     primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
                     if primary is True:
-                        tp.set_primary(entity)
+                        set_primary(entity)
                 with entity as ent:
                     if isinstance(ent, Scenario):
                         tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
@@ -302,10 +305,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        entity = tp.get(entity_id)
+        entity = core_get(entity_id)
         if entity:
             try:
-                tp.submit(entity)
+                core_submit(entity)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
@@ -314,7 +317,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         with self.lock:
             if self.data_nodes_base_level is None:
                 self.data_nodes_base_level = _GuiCoreContext.__get_data_nodes()
-                for cycle, scenarios in tp.get_cycles_scenarios().items():
+                for cycle, scenarios in get_cycles_scenarios().items():
                     if cycle is None:
                         self.data_nodes_base_level.extend(scenarios)
                     else:
@@ -328,16 +331,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return True
             return False if id is None or dn.owner_id is None else dn.owner_id == id
 
-        return [x for x in tp.get_data_nodes() if from_parent(x)]
+        return [x for x in get_data_nodes() if from_parent(x)]
 
     @staticmethod
     def data_node_adapter(data):
-        if hasattr(data, "id") and tp.get(data.id) is not None:
+        if hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, Cycle):
                 return (
                     data.id,
                     data.get_simple_label(),
-                    _GuiCoreContext.__get_data_nodes(data.id) + tp.get_scenarios(data),
+                    _GuiCoreContext.__get_data_nodes(data.id) + get_scenarios(data),
                     _EntityType.CYCLE.value,
                     False,
                 )
@@ -345,7 +348,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return (
                     data.id,
                     data.get_simple_label(),
-                    _GuiCoreContext.__get_data_nodes(data.id) + [tp.get(p) for p in data._pipelines],
+                    _GuiCoreContext.__get_data_nodes(data.id) + [core_get(p) for p in data._pipelines],
                     _EntityType.SCENARIO.value,
                     data.is_primary,
                 )
