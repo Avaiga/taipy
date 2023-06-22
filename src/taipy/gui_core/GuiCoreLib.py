@@ -171,7 +171,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
-            self.scenarios_base_level = None
+            with self.lock:
+                self.scenarios_base_level = None
             scenario = core_get(event.entity_id) if event.operation.value != 3 else None
             self.gui.broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
@@ -186,7 +187,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids]}
                     )
         elif event.entity_type == EventEntityType.JOB:
-            self.jobs_list = None
+            with self.lock:
+                self.jobs_list = None
             self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
 
     @staticmethod
@@ -531,7 +533,7 @@ class _GuiCore(ElementLibrary):
             inner_properties={
                 "jobs": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_jobs_list()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
-                "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
+                "type": ElementProperty(PropertyType.inner, __JOB_ADAPTER),
                 "on_job_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.act_on_jobs}}"),
                 "error": ElementProperty(PropertyType.dynamic_string, f"{{{_GuiCoreContext._JOB_SELECTOR_ERROR_VAR}}}"),
             },

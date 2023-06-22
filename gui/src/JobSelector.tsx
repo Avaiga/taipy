@@ -85,7 +85,7 @@ const selectSx = {
 const containerPopupSx = { width: "619px" };
 
 const ChipStatus = ({ status }: { status: number }) => {
-    const statusText = Object.keys(JobStatus)[Object.values(JobStatus).indexOf(status)];
+    const statusText = JobStatus[status];
     let colorFill: "warning" | "default" | "success" | "error" = "warning";
 
     if (status === JobStatus.COMPLETED || status === JobStatus.SKIPPED) {
@@ -612,9 +612,9 @@ function JobSelectedTableRow({
 }
 
 const JobSelector = (props: JobSelectorProps) => {
-    const { id = "", jobs = [] } = props;
+    const { id = "" } = props;
     const [selected, setSelected] = useState<string[]>([]);
-    const [jobRows, setJobRows] = useState<Jobs>(jobs);
+    const [jobRows, setJobRows] = useState<Jobs>([]);
     const [filters, setFilters] = useState<FilterData[]>();
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
@@ -768,8 +768,8 @@ const JobSelector = (props: JobSelectorProps) => {
 
     useEffect(() => {
         if (filters) {
-            let filteredJobRows = jobs ? [...jobs] : [];
-            filters.forEach((filter) => {
+            let filteredJobRows = props.jobs ? [...props.jobs] : [];
+            filteredJobRows.length && filters.forEach((filter) => {
                 filteredJobRows = filteredJobRows?.filter((job) => {
                     let rowColumnValue = "";
                     if (filter.data === 6) {
@@ -796,8 +796,8 @@ const JobSelector = (props: JobSelectorProps) => {
     }, [filters]);
 
     useEffect(() => {
-        setJobRows(jobs);
-    }, [jobs]);
+        props.jobs && setJobRows(props.jobs);
+    }, [props.jobs]);
 
     useEffect(() => {
         if (props.coreChanged?.jobs) {

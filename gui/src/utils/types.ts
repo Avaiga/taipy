@@ -25,13 +25,13 @@ export type Job = [string, string, string, string, string, string, number];
 export type Jobs = Array<Job>;
 
 export enum JobStatus {
-    COMPLETED = 0,
     SUBMITTED = 1,
     BLOCKED = 2,
     PENDING = 3,
     RUNNING = 4,
     CANCELED = 5,
     FAILED = 6,
-    SKIPPED = 7,
-    ABANDONED = 8,
+    COMPLETED = 7,
+    SKIPPED = 8,
+    ABANDONED = 9,
 }
