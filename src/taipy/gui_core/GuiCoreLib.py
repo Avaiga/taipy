@@ -15,11 +15,11 @@ from enum import Enum
 from threading import Lock
 
 from dateutil import parser
-from enum import Enum
 
 from taipy.config import Config
-from taipy.core import Cycle, DataNode, Pipeline, Scenario, create_scenario
+from taipy.core import Cycle, DataNode, Job, Pipeline, Scenario, cancel_job, create_scenario
 from taipy.core import delete as core_delete
+from taipy.core import delete_job
 from taipy.core import get as core_get
 from taipy.core import (
     get_cycles_scenarios,
@@ -389,14 +389,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_jobs_list(self):
         with self.lock:
             if self.jobs_list is None:
-                self.jobs_list = tp.get_jobs()
+                self.jobs_list = get_jobs()
             return self.jobs_list
 
     @staticmethod
     def job_adapter(data):
-        if hasattr(data, "id") and tp.get(data.id) is not None:
+        if hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, Job):
-                entity = tp.get(data.owner_id)
+                entity = core_get(data.owner_id)
                 return (data.id, data.get_simple_label(), "", "", data.submit_id, data.creation_date, data.status.value)
 
     def act_on_jobs(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
@@ -410,13 +410,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if job_action == "delete":
                 for job_id in job_ids:
                     try:
-                        tp.delete_job(tp.get(job_id))
+                        delete_job(core_get(job_id))
                     except Exception as e:
                         errs.append(f"Error deleting job. {e}")
             elif job_action == "cancel":
                 for job_id in job_ids:
                     try:
-                        tp.cancel_job(job_id)
+                        cancel_job(job_id)
                     except Exception as e:
                         errs.append(f"Error canceling job. {e}")
             state.assign(_GuiCoreContext._JOB_SELECTOR_ERROR_VAR, "<br/>".join(errs) if errs else "")
