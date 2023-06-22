@@ -612,10 +612,21 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     }, [props.coreChanged, props.updateVars, module, dispatch, id]);
 
     useEffect(() => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             setSelected(value);
         } else if (defaultValue) {
-            setSelected(defaultValue);
+            try {
+                const parsedValue = JSON.parse(defaultValue);
+                if (Array.isArray(parsedValue)) {
+                    parsedValue.length && setSelected(parsedValue[0]);
+                } else {
+                    setSelected(parsedValue);
+                }
+            } catch {
+                setSelected(defaultValue);
+            }
+        } else if (value === null) {
+            setSelected("");
         }
     }, [defaultValue, value]);
 
