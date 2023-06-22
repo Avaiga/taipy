@@ -630,6 +630,32 @@ def test_scenario_notification_subscribe_all():
     assert len(_ScenarioManager._get(other_scenario.id).subscribers) == 1
 
 
+def test_is_promotable_to_primary_scenario():
+    assert len(_ScenarioManager._get_all()) == 0
+    scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
+    creation_date = datetime.now()
+    scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="1")  # primary scenario
+    scenario_2 = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="2")
+
+    assert len(_ScenarioManager._get_all()) == 2
+    assert scenario_1.is_primary
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_1)
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_1.id)
+    assert not scenario_2.is_primary
+    assert _ScenarioManager._is_promotable_to_primary(scenario_2)
+    assert _ScenarioManager._is_promotable_to_primary(scenario_2.id)
+
+    _ScenarioManager._set_primary(scenario_2)
+
+    assert len(_ScenarioManager._get_all()) == 2
+    assert not scenario_1.is_primary
+    assert _ScenarioManager._is_promotable_to_primary(scenario_1)
+    assert _ScenarioManager._is_promotable_to_primary(scenario_1.id)
+    assert scenario_2.is_primary
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_2)
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_2.id)
+
+
 def test_get_set_primary_scenario():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()

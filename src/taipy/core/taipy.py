@@ -261,6 +261,15 @@ def get_primary_scenarios() -> List[Scenario]:
     return _ScenarioManagerFactory._build_manager()._get_primary_scenarios()
 
 
+def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
+    """Indicate if a scenario can be promoted to a primary scenario.
+
+    Returns:
+        True if the given scenario can be promoted to be a primary scenario. False otherwise.
+    """
+    return _ScenarioManagerFactory._build_manager()._is_promotable_to_primary(scenario)
+
+
 def set_primary(scenario: Scenario):
     """Promote a scenario as the primary scenario of its cycle.
 
