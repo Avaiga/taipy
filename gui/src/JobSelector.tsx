@@ -43,12 +43,15 @@ import { FilterList } from "@mui/icons-material";
 import { Job, JobStatus, Jobs } from "./utils/types";
 import {
     createRequestUpdateAction,
+    createSendActionNameAction,
     getUpdateVar,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
+    useDynamicProperty,
     useModule,
 } from "taipy-gui";
 import { useFormik } from "formik";
+import { useClassNames } from "./utils";
 
 interface JobSelectorProps {
     updateVarName?: string;
@@ -58,6 +61,20 @@ interface JobSelectorProps {
     onSelect?: string;
     updateVars: string;
     id?: string;
+    className?: string;
+    dynamicClassName?: string;
+    height: string;
+    displayJobId?: boolean;
+    defaultDisplayJobId: boolean;
+    displayEntityLabel?: boolean;
+    defaultDisplayEntityLabel: boolean;
+    displayEntityId?: boolean;
+    defaultDisplayEntityId: boolean;
+    displaySubmitId?: boolean;
+    defaultDisplaySubmitId: boolean;
+    displayDate?: boolean;
+    defaultDisplayDate: boolean;
+    onJobAction: string;
 }
 
 const selectedSx = { flex: "1 1 100%" };
@@ -84,35 +101,14 @@ const ChipStatus = ({ status }: { status: number }) => {
     return <Chip label={statusText} variant={variant} color={colorFill} />;
 };
 
-const JobSelectorColumns = [
-    {
-        id: "jobId",
-        primaryLabel: "Job",
-        secondaryLabel: "ID",
-        columnIndex: 0,
-    },
-    {
-        id: "submitID",
-        primaryLabel: "Submit ID",
-        columnIndex: 4,
-    },
-    {
-        id: "submitEntity",
-        primaryLabel: "Submitted entity",
-        secondaryLabel: "ID",
-        columnIndex: 3,
-    },
-    {
-        id: "createdDt",
-        primaryLabel: "Creation date",
-        columnIndex: 5,
-    },
-    {
-        id: "status",
-        primaryLabel: "Status",
-        columnIndex: 6,
-    },
-];
+export type JobSelectorColumns = {
+    id: string;
+    primaryLabel: string;
+    showPrimaryLabel?: boolean;
+    secondaryLabel?: string;
+    showSecondayLabel?: boolean;
+    columnIndex: number;
+};
 
 export type FilterData = {
     data: number;
@@ -125,8 +121,9 @@ interface FilterProps {
     anchorEl: HTMLButtonElement | null;
     handleFilterClose: () => void;
     handleApplyFilter: (filters: FilterData[]) => void;
+    columns: JobSelectorColumns[];
 }
-const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter }: FilterProps) => {
+const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns }: FilterProps) => {
     const form = useFormik({
         initialValues: {
             filters: [],
@@ -203,13 +200,15 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter }: Filter
                                                   label="Job Label"
                                                   {...form.getFieldProps(`filters.${index}.data`)}
                                               >
-                                                  {JobSelectorColumns.map((item, index) => {
-                                                      return (
-                                                          <MenuItem key={index} value={item.columnIndex}>
-                                                              {item.primaryLabel}
-                                                          </MenuItem>
-                                                      );
-                                                  })}
+                                                  {columns
+                                                      .filter((i) => i.showPrimaryLabel || i.showSecondayLabel)
+                                                      .map((item, index) => {
+                                                          return (
+                                                              <MenuItem key={index} value={item.columnIndex}>
+                                                                  {item.primaryLabel}
+                                                              </MenuItem>
+                                                          );
+                                                      })}
                                               </Select>
                                           </FormControl>
                                       </Grid>
@@ -253,13 +252,15 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter }: Filter
                                     label="Job Label"
                                     {...form.getFieldProps(`newData`)}
                                 >
-                                    {JobSelectorColumns.map((item, index) => {
-                                        return (
-                                            <MenuItem key={index} value={item.columnIndex}>
-                                                {item.primaryLabel}
-                                            </MenuItem>
-                                        );
-                                    })}
+                                    {columns
+                                        .filter((i) => i.showPrimaryLabel || i.showSecondayLabel)
+                                        .map((item, index) => {
+                                            return (
+                                                <MenuItem key={index} value={item.columnIndex}>
+                                                    {item.primaryLabel}
+                                                </MenuItem>
+                                            );
+                                        })}
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -303,25 +304,28 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter }: Filter
 interface JobSelectedTableHeadProps {
     selectAllTrue: boolean;
     handleSelectAllClick?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    columns: JobSelectorColumns[];
 }
-function JobSelectedTableHead({ selectAllTrue, handleSelectAllClick }: JobSelectedTableHeadProps) {
+function JobSelectedTableHead({ selectAllTrue, handleSelectAllClick, columns }: JobSelectedTableHeadProps) {
     return (
         <TableHead>
             <TableRow>
                 <TableCell padding="checkbox">
                     <Checkbox color="primary" checked={selectAllTrue} onChange={handleSelectAllClick} />
                 </TableCell>
-                {JobSelectorColumns.map((item, index) => {
-                    return (
-                        <TableCell key={index}>
-                            {item.secondaryLabel ? (
-                                <ListItemText primary={item.primaryLabel} secondary={item.secondaryLabel} />
-                            ) : (
-                                item.primaryLabel
-                            )}
-                        </TableCell>
-                    );
-                })}
+                {columns
+                    .filter((i) => i.showPrimaryLabel || i.showSecondayLabel)
+                    .map((item, index) => {
+                        return (
+                            <TableCell key={index}>
+                                {item.secondaryLabel ? (
+                                    <ListItemText primary={item.primaryLabel} secondary={item.secondaryLabel} />
+                                ) : (
+                                    item.primaryLabel
+                                )}
+                            </TableCell>
+                        );
+                    })}
                 <TableCell>Actions</TableCell>
             </TableRow>
         </TableHead>
@@ -334,6 +338,11 @@ interface JobSelectedTableRowProps {
     handleCheckboxClick: (event: React.MouseEvent<HTMLElement>, name: string) => void;
     handleCancelJobs: (id: string[]) => void;
     handleDeleteJobs: (id: string[]) => void;
+    displayJobId?: boolean;
+    displayEntityLabel?: boolean;
+    displayEntityId?: boolean;
+    displaySubmitId?: boolean;
+    displayDate?: boolean;
 }
 function JobSelectedTableRow({
     row,
@@ -341,6 +350,11 @@ function JobSelectedTableRow({
     handleCheckboxClick,
     handleCancelJobs,
     handleDeleteJobs,
+    displayJobId,
+    displayEntityLabel,
+    displayEntityId,
+    displaySubmitId,
+    displayDate,
 }: JobSelectedTableRowProps) {
     const [id, jobName, entityId, entityName, submitId, creationDate, status] = row;
 
@@ -368,14 +382,24 @@ function JobSelectedTableRow({
             <TableCell padding="checkbox">
                 <Checkbox color="primary" checked={isItemSelected} onClick={(event) => doCheckboxClick(event, id)} />
             </TableCell>
-            <TableCell component="th" id={id} scope="row" padding="none">
-                <ListItemText primary={jobName} secondary={id} />
-            </TableCell>
-            <TableCell>{submitId}</TableCell>
-            <TableCell>
-                <ListItemText primary={entityName} secondary={entityId} />
-            </TableCell>
-            <TableCell>{creationDate}</TableCell>
+            {displayJobId ? (
+                <TableCell component="th" id={id} scope="row" padding="none">
+                    <ListItemText primary={jobName} secondary={id} />
+                </TableCell>
+            ) : null}
+            {displaySubmitId ? <TableCell>{submitId}</TableCell> : null}
+            {displayEntityLabel || displayEntityId ? (
+                <TableCell>
+                    {!displayEntityLabel && displayEntityId ? (
+                        entityId
+                    ) : !displayEntityId && displayEntityLabel ? (
+                        entityName
+                    ) : (
+                        <ListItemText primary={entityName} secondary={entityId} />
+                    )}
+                </TableCell>
+            ) : null}
+            {displayDate ? <TableCell>{creationDate}</TableCell> : null}
             <TableCell>
                 <ChipStatus status={status} />
             </TableCell>
@@ -408,7 +432,15 @@ const JobSelector = (props: JobSelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
+    const className = useClassNames(props.className, props.dynamicClassName);
+
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
+
+    const displayJobId = useDynamicProperty(props.displayJobId, props.defaultDisplayJobId, true);
+    const displayEntityLabel = useDynamicProperty(props.displayEntityLabel, props.defaultDisplayEntityLabel, true);
+    const displayEntityId = useDynamicProperty(props.displayEntityId, props.defaultDisplayEntityId, true);
+    const displaySubmitId = useDynamicProperty(props.displaySubmitId, props.defaultDisplaySubmitId, true);
+    const displayDate = useDynamicProperty(props.displayDate, props.defaultDisplayDate, true);
 
     const headerToolbarSx = useMemo(
         () => ({
@@ -419,6 +451,49 @@ const JobSelector = (props: JobSelectorProps) => {
             }),
         }),
         [selected]
+    );
+
+    const jobSelectorColumns: JobSelectorColumns[] = useMemo(
+        () => [
+            {
+                id: "jobId",
+                primaryLabel: "Job",
+                showPrimaryLabel: displayJobId,
+                secondaryLabel: "ID",
+                showSecondayLabel: displayJobId,
+                columnIndex: 0,
+            },
+            {
+                id: "submitID",
+                primaryLabel: "Submit ID",
+                columnIndex: 4,
+                showPrimaryLabel: displaySubmitId,
+                showSecondayLabel: displaySubmitId,
+            },
+            {
+                id: "submitEntity",
+                primaryLabel: "Submitted entity",
+                secondaryLabel: "ID",
+                columnIndex: 3,
+                showPrimaryLabel: displayEntityLabel,
+                showSecondayLabel: displayEntityId,
+            },
+            {
+                id: "createdDt",
+                primaryLabel: "Creation date",
+                columnIndex: 5,
+                showPrimaryLabel: displayDate,
+                showSecondayLabel: displayDate,
+            },
+            {
+                id: "status",
+                primaryLabel: "Status",
+                columnIndex: 6,
+                showPrimaryLabel: true,
+                showSecondayLabel: true,
+            },
+        ],
+        [displayDate, displayEntityId, displayEntityLabel, displayJobId, displaySubmitId]
     );
 
     const handleClick = useCallback(
@@ -452,12 +527,18 @@ const JobSelector = (props: JobSelectorProps) => {
         [jobRows]
     );
 
-    const handleCancelJobs = useCallback((id: string[]) => {
-        //TODO: cancel job
-    }, []);
-    const handleDeleteJobs = useCallback((id: string[]) => {
-        //TODO: delete job
-    }, []);
+    const handleCancelJobs = useCallback(
+        (id: string[]) => {
+            dispatch(createSendActionNameAction(props.id, module, props.onJobAction, id));
+        },
+        [dispatch, module, props.id, props.onJobAction]
+    );
+    const handleDeleteJobs = useCallback(
+        (id: string[]) => {
+            dispatch(createSendActionNameAction(props.id, module, props.onJobAction, id));
+        },
+        [dispatch, module, props.id, props.onJobAction]
+    );
 
     const selectedAllowedCancelJobs = useMemo(
         () =>
@@ -536,8 +617,10 @@ const JobSelector = (props: JobSelectorProps) => {
 
     const open = Boolean(anchorEl);
 
+    const tableHeightSx = useMemo(() => ({ maxHeight: props.height || "50vh" }), [props.height]);
+
     return (
-        <Box>
+        <Box className={className}>
             <Paper sx={containerSx}>
                 <Toolbar sx={headerToolbarSx}>
                     <Tooltip title="Filter">
@@ -582,13 +665,15 @@ const JobSelector = (props: JobSelectorProps) => {
                         anchorEl={anchorEl}
                         handleFilterClose={handleFilterClose}
                         handleApplyFilter={handleApplyFilters}
+                        columns={jobSelectorColumns}
                     />
                 </Toolbar>
-                <TableContainer>
+                <TableContainer sx={tableHeightSx}>
                     <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium">
                         <JobSelectedTableHead
                             selectAllTrue={jobRows?.length === selected?.length}
                             handleSelectAllClick={handleSelectAllClick}
+                            columns={jobSelectorColumns}
                         />
                         <TableBody>
                             {jobRows
@@ -603,6 +688,11 @@ const JobSelector = (props: JobSelectorProps) => {
                                               key={index}
                                               handleDeleteJobs={handleDeleteJobs}
                                               handleCancelJobs={handleCancelJobs}
+                                              displaySubmitId={displaySubmitId}
+                                              displayJobId={displayJobId}
+                                              displayEntityLabel={displayEntityLabel}
+                                              displayEntityId={displayEntityId}
+                                              displayDate={displayDate}
                                           />
                                       );
                                   })
