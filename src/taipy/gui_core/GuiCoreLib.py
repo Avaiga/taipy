@@ -24,6 +24,7 @@ from taipy.core import get as core_get
 from taipy.core import (
     get_cycles_scenarios,
     get_data_nodes,
+    get_jobs,
     get_scenarios,
     is_deletable,
     is_promotable,
@@ -59,16 +60,6 @@ class _EntityType(Enum):
     SCENARIO = 1
     PIPELINE = 2
     DATANODE = 3
-
-Config.configure_global_app(read_entity_retry=3)
-
-
-class EntityType(Enum):
-    CYCLE = 0
-    SCENARIO = 1
-    PIPELINE = 2
-    DATANODE = 3
-
 
 class _GuiCoreScenarioAdapter(_TaipyBase):
     __INNER_PROPS = ["name"]
