@@ -141,6 +141,12 @@ class _TaskManager(_Manager[Task]):
         return entity_ids
 
     @classmethod
+    def _is_submittable(cls, task: Union[Task, TaskId]) -> bool:
+        if isinstance(task, str):
+            task = cls._get(task)
+        return isinstance(task, Task)
+
+    @classmethod
     def _submit(
         cls,
         task: Union[TaskId, Task],

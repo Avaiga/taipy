@@ -64,6 +64,21 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
         return _DataManagerFactory._build_manager()._set(entity)
 
 
+def is_submittable(entity: Union[Scenario, ScenarioId, Pipeline, PipelineId, Task, TaskId]) -> bool:
+    """Indicate if an entity can be submitted.
+
+    Returns:
+        True if the given entity can be submitted. False otherwise.
+    """
+    if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
+        return _ScenarioManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    if isinstance(entity, Pipeline) or (isinstance(entity, str) and entity.startswith(Pipeline._ID_PREFIX)):
+        return _PipelineManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
+        return _TaskManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    return False
+
+
 @_warn_no_core_service()
 def submit(
     entity: Union[Scenario, Pipeline, Task],
@@ -259,6 +274,15 @@ def get_primary_scenarios() -> List[Scenario]:
         The list of all primary scenarios.
     """
     return _ScenarioManagerFactory._build_manager()._get_primary_scenarios()
+
+
+def is_promotable(scenario: Union[Scenario, ScenarioId]) -> bool:
+    """Indicate if a scenario can be promoted to a primary scenario.
+
+    Returns:
+        True if the given scenario can be promoted to be a primary scenario. False otherwise.
+    """
+    return _ScenarioManagerFactory._build_manager()._is_promotable_to_primary(scenario)
 
 
 def set_primary(scenario: Scenario):
@@ -662,7 +686,7 @@ def get_cycles_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
 def get_entities_by_config_id(
     config_id: str,
 ) -> Union[List, List[Task], List[DataNode], List[Pipeline], List[Scenario]]:
-    """Get the entities by its cofig id.
+    """Get the entities by its config id.
 
     Parameters:
         config_id (str): The config id of the entities

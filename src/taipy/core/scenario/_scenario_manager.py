@@ -140,6 +140,12 @@ class _ScenarioManager(_Manager[Scenario]):
             pipeline_manager._set(i)
 
     @classmethod
+    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+        if isinstance(scenario, str):
+            scenario = cls._get(scenario)
+        return isinstance(scenario, Scenario)
+
+    @classmethod
     def _submit(
         cls,
         scenario: Union[Scenario, ScenarioId],
@@ -205,6 +211,14 @@ class _ScenarioManager(_Manager[Scenario]):
             if scenario.is_primary:
                 primary_scenarios.append(scenario)
         return primary_scenarios
+
+    @classmethod
+    def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+        if isinstance(scenario, str):
+            scenario = cls._get(scenario)
+        if scenario and not scenario.is_primary and scenario.cycle:
+            return True
+        return False
 
     @classmethod
     def _set_primary(cls, scenario: Scenario):

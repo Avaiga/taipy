@@ -12,7 +12,7 @@
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
-from taipy import Config
+from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds
@@ -127,6 +127,12 @@ class _PipelineManager(_Manager[Pipeline]):
         task_manager = _TaskManagerFactory._build_manager()
         for i in tasks:
             task_manager._set(i)
+
+    @classmethod
+    def _is_submittable(cls, pipeline: Union[Pipeline, PipelineId]) -> bool:
+        if isinstance(pipeline, str):
+            pipeline = cls._get(pipeline)
+        return isinstance(pipeline, Pipeline)
 
     @classmethod
     def _submit(
