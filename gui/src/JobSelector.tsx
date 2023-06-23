@@ -590,7 +590,7 @@ function JobSelectedTableRow({
                     )}
                 </TableCell>
             ) : null}
-            {displayDate ? <TableCell>{creationDate}</TableCell> : null}
+            {displayDate ? <TableCell>{creationDate ? new Date(creationDate).toLocaleString() : ""}</TableCell> : null}
             <TableCell>
                 <ChipStatus status={status} />
             </TableCell>
@@ -784,6 +784,8 @@ const JobSelector = (props: JobSelectorProps) => {
                             rowColumnValue = `${job[2]?.toString()?.toLowerCase() || ""}${
                                 job[3]?.toString()?.toLowerCase() || ""
                             }`;
+                        } else if (filter.data === 5) {
+                            rowColumnValue = new Date(job[5]).toLocaleString();
                         } else {
                             rowColumnValue = job[filter.data]?.toString()?.toLowerCase() || "";
                         }
