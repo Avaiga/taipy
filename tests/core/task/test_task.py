@@ -206,9 +206,12 @@ def test_auto_set_and_reload(data_node):
 
         task.function = print
 
+        assert task.config_id == "foo"
+        assert task.owner_id is None
         assert task.function == mock_func
         assert task._is_in_context
 
+    assert task_1.config_id == "foo"
     assert task_1.owner_id is None
     assert task_1.function == print
     assert not task_1._is_in_context

@@ -161,11 +161,12 @@ def test_auto_set_and_reload(current_datetime):
         cycle.creation_date = new_datetime_2
         cycle.start_date = new_datetime_2
         cycle.end_date = new_datetime_2
-        cycle.name = "def"
-        cycle._name = "abc"
+        cycle.name = "abc"
+        assert cycle.name == "def"
+        assert cycle._name == "abc"
 
-    assert cycle_1.frequency == Frequency.YEARLY
-    assert cycle_1.creation_date == new_datetime_2
-    assert cycle_1.start_date == new_datetime_2
-    assert cycle_1.end_date == new_datetime_2
-    assert cycle_1.name == "abc"
+    assert cycle.frequency == Frequency.YEARLY
+    assert cycle.creation_date == new_datetime_2
+    assert cycle.start_date == new_datetime_2
+    assert cycle.end_date == new_datetime_2
+    assert cycle.name == "abc"
