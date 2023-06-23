@@ -52,7 +52,6 @@ type ScenarioEditPayload = {
 interface ScenarioViewerProps {
     id?: string;
     expandable?: boolean;
-    expanded?: boolean;
     defaultExpanded?: boolean;
     updateVarName?: string;
     defaultScenario?: string;
@@ -229,6 +228,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const {
         id = "",
         expandable = true,
+        defaultExpanded = false,
         showConfig = false,
         showCycle = false,
         showDelete = true,
@@ -271,7 +271,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     }, [props.scenario, props.defaultScenario]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
-    const expanded = useDynamicProperty(props.expanded, props.defaultExpanded, false);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const [deleteDialog, setDeleteDialogOpen] = useState(false);
@@ -302,8 +301,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     });
 
     // userExpanded
-    const [userExpanded, setUserExpanded] = useState(false);
-    const onExpand = useCallback((e: SyntheticEvent, exp: boolean) => setUserExpanded(exp), []);
+    const [userExpanded, setUserExpanded] = useState(isScenario && defaultExpanded);
+    const onExpand = useCallback(
+        (e: SyntheticEvent, expand: boolean) => expandable && setUserExpanded(expand),
+        [expandable]
+    );
 
     // submits
     const submitPipeline = useCallback(
@@ -463,8 +465,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 }))
             );
         setLabel(scLabel);
-        isScenario || setUserExpanded(false);
-    }, [scTags, scProperties, scLabel, isScenario, showTags, showProperties]);
+        setUserExpanded(defaultExpanded && isScenario);
+    }, [scTags, scProperties, scLabel, isScenario, showTags, showProperties, defaultExpanded]);
 
     // Refresh on broadcast
     useEffect(() => {
@@ -478,7 +480,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         <>
             <Box sx={MainBoxSx} id={id} onClick={onFocus} className={className}>
                 <Accordion
-                    defaultExpanded={expandable && expanded}
+                    defaultExpanded={defaultExpanded}
                     expanded={userExpanded}
                     onChange={onExpand}
                     disabled={!isScenario}
