@@ -179,42 +179,86 @@ def mock_func():
 
 
 def test_auto_set_and_reload(data_node):
-    task_1 = Task(config_id="foo", properties={}, function=print, input=None, output=None, owner_id=None)
+    task_1 = Task(
+        config_id="foo", properties={}, function=print, input=None, output=None, owner_id=None, skippable=False
+    )
 
     _DataManager._set(data_node)
     _TaskManager._set(task_1)
 
     task_2 = _TaskManager._get(task_1)
 
+    # auto set & reload on function attribute
     assert task_1.function == print
-    task_1.function = mock_func
+    assert task_2.function == print
+    task_1.function = sum
+    assert task_1.function == sum
+    assert task_2.function == sum
+    task_2.function = mock_func
     assert task_1.function == mock_func
     assert task_2.function == mock_func
 
+    # auto set & reload on skippable attribute
+    assert not task_1.skippable
+    assert not task_2.skippable
+    task_1.skippable = True
+    assert task_1.skippable
+    assert task_2.skippable
+    task_2.skippable = False
+    assert not task_1.skippable
+    assert not task_2.skippable
+
+    # auto set & reload on parent_ids attribute (set() object does not have auto set yet)
     assert task_1.parent_ids == set()
     assert task_2.parent_ids == set()
-    task_1._parent_ids.update(["p1"])
+    task_1._parent_ids.update(["sc2"])
     _TaskManager._set(task_1)
-    assert task_1.parent_ids == {"p1"}
-    assert task_2.parent_ids == {"p1"}
+    assert task_1.parent_ids == {"sc2"}
+    assert task_2.parent_ids == {"sc2"}
+    task_2._parent_ids.clear()
+    task_2._parent_ids.update(["sc1"])
+    _TaskManager._set(task_2)
+    assert task_1.parent_ids == {"sc1"}
+    assert task_2.parent_ids == {"sc1"}
+
+    # auto set & reload on properties attribute
+    assert task_1.properties == {}
+    assert task_2.properties == {}
+    task_1._properties["qux"] = 4
+    assert task_1.properties["qux"] == 4
+    assert task_2.properties["qux"] == 4
+
+    assert task_1.properties == {"qux": 4}
+    assert task_2.properties == {"qux": 4}
+    task_2._properties["qux"] = 5
+    assert task_1.properties["qux"] == 5
+    assert task_2.properties["qux"] == 5
 
     with task_1 as task:
         assert task.config_id == "foo"
         assert task.owner_id is None
         assert task.function == mock_func
+        assert not task.skippable
         assert task._is_in_context
+        assert task.properties["qux"] == 5
 
         task.function = print
+        task.skippable = True
+        task.properties["qux"] = 9
 
         assert task.config_id == "foo"
         assert task.owner_id is None
         assert task.function == mock_func
+        assert not task.skippable
         assert task._is_in_context
+        assert task.properties["qux"] == 5
 
     assert task_1.config_id == "foo"
     assert task_1.owner_id is None
     assert task_1.function == print
+    assert task.skippable
     assert not task_1._is_in_context
+    assert task_1.properties["qux"] == 9
 
 
 def test_get_parents(task):
