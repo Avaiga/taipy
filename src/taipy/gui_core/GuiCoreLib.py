@@ -20,7 +20,15 @@ from taipy.config import Config
 from taipy.core import Cycle, DataNode, Pipeline, Scenario, create_scenario
 from taipy.core import delete as core_delete
 from taipy.core import get as core_get
-from taipy.core import get_cycles_scenarios, get_data_nodes, get_scenarios, is_deletable, set_primary
+from taipy.core import (
+    get_cycles_scenarios,
+    get_data_nodes,
+    get_scenarios,
+    is_deletable,
+    is_promotable,
+    is_submittable,
+    set_primary,
+)
 from taipy.core import submit as core_submit
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
@@ -68,9 +76,11 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                     scenario.get_simple_label(),
                     list(scenario.tags),
                     [(k, v) for k, v in scenario.properties.items() if k not in _GuiCoreScenarioAdapter.__INNER_PROPS],
-                    [(p.id, p.get_simple_label()) for p in scenario.pipelines.values()],
+                    [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.pipelines.values()],
                     list(scenario.properties.get("authorized_tags", set())),
                     is_deletable(scenario),  # deletable
+                    is_promotable(scenario),
+                    is_submittable(scenario),
                 ]
         return None
 
