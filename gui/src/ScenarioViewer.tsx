@@ -89,6 +89,7 @@ interface PipelinesRowProps {
     onFocus: (e: MouseEvent<HTMLElement>) => void;
     focusName: string;
     setFocusName: (name: string) => void;
+    submittable: boolean;
 }
 
 const MainBoxSx = {
@@ -144,6 +145,7 @@ const PipelineRow = ({
     onFocus,
     focusName,
     setFocusName,
+    submittable,
 }: PipelinesRowProps) => {
     const [pipeline, setPipeline] = useState<string>(label);
 
@@ -207,8 +209,8 @@ const PipelineRow = ({
             </Grid>
             <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
                 {submit ? (
-                    <IconButton size="small" onClick={onSubmitPipeline} disabled={!enableScenarioFields || !active}>
-                        <Send color={disableColor("info", !enableScenarioFields)} />
+                    <IconButton size="small" onClick={onSubmitPipeline} disabled={!enableScenarioFields || !active || !submittable}>
+                        <Send color={disableColor("info", !enableScenarioFields || !active || !submittable)} />
                     </IconButton>
                 ) : null}
             </Grid>
@@ -251,6 +253,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scPipelines,
         scAuthorizedTags,
         scDeletable,
+        scPromotable,
+        scSubmittable,
         isScenario,
     ] = useMemo(() => {
         let sc: ScenarioFull | undefined = undefined;
@@ -263,7 +267,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 // DO nothing
             }
         }
-        return sc ? [...sc, true] : ["", false, "", "", "", [], [], [], [], false, false];
+        return sc ? [...sc, true] : ["", false, "", "", "", [], [], [], [], false, false, false, false];
     }, [props.scenario, props.defaultScenario]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -507,9 +511,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     <IconButton
                                         sx={IconPaddingSx}
                                         onClick={submitScenario}
-                                        disabled={!isScenario || !active}
+                                        disabled={!isScenario || !active || !scSubmittable}
                                     >
-                                        <Send fontSize="medium" color={disableColor("info", !isScenario || !active)} />
+                                        <Send fontSize="medium" color={disableColor("info", !isScenario || !active || !scSubmittable)} />
                                     </IconButton>
                                 ) : null}
                             </Grid>
@@ -844,7 +848,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
 
                                     {scPipelines &&
                                         scPipelines.map((item, index) => {
-                                            const [key, value] = item;
+                                            const [key, value, submittable] = item;
                                             return (
                                                 <PipelineRow
                                                     active={active}
@@ -859,6 +863,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     onFocus={onFocus}
                                                     focusName={focusName}
                                                     setFocusName={setFocusName}
+                                                    submittable={submittable}
                                                 />
                                             );
                                         })}
@@ -882,7 +887,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 <Button
                                     variant="outlined"
                                     color="primary"
-                                    disabled={!active || !isScenario || scPrimary}
+                                    disabled={!active || !isScenario || scPrimary || !scPromotable}
                                     onClick={openPrimaryDialog}
                                 >
                                     PROMOTE TO PRIMARY
