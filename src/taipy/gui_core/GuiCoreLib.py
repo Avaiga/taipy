@@ -31,7 +31,6 @@ from taipy.core import (
     set_primary,
 )
 from taipy.core import submit as core_submit
-import taipy as tp
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
