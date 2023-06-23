@@ -22,8 +22,10 @@ export type ScenarioFull = [
     string,
     string[],
     Array<[string, string]>,
-    Array<[string, string]>,
+    Array<[string, string, boolean]>,
     string[],
+    boolean,
+    boolean,
     boolean
 ];
 
@@ -38,6 +40,8 @@ export enum ScFProps {
     pipelines,
     authorized_tags,
     deletable,
+    promotable,
+    submittable,
 }
 export const ScenarioFullLength = Object.keys(ScFProps).length / 2;
 
