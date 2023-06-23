@@ -21,15 +21,7 @@ from taipy.config import Config
 from taipy.core import Cycle, DataNode, Pipeline, Scenario, create_scenario
 from taipy.core import delete as core_delete
 from taipy.core import get as core_get
-from taipy.core import (
-    get_cycles_scenarios,
-    get_data_nodes,
-    get_scenarios,
-    is_deletable,
-    is_promotable,
-    is_submittable,
-    set_primary,
-)
+from taipy.core import get_cycles_scenarios, get_data_nodes, is_deletable, set_primary
 from taipy.core import submit as core_submit
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
