@@ -132,6 +132,7 @@ class Cycle(_Entity, _Labeled):
     @property
     def properties(self):
         self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties._entity_owner = self
         return self._properties
 
     @staticmethod

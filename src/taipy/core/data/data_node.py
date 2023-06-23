@@ -267,6 +267,7 @@ class DataNode(_Entity, _Labeled):
     def properties(self):
         """Dictionary of custom properties."""
         self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties._entity_owner = self
         return self._properties
 
     def __eq__(self, other):
