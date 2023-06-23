@@ -52,7 +52,7 @@ This creates the 'taipy-gui' directory that holds all the package's source code.
 
 ### Building the JavaScript bundle
 
-Taipy GUI has some code dealing with the client side of the Web applications.
+Taipy GUI has some code dealing with the client side of the web applications.
 This code is written in [TypeScript](https://www.typescriptlang.org/), relies on
 [React](https://reactjs.org/) components, and is packaged into a JavaScript bundle
 that is sent to browsers when they connect to all Taipy GUI applications.
@@ -75,9 +75,9 @@ $ cd gui
 $ cd dom
 $ npm i
 $ cd ..
-# Install the Web app dependencies
+# Install the web app dependencies
 $ npm i --omit=optional
-# Build the Web application
+# Build the web app
 $ npm run build
 $ cd ..
 # Current directory is the repository's root directory
@@ -103,14 +103,15 @@ TypeScript code from your debugger.
 >
 > When you are developing front-end code for the Taipy GUI package, it may
 > be cumbersome to have to install the package over and over when you know
-> that all that has changed is the JavaScript bundle.
+> that all that has changed is the JavaScript bundle that makes the Taipy
+> web app.
 >
 > By default, the Taipy GUI application searches for the front-end code
 > in the `[taipy-gui-package-dir]/taipy/src/gui/webapp` directory.<br/>
 > You can, however, set the environment variable `TAIPY_GUI_WEBAPP_PATH`
-> to the location of your choice, and Taipy GUI will look for the Web
+> to the location of your choice, and Taipy GUI will look for the web
 > app in that directory.<br/>
-> If you set this variable to the location where you build the Web app
+> If you set this variable to the location where you build the web app
 > repeatedly, you will no longer have to reinstall Taipy GUI before you
 > try your code again.
 

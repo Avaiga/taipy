@@ -25,7 +25,7 @@ class Page(ABC):
     """Generic page generator.
 
     The `Page` class transforms template text into actual pages that can be displayed
-    on a Web browser.
+    on a web browser.
 
     When a page is requested to be displayed, it is converted into HTML
     code that can be sent to the client. All control placeholders are
@@ -39,7 +39,7 @@ class Page(ABC):
         Arguments:
             content (str): The text content or the path to the file holding the text to be transformed.
 
-        If _content_ is a path to a readable file, the file is read entirely as the text template.
+        If *content* is a path to a readable file, the file is read entirely as the text template.
         """
         self._content = ""
         self._base_element: t.Optional["ElementApi"] = None
@@ -59,7 +59,7 @@ class Page(ABC):
         if path.exists(content) and path.isfile(content):
             with open(t.cast(str, content), "r") as f:
                 self._content = f.read()
-                # save file path for error handling
+                # Save file path for error handling
                 self._filepath = content
         else:
             self._content = content
@@ -74,7 +74,7 @@ class Page(ABC):
 
         Arguments:
             content (str): The text content or the path to the file holding the text to be transformed.
-                If _content_ is a path to a readable file, the file is read entirely as the text
+                If *content* is a path to a readable file, the file is read entirely as the text
                 template.
 
         Exceptions:

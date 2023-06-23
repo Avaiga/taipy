@@ -59,7 +59,7 @@ class _DataScopes:
         if self.__single_client:
             return
         if id is None:
-            _warn("Empty session id, might be due to unestablished Web Socket connection.")
+            _warn("Empty session id, might be due to unestablished WebSocket connection.")
             return
         if id not in self.__scopes:
             self.__scopes[id] = SimpleNamespace()
@@ -68,7 +68,7 @@ class _DataScopes:
         if self.__single_client:
             return
         if id is None:
-            _warn("Empty session id, might be due to unestablished Web Socket connection.")
+            _warn("Empty session id, might be due to unestablished WebSocket connection.")
             return
         if id in self.__scopes:
             del self.__scopes[id]

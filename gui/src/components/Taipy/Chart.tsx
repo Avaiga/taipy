@@ -417,7 +417,7 @@ const Chart = (props: ChartProp) => {
                 console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
             }
             if (typeof plconf !== "object" || plconf === null || Array.isArray(plconf)) {
-                console.info("Error Chart.plot_config is not a dictionnary");
+                console.info("Error Chart.plot_config is not a dictionary");
                 plconf = {};
             }
         }
