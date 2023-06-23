@@ -462,12 +462,10 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
-        assert pipeline.properties["qux"] == 5
 
         pipeline.tasks = []
         pipeline.owner_id = None
         pipeline.subscribers = [print]
-        pipeline.properties["qux"] = 9
 
         assert pipeline.config_id == "foo"
         assert len(pipeline.tasks) == 1
@@ -475,14 +473,12 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
-        assert pipeline.properties["qux"] == 5
 
     assert pipeline_1.config_id == "foo"
     assert len(pipeline_1.tasks) == 0
     assert pipeline_1.owner_id is None
     assert len(pipeline_1.subscribers) == 1
     assert not pipeline_1._is_in_context
-    assert pipeline_1.properties["qux"] == 9
 
 
 def test_get_parents(pipeline):

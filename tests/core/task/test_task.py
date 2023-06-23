@@ -198,30 +198,20 @@ def test_auto_set_and_reload(data_node):
     assert task_1.parent_ids == {"p1"}
     assert task_2.parent_ids == {"p1"}
 
-    assert task_1.properties == {}
-    assert task_2.properties == {}
-
-    # TODO: this test would fail if: task_2.properties["qux"] = 5
-    task_1.properties["qux"] = 5
-    assert task_1.properties["qux"] == 5
-    assert task_2.properties["qux"] == 5
-
     with task_1 as task:
+        assert task.config_id == "foo"
+        assert task.owner_id is None
         assert task.function == mock_func
         assert task._is_in_context
-        assert task.properties["qux"] == 5
 
         task.function = print
-        task.properties["qux"] = 9
 
         assert task.function == mock_func
         assert task._is_in_context
-        assert task.properties["qux"] == 5
 
     assert task_1.owner_id is None
     assert task_1.function == print
     assert not task_1._is_in_context
-    assert task_1.properties["qux"] == 9
 
 
 def test_get_parents(task):

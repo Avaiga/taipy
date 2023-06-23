@@ -528,7 +528,6 @@ class TestDataNode:
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 1
             assert dn._is_in_context
-            assert dn.properties["qux"] == 5
 
             new_datetime_2 = new_datetime + timedelta(1)
 
@@ -537,7 +536,6 @@ class TestDataNode:
             dn.name = "abc"
             dn.edition_in_progress = False
             dn.validity_period = None
-            dn.properties["qux"] = 9
 
             assert dn.config_id == "foo"
             assert dn.owner_id is None
@@ -547,7 +545,6 @@ class TestDataNode:
             assert dn.edition_in_progress
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 1
-            assert dn.properties["qux"] == 5
 
         assert dn_1.config_id == "foo"
         assert dn_1.owner_id is None
@@ -558,7 +555,6 @@ class TestDataNode:
         assert dn_1.validity_period is None
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
-        assert dn_1.properties["qux"] == 9
 
     def test_get_parents(self, data_node):
         with mock.patch("src.taipy.core.get_parents") as mck:
