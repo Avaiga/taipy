@@ -131,14 +131,8 @@ class Cycle(_Entity, _Labeled):
 
     @property
     def properties(self):
-        properties = _reload(self._MANAGER_NAME, self)._properties
-        if not self._is_in_context:
-            properties._entity_owner = self
-            self._properties = properties
-        else:
-            properties._entity_owner = None
-            properties._current_in_context_entity_owner = self
-        return properties
+        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        return self._properties
 
     @staticmethod
     def _new_id(name: str) -> CycleId:

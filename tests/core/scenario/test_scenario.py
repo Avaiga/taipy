@@ -281,8 +281,8 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         assert scenario._is_in_context
         assert scenario.name == "baz"
 
-        scenario.config_id = "foo"
         new_datetime_2 = new_datetime + timedelta(1)
+        scenario.config_id = "foo"
         scenario.pipelines = []
         scenario.creation_date = new_datetime_2
         scenario.cycle = None

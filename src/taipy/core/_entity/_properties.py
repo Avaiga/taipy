@@ -24,7 +24,7 @@ class _Properties(UserDict):
         super(_Properties, self).__setitem__(key, value)
         from ... import core as tp
 
-        if hasattr(self, "_entity_owner") and getattr(self, "_entity_owner"):
+        if hasattr(self, "_entity_owner"):
             to_publish_event_parameters = [
                 _ENTITY_TO_EVENT_ENTITY_TYPE[self._entity_owner._MANAGER_NAME],
                 self._entity_owner.id,
@@ -32,13 +32,10 @@ class _Properties(UserDict):
                 key,
             ]
             if not self._entity_owner._is_in_context:
-                self._entity_owner._properties = self
                 tp.set(self._entity_owner)
                 _publish_event(*to_publish_event_parameters)
             else:
                 self._entity_owner._in_context_attributes_changed_collector.append(to_publish_event_parameters)
-        elif hasattr(self, "_current_in_context_entity_owner"):
-            self._current_in_context_entity_owner._properties[key] = value
 
     def __getitem__(self, key):
         from taipy.config.common._template_handler import _TemplateHandler as _tpl

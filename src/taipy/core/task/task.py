@@ -101,13 +101,8 @@ class Task(_Entity, _Labeled):
 
     @property  # type: ignore
     def properties(self):
-        properties = _reload(self._MANAGER_NAME, self)._properties
-        if not self._is_in_context:
-            properties._entity_owner = self
-        else:
-            properties._entity_owner = None
-            properties._current_in_context_entity_owner = self
-        return properties
+        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        return self._properties
 
     @property  # type: ignore
     def parent_id(self):
