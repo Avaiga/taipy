@@ -50,11 +50,17 @@ class _Config:
         if other_config._sections:
             for section_name, other_non_unique_sections in other_config._sections.items():
                 if non_unique_sections := self._sections.get(section_name, None):
-                    self.__update_sections(non_unique_sections, other_non_unique_sections, None)
+                    self.__update_sections(non_unique_sections, other_non_unique_sections)
                 else:
-                    self._sections[section_name] = {k: copy(v) for k, v in other_non_unique_sections.items()}
+                    self._sections[section_name] = {}
+                    self.__add_sections(self._sections[section_name], other_non_unique_sections)
 
-    def __update_sections(self, entity_config, other_entity_configs, _class):
+    def __add_sections(self, entity_config, other_entity_configs):
+        for cfg_id, sub_config in other_entity_configs.items():
+            entity_config[cfg_id] = copy(sub_config)
+            self.__point_nested_section_to_self(sub_config)
+
+    def __update_sections(self, entity_config, other_entity_configs):
         if self.DEFAULT_KEY in other_entity_configs:
             if self.DEFAULT_KEY in entity_config:
                 entity_config[self.DEFAULT_KEY]._update(other_entity_configs[self.DEFAULT_KEY]._to_dict())
@@ -67,3 +73,13 @@ class _Config:
                 else:
                     entity_config[cfg_id] = copy(sub_config)
                     entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))
+            self.__point_nested_section_to_self(sub_config)
+
+    def __point_nested_section_to_self(self, sub_config):
+        for _, attr_value in vars(sub_config).items():
+            if isinstance(attr_value, list):
+                for index, item in enumerate(attr_value):
+                    if isinstance(item, Section):
+                        if sub_sections := self._sections.get(item.name, None):
+                            if sub_item := sub_sections.get(item.id):
+                                attr_value[index] = sub_item
