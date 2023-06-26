@@ -18,7 +18,6 @@ class _Properties(UserDict):
     def __init__(self, entity_owner, **kwargs):
         super().__init__(**kwargs)
         self._entity_owner = entity_owner
-        self._current_in_context_entity_owner = None
 
     def __setitem__(self, key, value):
         super(_Properties, self).__setitem__(key, value)
