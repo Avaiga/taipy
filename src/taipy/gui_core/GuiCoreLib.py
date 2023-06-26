@@ -406,7 +406,7 @@ class _GuiCore(ElementLibrary):
                 "scenario": ElementProperty(_GuiCoreScenarioAdapter),
                 "active": ElementProperty(PropertyType.dynamic_boolean, True),
                 "expandable": ElementProperty(PropertyType.boolean, True),
-                "default_expanded": ElementProperty(PropertyType.boolean, False),
+                "expanded": ElementProperty(PropertyType.boolean, False),
                 "show_submit": ElementProperty(PropertyType.boolean, True),
                 "show_delete": ElementProperty(PropertyType.boolean, True),
                 "show_config": ElementProperty(PropertyType.boolean, False),
