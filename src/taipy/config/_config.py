@@ -76,10 +76,19 @@ class _Config:
             self.__point_nested_section_to_self(sub_config)
 
     def __point_nested_section_to_self(self, sub_config):
+        """Loop through attributes of a Section to find if any attribute has a list of Section as value.
+        If there is, update each nested Section by the corresponding instance in self.
+
+        Args:
+            sub_config (Section): The Section to search for nested sections.
+        """
         for _, attr_value in vars(sub_config).items():
-            if isinstance(attr_value, list):
-                for index, item in enumerate(attr_value):
-                    if isinstance(item, Section):
-                        if sub_sections := self._sections.get(item.name, None):
-                            if sub_item := sub_sections.get(item.id):
-                                attr_value[index] = sub_item
+            if not isinstance(attr_value, list):
+                return
+
+            for index, item in enumerate(attr_value):
+                if not isinstance(item, Section):
+                    return
+
+                if sub_item := self._sections.get(item.name, {}).get(item.id, None):
+                    attr_value[index] = sub_item
