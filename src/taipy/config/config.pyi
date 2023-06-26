@@ -163,21 +163,33 @@ class Config:
     def _from_json(cls, config_as_str: str) -> _Config:
         """"""
 
+    @classmethod
+    @property
     def job_config(cls) -> JobConfig:
         """"""
 
+    @classmethod
+    @property
     def data_nodes(cls) -> Dict[str, DataNodeConfig]:
         """"""
 
+    @classmethod
+    @property
     def tasks(cls) -> Dict[str, TaskConfig]:
         """"""
 
+    @classmethod
+    @property
     def pipelines(cls) -> Dict[str, PipelineConfig]:
         """"""
 
+    @classmethod
+    @property
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """"""
 
+    @classmethod
+    @property
     def core(cls) -> Dict[str, CoreSection]:
         """"""
 

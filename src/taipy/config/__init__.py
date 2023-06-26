@@ -18,14 +18,11 @@ Taipy application and some attributes to retrieve the configuration values.
 
 """
 
-import os
-from typing import List
+from ._init import *
 
+from typing import List
 from .checker.issue import Issue
 from .checker.issue_collector import IssueCollector
-from .common.frequency import Frequency
-from .common.scope import Scope
-from .config import Config
 from .global_app.global_app_config import GlobalAppConfig
 from .section import Section
 from .unique_section import UniqueSection
@@ -36,6 +33,7 @@ __version__ = _get_version()
 
 def _config_doc(func):
     def func_with_doc(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections=False):
+        import os
         if os.environ.get("GENERATING_TAIPY_DOC", None) and os.environ["GENERATING_TAIPY_DOC"] == "true":
             with open("config_doc.txt", "a") as f:
                 from inspect import signature

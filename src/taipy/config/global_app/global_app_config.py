@@ -21,13 +21,14 @@ class GlobalAppConfig:
     """
     Configuration fields related to the global application.
 
-    Parameters:
+    Attributes:
+
         root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
         storage_folder (str): Folder name used to store Taipy data. The default value is ".data/". It is used in
             conjunction with the `root_folder` field. That means the storage path is <root_folder><storage_folder>
             (The Default path is "./taipy/.data/").
         clean_entities_enabled (bool): Boolean field to activate/deactivate the clean entities feature. Default: false
-        **properties: A dictionary of additional properties.
+        **properties (dict[src, any]): A dictionary of additional properties.
     """
 
     _ROOT_FOLDER_KEY = "root_folder"
