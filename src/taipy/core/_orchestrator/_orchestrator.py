@@ -72,7 +72,7 @@ class _Orchestrator(_AbstractOrchestrator):
         with cls.lock:
             for ts in tasks:
                 for task in ts:
-                    res.append(cls._submit_task(task, submit_id, callbacks=callbacks, force=force))
+                    res.append(cls._submit_task(task, submit_id, submittable.id, callbacks=callbacks, force=force))  # type: ignore
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
@@ -86,9 +86,10 @@ class _Orchestrator(_AbstractOrchestrator):
         cls,
         task: Task,
         submit_id: Optional[str] = None,
+        submit_entity_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
-        wait=False,
+        wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
     ) -> Job:
         """Submit the given `Task^` for an execution.
@@ -106,7 +107,7 @@ class _Orchestrator(_AbstractOrchestrator):
             The created `Job^`.
         """
         with cls.lock:
-            job = cls._submit_task(task, submit_id, callbacks, force)
+            job = cls._submit_task(task, submit_id, submit_entity_id, callbacks, force)
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
@@ -120,15 +121,17 @@ class _Orchestrator(_AbstractOrchestrator):
         cls,
         task: Task,
         submit_id: Optional[str] = None,
+        submit_entity_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
     ) -> Job:
         submit_id = submit_id if submit_id else cls.__generate_submit_id()
+        submit_entity_id = submit_entity_id if submit_entity_id else task.id
 
         for dn in task.output.values():
             dn.lock_edit()
         job = _JobManagerFactory._build_manager()._create(
-            task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, force=force
+            task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, submit_entity_id, force=force
         )
         cls._orchestrate_job_to_run_or_block(job)
 

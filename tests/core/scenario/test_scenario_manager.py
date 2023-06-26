@@ -847,11 +847,12 @@ def test_submit():
             cls,
             task: Task,
             submit_id: Optional[str] = None,
+            submit_entity_id: Optional[str] = None,
             callbacks: Optional[Iterable[Callable]] = None,
             force: bool = False,
         ) -> Job:
             cls.submit_calls.append(task.id)
-            return super()._submit_task(task, submit_id, callbacks, force)
+            return super()._submit_task(task, submit_id, submit_entity_id, callbacks, force)
 
     with patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         with pytest.raises(NonExistingScenario):

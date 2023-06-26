@@ -146,6 +146,33 @@ def test_submit_scenario_generate_unique_submit_id():
     assert len(jobs_2) == 3
 
 
+def test_submit_entity_store_entity_id_in_job():
+    dn_1 = InMemoryDataNode("dn_config_id_1", Scope.SCENARIO)
+    dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
+    dn_3 = InMemoryDataNode("dn_config_id_3", Scope.SCENARIO)
+    task_1 = Task("task_config_id_1", {}, print, [dn_1])
+    task_2 = Task("task_config_id_2", {}, print, [dn_2])
+    task_3 = Task("task_config_id_3", {}, print, [dn_3])
+    pipeline_1 = Pipeline("pipeline_config_id_1", {}, [task_1, task_2])
+    pipeline_2 = Pipeline("pipeline_config_id_2", {}, [task_3])
+    scenario = Scenario("scenario_config_id", [pipeline_1, pipeline_2], {})
+
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+    _TaskManager._set(task_1)
+    _TaskManager._set(task_2)
+    _TaskManager._set(task_3)
+    _PipelineManager._set(pipeline_1)
+    _PipelineManager._set(pipeline_2)
+    _ScenarioManager._set(scenario)
+
+    jobs_1 = taipy.submit(scenario)
+    assert all(job.submit_entity_id == scenario.id for job in jobs_1)
+
+    job_1 = taipy.submit(task_1)
+    assert job_1.submit_entity_id == task_1.id
+
+
 def test_submit_task_that_return_multiple_outputs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 

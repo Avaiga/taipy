@@ -236,15 +236,15 @@ class TestTaipy:
 
     def test_delete_job(self, task):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, False)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, True)
             mck.assert_called_once_with(job, True)
 

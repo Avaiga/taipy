@@ -48,20 +48,22 @@ def test_create_jobs():
 
     _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _JobManager._create(task, [print], "submit_id", True)
+    job_1 = _JobManager._create(task, [print], "submit_id", "secnario_id", True)
     assert _JobManager._get(job_1.id) == job_1
     assert job_1.is_submitted()
     assert task.config_id in job_1.id
     assert job_1.task.id == task.id
     assert job_1.submit_id == "submit_id"
+    assert job_1.submit_entity_id == "secnario_id"
     assert job_1.force
 
-    job_2 = _JobManager._create(task, [print], "submit_id_1", False)
+    job_2 = _JobManager._create(task, [print], "submit_id_1", "secnario_id", False)
     assert _JobManager._get(job_2.id) == job_2
     assert job_2.is_submitted()
     assert task.config_id in job_2.id
     assert job_2.task.id == task.id
     assert job_2.submit_id == "submit_id_1"
+    assert job_2.submit_entity_id == "secnario_id"
     assert not job_2.force
 
 
@@ -74,11 +76,13 @@ def test_get_job():
 
     job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
     assert _JobManager._get(job_1.id) == job_1
+    assert _JobManager._get(job_1.id).submit_entity_id == task.id
 
     job_2 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_2")
     assert job_1 != job_2
     assert _JobManager._get(job_1.id).id == job_1.id
     assert _JobManager._get(job_2.id).id == job_2.id
+    assert _JobManager._get(job_2.id).submit_entity_id == task.id
 
 
 def test_get_latest_job():

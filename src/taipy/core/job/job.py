@@ -60,13 +60,14 @@ class Job(_Entity, _Labeled):
     _MANAGER_NAME = "job"
     _ID_PREFIX = "JOB"
 
-    def __init__(self, id: JobId, task: Task, submit_id: str, force=False, version=None):
+    def __init__(self, id: JobId, task: Task, submit_id: str, submit_entity_id: str, force=False, version=None):
         self.id = id
         self._task = task
         self._force = force
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
         self._submit_id: str = submit_id
+        self._submit_entity_id: str = submit_entity_id
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
@@ -99,6 +100,10 @@ class Job(_Entity, _Labeled):
     @property
     def submit_id(self):
         return self._submit_id
+
+    @property
+    def submit_entity_id(self):
+        return self._submit_entity_id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -326,6 +331,7 @@ class Job(_Entity, _Labeled):
             entity._status,
             entity._force,
             entity.submit_id,
+            entity.submit_entity_id,
             entity._creation_date.isoformat(),
             cls._serialize_subscribers(entity._subscribers),
             entity._stacktrace,
@@ -340,7 +346,11 @@ class Job(_Entity, _Labeled):
         task_repository = task_manager._repository
 
         job = Job(
-            id=model.id, task=task_repository._load(model.task_id), submit_id=model.submit_id, version=model.version
+            id=model.id,
+            task=task_repository._load(model.task_id),
+            submit_id=model.submit_id,
+            submit_entity_id=model.submit_entity_id,
+            version=model.version,
         )
 
         job.status = model.status  # type: ignore

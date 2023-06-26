@@ -152,9 +152,10 @@ def test_submit():
             cls,
             task: Task,
             submit_id: Optional[str] = None,
+            submit_entity_id: Optional[str] = None,
             callbacks: Optional[Iterable[Callable]] = None,
             force: bool = False,
-        ) -> Job:
+        ):
             cls.submit_calls.append(task)
             return None
 

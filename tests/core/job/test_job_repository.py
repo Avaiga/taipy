@@ -72,7 +72,7 @@ class A:
         pass
 
 
-job = Job(JobId("id"), task, "submit_id", version="latest")
+job = Job(JobId("id"), task, "submit_id", "submit_entity_id", version="latest")
 job._subscribers = [f, A.f, A.g, A.h, A.B.f]
 job._exceptions = [traceback.TracebackException.from_exception(Exception())]
 
@@ -82,6 +82,7 @@ job_model = _JobModel(
     status=Status(Status.SUBMITTED),
     force=False,
     submit_id="submit_id",
+    submit_entity_id="submit_entity_id",
     creation_date=job._creation_date.isoformat(),
     subscribers=Job._serialize_subscribers(job._subscribers),
     stacktrace=job._stacktrace,
@@ -134,6 +135,7 @@ class TestJobRepository:
             Status.COMPLETED,
             False,
             "sid",
+            "seid",
             datetime.datetime.now().isoformat(),
             subscribers,
             [],
