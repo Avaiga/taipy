@@ -12,7 +12,7 @@
 import dataclasses
 import pathlib
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from sqlalchemy import Column, String, Table, create_engine
 from sqlalchemy.orm import declarative_base, registry, sessionmaker
@@ -24,13 +24,18 @@ from src.taipy.core._repository._v2._sql_repository import _SQLRepository as _SQ
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
 
-Base = declarative_base()
+
+class Base:
+    __allow_unmapped__ = True
+
+
+Base = declarative_base(cls=Base)  # type: ignore
 mapper_registry = registry()
 
 
 @dataclass
 class MockObj:
-    def __init__(self, id: str, name: str, version: str = None) -> None:
+    def __init__(self, id: str, name: str, version: Optional[str] = None) -> None:
         self.id = id
         self.name = name
         if version:
