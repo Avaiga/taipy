@@ -44,9 +44,9 @@ class _Labeled:
         if not simple:
             if owner_id := self._get_owner_id():
                 if getattr(self, "id") != owner_id:
-                    from ... import core
+                    from ... import core as tp
 
-                    owner = core.get(owner_id)
+                    owner = tp.get(owner_id)
                     ls.append(owner.get_label())
         ls.append(self._generate_entity_label())
         return self.__LABEL_SEPARATOR.join(ls)
