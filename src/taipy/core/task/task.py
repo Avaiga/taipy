@@ -102,7 +102,6 @@ class Task(_Entity, _Labeled):
     @property  # type: ignore
     def properties(self):
         self._properties = _reload(self._MANAGER_NAME, self)._properties
-        self._properties._entity_owner = self
         return self._properties
 
     @property  # type: ignore

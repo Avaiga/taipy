@@ -34,7 +34,10 @@ def _get_manager(manager: str):
 
 
 def _reload(manager: str, obj):
-    return _get_manager(manager)._get(obj, obj)
+    entity = _get_manager(manager)._get(obj, obj)
+    if hasattr(entity, "_properties"):
+        entity._properties._entity_owner = obj
+    return entity
 
 
 def _self_setter(manager):
