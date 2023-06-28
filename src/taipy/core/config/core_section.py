@@ -19,18 +19,18 @@ from taipy.config.common._template_handler import _TemplateHandler as _tpl
 
 class CoreSection(UniqueSection):
     """
-    Configuration fields needed to run the `Core^` service.
+    Configuration parameters for running the `Core^` service.
 
 
     Attributes:
         mode (str): The Taipy operating mode. By default, the `Core^` service runs in "development" mode.
             An "experiment" and a "production" mode are also available. Please refer to the
-            [Versioning management](../../../manuals/core/versioning/index.md) documentation page.
+            [Versioning management](../../core/versioning/) documentation page for more details.
         version_number (str)): The identifier of the user application version. Please refer to the
-            [Versioning management](../../../manuals/core/versioning/index.md) documentation page.
-        force (bool): Parameter to force the application run even if there are some conflicts in the
+            [Versioning management](../../core/versioning/) documentation page for more details.
+        force (bool): If True, force the application run even if there are some conflicts in the
             configuration.
-        clean_entities(bool): Parameter to remove all entities (from previous run) before running
+        clean_entities(bool): If True, remove all entities (from previous run) before running
             the application.
         **properties (dict[str, any]): A dictionary of additional properties.
     """

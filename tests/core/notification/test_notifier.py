@@ -408,6 +408,103 @@ def test_publish_event():
         ]
     )
 
+    # Test UPDATE Event in Context Manager
+
+    assert registration_queue.qsize() == 0
+
+    # If multiple entities is in context, the last to enter will be the first to exit
+    # So the published event will have the order starting with scenario first and ending with dn
+    with dn as d, task as t, pipeline as pl, cycle as c, scenario as sc:
+
+        sc.is_primary = True
+        assert registration_queue.qsize() == 0
+
+        tp.set_primary(sc)
+        assert registration_queue.qsize() == 0
+
+        sc.properties["flag"] = "production"
+        assert registration_queue.qsize() == 0
+
+        sc.name = "my_scenario"
+        assert registration_queue.qsize() == 0
+
+        c.name = "another new cycle name"
+        assert registration_queue.qsize() == 0
+
+        c.properties["valid"] = True
+        assert registration_queue.qsize() == 0
+
+        pl.properties["name"] = "weather_forecast"
+        assert registration_queue.qsize() == 0
+
+        t.skippable = True
+        assert registration_queue.qsize() == 0
+
+        t.properties["number_of_run"] = 2
+        assert registration_queue.qsize() == 0
+
+        d.name = "another new datanode name"
+        assert registration_queue.qsize() == 0
+
+        d.properties["sorted"] = True
+        assert registration_queue.qsize() == 0
+
+    published_events = []
+
+    assert registration_queue.qsize() == 11
+    while registration_queue.qsize() != 0:
+        published_events.append(registration_queue.get())
+
+    expected_event_types = [
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.SCENARIO,
+        EventEntityType.CYCLE,
+        EventEntityType.CYCLE,
+        EventEntityType.PIPELINE,
+        EventEntityType.TASK,
+        EventEntityType.TASK,
+        EventEntityType.DATA_NODE,
+        EventEntityType.DATA_NODE,
+    ]
+    expected_attribute_names = [
+        "is_primary",
+        "is_primary",
+        "flag",
+        "name",
+        "name",
+        "valid",
+        "name",
+        "skippable",
+        "number_of_run",
+        "name",
+        "sorted",
+    ]
+    expected_event_entity_id = [
+        scenario.id,
+        scenario.id,
+        scenario.id,
+        scenario.id,
+        cycle.id,
+        cycle.id,
+        pipeline.id,
+        task.id,
+        task.id,
+        dn.id,
+        dn.id,
+    ]
+
+    assert all(
+        [
+            event.entity_type == expected_event_types[i]
+            and event.entity_id == expected_event_entity_id[i]
+            and event.operation == EventOperation.UPDATE
+            and event.attribute_name == expected_attribute_names[i]
+            for i, event in enumerate(published_events)
+        ]
+    )
+
     # Test SUBMISSION Event
 
     job = scenario.submit()[0]

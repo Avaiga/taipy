@@ -154,7 +154,7 @@ class Pipeline(_Entity, _Submittable, _Labeled):
 
     @property  # type: ignore
     def properties(self):
-        self._properties = _reload("pipeline", self)._properties
+        self._properties = _reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     def _is_consistent(self) -> bool:
