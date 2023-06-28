@@ -4,7 +4,7 @@ on:
   push:
     branches: [ develop ]
   pull_request:
-    branches: [ 'develop', 'dev/3.0' ]
+    branches: [ 'develop', 'dev/*' ]
 
 jobs:
   linter:
