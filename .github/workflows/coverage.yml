@@ -1,7 +1,7 @@
 name: 'code-coverage'
 on:
   pull_request:
-    branches: [ master,main,release ]
+    branches: [ develop, dev/*, release/* ]
   workflow_dispatch:
 
 jobs:
