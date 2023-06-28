@@ -18,9 +18,10 @@ from .._repository._v2._filesystem_repository import _FileSystemRepository
 from ..exceptions.exceptions import VersionIsNotProductionVersion
 from ._version_converter import _VersionConverter
 from ._version_model import _VersionModel
+from ._version_repository_interface import _VersionRepositoryInterface
 
 
-class _VersionFSRepository(_FileSystemRepository):
+class _VersionFSRepository(_FileSystemRepository, _VersionRepositoryInterface):
     _LATEST_VERSION_KEY = "latest_version"
     _DEVELOPMENT_VERSION_KEY = "development_version"
     _PRODUCTION_VERSION_KEY = "production_version"

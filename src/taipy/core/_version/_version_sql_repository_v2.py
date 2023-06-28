@@ -13,9 +13,10 @@ from .._repository._v2._sql_repository import _SQLRepository
 from ..exceptions.exceptions import ModelNotFound, VersionIsNotProductionVersion
 from ._version_converter import _VersionConverter
 from ._version_model import _VersionModel
+from ._version_repository_interface import _VersionRepositoryInterface
 
 
-class _VersionSQLRepository(_SQLRepository):
+class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
     _LATEST_VERSION_KEY = "latest_version"
     _DEVELOPMENT_VERSION_KEY = "development_version"
     _PRODUCTION_VERSION_KEY = "production_version"
