@@ -2,7 +2,7 @@ name: Generate config.pyi
 
 on:
   pull_request:
-    branches: [ develop, 'release/**' ]
+    branches: [ develop, dev/*, release/* ]
 
 jobs:
   generate-pyi:
