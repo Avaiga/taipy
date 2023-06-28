@@ -137,7 +137,6 @@ def tmp_sqlite_db_file_path(tmpdir_factory):
     fn = tmpdir_factory.mktemp("data")
     db_name = "df"
     file_extension = ".db"
-
     db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
     conn = db.connect()
     conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
