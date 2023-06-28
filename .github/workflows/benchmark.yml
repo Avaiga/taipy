@@ -2,7 +2,7 @@ name: Performance benchmarking
 
 on:
   push:
-    branches: [ develop, dev/* ]
+    branches: [ develop ]
 
 jobs:
   benchmark:
