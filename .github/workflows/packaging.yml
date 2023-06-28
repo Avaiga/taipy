@@ -2,9 +2,9 @@ name: Test package installation
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, dev/*, release/* ]
   pull_request:
-    branches: [ develop ]
+    branches: [ develop, dev/*, release/* ]
   workflow_dispatch:
     inputs:
       user-to-notify:
