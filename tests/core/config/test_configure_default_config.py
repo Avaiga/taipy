@@ -12,7 +12,7 @@
 import json
 from datetime import timedelta
 
-from src.taipy.core.common.default_custom_document import DefaultCustomDocument
+from src.taipy.core.common.mongo_default_document import MongoDefaultDocument
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
@@ -120,14 +120,14 @@ def test_configure_default_csv_data_node():
         id="dn3",
         storage_type="csv",
         default_path="dn3.csv",
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
         validity_period=timedelta(1),
     )
     assert dn3.storage_type == "csv"
     assert dn3.default_path == "dn3.csv"
     assert dn3.has_header is False
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
     assert dn3.validity_period == timedelta(1)
 
 
@@ -230,7 +230,7 @@ def test_configure_default_parquet_data_node():
         storage_type="parquet",
         default_path="dn3.parquet",
         read_kwargs={"filter": "foo"},
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
         validity_period=timedelta(1),
     )
     assert dn3.storage_type == "parquet"
@@ -240,7 +240,7 @@ def test_configure_default_parquet_data_node():
     assert dn3.read_kwargs == {"filter": "foo"}
     assert dn3.write_kwargs is None
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
     assert dn3.validity_period == timedelta(1)
 
 
@@ -282,7 +282,7 @@ def test_configure_default_excel_data_node():
         id="dn3",
         storage_type="excel",
         default_path="dn3.xlsx",
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
         validity_period=timedelta(1),
     )
     assert dn3.storage_type == "excel"
@@ -290,7 +290,7 @@ def test_configure_default_excel_data_node():
     assert dn3.has_header is False
     assert dn3.sheet_name is None
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
     assert dn3.validity_period == timedelta(1)
 
 
@@ -329,14 +329,14 @@ def test_configure_default_pickle_data_node():
         id="dn3",
         storage_type="pickle",
         default_path="dn3.pkl",
-        scope=Scope.PIPELINE,
+        scope=Scope.SCENARIO,
         validity_period=timedelta(1),
     )
     assert dn3.storage_type == "pickle"
     assert dn3.default_path == "dn3.pkl"
     assert dn3.default_data == 1
     assert dn3.exposed_type == "numpy"
-    assert dn3.scope == Scope.PIPELINE
+    assert dn3.scope == Scope.SCENARIO
     assert dn3.validity_period == timedelta(1)
 
 
@@ -524,7 +524,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn1.db_password == ""
     assert dn1.db_name == "default_db_name"
     assert dn1.collection_name == "default_collection"
-    assert dn1.custom_document == DefaultCustomDocument
+    assert dn1.custom_document == MongoDefaultDocument
     assert dn1.db_host == "default_host"
     assert dn1.db_port == 1010
     assert dn1.db_extra_args == {"default": "default"}
@@ -544,7 +544,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn2.db_password == ""
     assert dn2.db_name == "default_db_name"
     assert dn2.collection_name == "collection_2"
-    assert dn2.custom_document == DefaultCustomDocument
+    assert dn2.custom_document == MongoDefaultDocument
     assert dn2.db_host == "host_2"
     assert dn2.db_port == 2020
     assert dn2.db_extra_args == {"default": "default"}
@@ -567,7 +567,7 @@ def test_configure_default_mongo_collection_data_node():
     assert dn3.db_password == "pwd_3"
     assert dn3.db_name == "db_3"
     assert dn3.collection_name == "collection_3"
-    assert dn3.custom_document == DefaultCustomDocument
+    assert dn3.custom_document == MongoDefaultDocument
     assert dn3.db_port == 1010
     assert dn3.db_host == "default_host"
     assert dn3.db_driver == "default server"

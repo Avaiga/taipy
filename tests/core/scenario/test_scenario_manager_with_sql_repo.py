@@ -56,8 +56,8 @@ def test_set_and_get_scenario(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
-    output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
+    input_2 = InMemoryDataNode("foo", Scope.SCENARIO)
+    output_2 = InMemoryDataNode("foo", Scope.SCENARIO)
     task_name = "task"
     task_2 = Task(task_name, {}, print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"
@@ -262,10 +262,10 @@ def test_scenario_manager_only_creates_data_node_once():
 
     init_managers()
 
-    dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
-    dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
-    dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
-    dn_config_4 = Config.configure_data_node("qux", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.GLOBAL, default_data=1)
+    dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.CYCLE, default_data=0)
+    dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.CYCLE, default_data=0)
+    dn_config_4 = Config.configure_data_node("qux", "in_memory", Scope.SCENARIO, default_data=0)
 
     task_mult_by_2_config = Config.configure_task("mult_by_2", print, [dn_config_1], dn_config_2)
     task_mult_by_3_config = Config.configure_task("mult_by_3", print, [dn_config_2], dn_config_6)
@@ -286,20 +286,27 @@ def test_scenario_manager_only_creates_data_node_once():
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_CycleManager._get_all()) == 0
 
-    scenario = _ScenarioManager._create(scenario_config)
+    scenario_1 = _ScenarioManager._create(scenario_config)
 
-    assert len(_DataManager._get_all()) == 5
+    assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 3
     assert len(_PipelineManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 1
-    assert scenario.foo.read() == 1
-    assert scenario.bar.read() == 0
-    assert scenario.baz.read() == 0
-    assert scenario.qux.read() == 0
-    assert scenario.by_6._get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.id
-    assert scenario.by_6._get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.id
-    assert scenario.by_4._get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
-    assert scenario.cycle.frequency == Frequency.DAILY
+    assert scenario_1.foo.read() == 1
+    assert scenario_1.bar.read() == 0
+    assert scenario_1.baz.read() == 0
+    assert scenario_1.qux.read() == 0
+    assert scenario_1.by_6._get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.id
+    assert scenario_1.by_6._get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.id
+    assert scenario_1.by_4._get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
+    assert scenario_1.cycle.frequency == Frequency.DAILY
+
+    scenario_2 = _ScenarioManager._create(scenario_config)
+
+    assert len(_DataManager._get_all()) == 5
+    assert len(_TaskManager._get_all()) == 4
+    assert len(_PipelineManager._get_all()) == 3
+    assert len(_ScenarioManager._get_all()) == 2
 
 
 def test_scenario_create_from_task_config():
@@ -324,6 +331,7 @@ def test_scenario_create_from_task_config():
     )
 
     _ScenarioManager._submit(_ScenarioManager._create(scenario_config_1))
+
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
     assert len(scenario_config_1.pipeline_configs) == 1

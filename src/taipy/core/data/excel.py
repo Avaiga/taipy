@@ -24,14 +24,15 @@ from taipy.config.common.scope import Scope
 from .._backup._backup import _replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..exceptions.exceptions import ExposedTypeLengthMismatch, InvalidExposedType, NonExistingExcelSheet
+from ..exceptions.exceptions import ExposedTypeLengthMismatch, NonExistingExcelSheet
 from ..job.job_id import JobId
+from ._abstract_tabular import _AbstractTabularDataNode
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ExcelDataNode(DataNode, _AbstractFileDataNode):
+class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     """Data Node stored as an Excel file.
 
     The Excel file format is _xlsx_.
@@ -108,7 +109,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode):
             properties[self.__HAS_HEADER_PROPERTY] = True
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
+        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
 
         super().__init__(
             config_id,
@@ -150,18 +151,16 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    def _check_exposed_type(self, exposed_type):
-        if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
-            raise InvalidExposedType(
-                f"Invalid string exposed type {exposed_type}. Supported values are "
-                f"{', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
-            )
+    @staticmethod
+    def _check_exposed_type(exposed_type, valid_string_exposed_types):
+        if isinstance(exposed_type, str):
+            _AbstractTabularDataNode._check_exposed_type(exposed_type, valid_string_exposed_types)
         elif isinstance(exposed_type, list):
             for t in exposed_type:
-                self._check_exposed_type(t)
+                _AbstractTabularDataNode._check_exposed_type(t, valid_string_exposed_types)
         elif isinstance(exposed_type, dict):
             for t in exposed_type.values():
-                self._check_exposed_type(t)
+                _AbstractTabularDataNode._check_exposed_type(t, valid_string_exposed_types)
 
     def _read(self):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:

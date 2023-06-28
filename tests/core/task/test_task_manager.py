@@ -56,24 +56,24 @@ def test_create_and_save():
 
 
 def test_do_not_recreate_existing_data_node():
-    input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
-    output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
+    output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
 
-    _DataManager._create_and_set(input_config, "pipeline_id", "task_id")
+    _DataManager._create_and_set(input_config, "scenario_id", "task_id")
     assert len(_DataManager._get_all()) == 1
 
     task_config = Config.configure_task("foo", print, input_config, output_config)
-    _create_task_from_config(task_config, pipeline_id="pipeline_id")
+    _create_task_from_config(task_config, scenario_id="scenario_id")
     assert len(_DataManager._get_all()) == 2
 
 
 def test_assign_task_as_parent_of_datanode():
-    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
-    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
-    dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.PIPELINE)
+    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
+    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
+    dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("task_1", print, dn_config_1, dn_config_2)
     task_config_2 = Config.configure_task("task_2", print, dn_config_2, dn_config_3)
-    tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_2], "scenario_id", "pipeline_id")
+    tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_2], "cycle_id", "scenario_id")
 
     assert len(_DataManager._get_all()) == 3
     assert len(_TaskManager._get_all()) == 2
@@ -86,118 +86,86 @@ def test_assign_task_as_parent_of_datanode():
 
 
 def test_do_not_recreate_existing_task():
-    input_config_scope_pipeline = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
-    output_config_scope_pipeline = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
-    task_config = Config.configure_task("foo", print, input_config_scope_pipeline, output_config_scope_pipeline)
-    # task_config scope is Pipeline
-
-    task_1 = _create_task_from_config(task_config)
-    assert len(_TaskManager._get_all()) == 1
-    _TaskManager._bulk_get_or_create([task_config])  # Do not create. It already exists for None pipeline
-    assert len(_TaskManager._get_all()) == 1
-    task_2 = _create_task_from_config(
-        task_config, None, "whatever_scenario"
-    )  # Do not create. It already exists for None pipeline
-    assert len(_TaskManager._get_all()) == 1
-    assert task_1.id == task_2.id
-    task_3 = _create_task_from_config(task_config, None, "whatever_scenario", "pipeline_1")
-    assert len(_TaskManager._get_all()) == 2
-    assert task_1.id == task_2.id
-    assert task_2.id != task_3.id
-    task_4 = _create_task_from_config(
-        task_config, None, "other_sc", "pipeline_1"
-    )  # Do not create. It already exists for pipeline_1
-    assert len(_TaskManager._get_all()) == 2
-    assert task_1.id == task_2.id
-    assert task_2.id != task_3.id
-    assert task_3.id == task_4.id
-
-    input_config_scope_scenario = Config.configure_data_node("my_input_2", "in_memory", Scope.SCENARIO)
-    output_config_scope_scenario = Config.configure_data_node("my_output_2", "in_memory", Scope.SCENARIO)
-    task_config_2 = Config.configure_task("bar", print, input_config_scope_scenario, output_config_scope_scenario)
+    input_config_scope_scenario = Config.configure_data_node("my_input_1", "in_memory", Scope.SCENARIO)
+    output_config_scope_scenario = Config.configure_data_node("my_output_1", "in_memory", Scope.SCENARIO)
+    task_config_1 = Config.configure_task("bar", print, input_config_scope_scenario, output_config_scope_scenario)
     # task_config_2 scope is Scenario
 
-    task_5 = _create_task_from_config(task_config_2)
-    assert len(_TaskManager._get_all()) == 3
-    task_6 = _create_task_from_config(task_config_2)  # Do not create. It already exists for None scenario
-    assert len(_TaskManager._get_all()) == 3
-    assert task_5.id == task_6.id
-    task_7 = _create_task_from_config(
-        task_config_2, None, None, "A_pipeline"
-    )  # Do not create. It already exists for None scenario
-    assert len(_TaskManager._get_all()) == 3
-    assert task_5.id == task_6.id
-    assert task_6.id == task_7.id
-    task_8 = _create_task_from_config(
-        task_config_2, None, "scenario_1", "A_pipeline"
-    )  # Create even if pipeline is the same.
-    assert len(_TaskManager._get_all()) == 4
-    assert task_5.id == task_6.id
-    assert task_6.id == task_7.id
-    assert task_7.id != task_8.id
-    task_9 = _create_task_from_config(
-        task_config_2, None, "scenario_1", "bar"
+    task_1 = _create_task_from_config(task_config_1)
+    assert len(_TaskManager._get_all()) == 1
+    task_2 = _create_task_from_config(task_config_1)  # Do not create. It already exists for None scenario
+    assert len(_TaskManager._get_all()) == 1
+    assert task_1.id == task_2.id
+    task_3 = _create_task_from_config(task_config_1, None, None)  # Do not create. It already exists for None scenario
+    assert len(_TaskManager._get_all()) == 1
+    assert task_1.id == task_2.id
+    assert task_2.id == task_3.id
+    task_4 = _create_task_from_config(task_config_1, None, "scenario_1")  # Create even if pipeline is the same.
+    assert len(_TaskManager._get_all()) == 2
+    assert task_1.id == task_2.id
+    assert task_2.id == task_3.id
+    assert task_3.id != task_4.id
+    task_5 = _create_task_from_config(
+        task_config_1, None, "scenario_1"
     )  # Do not create. It already exists for scenario_1
-    assert len(_TaskManager._get_all()) == 4
-    assert task_5.id == task_6.id
-    assert task_6.id == task_7.id
-    assert task_7.id != task_8.id
-    assert task_8.id == task_9.id
-    task_10 = _create_task_from_config(task_config_2, None, "scenario_2", "baz")
-    assert len(_TaskManager._get_all()) == 5
-    assert task_5.id == task_6.id
-    assert task_6.id == task_7.id
-    assert task_7.id != task_8.id
-    assert task_8.id == task_9.id
-    assert task_9.id != task_10.id
-    assert task_7.id != task_10.id
+    assert len(_TaskManager._get_all()) == 2
+    assert task_1.id == task_2.id
+    assert task_2.id == task_3.id
+    assert task_3.id != task_4.id
+    assert task_4.id == task_5.id
+    task_6 = _create_task_from_config(task_config_1, None, "scenario_2")
+    assert len(_TaskManager._get_all()) == 3
+    assert task_1.id == task_2.id
+    assert task_2.id == task_3.id
+    assert task_3.id != task_4.id
+    assert task_4.id == task_5.id
+    assert task_5.id != task_6.id
+    assert task_3.id != task_6.id
 
-    input_config_scope_cycle = Config.configure_data_node("my_input_3", "in_memory", Scope.CYCLE)
-    output_config_scope_cycle = Config.configure_data_node("my_output_3", "in_memory", Scope.CYCLE)
-    task_config_3 = Config.configure_task("xyz", print, input_config_scope_cycle, output_config_scope_cycle)
+    input_config_scope_cycle = Config.configure_data_node("my_input_2", "in_memory", Scope.CYCLE)
+    output_config_scope_cycle = Config.configure_data_node("my_output_2", "in_memory", Scope.CYCLE)
+    task_config_2 = Config.configure_task("xyz", print, input_config_scope_cycle, output_config_scope_cycle)
     # task_config_3 scope is Cycle
 
-    task_11 = _create_task_from_config(task_config_3)
-    assert len(_TaskManager._get_all()) == 6
-    task_12 = _create_task_from_config(task_config_3)  # Do not create. It already exists for None cycle
-    assert len(_TaskManager._get_all()) == 6
-    assert task_11.id == task_12.id
-    task_13 = _create_task_from_config(
-        task_config_3, None, None, "pipeline"
+    task_7 = _create_task_from_config(task_config_2)
+    assert len(_TaskManager._get_all()) == 4
+    task_8 = _create_task_from_config(task_config_2)  # Do not create. It already exists for None cycle
+    assert len(_TaskManager._get_all()) == 4
+    assert task_7.id == task_8.id
+    task_9 = _create_task_from_config(task_config_2, None, None)  # Do not create. It already exists for None cycle
+    assert len(_TaskManager._get_all()) == 4
+    assert task_7.id == task_8.id
+    assert task_8.id == task_9.id
+    task_10 = _create_task_from_config(
+        task_config_2, None, "scenario"
     )  # Do not create. It already exists for None cycle
-    assert len(_TaskManager._get_all()) == 6
-    assert task_11.id == task_12.id
-    assert task_12.id == task_13.id
-    task_14 = _create_task_from_config(
-        task_config_3, None, "scenario", "pipeline"
+    assert len(_TaskManager._get_all()) == 4
+    assert task_7.id == task_8.id
+    assert task_8.id == task_9.id
+    assert task_9.id == task_10.id
+    task_11 = _create_task_from_config(
+        task_config_2, None, "scenario"
     )  # Do not create. It already exists for None cycle
-    assert len(_TaskManager._get_all()) == 6
-    assert task_11.id == task_12.id
+    assert len(_TaskManager._get_all()) == 4
+    assert task_7.id == task_8.id
+    assert task_8.id == task_9.id
+    assert task_9.id == task_10.id
+    assert task_10.id == task_11.id
+    task_12 = _create_task_from_config(task_config_2, "cycle", None)
+    assert len(_TaskManager._get_all()) == 5
+    assert task_7.id == task_8.id
+    assert task_8.id == task_9.id
+    assert task_9.id == task_10.id
+    assert task_10.id == task_11.id
+    assert task_11.id != task_12.id
+    task_13 = _create_task_from_config(task_config_2, "cycle", None)
+    assert len(_TaskManager._get_all()) == 5
+    assert task_7.id == task_8.id
+    assert task_8.id == task_9.id
+    assert task_9.id == task_10.id
+    assert task_10.id == task_11.id
+    assert task_11.id != task_12.id
     assert task_12.id == task_13.id
-    assert task_13.id == task_14.id
-    task_15 = _create_task_from_config(
-        task_config_3, None, "scenario", "pipeline"
-    )  # Do not create. It already exists for None cycle
-    assert len(_TaskManager._get_all()) == 6
-    assert task_11.id == task_12.id
-    assert task_12.id == task_13.id
-    assert task_13.id == task_14.id
-    assert task_14.id == task_15.id
-    task_16 = _create_task_from_config(task_config_3, "cycle", None, None)
-    assert len(_TaskManager._get_all()) == 7
-    assert task_11.id == task_12.id
-    assert task_12.id == task_13.id
-    assert task_13.id == task_14.id
-    assert task_14.id == task_15.id
-    assert task_15.id != task_16.id
-    task_17 = _create_task_from_config(task_config_3, "cycle", None, None)
-    assert len(_TaskManager._get_all()) == 7
-    assert task_11.id == task_12.id
-    assert task_12.id == task_13.id
-    assert task_13.id == task_14.id
-    assert task_14.id == task_15.id
-    assert task_15.id != task_16.id
-    assert task_16.id == task_17.id
 
 
 def test_set_and_get_task():
@@ -251,11 +219,11 @@ def test_set_and_get_task():
 
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
-    embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
-    embedded_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
-    embedded_3 = Config.configure_data_node("a_dn_3", "in_memory", scope=Scope.PIPELINE)
-    embedded_4 = Config.configure_data_node("dn_4", "in_memory", scope=Scope.PIPELINE)
-    embedded_5 = Config.configure_data_node("dn_5", "in_memory", scope=Scope.PIPELINE)
+    embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
+    embedded_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
+    embedded_3 = Config.configure_data_node("a_dn_3", "in_memory", scope=Scope.SCENARIO)
+    embedded_4 = Config.configure_data_node("dn_4", "in_memory", scope=Scope.SCENARIO)
+    embedded_5 = Config.configure_data_node("dn_5", "in_memory", scope=Scope.SCENARIO)
 
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
@@ -274,7 +242,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
 
 def test_delete_raise_exception():
     dn_input_config_1 = Config.configure_data_node(
-        "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+        "my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing"
     )
     dn_output_config_1 = Config.configure_data_node("my_output_1", "in_memory")
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
@@ -287,7 +255,7 @@ def test_delete_raise_exception():
 
 def test_hard_delete():
     dn_input_config_1 = Config.configure_data_node(
-        "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+        "my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing"
     )
     dn_output_config_1 = Config.configure_data_node("my_output_1", "in_memory")
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
@@ -312,8 +280,8 @@ def test_is_submittable():
 
 
 def test_submit_task():
-    data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
-    data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
+    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
     task_1 = Task(
         "grault",
         {},
@@ -411,21 +379,21 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
 
 
 def test_get_tasks_by_config_id():
-    dn_config = Config.configure_data_node("dn", scope=Scope.PIPELINE)
+    dn_config = Config.configure_data_node("dn", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("t1", print, dn_config)
     task_config_2 = Config.configure_task("t2", print, dn_config)
     task_config_3 = Config.configure_task("t3", print, dn_config)
 
-    t_1_1 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p1")[0]
-    t_1_2 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p2")[0]
-    t_1_3 = _TaskManager._bulk_get_or_create([task_config_1], pipeline_id="p3")[0]
+    t_1_1 = _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_1")[0]
+    t_1_2 = _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_2")[0]
+    t_1_3 = _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_3")[0]
     assert len(_TaskManager._get_all()) == 3
 
-    t_2_1 = _TaskManager._bulk_get_or_create([task_config_2], pipeline_id="p4")[0]
-    t_2_2 = _TaskManager._bulk_get_or_create([task_config_2], pipeline_id="p5")[0]
+    t_2_1 = _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_4")[0]
+    t_2_2 = _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_5")[0]
     assert len(_TaskManager._get_all()) == 5
 
-    t_3_1 = _TaskManager._bulk_get_or_create([task_config_3], pipeline_id="p6")[0]
+    t_3_1 = _TaskManager._bulk_get_or_create([task_config_3], scenario_id="scenario_6")[0]
     assert len(_TaskManager._get_all()) == 6
 
     t1_tasks = _TaskManager._get_by_config_id(task_config_1.id)

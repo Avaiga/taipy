@@ -9,11 +9,20 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import dataclasses
+import enum
+from typing import Any, Dict
 
-def migrate_subscriber(fct_module, fct_name):
-    """Rename scheduler by orchestrator on old jobs. Used to migrate from <=2.2 to >=2.3 version."""
 
-    if fct_module == "taipy.core._scheduler._scheduler":
-        fct_module = fct_module.replace("_scheduler", "_orchestrator")
-        fct_name = fct_name.replace("_Scheduler", "_Orchestrator")
-    return fct_module, fct_name
+class _BaseModel:
+    def __iter__(self):
+        for attr, value in self.__dict__.items():
+            yield attr, value
+
+    def to_dict(self) -> Dict[str, Any]:
+        model_dict = {**dataclasses.asdict(self)}
+
+        for k, v in model_dict.items():
+            if isinstance(v, enum.Enum):
+                model_dict[k] = repr(v)
+        return model_dict

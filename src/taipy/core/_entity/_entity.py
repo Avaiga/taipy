@@ -31,3 +31,11 @@ class _Entity:
         while self._in_context_attributes_changed_collector:
             _publish_event(*self._in_context_attributes_changed_collector.pop(0))
         _get_manager(self._MANAGER_NAME)._set(self)
+
+    @classmethod
+    def _to_model(cls, entity):
+        raise NotImplementedError
+
+    @classmethod
+    def _from_model(cls, model):
+        raise NotImplementedError

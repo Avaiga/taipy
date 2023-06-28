@@ -15,7 +15,13 @@ from typing import Union
 from sqlalchemy import Boolean, Column, Integer, Text
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+
+class Base:
+    __allow_unmapped__ = True
+
+
+Base = declarative_base(cls=Base)  # type: ignore
+
 Json = Union[dict, list, str, int, float, bool, None]
 
 
@@ -29,7 +35,7 @@ class _TaipyModel(Base):  # type: ignore
     model_name = Column(Text)
     document = Column(Text)
 
-    def __int__(self, model_id: str, model_name: str, document: Json):
+    def __init__(self, model_id: str, model_name: str, document: Json):
         self.model_id = model_id
         self.model_name = model_name
         self.document = document
@@ -47,7 +53,7 @@ class _TaipyVersion(Base):  # type: ignore
     is_development = Column(Boolean)
     is_latest = Column(Boolean)
 
-    def __int__(
+    def __init__(
         self,
         id: str,
         config: Json,

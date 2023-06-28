@@ -9,7 +9,7 @@
 "DATANODE_d1_3d65c33b-b188-4402-8d2c-3b26d98b9a9e"
 ],
 "function_name": "twice",
-"function_module": "tests.core.version.test_version_migration",
+"function_module": "tests.core.version.test_legacy_version_migration",
 "output_ids": [
 "DATANODE_d2_bd8ee43e-6fa9-4832-b2e7-c0c9516b1e1c"
 ]

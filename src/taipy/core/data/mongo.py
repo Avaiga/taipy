@@ -11,6 +11,7 @@
 
 from datetime import datetime, timedelta
 from inspect import isclass
+from pydoc import locate
 from typing import Any, Dict, List, Optional, Set
 
 import pymongo
@@ -62,7 +63,7 @@ class MongoCollectionDataNode(DataNode):
     """
 
     __STORAGE_TYPE = "mongo_collection"
-    __CUSTOM_DOCUMENT_PROPERTY = "custom_document"
+    _CUSTOM_DOCUMENT_PROPERTY = "custom_document"
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
     _REQUIRED_PROPERTIES: List[str] = [
         "db_name",
@@ -92,7 +93,7 @@ class MongoCollectionDataNode(DataNode):
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
 
-        self._check_custom_document(properties[self.__CUSTOM_DOCUMENT_PROPERTY])
+        self._check_custom_document(properties[self._CUSTOM_DOCUMENT_PROPERTY])
 
         super().__init__(
             config_id,
@@ -118,7 +119,7 @@ class MongoCollectionDataNode(DataNode):
         )
         self.collection = mongo_client[properties.get("db_name", "")][properties.get("collection_name", "")]
 
-        self.custom_document = properties[self.__CUSTOM_DOCUMENT_PROPERTY]
+        self.custom_document = properties[self._CUSTOM_DOCUMENT_PROPERTY]
 
         self._decoder = self._default_decoder
         custom_decoder = getattr(self.custom_document, "decode", None)

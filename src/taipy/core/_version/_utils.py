@@ -10,7 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 from .._core_cli import _CoreCLI
-from ..config import CoreSection
+from .._entity._reload import _Reloader
+from ..config import CoreSection, MigrationConfig
 from ._version_manager_factory import _VersionManagerFactory
 
 
@@ -24,3 +25,16 @@ def _version_migration() -> str:
     else:
         _VersionManagerFactory._build_manager()._get_or_create("LEGACY-VERSION", True)
         return "LEGACY-VERSION"
+
+
+def _migrate_entity(entity):
+    if (
+        latest_version := _VersionManagerFactory._build_manager()._get_latest_version()
+    ) in _VersionManagerFactory._build_manager()._get_production_versions():
+        if migration_fcts := MigrationConfig._get_migration_fcts_to_latest(entity.version, entity.config_id):
+            with _Reloader():
+                for fct in migration_fcts:
+                    entity = fct(entity)
+                entity.version = latest_version
+
+    return entity

@@ -11,5 +11,4 @@
 
 from ._filesystem_repository import _FileSystemRepository
 from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
-from ._repository_factory import _RepositoryFactory
 from ._sql_repository import _SQLRepository

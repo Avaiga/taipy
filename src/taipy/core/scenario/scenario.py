@@ -22,12 +22,16 @@ from taipy.config.common._validate_id import _validate_id
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
-from .._entity._reload import _reload, _self_reload, _self_setter
+from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._entity._submittable import _Submittable
+from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common import _utils
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
+from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
+from ..cycle.cycle_id import CycleId
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job.job import Job
@@ -35,6 +39,7 @@ from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
 from ..pipeline.pipeline_id import PipelineId
 from ..task.task import Task
+from ._scenario_model import _ScenarioModel
 from .scenario_id import ScenarioId
 
 
@@ -218,13 +223,17 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def version(self):
         return self._version
 
+    @version.setter
+    def version(self, val):
+        self._version = val
+
     @property
     def owner_id(self):
         return self._cycle.id
 
     @property
     def properties(self):
-        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     @property  # type: ignore
@@ -247,11 +256,11 @@ class Scenario(_Entity, _Submittable, _Labeled):
         return tag in self.tags
 
     def _add_tag(self, tag: str):
-        self._tags = _reload("scenario", self)._tags
+        self._tags = _Reloader()._reload("scenario", self)._tags
         self._tags.add(tag)
 
     def _remove_tag(self, tag: str):
-        self._tags = _reload("scenario", self)._tags
+        self._tags = _Reloader()._reload("scenario", self)._tags
         if self.has_tag(tag):
             self._tags.remove(tag)
 
@@ -384,6 +393,52 @@ class Scenario(_Entity, _Submittable, _Labeled):
                 raise NonExistingPipeline(pipeline_or_id)
             pipelines[p.config_id] = p
         return pipelines
+
+    @classmethod
+    def _to_model(cls, entity) -> _ScenarioModel:
+        return _ScenarioModel(
+            id=entity.id,
+            config_id=entity.config_id,
+            pipelines=cls.__to_pipeline_ids(entity._pipelines),
+            properties=entity._properties.data,
+            creation_date=entity._creation_date.isoformat(),
+            primary_scenario=entity._primary_scenario,
+            subscribers=_utils._fcts_to_dict(entity._subscribers),
+            tags=list(entity._tags),
+            version=entity.version,
+            cycle=cls.__to_cycle_id(entity._cycle),
+        )
+
+    @classmethod
+    def _from_model(cls, model: _ScenarioModel):
+        scenario = Scenario(
+            scenario_id=model.id,
+            config_id=model.config_id,
+            pipelines=model.pipelines,
+            properties=model.properties,
+            creation_date=datetime.fromisoformat(model.creation_date),
+            is_primary=model.primary_scenario,
+            tags=set(model.tags),
+            cycle=Scenario.__to_cycle(model.cycle),
+            subscribers=[
+                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                for it in model.subscribers
+            ],
+            version=model.version,
+        )
+        return _migrate_entity(scenario)
+
+    @staticmethod
+    def __to_pipeline_ids(pipelines) -> List[PipelineId]:
+        return [p.id if isinstance(p, Pipeline) else p for p in pipelines]
+
+    @staticmethod
+    def __to_cycle(cycle_id: Optional[CycleId] = None) -> Optional[Cycle]:
+        return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
+
+    @staticmethod
+    def __to_cycle_id(cycle: Optional[Cycle] = None) -> Optional[CycleId]:
+        return cycle.id if cycle else None
 
     def get_label(self) -> str:
         """Returns the scenario simple label prefixed by its owner label.

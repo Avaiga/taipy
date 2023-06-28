@@ -14,30 +14,46 @@ import functools
 from ..notification import EventOperation, _publish_event
 
 
-@functools.lru_cache
-def _get_manager(manager: str):
-    from ..cycle._cycle_manager_factory import _CycleManagerFactory
-    from ..data._data_manager_factory import _DataManagerFactory
-    from ..job._job_manager_factory import _JobManagerFactory
-    from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
-    from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
-    from ..task._task_manager_factory import _TaskManagerFactory
+class _Reloader:
+    """The _Reloader singleton class"""
 
-    return {
-        "scenario": _ScenarioManagerFactory._build_manager(),
-        "pipeline": _PipelineManagerFactory._build_manager(),
-        "data": _DataManagerFactory._build_manager(),
-        "cycle": _CycleManagerFactory._build_manager(),
-        "job": _JobManagerFactory._build_manager(),
-        "task": _TaskManagerFactory._build_manager(),
-    }[manager]
+    _instance = None
+
+    _no_reload_context = False
+
+    def __new__(class_, *args, **kwargs):
+        if not isinstance(class_._instance, class_):
+            class_._instance = object.__new__(class_, *args, **kwargs)
+        return class_._instance
+
+    def _reload(self, manager: str, obj):
+        if self._no_reload_context:
+            return obj
+        
+        entity = _get_manager(manager)._get(obj, obj)
+        if hasattr(entity, "_properties"):
+            entity._properties._entity_owner = obj
+        return entity
+
+    def __enter__(self):
+        self._no_reload_context = True
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._no_reload_context = False
 
 
-def _reload(manager: str, obj):
-    entity = _get_manager(manager)._get(obj, obj)
-    if hasattr(entity, "_properties"):
-        entity._properties._entity_owner = obj
-    return entity
+def _self_reload(manager):
+    def __reload(fct):
+        @functools.wraps(fct)
+        def _do_reload(self, *args, **kwargs):
+            self = _Reloader()._reload(manager, self)
+            return fct(self, *args, **kwargs)
+
+        return _do_reload
+
+
+    return __reload
 
 
 def _self_setter(manager):
@@ -65,13 +81,20 @@ def _self_setter(manager):
     return __set_entity
 
 
-def _self_reload(manager):
-    def __reload(fct):
-        @functools.wraps(fct)
-        def _do_reload(self, *args, **kwargs):
-            self = _reload(manager, self)
-            return fct(self, *args, **kwargs)
+@functools.lru_cache
+def _get_manager(manager: str):
+    from ..cycle._cycle_manager_factory import _CycleManagerFactory
+    from ..data._data_manager_factory import _DataManagerFactory
+    from ..job._job_manager_factory import _JobManagerFactory
+    from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
+    from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
+    from ..task._task_manager_factory import _TaskManagerFactory
 
-        return _do_reload
-
-    return __reload
+    return {
+        "scenario": _ScenarioManagerFactory._build_manager(),
+        "pipeline": _PipelineManagerFactory._build_manager(),
+        "data": _DataManagerFactory._build_manager(),
+        "cycle": _CycleManagerFactory._build_manager(),
+        "job": _JobManagerFactory._build_manager(),
+        "task": _TaskManagerFactory._build_manager(),
+    }[manager]

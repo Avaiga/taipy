@@ -54,14 +54,13 @@ class TestGenericDataNode:
 
     def test_create(self):
         dn = GenericDataNode(
-            "foo_bar", Scope.PIPELINE, name="super name", properties={"read_fct": read_fct, "write_fct": write_fct}
+            "foo_bar", Scope.SCENARIO, name="super name", properties={"read_fct": read_fct, "write_fct": write_fct}
         )
         assert isinstance(dn, GenericDataNode)
         assert dn.storage_type() == "generic"
         assert dn.config_id == "foo_bar"
-        print(dn)
         assert dn.name == "super name"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.last_edition_date is not None
@@ -70,12 +69,12 @@ class TestGenericDataNode:
         assert dn.properties["read_fct"] == read_fct
         assert dn.properties["write_fct"] == write_fct
 
-        dn_1 = GenericDataNode("foo", Scope.PIPELINE, name="foo", properties={"read_fct": read_fct, "write_fct": None})
+        dn_1 = GenericDataNode("foo", Scope.SCENARIO, name="foo", properties={"read_fct": read_fct, "write_fct": None})
         assert isinstance(dn, GenericDataNode)
         assert dn_1.storage_type() == "generic"
         assert dn_1.config_id == "foo"
         assert dn_1.name == "foo"
-        assert dn_1.scope == Scope.PIPELINE
+        assert dn_1.scope == Scope.SCENARIO
         assert dn_1.id is not None
         assert dn_1.owner_id is None
         assert dn_1.last_edition_date is not None
@@ -84,12 +83,12 @@ class TestGenericDataNode:
         assert dn_1.properties["read_fct"] == read_fct
         assert dn_1.properties["write_fct"] is None
 
-        dn_2 = GenericDataNode("xyz", Scope.PIPELINE, name="xyz", properties={"read_fct": None, "write_fct": write_fct})
+        dn_2 = GenericDataNode("xyz", Scope.SCENARIO, name="xyz", properties={"read_fct": None, "write_fct": write_fct})
         assert isinstance(dn, GenericDataNode)
         assert dn_2.storage_type() == "generic"
         assert dn_2.config_id == "xyz"
         assert dn_2.name == "xyz"
-        assert dn_2.scope == Scope.PIPELINE
+        assert dn_2.scope == Scope.SCENARIO
         assert dn_2.id is not None
         assert dn_2.owner_id is None
         assert dn_2.last_edition_date is not None
@@ -98,12 +97,12 @@ class TestGenericDataNode:
         assert dn_2.properties["read_fct"] is None
         assert dn_2.properties["write_fct"] == write_fct
 
-        dn_3 = GenericDataNode("xyz", Scope.PIPELINE, name="xyz", properties={"read_fct": read_fct})
+        dn_3 = GenericDataNode("xyz", Scope.SCENARIO, name="xyz", properties={"read_fct": read_fct})
         assert isinstance(dn, GenericDataNode)
         assert dn_3.storage_type() == "generic"
         assert dn_3.config_id == "xyz"
         assert dn_3.name == "xyz"
-        assert dn_3.scope == Scope.PIPELINE
+        assert dn_3.scope == Scope.SCENARIO
         assert dn_3.id is not None
         assert dn_3.owner_id is None
         assert dn_3.last_edition_date is not None
@@ -112,12 +111,12 @@ class TestGenericDataNode:
         assert dn_3.properties["read_fct"] == read_fct
         assert dn_3.properties["write_fct"] is None
 
-        dn_4 = GenericDataNode("xyz", Scope.PIPELINE, name="xyz", properties={"write_fct": write_fct})
+        dn_4 = GenericDataNode("xyz", Scope.SCENARIO, name="xyz", properties={"write_fct": write_fct})
         assert isinstance(dn, GenericDataNode)
         assert dn_4.storage_type() == "generic"
         assert dn_4.config_id == "xyz"
         assert dn_4.name == "xyz"
-        assert dn_4.scope == Scope.PIPELINE
+        assert dn_4.scope == Scope.SCENARIO
         assert dn_4.id is not None
         assert dn_4.owner_id is None
         assert dn_4.last_edition_date is not None
@@ -127,16 +126,16 @@ class TestGenericDataNode:
         assert dn_4.properties["write_fct"] == write_fct
 
         with pytest.raises(InvalidConfigurationId):
-            GenericDataNode("foo bar", Scope.PIPELINE, properties={"read_fct": read_fct, "write_fct": write_fct})
+            GenericDataNode("foo bar", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": write_fct})
 
     def test_create_with_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
-            GenericDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
+            GenericDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         with pytest.raises(MissingRequiredProperty):
-            GenericDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties={})
+            GenericDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties={})
 
     def test_read_write_generic_datanode(self):
-        generic_dn = GenericDataNode("foo", Scope.PIPELINE, properties={"read_fct": read_fct, "write_fct": write_fct})
+        generic_dn = GenericDataNode("foo", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": write_fct})
 
         assert generic_dn.read() == self.data
         assert len(generic_dn.read()) == 10
@@ -145,7 +144,7 @@ class TestGenericDataNode:
         assert generic_dn.read() == self.data
         assert len(generic_dn.read()) == 11
 
-        generic_dn_1 = GenericDataNode("bar", Scope.PIPELINE, properties={"read_fct": read_fct, "write_fct": None})
+        generic_dn_1 = GenericDataNode("bar", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": None})
 
         assert generic_dn_1.read() == self.data
         assert len(generic_dn_1.read()) == 11
@@ -153,7 +152,7 @@ class TestGenericDataNode:
         with pytest.raises(MissingWriteFunction):
             generic_dn_1.write(self.data)
 
-        generic_dn_2 = GenericDataNode("xyz", Scope.PIPELINE, properties={"read_fct": None, "write_fct": write_fct})
+        generic_dn_2 = GenericDataNode("xyz", Scope.SCENARIO, properties={"read_fct": None, "write_fct": write_fct})
 
         generic_dn_2.write(self.data)
         assert len(self.data) == 12
@@ -161,7 +160,7 @@ class TestGenericDataNode:
         with pytest.raises(MissingReadFunction):
             generic_dn_2.read()
 
-        generic_dn_3 = GenericDataNode("bar", Scope.PIPELINE, properties={"read_fct": None, "write_fct": None})
+        generic_dn_3 = GenericDataNode("bar", Scope.SCENARIO, properties={"read_fct": None, "write_fct": None})
 
         with pytest.raises(MissingReadFunction):
             generic_dn_3.read()
@@ -173,7 +172,7 @@ class TestGenericDataNode:
     def test_read_write_generic_datanode_with_arguments(self):
         generic_dn = GenericDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "read_fct": read_fct_with_args,
                 "write_fct": write_fct_with_args,
@@ -193,7 +192,7 @@ class TestGenericDataNode:
     def test_read_write_generic_datanode_with_non_list_arguments(self):
         generic_dn = GenericDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "read_fct": read_fct_with_args,
                 "write_fct": write_fct_with_args,
@@ -212,7 +211,7 @@ class TestGenericDataNode:
 
     def test_save_data_node_when_read(self):
         generic_dn = GenericDataNode(
-            "foo", Scope.PIPELINE, properties={"read_fct": read_fct_modify_data_node_name, "write_fct": write_fct}
+            "foo", Scope.SCENARIO, properties={"read_fct": read_fct_modify_data_node_name, "write_fct": write_fct}
         )
         generic_dn._properties["read_fct_args"] = (generic_dn.id, "bar")
         generic_dn.read()
