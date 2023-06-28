@@ -96,10 +96,9 @@ def excel_file_with_multi_sheet(tmpdir_factory) -> str:
     }
     fn = tmpdir_factory.mktemp("data").join("df.xlsx")
 
-    writer = pd.ExcelWriter(str(fn))
-    for key in excel_multi_sheet.keys():
-        excel_multi_sheet[key].to_excel(writer, key, index=False)
-    writer.save()
+    with pd.ExcelWriter(str(fn)) as writer:
+        for key in excel_multi_sheet.keys():
+            excel_multi_sheet[key].to_excel(writer, key, index=False)
 
     return fn.strpath
 
