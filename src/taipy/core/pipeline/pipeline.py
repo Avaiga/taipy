@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import uuid
+from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
@@ -22,9 +23,11 @@ from taipy.config.common._validate_id import _validate_id
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
-from .._entity._reload import _reload, _self_reload, _self_setter
+from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._entity._submittable import _Submittable
+from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common import _utils
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..common._warnings import _warn_deprecated
@@ -33,6 +36,7 @@ from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
 from ..task.task import Task
 from ..task.task_id import TaskId
+from ._pipeline_model import _PipelineModel
 from .pipeline_id import PipelineId
 
 
@@ -64,7 +68,7 @@ class Pipeline(_Entity, _Submittable, _Labeled):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         subscribers: Optional[List[_Subscriber]] = None,
-        version: str = None,
+        version: Optional[str] = None,
     ):
         super().__init__(subscribers)
         self.config_id = _validate_id(config_id)
@@ -127,7 +131,7 @@ class Pipeline(_Entity, _Submittable, _Labeled):
                 data_nodes[k] = v
         return data_nodes
 
-    @property  # type: ignore
+    @property
     def parent_id(self):
         """
         Deprecated. Use owner_id instead.
@@ -135,7 +139,7 @@ class Pipeline(_Entity, _Submittable, _Labeled):
         _warn_deprecated("parent_id", suggest="owner_id")
         return self.owner_id
 
-    @parent_id.setter  # type: ignore
+    @parent_id.setter
     def parent_id(self, val):
         """
         Deprecated. Use owner_id instead.
@@ -148,13 +152,17 @@ class Pipeline(_Entity, _Submittable, _Labeled):
     def parent_ids(self):
         return self._parent_ids
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
 
-    @property  # type: ignore
+    @version.setter
+    def version(self, val):
+        self._version = val
+
+    @property
     def properties(self):
-        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties = _Reloader()._reload("pipeline", self)._properties
         return self._properties
 
     def _is_consistent(self) -> bool:
@@ -268,6 +276,49 @@ class Pipeline(_Entity, _Submittable, _Labeled):
         from ._pipeline_manager_factory import _PipelineManagerFactory
 
         return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+
+    @classmethod
+    def _to_model(cls, pipeline) -> _PipelineModel:
+        datanode_task_edges = defaultdict(list)
+        task_datanode_edges = defaultdict(list)
+
+        for task in pipeline._get_tasks().values():
+            task_id = str(task.id)
+            for predecessor in task.input.values():
+                datanode_task_edges[str(predecessor.id)].append(task_id)
+            for successor in task.output.values():
+                task_datanode_edges[task_id].append(str(successor.id))
+        return _PipelineModel(
+            pipeline.id,
+            pipeline.owner_id,
+            list(pipeline._parent_ids),
+            pipeline.config_id,
+            pipeline._properties.data,
+            cls.__to_task_ids(pipeline._tasks),
+            _utils._fcts_to_dict(pipeline._subscribers),
+            pipeline.version,
+        )
+
+    @classmethod
+    def _from_model(cls, model: _PipelineModel):
+        pipeline = Pipeline(
+            model.config_id,
+            model.properties,
+            model.tasks,
+            model.id,
+            model.owner_id,
+            set(model.parent_ids),
+            [
+                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                for it in model.subscribers
+            ],
+            model.version,
+        )
+        return _migrate_entity(pipeline)
+
+    @staticmethod
+    def __to_task_ids(tasks):
+        return [t.id if isinstance(t, Task) else t for t in tasks]
 
     def get_label(self) -> str:
         """Returns the pipeline simple label prefixed by its owner label.

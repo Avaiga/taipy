@@ -8,23 +8,11 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
-from abc import abstractmethod
-from importlib import util
-from typing import Type
-
-from ._repository import _AbstractRepository
+from .._repository._v2._sql_repository import _SQLRepository
+from ._pipeline_converter import _PipelineConverter
+from ._pipeline_model import _PipelineModel
 
 
-class _RepositoryFactory:
-    _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
-    _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
-
-    @classmethod
-    @abstractmethod
-    def _build_repository(cls) -> Type[_AbstractRepository]:  # type: ignore
-        raise NotImplementedError
-
-    @classmethod
-    def _using_enterprise(cls) -> bool:
-        return util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None
+class _PipelineSQLRepository(_SQLRepository):
+    def __init__(self):
+        super().__init__(model_type=_PipelineModel, converter=_PipelineConverter)

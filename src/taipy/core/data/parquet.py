@@ -22,14 +22,15 @@ from taipy.config.common.scope import Scope
 from .._backup._backup import _replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..exceptions.exceptions import InvalidExposedType, UnknownCompressionAlgorithm, UnknownParquetEngine
+from ..exceptions.exceptions import UnknownCompressionAlgorithm, UnknownParquetEngine
 from ..job.job_id import JobId
+from ._abstract_tabular import _AbstractTabularDataNode
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ParquetDataNode(DataNode, _AbstractFileDataNode):
+class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     """Data Node stored as a Parquet file.
 
     Attributes:
@@ -139,7 +140,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode):
 
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
+        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
 
         super().__init__(
             config_id,
@@ -181,13 +182,6 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode):
         self._path = value
         self.properties[self.__PATH_KEY] = value
         _replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
-
-    def _check_exposed_type(self, exposed_type):
-        if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
-            raise InvalidExposedType(
-                f"Invalid string exposed type {exposed_type}. Supported values are "
-                f"{', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
-            )
 
     def _read(self):
         return self.read_with_kwargs()

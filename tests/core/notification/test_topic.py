@@ -11,7 +11,7 @@
 
 import pytest
 
-from src.taipy.core.exceptions.exceptions import InvalidEventAttributeName, InvalidEventOperation
+from src.taipy.core.exceptions.exceptions import InvalidEventOperation
 from src.taipy.core.notification.event import EventEntityType, EventOperation
 from src.taipy.core.notification.topic import Topic
 

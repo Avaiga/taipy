@@ -10,9 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from unittest import mock
-
-import pytest
 
 from src.taipy.core import taipy as tp
 from src.taipy.core.notification import EventEntityType, EventOperation

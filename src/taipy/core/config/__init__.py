@@ -26,6 +26,7 @@ from .checkers._task_config_checker import _TaskConfigChecker
 from .core_section import CoreSection
 from .data_node_config import DataNodeConfig
 from .job_config import JobConfig
+from .migration_config import MigrationConfig
 from .pipeline_config import PipelineConfig
 from .scenario_config import ScenarioConfig
 from .task_config import TaskConfig
@@ -80,6 +81,13 @@ _inject_section(
         ("configure_default_scenario", ScenarioConfig._configure_default),
         ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
     ],
+)
+_inject_section(
+    MigrationConfig,
+    "migration_functions",
+    MigrationConfig.default_config(),
+    [("add_migration_function", MigrationConfig._add_migration_function)],
+    add_to_unconflicted_sections=True,
 )
 _inject_section(
     CoreSection,

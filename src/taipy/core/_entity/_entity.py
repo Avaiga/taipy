@@ -34,3 +34,11 @@ class _Entity:
             self._properties.data = self._properties._previous_data
 
         _get_manager(self._MANAGER_NAME)._set(self)
+
+    @classmethod
+    def _to_model(cls, entity):
+        raise NotImplementedError
+
+    @classmethod
+    def _from_model(cls, model):
+        raise NotImplementedError

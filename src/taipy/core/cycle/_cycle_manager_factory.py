@@ -14,15 +14,29 @@ from typing import Type
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ..cycle._cycle_manager import _CycleManager
-from ._cycle_repository_factory import _CycleRepositoryFactory
+from ._cycle_fs_repository_v2 import _CycleFSRepository
+from ._cycle_sql_repository_v2 import _CycleSQLRepository
 
 
 class _CycleManagerFactory(_ManagerFactory):
+
+    __REPOSITORY_MAP = {"default": _CycleFSRepository, "sql": _CycleSQLRepository}
+
     @classmethod
     def _build_manager(cls) -> Type[_CycleManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(
+            cycle_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager"
             )  # type: ignore
-        _CycleManager._repository = _CycleRepositoryFactory._build_repository()
-        return _CycleManager
+            build_repository = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager_factory", "_CycleManagerFactory"
+            )._build_repository  # type: ignore
+        else:
+            cycle_manager = _CycleManager
+            build_repository = cls._build_repository
+        cycle_manager._repository = build_repository()  # type: ignore
+        return cycle_manager  # type: ignore
+
+    @classmethod
+    def _build_repository(cls):
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

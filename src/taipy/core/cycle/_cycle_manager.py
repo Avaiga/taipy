@@ -11,22 +11,22 @@
 
 import calendar
 from datetime import datetime, time, timedelta
-from typing import List, Optional
+from typing import Callable, Dict, List, Optional
 
 from taipy.config.common.frequency import Frequency
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
+from .._repository._v2._abstract_repository import _AbstractRepository
 from ..job._job_manager_factory import _JobManagerFactory
 from ..notification import EventEntityType, EventOperation, _publish_event
-from ._cycle_repository_factory import _CycleRepositoryFactory
 from .cycle import Cycle
 from .cycle_id import CycleId
 
 
 class _CycleManager(_Manager[Cycle]):
-    _repository = _CycleRepositoryFactory._build_repository()
     _ENTITY_NAME = Cycle.__name__
+    _repository: _AbstractRepository
     _EVENT_ENTITY_TYPE = EventEntityType.CYCLE
 
     @classmethod
@@ -44,18 +44,15 @@ class _CycleManager(_Manager[Cycle]):
         return cycle
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = "all") -> List[Cycle]:
-        """
-        Returns all entities.
-        """
-        return cls._repository._load_all(version_number)
-
-    @classmethod
-    def _get_all_by(cls, by, version_number: Optional[str] = "all") -> List[Cycle]:
+    def _get_all_by(cls, by, filters: Optional[List[Dict]] = None) -> List[Cycle]:
         """
         Returns all entities based on a criteria.
         """
-        return cls._repository._load_all_by(by, version_number)
+        if not filters:
+            filters = []
+        if by:
+            filters.append(by)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _get_or_create(
@@ -63,7 +60,9 @@ class _CycleManager(_Manager[Cycle]):
     ) -> Cycle:
         creation_date = creation_date if creation_date else datetime.now()
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
-        cycles = cls._repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
+        cycles = cls._get_cycles_by_frequency_and_start_date(
+            frequency=frequency, start_date=start_date, cycles=cls._get_all()
+        )
         if len(cycles) > 0:
             return cycles[0]
         else:
@@ -131,3 +130,23 @@ class _CycleManager(_Manager[Cycle]):
                 entity_ids.job_ids.add(job.id)
 
         return entity_ids
+
+    @classmethod
+    def _get_cycles_by_frequency_and_start_date(
+        cls, frequency: Frequency, start_date: datetime, cycles: List[Cycle]
+    ) -> List[Cycle]:
+        return cls._get_cycles_cdt(
+            lambda cycle: cycle.frequency == frequency and cycle.start_date == start_date, cycles
+        )
+
+    @classmethod
+    def _get_cycles_by_frequency_and_overlapping_date(
+        cls, frequency: Frequency, date: datetime, cycles: List[Cycle]
+    ) -> List[Cycle]:
+        return cls._get_cycles_cdt(
+            lambda cycle: cycle.frequency == frequency and cycle.start_date <= date <= cycle.end_date, cycles
+        )
+
+    @classmethod
+    def _get_cycles_cdt(cls, cdt: Callable[[Cycle], bool], cycles: List[Cycle]) -> List[Cycle]:
+        return [cycle for cycle in cycles if cdt(cycle)]

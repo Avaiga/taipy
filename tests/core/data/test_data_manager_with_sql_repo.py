@@ -92,7 +92,7 @@ class TestDataManager:
         init_managers()
 
         with pytest.raises(ModelNotFound):
-            _DataManager._repository.load("test_data_node_2")
+            _DataManager._repository._load("test_data_node_2")
 
     def test_get_all(self):
         Config.configure_global_app(repository_type="sql")
@@ -116,7 +116,7 @@ class TestDataManager:
 
         dn = InMemoryDataNode(
             "config_id",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             id=DataNodeId("id"),
             owner_id=None,
             parent_ids={"task_id_1"},
@@ -142,9 +142,9 @@ class TestDataManager:
         init_managers()
         _DataManager._delete_all()
 
-        dn_1 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_1")
-        dn_2 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_2")
-        dn_3 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_3")
+        dn_1 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_1")
+        dn_2 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_2")
+        dn_3 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_3")
         assert len(_DataManager._get_all()) == 0
         _DataManager._set(dn_1)
         _DataManager._set(dn_2)
@@ -174,12 +174,6 @@ class TestDataManager:
         scenario_dn_config = Config.configure_data_node(
             id="test_data_node2", storage_type="in_memory", scope=Scope.SCENARIO, data="In memory scenario"
         )
-        pipeline_dn_config = Config.configure_data_node(
-            id="test_data_node3", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
-        )
-        pipeline_dn_config_bis = Config.configure_data_node(
-            id="test_data_node4", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
-        )
 
         _DataManager._delete_all()
 
@@ -195,7 +189,7 @@ class TestDataManager:
         scenario_dn_bis = _get_or_create_dn(scenario_dn_config, None, "scenario_id")
         assert len(_DataManager._get_all()) == 2
         assert scenario_dn.id == scenario_dn_bis.id
-        scenario_dn_ter = _get_or_create_dn(scenario_dn_config, None, "scenario_id", "whatever_pipeline_id")
+        scenario_dn_ter = _get_or_create_dn(scenario_dn_config, None, "scenario_id")
         assert len(_DataManager._get_all()) == 2
         assert scenario_dn.id == scenario_dn_bis.id
         assert scenario_dn_bis.id == scenario_dn_ter.id
@@ -205,45 +199,23 @@ class TestDataManager:
         assert scenario_dn_bis.id == scenario_dn_ter.id
         assert scenario_dn_ter.id != scenario_dn_quater.id
 
-        pipeline_dn = _get_or_create_dn(pipeline_dn_config, None, "scenario_id", "pipeline_1")
+        assert len(_DataManager._get_all()) == 3
+        cycle_dn = _get_or_create_dn(cycle_dn_config, "cycle_id", None)
         assert len(_DataManager._get_all()) == 4
-        pipeline_dn_bis = _get_or_create_dn(pipeline_dn_config, None, "scenario_id", "pipeline_1")
+        cycle_dn_1 = _get_or_create_dn(cycle_dn_config, "cycle_id", None)
         assert len(_DataManager._get_all()) == 4
-        assert pipeline_dn.id == pipeline_dn_bis.id
-        pipeline_dn_ter = _get_or_create_dn(pipeline_dn_config, None, "scenario_id", "pipeline_2")
-        assert len(_DataManager._get_all()) == 5
-        assert pipeline_dn.id == pipeline_dn_bis.id
-        assert pipeline_dn.id != pipeline_dn_ter.id
-        pipeline_dn_quater = _get_or_create_dn(pipeline_dn_config, None, "other_scenario_id", "pipeline_2")
-        assert len(_DataManager._get_all()) == 5
-        assert pipeline_dn.id == pipeline_dn_bis.id
-        assert pipeline_dn_bis.id != pipeline_dn_ter.id
-        assert pipeline_dn_ter.id == pipeline_dn_quater.id
-
-        pipeline_dn_quinquies = _get_or_create_dn(pipeline_dn_config_bis, None)
-        assert len(_DataManager._get_all()) == 6
-        assert pipeline_dn.id == pipeline_dn_bis.id
-        assert pipeline_dn_bis.id != pipeline_dn_ter.id
-        assert pipeline_dn_bis.id != pipeline_dn_quinquies.id
-        assert pipeline_dn_ter.id != pipeline_dn_quinquies.id
-
-        assert len(_DataManager._get_all()) == 6
-        cycle_dn = _get_or_create_dn(cycle_dn_config, "cycle_id", None, None)
-        assert len(_DataManager._get_all()) == 7
-        cycle_dn_1 = _get_or_create_dn(cycle_dn_config, "cycle_id", None, None)
-        assert len(_DataManager._get_all()) == 7
         assert cycle_dn.id == cycle_dn_1.id
-        cycle_dn_2 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id", None)
-        assert len(_DataManager._get_all()) == 7
+        cycle_dn_2 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id")
+        assert len(_DataManager._get_all()) == 4
         assert cycle_dn.id == cycle_dn_2.id
-        cycle_dn_3 = _get_or_create_dn(cycle_dn_config, "cycle_id", None, "pipeline_id")
-        assert len(_DataManager._get_all()) == 7
+        cycle_dn_3 = _get_or_create_dn(cycle_dn_config, "cycle_id", None)
+        assert len(_DataManager._get_all()) == 4
         assert cycle_dn.id == cycle_dn_3.id
-        cycle_dn_4 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id", "pipeline_id")
-        assert len(_DataManager._get_all()) == 7
+        cycle_dn_4 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id")
+        assert len(_DataManager._get_all()) == 4
         assert cycle_dn.id == cycle_dn_4.id
-        cycle_dn_5 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id_2", "pipeline_id")
-        assert len(_DataManager._get_all()) == 7
+        cycle_dn_5 = _get_or_create_dn(cycle_dn_config, "cycle_id", "scenario_id_2")
+        assert len(_DataManager._get_all()) == 4
         assert cycle_dn.id == cycle_dn_5.id
 
         assert cycle_dn_1.id == cycle_dn_2.id
@@ -255,9 +227,9 @@ class TestDataManager:
         Config.configure_global_app(repository_type="sql")
         init_managers()
 
-        dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.PIPELINE)
-        dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.PIPELINE)
-        dn_config_3 = Config.configure_data_node("dn_3", scope=Scope.PIPELINE)
+        dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)
+        dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.SCENARIO)
+        dn_config_3 = Config.configure_data_node("dn_3", scope=Scope.SCENARIO)
 
         dn_1_1 = _DataManager._create_and_set(dn_config_1, None, None)
         dn_1_2 = _DataManager._create_and_set(dn_config_1, None, None)

@@ -17,7 +17,8 @@ from taipy.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._version._version_manager_factory import _VersionManagerFactory
+from .._repository._v2._abstract_repository import _AbstractRepository
+from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.pipeline_config import PipelineConfig
 from ..cycle.cycle_id import CycleId
@@ -28,15 +29,23 @@ from ..notification import EventEntityType, EventOperation, _publish_event
 from ..scenario.scenario_id import ScenarioId
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
-from ._pipeline_repository_factory import _PipelineRepositoryFactory
 from .pipeline import Pipeline
 from .pipeline_id import PipelineId
 
 
-class _PipelineManager(_Manager[Pipeline]):
-    _repository = _PipelineRepositoryFactory._build_repository()
+class _PipelineManager(_Manager[Pipeline], _VersionMixin):
+
     _ENTITY_NAME = Pipeline.__name__
+    _repository: _AbstractRepository
     _EVENT_ENTITY_TYPE = EventEntityType.PIPELINE
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[Pipeline]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _subscribe(
@@ -89,23 +98,23 @@ class _PipelineManager(_Manager[Pipeline]):
 
         task_configs = [Config.tasks[t.id] for t in pipeline_config.task_configs]
         task_manager = _TaskManagerFactory._build_manager()
-        tasks = task_manager._bulk_get_or_create(task_configs, cycle_id, scenario_id, pipeline_id)
-
+        tasks = task_manager._bulk_get_or_create(task_configs, cycle_id, scenario_id)
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
-        if scope == Scope.PIPELINE:
-            owner_id = pipeline_id
-        elif scope == Scope.SCENARIO:
+        if scope == Scope.SCENARIO:
             owner_id = scenario_id
         elif scope == Scope.CYCLE:
             owner_id = cycle_id
         else:
             owner_id = None
 
-        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(str(pipeline_config.id), owner_id):
+        filters = cls._build_filters_with_version(None)
+        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(  # type: ignore
+            str(pipeline_config.id), owner_id, filters
+        ):
             return pipelines_from_owner
 
-        version = _VersionManagerFactory._build_manager()._get_latest_version()
+        version = cls._get_latest_version()
         pipeline = Pipeline(
             str(pipeline_config.id),
             dict(**pipeline_config._properties),
@@ -188,3 +197,10 @@ class _PipelineManager(_Manager[Pipeline]):
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
         return entity_ids
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[Pipeline]:
+        """
+        Get all pipelines by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])
