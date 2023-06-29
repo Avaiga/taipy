@@ -72,7 +72,7 @@ def _self_setter(manager):
             ]
 
             if not self._is_in_context:
-                entity = entity_manager._get(self, self)
+                entity = _Reloader()._reload(manager, self)
                 fct(entity, *args, **kwargs)
                 entity_manager._set(entity)
                 _publish_event(*to_publish_event_parameters)
