@@ -22,7 +22,15 @@ from taipy.core import Cycle, DataNode, Job, Pipeline, Scenario, cancel_job, cre
 from taipy.core import delete as core_delete
 from taipy.core import delete_job
 from taipy.core import get as core_get
-from taipy.core import get_cycles_scenarios, get_data_nodes, get_jobs, is_deletable, is_promotable, is_submittable, set_primary
+from taipy.core import (
+    get_cycles_scenarios,
+    get_data_nodes,
+    get_jobs,
+    is_deletable,
+    is_promotable,
+    is_submittable,
+    set_primary,
+)
 from taipy.core import submit as core_submit
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
@@ -52,6 +60,7 @@ class _EntityType(Enum):
     SCENARIO = 1
     PIPELINE = 2
     DATANODE = 3
+
 
 class _GuiCoreScenarioAdapter(_TaipyBase):
     __INNER_PROPS = ["name"]
