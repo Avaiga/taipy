@@ -28,12 +28,12 @@ class _Entity:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         # If multiple entities is in context, the last to enter will be the first to exit
         self._is_in_context = False
+        if hasattr(self, "_properties"):
+            self._properties.data = self._properties._pending_changes
+        _get_manager(self._MANAGER_NAME)._set(self)
+
         while self._in_context_attributes_changed_collector:
             _publish_event(*self._in_context_attributes_changed_collector.pop(0))
-        if hasattr(self, "_properties"):
-            self._properties.data = self._properties._previous_data
-
-        _get_manager(self._MANAGER_NAME)._set(self)
 
     @classmethod
     def _to_model(cls, entity):

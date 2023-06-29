@@ -32,8 +32,8 @@ class _Reloader:
 
         entity = _get_manager(manager)._get(obj, obj)
         if obj._is_in_context and hasattr(entity, "_properties"):
-            if obj._properties._previous_data:
-                entity._properties._previous_data = obj._properties._previous_data
+            if obj._properties._pending_changes:
+                entity._properties._pending_changes = obj._properties._pending_changes
             entity._properties._entity_owner = obj
         return entity
 

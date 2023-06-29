@@ -18,7 +18,7 @@ class _Properties(UserDict):
     def __init__(self, entity_owner, **kwargs):
         super().__init__(**kwargs)
         self._entity_owner = entity_owner
-        self._previous_data = {}
+        self._pending_changes = {}
 
     def __setitem__(self, key, value):
         super(_Properties, self).__setitem__(key, value)
@@ -35,7 +35,7 @@ class _Properties(UserDict):
                 tp.set(self._entity_owner)
                 _publish_event(*to_publish_event_parameters)
             else:
-                self._previous_data[key] = value
+                self._pending_changes[key] = value
                 self._entity_owner._in_context_attributes_changed_collector.append(to_publish_event_parameters)
 
     def __getitem__(self, key):
