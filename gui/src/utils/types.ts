@@ -19,19 +19,3 @@ export enum NodeType {
     PIPELINE = 2,
     NODE = 3,
 }
-
-// job id, job name, entity id, entity name, submit id, creation date, status
-export type Job = [string, string, string, string, string, string, number];
-export type Jobs = Array<Job>;
-
-export enum JobStatus {
-    SUBMITTED = 1,
-    BLOCKED = 2,
-    PENDING = 3,
-    RUNNING = 4,
-    CANCELED = 5,
-    FAILED = 6,
-    COMPLETED = 7,
-    SKIPPED = 8,
-    ABANDONED = 9,
-}

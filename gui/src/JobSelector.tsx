@@ -40,14 +40,12 @@ import {
 } from "@mui/material";
 
 import { FilterList } from "@mui/icons-material";
-import { Job, JobStatus, Jobs } from "./utils/types";
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
     getUpdateVar,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
-    useDynamicProperty,
     useModule,
 } from "taipy-gui";
 import { useFormik } from "formik";
@@ -65,16 +63,27 @@ interface JobSelectorProps {
     dynamicClassName?: string;
     height: string;
     displayJobId?: boolean;
-    defaultDisplayJobId: boolean;
     displayEntityLabel?: boolean;
-    defaultDisplayEntityLabel: boolean;
     displayEntityId?: boolean;
-    defaultDisplayEntityId: boolean;
     displaySubmitId?: boolean;
-    defaultDisplaySubmitId: boolean;
     displayDate?: boolean;
-    defaultDisplayDate: boolean;
     onJobAction: string;
+}
+
+// job id, job name, entity id, entity name, submit id, creation date, status
+type Job = [string, string, string, string, string, string, number];
+type Jobs = Array<Job>;
+
+enum JobStatus {
+    SUBMITTED = 1,
+    BLOCKED = 2,
+    PENDING = 3,
+    RUNNING = 4,
+    CANCELED = 5,
+    FAILED = 6,
+    COMPLETED = 7,
+    SKIPPED = 8,
+    ABANDONED = 9,
 }
 
 const selectedSx = { flex: "1 1 100%" };
@@ -83,6 +92,7 @@ const selectSx = {
     height: 50,
 };
 const containerPopupSx = { width: "619px" };
+const tableWidthSx = { minWidth: 750 };
 
 const ChipStatus = ({ status }: { status: number }) => {
     const statusText = JobStatus[status];
@@ -101,7 +111,7 @@ const ChipStatus = ({ status }: { status: number }) => {
     return <Chip label={statusText} variant={variant} color={colorFill} />;
 };
 
-export type JobSelectorColumns = {
+type JobSelectorColumns = {
     id: string;
     primaryLabel: string;
     showPrimaryLabel?: boolean;
@@ -110,7 +120,7 @@ export type JobSelectorColumns = {
     columnIndex: number;
 };
 
-export type FilterData = {
+type FilterData = {
     data: number;
     operator: string;
     value: string;
@@ -335,9 +345,9 @@ function JobSelectedTableHead({ selectAllTrue, handleSelectAllClick, columns }: 
 interface JobSelectedTableRowProps {
     row: Job;
     isItemSelected: boolean;
-    handleCheckboxClick: (event: React.MouseEvent<HTMLElement>, name: string) => void;
-    handleCancelJobs: (id: string[]) => void;
-    handleDeleteJobs: (id: string[]) => void;
+    handleCheckboxClick: (event: React.MouseEvent<HTMLElement>) => void;
+    handleCancelJobs: (event: React.MouseEvent<HTMLElement>) => void;
+    handleDeleteJobs: (event: React.MouseEvent<HTMLElement>) => void;
     displayJobId?: boolean;
     displayEntityLabel?: boolean;
     displayEntityId?: boolean;
@@ -358,29 +368,10 @@ function JobSelectedTableRow({
 }: JobSelectedTableRowProps) {
     const [id, jobName, entityId, entityName, submitId, creationDate, status] = row;
 
-    const doDeleteJob = useCallback(
-        (id: string[]) => {
-            handleDeleteJobs && handleDeleteJobs(id);
-        },
-        [handleDeleteJobs]
-    );
-    const doCancelJob = useCallback(
-        (id: string[]) => {
-            handleCancelJobs && handleCancelJobs(id);
-        },
-        [handleCancelJobs]
-    );
-    const doCheckboxClick = useCallback(
-        (event: React.MouseEvent<HTMLElement>, name: string) => {
-            handleCheckboxClick && handleCheckboxClick(event, name);
-        },
-        [handleCheckboxClick]
-    );
-
     return (
         <TableRow hover role="checkbox" tabIndex={-1} key={id}>
             <TableCell padding="checkbox">
-                <Checkbox color="primary" checked={isItemSelected} onClick={(event) => doCheckboxClick(event, id)} />
+                <Checkbox color="primary" checked={isItemSelected} data-id={id} onClick={handleCheckboxClick} />
             </TableCell>
             {displayJobId ? (
                 <TableCell component="th" id={id} scope="row" padding="none">
@@ -407,11 +398,11 @@ function JobSelectedTableRow({
                 {status === JobStatus.RUNNING ? null : status === JobStatus.BLOCKED ||
                   status === JobStatus.PENDING ||
                   status === JobStatus.SUBMITTED ? (
-                    <IconButton onClick={() => doCancelJob([id])}>
+                    <IconButton data-id={[id]} onClick={handleCancelJobs}>
                         <StopCircleOutlined />
                     </IconButton>
                 ) : (
-                    <IconButton onClick={() => doDeleteJob([id])}>
+                    <IconButton data-id={[id]} onClick={handleDeleteJobs}>
                         <DeleteOutline color="primary" />
                     </IconButton>
                 )}
@@ -421,7 +412,14 @@ function JobSelectedTableRow({
 }
 
 const JobSelector = (props: JobSelectorProps) => {
-    const { id = "" } = props;
+    const {
+        id = "",
+        displayJobId = true,
+        displayEntityLabel = true,
+        displayEntityId = true,
+        displaySubmitId = true,
+        displayDate = true,
+    } = props;
     const [selected, setSelected] = useState<string[]>([]);
     const [jobRows, setJobRows] = useState<Jobs>([]);
     const [filters, setFilters] = useState<FilterData[]>();
@@ -436,19 +434,15 @@ const JobSelector = (props: JobSelectorProps) => {
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
 
-    const displayJobId = useDynamicProperty(props.displayJobId, props.defaultDisplayJobId, true);
-    const displayEntityLabel = useDynamicProperty(props.displayEntityLabel, props.defaultDisplayEntityLabel, true);
-    const displayEntityId = useDynamicProperty(props.displayEntityId, props.defaultDisplayEntityId, true);
-    const displaySubmitId = useDynamicProperty(props.displaySubmitId, props.defaultDisplaySubmitId, true);
-    const displayDate = useDynamicProperty(props.displayDate, props.defaultDisplayDate, true);
-
     const headerToolbarSx = useMemo(
         () => ({
             pl: { sm: 2 },
             pr: { xs: 1, sm: 1 },
-            ...(selected.length > 0 && {
-                bgcolor: "rgba(0, 0, 0, 0.05)",
-            }),
+            ...(selected.length > 0
+                ? {
+                      bgcolor: "rgba(0, 0, 0, 0.05)",
+                  }
+                : {}),
         }),
         [selected]
     );
@@ -496,24 +490,27 @@ const JobSelector = (props: JobSelectorProps) => {
         [displayDate, displayEntityId, displayEntityLabel, displayJobId, displaySubmitId]
     );
 
-    const handleClick = useCallback(
-        (event: React.MouseEvent<HTMLElement>, name: string) => {
-            const selectedIndex = selected.indexOf(name);
+    const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+        const { id = "" } = event.currentTarget?.dataset || {};
+        setSelected((oldSelected) => {
+            const selectedIndex = oldSelected.indexOf(id);
             let newSelected: string[] = [];
 
             if (selectedIndex === -1) {
-                newSelected = newSelected.concat(selected, name);
+                newSelected = newSelected.concat(oldSelected, id);
             } else if (selectedIndex === 0) {
-                newSelected = newSelected.concat(selected.slice(1));
-            } else if (selectedIndex === selected.length - 1) {
-                newSelected = newSelected.concat(selected.slice(0, -1));
+                newSelected = newSelected.concat(oldSelected.slice(1));
+            } else if (selectedIndex === oldSelected.length - 1) {
+                newSelected = newSelected.concat(oldSelected.slice(0, -1));
             } else if (selectedIndex > 0) {
-                newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+                newSelected = newSelected.concat(
+                    oldSelected.slice(0, selectedIndex),
+                    oldSelected.slice(selectedIndex + 1)
+                );
             }
-            setSelected([...newSelected]);
-        },
-        [selected]
-    );
+            return [...newSelected];
+        });
+    }, []);
 
     const handleSelectAllClick = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -528,13 +525,15 @@ const JobSelector = (props: JobSelectorProps) => {
     );
 
     const handleCancelJobs = useCallback(
-        (id: string[]) => {
+        (event: React.MouseEvent<HTMLElement>) => {
+            const { id = "" } = event.currentTarget?.dataset || {};
             dispatch(createSendActionNameAction(props.id, module, props.onJobAction, id));
         },
         [dispatch, module, props.id, props.onJobAction]
     );
     const handleDeleteJobs = useCallback(
-        (id: string[]) => {
+        (event: React.MouseEvent<HTMLElement>) => {
+            const { id = "" } = event.currentTarget?.dataset || {};
             dispatch(createSendActionNameAction(props.id, module, props.onJobAction, id));
         },
         [dispatch, module, props.id, props.onJobAction]
@@ -542,7 +541,7 @@ const JobSelector = (props: JobSelectorProps) => {
 
     const selectedAllowedCancelJobs = useMemo(
         () =>
-            jobRows?.filter(
+            jobRows.filter(
                 (job) =>
                     selected.includes(job[0]) &&
                     (job[6] === JobStatus.SUBMITTED || job[6] === JobStatus.BLOCKED || job[6] === JobStatus.PENDING)
@@ -552,7 +551,7 @@ const JobSelector = (props: JobSelectorProps) => {
 
     const selectedAllowedDeleteJobs = useMemo(
         () =>
-            jobRows?.filter(
+            jobRows.filter(
                 (job) =>
                     selected.includes(job[0]) &&
                     (job[6] === JobStatus.CANCELED ||
@@ -640,23 +639,21 @@ const JobSelector = (props: JobSelectorProps) => {
                         <>
                             <Tooltip title="Stop">
                                 <IconButton
-                                    disabled={!selectedAllowedCancelJobs || selectedAllowedCancelJobs.length == 0}
-                                    onClick={() => handleCancelJobs(selected as string[])}
+                                    disabled={selectedAllowedCancelJobs.length == 0}
+                                    data-id={selected as string[]}
+                                    onClick={handleCancelJobs}
                                 >
                                     <StopCircleOutlined />
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Delete">
                                 <IconButton
-                                    disabled={!selectedAllowedDeleteJobs || selectedAllowedDeleteJobs.length == 0}
-                                    onClick={() => handleDeleteJobs(selected as string[])}
+                                    disabled={selectedAllowedDeleteJobs.length == 0}
+                                    data-id={selected as string[]}
+                                    onClick={handleDeleteJobs}
                                 >
                                     <DeleteOutline
-                                        color={
-                                            !selectedAllowedDeleteJobs || selectedAllowedDeleteJobs.length == 0
-                                                ? "disabled"
-                                                : "primary"
-                                        }
+                                        color={selectedAllowedDeleteJobs.length == 0 ? "disabled" : "primary"}
                                     />
                                 </IconButton>
                             </Tooltip>
@@ -672,34 +669,32 @@ const JobSelector = (props: JobSelectorProps) => {
                     />
                 </Toolbar>
                 <TableContainer sx={tableHeightSx}>
-                    <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium">
+                    <Table sx={tableWidthSx} aria-labelledby="tableTitle" size="medium">
                         <JobSelectedTableHead
                             selectAllTrue={jobRows?.length === selected?.length}
                             handleSelectAllClick={handleSelectAllClick}
                             columns={jobSelectorColumns}
                         />
                         <TableBody>
-                            {jobRows
-                                ? jobRows.map((row, index) => {
-                                      const isItemSelected = isSelected(row[0]);
+                            {jobRows.map((row, index) => {
+                                const isItemSelected = isSelected(row[0]);
 
-                                      return (
-                                          <JobSelectedTableRow
-                                              handleCheckboxClick={handleClick}
-                                              row={row}
-                                              isItemSelected={isItemSelected}
-                                              key={index}
-                                              handleDeleteJobs={handleDeleteJobs}
-                                              handleCancelJobs={handleCancelJobs}
-                                              displaySubmitId={displaySubmitId}
-                                              displayJobId={displayJobId}
-                                              displayEntityLabel={displayEntityLabel}
-                                              displayEntityId={displayEntityId}
-                                              displayDate={displayDate}
-                                          />
-                                      );
-                                  })
-                                : null}
+                                return (
+                                    <JobSelectedTableRow
+                                        handleCheckboxClick={handleClick}
+                                        row={row}
+                                        isItemSelected={isItemSelected}
+                                        key={index}
+                                        handleDeleteJobs={handleDeleteJobs}
+                                        handleCancelJobs={handleCancelJobs}
+                                        displaySubmitId={displaySubmitId}
+                                        displayJobId={displayJobId}
+                                        displayEntityLabel={displayEntityLabel}
+                                        displayEntityId={displayEntityId}
+                                        displayDate={displayDate}
+                                    />
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </TableContainer>
