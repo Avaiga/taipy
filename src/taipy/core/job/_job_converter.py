@@ -33,7 +33,7 @@ class _JobConverter(_AbstractConverter):
             job._creation_date.isoformat(),
             cls._serialize_subscribers(job._subscribers),
             job._stacktrace,
-            version=job.version,
+            version=job._version,
         )
 
     @classmethod

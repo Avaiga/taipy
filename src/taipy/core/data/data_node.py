@@ -225,10 +225,6 @@ class DataNode(_Entity, _Labeled):
     def version(self):
         return self._version
 
-    @version.setter
-    def version(self, val):
-        self._version = val
-
     @property
     def cacheable(self):
         """Deprecated. Use `skippable` attribute of a `Task^` instead."""

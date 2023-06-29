@@ -32,7 +32,7 @@ class _TaskConverter(_AbstractConverter):
             function_name=task._function.__name__,
             function_module=task._function.__module__,
             output_ids=cls.__to_ids(task.output.values()),
-            version=task.version,
+            version=task._version,
             skippable=task._skippable,
             properties=task._properties.data.copy(),
         )

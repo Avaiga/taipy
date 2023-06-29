@@ -34,7 +34,7 @@ class _ScenarioConverter(_AbstractConverter):
             primary_scenario=scenario._primary_scenario,
             subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
-            version=scenario.version,
+            version=scenario._version,
             cycle=scenario._cycle.id if scenario._cycle else None,
         )
 
