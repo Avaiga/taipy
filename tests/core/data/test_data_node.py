@@ -473,7 +473,7 @@ class TestDataNode:
         dn_1.scope = Scope.CYCLE
         assert dn_1.scope == Scope.CYCLE
         assert dn_2.scope == Scope.CYCLE
-        dn_1.scope = Scope.SCENARIO
+        dn_2.scope = Scope.SCENARIO
         assert dn_1.scope == Scope.SCENARIO
         assert dn_2.scope == Scope.SCENARIO
 

@@ -228,13 +228,12 @@ class Scenario(_Entity, _Submittable, _Labeled):
         return self._properties
 
     @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
     def name(self) -> Optional[str]:
-        return self._properties.get("name")
+        return self.properties.get("name")
 
     @name.setter  # type: ignore
     def name(self, val):
-        self._properties["name"] = val
+        self.properties["name"] = val
 
     def has_tag(self, tag: str) -> bool:
         """Indicate if the scenario has a given tag.

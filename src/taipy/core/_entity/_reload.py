@@ -35,8 +35,12 @@ def _get_manager(manager: str):
 
 def _reload(manager: str, obj):
     entity = _get_manager(manager)._get(obj, obj)
-    if hasattr(entity, "_properties"):
-        entity._properties._entity_owner = obj
+    if obj._is_in_context:
+        if hasattr(entity, "_properties"):
+            if obj._properties._previous_data:
+                entity._properties._previous_data = obj._properties._previous_data
+            entity._properties._entity_owner = obj
+
     return entity
 
 
@@ -55,7 +59,9 @@ def _self_setter(manager):
             ]
 
             if not self._is_in_context:
-                entity_manager._set(self)
+                entity = entity_manager._get(self, self)
+                fct(entity, *args, **kwargs)
+                entity_manager._set(entity)
                 _publish_event(*to_publish_event_parameters)
             else:
                 self._in_context_attributes_changed_collector.append(to_publish_event_parameters)

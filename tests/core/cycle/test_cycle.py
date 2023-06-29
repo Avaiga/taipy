@@ -205,8 +205,7 @@ def test_auto_set_and_reload(current_datetime):
         assert cycle.start_date == new_datetime_2
         assert cycle.end_date == new_datetime_2
         assert cycle._is_in_context
-        # TODO: should be assert cycle.properties["qux"] == 5
-        assert cycle.properties["qux"] == 9
+        assert cycle.properties["qux"] == 5
         assert cycle.name == "def"
 
     assert cycle_1.frequency == Frequency.YEARLY

@@ -280,7 +280,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     scenario_1.is_primary = False
     assert not scenario_1.is_primary
     assert not scenario_2.is_primary
-    scenario_1.is_primary = True
+    scenario_2.is_primary = True
     assert scenario_1.is_primary
     assert scenario_2.is_primary
 
@@ -320,7 +320,6 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_2.tags) == 1
 
     # auto set & reload on properties attribute
-    # TODO: This assertion is failing is probably due to changes in scenario_2 not updated to scenario_1 properties
     assert scenario_1.properties == {"name": "baz"}
     assert scenario_2.properties == {"name": "baz"}
     scenario_1._properties["qux"] = 4

@@ -30,4 +30,7 @@ class _Entity:
         self._is_in_context = False
         while self._in_context_attributes_changed_collector:
             _publish_event(*self._in_context_attributes_changed_collector.pop(0))
+        if hasattr(self, "_properties"):
+            self._properties.data = self._properties._previous_data
+
         _get_manager(self._MANAGER_NAME)._set(self)
