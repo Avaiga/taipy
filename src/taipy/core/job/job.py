@@ -128,10 +128,6 @@ class Job(_Entity, _Labeled):
     def version(self):
         return self._version
 
-    @version.setter
-    def version(self, val):
-        self._version = val
-
     def __contains__(self, task: Task):
         return self.task.id == task.id
 
@@ -329,7 +325,7 @@ class Job(_Entity, _Labeled):
             entity._creation_date.isoformat(),
             cls._serialize_subscribers(entity._subscribers),
             entity._stacktrace,
-            version=entity.version,
+            version=entity._version,
         )
 
     @classmethod

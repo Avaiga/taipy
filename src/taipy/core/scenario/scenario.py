@@ -223,10 +223,6 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def version(self):
         return self._version
 
-    @version.setter
-    def version(self, val):
-        self._version = val
-
     @property
     def owner_id(self):
         return self._cycle.id
@@ -405,7 +401,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
             primary_scenario=entity._primary_scenario,
             subscribers=_utils._fcts_to_dict(entity._subscribers),
             tags=list(entity._tags),
-            version=entity.version,
+            version=entity._version,
             cycle=cls.__to_cycle_id(entity._cycle),
         )
 

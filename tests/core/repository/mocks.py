@@ -39,9 +39,9 @@ class MockObj:
         self.id = id
         self.name = name
         if version:
-            self.version = version
+            self._version = version
         else:
-            self.version = _VersionManager._get_latest_version()
+            self._version = _VersionManager._get_latest_version()
 
 
 @dataclass
@@ -69,13 +69,13 @@ class MockModel(Base):  # type: ignore
 
     @classmethod
     def _from_entity(cls, entity: MockObj):
-        return MockModel(id=entity.id, name=entity.name, version=entity.version)
+        return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
 
 class MockConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, entity):
-        return MockModel(id=entity.id, name=entity.name, version=entity.version)
+        return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
     @classmethod
     def _model_to_entity(cls, model):
@@ -88,7 +88,7 @@ class MockFSRepository(_FileSystemRepository):
         super().__init__(**kwargs)
 
     def _to_model(self, obj: MockObj):
-        return MockModel(obj.id, obj.name, obj.version)
+        return MockModel(obj.id, obj.name, obj._version)
 
     def _from_model(self, model: MockModel):
         return MockObj(model.id, model.name, model.version)
@@ -113,7 +113,7 @@ class MockSQLRepository(_SQLRepository):
         super().__init__(**kwargs)
 
     def _to_model(self, obj: MockObj):
-        return MockModel(obj.id, obj.name, obj.version)
+        return MockModel(obj.id, obj.name, obj._version)
 
     def _from_model(self, model: MockModel):
         return MockObj(model.id, model.name, model.version)

@@ -156,10 +156,6 @@ class Pipeline(_Entity, _Submittable, _Labeled):
     def version(self):
         return self._version
 
-    @version.setter
-    def version(self, val):
-        self._version = val
-
     @property
     def properties(self):
         self._properties = _Reloader()._reload("pipeline", self)._properties
@@ -296,7 +292,7 @@ class Pipeline(_Entity, _Submittable, _Labeled):
             pipeline._properties.data,
             cls.__to_task_ids(pipeline._tasks),
             _utils._fcts_to_dict(pipeline._subscribers),
-            pipeline.version,
+            pipeline._version,
         )
 
     @classmethod

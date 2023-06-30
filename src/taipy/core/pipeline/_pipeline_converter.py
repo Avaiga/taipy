@@ -39,7 +39,7 @@ class _PipelineConverter(_AbstractConverter):
             pipeline._properties.data,
             cls.__to_task_ids(pipeline._tasks),
             _utils._fcts_to_dict(pipeline._subscribers),
-            pipeline.version,
+            pipeline._version,
         )
 
     @classmethod
