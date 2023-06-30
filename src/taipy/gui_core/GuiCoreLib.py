@@ -392,7 +392,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, Job):
                 # entity = core_get(data.owner_id)
-                return (data.id, data.get_simple_label(), [], "", "", data.submit_id, data.creation_date, data.status.value)
+                return (
+                    data.id,
+                    data.get_simple_label(),
+                    [],
+                    "",
+                    "",
+                    data.submit_id,
+                    data.creation_date,
+                    data.status.value,
+                )
 
     def act_on_jobs(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
