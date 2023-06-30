@@ -29,7 +29,7 @@ class _Reloader:
     def _reload(self, manager: str, obj):
         if self._no_reload_context:
             return obj
-        
+
         entity = _get_manager(manager)._get(obj, obj)
         if hasattr(entity, "_properties"):
             entity._properties._entity_owner = obj
@@ -51,7 +51,6 @@ def _self_reload(manager):
             return fct(self, *args, **kwargs)
 
         return _do_reload
-
 
     return __reload
 
