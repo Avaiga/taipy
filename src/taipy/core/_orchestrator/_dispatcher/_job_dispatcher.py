@@ -11,7 +11,7 @@
 
 import threading
 from abc import abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
@@ -36,7 +36,7 @@ class _JobDispatcher(threading.Thread):
     __logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, orchestrator: _AbstractOrchestrator):
+    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator
