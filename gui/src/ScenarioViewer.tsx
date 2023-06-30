@@ -35,7 +35,7 @@ import {
     useModule,
 } from "taipy-gui";
 
-import { FlagSx, ScFProps, ScenarioFull, ScenarioFullLength, useClassNames } from "./utils";
+import { FlagSx, ScFProps, ScenarioFull, ScenarioFullLength, disableColor, useClassNames } from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
 
 type Property = {
@@ -130,8 +130,6 @@ const AccordionSummarySx = {
     },
 };
 
-const disableColor = <T,>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
-
 const PipelineRow = ({
     active,
     number,
@@ -208,7 +206,11 @@ const PipelineRow = ({
             </Grid>
             <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
                 {submit ? (
-                    <IconButton size="small" onClick={onSubmitPipeline} disabled={!enableScenarioFields || !active || !submittable}>
+                    <IconButton
+                        size="small"
+                        onClick={onSubmitPipeline}
+                        disabled={!enableScenarioFields || !active || !submittable}
+                    >
                         <Send color={disableColor("info", !enableScenarioFields || !active || !submittable)} />
                     </IconButton>
                 ) : null}
@@ -515,7 +517,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         onClick={submitScenario}
                                         disabled={!isScenario || !active || !scSubmittable}
                                     >
-                                        <Send fontSize="medium" color={disableColor("info", !isScenario || !active || !scSubmittable)} />
+                                        <Send
+                                            fontSize="medium"
+                                            color={disableColor("info", !isScenario || !active || !scSubmittable)}
+                                        />
                                     </IconButton>
                                 ) : null}
                             </Grid>

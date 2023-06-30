@@ -51,6 +51,7 @@ class _GCDoNotUpdate(_DoNotUpdate):
 
 Scenario.__bases__ += (_GCDoNotUpdate,)
 DataNode.__bases__ += (_GCDoNotUpdate,)
+Job.__bases__ += (_GCDoNotUpdate,)
 
 Config.configure_global_app(read_entity_retry=3)
 
@@ -387,12 +388,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 self.jobs_list = get_jobs()
             return self.jobs_list
 
-    @staticmethod
-    def job_adapter(data):
+    def job_adapter(self, data):
         if hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, Job):
                 # entity = core_get(data.owner_id)
-                return (data.id, data.get_simple_label(), "", "", data.submit_id, data.creation_date, data.status.value)
+                return (data.id, data.get_simple_label(), [], "", "", data.submit_id, data.creation_date, data.status.value)
 
     def act_on_jobs(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -400,7 +400,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         job_ids = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if job_action := data.get(_GuiCoreContext.__JOB_ACTION) and isinstance(job_ids, list):
+        job_action = data.get(_GuiCoreContext.__JOB_ACTION)
+        if job_action and isinstance(job_ids, list):
             errs = []
             if job_action == "delete":
                 for job_id in job_ids:
@@ -515,11 +516,13 @@ class _GuiCore(ElementLibrary):
                 "id": ElementProperty(PropertyType.string),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "value": ElementProperty(PropertyType.lov_value),
-                "display_job_id": ElementProperty(PropertyType.boolean, True),
-                "display_entity_label": ElementProperty(PropertyType.boolean, True),
-                "display_entity_id": ElementProperty(PropertyType.boolean, False),
-                "display_submit_id": ElementProperty(PropertyType.boolean, False),
-                "display_date": ElementProperty(PropertyType.boolean, True),
+                "show_job_id": ElementProperty(PropertyType.boolean, True),
+                "show_entity_label": ElementProperty(PropertyType.boolean, True),
+                "show_entity_id": ElementProperty(PropertyType.boolean, False),
+                "show_submit_id": ElementProperty(PropertyType.boolean, False),
+                "show_date": ElementProperty(PropertyType.boolean, True),
+                "show_cancel": ElementProperty(PropertyType.boolean, True),
+                "show_delete": ElementProperty(PropertyType.boolean, True),
                 "on_change": ElementProperty(PropertyType.function),
                 "height": ElementProperty(PropertyType.string, "50vh"),
             },

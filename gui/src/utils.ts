@@ -106,3 +106,5 @@ export const ParentItemSx = {
 
 export const useClassNames = (libClassName?: string, dynamicClassName?: string, className?: string) =>
     ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();
+
+export const disableColor = <T>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
