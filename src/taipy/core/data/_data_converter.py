@@ -13,7 +13,8 @@ from datetime import datetime, timedelta
 from pydoc import locate
 from typing import Dict, List, Optional
 
-from .._repository._v2._abstract_converter import _AbstractConverter
+from src.taipy.core._repository._abstract_converter import _AbstractConverter
+
 from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
 from ..common._warnings import _warn_deprecated

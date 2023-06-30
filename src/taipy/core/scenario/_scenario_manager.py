@@ -13,11 +13,11 @@ import datetime
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
+from src.taipy.core._repository._abstract_repository import _AbstractRepository
 from taipy.config import Config
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._repository._v2._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig

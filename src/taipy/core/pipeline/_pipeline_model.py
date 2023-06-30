@@ -15,8 +15,9 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy import JSON, Column, String, Table
 
-from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import mapper_registry
+from src.taipy.core._repository._base_taipy_model import _BaseModel
+from src.taipy.core._repository.db._sql_base_model import mapper_registry
+
 from .._version._utils import _version_migration
 from ..task.task_id import TaskId
 from .pipeline_id import PipelineId
