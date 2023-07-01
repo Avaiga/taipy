@@ -13,13 +13,30 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy import JSON, Column, String, Table
+
+from .._repository._v2._base_taipy_model import _BaseModel
+from .._repository._v2.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from ..task.task_id import TaskId
 from .pipeline_id import PipelineId
 
 
+@mapper_registry.mapped
 @dataclass
-class _PipelineModel:
+class _PipelineModel(_BaseModel):
+    __table__ = Table(
+        "pipeline",
+        mapper_registry.metadata,
+        Column("id", String, primary_key=True),
+        Column("owner_id", String),
+        Column("parent_ids", JSON),
+        Column("config_id", String),
+        Column("properties", JSON),
+        Column("tasks", JSON),
+        Column("subscribers", JSON),
+        Column("version", String),
+    )
     id: PipelineId
     owner_id: Optional[str]
     parent_ids: List[str]

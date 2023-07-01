@@ -13,14 +13,30 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
-from ..task._task_repository_factory import _TaskRepositoryFactory
+from ._task_fs_repository_v2 import _TaskFSRepository
 from ._task_manager import _TaskManager
+from ._task_sql_repository_v2 import _TaskSQLRepository
 
 
 class _TaskManagerFactory(_ManagerFactory):
+
+    __REPOSITORY_MAP = {"default": _TaskFSRepository, "sql": _TaskSQLRepository}
+
     @classmethod
     def _build_manager(cls) -> Type[_TaskManager]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager")  # type: ignore
-        _TaskManager._repository = _TaskRepositoryFactory._build_repository()  # type: ignore
-        return _TaskManager
+            task_manager = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager"
+            )  # type: ignore
+            build_repository = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager_factory", "_TaskManagerFactory"
+            )._build_repository  # type: ignore
+        else:
+            task_manager = _TaskManager
+            build_repository = cls._build_repository
+        task_manager._repository = build_repository()  # type: ignore
+        return task_manager  # type: ignore
+
+    @classmethod
+    def _build_repository(cls):
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()

@@ -15,8 +15,9 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional
 
 from src.taipy.core._manager._manager import _Manager
-from src.taipy.core._repository._repository import _AbstractRepository
-from src.taipy.core._repository._repository_adapter import _RepositoryAdapter
+from src.taipy.core._repository._v2._abstract_converter import _AbstractConverter
+from src.taipy.core._repository._v2._abstract_repository import _AbstractRepository
+from src.taipy.core._repository._v2._filesystem_repository import _FileSystemRepository
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
 
@@ -41,24 +42,33 @@ class MockEntity:
         self.id = id
         self.name = name
         if version:
-            self.version = version
+            self._version = version
         else:
-            self.version = _VersionManager._get_latest_version()
+            self._version = _VersionManager._get_latest_version()
+
+
+class MockConverter(_AbstractConverter):
+    @classmethod
+    def _entity_to_model(cls, entity: MockEntity) -> MockModel:
+        return MockModel(id=entity.id, name=entity.name, version=entity._version)
+
+    @classmethod
+    def _model_to_entity(cls, model: MockModel) -> MockEntity:
+        return MockEntity(id=model.id, name=model.name, version=model.version)
 
 
 class MockRepository(_AbstractRepository):  # type: ignore
     def __init__(self, **kwargs):
-        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
-        self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
+        self.repo = _FileSystemRepository(**kwargs, converter=MockConverter)
 
     def _to_model(self, obj: MockEntity):
-        return MockModel(obj.id, obj.name, obj.version)
+        return MockModel(obj.id, obj.name, obj._version)
 
     def _from_model(self, model: MockModel):
         return MockEntity(model.id, model.name, model.version)
 
-    def load(self, model_id: str) -> MockEntity:
-        return self.repo.load(model_id)
+    def _load(self, entity_id: str) -> MockEntity:
+        return self.repo._load(entity_id)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[MockEntity]:
         return self.repo._load_all(version_number)
@@ -88,7 +98,7 @@ class MockRepository(_AbstractRepository):  # type: ignore
 
 class MockManager(_Manager[MockEntity]):
     _ENTITY_NAME = MockEntity.__name__
-    _repository = MockRepository(model=MockModel, dir_name="foo")
+    _repository = MockRepository(model_type=MockModel, dir_name="foo")
 
 
 class TestManager:

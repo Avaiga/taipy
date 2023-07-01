@@ -85,12 +85,12 @@ class MyCustomDecoder(json.JSONDecoder):
 class TestJSONDataNode:
     def test_create(self):
         path = "data/node/path"
-        dn = JSONDataNode("foo_bar", Scope.PIPELINE, name="super name", properties={"default_path": path})
+        dn = JSONDataNode("foo_bar", Scope.SCENARIO, name="super name", properties={"default_path": path})
         assert isinstance(dn, JSONDataNode)
         assert dn.storage_type() == "json"
         assert dn.config_id == "foo_bar"
         assert dn.name == "super name"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.last_edition_date is None
@@ -100,7 +100,7 @@ class TestJSONDataNode:
 
         with pytest.raises(InvalidConfigurationId):
             dn = JSONDataNode(
-                "foo bar", Scope.PIPELINE, name="super name", properties={"default_path": path, "has_header": False}
+                "foo bar", Scope.SCENARIO, name="super name", properties={"default_path": path, "has_header": False}
             )
 
     def test_new_json_data_node_with_existing_file_is_ready_for_reading(self):
@@ -117,55 +117,55 @@ class TestJSONDataNode:
         assert ready_dn.is_ready_for_reading
 
     def test_read_non_existing_json(self):
-        not_existing_json = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": "WRONG.json"})
+        not_existing_json = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": "WRONG.json"})
         with pytest.raises(NoData):
             assert not_existing_json.read() is None
             not_existing_json.read_or_raise()
 
     def test_read(self):
         path_1 = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_list.json")
-        dn_1 = JSONDataNode("bar", Scope.PIPELINE, properties={"default_path": path_1})
+        dn_1 = JSONDataNode("bar", Scope.SCENARIO, properties={"default_path": path_1})
         data_1 = dn_1.read()
         assert isinstance(data_1, list)
         assert len(data_1) == 4
 
         path_2 = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")
-        dn_2 = JSONDataNode("bar", Scope.PIPELINE, properties={"default_path": path_2})
+        dn_2 = JSONDataNode("bar", Scope.SCENARIO, properties={"default_path": path_2})
         data_2 = dn_2.read()
         assert isinstance(data_2, dict)
         assert data_2["id"] == "1"
 
         path_3 = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_int.json")
-        dn_3 = JSONDataNode("bar", Scope.PIPELINE, properties={"default_path": path_3})
+        dn_3 = JSONDataNode("bar", Scope.SCENARIO, properties={"default_path": path_3})
         data_3 = dn_3.read()
         assert isinstance(data_3, int)
         assert data_3 == 1
 
         path_4 = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_null.json")
-        dn_4 = JSONDataNode("bar", Scope.PIPELINE, properties={"default_path": path_4})
+        dn_4 = JSONDataNode("bar", Scope.SCENARIO, properties={"default_path": path_4})
         data_4 = dn_4.read()
         assert data_4 is None
 
     def test_read_invalid_json(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/invalid.json.txt")
-        dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": path})
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": path})
         with pytest.raises(ValueError):
             dn.read()
 
     def test_write(self, json_file):
-        json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
+        json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})
         data = {"a": 1, "b": 2, "c": 3}
         json_dn.write(data)
         assert np.array_equal(json_dn.read(), data)
 
     def test_write_non_serializable(self, json_file):
-        json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
+        json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})
         data = {"a": 1, "b": json_dn}
         with pytest.raises(TypeError):
             json_dn.write(data)
 
     def test_write_date(self, json_file):
-        json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
+        json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})
         now = datetime.datetime.now()
         data = {"date": now}
         json_dn.write(data)
@@ -173,14 +173,14 @@ class TestJSONDataNode:
         assert read_data["date"] == now
 
     def test_write_enum(self, json_file):
-        json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
+        json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})
         data = [MyEnum.A, MyEnum.B, MyEnum.C]
         json_dn.write(data)
         read_data = json_dn.read()
         assert read_data == [MyEnum.A, MyEnum.B, MyEnum.C]
 
     def test_write_dataclass(self, json_file):
-        json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
+        json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})
         json_dn.write(CustomDataclass(integer=1, string="foo"))
         read_data = json_dn.read()
         assert read_data.integer == 1
@@ -188,7 +188,7 @@ class TestJSONDataNode:
 
     def test_write_custom_encoder(self, json_file):
         json_dn = JSONDataNode(
-            "foo", Scope.PIPELINE, properties={"default_path": json_file, "encoder": MyCustomEncoder}
+            "foo", Scope.SCENARIO, properties={"default_path": json_file, "encoder": MyCustomEncoder}
         )
         data = [MyCustomObject("1", 1, "abc"), 100]
         json_dn.write(data)
@@ -202,7 +202,7 @@ class TestJSONDataNode:
     def test_read_write_custom_encoder_decoder(self, json_file):
         json_dn = JSONDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"default_path": json_file, "encoder": MyCustomEncoder, "decoder": MyCustomDecoder},
         )
         data = [MyCustomObject("1", 1, "abc"), 100]
@@ -222,11 +222,11 @@ class TestJSONDataNode:
         ],
     )
     def test_create_with_default_data(self, properties, exists):
-        dn = JSONDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+        dn = JSONDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
         assert os.path.exists(dn.path) is exists
 
     def test_set_path(self):
-        dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.json"})
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": "foo.json"})
         assert dn.path == "foo.json"
         dn.path = "bar.json"
         assert dn.path == "bar.json"
@@ -234,7 +234,7 @@ class TestJSONDataNode:
     def test_read_write_after_modify_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")
         new_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.json")
-        dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": path})
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": path})
         read_data = dn.read()
         assert read_data is not None
         dn.path = new_path
@@ -246,7 +246,7 @@ class TestJSONDataNode:
     def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.json"))
         pd.DataFrame([]).to_json(temp_file_path)
-        dn = JSONDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
         dn.write([1, 2, 3])
         previous_edit_date = dn.last_edit_date

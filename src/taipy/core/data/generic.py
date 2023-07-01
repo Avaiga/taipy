@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common._utils import _load_fct
 from ..exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -54,9 +55,9 @@ class GenericDataNode(DataNode):
 
     __STORAGE_TYPE = "generic"
     _OPTIONAL_READ_FUNCTION_PROPERTY = "read_fct"
-    _READ_FUNCTION_ARGS_PROPERTY = "read_fct_args"
+    __READ_FUNCTION_ARGS_PROPERTY = "read_fct_args"
     _OPTIONAL_WRITE_FUNCTION_PROPERTY = "write_fct"
-    _WRITE_FUNCTION_ARGS_PROPERTY = "write_fct_args"
+    __WRITE_FUNCTION_ARGS_PROPERTY = "write_fct_args"
     _REQUIRED_PROPERTIES: List[str] = []
     _REQUIRED_AT_LEAST_ONE_PROPERTY: List[str] = [_OPTIONAL_READ_FUNCTION_PROPERTY, _OPTIONAL_WRITE_FUNCTION_PROPERTY]
 
@@ -114,7 +115,7 @@ class GenericDataNode(DataNode):
 
     def _read(self):
         if read_fct := self.properties[self._OPTIONAL_READ_FUNCTION_PROPERTY]:
-            if read_fct_args := self.properties.get(self._READ_FUNCTION_ARGS_PROPERTY, None):
+            if read_fct_args := self.properties.get(self.__READ_FUNCTION_ARGS_PROPERTY, None):
                 if not isinstance(read_fct_args, list):
                     return read_fct(*[read_fct_args])
                 return read_fct(*read_fct_args)
@@ -123,7 +124,7 @@ class GenericDataNode(DataNode):
 
     def _write(self, data: Any):
         if write_fct := self.properties[self._OPTIONAL_WRITE_FUNCTION_PROPERTY]:
-            if write_fct_args := self.properties.get(self._WRITE_FUNCTION_ARGS_PROPERTY, None):
+            if write_fct_args := self.properties.get(self.__WRITE_FUNCTION_ARGS_PROPERTY, None):
                 if not isinstance(write_fct_args, list):
                     return write_fct(data, *[write_fct_args])
                 return write_fct(data, *write_fct_args)

@@ -23,36 +23,18 @@ from ..cycle.cycle import Cycle
 
 class _CycleRepository(_AbstractRepository[_CycleModel, Cycle]):  # type: ignore
     def __init__(self, **kwargs):
-        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        kwargs.update({"to_model_fct": Cycle._to_model, "from_model_fct": Cycle._from_model})
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
 
     @property
     def repository(self):
         return self.repo
 
-    def _to_model(self, cycle: Cycle) -> _CycleModel:
-        return _CycleModel(
-            id=cycle.id,
-            name=cycle._name,
-            frequency=cycle._frequency,
-            creation_date=cycle._creation_date.isoformat(),
-            start_date=cycle._start_date.isoformat(),
-            end_date=cycle._end_date.isoformat(),
-            properties=cycle._properties.data,
-        )
-
-    def _from_model(self, model: _CycleModel) -> Cycle:
-        return Cycle(
-            id=model.id,
-            name=model.name,
-            frequency=model.frequency,
-            properties=model.properties,
-            creation_date=datetime.fromisoformat(model.creation_date),
-            start_date=datetime.fromisoformat(model.start_date),
-            end_date=datetime.fromisoformat(model.end_date),
-        )
-
     def load(self, model_id: str) -> Cycle:
+        return self.repo.load(model_id)
+
+    # This is temporary, just to keep the same interface as the new repository signature, to not break old tests
+    def _load(self, model_id: str) -> Cycle:
         return self.repo.load(model_id)
 
     def _load_all(self, version_number: Optional[str] = "all") -> List[Cycle]:

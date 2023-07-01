@@ -38,6 +38,8 @@ version_number = ""
 force = "False:bool"
 clean_entities = "False:bool"
 
+[VERSION_MIGRATION.migration_fcts]
+
 [DATA_NODE.default]
 storage_type = "in_memory"
 scope = "SCENARIO:SCOPE"
@@ -46,7 +48,7 @@ custom = "default_custom_prop"
 
 [DATA_NODE.dn1]
 storage_type = "pickle"
-scope = "PIPELINE:SCOPE"
+scope = "SCENARIO:SCOPE"
 validity_period = "1d0h0m0s:timedelta"
 custom = "custom property"
 default_data = "dn1"
@@ -106,7 +108,7 @@ owner = "Raymond Kopa"
             validity_period=timedelta(1),
         )
         dn1_cfg_v2 = Config.configure_data_node(
-            "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
+            "dn1", storage_type="pickle", scope=Scope.SCENARIO, default_data="dn1", custom="custom property"
         )
         dn2_cfg_v2 = Config.configure_data_node(
             "dn2",

@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import functools
+import time
 from collections import namedtuple
 from importlib import import_module
 from operator import attrgetter
@@ -20,6 +21,31 @@ from typing import Callable, Optional
 def _load_fct(module_name: str, fct_name: str) -> Callable:
     module = import_module(module_name)
     return attrgetter(fct_name)(module)
+
+
+def _retry(times, exceptions):
+    """
+    Retry Decorator
+    Retries the wrapped function/method `times` times if the exceptions listed
+    in ``exceptions`` are thrown
+    :param times: The number of times to repeat the wrapped function/method
+    :type times: Int
+    :param exceptions: Lists of exceptions that trigger a retry attempt
+    :type exceptions: Tuple of Exceptions
+    """
+
+    def decorator(func):
+        def newfn(*args, **kwargs):
+            for _ in range(times):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions:
+                    time.sleep(0.5)
+            return func(*args, **kwargs)
+
+        return newfn
+
+    return decorator
 
 
 @functools.lru_cache

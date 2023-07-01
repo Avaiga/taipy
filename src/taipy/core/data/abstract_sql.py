@@ -23,12 +23,13 @@ from sqlalchemy import create_engine, text
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty, UnknownDatabaseEngine
+from ..exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
+from ._abstract_tabular import _AbstractTabularDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class _AbstractSQLDataNode(DataNode):
+class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
     __STORAGE_TYPE = "NOT_IMPLEMENTED"
@@ -101,7 +102,7 @@ class _AbstractSQLDataNode(DataNode):
 
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
+        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
 
         super().__init__(
             config_id,
@@ -132,13 +133,6 @@ class _AbstractSQLDataNode(DataNode):
         if missing := set(required) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
-            )
-
-    def _check_exposed_type(self, exposed_type):
-        if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
-            raise InvalidExposedType(
-                f"Invalid string exposed type {exposed_type}. Supported values are "
-                f"{', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
             )
 
     def _get_engine(self):

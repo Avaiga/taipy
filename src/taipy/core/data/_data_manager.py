@@ -18,25 +18,26 @@ from taipy.config.config import Config
 
 from .._backup._backup import _append_to_backup_file, _remove_from_backup_file
 from .._manager._manager import _Manager
-from .._version._version_manager_factory import _VersionManagerFactory
+from .._version._version_mixin import _VersionMixin
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ._data_repository_factory import _DataRepositoryFactory
+from ._data_fs_repository_v2 import _DataFSRepository
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId
 from .pickle import PickleDataNode
 
 
-class _DataManager(_Manager[DataNode]):
+class _DataManager(_Manager[DataNode], _VersionMixin):
+
     __DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
-    _repository = _DataRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.DATA_NODE
+    _repository: _DataFSRepository
 
     @classmethod
     def _bulk_get_or_create(
@@ -44,16 +45,13 @@ class _DataManager(_Manager[DataNode]):
         data_node_configs: List[DataNodeConfig],
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
-        pipeline_id: Optional[PipelineId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
         data_node_configs = [Config.data_nodes[dnc.id] for dnc in data_node_configs]
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
             scope = dn_config.scope
             owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
-            if scope == Scope.PIPELINE:
-                owner_id = pipeline_id
-            elif scope == Scope.SCENARIO:
+            if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:
                 owner_id = cycle_id
@@ -61,7 +59,9 @@ class _DataManager(_Manager[DataNode]):
                 owner_id = None
             dn_configs_and_owner_id.append((dn_config, owner_id))
 
-        data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore
+        data_nodes = cls._repository._get_by_configs_and_owner_ids(
+            dn_configs_and_owner_id, cls._build_filters_with_version(None)
+        )
 
         return {
             dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id, None)
@@ -84,7 +84,7 @@ class _DataManager(_Manager[DataNode]):
         cls, data_node_config: DataNodeConfig, owner_id: Optional[str], parent_ids: Optional[Set[str]]
     ) -> DataNode:
         try:
-            version = _VersionManagerFactory._build_manager()._get_latest_version()
+            version = cls._get_latest_version()
             props = data_node_config._properties.copy()
 
             if data_node_config.storage_type:
@@ -103,6 +103,14 @@ class _DataManager(_Manager[DataNode]):
             )
         except KeyError:
             raise InvalidDataNodeType(data_node_config.storage_type)
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[DataNode]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _clean_pickle_file(cls, data_node: DataNode):
@@ -156,5 +164,12 @@ class _DataManager(_Manager[DataNode]):
         data_nodes = cls._get_all(version_number)
         cls._clean_pickle_files(data_nodes)
         cls._remove_dn_file_paths_in_backup_file(data_nodes)
-        cls._repository._delete_by(attribute="version", value=version_number, version_number="all")
+        cls._repository._delete_by(attribute="version", value=version_number)
         _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[DataNode]:
+        """
+        Get all datanodes by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])

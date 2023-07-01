@@ -319,10 +319,10 @@ def test_cancel_subsequent_jobs():
 
     lock_0 = m.Lock()
 
-    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
-    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
-    dn_3 = InMemoryDataNode("dn_config_3", Scope.PIPELINE, properties={"default_data": 3})
-    dn_4 = InMemoryDataNode("dn_config_4", Scope.PIPELINE, properties={"default_data": 4})
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO, properties={"default_data": 3})
+    dn_4 = InMemoryDataNode("dn_config_4", Scope.SCENARIO, properties={"default_data": 4})
     task_1 = Task("task_config_1", {}, partial(lock_multiply, lock_0), [dn_1, dn_2], [dn_3], id="task_1")
     task_2 = Task("task_config_2", {}, multiply, [dn_1, dn_3], [dn_4], id="task_2")
     task_3 = Task("task_config_3", {}, print, [dn_4], id="task_3")
@@ -383,10 +383,10 @@ def test_cancel_subsequent_jobs():
 
 
 def _create_task(function, nb_outputs=1, name=None):
-    input1_dn_config = Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)
-    input2_dn_config = Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)
+    input1_dn_config = Config.configure_data_node("input1", "pickle", Scope.SCENARIO, default_data=21)
+    input2_dn_config = Config.configure_data_node("input2", "pickle", Scope.SCENARIO, default_data=2)
     output_dn_configs = [
-        Config.configure_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
+        Config.configure_data_node(f"output{i}", "pickle", Scope.SCENARIO, default_data=0) for i in range(nb_outputs)
     ]
     _DataManager._bulk_get_or_create({cfg for cfg in output_dn_configs})
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))

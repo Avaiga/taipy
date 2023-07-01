@@ -17,7 +17,8 @@ from taipy.config import Config
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._version._version_manager_factory import _VersionManagerFactory
+from .._repository._v2._abstract_repository import _AbstractRepository
+from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -38,16 +39,24 @@ from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
-from ._scenario_repository_factory import _ScenarioRepositoryFactory
 from .scenario import Scenario
 from .scenario_id import ScenarioId
 
 
-class _ScenarioManager(_Manager[Scenario]):
+class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
-    _repository = _ScenarioRepositoryFactory._build_repository()
     _ENTITY_NAME = Scenario.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.SCENARIO
+
+    _repository: _AbstractRepository
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[Scenario]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
 
     @classmethod
     def _subscribe(
@@ -115,7 +124,7 @@ class _ScenarioManager(_Manager[Scenario]):
         props = config._properties.copy()
         if name:
             props["name"] = name
-        version = _VersionManagerFactory._build_manager()._get_latest_version()
+        version = cls._get_latest_version()
         scenario = Scenario(
             str(config.id),
             pipelines,
@@ -202,7 +211,8 @@ class _ScenarioManager(_Manager[Scenario]):
 
     @classmethod
     def _get_all_by_cycle(cls, cycle: Cycle) -> List[Scenario]:
-        return cls._get_all_by(cycle.id, "all")
+        filters = cls._build_filters_with_version("all")
+        return cls._get_all_by({"cycle": cycle.id}, filters)
 
     @classmethod
     def _get_primary_scenarios(cls) -> List[Scenario]:
@@ -329,7 +339,7 @@ class _ScenarioManager(_Manager[Scenario]):
 
         Check if the cycle is only attached to this scenario, then delete it.
         """
-        while scenario := cls._repository._search("version", version_number, version_number="all"):
+        while scenario := cls._repository._search("version", version_number):
             if scenario.cycle and len(cls._get_all_by_cycle(scenario.cycle)) == 1:
                 _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
             super()._delete(scenario.id)
@@ -356,3 +366,10 @@ class _ScenarioManager(_Manager[Scenario]):
                 entity_ids.job_ids.add(job.id)
 
         return entity_ids
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[Scenario]:
+        """
+        Get all scenarios by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])

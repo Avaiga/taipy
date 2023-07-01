@@ -36,7 +36,7 @@ class FakeDataNode(InMemoryDataNode):
     write_has_been_called = 0
 
     def __init__(self, config_id, **kwargs):
-        scope = kwargs.pop("scope", Scope.PIPELINE)
+        scope = kwargs.pop("scope", Scope.SCENARIO)
         super().__init__(config_id=config_id, scope=scope, **kwargs)
 
     def _read(self, query=None):
@@ -213,7 +213,7 @@ class TestDataNode:
 
     def test_is_up_to_date_no_validity_period(self):
         # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "owner_id")
+        dn = InMemoryDataNode("foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id")
         assert not dn.is_up_to_date
 
         # test has been writen
@@ -223,7 +223,7 @@ class TestDataNode:
     def test_is_up_to_date_with_30_min_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode(
-            "foo", Scope.PIPELINE, DataNodeId("id"), "name", "owner_id", validity_period=timedelta(minutes=30)
+            "foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id", validity_period=timedelta(minutes=30)
         )
         assert dn.is_up_to_date is False
 
@@ -237,7 +237,7 @@ class TestDataNode:
 
     def test_is_up_to_date_with_5_days_validity_period(self):
         # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, validity_period=timedelta(days=5))
+        dn = InMemoryDataNode("foo", Scope.SCENARIO, validity_period=timedelta(days=5))
         assert dn.is_up_to_date is False
 
         # Has been writen less than 30 minutes ago
@@ -468,9 +468,9 @@ class TestDataNode:
         dn_2 = dm._get(dn_1)
 
         assert dn_1.scope == Scope.SCENARIO
-        dn_1.scope = Scope.PIPELINE
-        assert dn_1.scope == Scope.PIPELINE
-        assert dn_2.scope == Scope.PIPELINE
+        dn_1.scope = Scope.SCENARIO
+        assert dn_1.scope == Scope.SCENARIO
+        assert dn_2.scope == Scope.SCENARIO
 
         new_datetime = current_datetime + timedelta(1)
 
@@ -521,7 +521,7 @@ class TestDataNode:
         with dn_1 as dn:
             assert dn.config_id == "foo"
             assert dn.owner_id is None
-            assert dn.scope == Scope.PIPELINE
+            assert dn.scope == Scope.SCENARIO
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
@@ -539,7 +539,7 @@ class TestDataNode:
 
             assert dn.config_id == "foo"
             assert dn.owner_id is None
-            assert dn.scope == Scope.PIPELINE
+            assert dn.scope == Scope.SCENARIO
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
@@ -568,14 +568,6 @@ class TestDataNode:
             with mock.patch("src.taipy.core.data.data_node.DataNode.unlock_edit") as unlock_edit:
                 dn.unlock_edition(datetime.now(), None)
                 unlock_edit.assert_called_once_with()
-
-    def test_scope_pipeline_deprecated(self):
-        dn = FakeDataNode("foo")
-        _DataManager._set(dn)
-        with pytest.warns(DeprecationWarning):
-            _DataManager._get(dn)
-        with pytest.warns(DeprecationWarning):
-            dn.scope
 
     def test_lock_edition_deprecated(self):
         dn = FakeDataNode("foo")
