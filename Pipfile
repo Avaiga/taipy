@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-modin = {extras = ["dask"], version = "==0.16.2"}
+modin = {extras = ["dask"], version = "==0.23.0rc0"}
 networkx = "==2.6"
 openpyxl = "==3.0.7"
 pyarrow = "==10.0.1"
