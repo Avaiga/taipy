@@ -80,16 +80,16 @@ def test_multi_page_gui_template(tmpdir):
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
 
 
-def test_multi_page_gui_core_template_with_toml_config(tmpdir):
+def test_scenario_management_with_toml_config(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/multi-page-gui-core",
+        template="src/taipy/templates/scenario-management",
         output_dir=tmpdir,
         no_input=True,
         extra_context={
-            "application_name": "foo_app",
-            "application_main_file": "main.py",
-            "application_title": "bar",
-            "use_toml_config": "yes",
+            "root folder name": "foo_app",
+            "main file": "main.py",
+            "application title": "bar",
+            "use toml config": "yes",
         },
     )
 
@@ -117,16 +117,16 @@ def test_multi_page_gui_core_template_with_toml_config(tmpdir):
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
 
 
-def test_multi_page_gui_core_template_without_toml_config(tmpdir):
+def test_scenario_management_without_toml_config(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/multi-page-gui-core",
+        template="src/taipy/templates/scenario-management",
         output_dir=tmpdir,
         no_input=True,
         extra_context={
-            "application_name": "foo_app",
-            "application_main_file": "main.py",
-            "application_title": "bar",
-            "use_toml_config": "no",
+            "root_folder_name": "foo_app",
+            "main file": "main.py",
+            "application title": "bar",
+            "use toml config": "no",
         },
     )
 

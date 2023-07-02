@@ -1,0 +1,6 @@
+{
+    "root_folder_name": "taipy_application",
+    "main_file": "main.py",
+    "application_title": "Taipy Application",
+    "use_toml_config": "y/N"
+}
