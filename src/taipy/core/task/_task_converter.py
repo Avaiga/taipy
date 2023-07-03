@@ -10,8 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 
-from src.taipy.core._repository._abstract_converter import _AbstractConverter
-
+from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
 from ..data._data_manager_factory import _DataManagerFactory

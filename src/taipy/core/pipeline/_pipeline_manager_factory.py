@@ -13,9 +13,9 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
-from ._pipeline_fs_repository_v2 import _PipelineFSRepository
+from ._pipeline_fs_repository import _PipelineFSRepository
 from ._pipeline_manager import _PipelineManager
-from ._pipeline_sql_repository_v2 import _PipelineSQLRepository
+from ._pipeline_sql_repository import _PipelineSQLRepository
 
 
 class _PipelineManagerFactory(_ManagerFactory):

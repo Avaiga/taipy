@@ -8,12 +8,11 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
+from .._repository._filesystem_repository import _FileSystemRepository
+from ._cycle_converter import _CycleConverter
+from ._cycle_model import _CycleModel
 
-from ._scenario_converter import _ScenarioConverter
-from ._scenario_model import _ScenarioModel
 
-
-class _ScenarioFSRepository(_FileSystemRepository):
+class _CycleFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model_type=_ScenarioModel, converter=_ScenarioConverter, dir_name="scenarios")
+        super().__init__(model_type=_CycleModel, converter=_CycleConverter, dir_name="cycles")

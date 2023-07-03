@@ -12,9 +12,9 @@
 import json
 from typing import List
 
-from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .._repository._filesystem_repository import _FileSystemRepository
 from ..exceptions.exceptions import VersionIsNotProductionVersion
 from ._version_converter import _VersionConverter
 from ._version_model import _VersionModel

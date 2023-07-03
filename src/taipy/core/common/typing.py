@@ -11,8 +11,8 @@
 
 from typing import TypeVar, Union
 
-from src.taipy.core._repository._abstract_converter import _AbstractConverter
-from src.taipy.core._repository._base_taipy_model import _BaseModel
+from .._repository._abstract_converter import _AbstractConverter
+from .._repository._base_taipy_model import _BaseModel
 
 ModelType = TypeVar("ModelType", bound=_BaseModel)
 Entity = TypeVar("Entity")

@@ -12,8 +12,7 @@
 from datetime import datetime
 from typing import Optional
 
-from src.taipy.core._repository._abstract_converter import _AbstractConverter
-
+from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
 from ..common import _utils
 from ..cycle._cycle_manager_factory import _CycleManagerFactory

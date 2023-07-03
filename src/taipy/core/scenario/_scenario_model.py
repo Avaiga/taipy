@@ -14,9 +14,8 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy import JSON, Boolean, Column, String, Table
 
-from src.taipy.core._repository._base_taipy_model import _BaseModel
-from src.taipy.core._repository.db._sql_base_model import mapper_registry
-
+from .._repository._base_taipy_model import _BaseModel
+from .._repository.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from ..cycle.cycle_id import CycleId
 from ..pipeline.pipeline_id import PipelineId

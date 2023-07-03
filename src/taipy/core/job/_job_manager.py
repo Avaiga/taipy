@@ -12,9 +12,8 @@
 import uuid
 from typing import Callable, Iterable, List, Optional, Union
 
-from src.taipy.core._repository._abstract_repository import _AbstractRepository
-
 from .._manager._manager import _Manager
+from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import JobNotDeletedException

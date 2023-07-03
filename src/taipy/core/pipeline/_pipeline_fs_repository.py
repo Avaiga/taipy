@@ -8,12 +8,11 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from src.taipy.core._repository._sql_repository import _SQLRepository
+from .._repository._filesystem_repository import _FileSystemRepository
+from ._pipeline_converter import _PipelineConverter
+from ._pipeline_model import _PipelineModel
 
-from ._data_converter import _DataNodeConverter
-from ._data_model import _DataNodeModel
 
-
-class _DataSQLRepository(_SQLRepository):
+class _PipelineFSRepository(_FileSystemRepository):
     def __init__(self):
-        super().__init__(model_type=_DataNodeModel, converter=_DataNodeConverter)
+        super().__init__(model_type=_PipelineModel, converter=_PipelineConverter, dir_name="pipelines")

@@ -12,8 +12,7 @@
 from datetime import datetime
 from typing import List
 
-from src.taipy.core._repository._abstract_converter import _AbstractConverter
-
+from .._repository._abstract_converter import _AbstractConverter
 from ..common._utils import _fcts_to_dict, _load_fct
 from ..exceptions import InvalidSubscriber
 from ..job._job_model import _JobModel

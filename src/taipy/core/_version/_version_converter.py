@@ -11,9 +11,9 @@
 
 from datetime import datetime
 
-from src.taipy.core._repository._abstract_converter import _AbstractConverter
 from taipy.config import Config
 
+from .._repository._abstract_converter import _AbstractConverter
 from .._version._version import _Version
 from .._version._version_model import _VersionModel
 

@@ -21,7 +21,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._manager._manager import _Manager
 from ..exceptions.exceptions import ConflictedConfigurationError, ModelNotFound, NonExistingVersion
 from ._version import _Version
-from ._version_fs_repository_v2 import _VersionFSRepository
+from ._version_fs_repository import _VersionFSRepository
 
 
 class _VersionManager(_Manager[_Version]):
