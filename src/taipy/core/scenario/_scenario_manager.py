@@ -105,7 +105,6 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         creation_date: Optional[datetime.datetime] = None,
         name: Optional[str] = None,
     ) -> Scenario:
-        config = Config.scenarios[config.id]
         scenario_id = Scenario._new_id(str(config.id))
         cycle = (
             _CycleManagerFactory._build_manager()._get_or_create(config.frequency, creation_date)
@@ -114,9 +113,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         )
 
         pipelines = [
-            _PipelineManagerFactory._build_manager()._get_or_create(
-                Config.pipelines[p_config.id], cycle.id if cycle else None, scenario_id
-            )
+            _PipelineManagerFactory._build_manager()._get_or_create(p_config, cycle.id if cycle else None, scenario_id)
             for p_config in config.pipeline_configs
         ]
 
