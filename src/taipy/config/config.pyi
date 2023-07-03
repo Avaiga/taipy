@@ -190,6 +190,11 @@ class Config:
 
     @classmethod
     @property
+    def migration_functions(cls) -> Dict[str, MigrationConfig]:
+        """"""
+
+    @classmethod
+    @property
     def core(cls) -> Dict[str, CoreSection]:
         """"""
 
