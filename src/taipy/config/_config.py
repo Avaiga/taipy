@@ -75,20 +75,21 @@ class _Config:
                     entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))
             self.__point_nested_section_to_self(sub_config)
 
-    def __point_nested_section_to_self(self, sub_config):
+    def __point_nested_section_to_self(self, section):
         """Loop through attributes of a Section to find if any attribute has a list of Section as value.
         If there is, update each nested Section by the corresponding instance in self.
 
         Args:
-            sub_config (Section): The Section to search for nested sections.
+            section (Section): The Section to search for nested sections.
         """
-        for _, attr_value in vars(sub_config).items():
+        for _, attr_value in vars(section).items():
+            # ! This will fail if an attribute is a dictionary, or nested list of Sections.
             if not isinstance(attr_value, list):
-                return
+                continue
 
             for index, item in enumerate(attr_value):
                 if not isinstance(item, Section):
-                    return
+                    continue
 
                 if sub_item := self._sections.get(item.name, {}).get(item.id, None):
                     attr_value[index] = sub_item
