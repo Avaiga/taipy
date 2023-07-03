@@ -19,10 +19,15 @@ from taipy.config.common.scope import Scope
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
-from .._entity._reload import _reload, _self_reload, _self_setter
+from .._entity._reload import _Reloader, _self_reload, _self_setter
+from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common._utils import _load_fct
 from ..common._warnings import _warn_deprecated
+from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
+from ..exceptions.exceptions import NonExistingDataNode
+from ._task_model import _TaskModel
 from .task_id import TaskId
 
 if TYPE_CHECKING:
@@ -66,7 +71,7 @@ class Task(_Entity, _Labeled):
         id: Optional[TaskId] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
-        version: str = None,
+        version: Optional[str] = None,
         skippable: bool = False,
     ):
         self.config_id = _validate_id(config_id)
@@ -99,18 +104,18 @@ class Task(_Entity, _Labeled):
             return self.output[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
 
-    @property  # type: ignore
+    @property
     def properties(self):
-        self._properties = _reload(self._MANAGER_NAME, self)._properties
+        self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
-    @property  # type: ignore
+    @property
     def parent_id(self):
         """Deprecated. Use owner_id instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
         return self.owner_id
 
-    @parent_id.setter  # type: ignore
+    @parent_id.setter
     def parent_id(self, val):
         """Deprecated. Use owner_id instead."""
         _warn_deprecated("parent_id", suggest="owner_id")
@@ -127,15 +132,15 @@ class Task(_Entity, _Labeled):
     def parent_ids(self):
         return self._parent_ids
 
-    @property  # type: ignore
+    @property
     def input(self) -> Dict[str, DataNode]:
         return self.__input
 
-    @property  # type: ignore
+    @property
     def output(self) -> Dict[str, DataNode]:
         return self.__output
 
-    @property  # type: ignore
+    @property
     def data_nodes(self) -> Dict[str, DataNode]:
         return {**self.input, **self.output}
 
@@ -169,11 +174,9 @@ class Task(_Entity, _Labeled):
         """
         data_nodes = list(self.__input.values()) + list(self.__output.values())
         scope = Scope(min(dn.scope for dn in data_nodes)) if len(data_nodes) != 0 else Scope.GLOBAL
-        if scope == Scope.PIPELINE:
-            _warn_deprecated(f"`{Scope.PIPELINE}`", suggest="other `Scope` value")
         return scope
 
-    @property  # type: ignore
+    @property
     def version(self):
         return self._version
 
@@ -201,6 +204,53 @@ class Task(_Entity, _Labeled):
         from ._task_manager_factory import _TaskManagerFactory
 
         return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+
+    @classmethod
+    def _to_model(cls, task) -> _TaskModel:
+        return _TaskModel(
+            id=task.id,
+            owner_id=task.owner_id,
+            parent_ids=list(task._parent_ids),
+            config_id=task.config_id,
+            input_ids=cls.__to_ids(task.input.values()),
+            function_name=task._function.__name__,
+            function_module=task._function.__module__,
+            output_ids=cls.__to_ids(task.output.values()),
+            version=task._version,
+            skippable=task._skippable,
+            properties=task._properties.data.copy(),
+        )
+
+    @classmethod
+    def _from_model(cls, model: _TaskModel):
+        task = Task(
+            id=TaskId(model.id),
+            owner_id=model.owner_id,
+            parent_ids=set(model.parent_ids),
+            config_id=model.config_id,
+            function=_load_fct(model.function_module, model.function_name),
+            input=cls.__to_data_nodes(model.input_ids),
+            output=cls.__to_data_nodes(model.output_ids),
+            version=model.version,
+            skippable=model.skippable,
+            properties=model.properties,
+        )
+        return _migrate_entity(task)
+
+    @staticmethod
+    def __to_ids(data_nodes):
+        return [i.id for i in data_nodes]
+
+    @staticmethod
+    def __to_data_nodes(data_nodes_ids):
+        data_nodes = []
+        data_manager = _DataManagerFactory._build_manager()
+        for _id in data_nodes_ids:
+            if data_node := data_manager._get(_id):
+                data_nodes.append(data_node)
+            else:
+                raise NonExistingDataNode(_id)
+        return data_nodes
 
     def get_label(self) -> str:
         """Returns the task simple label prefixed by its owner label.

@@ -11,10 +11,12 @@
 
 from datetime import datetime
 
+import pytest
+
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
-from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
+from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.cycle.cycle_id import CycleId
 from src.taipy.core.data._data_manager import _DataManager
@@ -27,10 +29,10 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
-def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
+def test_save_and_get_cycle_entity(cycle, current_datetime):
     Config.configure_global_app(repository_type="sql")
 
-    _CycleManager._repository = _CycleRepositoryFactory._build_repository()
+    _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
     assert len(_CycleManager._get_all()) == 0
@@ -66,6 +68,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
         name="bar",
         id=cycle_1.id,
     )
+
     _CycleManager._set(cycle_3)
 
     cycle_3 = _CycleManager._get(cycle_1.id)
@@ -80,10 +83,10 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
     assert cycle_3.frequency == cycle_3.frequency
 
 
-def test_create_and_delete_cycle_entity(tmpdir):
+def test_create_and_delete_cycle_entity():
     Config.configure_global_app(repository_type="sql")
 
-    _CycleManager._repository = _CycleRepositoryFactory._build_repository()
+    _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
     assert len(_CycleManager._get_all()) == 0
@@ -140,7 +143,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
 def test_get_cycle_start_date_and_end_date():
     Config.configure_global_app(repository_type="sql")
 
-    _CycleManager._repository = _CycleRepositoryFactory._build_repository()
+    _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
 
@@ -196,7 +199,7 @@ def test_get_cycle_start_date_and_end_date():
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_config_4 = Config.configure_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
@@ -228,8 +231,8 @@ def test_hard_delete_shared_entities():
 
     assert len(_ScenarioManager._get_all()) == 3
     assert len(_PipelineManager._get_all()) == 6
-    assert len(_TaskManager._get_all()) == 8
-    assert len(_DataManager._get_all()) == 9
+    assert len(_TaskManager._get_all()) == 6
+    assert len(_DataManager._get_all()) == 7
     assert len(_JobManager._get_all()) == 11
     assert len(_CycleManager._get_all()) == 1
     _CycleManager._hard_delete(scenario_1.cycle.id)

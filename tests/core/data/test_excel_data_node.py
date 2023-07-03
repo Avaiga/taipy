@@ -78,7 +78,7 @@ class TestExcelDataNode:
         sheet_names = ["sheet_name_1", "sheet_name_2"]
         dn = ExcelDataNode(
             "foo_bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             name="super name",
             properties={"path": path, "has_header": False, "sheet_name": sheet_names},
         )
@@ -86,7 +86,7 @@ class TestExcelDataNode:
         assert dn.storage_type() == "excel"
         assert dn.config_id == "foo_bar"
         assert dn.name == "super name"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.parent_ids == set()
@@ -99,14 +99,14 @@ class TestExcelDataNode:
 
     def test_read_with_header(self):
         with pytest.raises(NoData):
-            not_existing_excel = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx"})
+            not_existing_excel = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx"})
             assert not_existing_excel.read() is None
             not_existing_excel.read_or_raise()
 
         empty_excel_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/empty.xlsx")
         empty_excel = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": empty_excel_path, "exposed_type": MyCustomObject, "has_header": True},
         )
         assert len(empty_excel.read()) == 0
@@ -115,7 +115,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
         excel_data_node_as_pandas = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "sheet_name": "Sheet1"}
+            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": "Sheet1"}
         )
 
         data_pandas = excel_data_node_as_pandas.read()
@@ -125,7 +125,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode with modin exposed_type
         excel_data_node_as_modin = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "sheet_name": "Sheet1", "exposed_type": "modin"}
+            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": "Sheet1", "exposed_type": "modin"}
         )
 
         data_modin = excel_data_node_as_modin.read()
@@ -135,7 +135,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "exposed_type": "numpy", "sheet_name": "Sheet1"}
+            "bar", Scope.SCENARIO, properties={"path": path, "exposed_type": "numpy", "sheet_name": "Sheet1"}
         )
 
         data_numpy = excel_data_node_as_numpy.read()
@@ -146,7 +146,7 @@ class TestExcelDataNode:
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "sheet_name": "abc", "exposed_type": MyCustomObject},
         )
         with pytest.raises(NonExistingExcelSheet):
@@ -154,7 +154,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "exposed_type": MyCustomObject, "sheet_name": "Sheet1"},
         )
 
@@ -170,7 +170,7 @@ class TestExcelDataNode:
 
     def test_read_without_header(self):
         not_existing_excel = ExcelDataNode(
-            "foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx", "has_header": False}
+            "foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx", "has_header": False}
         )
         with pytest.raises(NoData):
             assert not_existing_excel.read() is None
@@ -180,7 +180,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
         excel_data_node_as_pandas = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "sheet_name": "Sheet1"}
+            "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "sheet_name": "Sheet1"}
         )
         data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
@@ -190,7 +190,7 @@ class TestExcelDataNode:
         # Create ExcelDataNode with modin exposed_type
         excel_data_node_as_modin = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "sheet_name": "Sheet1", "exposed_type": "modin"},
         )
         data_modin = excel_data_node_as_modin.read()
@@ -201,7 +201,7 @@ class TestExcelDataNode:
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "exposed_type": "numpy", "sheet_name": "Sheet1"},
         )
 
@@ -213,7 +213,7 @@ class TestExcelDataNode:
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "sheet_name": "abc", "exposed_type": MyCustomObject},
         )
         with pytest.raises(NonExistingExcelSheet):
@@ -221,7 +221,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": path,
                 "has_header": False,
@@ -249,7 +249,7 @@ class TestExcelDataNode:
         ],
     )
     def test_write(self, excel_file, default_data_frame, content, columns):
-        excel_dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": excel_file, "sheet_name": "Sheet1"})
+        excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1"})
         assert np.array_equal(excel_dn.read().values, default_data_frame.values)
         if not columns:
             excel_dn.write(content)
@@ -273,7 +273,7 @@ class TestExcelDataNode:
     )
     def test_write_modin(self, excel_file, default_data_frame, content, columns):
         excel_dn = ExcelDataNode(
-            "foo", Scope.PIPELINE, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "modin"}
+            "foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "modin"}
         )
         assert np.array_equal(excel_dn.read().values, default_data_frame.values)
         if not columns:
@@ -291,7 +291,7 @@ class TestExcelDataNode:
     def test_read_multi_sheet_with_header(self):
         not_existing_excel = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": "WRONG.xlsx", "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
@@ -303,7 +303,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
         excel_data_node_as_pandas = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "sheet_name": sheet_names}
+            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": sheet_names}
         )
 
         data_pandas = excel_data_node_as_pandas.read()
@@ -317,7 +317,7 @@ class TestExcelDataNode:
         for sheet_name in sheet_names:
             assert data_pandas[sheet_name].equals(pd.read_excel(path, sheet_name=sheet_name))
 
-        excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.PIPELINE, properties={"path": path})
+        excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": path})
 
         data_pandas_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
         assert isinstance(data_pandas_no_sheet_name, Dict)
@@ -329,7 +329,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode with modin exposed_type
         excel_data_node_as_modin = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "sheet_name": sheet_names, "exposed_type": "modin"}
+            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": sheet_names, "exposed_type": "modin"}
         )
 
         data_modin = excel_data_node_as_modin.read()
@@ -343,7 +343,7 @@ class TestExcelDataNode:
         for sheet_name in sheet_names:
             assert data_modin[sheet_name].equals(modin_pd.read_excel(path, sheet_name=sheet_name))
 
-        excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.PIPELINE, properties={"path": path})
+        excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": path})
 
         data_modin_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
         assert isinstance(data_modin_no_sheet_name, Dict)
@@ -356,7 +356,7 @@ class TestExcelDataNode:
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "sheet_name": sheet_names, "exposed_type": "numpy"},
         )
 
@@ -373,7 +373,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_numpy_no_sheet_name = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "exposed_type": "numpy"},
         )
 
@@ -388,7 +388,7 @@ class TestExcelDataNode:
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": path,
                 "sheet_name": ["Sheet1", "xyz"],
@@ -400,7 +400,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "sheet_name": sheet_names, "exposed_type": MyCustomObject1},
         )
 
@@ -420,7 +420,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_custom_object_no_sheet_name = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "exposed_type": MyCustomObject1},
         )
 
@@ -443,7 +443,7 @@ class TestExcelDataNode:
         with pytest.raises(ExposedTypeLengthMismatch):
             dn = ExcelDataNode(
                 "bar",
-                Scope.PIPELINE,
+                Scope.SCENARIO,
                 properties={
                     "path": path,
                     "sheet_name": ["Sheet1"],
@@ -456,14 +456,14 @@ class TestExcelDataNode:
 
         excel_data_node_as_multi_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "sheet_name": sheet_names, "exposed_type": custom_class_dict},
         )
         assert excel_data_node_as_multi_custom_object.properties["exposed_type"] == custom_class_dict
 
         excel_data_node_as_multi_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "sheet_name": sheet_names, "exposed_type": [MyCustomObject1, MyCustomObject2]},
         )
         assert excel_data_node_as_multi_custom_object.properties["exposed_type"] == [MyCustomObject1, MyCustomObject2]
@@ -484,7 +484,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_multi_custom_object_no_sheet_name = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "exposed_type": custom_class_dict},
         )
         assert excel_data_node_as_multi_custom_object_no_sheet_name.properties["exposed_type"] == custom_class_dict
@@ -508,7 +508,7 @@ class TestExcelDataNode:
     def test_read_multi_sheet_without_header(self):
         not_existing_excel = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": "WRONG.xlsx", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
@@ -520,7 +520,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
         excel_data_node_as_pandas = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "sheet_name": sheet_names}
+            "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "sheet_name": sheet_names}
         )
         data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, Dict)
@@ -532,7 +532,7 @@ class TestExcelDataNode:
             assert data_pandas[sheet_name].equals(pd.read_excel(path, header=None, sheet_name=sheet_name))
 
         excel_data_node_as_pandas_no_sheet_name = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False}
+            "bar", Scope.SCENARIO, properties={"path": path, "has_header": False}
         )
         data_pandas_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
         assert isinstance(data_pandas_no_sheet_name, Dict)
@@ -545,7 +545,7 @@ class TestExcelDataNode:
         # Create ExcelDataNode with modin exposed_type
         excel_data_node_as_modin = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "modin"},
         )
         data_modin = excel_data_node_as_modin.read()
@@ -558,7 +558,7 @@ class TestExcelDataNode:
             assert data_modin[sheet_name].equals(pd.read_excel(path, header=None, sheet_name=sheet_name))
 
         excel_data_node_as_modin_no_sheet_name = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False}
+            "bar", Scope.SCENARIO, properties={"path": path, "has_header": False}
         )
         data_modin_no_sheet_name = excel_data_node_as_modin_no_sheet_name.read()
         assert isinstance(data_modin_no_sheet_name, Dict)
@@ -571,7 +571,7 @@ class TestExcelDataNode:
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "numpy"},
         )
 
@@ -590,7 +590,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_numpy_no_sheet_name = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "exposed_type": "numpy"},
         )
 
@@ -605,7 +605,7 @@ class TestExcelDataNode:
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": path,
                 "has_header": False,
@@ -618,7 +618,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": path,
                 "has_header": False,
@@ -644,7 +644,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_custom_object_no_sheet_name = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "exposed_type": MyCustomObject1},
         )
 
@@ -667,7 +667,7 @@ class TestExcelDataNode:
         with pytest.raises(ExposedTypeLengthMismatch):
             dn = ExcelDataNode(
                 "bar",
-                Scope.PIPELINE,
+                Scope.SCENARIO,
                 properties={
                     "path": path,
                     "sheet_name": ["Sheet1"],
@@ -681,7 +681,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_multi_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": path,
                 "sheet_name": sheet_names,
@@ -693,7 +693,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_multi_custom_object = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": path,
                 "sheet_name": sheet_names,
@@ -719,7 +719,7 @@ class TestExcelDataNode:
 
         excel_data_node_as_multi_custom_object_no_sheet_name = ExcelDataNode(
             "bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": path, "has_header": False, "exposed_type": custom_class_dict},
         )
 
@@ -752,7 +752,7 @@ class TestExcelDataNode:
 
         excel_dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names},
         )
 
@@ -771,7 +771,7 @@ class TestExcelDataNode:
 
         excel_dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names, "exposed_type": "numpy"},
         )
 
@@ -798,7 +798,7 @@ class TestExcelDataNode:
 
         excel_dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names, "exposed_type": "modin"},
         )
 
@@ -813,7 +813,7 @@ class TestExcelDataNode:
             assert np.array_equal(excel_dn.read()[sheet_name].values, multi_sheet_content[sheet_name].values)
 
     def test_set_path(self):
-        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.xlsx"})
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"default_path": "foo.xlsx"})
         assert dn.path == "foo.xlsx"
         dn.path = "bar.xlsx"
         assert dn.path == "bar.xlsx"
@@ -826,13 +826,13 @@ class TestExcelDataNode:
         ],
     )
     def test_create_with_default_data(self, properties, exists):
-        dn = ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+        dn = ExcelDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
         assert os.path.exists(dn.path) is exists
 
     def test_read_write_after_modify_path(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         new_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.xlsx")
-        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"default_path": path})
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"default_path": path})
         read_data = dn.read()
         assert read_data is not None
         dn.path = new_path
@@ -847,7 +847,7 @@ class TestExcelDataNode:
         new_path = os.path.join(
             pathlib.Path(__file__).parent.resolve(), "data_sample/example_2.xlsx"
         )  # ["Sheet1", "Sheet2", "Sheet3"]
-        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"default_path": path, "exposed_type": MyCustomObject1})
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"default_path": path, "exposed_type": MyCustomObject1})
         assert dn.exposed_type == MyCustomObject1
         dn.read()
         dn.path = new_path
@@ -855,7 +855,7 @@ class TestExcelDataNode:
 
         dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"default_path": path, "exposed_type": MyCustomObject1, "sheet_name": ["Sheet4"]},
         )
         assert dn.exposed_type == MyCustomObject1
@@ -866,7 +866,7 @@ class TestExcelDataNode:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")  # ["Sheet1", "Sheet2"]
         dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "default_path": path,
                 "exposed_type": {
@@ -891,7 +891,7 @@ class TestExcelDataNode:
 
         dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"default_path": path_1, "exposed_type": [MyCustomObject1, MyCustomObject2]},
         )
         data = dn.read()
@@ -905,20 +905,20 @@ class TestExcelDataNode:
 
     def test_not_trying_to_read_sheet_names_when_exposed_type_is_set(self):
         dn = ExcelDataNode(
-            "foo", Scope.PIPELINE, properties={"default_path": "notexistyet.xlsx", "exposed_type": MyCustomObject1}
+            "foo", Scope.SCENARIO, properties={"default_path": "notexistyet.xlsx", "exposed_type": MyCustomObject1}
         )
         assert dn.path == "notexistyet.xlsx"
         assert dn.exposed_type == MyCustomObject1
         dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"default_path": "notexistyet.xlsx", "exposed_type": [MyCustomObject1, MyCustomObject2]},
         )
         assert dn.path == "notexistyet.xlsx"
         assert dn.exposed_type == [MyCustomObject1, MyCustomObject2]
         dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "default_path": "notexistyet.xlsx",
                 "exposed_type": {"Sheet1": MyCustomObject1, "Sheet2": MyCustomObject2},
@@ -929,7 +929,7 @@ class TestExcelDataNode:
 
     def test_exposed_type_default(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
-        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"default_path": path, "sheet_name": "Sheet1"})
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"default_path": path, "sheet_name": "Sheet1"})
         assert dn.exposed_type == "pandas"
         data = dn.read()
         assert isinstance(data, pd.DataFrame)
@@ -937,7 +937,7 @@ class TestExcelDataNode:
     def test_pandas_exposed_type(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         dn = ExcelDataNode(
-            "foo", Scope.PIPELINE, properties={"default_path": path, "exposed_type": "pandas", "sheet_name": "Sheet1"}
+            "foo", Scope.SCENARIO, properties={"default_path": path, "exposed_type": "pandas", "sheet_name": "Sheet1"}
         )
         assert dn.exposed_type == "pandas"
         data = dn.read()
@@ -948,7 +948,7 @@ class TestExcelDataNode:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example_4.xlsx")
         dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "default_path": path,
                 "exposed_type": {
@@ -973,7 +973,7 @@ class TestExcelDataNode:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example_4.xlsx")
         dn = ExcelDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "default_path": path,
                 "exposed_type": [MyCustomObject1, "numpy", "pandas"],
@@ -992,14 +992,14 @@ class TestExcelDataNode:
         with pytest.raises(InvalidExposedType):
             ExcelDataNode(
                 "foo",
-                Scope.PIPELINE,
+                Scope.SCENARIO,
                 properties={"default_path": path, "exposed_type": "invalid", "sheet_name": "Sheet1"},
             )
 
         with pytest.raises(InvalidExposedType):
             ExcelDataNode(
                 "foo",
-                Scope.PIPELINE,
+                Scope.SCENARIO,
                 properties={
                     "default_path": path,
                     "exposed_type": ["numpy", "invalid", "pandas"],
@@ -1010,7 +1010,7 @@ class TestExcelDataNode:
         with pytest.raises(InvalidExposedType):
             ExcelDataNode(
                 "foo",
-                Scope.PIPELINE,
+                Scope.SCENARIO,
                 properties={
                     "default_path": path,
                     "exposed_type": {"Sheet1": "pandas", "Sheet2": "invalid"},
@@ -1021,7 +1021,7 @@ class TestExcelDataNode:
     def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.xlsx"))
         pd.DataFrame([]).to_excel(temp_file_path)
-        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
         dn.write(pd.DataFrame([1, 2, 3]))
         previous_edit_date = dn.last_edit_date

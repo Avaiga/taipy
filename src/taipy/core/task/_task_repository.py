@@ -14,53 +14,24 @@ from typing import Any, Iterable, List, Optional, Union
 
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
-from ..common._utils import _load_fct
-from ..data._data_manager_factory import _DataManagerFactory
-from ..exceptions.exceptions import NonExistingDataNode
 from ._task_model import _TaskModel
 from .task import Task
-from .task_id import TaskId
 
 
 class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
     def __init__(self, **kwargs):
-        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        kwargs.update({"to_model_fct": Task._to_model, "from_model_fct": Task._from_model})
         self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
 
     @property
     def repository(self):
         return self.repo
 
-    def _to_model(self, task: Task) -> _TaskModel:
-        return _TaskModel(
-            id=task.id,
-            owner_id=task.owner_id,
-            parent_ids=list(task._parent_ids),
-            config_id=task.config_id,
-            input_ids=self.__to_ids(task.input.values()),
-            function_name=task._function.__name__,
-            function_module=task._function.__module__,
-            output_ids=self.__to_ids(task.output.values()),
-            version=task.version,
-            skippable=task._skippable,
-            properties=task._properties.data.copy(),
-        )
-
-    def _from_model(self, model: _TaskModel) -> Task:
-        return Task(
-            id=TaskId(model.id),
-            owner_id=model.owner_id,
-            parent_ids=set(model.parent_ids),
-            config_id=model.config_id,
-            function=_load_fct(model.function_module, model.function_name),
-            input=self.__to_data_nodes(model.input_ids),
-            output=self.__to_data_nodes(model.output_ids),
-            version=model.version,
-            skippable=model.skippable,
-            properties=model.properties,
-        )
-
     def load(self, model_id: str) -> Task:
+        return self.repo.load(model_id)
+
+    # This is temporary, just to keep the same interface as the new repository signature, to not break old tests
+    def _load(self, model_id: str) -> Task:
         return self.repo.load(model_id)
 
     def _load_all(self, version_number: Optional[str] = None) -> List[Task]:
@@ -89,21 +60,3 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)
-
-    @staticmethod
-    def __to_ids(data_nodes):
-        return [i.id for i in data_nodes]
-
-    @staticmethod
-    def __to_data_nodes(data_nodes_ids):
-        data_nodes = []
-        data_manager = _DataManagerFactory._build_manager()
-        for _id in data_nodes_ids:
-            if data_node := data_manager._get(_id):
-                data_nodes.append(data_node)
-            else:
-                raise NonExistingDataNode(_id)
-        return data_nodes
-
-    def _get_by_config_id(self, config_id: str) -> List[Task]:
-        return self.repo._get_by_config_id(config_id)

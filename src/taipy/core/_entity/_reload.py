@@ -14,6 +14,73 @@ import functools
 from ..notification import EventOperation, _publish_event
 
 
+class _Reloader:
+    """The _Reloader singleton class"""
+
+    _instance = None
+
+    _no_reload_context = False
+
+    def __new__(class_, *args, **kwargs):
+        if not isinstance(class_._instance, class_):
+            class_._instance = object.__new__(class_, *args, **kwargs)
+        return class_._instance
+
+    def _reload(self, manager: str, obj):
+        if self._no_reload_context:
+            return obj
+        
+        entity = _get_manager(manager)._get(obj, obj)
+        if hasattr(entity, "_properties"):
+            entity._properties._entity_owner = obj
+        return entity
+
+    def __enter__(self):
+        self._no_reload_context = True
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._no_reload_context = False
+
+
+def _self_reload(manager):
+    def __reload(fct):
+        @functools.wraps(fct)
+        def _do_reload(self, *args, **kwargs):
+            self = _Reloader()._reload(manager, self)
+            return fct(self, *args, **kwargs)
+
+        return _do_reload
+
+
+    return __reload
+
+
+def _self_setter(manager):
+    def __set_entity(fct):
+        @functools.wraps(fct)
+        def _do_set_entity(self, *args, **kwargs):
+            fct(self, *args, **kwargs)
+
+            entity_manager = _get_manager(manager)
+            to_publish_event_parameters = [
+                entity_manager._EVENT_ENTITY_TYPE,
+                self.id,
+                EventOperation.UPDATE,
+                fct.__name__,
+            ]
+
+            if not self._is_in_context:
+                entity_manager._set(self)
+                _publish_event(*to_publish_event_parameters)
+            else:
+                self._in_context_attributes_changed_collector.append(to_publish_event_parameters)
+
+        return _do_set_entity
+
+    return __set_entity
+
+
 @functools.lru_cache
 def _get_manager(manager: str):
     from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -31,34 +98,3 @@ def _get_manager(manager: str):
         "job": _JobManagerFactory._build_manager(),
         "task": _TaskManagerFactory._build_manager(),
     }[manager]
-
-
-def _reload(manager: str, obj):
-    return _get_manager(manager)._get(obj, obj)
-
-
-def _self_setter(manager):
-    def __set_entity(fct):
-        @functools.wraps(fct)
-        def _do_set_entity(self, *args, **kwargs):
-            fct(self, *args, **kwargs)
-            if not self._is_in_context:
-                entity_manager = _get_manager(manager)
-                entity_manager._set(self)
-                _publish_event(entity_manager._EVENT_ENTITY_TYPE, self.id, EventOperation.UPDATE, fct.__name__)
-
-        return _do_set_entity
-
-    return __set_entity
-
-
-def _self_reload(manager):
-    def __reload(fct):
-        @functools.wraps(fct)
-        def _do_reload(self, *args, **kwargs):
-            self = _reload(manager, self)
-            return fct(self, *args, **kwargs)
-
-        return _do_reload
-
-    return __reload

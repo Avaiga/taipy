@@ -15,8 +15,8 @@ from unittest import mock
 
 import pytest
 
+from src.taipy.core import MongoDefaultDocument
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.common.default_custom_document import DefaultCustomDocument
 from src.taipy.core.config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config.common.scope import Scope
@@ -88,7 +88,7 @@ def test_data_node_config_default_parameter():
     assert mongo_dn_cfg.scope == Scope.SCENARIO
     assert mongo_dn_cfg.db_host == "localhost"
     assert mongo_dn_cfg.db_port == 27017
-    assert mongo_dn_cfg.custom_document == DefaultCustomDocument
+    assert mongo_dn_cfg.custom_document == MongoDefaultDocument
     assert mongo_dn_cfg.db_username == ""
     assert mongo_dn_cfg.db_password == ""
     assert mongo_dn_cfg.validity_period is None
@@ -256,7 +256,7 @@ def test_block_datanode_config_update_in_development_mode():
         data_node_config.storage_type = "foo"
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        data_node_config.scope = Scope.PIPELINE
+        data_node_config.scope = Scope.SCENARIO
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.cacheable = True
@@ -293,7 +293,7 @@ def test_block_datanode_config_update_in_standalone_mode():
         data_node_config.storage_type = "foo"
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        data_node_config.scope = Scope.PIPELINE
+        data_node_config.scope = Scope.SCENARIO
 
     with pytest.raises(ConfigurationUpdateBlocked):
         data_node_config.cacheable = True

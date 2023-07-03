@@ -22,5 +22,6 @@ class _DataSQLRepository(_DataRepository):
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]):
         super().repository._get_by_config_and_owner_id(config_id, owner_id)
 
-    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
+    # TODO: introduce a temporary fix, should propose a new fix quickly
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, tmp=None):
         return super().repository._get_by_configs_and_owner_ids(configs_and_owner_ids)

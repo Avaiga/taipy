@@ -40,7 +40,7 @@ in the following [function](./#functions) section. In particular, the most used 
 """
 
 from ._init import *
-from .common.default_custom_document import DefaultCustomDocument
+from .common.mongo_default_document import MongoDefaultDocument
 from .data.data_node_id import Edit
 from .exceptions import exceptions
 

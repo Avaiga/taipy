@@ -9,13 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import dataclasses
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, cast
 
+from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table, UniqueConstraint
+
 from taipy.config.common.scope import Scope
 
+from .._repository._v2._base_taipy_model import _BaseModel
+from .._repository._v2.db._sql_base_model import _SQLBaseModel, mapper_registry
 from .._version._utils import _version_migration
 from ..common._warnings import _warn_deprecated
 from .data_node_id import Edit
@@ -32,8 +35,29 @@ def _to_edits_migration(job_ids: Optional[List[str]]) -> List[Edit]:
     return [cast(Edit, dict(timestamp=timestamp, job_id=job_id)) for job_id in job_ids]
 
 
+@mapper_registry.mapped
 @dataclass
-class _DataNodeModel:
+class _DataNodeModel(_BaseModel):
+    __table__ = Table(
+        "data_node",
+        mapper_registry.metadata,
+        Column("id", String, primary_key=True),
+        Column("config_id", String),
+        Column("scope", Enum(Scope)),
+        Column("storage_type", String),
+        Column("name", String),
+        Column("owner_id", String),
+        Column("parent_ids", JSON),
+        Column("last_edit_date", String),
+        Column("edits", JSON),
+        Column("version", String),
+        Column("validity_days", Float),
+        Column("validity_seconds", Float),
+        Column("edit_in_progress", Boolean),
+        Column("data_node_properties", JSON),
+    )
+    __table_args__ = (UniqueConstraint("config_id", "owner_id", name="_config_owner_uc"),)
+
     id: str
     config_id: str
     scope: Scope
@@ -48,9 +72,6 @@ class _DataNodeModel:
     validity_seconds: Optional[float]
     edit_in_progress: bool
     data_node_properties: Dict[str, Any]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {**dataclasses.asdict(self), "scope": repr(self.scope)}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):

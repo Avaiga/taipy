@@ -17,29 +17,31 @@ from taipy.config.common.scope import Scope
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._orchestrator._abstract_orchestrator import _AbstractOrchestrator
-from .._orchestrator._orchestrator_factory import _OrchestratorFactory
+from .._repository._v2._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
+from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.task_config import TaskConfig
 from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
-from ..job._job_manager_factory import _JobManagerFactory
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ..task._task_repository_factory import _TaskRepositoryFactory
 from ..task.task import Task
 from .task_id import TaskId
 
 
-class _TaskManager(_Manager[Task]):
-    _repository = _TaskRepositoryFactory._build_repository()
+class _TaskManager(_Manager[Task], _VersionMixin):
+
     _ENTITY_NAME = Task.__name__
+    _repository: _AbstractRepository
     _EVENT_ENTITY_TYPE = EventEntityType.TASK
 
     @classmethod
     def _orchestrator(cls) -> Type[_AbstractOrchestrator]:
+        from .._orchestrator._orchestrator_factory import _OrchestratorFactory
+
         return _OrchestratorFactory._build_orchestrator()
 
     @classmethod
@@ -54,7 +56,6 @@ class _TaskManager(_Manager[Task]):
         task_configs: List[TaskConfig],
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
-        pipeline_id: Optional[PipelineId] = None,
     ) -> List[Task]:
         data_node_configs = set()
         for task_config in task_configs:
@@ -62,7 +63,7 @@ class _TaskManager(_Manager[Task]):
             data_node_configs.update([Config.data_nodes[dnc.id] for dnc in task_config.output_configs])
 
         data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(
-            list(data_node_configs), cycle_id, scenario_id, pipeline_id
+            list(data_node_configs), cycle_id, scenario_id
         )
         tasks_configs_and_owner_id = []
         for task_config in task_configs:
@@ -72,9 +73,7 @@ class _TaskManager(_Manager[Task]):
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
             scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
             owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
-            if scope == Scope.PIPELINE:
-                owner_id = pipeline_id
-            elif scope == Scope.SCENARIO:
+            if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:
                 owner_id = cycle_id
@@ -83,7 +82,7 @@ class _TaskManager(_Manager[Task]):
 
             tasks_configs_and_owner_id.append((task_config, owner_id))
 
-        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(tasks_configs_and_owner_id)
+        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(tasks_configs_and_owner_id)  # type: ignore
 
         tasks = []
         for task_config, owner_id in tasks_configs_and_owner_id:
@@ -119,6 +118,14 @@ class _TaskManager(_Manager[Task]):
         return tasks
 
     @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[Task]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
+
+    @classmethod
     def __save_data_nodes(cls, data_nodes):
         data_manager = _DataManagerFactory._build_manager()
         for i in data_nodes:
@@ -134,7 +141,11 @@ class _TaskManager(_Manager[Task]):
     @classmethod
     def _get_children_entity_ids(cls, task: Task):
         entity_ids = _EntityIds()
+
+        from ..job._job_manager_factory import _JobManagerFactory
+
         jobs = _JobManagerFactory._build_manager()._get_all()
+
         for job in jobs:
             if job.task.id == task.id:
                 entity_ids.job_ids.add(job.id)
@@ -165,3 +176,10 @@ class _TaskManager(_Manager[Task]):
         job = cls._orchestrator().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)
         _publish_event(cls._EVENT_ENTITY_TYPE, task.id, EventOperation.SUBMISSION, None)
         return job
+
+    @classmethod
+    def _get_by_config_id(cls, config_id: str) -> List[Task]:
+        """
+        Get all tasks by its config id.
+        """
+        return cls._repository._load_all([{"config_id": config_id}])

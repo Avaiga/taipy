@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from time import sleep
 
 from src.taipy.core import taipy as tp
 from src.taipy.core.notification.core_event_consumer import CoreEventConsumerBase

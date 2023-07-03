@@ -68,13 +68,13 @@ class TestParquetDataNode:
         path = "data/node/path"
         compression = "snappy"
         dn = ParquetDataNode(
-            "foo_bar", Scope.PIPELINE, name="super name", properties={"path": path, "compression": compression}
+            "foo_bar", Scope.SCENARIO, name="super name", properties={"path": path, "compression": compression}
         )
         assert isinstance(dn, ParquetDataNode)
         assert dn.storage_type() == "parquet"
         assert dn.config_id == "foo_bar"
         assert dn.name == "super name"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.last_edition_date is None
@@ -86,7 +86,7 @@ class TestParquetDataNode:
         assert dn.engine == "pyarrow"
 
         with pytest.raises(InvalidConfigurationId):
-            dn = ParquetDataNode("foo bar", Scope.PIPELINE, name="super name", properties={"path": path})
+            dn = ParquetDataNode("foo bar", Scope.SCENARIO, name="super name", properties={"path": path})
 
     def test_new_parquet_data_node_with_existing_file_is_ready_for_reading(self, parquet_file_path):
         not_ready_dn_cfg = Config.configure_data_node(
@@ -107,13 +107,13 @@ class TestParquetDataNode:
         ],
     )
     def test_create_with_default_data(self, properties, exists):
-        dn = ParquetDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+        dn = ParquetDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
         assert os.path.exists(dn.path) is exists
 
     @pytest.mark.parametrize("engine", __engine)
     def test_read_file(self, engine, parquet_file_path):
         not_existing_parquet = ParquetDataNode(
-            "foo", Scope.PIPELINE, properties={"path": "nonexistent.parquet", "engine": engine}
+            "foo", Scope.SCENARIO, properties={"path": "nonexistent.parquet", "engine": engine}
         )
         with pytest.raises(NoData):
             assert not_existing_parquet.read() is None
@@ -122,7 +122,7 @@ class TestParquetDataNode:
         df = pd.read_parquet(parquet_file_path)
         # Create ParquetDataNode without exposed_type (Default is pandas.DataFrame)
         parquet_data_node_as_pandas = ParquetDataNode(
-            "bar", Scope.PIPELINE, properties={"path": parquet_file_path, "engine": engine}
+            "bar", Scope.SCENARIO, properties={"path": parquet_file_path, "engine": engine}
         )
         data_pandas = parquet_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
@@ -132,7 +132,7 @@ class TestParquetDataNode:
 
         # Create ParquetDataNode with modin exposed_type
         parquet_data_node_as_modin = ParquetDataNode(
-            "bar", Scope.PIPELINE, properties={"path": parquet_file_path, "exposed_type": "modin", "engine": engine}
+            "bar", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "modin", "engine": engine}
         )
         data_modin = parquet_data_node_as_modin.read()
         assert isinstance(data_modin, modin_pd.DataFrame)
@@ -142,7 +142,7 @@ class TestParquetDataNode:
 
         # Create ParquetDataNode with numpy exposed_type
         parquet_data_node_as_numpy = ParquetDataNode(
-            "bar", Scope.PIPELINE, properties={"path": parquet_file_path, "exposed_type": "numpy", "engine": engine}
+            "bar", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "numpy", "engine": engine}
         )
         data_numpy = parquet_data_node_as_numpy.read()
         assert isinstance(data_numpy, np.ndarray)
@@ -155,7 +155,7 @@ class TestParquetDataNode:
 
         df = pd.read_parquet(parquet_folder_path)
         parquet_data_node_as_pandas = ParquetDataNode(
-            "bar", Scope.PIPELINE, properties={"path": parquet_folder_path, "engine": engine}
+            "bar", Scope.SCENARIO, properties={"path": parquet_folder_path, "engine": engine}
         )
         data_pandas = parquet_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
@@ -164,7 +164,7 @@ class TestParquetDataNode:
         assert np.array_equal(data_pandas.to_numpy(), df.to_numpy())
 
     def test_set_path(self):
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": "foo.parquet"})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": "foo.parquet"})
         assert dn.path == "foo.parquet"
         dn.path = "bar.parquet"
         assert dn.path == "bar.parquet"
@@ -173,7 +173,7 @@ class TestParquetDataNode:
     def test_read_write_after_modify_path(self, engine):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
         new_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.parquet")
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": path, "engine": engine})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path, "engine": engine})
         read_data = dn.read()
         assert read_data is not None
         dn.path = new_path
@@ -186,29 +186,29 @@ class TestParquetDataNode:
         example_parquet_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
 
         dn = ParquetDataNode(
-            "foo", Scope.PIPELINE, properties={"path": example_parquet_path, "exposed_type": MyCustomObject}
+            "foo", Scope.SCENARIO, properties={"path": example_parquet_path, "exposed_type": MyCustomObject}
         )
         assert all([isinstance(obj, MyCustomObject) for obj in dn.read()])
 
         dn = ParquetDataNode(
-            "foo", Scope.PIPELINE, properties={"path": example_parquet_path, "exposed_type": create_custom_class}
+            "foo", Scope.SCENARIO, properties={"path": example_parquet_path, "exposed_type": create_custom_class}
         )
         assert all([isinstance(obj, MyOtherCustomObject) for obj in dn.read()])
 
     def test_raise_error_unknown_parquet_engine(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
         with pytest.raises(UnknownParquetEngine):
-            ParquetDataNode("foo", Scope.PIPELINE, properties={"path": path, "engine": "foo"})
+            ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path, "engine": "foo"})
 
     def test_raise_error_unknown_compression_algorithm(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
         with pytest.raises(UnknownCompressionAlgorithm):
-            ParquetDataNode("foo", Scope.PIPELINE, properties={"path": path, "compression": "foo"})
+            ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path, "compression": "foo"})
 
     def test_raise_error_invalid_exposed_type(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
         with pytest.raises(InvalidExposedType):
-            ParquetDataNode("foo", Scope.PIPELINE, properties={"path": path, "exposed_type": "foo"})
+            ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path, "exposed_type": "foo"})
 
     def test_read_empty_data(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
@@ -216,21 +216,21 @@ class TestParquetDataNode:
         empty_df.to_parquet(temp_file_path)
 
         # Pandas
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "pandas"})
         assert dn.read().equals(empty_df)
 
         # Numpy
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "numpy"})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "numpy"})
         assert np.array_equal(dn.read(), empty_df.to_numpy())
 
         # Custom
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": MyCustomObject})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": MyCustomObject})
         assert dn.read() == []
 
     def test_get_system_file_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
         pd.DataFrame([]).to_parquet(temp_file_path)
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
         dn.write(pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]}))
         previous_edit_date = dn.last_edit_date
@@ -254,7 +254,7 @@ class TestParquetDataNode:
         temp_file_path = os.path.join(temp_folder_path, "temp.parquet")
         pd.DataFrame([]).to_parquet(temp_file_path)
 
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_folder_path})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_folder_path})
         initial_edit_date = dn.last_edit_date
 
         # Sleep so that the file can be created successfully on Ubuntu
@@ -284,7 +284,7 @@ class TestParquetDataNode:
     )
     def test_write_to_disk(self, tmpdir_factory, data):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path})
         dn.write(data)
 
         assert pathlib.Path(temp_file_path).exists()
@@ -295,7 +295,7 @@ class TestParquetDataNode:
         read_kwargs = {"filters": [("integer", "<", 10)], "columns": ["integer"]}
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
         dn = ParquetDataNode(
-            "foo", Scope.PIPELINE, properties={"path": temp_file_path, "engine": engine, "read_kwargs": read_kwargs}
+            "foo", Scope.SCENARIO, properties={"path": temp_file_path, "engine": engine, "read_kwargs": read_kwargs}
         )
 
         df = pd.read_csv(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv"))
@@ -325,7 +325,7 @@ class TestParquetDataNode:
         # 3
         comp3 = "snappy"
         dn = ParquetDataNode(
-            "foo", Scope.PIPELINE, properties={"path": temp_file_path, "engine": engine, "compression": comp3}
+            "foo", Scope.SCENARIO, properties={"path": temp_file_path, "engine": engine, "compression": comp3}
         )
         dn.write(df)
         df.to_parquet(path=temp_file_2_path, compression=comp3, engine=engine)
@@ -337,7 +337,7 @@ class TestParquetDataNode:
         comp2 = "gzip"
         dn = ParquetDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": temp_file_path,
                 "engine": engine,
@@ -355,7 +355,7 @@ class TestParquetDataNode:
         comp1 = "brotli"
         dn = ParquetDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={
                 "path": temp_file_path,
                 "engine": engine,
@@ -375,7 +375,7 @@ class TestParquetDataNode:
         cols2 = ["a", "b"]
         dn = ParquetDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": temp_file_path, "engine": engine, "read_kwargs": {"columns": cols2}},
         )
         assert set(dn.read().columns) == set(cols2)
@@ -384,7 +384,7 @@ class TestParquetDataNode:
         cols1 = ["a"]
         dn = ParquetDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties={"path": temp_file_path, "engine": engine, "read_kwargs": {"columns": cols2}},
         )
         assert set(dn.read_with_kwargs(columns=cols1).columns) == set(cols1)
@@ -393,7 +393,7 @@ class TestParquetDataNode:
         temp_dir_path = str(tmpdir_factory.mktemp("data").join("temp_dir"))
 
         write_kwargs = {"partition_cols": ["a", "b"]}
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": temp_dir_path, "write_kwargs": write_kwargs})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_dir_path, "write_kwargs": write_kwargs})
         dn.write(default_data_frame)
 
         assert pathlib.Path(temp_dir_path).is_dir()
@@ -407,5 +407,5 @@ class TestParquetDataNode:
 
     def test_read_with_kwargs_never_written(self):
         path = "data/node/path"
-        dn = ParquetDataNode("foo", Scope.PIPELINE, properties={"path": path})
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path})
         assert dn.read_with_kwargs() is None

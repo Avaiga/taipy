@@ -17,32 +17,32 @@ from taipy.config.common.scope import Scope
 
 class TestConfig:
     def test_configure_csv_data_node(self):
-        a, b, c, d, e, f = "foo", "path", True, "numpy", Scope.PIPELINE, timedelta(1)
+        a, b, c, d, e, f = "foo", "path", True, "numpy", Scope.SCENARIO, timedelta(1)
         Config.configure_csv_data_node(a, b, c, d, e, f)
         assert len(Config.data_nodes) == 2
 
     def test_configure_excel_data_node(self):
-        a, b, c, d, e, f, g = "foo", "path", True, "Sheet1", "numpy", Scope.PIPELINE, timedelta(1)
+        a, b, c, d, e, f, g = "foo", "path", True, "Sheet1", "numpy", Scope.SCENARIO, timedelta(1)
         Config.configure_excel_data_node(a, b, c, d, e, f, g)
         assert len(Config.data_nodes) == 2
 
     def test_configure_generic_data_node(self):
-        a, b, c, d, e, f, g, h = "foo", print, print, tuple([]), tuple([]), Scope.PIPELINE, timedelta(1), "qux"
+        a, b, c, d, e, f, g, h = "foo", print, print, tuple([]), tuple([]), Scope.SCENARIO, timedelta(1), "qux"
         Config.configure_generic_data_node(a, b, c, d, e, f, g, property=h)
         assert len(Config.data_nodes) == 2
 
     def test_configure_in_memory_data_node(self):
-        a, b, c, d, e = "foo", 0, Scope.PIPELINE, timedelta(1), "qux"
+        a, b, c, d, e = "foo", 0, Scope.SCENARIO, timedelta(1), "qux"
         Config.configure_in_memory_data_node(a, b, c, d, property=e)
         assert len(Config.data_nodes) == 2
 
     def test_configure_pickle_data_node(self):
-        a, b, c, d, e = "foo", 0, Scope.PIPELINE, timedelta(1), "path"
+        a, b, c, d, e = "foo", 0, Scope.SCENARIO, timedelta(1), "path"
         Config.configure_pickle_data_node(a, b, c, d, path=e)
         assert len(Config.data_nodes) == 2
 
     def test_configure_json_data_node(self):
-        a, dp, ec, dc, sc, f, p = "foo", "path", "ec", "dc", Scope.PIPELINE, timedelta(1), "qux"
+        a, dp, ec, dc, sc, f, p = "foo", "path", "ec", "dc", Scope.SCENARIO, timedelta(1), "qux"
         Config.configure_json_data_node(a, dp, ec, dc, sc, f, path=p)
         assert len(Config.data_nodes) == 2
 
@@ -59,7 +59,7 @@ class TestConfig:
             "driver",
             {"foo": "bar"},
             "exposed_type",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             timedelta(1),
             "qux",
         )
@@ -80,7 +80,7 @@ class TestConfig:
             "driver",
             {"foo": "bar"},
             "exposed_type",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             timedelta(1),
             "qux",
         )

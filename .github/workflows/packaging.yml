@@ -2,9 +2,9 @@ name: Test package installation
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, dev/*, release/* ]
   pull_request:
-    branches: [ develop ]
+    branches: [ develop, dev/*, release/* ]
   schedule:
     - cron: "0 8 * * *"
 

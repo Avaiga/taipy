@@ -143,13 +143,13 @@ class TestSQLTableDataNode:
     def test_create(self, pandas_properties, modin_properties):
         dn = SQLTableDataNode(
             "foo_bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=pandas_properties,
         )
         assert isinstance(dn, SQLTableDataNode)
         assert dn.storage_type() == "sql_table"
         assert dn.config_id == "foo_bar"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.job_ids == []
@@ -160,13 +160,13 @@ class TestSQLTableDataNode:
 
         dn = SQLTableDataNode(
             "foo_bar",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=modin_properties,
         )
         assert isinstance(dn, SQLTableDataNode)
         assert dn.storage_type() == "sql_table"
         assert dn.config_id == "foo_bar"
-        assert dn.scope == Scope.PIPELINE
+        assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.job_ids == []
@@ -186,9 +186,9 @@ class TestSQLTableDataNode:
     )
     def test_create_with_missing_parameters(self, properties):
         with pytest.raises(MissingRequiredProperty):
-            SQLTableDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
+            SQLTableDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         with pytest.raises(MissingRequiredProperty):
-            SQLTableDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
+            SQLTableDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
     @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as", return_value="custom")
     @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
@@ -209,7 +209,7 @@ class TestSQLTableDataNode:
         # Create SQLTableDataNode without exposed_type (Default is pandas.DataFrame)
         sql_data_node_as_pandas = SQLTableDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=pandas_properties,
         )
 
@@ -218,17 +218,17 @@ class TestSQLTableDataNode:
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = MyCustomObject
         # Create the same SQLTableDataNode but with custom exposed_type
-        sql_data_node_as_custom_object = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        sql_data_node_as_custom_object = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
         assert sql_data_node_as_custom_object.read() == "custom"
 
         # Create the same SQLDataSource but with numpy exposed_type
         custom_properties["exposed_type"] = "numpy"
-        sql_data_source_as_numpy_object = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        sql_data_source_as_numpy_object = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         assert sql_data_source_as_numpy_object.read() == "numpy"
 
         # Create the same SQLDataSource but with modin exposed_type
-        sql_data_source_as_modin_object = SQLTableDataNode("foo", Scope.PIPELINE, properties=modin_properties)
+        sql_data_source_as_modin_object = SQLTableDataNode("foo", Scope.SCENARIO, properties=modin_properties)
         assert sql_data_source_as_modin_object.properties["exposed_type"] == "modin"
         assert sql_data_source_as_modin_object.read() == "modin"
 
@@ -238,7 +238,7 @@ class TestSQLTableDataNode:
 
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = MyCustomObject
-        sql_data_node = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        sql_data_node = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
@@ -302,7 +302,7 @@ class TestSQLTableDataNode:
     def test_write(self, data, written_data, called_func, pandas_properties):
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
-        dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
@@ -320,7 +320,7 @@ class TestSQLTableDataNode:
         custom_properties.pop("db_extra_args")
         custom_properties["exposed_type"] = "foo"
         with pytest.raises(InvalidExposedType):
-            SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+            SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     @pytest.mark.parametrize("modin_properties", __modin_properties)
@@ -328,7 +328,7 @@ class TestSQLTableDataNode:
         # test write pandas dataframe
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
-        dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
@@ -344,7 +344,7 @@ class TestSQLTableDataNode:
         # test write modin dataframe
         custom_properties = modin_properties.copy()
         custom_properties.pop("db_extra_args")
-        dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         df = modin_pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
@@ -368,7 +368,7 @@ class TestSQLTableDataNode:
     def test_write_empty_list(self, data, pandas_properties):
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
-        dn = SQLTableDataNode("foo", Scope.PIPELINE, properties=custom_properties)
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
@@ -385,7 +385,7 @@ class TestSQLTableDataNode:
     def test_engine_cache(self, _, pandas_properties):
         dn = SQLTableDataNode(
             "foo",
-            Scope.PIPELINE,
+            Scope.SCENARIO,
             properties=pandas_properties,
         )
 
@@ -427,7 +427,7 @@ class TestSQLTableDataNode:
             "sqlite_file_extension": file_extension,
         }
 
-        dn = SQLTableDataNode("sqlite_dn", Scope.PIPELINE, properties=properties)
+        dn = SQLTableDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
         data = dn.read()
 
         assert data.equals(pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]))

@@ -256,7 +256,7 @@ class _TaipyModelTable(_BaseSQLRepository[ModelType, Entity]):
             from taipy.logger._taipy_logger import _TaipyLogger
 
             _TaipyLogger._get_logger().warning(
-                f"Entity {entity.id} has automatically been assigned to version named " f"{entity.version}"
+                f"Entity {entity.id} has automatically been assigned to version named " f"{entity._version}"
             )
         return entity
 
@@ -385,7 +385,7 @@ class _TaipyVersionTable(_BaseSQLRepository[ModelType, Entity]):
             from taipy.logger._taipy_logger import _TaipyLogger
 
             _TaipyLogger._get_logger().warning(
-                f"Entity {entity.id} has automatically been assigned to version named " f"{entity.version}"
+                f"Entity {entity.id} has automatically been assigned to version named " f"{entity._version}"
             )
         return entity
 

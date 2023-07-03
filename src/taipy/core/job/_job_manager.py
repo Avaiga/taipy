@@ -10,21 +10,33 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Callable, Iterable, Optional, Union
+from typing import Callable, Iterable, List, Optional, Union
 
 from .._manager._manager import _Manager
+from .._repository._v2._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
+from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import JobNotDeletedException
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..task.task import Task
-from ._job_repository_factory import _JobRepositoryFactory
 from .job import Job
 from .job_id import JobId
 
 
-class _JobManager(_Manager[Job]):
-    _repository = _JobRepositoryFactory._build_repository()
+class _JobManager(_Manager[Job], _VersionMixin):
+
     _ENTITY_NAME = Job.__name__
+    _ID_PREFIX = "JOB_"
+    _repository: _AbstractRepository
+
+    @classmethod
+    def _get_all(cls, version_number: Optional[str] = "all") -> List[Job]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
+
     _EVENT_ENTITY_TYPE = EventEntityType.JOB
 
     @classmethod

@@ -19,13 +19,16 @@ import pandas as pd
 import pytest
 from sqlalchemy import create_engine, text
 
-from src.taipy.core import CycleId, PipelineId, ScenarioId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._repository._v2.db._sql_session import engine
+from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
+from src.taipy.core._version._version_model import _VersionModel
 from src.taipy.core.config import (
     CoreSection,
     DataNodeConfig,
     JobConfig,
+    MigrationConfig,
     PipelineConfig,
     ScenarioConfig,
     TaskConfig,
@@ -39,17 +42,25 @@ from src.taipy.core.config import (
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle.cycle import Cycle
+from src.taipy.core.cycle.cycle_id import CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
+from src.taipy.core.data._data_model import _DataNodeModel
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
+from src.taipy.core.job._job_model import _JobModel
+from src.taipy.core.job.job import Job
+from src.taipy.core.job.job_id import JobId
 from src.taipy.core.notification.notifier import Notifier
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
+from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
@@ -204,12 +215,32 @@ def scenario(cycle):
 
 @pytest.fixture(scope="function")
 def data_node():
-    return InMemoryDataNode("data_node_config_id", Scope.PIPELINE, version="random_version_number")
+    return InMemoryDataNode("data_node_config_id", Scope.SCENARIO, version="random_version_number")
+
+
+@pytest.fixture(scope="function")
+def data_node_model():
+    return _DataNodeModel(
+        "my_dn_id",
+        "test_data_node",
+        Scope.SCENARIO,
+        "csv",
+        "name",
+        "owner_id",
+        list({"parent_id_1", "parent_id_2"}),
+        datetime(1985, 10, 14, 2, 30, 0).isoformat(),
+        [dict(timestamp=datetime(1985, 10, 14, 2, 30, 0).isoformat(), job_id="job_id")],
+        "latest",
+        None,
+        None,
+        False,
+        {"path": "/path", "has_header": True, "prop": "ENV[FOO]", "exposed_type": "pandas"},
+    )
 
 
 @pytest.fixture(scope="function")
 def task(data_node):
-    dn = InMemoryDataNode("dn_config_id", Scope.PIPELINE, version="random_version_number")
+    dn = InMemoryDataNode("dn_config_id", Scope.SCENARIO, version="random_version_number")
     return Task("task_config_id", {}, print, [data_node], [dn])
 
 
@@ -254,6 +285,16 @@ def pipeline():
         parent_ids=set(["parent_id_1", "parent_id_2"]),
         version="random_version_number",
     )
+
+
+@pytest.fixture(scope="function")
+def job(task):
+    return Job(JobId("job"), task, "foo")
+
+
+@pytest.fixture(scope="function")
+def _version():
+    return _Version(id="foo", config=Config._applied_config)
 
 
 @pytest.fixture(scope="function")
@@ -369,6 +410,13 @@ def init_config():
             ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
         ],
     )
+    _inject_section(
+        MigrationConfig,
+        "migration_functions",
+        MigrationConfig.default_config(),
+        [("add_migration_function", MigrationConfig._add_migration_function)],
+        True,
+    )
     _Checker.add_checker(_ConfigIdChecker)
     _Checker.add_checker(_JobConfigChecker)
     _Checker.add_checker(_DataNodeConfigChecker)
@@ -402,3 +450,22 @@ def init_notifier():
 @pytest.fixture
 def sql_engine():
     return create_engine("sqlite:///:memory:")
+
+
+@pytest.fixture(autouse=True)
+def clean_sql_db():
+    _CycleModel.__table__.drop(engine, checkfirst=True)
+    _DataNodeModel.__table__.drop(bind=engine, checkfirst=True)
+    _JobModel.__table__.drop(bind=engine, checkfirst=True)
+    _PipelineModel.__table__.drop(bind=engine, checkfirst=True)
+    _ScenarioModel.__table__.drop(bind=engine, checkfirst=True)
+    _TaskModel.__table__.drop(bind=engine, checkfirst=True)
+    _VersionModel.__table__.drop(bind=engine, checkfirst=True)
+
+    _CycleModel.__table__.create(engine, checkfirst=True)
+    _DataNodeModel.__table__.create(bind=engine, checkfirst=True)
+    _JobModel.__table__.create(bind=engine, checkfirst=True)
+    _PipelineModel.__table__.create(bind=engine, checkfirst=True)
+    _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
+    _TaskModel.__table__.create(bind=engine, checkfirst=True)
+    _VersionModel.__table__.create(bind=engine, checkfirst=True)
