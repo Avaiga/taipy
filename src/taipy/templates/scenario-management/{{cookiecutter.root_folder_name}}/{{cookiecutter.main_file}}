@@ -3,7 +3,6 @@ import re
 import pandas
 import taipy as tp
 from taipy import Core, Gui
-from taipy.gui import navigate
 
 from config.config import configure
 from pages import inputs_page
