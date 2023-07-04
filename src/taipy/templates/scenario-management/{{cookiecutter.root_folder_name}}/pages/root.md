@@ -4,8 +4,6 @@
 
 <|part|class_name=main|render={selected_scenario}|
 
-<|navbar|>
-
 <|content|>
 
 |>

@@ -10,6 +10,7 @@ from pages import outputs_page
 from pages import root
 from pages import scenario_page
 
+
 selected_scenario = None
 inputs = None
 outputs = None
@@ -134,8 +135,6 @@ def on_change(state, var, val):
 
 pages = {"/": root,
          "scenario": scenario_page,
-         "inputs": inputs_page,
-         "outputs": outputs_page,
          }
 
 if __name__ == "__main__":
@@ -156,5 +155,7 @@ if __name__ == "__main__":
     # Instantiate, configure and run the GUI
     gui = Gui(pages=pages)
     inputs_partial = gui.add_partial(" <center> Select a Scenario. </center>")
+    inputs_section_partial = gui.add_partial(inputs_page)
     outputs_partial = gui.add_partial(" <center> Select a Scenario. </center>")
+    outputs_section_partial = gui.add_partial(outputs_page)
     gui.run(title="{{cookiecutter.application_title}}")
