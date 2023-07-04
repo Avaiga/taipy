@@ -64,7 +64,7 @@ class MockModel(Base):  # type: ignore
         return MockModel(id=data["id"], name=data["name"], version=data["version"])
 
     def _to_entity(self):
-        return MockObj(id=self.id, name=self.name, version=self._version)
+        return MockObj(id=self.id, name=self.name, version=self.version)
 
     @classmethod
     def _from_entity(cls, entity: MockObj):
@@ -78,7 +78,7 @@ class MockConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model):
-        return MockObj(id=model.id, name=model.name, version=model._version)
+        return MockObj(id=model.id, name=model.name, version=model.version)
 
 
 class MockFSRepository(_FileSystemRepository):
