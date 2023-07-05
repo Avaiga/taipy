@@ -109,8 +109,10 @@ def test_scenario_management_with_toml_config(tmpdir):
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         assert 'Config.load("config/config.toml")' in config_file.read()
 
+    oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "foo_app"))
     stdout = _run_template("main.py")
+    os.chdir(oldpwd)
 
     # Assert the message when the application is run successfully is in the stdout
     assert "[Taipy][INFO] Configuration 'config/config.toml' successfully loaded." in str(stdout, "utf-8")
@@ -145,8 +147,10 @@ def test_scenario_management_without_toml_config(tmpdir):
         assert 'Config.load("config/config.toml")' not in config_content
         assert all([x in config_content for x in ["Config.configure_csv_data_node", "Config.configure_task"]])
 
+    oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "foo_app"))
     stdout = _run_template("main.py")
+    os.chdir(oldpwd)
 
     # Assert the message when the application is run successfully is in the stdout
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
