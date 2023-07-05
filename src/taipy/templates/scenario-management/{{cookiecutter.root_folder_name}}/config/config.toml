@@ -1,1 +1,27 @@
 [TAIPY]
+
+[DATA_NODE.initial_dataset]
+storage_type = "csv"
+scope = "CYCLE:SCOPE"
+
+[DATA_NODE.replacement_type]
+default_data = "NO VALUE"
+
+[DATA_NODE.cleaned_dataset]
+storage_type = "csv"
+
+[TASK.clean_data]
+function = "config.config.clean_data:function"
+inputs = [ "initial_dataset:SECTION", "replacement_type:SECTION",]
+outputs = [ "cleaned_dataset:SECTION",]
+skippable = "False:bool"
+
+[PIPELINE.scenario_configuration_pipeline]
+tasks = [ "clean_data:SECTION",]
+
+[SCENARIO.scenario_configuration]
+pipelines = [ "scenario_configuration_pipeline:SECTION",]
+frequency = "DAILY:FREQUENCY"
+
+[SCENARIO.scenario_configuration.comparators]
+
