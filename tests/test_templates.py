@@ -16,7 +16,7 @@ import sys
 from cookiecutter.main import cookiecutter
 
 
-def _run_template(main_path, time_out=5):
+def _run_template(main_path, time_out=30):
     """Run the templates on a subprocess and get stdout after timeout"""
     with subprocess.Popen([sys.executable, main_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
         try:
