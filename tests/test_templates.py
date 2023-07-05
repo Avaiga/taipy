@@ -149,5 +149,4 @@ def test_scenario_management_without_toml_config(tmpdir):
     stdout = _run_template("main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO] Configuration 'config/config.toml' successfully loaded." in str(stdout, "utf-8")
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
