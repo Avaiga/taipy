@@ -60,6 +60,12 @@ $ pip install taipy
 
 <br>
 
+## Community
+
+Join our [Discord](https://discord.gg/XcFhrJZru3) to give us feedback, share your creations or just to have a chat with us.
+
+<br>
+
 ## Ready, Set, GUI
 
 ### Tiny Taipy GUI Demo
