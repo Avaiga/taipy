@@ -124,9 +124,9 @@ def test_scenario_management_without_toml_config(tmpdir):
         no_input=True,
         extra_context={
             "root_folder_name": "foo_app",
-            "main file": "main.py",
-            "application title": "bar",
-            "use toml config": "no",
+            "main_file": "main.py",
+            "application_title": "bar",
+            "use_toml_config": "no",
         },
     )
 
