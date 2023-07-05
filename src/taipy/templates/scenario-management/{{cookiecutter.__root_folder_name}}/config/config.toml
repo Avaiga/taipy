@@ -11,7 +11,7 @@ default_data = "NO VALUE"
 storage_type = "csv"
 
 [TASK.clean_data]
-function = "config.config.clean_data:function"
+function = "algos.algos.clean_data:function"
 inputs = [ "initial_dataset:SECTION", "replacement_type:SECTION",]
 outputs = [ "cleaned_dataset:SECTION",]
 skippable = "False:bool"

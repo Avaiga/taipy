@@ -1,9 +1,6 @@
+from algos import clean_data
+
 from taipy import Config, Frequency, Scope
-
-
-def clean_data(df, replacement_type):
-    df = df.fillna(replacement_type)
-    return df
 
 
 def configure():
