@@ -15,23 +15,22 @@ import sys
 from cookiecutter.main import cookiecutter
 
 from taipy._cli._base_cli import _CLI
+from taipy.logger._taipy_logger import _TaipyLogger
 
 
 class _ScaffoldCLI:
+    __logger = _TaipyLogger._get_logger()
     __TAIPY_PATH = pathlib.Path(__file__).parent.parent.resolve() / "templates"
 
-    _TEMPLATE_MAP = {
-        "default": str(__TAIPY_PATH / "taipy-default-template"),
-        "multi-page-gui": str(__TAIPY_PATH / "multi-page-gui"),
-    }
+    _TEMPLATE_MAP = {str(x.name): str(x) for x in __TAIPY_PATH.iterdir() if x.is_dir()}
 
     @classmethod
     def create_parser(cls):
         create_parser = _CLI._add_subparser("create", help="Create a new Taipy application.")
         create_parser.add_argument(
             "--template",
-            choices=["default", "multi-page-gui"],
-            default="default",
+            choices=list(cls._TEMPLATE_MAP.keys()),
+            default="taipy-default-template",
             help="The Taipy template to create new application.",
         )
 
@@ -40,5 +39,6 @@ class _ScaffoldCLI:
         args = _CLI._parse()
 
         if getattr(args, "which", None) == "create":
-            cookiecutter(cls._TEMPLATE_MAP[args.template])
+            application_path = cookiecutter(cls._TEMPLATE_MAP[args.template])
+            cls.__logger.info(f"Taipy application created at {application_path}")
             sys.exit(0)
