@@ -86,10 +86,10 @@ def test_scenario_management_with_toml_config(tmpdir):
         output_dir=tmpdir,
         no_input=True,
         extra_context={
-            "root folder name": "foo_app",
-            "main file": "main.py",
-            "application title": "bar",
-            "use toml config": "yes",
+            "root_folder_name": "foo_app",
+            "main_file": "main.py",
+            "application_title": "bar",
+            "use_toml_config": "yes",
         },
     )
 
