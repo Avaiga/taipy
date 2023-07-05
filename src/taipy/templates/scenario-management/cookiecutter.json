@@ -1,6 +1,11 @@
 {
-    "root_folder_name": "taipy_application",
-    "main_file": "main.py",
-    "application_title": "Taipy Application",
-    "use_toml_config": "y/N"
+    "Your application root folder name": "taipy_application",
+    "Your application main Python file": "main.py",
+    "Your application title": "Taipy Application",
+    "Use TOML Config": "Y/N",
+
+    "__root_folder_name": "{{ cookiecutter['Your application root folder name'] | replace(' ','-') }}",
+    "__main_file": "{{ cookiecutter['Your application main Python file'] if cookiecutter['Your application main Python file'].endswith('.py') else cookiecutter['Your application main Python file']+'.py' }}",
+    "__application_title": "{{ cookiecutter['Your application title'] }}",
+    "__use_toml_config": "{{ cookiecutter['Use TOML Config'] }}"
 }

@@ -18,7 +18,7 @@ with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_fil
     requirement_file.write(f"taipy=={taipy.version._get_version()}\n")
 
 # Use TOML config file or not
-use_toml_config = "{{ cookiecutter.use_toml_config }}".upper()
+use_toml_config = "{{ cookiecutter.__use_toml_config }}".upper()
 if use_toml_config == "YES" or use_toml_config == "Y":
     os.remove(os.path.join(os.getcwd(), "config", "config.py"))
     os.rename(

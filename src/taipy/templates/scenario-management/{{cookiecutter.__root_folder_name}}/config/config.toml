@@ -24,4 +24,3 @@ pipelines = [ "scenario_configuration_pipeline:SECTION",]
 frequency = "DAILY:FREQUENCY"
 
 [SCENARIO.scenario_configuration.comparators]
-

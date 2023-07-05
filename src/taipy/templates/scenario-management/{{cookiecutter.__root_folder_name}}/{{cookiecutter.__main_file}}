@@ -158,4 +158,4 @@ if __name__ == "__main__":
     inputs_section_partial = gui.add_partial(inputs_page)
     outputs_partial = gui.add_partial(" <center> Select a Scenario. </center>")
     outputs_section_partial = gui.add_partial(outputs_page)
-    gui.run(title="{{cookiecutter.application_title}}")
+    gui.run(title="{{cookiecutter.__application_title}}")
