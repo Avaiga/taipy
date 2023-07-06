@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from taipy.config import Config
 from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
@@ -52,9 +53,27 @@ class _ScenarioConfigChecker(_ConfigChecker):
             )
 
     def _check_comparators(self, scenario_config_id: str, scenario_config: ScenarioConfig):
-        if not scenario_config.comparators:
-            self._info(
-                scenario_config._COMPARATOR_KEY,
+        if scenario_config.comparators is not None and not isinstance(scenario_config.comparators, dict):
+            self._error(
+                ScenarioConfig._COMPARATOR_KEY,
                 scenario_config.comparators,
-                f"No scenario {scenario_config._COMPARATOR_KEY} defined for ScenarioConfig `{scenario_config_id}`.",
+                f"{ScenarioConfig._COMPARATOR_KEY} field of ScenarioConfig"
+                f" `{scenario_config_id}` must be populated with a dictionary value.",
             )
+        else:
+            for data_node_id, comparator in scenario_config.comparators.items():
+                if data_node_id not in Config.data_nodes:
+                    self._error(
+                        ScenarioConfig._COMPARATOR_KEY,
+                        scenario_config.comparators,
+                        f"The key `{data_node_id}` in {ScenarioConfig._COMPARATOR_KEY} field of ScenarioConfig"
+                        f" `{scenario_config_id}` must be populated with a valid data node configuration id.",
+                    )
+                if not callable(comparator):
+                    if not isinstance(comparator, list) or not all(callable(comp) for comp in comparator):
+                        self._error(
+                            ScenarioConfig._COMPARATOR_KEY,
+                            scenario_config.comparators,
+                            f"The value of `{data_node_id}` in {ScenarioConfig._COMPARATOR_KEY} field of ScenarioConfig"
+                            f" `{scenario_config_id}` must be populated with a list of Callable values.",
+                        )
