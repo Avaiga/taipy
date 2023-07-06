@@ -97,9 +97,9 @@ class MigrationConfig(UniqueSection):
 
         Parameters:
             target_version (str): The production version that entities are migrated to.
-            config (Union[Section, str]): The configuration or the `id` of the config that need to migrate.
+            config (Union[Section, str]): The configuration or the `id` of the config that needs to migrate.
             migration_fct (Callable): Migration function that takes an entity as input and returns a new entity
-                that compatible with the target production version.
+                that is compatible with the target production version.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
         Returns:
             `MigrationConfig^`: The Migration configuration.
