@@ -3,11 +3,9 @@
 <| Selected scenario |expandable|
 
 <|layout|columns=1 1|
-
 <|{selected_scenario}|scenario|not expandable|expanded|>
 
 <|{selected_scenario}|scenario_dag|>
-
 |>
 
 |>
@@ -15,13 +13,15 @@
 
 <|layout|columns=1 1|
 
-<|card|
-<|part|partial={inputs_section_partial}|>
-|>
+<input|card|
+## Input
+<|part|partial={inputs_partial}|>
+|input>
 
-<|card|
-<|part|partial={outputs_section_partial}|>
-|>
+<output|card|
+## Output
+<|part|partial={outputs_partial}|>
+|output>
 
 |>
 
