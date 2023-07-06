@@ -95,7 +95,7 @@ class TestTaipy:
         scenario = Scenario("scenario_config_id", [], {})
         pipeline = Pipeline("pipeline_config_id", {}, [])
         task = Task("task_config_id", {}, print)
-        job = Job("job_id", task, "submit_id")
+        job = Job("job_id", task, "submit_id", scenario.id)
         dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 
         _CycleManager._set(cycle)

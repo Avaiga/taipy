@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.taipy.core import JobId, TaskId
+from src.taipy.core import JobId, Pipeline, PipelineId, TaskId
 from src.taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -46,9 +46,22 @@ def job_id():
     return JobId("id1")
 
 
+@pytest.fixture(scope="class")
+def pipeline():
+    return Pipeline(
+        "pipeline",
+        {},
+        [],
+        PipelineId(Pipeline._ID_PREFIX + "pipeline_id"),
+        owner_id="owner_id",
+        parent_ids={"parent_id_1", "parent_id_2"},
+        version="random_version_number",
+    )
+
+
 @pytest.fixture
 def job(task, job_id):
-    return Job(job_id, task, "submit_id", "scenario_entity_id")
+    return Job(job_id, task, "submit_id", Pipeline._ID_PREFIX + "pipeline_id")
 
 
 @pytest.fixture
@@ -67,12 +80,17 @@ def _error():
     raise RuntimeError("Something bad has happened")
 
 
-def test_create_job(task, job):
+def test_create_job(pipeline, task, job):
+    from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+
+    _PipelineManagerFactory._build_manager()._set(pipeline)
+
     assert job.id == "id1"
     assert task in job
     assert job.is_submitted()
     assert job.submit_id is not None
-    assert job.submit_entity_id == "scenario_entity_id"
+    assert job.submit_entity_id == Pipeline._ID_PREFIX + "pipeline_id"
+    assert job.submit_entity == pipeline
     with mock.patch("src.taipy.core.get") as get_mck:
         get_mck.return_value = task
         assert job.get_label() == "name > " + job.id

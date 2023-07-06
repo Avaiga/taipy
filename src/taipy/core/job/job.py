@@ -106,6 +106,12 @@ class Job(_Entity, _Labeled):
         return self._submit_entity_id
 
     @property  # type: ignore
+    def submit_entity(self):
+        from ..taipy import get as tp_get
+
+        return tp_get(self._submit_entity_id)
+
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def status(self):
         return self._status
