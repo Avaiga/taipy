@@ -109,8 +109,8 @@ def test_check_migration_from_productions_to_productions_exist(caplog):
 
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         Core().run()
-    assert 'There is no migration functions from production version "1.0" to version "1.1".' in caplog.text
-    assert 'There is no migration functions from production version "1.1" to version "1.2".' in caplog.text
+    assert 'There is no migration function from production version "1.0" to version "1.1".' in caplog.text
+    assert 'There is no migration function from production version "1.1" to version "1.2".' in caplog.text
 
     caplog.clear()
     Config.unblock_update()
@@ -118,4 +118,4 @@ def test_check_migration_from_productions_to_productions_exist(caplog):
     Config.add_migration_function("1.2", "data_nodes1", mock_func)
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         Core().run()
-    assert 'There is no migration functions from production version "1.0" to version "1.1".' in caplog.text
+    assert 'There is no migration function from production version "1.0" to version "1.1".' in caplog.text
