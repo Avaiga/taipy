@@ -273,45 +273,6 @@ class Pipeline(_Entity, _Submittable, _Labeled):
 
         return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
 
-    @classmethod
-    def _to_model(cls, pipeline) -> _PipelineModel:
-        datanode_task_edges = defaultdict(list)
-        task_datanode_edges = defaultdict(list)
-
-        for task in pipeline._get_tasks().values():
-            task_id = str(task.id)
-            for predecessor in task.input.values():
-                datanode_task_edges[str(predecessor.id)].append(task_id)
-            for successor in task.output.values():
-                task_datanode_edges[task_id].append(str(successor.id))
-        return _PipelineModel(
-            pipeline.id,
-            pipeline.owner_id,
-            list(pipeline._parent_ids),
-            pipeline.config_id,
-            pipeline._properties.data,
-            cls.__to_task_ids(pipeline._tasks),
-            _utils._fcts_to_dict(pipeline._subscribers),
-            pipeline._version,
-        )
-
-    @classmethod
-    def _from_model(cls, model: _PipelineModel):
-        pipeline = Pipeline(
-            model.config_id,
-            model.properties,
-            model.tasks,
-            model.id,
-            model.owner_id,
-            set(model.parent_ids),
-            [
-                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
-                for it in model.subscribers
-            ],
-            model.version,
-        )
-        return _migrate_entity(pipeline)
-
     @staticmethod
     def __to_task_ids(tasks):
         return [t.id if isinstance(t, Task) else t for t in tasks]

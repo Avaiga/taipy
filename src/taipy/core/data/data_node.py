@@ -566,56 +566,6 @@ class DataNode(_Entity, _Labeled):
     def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
         raise NotImplementedError
 
-    @classmethod
-    def _to_model(cls, entity) -> _DataNodeModel:
-
-        properties = entity._serialize_datanode_properties(entity._properties.data.copy())
-
-        return _DataNodeModel(
-            entity.id,
-            entity.config_id,
-            entity._scope,
-            entity.storage_type(),
-            entity._name,
-            entity.owner_id,
-            list(entity._parent_ids),
-            entity._last_edit_date.isoformat() if entity._last_edit_date else None,
-            entity._edits,
-            entity._version,
-            entity._validity_period.days if entity._validity_period else None,
-            entity._validity_period.seconds if entity._validity_period else None,
-            entity._edit_in_progress,
-            properties,
-        )
-
-    @classmethod
-    def _from_model(cls, model: _DataNodeModel):
-
-        __CLASS_MAP = cls._class_map()
-
-        properties = model.data_node_properties.copy()
-        model.data_node_properties = __CLASS_MAP[model.storage_type]._deserialize_datanode_model_properties(properties)
-
-        validity_period = None
-        if model.validity_seconds is not None and model.validity_days is not None:
-            validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
-
-        datanode = __CLASS_MAP[model.storage_type](
-            config_id=model.config_id,
-            scope=model.scope,
-            id=model.id,
-            name=model.name,
-            owner_id=model.owner_id,
-            parent_ids=set(model.parent_ids),
-            last_edit_date=datetime.fromisoformat(model.last_edit_date) if model.last_edit_date else None,
-            edits=model.edits,
-            version=model.version,
-            validity_period=validity_period,
-            edit_in_progress=model.edit_in_progress,
-            properties=model.data_node_properties,
-        )
-        return _migrate_entity(datanode)
-
     def get_label(self) -> str:
         """Returns the data node simple label prefixed by its owner label.
 
