@@ -393,7 +393,9 @@ class TestParquetDataNode:
         temp_dir_path = str(tmpdir_factory.mktemp("data").join("temp_dir"))
 
         write_kwargs = {"partition_cols": ["a", "b"]}
-        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_dir_path, "write_kwargs": write_kwargs})
+        dn = ParquetDataNode(
+            "foo", Scope.SCENARIO, properties={"path": temp_dir_path, "write_kwargs": write_kwargs}
+        )  # type: ignore
         dn.write(default_data_frame)
 
         assert pathlib.Path(temp_dir_path).is_dir()

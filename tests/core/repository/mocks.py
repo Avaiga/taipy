@@ -17,10 +17,9 @@ from typing import Any, Dict, Optional
 from sqlalchemy import Column, String, Table, create_engine
 from sqlalchemy.orm import declarative_base, registry, sessionmaker
 
-from src.taipy.core._repository import _FileSystemRepository, _SQLRepository
-from src.taipy.core._repository._v2._abstract_converter import _AbstractConverter
-from src.taipy.core._repository._v2._filesystem_repository import _FileSystemRepository as _FileSystemRepositoryV2
-from src.taipy.core._repository._v2._sql_repository import _SQLRepository as _SQLRepositoryV2
+from src.taipy.core._repository._abstract_converter import _AbstractConverter
+from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
+from src.taipy.core._repository._sql_repository import _SQLRepository
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
 
@@ -84,46 +83,18 @@ class MockConverter(_AbstractConverter):
 
 class MockFSRepository(_FileSystemRepository):
     def __init__(self, **kwargs):
-        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
-        super().__init__(**kwargs)
-
-    def _to_model(self, obj: MockObj):
-        return MockModel(obj.id, obj.name, obj._version)
-
-    def _from_model(self, model: MockModel):
-        return MockObj(model.id, model.name, model.version)
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
-
-
-class MockFSRepositoryV2(_FileSystemRepositoryV2):
-    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     @property
     def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
-
-
-class MockSQLRepository(_SQLRepository):
-    def __init__(self, **kwargs):
-        kwargs.update({"model_name": "mock_model", "to_model_fct": self._to_model, "from_model_fct": self._from_model})
-        super().__init__(**kwargs)
-
-    def _to_model(self, obj: MockObj):
-        return MockModel(obj.id, obj.name, obj._version)
-
-    def _from_model(self, model: MockModel):
-        return MockObj(model.id, model.name, model.version)
 
 
 def create_database(engine):
     MockModel.__table__.create(engine, checkfirst=True)
 
 
-class MockSQLRepositoryV2(_SQLRepositoryV2):
+class MockSQLRepository(_SQLRepository):
     def __init__(self, **kwargs):
         engine = create_engine("sqlite:///:memory:")
         create_database(engine)

@@ -314,45 +314,6 @@ class Job(_Entity, _Labeled):
         for dn in self.task.output.values():
             dn.unlock_edit()
 
-    @classmethod
-    def _to_model(cls, entity) -> _JobModel:
-        return _JobModel(
-            entity.id,
-            entity._task.id,
-            entity._status,
-            entity._force,
-            entity.submit_id,
-            entity._creation_date.isoformat(),
-            cls._serialize_subscribers(entity._subscribers),
-            entity._stacktrace,
-            version=entity._version,
-        )
-
-    @classmethod
-    def _from_model(cls, model: _JobModel):
-        from ..task._task_manager_factory import _TaskManagerFactory
-
-        task_manager = _TaskManagerFactory._build_manager()
-        task_repository = task_manager._repository
-
-        job = Job(
-            id=model.id, task=task_repository._load(model.task_id), submit_id=model.submit_id, version=model.version
-        )
-
-        job.status = model.status  # type: ignore
-        job.force = model.force  # type: ignore
-        job.creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
-        for it in model.subscribers:
-            try:
-                # Migrate from taipy-core 2.2 to taipy-core 2.3
-                fct_module, fct_name = _migrate_subscriber(it.get("fct_module"), it.get("fct_name"))
-                job._subscribers.append(_load_fct(fct_module, fct_name))  # type:ignore
-            except AttributeError:
-                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
-        job._stacktrace = model.stacktrace
-
-        return job
-
     @staticmethod
     def _serialize_subscribers(subscribers: List) -> List:
         return _fcts_to_dict(subscribers)

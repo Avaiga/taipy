@@ -17,8 +17,8 @@ from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table, Unique
 
 from taipy.config.common.scope import Scope
 
-from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import _SQLBaseModel, mapper_registry
+from .._repository._base_taipy_model import _BaseModel
+from .._repository.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from ..common._warnings import _warn_deprecated
 from .data_node_id import Edit

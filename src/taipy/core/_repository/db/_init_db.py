@@ -25,13 +25,13 @@ def run_once(fn):
 
 @run_once
 def init_db() -> None:
-    from .....core._version._version_model import _VersionModel
-    from .....core.cycle._cycle_model import _CycleModel
-    from .....core.data._data_model import _DataNodeModel
-    from .....core.job._job_model import _JobModel
-    from .....core.pipeline._pipeline_model import _PipelineModel
-    from .....core.scenario._scenario_model import _ScenarioModel
-    from .....core.task._task_model import _TaskModel
+    from ....core._version._version_model import _VersionModel
+    from ....core.cycle._cycle_model import _CycleModel
+    from ....core.data._data_model import _DataNodeModel
+    from ....core.job._job_model import _JobModel
+    from ....core.pipeline._pipeline_model import _PipelineModel
+    from ....core.scenario._scenario_model import _ScenarioModel
+    from ....core.task._task_model import _TaskModel
 
     _CycleModel.__table__.create(bind=engine, checkfirst=True)
     _DataNodeModel.__table__.create(bind=engine, checkfirst=True)

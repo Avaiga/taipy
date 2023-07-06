@@ -390,40 +390,6 @@ class Scenario(_Entity, _Submittable, _Labeled):
             pipelines[p.config_id] = p
         return pipelines
 
-    @classmethod
-    def _to_model(cls, entity) -> _ScenarioModel:
-        return _ScenarioModel(
-            id=entity.id,
-            config_id=entity.config_id,
-            pipelines=cls.__to_pipeline_ids(entity._pipelines),
-            properties=entity._properties.data,
-            creation_date=entity._creation_date.isoformat(),
-            primary_scenario=entity._primary_scenario,
-            subscribers=_utils._fcts_to_dict(entity._subscribers),
-            tags=list(entity._tags),
-            version=entity._version,
-            cycle=cls.__to_cycle_id(entity._cycle),
-        )
-
-    @classmethod
-    def _from_model(cls, model: _ScenarioModel):
-        scenario = Scenario(
-            scenario_id=model.id,
-            config_id=model.config_id,
-            pipelines=model.pipelines,
-            properties=model.properties,
-            creation_date=datetime.fromisoformat(model.creation_date),
-            is_primary=model.primary_scenario,
-            tags=set(model.tags),
-            cycle=Scenario.__to_cycle(model.cycle),
-            subscribers=[
-                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
-                for it in model.subscribers
-            ],
-            version=model.version,
-        )
-        return _migrate_entity(scenario)
-
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:
         return [p.id if isinstance(p, Pipeline) else p for p in pipelines]

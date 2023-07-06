@@ -20,7 +20,7 @@ import pytest
 from sqlalchemy import create_engine, text
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository._v2.db._sql_session import engine
+from src.taipy.core._repository.db import engine
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core._version._version_model import _VersionModel

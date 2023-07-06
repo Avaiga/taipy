@@ -11,6 +11,7 @@
 
 from datetime import timedelta
 from time import sleep
+from typing import Union
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -236,7 +237,9 @@ def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     _OrchestratorFactory._build_dispatcher()
     _TaskManager._set(task)
     _JobManager._set(job)
-    dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
+    dispatcher: Union[_StandaloneJobDispatcher, _DevelopmentJobDispatcher] = _StandaloneJobDispatcher(
+        _OrchestratorFactory._orchestrator
+    )
     if mode == JobConfig._DEVELOPMENT_MODE:
         dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
     dispatcher._dispatch(job)
