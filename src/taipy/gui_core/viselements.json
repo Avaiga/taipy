@@ -61,21 +61,6 @@
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If True, a pin is shown on each item of the selector and allows to restrict the numnber of displayed items."
-                    },
-                    {
-                        "name": "on_create",
-                        "type": "Callback",
-                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>scenario (<code>Scenario^</code>): the created scenario.</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "scenario",
-                                "Scenario"
-                            ]
-                        ]
                     }
                 ]
             }
@@ -158,29 +143,6 @@
                         "type": "bool",
                         "default_value": "True",
                         "doc": "If False, the buttons to submit scenario pipelines are not visible."
-                    },
-                    {
-                        "name": "on_execution_end",
-                        "type": "Callback",
-                        "doc": "The name of a function that is triggered when the submission ends.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>status (bool): False if the submission didn't end well..</li>\n<li>entity (<code>Scenario^|Pipeline^</code>): the entity source of the submission.</li>\n<li>jobs (<code>list(Job^)</code>): the result of the submission.</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "status",
-                                "bool"
-                            ],
-                            [
-                                "entity",
-                                "Scenario | Pipeline"
-                            ],
-                            [
-                                "jobs",
-                                "list[Job]"
-                            ]
-                        ]
                     }
                 ]
             }

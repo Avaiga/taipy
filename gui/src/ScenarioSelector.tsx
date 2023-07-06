@@ -82,7 +82,6 @@ interface ScenarioSelectorProps {
     className?: string;
     dynamicClassName?: string;
     showPins?: boolean;
-    onCreate?: string;
 }
 
 interface ScenarioEditDialogProps {
@@ -435,7 +434,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, ...values, {create_action: props.onCreate, context: module}));
+            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, ...values));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 const lovVar = getUpdateVar(props.updateVars, "scenarios");
@@ -453,7 +452,6 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             props.onChange,
             props.updateVarName,
             props.updateVars,
-            props.onCreate
         ]
     );
 

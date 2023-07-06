@@ -35,8 +35,7 @@ from taipy.core import submit as core_submit
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
-from taipy.gui import Gui, State, invoke_long_callback
-from taipy.gui._warnings import _warn
+from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
@@ -145,8 +144,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
     __PROP_SCENARIO_TAGS = "tags"
     __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_ENTITY_NAME)
     __ACTION = "action"
-    __CONTEXT = "context"
-    __CREATE_ACTION = "create_action"
     _CORE_CHANGED_NAME = "core_changed"
     _SCENARIO_SELECTOR_ERROR_VAR = "gui_core_sc_error"
     _SCENARIO_SELECTOR_ID_VAR = "gui_core_sc_id"
@@ -247,21 +244,17 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if (
             args is None
             or not isinstance(args, list)
-            or len(args) < 4
+            or len(args) < 3
             or not isinstance(args[0], bool)
             or not isinstance(args[1], bool)
             or not isinstance(args[2], dict)
-            or not isinstance(args[3], dict)
         ):
             return
         update = args[0]
         delete = args[1]
         data = args[2]
-        action_data = args[3]
         scenario = None
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
-        user_action = None
-        module_context = action_data.get(_GuiCoreContext.__CONTEXT)
         if update:
             scenario_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
             if delete:
@@ -285,7 +278,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return
             try:
                 scenario = create_scenario(scenario_config, date, name)
-                user_action = action_data.get(_GuiCoreContext.__CREATE_ACTION)
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
@@ -304,17 +296,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, "")
                     except Exception as e:
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
-        if user_action:
-            gui: Gui = state._gui
-            user_fn = gui._get_user_function(user_action)
-            if callable(user_fn):
-                try:
-                    if module_context is not None:
-                        gui._set_locals_context(module_context)
-                    gui._call_function_with_state(user_fn, [scenario])
-                except Exception as e:  # pragma: no cover
-                    if not gui._call_on_exception(user_fn.__name__, e):
-                        _warn(f"invoke_callback(): Exception raised in '{user_fn.__name__}()':\n{e}")
 
     def edit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -353,27 +334,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
 
-    def submit_status(
-        self,
-        state: State,
-        status: bool,
-        entity_id: str,
-        user_action: t.Optional[str] = None,
-        module_context: t.Optional[str] = None,
-        submit_return: t.Optional[t.Union[Job, t.List[Job]]] = None,
-    ):
-        if user_action:
-            gui: Gui = state._gui
-            user_fn = gui._get_user_function(user_action)
-            if callable(user_fn):
-                try:
-                    if module_context is not None:
-                        gui._set_locals_context(module_context)
-                    gui._call_function_with_state(user_fn, [status, core_get(entity_id), submit_return])
-                except Exception as e:  # pragma: no cover
-                    if not gui._call_on_exception(user_fn.__name__, e):
-                        _warn(f"invoke_callback(): Exception raised in '{user_fn.__name__}()':\n{e}")
-
     def submit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
@@ -383,13 +343,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity = core_get(entity_id)
         if entity:
             try:
-                invoke_long_callback(
-                    state,
-                    core_submit,
-                    [entity, False, True],
-                    self.submit_status,
-                    [entity.id, data.get(_GuiCoreContext.__ACTION), data.get(_GuiCoreContext.__CONTEXT)],
-                )
+                core_submit(entity)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
@@ -494,7 +448,6 @@ class _GuiCore(ElementLibrary):
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, False),
-                "on_create": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
@@ -527,7 +480,6 @@ class _GuiCore(ElementLibrary):
                 "show_pipelines": ElementProperty(PropertyType.boolean, True),
                 "show_submit_pipelines": ElementProperty(PropertyType.boolean, True),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
-                "on_execution_end": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_entity}}"),
