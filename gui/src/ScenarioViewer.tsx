@@ -74,7 +74,7 @@ interface ScenarioViewerProps {
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
-    onSubmitEnd?: string;
+    onExecutionEnd?: string;
 }
 
 interface PipelinesRowProps {
@@ -313,19 +313,19 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // submits
     const submitPipeline = useCallback(
         (pipelineId: string) => {
-            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: pipelineId, action: props.onSubmitEnd }));
+            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: pipelineId, action: props.onExecutionEnd, context: module }));
         },
-        [props.onSubmit, id, dispatch, module, props.onSubmitEnd]
+        [props.onSubmit, id, dispatch, module, props.onExecutionEnd]
     );
 
     const submitScenario = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (isScenario) {
-                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scId, action: props.onSubmitEnd, context: module }));
+                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scId, action: props.onExecutionEnd, context: module }));
             }
         },
-        [isScenario, props.onSubmit, id, scId, dispatch, module, props.onSubmitEnd]
+        [isScenario, props.onSubmit, id, scId, dispatch, module, props.onExecutionEnd]
     );
 
     // focus

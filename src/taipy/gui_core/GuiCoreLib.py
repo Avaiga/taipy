@@ -527,7 +527,7 @@ class _GuiCore(ElementLibrary):
                 "show_pipelines": ElementProperty(PropertyType.boolean, True),
                 "show_submit_pipelines": ElementProperty(PropertyType.boolean, True),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
-                "on_submit_end": ElementProperty(PropertyType.function),
+                "on_execution_end": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_entity}}"),

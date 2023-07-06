@@ -160,7 +160,7 @@
                         "doc": "If False, the buttons to submit scenario pipelines are not visible."
                     },
                     {
-                        "name": "on_submit_end",
+                        "name": "on_execution_end",
                         "type": "Callback",
                         "doc": "The name of a function that is triggered when the submission ends.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>status (bool): False if the submission didn't end well..</li>\n<li>entity (<code>Scenario^|Pipeline^</code>): the entity source of the submission.</li>\n<li>jobs (<code>list(Job^)</code>): the result of the submission.</li>\n</ul>",
                         "signature": [
