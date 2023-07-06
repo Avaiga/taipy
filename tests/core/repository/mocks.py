@@ -12,7 +12,7 @@
 import dataclasses
 import pathlib
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from sqlalchemy import Column, String, Table, create_engine
 from sqlalchemy.orm import declarative_base, registry, sessionmaker
@@ -24,19 +24,24 @@ from src.taipy.core._repository._v2._sql_repository import _SQLRepository as _SQ
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
 
-Base = declarative_base()
+
+class Base:
+    __allow_unmapped__ = True
+
+
+Base = declarative_base(cls=Base)  # type: ignore
 mapper_registry = registry()
 
 
 @dataclass
 class MockObj:
-    def __init__(self, id: str, name: str, version: str = None) -> None:
+    def __init__(self, id: str, name: str, version: Optional[str] = None) -> None:
         self.id = id
         self.name = name
         if version:
-            self.version = version
+            self._version = version
         else:
-            self.version = _VersionManager._get_latest_version()
+            self._version = _VersionManager._get_latest_version()
 
 
 @dataclass
@@ -64,13 +69,13 @@ class MockModel(Base):  # type: ignore
 
     @classmethod
     def _from_entity(cls, entity: MockObj):
-        return MockModel(id=entity.id, name=entity.name, version=entity.version)
+        return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
 
 class MockConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, entity):
-        return MockModel(id=entity.id, name=entity.name, version=entity.version)
+        return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
     @classmethod
     def _model_to_entity(cls, model):
@@ -83,7 +88,7 @@ class MockFSRepository(_FileSystemRepository):
         super().__init__(**kwargs)
 
     def _to_model(self, obj: MockObj):
-        return MockModel(obj.id, obj.name, obj.version)
+        return MockModel(obj.id, obj.name, obj._version)
 
     def _from_model(self, model: MockModel):
         return MockObj(model.id, model.name, model.version)
@@ -108,7 +113,7 @@ class MockSQLRepository(_SQLRepository):
         super().__init__(**kwargs)
 
     def _to_model(self, obj: MockObj):
-        return MockModel(obj.id, obj.name, obj.version)
+        return MockModel(obj.id, obj.name, obj._version)
 
     def _from_model(self, model: MockModel):
         return MockObj(model.id, model.name, model.version)

@@ -32,9 +32,9 @@ requirements = [
     "openpyxl>=3.0.7,<3.1",
     "modin[dask]>=0.16.2,<1.0",
     "pymongo>=4.2.0,<5.0",
-    "sqlalchemy>=1.4,<2.0",
+    "sqlalchemy>=2.0.16,<2.1",
     "toml>=0.10,<0.11",
-    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@dev/3.0",
+    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
 ]
 
 test_requirements = ["pytest>=3.8"]

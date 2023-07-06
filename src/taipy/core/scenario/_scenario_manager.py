@@ -105,7 +105,6 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         creation_date: Optional[datetime.datetime] = None,
         name: Optional[str] = None,
     ) -> Scenario:
-        config = Config.scenarios[config.id]
         scenario_id = Scenario._new_id(str(config.id))
         cycle = (
             _CycleManagerFactory._build_manager()._get_or_create(config.frequency, creation_date)
@@ -114,9 +113,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         )
 
         pipelines = [
-            _PipelineManagerFactory._build_manager()._get_or_create(
-                Config.pipelines[p_config.id], cycle.id if cycle else None, scenario_id
-            )
+            _PipelineManagerFactory._build_manager()._get_or_create(p_config, cycle.id if cycle else None, scenario_id)
             for p_config in config.pipeline_configs
         ]
 
@@ -147,6 +144,12 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         pipeline_manager = _PipelineManagerFactory._build_manager()
         for i in pipelines:
             pipeline_manager._set(i)
+
+    @classmethod
+    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+        if isinstance(scenario, str):
+            scenario = cls._get(scenario)
+        return isinstance(scenario, Scenario)
 
     @classmethod
     def _submit(
@@ -217,10 +220,19 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return primary_scenarios
 
     @classmethod
+    def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+        if isinstance(scenario, str):
+            scenario = cls._get(scenario)
+        if scenario and not scenario.is_primary and scenario.cycle:
+            return True
+        return False
+
+    @classmethod
     def _set_primary(cls, scenario: Scenario):
         if scenario.cycle:
             primary_scenario = cls._get_primary(scenario.cycle)
-            if primary_scenario:
+            # To prevent SAME scenario updating out of Context Manager
+            if primary_scenario and primary_scenario != scenario:
                 primary_scenario.is_primary = False  # type: ignore
             scenario.is_primary = True  # type: ignore
         else:

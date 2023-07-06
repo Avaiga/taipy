@@ -31,10 +31,10 @@ def _migrate_entity(entity):
     if (
         latest_version := _VersionManagerFactory._build_manager()._get_latest_version()
     ) in _VersionManagerFactory._build_manager()._get_production_versions():
-        with _Reloader():
-            if migration_fcts := MigrationConfig._get_migration_fcts_to_latest(entity.version, entity.config_id):
+        if migration_fcts := MigrationConfig._get_migration_fcts_to_latest(entity._version, entity.config_id):
+            with _Reloader():
                 for fct in migration_fcts:
                     entity = fct(entity)
-                entity.version = latest_version
+                entity._version = latest_version
 
     return entity

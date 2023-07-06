@@ -2,9 +2,9 @@ name: Python tests
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, dev/*, release/* ]
   pull_request:
-    branches: [ 'develop', 'dev/3.0' ]
+    branches: [ develop , dev/*, release/* ]
 
 jobs:
   backend:

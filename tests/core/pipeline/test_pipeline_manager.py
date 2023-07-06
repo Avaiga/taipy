@@ -120,6 +120,17 @@ def test_set_and_get_pipeline():
     assert _TaskManager._get(task_2.id).id == task_2.id
 
 
+def test_is_submittable():
+    assert len(_PipelineManager._get_all()) == 0
+    pipeline_config = Config.configure_pipeline("pipeline", [])
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+
+    assert len(_PipelineManager._get_all()) == 1
+    assert _PipelineManager._is_submittable(pipeline)
+    assert _PipelineManager._is_submittable(pipeline.id)
+    assert not _PipelineManager._is_submittable("Pipeline_temp")
+
+
 def test_submit():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
@@ -157,7 +168,7 @@ def test_submit():
             force: bool = False,
         ):
             cls.submit_calls.append(task)
-            return None
+            return None  # type: ignore
 
     with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         # pipeline does not exists. We expect an exception to be raised

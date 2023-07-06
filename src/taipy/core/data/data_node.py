@@ -225,10 +225,6 @@ class DataNode(_Entity, _Labeled):
     def version(self):
         return self._version
 
-    @version.setter
-    def version(self, val):
-        self._version = val
-
     @property
     def cacheable(self):
         """Deprecated. Use `skippable` attribute of a `Task^` instead."""
@@ -270,8 +266,7 @@ class DataNode(_Entity, _Labeled):
     @property
     def properties(self):
         """Dictionary of custom properties."""
-        r = _Reloader()._reload(self._MANAGER_NAME, self)
-        self._properties = r._properties
+        self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     def __eq__(self, other):

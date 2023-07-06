@@ -127,7 +127,7 @@ class TaskConfig(Section):
     def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):
         as_dict.pop(cls._ID_KEY, id)
         funct = as_dict.pop(cls._FUNCTION, None)
-        dn_configs = config._sections[DataNodeConfig.name]  # type: ignore
+        dn_configs = config._sections.get(DataNodeConfig.name, None) or []  # type: ignore
         inputs = []
         if inputs_as_str := as_dict.pop(cls._INPUT_KEY, None):
             inputs = [dn_configs[dn_id] for dn_id in inputs_as_str if dn_id in dn_configs]

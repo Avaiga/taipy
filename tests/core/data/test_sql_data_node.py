@@ -277,5 +277,4 @@ class TestSQLDataNode:
 
         dn = SQLDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
         data = dn.read()
-
         assert data.equals(pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]))
