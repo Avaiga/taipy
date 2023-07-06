@@ -28,12 +28,10 @@ from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
-from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import NoData
 from ..job.job_id import JobId
-from ._data_model import _DataNodeModel
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator, Operator

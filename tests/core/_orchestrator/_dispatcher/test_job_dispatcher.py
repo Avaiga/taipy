@@ -92,7 +92,7 @@ def test_can_execute_2_workers():
         id=task_id,
     )
     job_id = JobId("id1")
-    job = Job(job_id, task, "submit_id")
+    job = Job(job_id, task, "submit_id", task.id)
 
     dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
 
@@ -113,7 +113,7 @@ def test_can_execute_synchronous():
     task_id = TaskId("task_id1")
     task = Task(config_id="name", properties={}, input=[], function=print, output=[], id=task_id)
     job_id = JobId("id1")
-    job = Job(job_id, task, "submit_id")
+    job = Job(job_id, task, "submit_id", task.id)
 
     dispatcher = _OrchestratorFactory._dispatcher
 
@@ -129,7 +129,7 @@ def test_exception_in_user_function():
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
     task = Task(config_id="name", properties={}, input=[], function=_error, output=[], id=task_id)
-    job = Job(job_id, task, "submit_id")
+    job = Job(job_id, task, "submit_id", task.id)
 
     dispatcher = _OrchestratorFactory._dispatcher
     dispatcher._dispatch(job)
@@ -149,7 +149,7 @@ def test_exception_in_writing_data():
     output._is_in_cache = False
     output.write.side_effect = ValueError()
     task = Task(config_id="name", properties={}, input=[], function=print, output=[output], id=task_id)
-    job = Job(job_id, task, "submit_id")
+    job = Job(job_id, task, "submit_id", task.id)
 
     dispatcher = _OrchestratorFactory._dispatcher
 

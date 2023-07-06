@@ -21,11 +21,8 @@ from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._utils import _fcts_to_dict, _load_fct
-from ..exceptions.exceptions import InvalidSubscriber
+from ..common._utils import _fcts_to_dict
 from ..task.task import Task
-from ._job_model import _JobModel
-from ._utils import _migrate_subscriber
 from .job_id import JobId
 from .status import Status
 
@@ -60,13 +57,14 @@ class Job(_Entity, _Labeled):
     _MANAGER_NAME = "job"
     _ID_PREFIX = "JOB"
 
-    def __init__(self, id: JobId, task: Task, submit_id: str, force=False, version=None):
+    def __init__(self, id: JobId, task: Task, submit_id: str, submit_entity_id: str, force=False, version=None):
         self.id = id
         self._task = task
         self._force = force
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
         self._submit_id: str = submit_id
+        self._submit_entity_id: str = submit_entity_id
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
@@ -99,6 +97,16 @@ class Job(_Entity, _Labeled):
     @property
     def submit_id(self):
         return self._submit_id
+
+    @property
+    def submit_entity_id(self):
+        return self._submit_entity_id
+
+    @property  # type: ignore
+    def submit_entity(self):
+        from ..taipy import get as tp_get
+
+        return tp_get(self._submit_entity_id)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

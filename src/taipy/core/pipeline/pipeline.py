@@ -12,7 +12,6 @@
 from __future__ import annotations
 
 import uuid
-from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
@@ -25,9 +24,7 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._entity._submittable import _Submittable
-from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common import _utils
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..common._warnings import _warn_deprecated
@@ -36,7 +33,6 @@ from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
 from ..task.task import Task
 from ..task.task_id import TaskId
-from ._pipeline_model import _PipelineModel
 from .pipeline_id import PipelineId
 
 

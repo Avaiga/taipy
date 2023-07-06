@@ -24,9 +24,7 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._entity._submittable import _Submittable
-from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common import _utils
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -39,7 +37,6 @@ from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
 from ..pipeline.pipeline_id import PipelineId
 from ..task.task import Task
-from ._scenario_model import _ScenarioModel
 from .scenario_id import ScenarioId
 
 

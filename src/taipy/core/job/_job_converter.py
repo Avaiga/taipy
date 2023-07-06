@@ -30,6 +30,7 @@ class _JobConverter(_AbstractConverter):
             job._status,
             job._force,
             job.submit_id,
+            job.submit_entity_id,
             job._creation_date.isoformat(),
             cls._serialize_subscribers(job._subscribers),
             job._stacktrace,
@@ -42,7 +43,11 @@ class _JobConverter(_AbstractConverter):
         task_repository = task_manager._repository
 
         job = Job(
-            id=model.id, task=task_repository._load(model.task_id), submit_id=model.submit_id, version=model.version
+            id=model.id,
+            task=task_repository._load(model.task_id),
+            submit_id=model.submit_id,
+            submit_entity_id=model.submit_entity_id,
+            version=model.version,
         )
 
         job._status = model.status  # type: ignore

@@ -16,7 +16,6 @@ from taipy.config import Config
 from taipy.config._config import _Config
 
 from .._entity._entity import _Entity
-from ._version_model import _VersionModel
 
 
 class _Version(_Entity):

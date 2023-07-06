@@ -95,7 +95,7 @@ class TestTaipy:
         scenario = Scenario("scenario_config_id", [], {})
         pipeline = Pipeline("pipeline_config_id", {}, [])
         task = Task("task_config_id", {}, print)
-        job = Job("job_id", task, "submit_id")
+        job = Job("job_id", task, "submit_id", scenario.id)
         dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 
         _CycleManager._set(cycle)
@@ -303,15 +303,15 @@ class TestTaipy:
 
     def test_delete_job(self, task):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, False)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, True)
             mck.assert_called_once_with(job, True)
 

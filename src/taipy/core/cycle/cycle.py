@@ -21,7 +21,6 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from ..exceptions.exceptions import _SuspiciousFileOperation
-from ._cycle_model import _CycleModel
 from .cycle_id import CycleId
 
 

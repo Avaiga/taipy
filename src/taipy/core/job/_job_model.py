@@ -31,6 +31,7 @@ class _JobModel(_BaseModel):
         Column("status", Enum(Status)),
         Column("force", Boolean),
         Column("submit_id", String),
+        Column("submit_entity_id", String),
         Column("creation_date", String),
         Column("subscribers", JSON),
         Column("stacktrace", JSON),
@@ -41,6 +42,7 @@ class _JobModel(_BaseModel):
     status: Status
     force: bool
     submit_id: str
+    submit_entity_id: str
     creation_date: str
     subscribers: List[Dict]
     stacktrace: List[str]
@@ -54,6 +56,7 @@ class _JobModel(_BaseModel):
             status=Status._from_repr(data["status"]),
             force=data["force"],
             submit_id=data["submit_id"],
+            submit_entity_id=data["submit_entity_id"],
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
             stacktrace=data["stacktrace"],
