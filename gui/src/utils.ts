@@ -104,6 +104,29 @@ export const ParentItemSx = {
     },
 };
 
+export const tinyIconButtonSx = {
+    position: "relative",
+    display: "flex",
+    width: "1rem",
+    height: "1rem",
+    fontSize: "0.750rem",
+
+    "&::before": {
+        content: "''",
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%,-50%)",
+        width: "2rem",
+        height: "2rem",
+    },
+
+    "& .MuiSvgIcon-root": {
+        color: "inherit",
+        fontSize: "inherit",
+    },
+};
+
 export const useClassNames = (libClassName?: string, dynamicClassName?: string, className?: string) =>
     ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();
 

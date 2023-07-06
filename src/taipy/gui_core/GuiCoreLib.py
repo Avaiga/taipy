@@ -50,6 +50,7 @@ class _GCDoNotUpdate(_DoNotUpdate):
 
 
 Scenario.__bases__ += (_GCDoNotUpdate,)
+Pipeline.__bases__ += (_GCDoNotUpdate,)
 DataNode.__bases__ += (_GCDoNotUpdate,)
 Job.__bases__ += (_GCDoNotUpdate,)
 
@@ -142,7 +143,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     __PROP_SCENARIO_PRIMARY = "primary"
     __PROP_SCENARIO_TAGS = "tags"
     __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_ENTITY_NAME)
-    __JOB_ACTION = "action"
+    __ACTION = "action"
     _CORE_CHANGED_NAME = "core_changed"
     _SCENARIO_SELECTOR_ERROR_VAR = "gui_core_sc_error"
     _SCENARIO_SELECTOR_ID_VAR = "gui_core_sc_id"
@@ -238,7 +239,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items() if id != "default"]
             return self.scenario_configs
 
-    def crud_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):  # noqa: C901
+    def crud_scenario(self, state: State, id: str, user_action: str, payload: t.Dict[str, str]):  # noqa: C901
         args = payload.get("args")
         if (
             args is None
@@ -409,7 +410,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         job_ids = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        job_action = data.get(_GuiCoreContext.__JOB_ACTION)
+        job_action = data.get(_GuiCoreContext.__ACTION)
         if job_action and isinstance(job_ids, list):
             errs = []
             if job_action == "delete":
@@ -439,13 +440,14 @@ class _GuiCore(ElementLibrary):
             "value",
             {
                 "id": ElementProperty(PropertyType.string),
-                "show_add_button": ElementProperty(PropertyType.dynamic_boolean, True),
-                "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
-                "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
+                "show_add_button": ElementProperty(PropertyType.boolean, True),
+                "display_cycles": ElementProperty(PropertyType.boolean, True),
+                "show_primary_flag": ElementProperty(PropertyType.boolean, True),
                 "value": ElementProperty(PropertyType.lov_value),
                 "on_change": ElementProperty(PropertyType.function),
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
+                "show_pins": ElementProperty(PropertyType.boolean, False),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
@@ -506,12 +508,13 @@ class _GuiCore(ElementLibrary):
             "value",
             {
                 "id": ElementProperty(PropertyType.string),
-                "display_cycles": ElementProperty(PropertyType.dynamic_boolean, True),
-                "show_primary_flag": ElementProperty(PropertyType.dynamic_boolean, True),
+                "display_cycles": ElementProperty(PropertyType.boolean, True),
+                "show_primary_flag": ElementProperty(PropertyType.boolean, True),
                 "value": ElementProperty(PropertyType.lov_value),
                 "on_change": ElementProperty(PropertyType.function),
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
+                "show_pins": ElementProperty(PropertyType.boolean, True),
             },
             inner_properties={
                 "datanodes": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_datanodes_tree()}}"),

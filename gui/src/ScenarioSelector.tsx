@@ -11,9 +11,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Theme, alpha } from "@mui/material";
-import Badge, { BadgeOrigin } from "@mui/material/Badge";
+
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -30,41 +30,16 @@ import Dialog from "@mui/material/Dialog";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { ChevronRight, ExpandMore, FlagOutlined, Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
-import TreeItem from "@mui/lab/TreeItem";
-import TreeView from "@mui/lab/TreeView";
+import { Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
-import {
-    useDynamicProperty,
-    useDispatch,
-    useModule,
-    createRequestUpdateAction,
-    getUpdateVar,
-    createSendActionNameAction,
-    useDispatchRequestUpdateOnFirstRender,
-    createSendUpdateAction,
-} from "taipy-gui";
+import { useDispatch, useModule, createSendActionNameAction, getUpdateVar, createSendUpdateAction } from "taipy-gui";
 
-import { Cycle, Scenario } from "./icons";
 import ConfirmDialog from "./utils/ConfirmDialog";
-import {
-    BadgePos,
-    BadgeSx,
-    BaseTreeViewSx,
-    FlagSx,
-    MainBoxSx,
-    ParentItemSx,
-    ScFProps,
-    ScenarioFull,
-    useClassNames,
-} from "./utils";
-
-enum NodeType {
-    CYCLE = 0,
-    SCENARIO = 1,
-}
+import { MainBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
+import CoreSelector, { EditProps } from "./CoreSelector";
+import { NodeType } from "./utils/types";
 
 type Property = {
     id: string;
@@ -86,11 +61,8 @@ interface ScenarioDict {
 
 interface ScenarioSelectorProps {
     id?: string;
-    defaultShowAddButton: boolean;
     showAddButton?: boolean;
-    defaultDisplayCycles: boolean;
     displayCycles?: boolean;
-    defaultShowPrimaryFlag: boolean;
     showPrimaryFlag?: boolean;
     updateVarName?: string;
     scenarios?: Cycles | Scenarios;
@@ -109,19 +81,7 @@ interface ScenarioSelectorProps {
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
-}
-
-interface ScenarioNodesProps {
-    scenarios?: Scenarios | Scenario;
-    showPrimary?: boolean;
-    openEditDialog: (e: React.MouseEvent<HTMLElement>) => void;
-}
-
-interface ScenarioItemProps {
-    scenarioId?: string;
-    label?: string;
-    isPrimary?: boolean;
-    openEditDialog: (e: React.MouseEvent<HTMLElement>) => void;
+    showPins?: boolean;
 }
 
 interface ScenarioEditDialogProps {
@@ -140,36 +100,7 @@ const emptyScenario: ScenarioDict = {
     properties: [],
 };
 
-const tinyIconButtonSx = {
-    position: "relative",
-    display: "flex",
-    width: "1rem",
-    height: "1rem",
-    fontSize: "0.750rem",
-
-    "&::before": {
-        content: "''",
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%,-50%)",
-        width: "2rem",
-        height: "2rem",
-    },
-
-    "& .MuiSvgIcon-root": {
-        color: "inherit",
-        fontSize: "inherit",
-    },
-};
-
 const ActionContentSx = { mr: 2, ml: 2 };
-
-const treeItemLabelSx = {
-    display: "flex",
-    alignItems: "center",
-    gap: 1,
-};
 
 const DialogContentSx = {
     maxHeight: "calc(100vh - 256px)",
@@ -206,61 +137,6 @@ const tinyEditIconButtonSx = (theme: Theme) => ({
         color: "primary.contrastText",
     },
 });
-
-const ScenarioItem = ({ scenarioId, label, isPrimary, openEditDialog }: ScenarioItemProps) => (
-    <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-        <Grid item xs sx={treeItemLabelSx}>
-            {isPrimary ? (
-                <Badge
-                    badgeContent={<FlagOutlined sx={FlagSx} />}
-                    color="primary"
-                    anchorOrigin={BadgePos as BadgeOrigin}
-                    sx={BadgeSx}
-                >
-                    <Scenario fontSize="small" color="primary" />
-                </Badge>
-            ) : (
-                <Scenario fontSize="small" color="primary" />
-            )}
-            {label}
-        </Grid>
-        <Grid item xs="auto">
-            <IconButton data-id={scenarioId} onClick={openEditDialog} sx={tinyEditIconButtonSx}>
-                <EditOutlined />
-            </IconButton>
-        </Grid>
-    </Grid>
-);
-
-const ScenarioNodes = ({ scenarios = [], showPrimary = true, openEditDialog }: ScenarioNodesProps) => {
-    const sc =
-        Array.isArray(scenarios) && scenarios.length
-            ? Array.isArray(scenarios[0])
-                ? (scenarios as Scenarios)
-                : [scenarios as Scenario]
-            : [];
-    return (
-        <>
-            {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                sc.map(([id, label, _, _nodeType, primary]) => (
-                    <TreeItem
-                        key={id}
-                        nodeId={id}
-                        label={
-                            <ScenarioItem
-                                scenarioId={id}
-                                label={label}
-                                isPrimary={showPrimary && primary}
-                                openEditDialog={openEditDialog}
-                            />
-                        }
-                    />
-                ))
-            }
-        </>
-    );
-};
 
 const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close }: ScenarioEditDialogProps) => {
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -524,21 +400,14 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-    const { id = "", scenarios = [], propagate = true, defaultValue = "", value } = props;
+    const { showAddButton = true, propagate = true, showPins = false } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
-    const [selected, setSelected] = useState("");
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const dispatch = useDispatch();
     const module = useModule();
-
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
-
-    const showAddButton = useDynamicProperty(props.showAddButton, props.defaultShowAddButton, true);
-    const displayCycles = useDynamicProperty(props.displayCycles, props.defaultDisplayCycles, true);
-    const showPrimaryFlag = useDynamicProperty(props.showPrimaryFlag, props.defaultShowPrimaryFlag, true);
 
     const onDialogOpen = useCallback(() => {
         setOpen(true);
@@ -556,154 +425,61 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             const { id: scenId } = e.currentTarget?.dataset || {};
             scenId &&
                 props.onScenarioSelect &&
-                dispatch(createSendActionNameAction(id, module, props.onScenarioSelect, scenId));
+                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, scenId));
             setOpen(true);
             setActionEdit(true);
         },
-        [props.onScenarioSelect, id, dispatch, module]
+        [props.onScenarioSelect, props.id, dispatch, module]
     );
-
-    const onSelect = useCallback(
-        (e: React.SyntheticEvent, nodeId: string) => {
-            const { cycle = false } = (e?.currentTarget as HTMLElement)?.parentElement?.dataset || {};
-            const scenariosVar = getUpdateVar(props.updateVars, "scenarios");
-            dispatch(
-                createSendUpdateAction(
-                    props.updateVarName,
-                    cycle ? undefined : nodeId,
-                    module,
-                    props.onChange,
-                    propagate,
-                    scenariosVar
-                )
-            );
-            setSelected(nodeId);
-        },
-        [props.updateVarName, props.updateVars, props.onChange, propagate, dispatch, module]
-    );
-
-    const unselect = useCallback(() => {
-        if (selected) {
-            const scenariosVar = getUpdateVar(props.updateVars, "scenarios");
-            dispatch(
-                createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, scenariosVar)
-            );
-            setSelected("");
-        }
-    }, [props.updateVarName, props.updateVars, props.onChange, propagate, dispatch, module, selected]);
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values));
+            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, ...values));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
-                unselect();
+                const lovVar = getUpdateVar(props.updateVars, "scenarios");
+                dispatch(
+                    createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, lovVar)
+                );
             }
         },
-        [id, props.onScenarioCrud, dispatch, module, unselect]
+        [
+            props.id,
+            props.onScenarioCrud,
+            dispatch,
+            module,
+            propagate,
+            props.onChange,
+            props.updateVarName,
+            props.updateVars,
+        ]
     );
 
-    // Refresh on broadcast
-    useEffect(() => {
-        if (props.coreChanged?.scenario) {
-            const updateVar = getUpdateVar(props.updateVars, "scenarios");
-            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
-        }
-    }, [props.coreChanged, props.updateVars, module, dispatch, id]);
-
-    useEffect(() => {
-        if (value !== undefined && value !== null) {
-            setSelected(value);
-        } else if (defaultValue) {
-            try {
-                const parsedValue = JSON.parse(defaultValue);
-                if (Array.isArray(parsedValue)) {
-                    parsedValue.length && setSelected(parsedValue[0]);
-                } else {
-                    setSelected(parsedValue);
-                }
-            } catch {
-                setSelected(defaultValue);
-            }
-        } else if (value === null) {
-            setSelected("");
-        }
-    }, [defaultValue, value]);
-
-    useEffect(() => {
-        if (!scenarios.length) {
-            unselect();
-        }
-    }, [scenarios, unselect]);
-
-    const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
+    const EditScenario = useCallback(
+        (props: EditProps) => (
+            <IconButton data-id={props.id} onClick={openEditDialog} sx={tinyEditIconButtonSx}>
+                <EditOutlined />
+            </IconButton>
+        ),
+        [openEditDialog]
+    );
 
     return (
         <>
             <Box sx={MainBoxSx} id={props.id} className={className}>
-                <TreeView
-                    defaultCollapseIcon={<ExpandMore />}
-                    defaultExpandIcon={<ChevronRight />}
-                    sx={treeViewSx}
-                    onNodeSelect={onSelect}
-                    selected={selected}
-                >
-                    {scenarios
-                        ? scenarios.map((item) => {
-                              const [id, label, scenarios, nodeType] = item;
-                              return displayCycles ? (
-                                  nodeType === NodeType.CYCLE ? (
-                                      <TreeItem
-                                          key={id}
-                                          nodeId={id}
-                                          label={
-                                              <Box sx={treeItemLabelSx}>
-                                                  <Cycle fontSize="small" color="primary" />
-                                                  {label}
-                                              </Box>
-                                          }
-                                          sx={ParentItemSx}
-                                          data-cycle
-                                      >
-                                          <ScenarioNodes
-                                              scenarios={scenarios}
-                                              showPrimary={showPrimaryFlag}
-                                              openEditDialog={openEditDialog}
-                                          />
-                                      </TreeItem>
-                                  ) : (
-                                      <ScenarioNodes
-                                          key={id}
-                                          scenarios={item as Scenario}
-                                          showPrimary={showPrimaryFlag}
-                                          openEditDialog={openEditDialog}
-                                      />
-                                  )
-                              ) : nodeType === NodeType.SCENARIO ? (
-                                  <ScenarioNodes
-                                      key={id}
-                                      scenarios={item as Scenario}
-                                      showPrimary={showPrimaryFlag}
-                                      openEditDialog={openEditDialog}
-                                  />
-                              ) : (
-                                  <ScenarioNodes
-                                      key={id}
-                                      scenarios={scenarios}
-                                      showPrimary={showPrimaryFlag}
-                                      openEditDialog={openEditDialog}
-                                  />
-                              );
-                          })
-                        : null}
-                </TreeView>
-
+                <CoreSelector
+                    {...props}
+                    entities={props.scenarios}
+                    leafType={NodeType.SCENARIO}
+                    lovPropertyName="scenarios"
+                    editComponent={EditScenario}
+                    showPins={showPins}
+                />
                 {showAddButton ? (
                     <Button variant="outlined" onClick={onDialogOpen} fullWidth endIcon={<Add />}>
                         Add scenario
                     </Button>
                 ) : null}
-
                 <Box>{props.error}</Box>
             </Box>
 

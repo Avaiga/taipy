@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import createEngine, {
+import {
     DefaultLinkModel,
     DefaultNodeModel,
     DefaultPortModel,
@@ -28,26 +28,23 @@ import { TaipyNodeFactory, TaipyPortFactory } from "../projectstorm/factories";
 import { nodeTypes } from "./config";
 import { DisplayModel } from "./types";
 
-export const initDiagram = (): [DiagramEngine, DagreEngine, TaipyDiagramModel] => {
-    const engine = createEngine();
+export const createDagreEngine = () => new DagreEngine({
+    graph: {
+        rankdir: "LR",
+        ranker: "longest-path",
+        marginx: 25,
+        marginy: 25,
+    },
+    includeLinks: false,
+});
+
+export const initDiagram = (engine: DiagramEngine)  => {
     nodeTypes.forEach((nodeType) => engine.getNodeFactories().registerFactory(new TaipyNodeFactory(nodeType)));
     engine.getPortFactories().registerFactory(new TaipyPortFactory());
     const state = engine.getStateMachine().getCurrentState();
     if (state instanceof DefaultDiagramState) {
         state.dragNewLink.config.allowLooseLinks = false;
     }
-    const dagreEngine = new DagreEngine({
-        graph: {
-            rankdir: "LR",
-            ranker: "longest-path",
-            marginx: 25,
-            marginy: 25,
-        },
-        includeLinks: false,
-    });
-    const model = new TaipyDiagramModel();
-    engine.setModel(model);
-    return [engine, dagreEngine, model];
 };
 
 export const getModelLinks = (model: TaipyDiagramModel) => Object.values(model.getActiveLinkLayer().getLinks());
