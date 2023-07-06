@@ -22,10 +22,6 @@ from ._version_repository_interface import _VersionRepositoryInterface
 
 
 class _VersionFSRepository(_FileSystemRepository, _VersionRepositoryInterface):
-    _LATEST_VERSION_KEY = "latest_version"
-    _DEVELOPMENT_VERSION_KEY = "development_version"
-    _PRODUCTION_VERSION_KEY = "production_version"
-
     def __init__(self):
         super().__init__(model_type=_VersionModel, converter=_VersionConverter, dir_name="version")
 
