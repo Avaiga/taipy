@@ -36,10 +36,10 @@ from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State, invoke_long_callback
+from taipy.gui._warnings import _warn
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
-from taipy.gui._warnings import _warn
 
 from ..version import _get_version
 
@@ -316,7 +316,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if not gui._call_on_exception(user_fn.__name__, e):
                         _warn(f"invoke_callback(): Exception raised in '{user_fn.__name__}()':\n{e}")
 
-
     def edit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
@@ -361,7 +360,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity_id: str,
         user_action: t.Optional[str] = None,
         module_context: t.Optional[str] = None,
-        submit_return: t.Optional[t.Union[Job, t.List[Job]]] = None ,
+        submit_return: t.Optional[t.Union[Job, t.List[Job]]] = None,
     ):
         if user_action:
             gui: Gui = state._gui
