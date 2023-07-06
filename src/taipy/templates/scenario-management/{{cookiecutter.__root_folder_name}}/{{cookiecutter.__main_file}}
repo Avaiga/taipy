@@ -2,9 +2,8 @@ import taipy as tp
 from taipy import Core, Gui
 
 from config.config import configure
-from pages import scenario_page, manage_inputs_partial, manage_outputs_partial, write_data_nodes, custom_write_data_nodes
+from pages import scenario_page, manage_data_node_partials
 from pages.root import *
-
 
 
 def on_init(state):
@@ -12,15 +11,11 @@ def on_init(state):
 
 
 def on_change(state, var, val):
+    state['scenario'].on_change(state, var, val)
+
     if var == "selected_scenario" and val:
         state.selected_scenario = val #BUG
-        manage_inputs_partial(state)
-        manage_outputs_partial(state)
-        return
-
-    write_data_nodes(state, var, val)
-    custom_write_data_nodes(state, var, val)
-
+        state['scenario'].manage_data_node_partials(state) 
 
 
 pages = {"/": root,

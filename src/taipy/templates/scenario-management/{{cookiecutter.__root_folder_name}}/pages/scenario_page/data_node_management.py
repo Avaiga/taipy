@@ -15,6 +15,7 @@ def build_dn_list_partial(dns, dn_contents):
         partial_content += build_dn_partial(dn, dn_label, dn_content)
     return partial_content
 
+
 # build partial content for a specific data node
 def build_dn_partial(dn, dn_label, dn_content):
     partial_content = ""
