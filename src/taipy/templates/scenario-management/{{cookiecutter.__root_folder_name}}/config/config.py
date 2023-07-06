@@ -1,5 +1,4 @@
 from algos import clean_data
-
 from taipy import Config, Frequency, Scope
 
 
