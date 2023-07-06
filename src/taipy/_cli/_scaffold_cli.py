@@ -16,11 +16,9 @@ from cookiecutter.main import cookiecutter
 
 import taipy
 from taipy._cli._base_cli import _CLI
-from taipy.logger._taipy_logger import _TaipyLogger
 
 
 class _ScaffoldCLI:
-    __logger = _TaipyLogger._get_logger()
     __TAIPY_PATH = pathlib.Path(taipy.__file__).parent.resolve() / "templates"
 
     _TEMPLATE_MAP = {str(x.name): str(x) for x in __TAIPY_PATH.iterdir() if x.is_dir()}
@@ -41,5 +39,5 @@ class _ScaffoldCLI:
 
         if getattr(args, "which", None) == "create":
             application_path = cookiecutter(cls._TEMPLATE_MAP[args.template])
-            cls.__logger.info(f"Taipy application created at {application_path}")
+            print(f"New Taipy application is created at {application_path}")
             sys.exit(0)
