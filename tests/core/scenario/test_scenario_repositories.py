@@ -14,8 +14,8 @@ import os
 import pytest
 
 from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.scenario._scenario_fs_repository_v2 import _ScenarioFSRepository
-from src.taipy.core.scenario._scenario_sql_repository_v2 import _ScenarioSQLRepository
+from src.taipy.core.scenario._scenario_fs_repository import _ScenarioFSRepository
+from src.taipy.core.scenario._scenario_sql_repository import _ScenarioSQLRepository
 from src.taipy.core.scenario.scenario import Scenario, ScenarioId
 
 

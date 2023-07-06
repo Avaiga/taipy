@@ -16,7 +16,6 @@ from taipy.config import Config
 from taipy.config._config import _Config
 
 from .._entity._entity import _Entity
-from ._version_model import _VersionModel
 
 
 class _Version(_Entity):
@@ -30,15 +29,3 @@ class _Version(_Entity):
 
     def __is_config_eq(self, other):
         return Config._serializer._str(self.config) == Config._serializer._str(other.config)
-
-    @classmethod
-    def _to_model(cls, entity) -> _VersionModel:
-        return _VersionModel(
-            id=entity.id, config=Config._to_json(entity.config), creation_date=entity.creation_date.isoformat()
-        )
-
-    @classmethod
-    def _from_model(cls, model: _VersionModel):
-        version = _Version(id=model.id, config=Config._from_json(model.config))
-        version.creation_date = datetime.fromisoformat(model.creation_date)
-        return version

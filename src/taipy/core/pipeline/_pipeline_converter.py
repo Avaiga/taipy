@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 from collections import defaultdict
 
-from .._repository._v2._abstract_converter import _AbstractConverter
+from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
 from ..common import _utils
 from ..exceptions import NonExistingPipeline, NonExistingTask

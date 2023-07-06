@@ -21,11 +21,8 @@ from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._utils import _fcts_to_dict, _load_fct
-from ..exceptions.exceptions import InvalidSubscriber
+from ..common._utils import _fcts_to_dict
 from ..task.task import Task
-from ._job_model import _JobModel
-from ._utils import _migrate_subscriber
 from .job_id import JobId
 from .status import Status
 
@@ -324,50 +321,6 @@ class Job(_Entity, _Labeled):
     def _unlock_edit_on_outputs(self):
         for dn in self.task.output.values():
             dn.unlock_edit()
-
-    @classmethod
-    def _to_model(cls, entity) -> _JobModel:
-        return _JobModel(
-            entity.id,
-            entity._task.id,
-            entity._status,
-            entity._force,
-            entity.submit_id,
-            entity.submit_entity_id,
-            entity._creation_date.isoformat(),
-            cls._serialize_subscribers(entity._subscribers),
-            entity._stacktrace,
-            version=entity._version,
-        )
-
-    @classmethod
-    def _from_model(cls, model: _JobModel):
-        from ..task._task_manager_factory import _TaskManagerFactory
-
-        task_manager = _TaskManagerFactory._build_manager()
-        task_repository = task_manager._repository
-
-        job = Job(
-            id=model.id,
-            task=task_repository._load(model.task_id),
-            submit_id=model.submit_id,
-            submit_entity_id=model.submit_entity_id,
-            version=model.version,
-        )
-
-        job.status = model.status  # type: ignore
-        job.force = model.force  # type: ignore
-        job.creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
-        for it in model.subscribers:
-            try:
-                # Migrate from taipy-core 2.2 to taipy-core 2.3
-                fct_module, fct_name = _migrate_subscriber(it.get("fct_module"), it.get("fct_name"))
-                job._subscribers.append(_load_fct(fct_module, fct_name))  # type:ignore
-            except AttributeError:
-                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
-        job._stacktrace = model.stacktrace
-
-        return job
 
     @staticmethod
     def _serialize_subscribers(subscribers: List) -> List:
