@@ -1,339 +1,389 @@
 {
-  "controls": [
-    [
-      "scenario_selector",
-      {
-        "inherits": [
-          "core_gui_shared"
+    "controls": [
+        [
+            "scenario_selector",
+            {
+                "inherits": [
+                    "core_gui_shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(Scenario)",
+                        "doc": "Bound to the selected <code>Scenario^</code>, or None if there is none."
+                    },
+                    {
+                        "name": "show_add_button",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the button to create a new scenario is not displayed."
+                    },
+                    {
+                        "name": "display_cycles",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the cycles are not shown."
+                    },
+                    {
+                        "name": "show_primary_flag",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the primary scenarios are not identified with specific visual hint."
+                    },
+                    {
+                        "name": "on_change",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Scenario^</code>): the selected scenario.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "value",
+                                "optional[Scenario]"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "50vh",
+                        "doc": "The maximum height, in CSS units, of the tree."
+                    },
+                    {
+                        "name": "show_pins",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, a pin is shown on each item of the selector and allows to restrict the numnber of displayed items."
+                    },
+                    {
+                        "name": "on_create",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>scenario (<code>Scenario^</code>): the created scenario.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "scenario",
+                                "Scenario"
+                            ]
+                        ]
+                    }
+                ]
+            }
         ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(Scenario)",
-            "doc": "Bound to the selected <code>Scenario^</code>, or None if there is none."
-          },
-          {
-            "name": "show_add_button",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the button to create a new scenario is not displayed."
-          },
-          {
-            "name": "display_cycles",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the cycles are not shown."
-          },
-          {
-            "name": "show_primary_flag",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the primary scenarios are not identified with specific visual hint."
-          },
-          {
-            "name": "on_change",
-            "type": "Callback",
-            "doc": "The name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Scenario^</code>): the selected scenario.</li>\n</ul>",
-            "signature": [
-              [
-                "state",
-                "State"
-              ],
-              [
-                "var_name",
-                "str"
-              ],
-              [
-                "value",
-                "optional[Scenario]"
-              ]
-            ]
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "default_value": "50vh",
-            "doc": "The maximum height, in CSS units, of the tree."
-          }
+        [
+            "scenario",
+            {
+                "inherits": [
+                    "core_gui_shared"
+                ],
+                "properties": [
+                    {
+                        "name": "scenario",
+                        "default_property": true,
+                        "type": "dynamic(Scenario|list[Scenario])",
+                        "doc": "The scenario to display and edit.<br/>If the value is a list, it must have a single element otherwise nothing is shown."
+                    },
+                    {
+                        "name": "active",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "Indicates if this component is active.<br/>An inactive component allows no user interaction."
+                    },
+                    {
+                        "name": "expandable",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If True, the scenario visualizer can be expanded.<br/>If False, the scenario visualizer is always collapsed and only its name and the <i>submit</i> button are visible."
+                    },
+                    {
+                        "name": "expanded",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If True, when a valid scenario is selected, the scenario visualizer is expanded, and its content is displayed.<br/>If False, the scenario visualizer is collapsed and only its name a <i>submit</i> button are visible."
+                    },
+                    {
+                        "name": "show_submit",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the scenario submit button is not visible."
+                    },
+                    {
+                        "name": "show_delete",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the button to delete a scenario is not visible."
+                    },
+                    {
+                        "name": "show_config",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If False, the scenario configuration label is not visible."
+                    },
+                    {
+                        "name": "show_cycle",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If False, the scenario cycle label is not visible."
+                    },
+                    {
+                        "name": "show_tags",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If False, the scenario tags are not visible."
+                    },
+                    {
+                        "name": "show_properties",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the scenario properties are not visible."
+                    },
+                    {
+                        "name": "show_pipelines",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the scenario pipelines are not visible."
+                    },
+                    {
+                        "name": "show_submit_pipelines",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the buttons to submit scenario pipelines are not visible."
+                    },
+                    {
+                        "name": "on_submit_end",
+                        "type": "Callback",
+                        "doc": "The name of a function that is triggered when the submission ends.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>status (bool): False if the submission didn't end well..</li>\n<li>entity (<code>Scenario^|Pipeline^</code>): the entity source of the submission.</li>\n<li>jobs (<code>list(Job^)</code>): the result of the submission.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "status",
+                                "bool"
+                            ],
+                            [
+                                "entity",
+                                "Scenario | Pipeline"
+                            ],
+                            [
+                                "jobs",
+                                "list[Job]"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        ],
+        [
+            "scenario_dag",
+            {
+                "inherits": [
+                    "core_gui_shared"
+                ],
+                "properties": [
+                    {
+                        "name": "scenario",
+                        "type": "dynamic(Scenario|list[Scenario])",
+                        "doc": "The <code>Scenario^</code> whose diagram is displayed.<br/>If the value is a list, it must have a single element otherwise nothing is shown."
+                    },
+                    {
+                        "name": "render",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If False, this scenario's DAG is not displayed."
+                    },
+                    {
+                        "name": "show_toolbar",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the DAG toolbar is not visible."
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "50vh",
+                        "doc": "The maximum height, in CSS units, of the DAG."
+                    },
+                    {
+                        "name": "width",
+                        "type": "str",
+                        "default_value": "100%",
+                        "doc": "The maximum width, in CSS units, of the DAG."
+                    }
+                ]
+            }
+        ],
+        [
+            "data_node_selector",
+            {
+                "inherits": [
+                    "core_gui_shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(DataNode|list[DataNode])",
+                        "doc": "Bound to the selected <code>DataNode^</code>(s), or None if there is none."
+                    },
+                    {
+                        "name": "display_cycles",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the cycles are not shown in the selector."
+                    },
+                    {
+                        "name": "show_primary_flag",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the primary scenarios are not identified with specific visual hint."
+                    },
+                    {
+                        "name": "on_change",
+                        "type": "callback",
+                        "doc": "The name of a function that is triggered when a datanode is selected.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>DataNode^</code>): the selected datanode.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "value",
+                                "optional[DataNode]"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "50vh",
+                        "doc": "The maximum height, in CSS units,of the tree."
+                    },
+                    {
+                        "name": "show_pins",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If True, a pin is shown on each item of the selector and allows to restrict the numnber of displayed items."
+                    }
+                ]
+            }
+        ],
+        [
+            "job_selector",
+            {
+                "inherits": [
+                    "core_gui_shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(Job|list[Job])",
+                        "doc": "Bound to the selected <code>Job^</code>(s), or None if there is none."
+                    },
+                    {
+                        "name": "show_job_id",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the <code>Job^</code> id is not shown in the selector."
+                    },
+                    {
+                        "name": "show_entity_label",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the <code>Entity^</code> label is not shown in the selector."
+                    },
+                    {
+                        "name": "show_entity_id",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the <code>Entity^</code> id is shown in the selector."
+                    },
+                    {
+                        "name": "show_submit_id",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the <code>Submit^</code> id is shown in the selector."
+                    },
+                    {
+                        "name": "show_date",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the <code>Job^</code> date is not shown in the selector."
+                    },
+                    {
+                        "name": "show_cancel",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the cancel buttons are not shown in the selector."
+                    },
+                    {
+                        "name": "show_delete",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the delete button are not shown in the selector."
+                    },
+                    {
+                        "name": "on_change",
+                        "type": "callback",
+                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Job^</code>): the selected job.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "value",
+                                "optional[Job]"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "50vh",
+                        "doc": "The maximum height, in CSS units,of the tree."
+                    }
+                ]
+            }
         ]
-      }
     ],
-    [
-      "scenario",
-      {
-        "inherits": [
-          "core_gui_shared"
-        ],
-        "properties": [
-          {
-            "name": "scenario",
-            "default_property": true,
-            "type": "dynamic(Scenario|list[Scenario])",
-            "doc": "The scenario to display and edit.<br/>If the value is a list, it must have a single element otherwise nothing is shown."
-          },
-          {
-            "name": "active",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "Indicates if this component is active.<br/>An inactive component allows no user interaction."
-          },
-          {
-            "name": "expandable",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If True, the scenario visualizer can be expanded.<br/>If False, the scenario visualizer is always collapsed and only its name and the <i>submit</i> button are visible."
-          },
-          {
-            "name": "expanded",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If True, when a valid scenario is selected, the scenario visualizer is expanded, and its content is displayed.<br/>If False, the scenario visualizer is collapsed and only its name a <i>submit</i> button are visible."
-          },
-          {
-            "name": "show_submit",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the scenario submit button is not visible."
-          },
-          {
-            "name": "show_delete",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the button to delete a scenario is not visible."
-          },
-          {
-            "name": "show_config",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If False, the scenario configuration label is not visible."
-          },
-          {
-            "name": "show_cycle",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If False, the scenario cycle label is not visible."
-          },
-          {
-            "name": "show_tags",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If False, the scenario tags are not visible."
-          },
-          {
-            "name": "show_properties",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the scenario properties are not visible."
-          },
-          {
-            "name": "show_pipelines",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the scenario pipelines are not visible."
-          },
-          {
-            "name": "show_submit_pipelines",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the buttons to submit scenario pipelines are not visible."
-          }
+    "undocumented": [
+        [
+            "core_gui_shared",
+            {
+                "properties": [
+                    {
+                        "name": "id",
+                        "type": "str",
+                        "doc": "The identifier that will be assigned to the rendered HTML component."
+                    },
+                    {
+                        "name": "class_name",
+                        "type": "dynamic(str)",
+                        "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
+                    }
+                ]
+            }
         ]
-      }
-    ],
-    [
-      "scenario_dag",
-      {
-        "inherits": [
-          "core_gui_shared"
-        ],
-        "properties": [
-          {
-            "name": "scenario",
-            "type": "dynamic(Scenario|list[Scenario])",
-            "doc": "The <code>Scenario^</code> whose diagram is displayed.<br/>If the value is a list, it must have a single element otherwise nothing is shown."
-          },
-          {
-            "name": "render",
-            "type": "dynamic(bool)",
-            "default_value": "True",
-            "doc": "If False, this scenario's DAG is not displayed."
-          },
-          {
-            "name": "show_toolbar",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the DAG toolbar is not visible."
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "default_value": "50vh",
-            "doc": "The maximum height, in CSS units, of the DAG."
-          },
-          {
-            "name": "width",
-            "type": "str",
-            "default_value": "100%",
-            "doc": "The maximum width, in CSS units, of the DAG."
-          }
-        ]
-      }
-    ],
-    [
-      "data_node_selector",
-      {
-        "inherits": [
-          "core_gui_shared"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(DataNode|list[DataNode])",
-            "doc": "Bound to the selected <code>DataNode^</code>(s), or None if there is none."
-          },
-          {
-            "name": "display_cycles",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the cycles are not shown in the selector."
-          },
-          {
-            "name": "show_primary_flag",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the primary scenarios are not identified with specific visual hint."
-          },
-          {
-            "name": "on_change",
-            "type": "callback",
-            "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>DataNode^</code>): the selected data node.</li>\n</ul>",
-            "signature": [
-              [
-                "state",
-                "State"
-              ],
-              [
-                "var_name",
-                "str"
-              ],
-              [
-                "value",
-                "optional[DataNode]"
-              ]
-            ]
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "default_value": "50vh",
-            "doc": "The maximum height, in CSS units,of the tree."
-          }
-        ]
-      }
-    ],
-    [
-      "job_selector",
-      {
-        "inherits": [
-          "core_gui_shared"
-        ],
-        "properties": [
-          {
-            "name": "value",
-            "default_property": true,
-            "type": "dynamic(Job|list[Job])",
-            "doc": "Bound to the selected <code>Job^</code>(s), or None if there is none."
-          },
-          {
-            "name": "show_job_id",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the <code>Job^</code> id is not shown in the selector."
-          },
-          {
-            "name": "show_entity_label",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the <code>Entity^</code> label is not shown in the selector."
-          },
-          {
-            "name": "show_entity_id",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the <code>Entity^</code> id is shown in the selector."
-          },
-          {
-            "name": "show_submit_id",
-            "type": "bool",
-            "default_value": "False",
-            "doc": "If True, the <code>Submit^</code> id is shown in the selector."
-          },
-          {
-            "name": "show_date",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the <code>Job^</code> date is not shown in the selector."
-          },
-          {
-            "name": "show_cancel",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the cancel buttons are not shown in the selector."
-          },
-          {
-            "name": "show_delete",
-            "type": "bool",
-            "default_value": "True",
-            "doc": "If False, the delete button are not shown in the selector."
-          },
-          {
-            "name": "on_change",
-            "type": "callback",
-            "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Job^</code>): the selected job.</li>\n</ul>",
-            "signature": [
-              [
-                "state",
-                "State"
-              ],
-              [
-                "var_name",
-                "str"
-              ],
-              [
-                "value",
-                "optional[Job]"
-              ]
-            ]
-          },
-          {
-            "name": "height",
-            "type": "str",
-            "default_value": "50vh",
-            "doc": "The maximum height, in CSS units,of the tree."
-          }
-        ]
-      }
     ]
-  ],
-  "undocumented": [
-    [
-      "core_gui_shared",
-      {
-        "properties": [
-          {
-            "name": "id",
-            "type": "str",
-            "doc": "The identifier that will be assigned to the rendered HTML component."
-          },
-          {
-            "name": "class_name",
-            "type": "dynamic(str)",
-            "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
-          }
-        ]
-      }
-    ]
-  ]
 }

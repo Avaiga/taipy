@@ -1,14 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CanvasWidget } from "@projectstorm/react-canvas-core";
 import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
 import Toolbar from "@mui/material/Toolbar";
 import { ZoomIn } from "@mui/icons-material";
+import createEngine from "@projectstorm/react-diagrams";
 
 import { DisplayModel } from "./utils/types";
-import { initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
-import { TaipyDiagramModel } from "./projectstorm/models";
+import { createDagreEngine, initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
 import {
     createRequestUpdateAction,
     createSendUpdateAction,
@@ -18,6 +19,7 @@ import {
     useModule,
 } from "taipy-gui";
 import { useClassNames } from "./utils";
+import { TaipyDiagramModel } from "./projectstorm/models";
 
 interface ScenarioDagProps {
     id?: string;
@@ -36,15 +38,8 @@ interface ScenarioDagProps {
     dynamicClassName?: string;
 }
 
-const boxSx = { "&>div": { height: "100%", width: "100%" }, height: "100%", width: "100%" };
 const titleSx = { ml: 2, flex: 1 };
 const appBarSx = { position: "relative" };
-
-const [engine, dagreEngine] = initDiagram();
-
-const relayout = () => relayoutDiagram(engine, dagreEngine);
-
-const zoomToFit = () => engine.zoomToFit();
 
 interface DagTitleProps {
     zoomToFit: () => void;
@@ -70,6 +65,8 @@ const getValidScenario = (scenar: DisplayModel | DisplayModel[]) =>
 const ScenarioDag = (props: ScenarioDagProps) => {
     const { showToolbar = true } = props;
     const [scenarioId, setScenarioId] = useState("");
+    const [engine] = useState(createEngine);
+    const [dagreEngine] = useState(createDagreEngine);
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -77,8 +74,8 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const sizeSx = useMemo(
-        () => ({ width: props.width || "100%", height: props.height || "50vh" }),
-        [props.width, props.height]
+        () => ({ width: props.width || "100%", height: props.height || "50vh", display: "grid", gridTemplateRows: showToolbar ? "auto 1fr" : "1fr", gridTemplateColumns: "1fr" }),
+        [props.width, props.height, showToolbar]
     );
 
     // Refresh on broadcast
@@ -103,9 +100,14 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         return dm;
     }, [props.scenario, props.defaultScenario]);
 
+    const relayout = useCallback(() => relayoutDiagram(engine, dagreEngine), [engine, dagreEngine]);
+
+    const zoomToFit = useCallback(() => engine.zoomToFit(), [engine]);
+
     useEffect(() => {
-        // clear model
         const model = new TaipyDiagramModel();
+        initDiagram(engine);
+
         if (displayModel) {
             setScenarioId(displayModel[0]);
             // populate model
@@ -116,7 +118,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         //engine.getActionEventBus().registerAction(new DeleteItemsAction({ keyCodes: [1] }));
         model.setLocked(true);
         setTimeout(relayout, 500);
-    }, [displayModel]);
+    }, [displayModel, engine, relayout]);
 
     useEffect(() => {
         const showVar = getUpdateVar(props.updateVars, "show");
@@ -124,12 +126,10 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     }, [render, props.updateVars, dispatch, module]);
 
     return render && scenarioId ? (
-        <Box sx={sizeSx} id={props.id} className={className}>
+        <Paper sx={sizeSx} id={props.id} className={className}>
             {showToolbar ? <DagTitle zoomToFit={zoomToFit} /> : null}
-            <Box sx={boxSx}>
-                <CanvasWidget engine={engine} />
-            </Box>
-        </Box>
+            <CanvasWidget engine={engine} />
+        </Paper>
     ) : null;
 };
 
