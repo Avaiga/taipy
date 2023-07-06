@@ -72,7 +72,11 @@ class _Orchestrator(_AbstractOrchestrator):
         with cls.lock:
             for ts in tasks:
                 for task in ts:
-                    res.append(cls._submit_task(task, submit_id, submittable.id, callbacks=callbacks, force=force))  # type: ignore
+                    res.append(
+                        cls._submit_task(
+                            task, submit_id, submittable.id, callbacks=callbacks, force=force  # type: ignore
+                        )
+                    )
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
