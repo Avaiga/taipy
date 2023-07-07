@@ -117,7 +117,7 @@ const CoreItem = (props: {
 };
 
 const NodeSelector = (props: NodeSelectorProps) => {
-    const { id = "", datanodes = [], propagate = true } = props;
+    const { id = "", datanodes, propagate = true } = props;
 
     const [selected, setSelected] = useState("");
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -168,7 +168,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
     }, [props.defaultValue, props.value]);
 
     useEffect(() => {
-        if (!datanodes.length) {
+        if (datanodes && !datanodes.length) {
             unselect();
         }
     }, [datanodes, unselect]);
@@ -192,14 +192,14 @@ const NodeSelector = (props: NodeSelectorProps) => {
                 onNodeSelect={onSelect}
                 selected={selected}
             >
-                {datanodes.map((item) => (
+                {datanodes ? datanodes.map((item) => (
                     <CoreItem
                         key={item[0]}
                         item={item}
                         displayCycles={displayCycles}
                         showPrimaryFlag={showPrimaryFlag}
                     />
-                ))}
+                )): null}
             </TreeView>
             <Box>{props.error}</Box>
         </Box>
