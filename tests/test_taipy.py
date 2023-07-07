@@ -18,7 +18,19 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
-from src.taipy.core import Core, Cycle, CycleId, JobId, Pipeline, PipelineId, Scenario, ScenarioId, Task, TaskId
+from src.taipy.core import (
+    Core,
+    Cycle,
+    CycleId,
+    DataNodeId,
+    JobId,
+    Pipeline,
+    PipelineId,
+    Scenario,
+    ScenarioId,
+    Task,
+    TaskId,
+)
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.job_config import JobConfig
@@ -162,6 +174,12 @@ class TestTaipy:
             tp.get(task_id)
             mck.assert_called_once_with(task_id)
 
+    def test_task_exists(self):
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._exists") as mck:
+            task_id = TaskId("TASK_id")
+            tp.exists(task_id)
+            mck.assert_called_once_with(task_id)
+
     def test_is_deletable(self):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
@@ -211,6 +229,12 @@ class TestTaipy:
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._get") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.get(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+    def test_scenario_exists(self):
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._exists") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.exists(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
     def test_get_primary(self, cycle):
@@ -290,6 +314,12 @@ class TestTaipy:
             tp.get_pipelines()
             mck.assert_called_once_with()
 
+    def test_pipeline_exists(self):
+        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._exists") as mck:
+            pipeline_id = PipelineId("PIPELINE_id")
+            tp.exists(pipeline_id)
+            mck.assert_called_once_with(pipeline_id)
+
     def test_get_job(self):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._get") as mck:
             job_id = JobId("JOB_id")
@@ -300,6 +330,12 @@ class TestTaipy:
         with mock.patch("src.taipy.core.job._job_manager._JobManager._get_all") as mck:
             tp.get_jobs()
             mck.assert_called_once_with()
+
+    def test_job_exists(self):
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._exists") as mck:
+            job_id = JobId("JOB_id")
+            tp.exists(job_id)
+            mck.assert_called_once_with(job_id)
 
     def test_delete_job(self, task):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
@@ -374,10 +410,22 @@ class TestTaipy:
             tp.get_data_nodes()
             mck.assert_called_once_with()
 
+    def test_data_node_exists(self):
+        with mock.patch("src.taipy.core.data._data_manager._DataManager._exists") as mck:
+            data_node_id = DataNodeId("DATANODE_id")
+            tp.exists(data_node_id)
+            mck.assert_called_once_with(data_node_id)
+
     def test_get_cycles(self):
         with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._get_all") as mck:
             tp.get_cycles()
             mck.assert_called_once_with()
+
+    def test_cycle_exists(self):
+        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._exists") as mck:
+            cycle_id = CycleId("CYCLE_id")
+            tp.exists(cycle_id)
+            mck.assert_called_once_with(cycle_id)
 
     def test_create_scenario(self, scenario):
         scenario_config = ScenarioConfig("scenario_config")

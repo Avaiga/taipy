@@ -76,6 +76,9 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _save(self, entity: MockEntity):
         return self.repo._save(entity)
 
+    def _exists(self, entity_id: str) -> bool:
+        return self.repo._exists(entity_id)
+
     def _delete(self, entity_id: str):
         return self.repo._delete(entity_id)
 
@@ -111,6 +114,11 @@ class TestManager:
 
         fetched_model = MockManager._get(m.id)
         assert m == fetched_model
+
+    def test_exists(self):
+        m = MockEntity("uuid", "foo")
+        MockManager._set(m)
+        assert MockManager._exists(m.id)
 
     def test_get(self):
         m = MockEntity("uuid", "foo")

@@ -37,6 +37,19 @@ class TestJobRepository:
         assert isinstance(obj, Job)
 
     @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_exists(self, tmpdir, data_node, job, repo):
+        _DataFSRepository()._save(data_node)
+        task = Task("task_config_id", {}, print, [data_node], [data_node])
+        _TaskFSRepository()._save(task)
+        job._task = task
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(job)
+
+        assert repository._exists(job.id)
+        assert not repository._exists("not-existed-job")
+
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
     def test_load_all(self, tmpdir, data_node, job, repo):
         _DataFSRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
