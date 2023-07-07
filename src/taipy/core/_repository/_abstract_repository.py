@@ -30,6 +30,18 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
+    def _exists(self, entity_id: str) -> bool:
+        """
+        Check if an entity with id entity_id exists in the repository.
+        Parameters:
+            entity_id: The entity id, i.e., its primary key.
+
+        Returns:
+            True if the entity id exists.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def _load(self, entity_id: str) -> Entity:
         """
         Retrieve the entity data from the repository.

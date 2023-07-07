@@ -51,7 +51,10 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             return
         self.__insert_model(obj)
 
-    def _load(self, entity_id: Any) -> Entity:
+    def _exists(self, entity_id: str):
+        return bool(self.db.query(self.model_type).filter_by(id=entity_id).first())
+
+    def _load(self, entity_id: str) -> Entity:
         if entry := self.db.query(self.model_type).filter(self.model_type.id == entity_id).first():  # type: ignore
             return self.converter._model_to_entity(entry)
         raise ModelNotFound(str(self.model_type.__name__), entity_id)

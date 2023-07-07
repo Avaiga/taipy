@@ -103,6 +103,13 @@ class _Manager(Generic[EntityType]):
             return default
 
     @classmethod
+    def _exists(cls, entity_id: str) -> bool:
+        """
+        Returns True if the entity id exists.
+        """
+        return cls._repository._exists(entity_id)
+
+    @classmethod
     def _delete_entities_of_multiple_types(cls, _entity_ids: _EntityIds):
         """
         Deletes entities of multiple types.
