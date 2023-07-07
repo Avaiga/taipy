@@ -79,8 +79,12 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                     scenario.cycle.get_simple_label() if scenario.cycle else "",
                     scenario.get_simple_label(),
                     list(scenario.tags) if scenario.tags else [],
-                    [(k, v) for k, v in scenario.properties.items() if k not in _GuiCoreScenarioAdapter.__INNER_PROPS] if scenario.properties else [],
-                    [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.pipelines.values()] if scenario.pipelines else [],
+                    [(k, v) for k, v in scenario.properties.items() if k not in _GuiCoreScenarioAdapter.__INNER_PROPS]
+                    if scenario.properties
+                    else [],
+                    [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.pipelines.values()]
+                    if scenario.pipelines
+                    else [],
                     list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                     is_deletable(scenario),  # deletable
                     is_promotable(scenario),
