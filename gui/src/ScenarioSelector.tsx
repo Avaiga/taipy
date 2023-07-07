@@ -524,7 +524,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 };
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
-    const { id = "", scenarios = [], propagate = true, defaultValue = "", value } = props;
+    const { id = "", scenarios, propagate = true, defaultValue = "", value } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
     const [selected, setSelected] = useState("");
@@ -631,7 +631,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     }, [defaultValue, value]);
 
     useEffect(() => {
-        if (!scenarios.length) {
+        if (scenarios && !scenarios.length) {
             unselect();
         }
     }, [scenarios, unselect]);
