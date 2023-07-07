@@ -52,7 +52,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.__insert_model(obj)
 
     def _exists(self, entity_id: str):
-        return bool(self.db.query(self.model_type).filter_by(id=entity_id).first())
+        return bool(self.db.query(self.model_type.id).filter_by(id=entity_id).first())  # type: ignore
 
     def _load(self, entity_id: str) -> Entity:
         if entry := self.db.query(self.model_type).filter(self.model_type.id == entity_id).first():  # type: ignore
