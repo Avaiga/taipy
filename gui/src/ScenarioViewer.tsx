@@ -230,7 +230,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const {
         id = "",
         expandable = true,
-        expanded = false,
+        expanded = true,
         showConfig = false,
         showCycle = false,
         showDelete = true,
@@ -238,7 +238,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showPipelines = true,
         showSubmit = true,
         showSubmitPipelines = true,
-        showTags = false,
+        showTags = true,
     } = props;
 
     const dispatch = useDispatch();
@@ -248,7 +248,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scId,
         scPrimary,
         scConfig,
-        scDate,
+        scCycle,
         scLabel,
         scTags,
         scProperties,
@@ -488,7 +488,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     disabled={!isScenario}
                 >
                     <AccordionSummary
-                        expandIcon={<ArrowForwardIosSharp sx={AccordionIconSx} />}
+                        expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
                         <Grid
@@ -501,14 +501,14 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         >
                             <Grid item>
                                 {scLabel}
-                                {scPrimary && (
+                                {scPrimary ? (
                                     <Chip
                                         color="primary"
                                         label={<FlagOutlined sx={FlagSx} />}
                                         size="small"
                                         sx={ChipSx}
                                     />
-                                )}
+                                ) : null}
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (
@@ -544,7 +544,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                         <Typography variant="subtitle2">Cycle / Frequency</Typography>
                                     </Grid>
                                     <Grid item xs={8}>
-                                        <Typography variant="subtitle2">{scDate}</Typography>
+                                        <Typography variant="subtitle2">{scCycle}</Typography>
                                     </Grid>
                                 </Grid>
                             ) : null}
@@ -667,9 +667,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             </Grid>
                             {showProperties ? (
                                 <>
-                                    <Grid item xs={12} container>
-                                        <Typography variant="h6">Custom Properties</Typography>
-                                    </Grid>
                                     <Grid item xs={12} container rowSpacing={2}>
                                         {properties
                                             ? properties.map((property) => {
@@ -700,7 +697,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                           onChange={updatePropertyField}
                                                                       />
                                                                   </Grid>
-                                                                  <Grid item xs={6}>
+                                                                  <Grid item xs={5}>
                                                                       <TextField
                                                                           label="Value"
                                                                           variant="outlined"
@@ -714,7 +711,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                   </Grid>
                                                                   <Grid
                                                                       item
-                                                                      xs={1}
+                                                                      xs={2}
                                                                       container
                                                                       alignContent="center"
                                                                       alignItems="center"
@@ -766,12 +763,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                           {property.key}
                                                                       </Typography>
                                                                   </Grid>
-                                                                  <Grid item xs={6}>
+                                                                  <Grid item xs={5}>
                                                                       <Typography variant="subtitle2">
                                                                           {property.value}
                                                                       </Typography>
                                                                   </Grid>{" "}
-                                                                  <Grid item xs={2} />
+                                                                  <Grid item xs={3} />
                                                               </>
                                                           )}
                                                       </Grid>
@@ -801,7 +798,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                             disabled={!isScenario}
                                                         />
                                                     </Grid>
-                                                    <Grid item xs={6}>
+                                                    <Grid item xs={5}>
                                                         <TextField
                                                             value={newProp.value}
                                                             data-name="value"
@@ -814,7 +811,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     </Grid>
                                                     <Grid
                                                         item
-                                                        xs={1}
+                                                        xs={2}
                                                         container
                                                         alignContent="center"
                                                         alignItems="center"
@@ -834,10 +831,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     <Grid item xs={4}>
                                                         <Typography variant="subtitle2">New Property Key</Typography>
                                                     </Grid>
-                                                    <Grid item xs={6}>
+                                                    <Grid item xs={5}>
                                                         <Typography variant="subtitle2">Value</Typography>
                                                     </Grid>
-                                                    <Grid item xs={2} />
+                                                    <Grid item xs={3} />
                                                 </>
                                             )}
                                         </Grid>
