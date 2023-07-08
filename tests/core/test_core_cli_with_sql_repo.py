@@ -503,35 +503,6 @@ def test_clean_production_version(tmp_sqlite):
     assert len(_JobManager._get_all()) == 1
 
 
-def test_modify_job_configuration_dont_stop_application(caplog, tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
-    scenario_config = config_scenario()
-
-    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Config.configure_job_executions(mode="development")
-        Core().run(force_restart=True)
-    scenario = _ScenarioManager._create(scenario_config)
-    jobs = _ScenarioManager._submit(scenario)
-    assert all([job.is_finished() for job in jobs])
-
-    init_config()
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
-    scenario_config = config_scenario()
-
-    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
-        Core().run(force_restart=True)
-    scenario = _ScenarioManager._create(scenario_config)
-
-    jobs = _ScenarioManager._submit(scenario)
-    assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
-    error_message = str(caplog.text)
-    assert 'JOB "mode" was modified' in error_message
-    assert 'JOB "max_nb_of_workers" was modified' in error_message
-
-
 def test_modify_config_properties_without_force(caplog, tmp_sqlite):
     Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
 
@@ -571,6 +542,35 @@ def test_modify_config_properties_without_force(caplog, tmp_sqlite):
     assert 'TASK "my_task" has attribute "outputs" modified' in error_message
     assert 'DATA_NODE "d2" has attribute "has_header" modified' in error_message
     assert 'DATA_NODE "d2" has attribute "exposed_type" modified' in error_message
+
+
+def test_modify_job_configuration_dont_stop_application(caplog, tmp_sqlite):
+    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+
+    scenario_config = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Config.configure_job_executions(mode="development")
+        Core().run(force_restart=True)
+    scenario = _ScenarioManager._create(scenario_config)
+    jobs = _ScenarioManager._submit(scenario)
+    assert all([job.is_finished() for job in jobs])
+
+    init_config()
+    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+
+    scenario_config = config_scenario()
+
+    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
+        Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
+        Core().run(force_restart=True)
+    scenario = _ScenarioManager._create(scenario_config)
+
+    jobs = _ScenarioManager._submit(scenario)
+    assert_true_after_time(lambda: all(job.is_finished() for job in jobs))
+    error_message = str(caplog.text)
+    assert 'JOB "mode" was modified' in error_message
+    assert 'JOB "max_nb_of_workers" was modified' in error_message
 
 
 def twice(a):
