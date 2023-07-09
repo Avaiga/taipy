@@ -114,7 +114,7 @@ def test_default_configuration():
     # assert len(Config.tasks) == 1
 
     _test_default_scenario_config(default_config._sections[ScenarioConfig.name][_Config.DEFAULT_KEY])
-    breakpoint()
+    # TODO: breakpoint()
     Config.scenarios[_Config.DEFAULT_KEY]
     _test_default_scenario_config(Config.scenarios[_Config.DEFAULT_KEY])
     _test_default_scenario_config(ScenarioConfig.default_config())

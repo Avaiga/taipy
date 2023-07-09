@@ -44,10 +44,17 @@ class _ScenarioConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _ScenarioModel) -> Scenario:
+        tasks = None
+        if model.tasks:
+            tasks = set(model.tasks)
+        else:
+            if model.pipelines:
+                tasks = Scenario._get_set_of_tasks_from_pipelines(model.pipelines)
+
         scenario = Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
-            tasks=set(model.tasks),
+            tasks=tasks,
             additional_data_nodes=set(model.additional_data_nodes),
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),

@@ -201,8 +201,9 @@ def current_datetime():
 def scenario(cycle):
     return Scenario(
         "sc",
-        [],
+        set(),
         {},
+        set(),
         ScenarioId("sc_id"),
         current_time,
         is_primary=False,
@@ -248,7 +249,8 @@ def scenario_model(cycle):
     return _ScenarioModel(
         ScenarioId("sc_id"),
         "sc",
-        [],
+        set(),
+        set(),
         {},
         creation_date=current_time.isoformat(),
         primary_scenario=False,

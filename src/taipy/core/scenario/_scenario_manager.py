@@ -23,6 +23,7 @@ from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
+from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import (
     DeletingPrimaryScenario,
     DifferentScenarioConfigs,
@@ -36,7 +37,6 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, _publish_event
-from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from .scenario import Scenario
@@ -89,12 +89,12 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         cls.__remove_subscriber(callback, params, scenario)
 
     @classmethod
-    def __add_subscriber(cls, callback, params, scenario):
+    def __add_subscriber(cls, callback, params, scenario: Scenario):
         scenario._add_subscriber(callback, params)
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "subscribers")
 
     @classmethod
-    def __remove_subscriber(cls, callback, params, scenario):
+    def __remove_subscriber(cls, callback, params, scenario: Scenario):
         scenario._remove_subscriber(callback, params)
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "subscribers")
 
@@ -105,45 +105,50 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         creation_date: Optional[datetime.datetime] = None,
         name: Optional[str] = None,
     ) -> Scenario:
+        _task_manager = _TaskManagerFactory._build_manager()
+        _data_manager = _DataManagerFactory._build_manager()
+
         scenario_id = Scenario._new_id(str(config.id))
         cycle = (
             _CycleManagerFactory._build_manager()._get_or_create(config.frequency, creation_date)
             if config.frequency
             else None
         )
-
-        pipelines = [
-            _PipelineManagerFactory._build_manager()._get_or_create(p_config, cycle.id if cycle else None, scenario_id)
-            for p_config in config.pipeline_configs
-        ]
+        cycle_id = cycle.id if cycle else None
+        tasks = _task_manager._bulk_get_or_create(config.task_configs, cycle_id, scenario_id)
+        additional_data_nodes = _data_manager._bulk_get_or_create(
+            config.additional_data_node_configs, cycle_id, scenario_id
+        )
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
         if name:
             props["name"] = name
         version = cls._get_latest_version()
+
         scenario = Scenario(
             str(config.id),
-            pipelines,
+            set(tasks),
             props,
+            set(additional_data_nodes),
             scenario_id,
             creation_date,
             is_primary=is_primary_scenario,
             cycle=cycle,
             version=version,
         )
-        for pipeline in pipelines:
-            pipeline._parent_ids.update([scenario_id])
-        cls.__save_pipelines(pipelines)
+
+        for task in tasks:
+            task._parent_ids.update([scenario_id])
+            _task_manager._set(task)
+
+        for dn in additional_data_nodes.values():
+            dn._parent_ids.update([scenario_id])
+            _data_manager._set(dn)
+
         cls._set(scenario)
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)
         return scenario
-
-    @classmethod
-    def __save_pipelines(cls, pipelines):
-        pipeline_manager = _PipelineManagerFactory._build_manager()
-        for i in pipelines:
-            pipeline_manager._set(i)
 
     @classmethod
     def _submit(
@@ -330,17 +335,14 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:
         entity_ids = _EntityIds()
 
-        for pipeline in scenario.pipelines.values():
-            if pipeline.owner_id in (pipeline.id, scenario.id):
-                entity_ids.pipeline_ids.add(pipeline.id)
-            for task in pipeline.tasks.values():
-                if not isinstance(task, Task):
-                    task = _TaskManagerFactory._build_manager()._get(task)
-                if task.owner_id in (pipeline.id, scenario.id):
-                    entity_ids.task_ids.add(task.id)
-                for data_node in task.data_nodes.values():
-                    if data_node.owner_id in (pipeline.id, scenario.id):
-                        entity_ids.data_node_ids.add(data_node.id)
+        for task in scenario.tasks.values():
+            if not isinstance(task, Task):
+                task = _TaskManagerFactory._build_manager()._get(task)
+            if task.owner_id == scenario.id:
+                entity_ids.task_ids.add(task.id)
+            for data_node in task.data_nodes.values():
+                if data_node.owner_id == scenario.id:
+                    entity_ids.data_node_ids.add(data_node.id)
 
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:

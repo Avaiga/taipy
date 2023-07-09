@@ -76,15 +76,11 @@ def test_get_label_complex_case():
     dn5_cfg = Config.configure_data_node("dn5", scope=Scope.SCENARIO)
     tA_cfg = Config.configure_task("t_A_C", mult, [dn1_cfg, dn2_cfg], dn3_cfg)
     tB_cfg = Config.configure_task("t_B_S", mult, [dn3_cfg, dn4_cfg], dn5_cfg)
-    pipeline_C_cfg = Config.configure_pipeline("pipeline_C", [tA_cfg])
-    pipeline_S_cfg = Config.configure_pipeline("pipeline_S", [tA_cfg, tB_cfg])
-    scenario_cfg = Config.configure_scenario("scenario_cfg", [pipeline_C_cfg, pipeline_S_cfg], Frequency.DAILY)
+    scenario_cfg = Config.configure_scenario("scenario_cfg", [tA_cfg, tB_cfg], [], Frequency.DAILY)
 
     scenario = taipy.create_scenario(scenario_cfg, name="My Name")
     cycle = scenario.cycle
     cycle.name = "Today"
-    pipeline_C = scenario.pipeline_C
-    pipeline_S = scenario.pipeline_S
     tA = scenario.t_A_C
     tB = scenario.t_B_S
     dn1 = scenario.dn1
@@ -97,10 +93,6 @@ def test_get_label_complex_case():
     assert cycle.get_simple_label() == scenario.cycle.name
     assert scenario.get_label() == "Today > My Name"
     assert scenario.get_simple_label() == "My Name"
-    assert pipeline_C.get_label() == "Today > pipeline_C"
-    assert pipeline_C.get_simple_label() == "pipeline_C"
-    assert pipeline_S.get_label() == "Today > My Name > pipeline_S"
-    assert pipeline_S.get_simple_label() == "pipeline_S"
     assert tA.get_label() == "Today > t_A_C"
     assert tA.get_simple_label() == "t_A_C"
     assert tB.get_label() == "Today > My Name > t_B_S"

@@ -40,6 +40,7 @@ class _ScenarioModel(_BaseModel):
         Column("subscribers", JSON),
         Column("tags", JSON),
         Column("version", String),
+        Column("pipelines", JSON),
         Column("cycle", String),
     )
     id: ScenarioId
@@ -57,8 +58,6 @@ class _ScenarioModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        if pipelines := data.pop("pipelines", None):
-            data["properties"]["pipelines"] = pipelines
         return _ScenarioModel(
             id=data["id"],
             config_id=data["config_id"],
@@ -70,5 +69,6 @@ class _ScenarioModel(_BaseModel):
             subscribers=data["subscribers"],
             tags=data["tags"],
             version=data["version"] if "version" in data.keys() else _version_migration(),
+            pipelines=data.get("pipelines", None),
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )

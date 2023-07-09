@@ -91,12 +91,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
         self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
 
-        self._tasks: Union[Set[TaskId], Set[Task], Set] = set(tasks) if tasks else set()
-        if not self._tasks and self._MIGRATED_PIPELINES_KEY in properties:
-            self._tasks = Scenario._get_set_of_tasks_from_pipelines(
-                pipelines=properties.pop(self._MIGRATED_PIPELINES_KEY, [])
-            )
-
+        self._tasks = set(tasks) if tasks else set()
         self._additional_data_nodes = set(additional_data_nodes) if additional_data_nodes else set()
 
         self._creation_date = creation_date or datetime.now()
@@ -197,7 +192,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
             dn = data_manager._get(dn_or_id, dn_or_id)
 
             if not isinstance(dn, DataNode):
-                raise NonExistingTask(dn_or_id)
+                raise NonExistingDataNode(dn_or_id)
             additional_data_nodes[dn.config_id] = dn
         return additional_data_nodes
 
@@ -208,17 +203,11 @@ class Scenario(_Entity, _Submittable, _Labeled):
 
     # TODO: TBD
     def _get_set_of_tasks(self) -> Set[Task]:
-        tasks = set()
-        list_dict_tasks = [pipeline.tasks for pipeline in self.pipelines.values()]
-        for dict_task in list_dict_tasks:
-            for task in dict_task.values():
-                tasks.add(task)
-        return tasks
+        return set(self.tasks.values())
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def data_nodes(self) -> Dict[str, DataNode]:
-        # breakpoint()
         data_nodes_dict = {dn.config_id: dn for dn in self.__get_additional_data_nodes().values()}
         for task_id, task in self.__get_tasks().items():
             data_nodes_dict.update(task.data_nodes)
