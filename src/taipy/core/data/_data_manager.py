@@ -25,7 +25,7 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ._data_fs_repository_v2 import _DataFSRepository
+from ._data_fs_repository import _DataFSRepository
 from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId
@@ -42,10 +42,11 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     @classmethod
     def _bulk_get_or_create(
         cls,
-        data_node_configs: Set[DataNodeConfig],
+        data_node_configs: List[DataNodeConfig],
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
+        data_node_configs = [Config.data_nodes[dnc.id] for dnc in data_node_configs]
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
             scope = dn_config.scope

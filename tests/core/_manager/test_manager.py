@@ -12,12 +12,12 @@
 import dataclasses
 import pathlib
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from src.taipy.core._manager._manager import _Manager
-from src.taipy.core._repository._v2._abstract_converter import _AbstractConverter
-from src.taipy.core._repository._v2._abstract_repository import _AbstractRepository
-from src.taipy.core._repository._v2._filesystem_repository import _FileSystemRepository
+from src.taipy.core._repository._abstract_converter import _AbstractConverter
+from src.taipy.core._repository._abstract_repository import _AbstractRepository
+from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
 
@@ -42,15 +42,15 @@ class MockEntity:
         self.id = id
         self.name = name
         if version:
-            self.version = version
+            self._version = version
         else:
-            self.version = _VersionManager._get_latest_version()
+            self._version = _VersionManager._get_latest_version()
 
 
 class MockConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, entity: MockEntity) -> MockModel:
-        return MockModel(id=entity.id, name=entity.name, version=entity.version)
+        return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
     @classmethod
     def _model_to_entity(cls, model: MockModel) -> MockEntity:
@@ -62,7 +62,7 @@ class MockRepository(_AbstractRepository):  # type: ignore
         self.repo = _FileSystemRepository(**kwargs, converter=MockConverter)
 
     def _to_model(self, obj: MockEntity):
-        return MockModel(obj.id, obj.name, obj.version)
+        return MockModel(obj.id, obj.name, obj._version)
 
     def _from_model(self, model: MockModel):
         return MockEntity(model.id, model.name, model.version)
@@ -70,11 +70,8 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _load(self, entity_id: str) -> MockEntity:
         return self.repo._load(entity_id)
 
-    def _load_all(self, version_number: Optional[str] = None) -> List[MockEntity]:
-        return self.repo._load_all(version_number)
-
-    def _load_all_by(self, by, version_number) -> List[MockEntity]:
-        return self.repo._load_all_by(by, version_number)
+    def _load_all(self, filters: Optional[List[Dict]] = None) -> List[MockEntity]:
+        return self.repo._load_all(filters)
 
     def _save(self, entity: MockEntity):
         return self.repo._save(entity)
@@ -88,8 +85,14 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
 
-    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[MockEntity]:
-        return self.repo._search(attribute, value, version_number)
+    def _delete_by(self, attribute: str, value: str):
+        return self.repo._delete_by(attribute, value)
+
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[MockEntity]:
+        return self.repo._search(attribute, value, filters)
+
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
+        return self.repo._export(self, entity_id, folder_path)
 
     @property
     def _storage_folder(self) -> pathlib.Path:

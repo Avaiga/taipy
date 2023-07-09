@@ -12,8 +12,86 @@
 import os
 from unittest import mock
 
+from src.taipy.core.config import DataNodeConfig
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from tests.core.utils.named_temporary_file import NamedTemporaryFile
+
+
+def _configure_task_in_toml():
+    return NamedTemporaryFile(
+        content="""
+[TAIPY]
+
+[DATA_NODE.input]
+
+[DATA_NODE.output]
+
+[TASK.tasks1]
+function = "builtins.print:function"
+inputs = [ "input:SECTION",]
+outputs = [ "output:SECTION",]
+    """
+    )
+
+
+def _check_data_nodes_instance(dn_id, task_id):
+    """Check if the data node instance in the task config correctly points to the Config._applied_config,
+    not the Config._python_config or the Config._file_config
+    """
+    dn_config_applied_instance = Config.data_nodes[dn_id]
+    for dn in Config.tasks[task_id].inputs:
+        if dn.id == dn_id:
+            dn_config_instance_via_task = dn
+    for dn in Config.tasks[task_id].outputs:
+        if dn.id == dn_id:
+            dn_config_instance_via_task = dn
+
+    dn_config_python_instance = None
+    if Config._python_config._sections.get("DATA_NODE", None):
+        dn_config_python_instance = Config._python_config._sections["DATA_NODE"][dn_id]
+
+    dn_config_file_instance = None
+    if Config._file_config._sections.get("DATA_NODE", None):
+        dn_config_file_instance = Config._file_config._sections["DATA_NODE"][dn_id]
+
+    if dn_config_python_instance:
+        assert dn_config_python_instance.scope is None
+    assert dn_config_python_instance is not dn_config_applied_instance
+    assert dn_config_python_instance is not dn_config_instance_via_task
+
+    if dn_config_file_instance:
+        assert dn_config_file_instance.scope is None
+    assert dn_config_file_instance is not dn_config_applied_instance
+    assert dn_config_file_instance is not dn_config_instance_via_task
+
+    assert dn_config_applied_instance.scope == DataNodeConfig._DEFAULT_SCOPE
+    assert dn_config_instance_via_task is dn_config_applied_instance
+
+
+def test_data_node_instance_when_configure_task_in_python():
+    input_config = Config.configure_data_node("input")
+    output_config = Config.configure_data_node("output")
+    Config.configure_task("tasks1", print, input_config, output_config)
+
+    _check_data_nodes_instance("input", "tasks1")
+    _check_data_nodes_instance("output", "tasks1")
+
+
+def test_data_node_instance_when_configure_task_by_loading_toml():
+    toml_config = _configure_task_in_toml()
+    Config.load(toml_config.filename)
+
+    _check_data_nodes_instance("input", "tasks1")
+    _check_data_nodes_instance("output", "tasks1")
+
+
+def test_data_node_instance_when_configure_task_by_overriding_toml():
+    toml_config = _configure_task_in_toml()
+    Config.override(toml_config.filename)
+
+    _check_data_nodes_instance("input", "tasks1")
+    _check_data_nodes_instance("output", "tasks1")
 
 
 def test_task_config_creation():

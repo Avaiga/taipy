@@ -10,10 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from typing import Callable, Iterable, Optional
 from unittest.mock import ANY, patch
 
 import pytest
 
+from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common import _utils
@@ -309,7 +311,7 @@ def test_is_deletable():
     assert _ScenarioManager._is_deletable(scenario_1_primary.id)
 
 
-def test_assign_scenario_as_parent_of_pipeline():
+def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
 
     # TODO: assign scenario as parent of tasks and additional data nodes
 
@@ -438,7 +440,7 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario_1._get_sorted_tasks()[0][1].config_id == task_mult_by_4_config.id
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
-    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._create(scenario_config)
 
     # TODO: discuss that additional data nodes will also be created only once??
 
@@ -629,20 +631,50 @@ def test_scenario_notification_subscribe_all():
             )
         ],
     )
-
+    other_scenario_config = Config.configure_scenario(
+        "other_scenario",
+        [
+            Config.configure_task(
+                "other_mult_by_2_2",
+                mult_by_2,
+                [Config.configure_data_node("other_foo", "in_memory", Scope.SCENARIO, default_data=1)],
+                Config.configure_data_node("other_bar", "in_memory", Scope.SCENARIO, default_data=0),
+            )
+        ],
+    )
     _OrchestratorFactory._build_dispatcher()
-
     scenario = _ScenarioManager._create(scenario_config)
-    scenario_config.id = "other_scenario"
-
-    other_scenario = _ScenarioManager._create(scenario_config)
-
+    other_scenario = _ScenarioManager._create(other_scenario_config)
     notify_1 = NotifyMock(scenario)
-
     _ScenarioManager._subscribe(notify_1)
-
     assert len(_ScenarioManager._get(scenario.id).subscribers) == 1
     assert len(_ScenarioManager._get(other_scenario.id).subscribers) == 1
+
+
+def test_is_promotable_to_primary_scenario():
+    assert len(_ScenarioManager._get_all()) == 0
+    scenario_config = Config.configure_scenario("sc", set(), set(), Frequency.DAILY)
+    creation_date = datetime.now()
+    scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="1")  # primary scenario
+    scenario_2 = _ScenarioManager._create(scenario_config, creation_date=creation_date, name="2")
+
+    assert len(_ScenarioManager._get_all()) == 2
+    assert scenario_1.is_primary
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_1)
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_1.id)
+    assert not scenario_2.is_primary
+    assert _ScenarioManager._is_promotable_to_primary(scenario_2)
+    assert _ScenarioManager._is_promotable_to_primary(scenario_2.id)
+
+    _ScenarioManager._set_primary(scenario_2)
+
+    assert len(_ScenarioManager._get_all()) == 2
+    assert not scenario_1.is_primary
+    assert _ScenarioManager._is_promotable_to_primary(scenario_1)
+    assert _ScenarioManager._is_promotable_to_primary(scenario_1.id)
+    assert scenario_2.is_primary
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_2)
+    assert not _ScenarioManager._is_promotable_to_primary(scenario_2.id)
 
 
 def test_get_set_primary_scenario():
@@ -796,6 +828,17 @@ def test_hard_delete_shared_entities():
     assert len(_JobManager._get_all()) == 6
 
 
+def test_is_submittable():
+    assert len(_ScenarioManager._get_all()) == 0
+    scenario_config = Config.configure_scenario("sc", set(), set(), Frequency.DAILY)
+    scenario = _ScenarioManager._create(scenario_config)
+
+    assert len(_ScenarioManager._get_all()) == 1
+    assert _ScenarioManager._is_submittable(scenario)
+    assert _ScenarioManager._is_submittable(scenario.id)
+    assert not _ScenarioManager._is_submittable("Scenario_temp")
+
+
 def test_submit():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
@@ -835,9 +878,16 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def _submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False, wait=False, timeout=None):
+        def _submit_task(
+            cls,
+            task: Task,
+            submit_id: Optional[str] = None,
+            submit_entity_id: Optional[str] = None,
+            callbacks: Optional[Iterable[Callable]] = None,
+            force: bool = False,
+        ) -> Job:
             cls.submit_calls.append(task.id)
-            return super()._submit_task(task, submit_id, callbacks, force)
+            return super()._submit_task(task, submit_id, submit_entity_id, callbacks, force)
 
     with patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         with pytest.raises(NonExistingScenario):

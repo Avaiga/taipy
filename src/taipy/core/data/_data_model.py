@@ -17,15 +17,15 @@ from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table, Unique
 
 from taipy.config.common.scope import Scope
 
-from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import _SQLBaseModel, mapper_registry
+from .._repository._base_taipy_model import _BaseModel
+from .._repository.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from ..common._warnings import _warn_deprecated
 from .data_node_id import Edit
 
 
 def _to_edits_migration(job_ids: Optional[List[str]]) -> List[Edit]:
-    "Migrate a list of job IDs to a list of Edits. Used to migrate data model from <=2.0 to >=2.1 version." ""
+    """Migrate a list of job IDs to a list of Edits. Used to migrate data model from <=2.0 to >=2.1 version."""
     _warn_deprecated("job_ids", suggest="edits")
     if not job_ids:
         return []
@@ -88,7 +88,7 @@ class _DataNodeModel(_BaseModel):
             owner_id=data.get("owner_id", data.get("parent_id")),
             parent_ids=data.get("parent_ids", []),
             last_edit_date=data.get("last_edit_date", data.get("last_edition_date")),
-            edits=data.get("edits", _to_edits_migration(data.get("job_ids"))),
+            edits=data["edits"] if "edits" in data.keys() else _to_edits_migration(data.get("job_ids")),
             version=data["version"] if "version" in data.keys() else _version_migration(),
             validity_days=data["validity_days"],
             validity_seconds=data["validity_seconds"],

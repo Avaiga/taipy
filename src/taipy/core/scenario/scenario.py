@@ -24,9 +24,7 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._entity._submittable import _Submittable
-from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common import _utils
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -267,10 +265,6 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def version(self):
         return self._version
 
-    @version.setter
-    def version(self, val):
-        self._version = val
-
     @property
     def owner_id(self):
         return self._cycle.id
@@ -438,47 +432,6 @@ class Scenario(_Entity, _Submittable, _Labeled):
     #             raise NonExistingPipeline(pipeline_or_id)
     #         pipelines[p.config_id] = p
     #     return pipelines
-
-    @classmethod
-    def _to_model(cls, entity: Scenario) -> _ScenarioModel:
-        return _ScenarioModel(
-            id=entity.id,
-            config_id=entity.config_id,
-            tasks=cls.__to_task_ids(entity._tasks),
-            additional_data_nodes=cls.__to_data_node_ids(entity._additional_data_nodes),
-            properties=entity._properties.data,
-            creation_date=entity._creation_date.isoformat(),
-            primary_scenario=entity._primary_scenario,
-            subscribers=_utils._fcts_to_dict(entity._subscribers),
-            tags=list(entity._tags),
-            version=entity.version,
-            cycle=cls.__to_cycle_id(entity._cycle),
-        )
-
-    @classmethod
-    def _from_model(cls, model: _ScenarioModel):
-        scenario = Scenario(
-            scenario_id=model.id,
-            config_id=model.config_id,
-            tasks=set(model.tasks),
-            additional_data_nodes=set(model.additional_data_nodes),
-            properties=model.properties,
-            creation_date=datetime.fromisoformat(model.creation_date),
-            is_primary=model.primary_scenario,
-            tags=set(model.tags),
-            cycle=Scenario.__to_cycle(model.cycle),
-            subscribers=[
-                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
-                for it in model.subscribers
-            ],
-            version=model.version,
-        )
-        return _migrate_entity(scenario)
-
-    # TODO: TBD
-    # @staticmethod
-    # def __to_pipeline_ids(pipelines) -> List[PipelineId]:
-    #     return [p.id if isinstance(p, Pipeline) else p for p in pipelines]
 
     @staticmethod
     def __to_cycle(cycle_id: Optional[CycleId] = None) -> Optional[Cycle]:

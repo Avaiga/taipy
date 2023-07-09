@@ -18,7 +18,7 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
-from src.taipy.core import Core, CycleId, JobId, PipelineId, Scenario, ScenarioId, TaskId
+from src.taipy.core import Core, Cycle, CycleId, JobId, Pipeline, PipelineId, Scenario, ScenarioId, Task, TaskId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.job_config import JobConfig
@@ -26,6 +26,7 @@ from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import InvalidExportPath
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job import Job
@@ -55,6 +56,61 @@ class TestTaipy:
         with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._set") as mck:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
+
+    def test_is_submittable_is_called(self):
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.is_submittable(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
+            scenario = Scenario("scenario_config_id", [], {})
+            tp.is_submittable(scenario)
+            mck.assert_called_once_with(scenario)
+
+        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._is_submittable") as mck:
+            pipeline_id = PipelineId("PIPELINE_id")
+            tp.is_submittable(pipeline_id)
+            mck.assert_called_once_with(pipeline_id)
+
+        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._is_submittable") as mck:
+            pipeline = Pipeline("pipeline_config_id", {}, [])
+            tp.is_submittable(pipeline)
+            mck.assert_called_once_with(pipeline)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
+            task_id = TaskId("TASK_id")
+            tp.is_submittable(task_id)
+            mck.assert_called_once_with(task_id)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
+            task = Task("task_config_id", {}, print)
+            tp.is_submittable(task)
+            mck.assert_called_once_with(task)
+
+    def test_is_submittable(self):
+        current_date = datetime.datetime.now()
+
+        cycle = Cycle(Frequency.DAILY, {}, current_date, current_date, current_date)
+        scenario = Scenario("scenario_config_id", [], {})
+        pipeline = Pipeline("pipeline_config_id", {}, [])
+        task = Task("task_config_id", {}, print)
+        job = Job("job_id", task, "submit_id", scenario.id)
+        dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
+
+        _CycleManager._set(cycle)
+        _ScenarioManager._set(scenario)
+        _PipelineManager._set(pipeline)
+        _TaskManager._set(task)
+        _JobManager._set(job)
+        _DataManager._set(dn)
+
+        assert tp.is_submittable(scenario)
+        assert tp.is_submittable(pipeline)
+        assert tp.is_submittable(task)
+        assert not tp.is_submittable(cycle)
+        assert not tp.is_submittable(job)
+        assert not tp.is_submittable(dn)
 
     def test_submit(self, scenario, pipeline, task):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
@@ -115,6 +171,17 @@ class TestTaipy:
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
             scenario = Scenario("config_id", [], {})
             tp.is_deletable(scenario)
+            mck.assert_called_once_with(scenario)
+
+    def test_is_promotable(self):
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.is_promotable(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
+            scenario = Scenario("config_id", [], {})
+            tp.is_promotable(scenario)
             mck.assert_called_once_with(scenario)
 
     def test_delete_scenario(self):
@@ -236,15 +303,15 @@ class TestTaipy:
 
     def test_delete_job(self, task):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, False)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task, "submit_id")
+            job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, True)
             mck.assert_called_once_with(job, True)
 
@@ -269,8 +336,7 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", set([task_cfg_1]), set(), Frequency.DAILY)
 
         Core().run()
 
@@ -278,7 +344,7 @@ class TestTaipy:
         tp.submit(scenario_1)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            Config.configure_scenario("block_scenario", pipeline_cfg_1)
+            Config.configure_scenario("block_scenario", set([task_cfg_1]))
 
     def test_block_config_when_core_is_running_in_standalone_mode(self):
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
@@ -286,8 +352,7 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", set([task_cfg_1]), set(), Frequency.DAILY)
 
         Core().run()
 
@@ -295,7 +360,7 @@ class TestTaipy:
         tp.submit(scenario_1, wait=True)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            Config.configure_scenario("block_scenario", pipeline_cfg_1)
+            Config.configure_scenario("block_scenario", set([task_cfg_1]))
 
     def test_get_data_node(self, data_node):
         with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as mck:
@@ -343,8 +408,7 @@ class TestTaipy:
         task_config = Config.configure_task(
             "my_task", print, data_node_1_config, data_node_2_config, scope=Scope.SCENARIO
         )
-        pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
-        scenario_config = Config.configure_scenario("my_scenario", pipeline_config)
+        scenario_config = Config.configure_scenario("my_scenario", set([task_config]))
 
         Core().run()
         _CycleManager._set(cycle)
@@ -355,7 +419,6 @@ class TestTaipy:
         # Initial assertion
         assert len(_DataManager._get_all()) == 2
         assert len(_TaskManager._get_all()) == 1
-        assert len(_PipelineManager._get_all()) == 1
         assert len(_ScenarioManager._get_all()) == 1
         assert len(_CycleManager._get_all()) == 1
         assert len(_JobManager._get_all()) == 1
@@ -370,7 +433,6 @@ class TestTaipy:
         # Everything should be the same after clean_all_entities since clean_entities_enabled is False
         assert len(_DataManager._get_all()) == 2
         assert len(_TaskManager._get_all()) == 1
-        assert len(_PipelineManager._get_all()) == 1
         assert len(_ScenarioManager._get_all()) == 1
         assert len(_CycleManager._get_all()) == 1
         assert len(_JobManager._get_all()) == 1
@@ -384,7 +446,6 @@ class TestTaipy:
         assert len(_VersionManager._get_all()) == 0
         assert len(_DataManager._get_all()) == 0
         assert len(_TaskManager._get_all()) == 0
-        assert len(_PipelineManager._get_all()) == 0
         assert len(_ScenarioManager._get_all()) == 0
         assert len(_CycleManager._get_all()) == 0
         assert len(_JobManager._get_all()) == 0
@@ -396,14 +457,12 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", set([task_cfg_1]), set(), Frequency.DAILY)
 
         input_cfg_2 = Config.configure_data_node(id="i2", storage_type="pickle", default_data=2, scope=Scope.SCENARIO)
         output_cfg_2 = Config.configure_data_node(id="o2", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_2 = Config.configure_task("t2", print, input_cfg_2, output_cfg_2)
-        pipeline_cfg_2 = Config.configure_pipeline("p2", task_cfg_2)
-        scenario_cfg_2 = Config.configure_scenario("s2", pipeline_cfg_2, Frequency.DAILY)
+        scenario_cfg_2 = Config.configure_scenario("s2", set([task_cfg_2]), set(), Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
         job_1 = tp.submit(scenario_1)[0]
@@ -414,7 +473,6 @@ class TestTaipy:
             [f"{scenario_1.i1.id}.json", f"{scenario_1.o1.id}.json"]
         )
         assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_1.t1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/pipelines")) == sorted([f"{scenario_1.p1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
@@ -428,7 +486,6 @@ class TestTaipy:
             [f"{scenario_2.i2.id}.json", f"{scenario_2.o2.id}.json"]
         )
         assert sorted(os.listdir("./tmp/exp_scenario_2/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/pipelines")) == sorted([f"{scenario_2.p2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/scenarios")) == sorted([f"{scenario_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
@@ -437,7 +494,6 @@ class TestTaipy:
         tp.export_scenario(scenario_2.id, "./tmp/exp_scenario_1")
         # Should have the files as scenario 1 only
         assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/pipelines")) == sorted([f"{scenario_2.p2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
@@ -457,52 +513,44 @@ class TestTaipy:
         dn_config_1 = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node(id="d2", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_3 = Config.configure_data_node(id="d3", storage_type="in_memory", scope=Scope.SCENARIO)
+        dn_config_4 = Config.configure_data_node(id="d4", storage_type="in_memory", scope=Scope.SCENARIO)
         task_config_1 = Config.configure_task("t1", print, dn_config_1, dn_config_2)
         task_config_2 = Config.configure_task("t2", print, dn_config_2, dn_config_3)
-        pipeline_config_1 = Config.configure_pipeline("p1", task_config_1)
-        pipeline_config_2 = Config.configure_pipeline("p2", [task_config_1, task_config_2])
-        scenario_cfg_1 = Config.configure_scenario("s1", [pipeline_config_1, pipeline_config_2], Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario(
+            "s1", set([task_config_1, task_config_2]), set([dn_config_4]), Frequency.DAILY
+        )
 
         scenario = tp.create_scenario(scenario_cfg_1)
-        pipelines = scenario.pipelines
-        tasks = {}
-        for pipeline in pipelines.values():
-            tasks.update(pipeline.tasks)
+        tasks = scenario.tasks
 
         expected_parents = {
             "scenarios": {scenario},
-            "pipelines": {pipelines["p1"], pipelines["p2"]},
             "tasks": {tasks["t1"]},
         }
-        parents = tp.get_parents(scenario.pipelines["p1"].tasks["t1"].data_nodes["d1"])
+        parents = tp.get_parents(scenario.tasks["t1"].data_nodes["d1"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {
             "scenarios": {scenario},
-            "pipelines": {pipelines["p1"], pipelines["p2"]},
             "tasks": {tasks["t1"], tasks["t2"]},
         }
-        parents = tp.get_parents(scenario.pipelines["p1"].tasks["t1"].data_nodes["d2"])
+        parents = tp.get_parents(scenario.tasks["t1"].data_nodes["d2"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p2"]}, "tasks": {tasks["t2"]}}
-        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t2"].data_nodes["d3"])
-        assert_result_parents_and_expected_parents(parents, expected_parents)
-
-        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p1"], pipelines["p2"]}}
-        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t1"])
-        assert_result_parents_and_expected_parents(parents, expected_parents)
-
-        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p2"]}}
-        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t2"])
+        expected_parents = {"scenarios": {scenario}, "tasks": {tasks["t2"]}}
+        parents = tp.get_parents(scenario.tasks["t2"].data_nodes["d3"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {"scenarios": {scenario}}
-        parents = tp.get_parents(scenario.pipelines["p1"])
+        parents = tp.get_parents(scenario.tasks["t1"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {"scenarios": {scenario}}
-        parents = tp.get_parents(scenario.pipelines["p2"])
+        parents = tp.get_parents(scenario.tasks["t2"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {"scenarios": {scenario}}
+        parents = list(tp.get_parents(scenario.additional_data_nodes))[0]
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {}
@@ -516,13 +564,14 @@ class TestTaipy:
     def test_get_cycles_scenarios(self):
         scenario_cfg_1 = Config.configure_scenario(
             "s1",
-            [],
+            set(),
+            set(),
             Frequency.DAILY,
         )
-        scenario_cfg_2 = Config.configure_scenario("s2", [], Frequency.WEEKLY)
-        scenario_cfg_3 = Config.configure_scenario("s3", [], Frequency.MONTHLY)
-        scenario_cfg_4 = Config.configure_scenario("s4", [], Frequency.YEARLY)
-        scenario_cfg_5 = Config.configure_scenario("s5", [], None)
+        scenario_cfg_2 = Config.configure_scenario("s2", set(), set(), Frequency.WEEKLY)
+        scenario_cfg_3 = Config.configure_scenario("s3", set(), set(), Frequency.MONTHLY)
+        scenario_cfg_4 = Config.configure_scenario("s4", set(), set(), Frequency.YEARLY)
+        scenario_cfg_5 = Config.configure_scenario("s5", set(), set(), None)
 
         now = datetime.datetime.now()
         scenario_1_1 = tp.create_scenario(scenario_cfg_1, now)

@@ -12,7 +12,7 @@
 from datetime import datetime
 from typing import Optional
 
-from .._repository._v2._abstract_converter import _AbstractConverter
+from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
 from ..common import _utils
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -38,7 +38,7 @@ class _ScenarioConverter(_AbstractConverter):
             primary_scenario=scenario._primary_scenario,
             subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
-            version=scenario.version,
+            version=scenario._version,
             cycle=scenario._cycle.id if scenario._cycle else None,
         )
 

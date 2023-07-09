@@ -8,12 +8,13 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+from typing import Callable, Iterable, Optional
 from unittest import mock
 from unittest.mock import ANY
 
 import pytest
 
+from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common import _utils
@@ -119,6 +120,17 @@ def test_set_and_get_pipeline():
     assert _TaskManager._get(task_2.id).id == task_2.id
 
 
+def test_is_submittable():
+    assert len(_PipelineManager._get_all()) == 0
+    pipeline_config = Config.configure_pipeline("pipeline", [])
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+
+    assert len(_PipelineManager._get_all()) == 1
+    assert _PipelineManager._is_submittable(pipeline)
+    assert _PipelineManager._is_submittable(pipeline.id)
+    assert not _PipelineManager._is_submittable("Pipeline_temp")
+
+
 def test_submit():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
@@ -147,12 +159,18 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def _submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False, wait=False, timeout=None):
+        def _submit_task(
+            cls,
+            task: Task,
+            submit_id: Optional[str] = None,
+            submit_entity_id: Optional[str] = None,
+            callbacks: Optional[Iterable[Callable]] = None,
+            force: bool = False,
+        ):
             cls.submit_calls.append(task)
-            return None
+            return None  # type: ignore
 
     with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
-
         # pipeline does not exists. We expect an exception to be raised
         with pytest.raises(NonExistingPipeline):
             _PipelineManager._submit(pipeline.id)

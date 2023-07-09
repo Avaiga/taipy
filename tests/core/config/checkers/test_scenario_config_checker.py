@@ -21,6 +21,10 @@ from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
 
 
+def subtraction(n1, n2):
+    return n1 - n2
+
+
 class TestScenarioConfigChecker:
     def test_check_config_id(self, caplog):
         Config._collector = IssueCollector()
@@ -110,7 +114,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._tasks = ["bar"]
         with pytest.raises(SystemExit):
@@ -123,7 +127,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._tasks = ["bar", TaskConfig("bar", print)]
         with pytest.raises(SystemExit):
@@ -137,7 +141,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._tasks = [TaskConfig("bar", print)]
         Config._collector = IssueCollector()
@@ -210,7 +214,7 @@ class TestScenarioConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
     def test_check_frequency(self, caplog):
         config = Config._applied_config
@@ -233,7 +237,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 1
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"].frequency = 1
         with pytest.raises(SystemExit):
@@ -246,14 +250,14 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 1
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"].frequency = Frequency.DAILY
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 1
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
     def test_check_comparators(self, caplog):
         config = Config._applied_config
@@ -269,11 +273,52 @@ class TestScenarioConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 1
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
-        config._sections[ScenarioConfig.name]["new"].comparators = {"bar": "abc"}
-        Config._collector = IssueCollector()
-        Config.check()
-        assert len(Config._collector.errors) == 0
+        config._sections[ScenarioConfig.name]["new"].comparators = ["bar"]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
         assert len(Config._collector.warnings) == 1
         assert len(Config._collector.infos) == 0
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "comparators field of ScenarioConfig `new` must be populated with a dictionary value."
+            " Current value of property `comparators` is ['bar']."
+        )
+        assert expected_error_message in caplog.text
+
+        config._sections[ScenarioConfig.name]["new"].comparators = {"bar": 1}
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 0
+        assert len(Config._collector.errors) == 2
+        expected_data_node_id_error_message = (
+            "The key `bar` in comparators field of ScenarioConfig `new` must be populated with a valid data node"
+            " configuration id. Current value of property `comparators` is {'bar': 1}."
+        )
+        assert expected_data_node_id_error_message in caplog.text
+        expected_comparator_error_message = (
+            "The value of `bar` in comparators field of ScenarioConfig `new` must be populated with a list of"
+            " Callable values. Current value of property `comparators` is {'bar': 1}."
+        )
+        assert expected_comparator_error_message in caplog.text
+
+        Config.configure_data_node("foo", "in_memory")
+        Config.configure_data_node("bar", "in_memory")
+        config._sections[ScenarioConfig.name]["new"].comparators = {"bar": 1}
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 0
+        assert len(Config._collector.errors) == 1
+
+        config._sections[ScenarioConfig.name]["new"].comparators = {"foo": subtraction, "bar": [subtraction]}
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.warnings) == 1
+        assert len(Config._collector.infos) == 0
+        assert len(Config._collector.errors) == 0

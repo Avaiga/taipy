@@ -382,7 +382,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert len(scenario.subscribers) == 0
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
-        assert scenario.name == "qux"  # should be baz here
+        assert scenario.name == "baz"
 
     assert scenario_1.config_id == "foo"
     assert len(scenario_1.tasks) == 0

@@ -23,7 +23,7 @@ from src.taipy.core.task.task import Task, TaskId
 from taipy.config.common.scope import Scope
 
 
-def test_preserve_old_scenario_with_pipeline():
+def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     dn_manager = _DataManagerFactory._build_manager()
     task_manager = _TaskManagerFactory._build_manager()
     pipeline_manager = _PipelineManagerFactory._build_manager()

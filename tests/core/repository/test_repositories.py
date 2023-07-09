@@ -19,15 +19,15 @@ import pytest
 from src.taipy.core.exceptions.exceptions import InvalidExportPath
 from taipy.config.config import Config
 
-from .mocks import MockConverter, MockFSRepositoryV2, MockModel, MockObj, MockSQLRepositoryV2
+from .mocks import MockConverter, MockFSRepository, MockModel, MockObj, MockSQLRepository
 
 
 class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
+            (MockFSRepository, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_save_and_fetch_model(self, mock_repo, params):
@@ -41,8 +41,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
+            (MockFSRepository, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_get_all(self, mock_repo, params):
@@ -65,8 +65,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
+            (MockFSRepository, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_delete_all(self, mock_repo, params):
@@ -87,8 +87,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
+            (MockFSRepository, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_delete_many(self, mock_repo, params):
@@ -108,8 +108,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
+            (MockFSRepository, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     def test_search(self, mock_repo, params):
@@ -128,8 +128,8 @@ class TestRepositoriesStorage:
     @pytest.mark.parametrize(
         "mock_repo,params",
         [
-            (MockFSRepositoryV2, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
-            (MockSQLRepositoryV2, {"model_type": MockModel, "converter": MockConverter}),
+            (MockFSRepository, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
     @pytest.mark.parametrize("export_path", ["tmp"])
@@ -150,7 +150,7 @@ class TestRepositoriesStorage:
         r._export("uuid", export_path)
         assert pathlib.Path(os.path.join(export_path, "mock_model/uuid.json")).exists()
 
-        if mock_repo == MockFSRepositoryV2:
+        if mock_repo == MockFSRepository:
             with pytest.raises(InvalidExportPath):
                 r._export("uuid", Config.global_config.storage_folder)
 

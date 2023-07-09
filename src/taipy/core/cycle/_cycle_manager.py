@@ -17,7 +17,7 @@ from taipy.config.common.frequency import Frequency
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._repository._v2._abstract_repository import _AbstractRepository
+from .._repository._abstract_repository import _AbstractRepository
 from ..job._job_manager_factory import _JobManagerFactory
 from ..notification import EventEntityType, EventOperation, _publish_event
 from .cycle import Cycle

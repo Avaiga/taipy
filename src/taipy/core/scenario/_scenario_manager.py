@@ -17,7 +17,7 @@ from taipy.config import Config
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._repository._v2._abstract_repository import _AbstractRepository
+from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.scenario_config import ScenarioConfig
@@ -151,6 +151,12 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return scenario
 
     @classmethod
+    def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+        if isinstance(scenario, str):
+            scenario = cls._get(scenario)
+        return isinstance(scenario, Scenario)
+
+    @classmethod
     def _submit(
         cls,
         scenario: Union[Scenario, ScenarioId],
@@ -219,10 +225,19 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return primary_scenarios
 
     @classmethod
+    def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
+        if isinstance(scenario, str):
+            scenario = cls._get(scenario)
+        if scenario and not scenario.is_primary and scenario.cycle:
+            return True
+        return False
+
+    @classmethod
     def _set_primary(cls, scenario: Scenario):
         if scenario.cycle:
             primary_scenario = cls._get_primary(scenario.cycle)
-            if primary_scenario:
+            # To prevent SAME scenario updating out of Context Manager
+            if primary_scenario and primary_scenario != scenario:
                 primary_scenario.is_primary = False  # type: ignore
             scenario.is_primary = True  # type: ignore
         else:

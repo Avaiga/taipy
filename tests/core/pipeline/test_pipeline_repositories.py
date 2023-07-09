@@ -14,8 +14,8 @@ import os
 import pytest
 
 from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.pipeline._pipeline_fs_repository_v2 import _PipelineFSRepository
-from src.taipy.core.pipeline._pipeline_sql_repository_v2 import _PipelineSQLRepository
+from src.taipy.core.pipeline._pipeline_fs_repository import _PipelineFSRepository
+from src.taipy.core.pipeline._pipeline_sql_repository import _PipelineSQLRepository
 from src.taipy.core.pipeline.pipeline import Pipeline, PipelineId
 
 

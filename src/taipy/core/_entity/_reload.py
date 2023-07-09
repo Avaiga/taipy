@@ -29,7 +29,11 @@ class _Reloader:
     def _reload(self, manager: str, obj):
         if self._no_reload_context:
             return obj
-        return _get_manager(manager)._get(obj, obj)
+
+        entity = _get_manager(manager)._get(obj, obj)
+        if hasattr(entity, "_properties"):
+            entity._properties._entity_owner = obj
+        return entity
 
     def __enter__(self):
         self._no_reload_context = True
@@ -56,10 +60,18 @@ def _self_setter(manager):
         @functools.wraps(fct)
         def _do_set_entity(self, *args, **kwargs):
             fct(self, *args, **kwargs)
+            entity_manager = _get_manager(manager)
+            to_publish_event_parameters = [
+                entity_manager._EVENT_ENTITY_TYPE,
+                self.id,
+                EventOperation.UPDATE,
+                fct.__name__,
+            ]
             if not self._is_in_context:
-                entity_manager = _get_manager(manager)
                 entity_manager._set(self)
-                _publish_event(entity_manager._EVENT_ENTITY_TYPE, self.id, EventOperation.UPDATE, fct.__name__)
+                _publish_event(*to_publish_event_parameters)
+            else:
+                self._in_context_attributes_changed_collector.append(to_publish_event_parameters)
 
         return _do_set_entity
 

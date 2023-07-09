@@ -15,7 +15,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src.taipy.core._repository._filesystem_repository import _CustomDecoder, _CustomEncoder
+from src.taipy.core._repository._decoder import _Decoder
+from src.taipy.core._repository._encoder import _Encoder
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -27,7 +28,7 @@ def create_and_delete_json_file():
         "validity_period": timedelta(days=1),
     }
     with open("data.json", "w") as f:
-        json.dump(test_json_file, f, ensure_ascii=False, indent=4, cls=_CustomEncoder)
+        json.dump(test_json_file, f, ensure_ascii=False, indent=4, cls=_Encoder)
     yield
     os.unlink("data.json")
 
@@ -47,7 +48,7 @@ def test_json_encoder():
 
 def test_json_decoder():
     with open("data.json") as json_file:
-        data = json.load(json_file, cls=_CustomDecoder)
+        data = json.load(json_file, cls=_Decoder)
         assert data["name"] == "testing"
         assert data["default_data"] == "data for testing encoder"
         assert data["date"] == datetime(1991, 1, 1)

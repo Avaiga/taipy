@@ -13,10 +13,10 @@ import os
 
 import pytest
 
-from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
+from src.taipy.core.data._data_fs_repository import _DataFSRepository
 from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.task._task_fs_repository_v2 import _TaskFSRepository
-from src.taipy.core.task._task_sql_repository_v2 import _TaskSQLRepository
+from src.taipy.core.task._task_fs_repository import _TaskFSRepository
+from src.taipy.core.task._task_sql_repository import _TaskSQLRepository
 from src.taipy.core.task.task import Task, TaskId
 
 

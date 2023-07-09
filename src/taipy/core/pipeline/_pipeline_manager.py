@@ -16,7 +16,7 @@ from taipy.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._repository._v2._abstract_repository import _AbstractRepository
+from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.pipeline_config import PipelineConfig
@@ -97,6 +97,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
         task_manager = _TaskManagerFactory._build_manager()
         tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id)
+
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
         if scope == Scope.SCENARIO:
@@ -134,6 +135,12 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         task_manager = _TaskManagerFactory._build_manager()
         for i in tasks:
             task_manager._set(i)
+
+    @classmethod
+    def _is_submittable(cls, pipeline: Union[Pipeline, PipelineId]) -> bool:
+        if isinstance(pipeline, str):
+            pipeline = cls._get(pipeline)
+        return isinstance(pipeline, Pipeline)
 
     @classmethod
     def _submit(

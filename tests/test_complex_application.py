@@ -158,8 +158,8 @@ def test_complex():
     task_avg_div = Config.configure_task("task_avg_div", average, input=dn_div, output=output_csv_dn)
     task_avg_mult = Config.configure_task("task_avg_mult", average, input=dn_mult, output=output_excel_dn)
 
-    pipeline_sum_print_mul_print_avg_placeholder_mul = Config.configure_pipeline(
-        "pipeline",
+    scenario_config = Config.configure_scenario(
+        "scenario",
         [
             task_print_csv,
             task_print_excel,
@@ -173,8 +173,6 @@ def test_complex():
             task_avg_mult,
         ],
     )
-
-    scenario_config = Config.configure_scenario("scenario", [pipeline_sum_print_mul_print_avg_placeholder_mul])
 
     scenario = tp.create_scenario(scenario_config)
 

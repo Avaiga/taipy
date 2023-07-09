@@ -198,9 +198,10 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         return self._read_as_pandas_dataframe().to_numpy()
 
     def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
-        if columns:
-            return pd.read_sql_query(self._get_read_query(), con=self._get_engine())[columns]
-        return pd.read_sql_query(self._get_read_query(), con=self._get_engine())
+        with self._get_engine().connect() as conn:
+            if columns:
+                return pd.DataFrame(conn.execute(text(self._get_read_query())))[columns]
+            return pd.DataFrame(conn.execute(text(self._get_read_query())))
 
     def _read_as_modin_dataframe(self, columns: Optional[List[str]] = None):
         if columns:

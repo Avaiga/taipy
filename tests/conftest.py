@@ -20,7 +20,7 @@ import pytest
 from sqlalchemy import create_engine, text
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository._v2.db._sql_session import engine
+from src.taipy.core._repository.db import engine
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core._version._version_model import _VersionModel
@@ -137,12 +137,12 @@ def tmp_sqlite_db_file_path(tmpdir_factory):
     fn = tmpdir_factory.mktemp("data")
     db_name = "df"
     file_extension = ".db"
-
     db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
     conn = db.connect()
     conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.commit()
     conn.close()
     db.dispose()
 
@@ -160,6 +160,7 @@ def tmp_sqlite_sqlite3_file_path(tmpdir_factory):
     conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
     conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.commit()
     conn.close()
     db.dispose()
 
@@ -290,7 +291,7 @@ def pipeline():
 
 @pytest.fixture(scope="function")
 def job(task):
-    return Job(JobId("job"), task, "foo")
+    return Job(JobId("job"), task, "foo", "bar")
 
 
 @pytest.fixture(scope="function")
@@ -349,9 +350,9 @@ def init_config():
     Config.unblock_update()
     Config._default_config = _Config()._default_config()
     Config._python_config = _Config()
-    Config._file_config = None
-    Config._env_file_config = None
-    Config._applied_config = _Config._default_config()
+    Config._file_config = _Config()
+    Config._env_file_config = _Config()
+    Config._applied_config = _Config()
     Config._collector = IssueCollector()
     Config._serializer = _TomlSerializer()
     _Checker._checkers = [_GlobalConfigChecker]

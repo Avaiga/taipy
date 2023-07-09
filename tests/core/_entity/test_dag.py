@@ -12,7 +12,7 @@ from typing import List
 
 from src.taipy.core import DataNode, Pipeline, PipelineId, Task, TaskId
 from src.taipy.core._entity._dag import _DAG
-from taipy import Scope
+from taipy.config.common.scope import Scope
 
 
 def assert_x(x: int, *nodes):
@@ -233,3 +233,62 @@ class TestDAG:
         assert_edge_exists("s4", "t3", dag)
         assert_edge_exists("t3", "s5", dag)
         assert_edge_exists("t4", "s6", dag)
+
+    def test_get_dag_5(self):
+        data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+        data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+        task_1 = Task("baz", {}, print, [data_node_1], [data_node_2], TaskId("t1"))
+        pipeline = Pipeline("qux", {}, [task_1], PipelineId("p1"))
+
+        #  1  |
+        #  0  |  s1 __ t1 __ s2
+        #     |_________________
+        #         0    1     2
+        dag = pipeline._get_dag()
+
+        assert dag.length == 3
+        assert dag.width == 1
+        assert dag._grid_length == 3
+        assert dag._grid_width == 1
+        assert len(dag.nodes) == 3
+
+        assert_x_y(0, [0], dag.nodes["s1"])
+        assert_x_y(1, [0], dag.nodes["t1"])
+        assert_x_y(2, [0], dag.nodes["s2"])
+        assert len(dag.edges) == 2
+        assert_edge_exists("s1", "t1", dag)
+        assert_edge_exists("t1", "s2", dag)
+
+    def test_get_dag_6(self):
+        data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+        data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+        data_node_3 = DataNode("baz", Scope.SCENARIO, "s3")
+        data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+        task_1 = Task("quux", {}, print, [data_node_1, data_node_2], [data_node_3], TaskId("t1"))
+        task_2 = Task("quuz", {}, print, [data_node_2], [data_node_4], TaskId("t2"))
+        pipeline = Pipeline("corge", {}, [task_1, task_2], PipelineId("p1"))
+
+        #  2  |
+        #     |
+        #  1  |  s1 ___ t1 __ s3
+        #     |      /
+        #  0  |  s2 /__ t2 __ s4
+        #     |_________________
+        #         0     1     2
+        dag = pipeline._get_dag()
+
+        assert dag.length == 3
+        assert dag.width == 2
+        assert dag._grid_length == 3
+        assert dag._grid_width == 2
+        assert len(dag.nodes) == 6
+
+        assert_x_y(0, [0, 1], dag.nodes["s1"], dag.nodes["s2"])
+        assert_x_y(1, [0, 1], dag.nodes["t1"], dag.nodes["t2"])
+        assert_x_y(2, [0, 1], dag.nodes["s3"], dag.nodes["s4"])
+        assert len(dag.edges) == 5
+        assert_edge_exists("s1", "t1", dag)
+        assert_edge_exists("s2", "t1", dag)
+        assert_edge_exists("t1", "s3", dag)
+        assert_edge_exists("s2", "t2", dag)
+        assert_edge_exists("t2", "s4", dag)
