@@ -61,6 +61,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
 
+    def _exists(self, entity_id: str) -> bool:
+        return self.__get_path(entity_id).exists()
+
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def _load(self, entity_id: str) -> Entity:
         try:

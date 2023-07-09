@@ -30,6 +30,15 @@ class TestDataNodeRepository:
         assert isinstance(obj, DataNode)
 
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_exists(self, tmpdir, data_node, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(data_node)
+
+        assert repository._exists(data_node.id)
+        assert not repository._exists("not-existed-data-node")
+
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
     def test_load_all(self, tmpdir, data_node, repo):
         repository = repo()
         repository.base_path = tmpdir
