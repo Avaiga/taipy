@@ -150,30 +150,19 @@ class ScenarioConfig(Section):
         }
 
     @classmethod
-    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]) -> "ScenarioConfig":  # type: ignore
+    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config] = None) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
 
-        tasks = set()
-        additional_data_nodes = set()
-
-        if cls._TASKS_KEY in as_dict or cls._ADDITIONAL_DATA_NODES_KEY in as_dict:
-            if task_ids := as_dict.pop(cls._TASKS_KEY, None):
-                task_configs = config._sections[TaskConfig.name]  # type: ignore
-                for task_id in task_ids:
-                    if task_config := task_configs.get(task_id, None):
-                        tasks.add(task_config)
-            if additional_data_node_ids := as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, None):
-                data_node_configs = config._sections[DataNodeConfig.name]  # type: ignore
-                for additional_data_node_id in additional_data_node_ids:
-                    if additional_data_node_config := data_node_configs.get(additional_data_node_id, None):
-                        additional_data_nodes.add(additional_data_node_config)
+        if cls._TASKS_KEY in as_dict:
+            task_config_ids = as_dict.pop(cls._TASKS_KEY, list())
+            tasks = cls.__get_task_configs(task_config_ids, config)
         else:
             # Check if pipeline configs exist, if yes, migrate by getting all task configs and ignore pipeline configs
-            if pipeline_ids := as_dict.pop(cls._PIPELINES_KEY, None):
-                pipeline_configs = config._sections[PipelineConfig.name]  # type: ignore
-                for p_id in pipeline_ids:
-                    if pipeline_config := pipeline_configs.get(p_id, None):
-                        tasks.update(pipeline_config.tasks)
+            pipeline_config_ids = as_dict.pop(cls._PIPELINES_KEY, list())
+            tasks = cls.__get_task_configs_from_pipeline_configs(pipeline_config_ids, config)
+
+        additional_data_node_ids = as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, list())
+        additional_data_nodes = cls.__get_additional_data_node_configs(additional_data_node_ids, config)
 
         frequency = as_dict.pop(cls._FREQUENCY_KEY, None)
         comparators = as_dict.pop(cls._COMPARATOR_KEY, dict())
@@ -186,6 +175,36 @@ class ScenarioConfig(Section):
             comparators=comparators,
             **as_dict,
         )
+
+    @staticmethod
+    def __get_task_configs(task_config_ids: List[str], config: Optional[_Config]):
+        task_configs = set()
+        if config:
+            task_config_section = config._sections[TaskConfig.name]
+            for task_config_id in task_config_ids:
+                if task_config := task_config_section.get(task_config_id, None):
+                    task_configs.add(task_config)
+        return task_configs
+
+    @staticmethod
+    def __get_task_configs_from_pipeline_configs(pipeline_config_ids: List[str], config: Optional[_Config]):
+        task_configs = set()
+        if config:
+            pipeline_config_section = config._sections[PipelineConfig.name]
+            for pipeline_config_id in pipeline_config_ids:
+                if pipeline_config := pipeline_config_section.get(pipeline_config_id, None):
+                    task_configs.update(pipeline_config.tasks)
+        return task_configs
+
+    @staticmethod
+    def __get_additional_data_node_configs(additional_data_node_ids: List[str], config: Optional[_Config]):
+        additional_data_node_configs = set()
+        if config:
+            if data_node_config_section := config._sections.get(DataNodeConfig.name, None):
+                for additional_data_node_id in additional_data_node_ids:
+                    if additional_data_node_config := data_node_config_section.get(additional_data_node_id, None):
+                        additional_data_node_configs.add(additional_data_node_config)
+        return additional_data_node_configs
 
     def _update(self, as_dict: Dict[str, Any], default_section=None):
         self._tasks = as_dict.pop(self._TASKS_KEY, self._tasks)

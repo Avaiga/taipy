@@ -29,65 +29,67 @@ def _configure_scenario_in_toml():
         content="""
 [TAIPY]
 
-[PIPELINE.pipeline1]
-tasks = []
+[TASK.task1]
+inputs = []
+outputs = []
 
-[PIPELINE.pipeline2]
-tasks = []
+[TASK.task2]
+inputs = []
+outputs = []
 
 [SCENARIO.scenarios1]
-pipelines = [ "pipeline1:SECTION", "pipeline2:SECTION"]
+tasks = [ "task_1:SECTION", "task2:SECTION"]
     """
     )
 
 
-def _check_pipelines_instance(pipeline_id, scenario_id):
-    """Check if the pipeline instance in the pipeline config correctly points to the Config._applied_config,
+def _check_tasks_instance(task_id, scenario_id):
+    """Check if the task instance in the task config correctly points to the Config._applied_config,
     not the Config._python_config or the Config._file_config
     """
-    pipeline_config_applied_instance = Config.pipelines[pipeline_id]
-    for pipeline in Config.scenarios[scenario_id].pipelines:
-        if pipeline.id == pipeline_id:
-            pipeline_config_instance_via_scenario = pipeline
+    task_config_applied_instance = Config.tasks[task_id]
+    for task in Config.scenarios[scenario_id].tasks:
+        if task.id == task_id:
+            task_config_instance_via_scenario = task
 
-    pipeline_config_python_instance = None
+    task_config_python_instance = None
     if Config._python_config._sections.get("TASK", None):
-        pipeline_config_python_instance = Config._python_config._sections["TASK"][pipeline_id]
+        task_config_python_instance = Config._python_config._sections["TASK"][task_id]
 
-    pipeline_config_file_instance = None
+    task_config_file_instance = None
     if Config._file_config._sections.get("TASK", None):
-        pipeline_config_file_instance = Config._file_config._sections["TASK"][pipeline_id]
+        task_config_file_instance = Config._file_config._sections["TASK"][task_id]
 
-    assert pipeline_config_python_instance is not pipeline_config_applied_instance
-    assert pipeline_config_python_instance is not pipeline_config_instance_via_scenario
-    assert pipeline_config_file_instance is not pipeline_config_applied_instance
-    assert pipeline_config_file_instance is not pipeline_config_instance_via_scenario
-    assert pipeline_config_instance_via_scenario is pipeline_config_applied_instance
-
-
-def test_pipeline_instance_when_configure_scenario_in_python():
-    pipeline1_config = Config.configure_pipeline("pipeline1", [])
-    pipeline2_config = Config.configure_pipeline("pipeline2", [])
-    Config.configure_scenario("scenarios1", [pipeline1_config, pipeline2_config])
-
-    _check_pipelines_instance("pipeline1", "scenarios1")
-    _check_pipelines_instance("pipeline2", "scenarios1")
+    assert task_config_python_instance is not task_config_applied_instance
+    assert task_config_python_instance is not task_config_instance_via_scenario
+    assert task_config_file_instance is not task_config_applied_instance
+    assert task_config_file_instance is not task_config_instance_via_scenario
+    assert task_config_instance_via_scenario is task_config_applied_instance
 
 
-def test_pipeline_instance_when_configure_scenario_by_loading_toml():
+def test_task_instance_when_configure_scenario_in_python():
+    task1_config = Config.configure_task("task1", [])
+    task2_config = Config.configure_task("task2", print)
+    Config.configure_scenario("scenarios1", [task1_config, task2_config])
+
+    _check_tasks_instance("task1", "scenarios1")
+    _check_tasks_instance("task2", "scenarios1")
+
+
+def test_task_instance_when_configure_scenario_by_loading_toml():
     toml_config = _configure_scenario_in_toml()
     Config.load(toml_config.filename)
 
-    _check_pipelines_instance("pipeline1", "scenarios1")
-    _check_pipelines_instance("pipeline2", "scenarios1")
+    _check_tasks_instance("task1", "scenarios1")
+    _check_tasks_instance("task2", "scenarios1")
 
 
-def test_pipeline_instance_when_configure_scenario_by_overriding_toml():
+def test_task_instance_when_configure_scenario_by_overriding_toml():
     toml_config = _configure_scenario_in_toml()
     Config.override(toml_config.filename)
 
-    _check_pipelines_instance("pipeline1", "scenarios1")
-    _check_pipelines_instance("pipeline2", "scenarios1")
+    _check_tasks_instance("task1", "scenarios1")
+    _check_tasks_instance("task2", "scenarios1")
 
 
 def test_scenario_creation():
