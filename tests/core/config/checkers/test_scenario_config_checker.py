@@ -44,8 +44,7 @@ class TestScenarioConfigChecker:
         assert "config_id of ScenarioConfig `None` is empty" in caplog.text
         assert len(Config._collector.warnings) == 1
         assert "tasks field of ScenarioConfig `new` is empty." in caplog.text
-        assert len(Config._collector.infos) == 1
-        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
+        assert len(Config._collector.infos) == 0
 
         caplog.clear()
 
@@ -55,8 +54,7 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 1
         assert "tasks field of ScenarioConfig `new` is empty." in caplog.text
-        assert len(Config._collector.infos) == 1
-        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
+        assert len(Config._collector.infos) == 0
 
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
@@ -100,8 +98,7 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 1
         assert "tasks field of ScenarioConfig `new` is empty." in caplog.text
-        assert len(Config._collector.infos) == 1
-        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._tasks = "bar"
         with pytest.raises(SystemExit):
@@ -148,7 +145,7 @@ class TestScenarioConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
     def test_check_additional_data_node_configs(self, caplog):
 
@@ -166,8 +163,7 @@ class TestScenarioConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
-        assert "No scenario comparators defined for ScenarioConfig `new`." in caplog.text
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = "bar"
         with pytest.raises(SystemExit):
@@ -180,7 +176,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = ["bar"]
         with pytest.raises(SystemExit):
@@ -193,7 +189,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = ["bar", DataNodeConfig("bar")]
         with pytest.raises(SystemExit):
@@ -207,7 +203,7 @@ class TestScenarioConfigChecker:
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
-        assert len(Config._collector.infos) == 1
+        assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [DataNodeConfig("bar")]
         Config._collector = IssueCollector()
