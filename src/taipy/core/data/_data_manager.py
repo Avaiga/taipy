@@ -105,7 +105,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             raise InvalidDataNodeType(data_node_config.storage_type)
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = "all") -> List[DataNode]:
+    def _get_all(cls, version_number: Optional[str] = None) -> List[DataNode]:
         """
         Returns all entities.
         """

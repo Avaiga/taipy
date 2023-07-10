@@ -18,6 +18,7 @@ import pytest
 from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.common import _utils
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.config.job_config import JobConfig
@@ -153,6 +154,23 @@ def test_set_and_get_scenario(cycle):
     assert _ScenarioManager._get(scenario_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_2).pipelines) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
+
+
+def test_get_all_on_multiple_versions_environment():
+    scenario_v1 = Scenario("name_1", [], {}, ScenarioId("id_v1"), version="1.0")
+    scenario_v2 = Scenario("name_2", [], {}, ScenarioId("id_v2"), version="2.0")
+    _ScenarioManager._set(scenario_v1)
+    _ScenarioManager._set(scenario_v2)
+
+    _VersionManager._set_development_version("1.0")
+    scenarios = _ScenarioManager._get_all()
+    assert len(scenarios) == 1
+    assert scenarios[0].id == scenario_v1.id
+
+    _VersionManager._set_development_version("2.0")
+    scenarios = _ScenarioManager._get_all()
+    assert len(scenarios) == 1
+    assert scenarios[0].id == scenario_v2.id
 
 
 def test_create_scenario_does_not_modify_config():

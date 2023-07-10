@@ -14,6 +14,7 @@ import pathlib
 
 import pytest
 
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
@@ -275,6 +276,22 @@ class TestDataManager:
         assert len(_DataManager._get_all()) == 1
         assert dn.config_id == "foo"
         assert _DataManager._get(dn.id).config_id == "foo"
+
+    def test_get_all_on_multiple_versions_environment(self):
+        dn_v1 = InMemoryDataNode("config_id", Scope.SCENARIO, id=DataNodeId("id_v1"), version="1.0")
+        dn_v2 = InMemoryDataNode("config_id", Scope.SCENARIO, id=DataNodeId("id_v2"), version="2.0")
+        _DataManager._set(dn_v1)
+        _DataManager._set(dn_v2)
+
+        _VersionManager._set_development_version("1.0")
+        data_nodes = _DataManager._get_all()
+        assert len(data_nodes) == 1
+        assert data_nodes[0].id == dn_v1.id
+
+        _VersionManager._set_development_version("2.0")
+        data_nodes = _DataManager._get_all()
+        assert len(data_nodes) == 1
+        assert data_nodes[0].id == dn_v2.id
 
     def test_delete(self):
         dn_1 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_1")

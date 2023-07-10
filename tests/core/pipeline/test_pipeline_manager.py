@@ -8,15 +8,16 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from typing import Callable, Iterable, Optional
 from unittest import mock
 from unittest.mock import ANY
 
 import pytest
 
-from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.common import _utils
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.config.job_config import JobConfig
@@ -118,6 +119,23 @@ def test_set_and_get_pipeline():
     assert _PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
+
+
+def test_get_all_on_multiple_versions_environment():
+    pipeline_v1 = Pipeline("name_1", {}, [], PipelineId("id_v1"), version="1.0")
+    pipeline_v2 = Pipeline("name_2", {}, [], PipelineId("id_v2"), version="2.0")
+    _PipelineManager._set(pipeline_v1)
+    _PipelineManager._set(pipeline_v2)
+
+    _VersionManager._set_development_version("1.0")
+    pipelines = _PipelineManager._get_all()
+    assert len(pipelines) == 1
+    assert pipelines[0].id == pipeline_v1.id
+
+    _VersionManager._set_development_version("2.0")
+    pipelines = _PipelineManager._get_all()
+    assert len(pipelines) == 1
+    assert pipelines[0].id == pipeline_v2.id
 
 
 def test_is_submittable():

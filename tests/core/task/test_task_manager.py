@@ -16,6 +16,7 @@ import pytest
 
 from src.taipy.core import taipy
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
@@ -216,6 +217,23 @@ def test_set_and_get_task():
     assert _TaskManager._get(first_task).id == third_task_with_same_id_as_first_task.id
     assert _TaskManager._get(task_id_2).id == second_task.id
     assert _TaskManager._get(second_task).id == second_task.id
+
+
+def test_get_all_on_multiple_versions_environment():
+    task_v1 = Task("name_1", {}, print, [], [], id=TaskId("id_v1"), version="1.0")
+    task_v2 = Task("name_2", {}, print, [], [], id=TaskId("id_v2"), version="2.0")
+    _TaskManager._set(task_v1)
+    _TaskManager._set(task_v2)
+
+    _VersionManager._set_development_version("1.0")
+    tasks = _TaskManager._get_all()
+    assert len(tasks) == 1
+    assert tasks[0].id == task_v1.id
+
+    _VersionManager._set_development_version("2.0")
+    tasks = _TaskManager._get_all()
+    assert len(tasks) == 1
+    assert tasks[0].id == task_v2.id
 
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():

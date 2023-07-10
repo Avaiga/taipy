@@ -51,7 +51,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     _repository: _AbstractRepository
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = "all") -> List[Scenario]:
+    def _get_all(cls, version_number: Optional[str] = None) -> List[Scenario]:
         """
         Returns all entities.
         """
