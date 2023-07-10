@@ -9,8 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from pydoc import locate
-
 from ..exceptions.exceptions import InvalidExposedType
 
 
@@ -25,40 +23,3 @@ class _AbstractTabularDataNode(object):
                 f"Invalid string exposed type {exposed_type}. Supported values are "
                 f"{', '.join(valid_string_exposed_types)}"
             )
-
-    @staticmethod
-    def _serialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types) -> dict:
-        if exposed_type_key in properties.keys():
-            if not isinstance(properties[exposed_type_key], str):
-                if isinstance(properties[exposed_type_key], dict):
-                    properties[exposed_type_key] = {
-                        k: v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
-                        for k, v in properties[exposed_type_key].items()
-                    }
-                elif isinstance(properties[exposed_type_key], list):
-                    properties[exposed_type_key] = [
-                        v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
-                        for v in properties[exposed_type_key]
-                    ]
-                else:
-                    properties[
-                        exposed_type_key
-                    ] = f"{properties[exposed_type_key].__module__}.{properties[exposed_type_key].__qualname__}"
-        return properties
-
-    @staticmethod
-    def _deserialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types) -> dict:
-        if exposed_type_key in properties.keys():
-            if properties[exposed_type_key] not in valid_str_exposed_types:
-                if isinstance(properties[exposed_type_key], str):
-                    properties[exposed_type_key] = locate(properties[exposed_type_key])
-                elif isinstance(properties[exposed_type_key], dict):
-                    properties[exposed_type_key] = {
-                        k: v if v in valid_str_exposed_types else locate(v)
-                        for k, v in properties[exposed_type_key].items()
-                    }
-                elif isinstance(properties[exposed_type_key], list):
-                    properties[exposed_type_key] = [
-                        v if v in valid_str_exposed_types else locate(v) for v in properties[exposed_type_key]
-                    ]
-        return properties
