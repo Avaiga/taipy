@@ -554,16 +554,6 @@ class DataNode(_Entity, _Labeled):
 
         return {c.storage_type(): c for c in all_subclasses(DataNode) if c.storage_type() is not None}
 
-    @classmethod
-    @abstractmethod
-    def _serialize_datanode_properties(cls, datanode_properties: dict) -> dict:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def _deserialize_datanode_model_properties(cls, datanode_model_properties: dict) -> dict:
-        raise NotImplementedError
-
     def get_label(self) -> str:
         """Returns the data node simple label prefixed by its owner label.
 
