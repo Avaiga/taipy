@@ -43,12 +43,12 @@ class ScenarioCoreEventConsumerProcessor(CoreEventConsumerBase):
 
 class PipelineCreationCoreEventConsumerProcessor(CoreEventConsumerBase):
     def __init__(self, registration_id: str, queue: SimpleQueue):
-        self.pipeline_event_collected = 0
+        self.task_event_collected = 0
         self.creation_event_operation_collected = 0
         super().__init__(registration_id, queue)
 
     def process_event(self, event: Event):
-        self.pipeline_event_collected += 1
+        self.task_event_collected += 1
         self.creation_event_operation_collected += 1
 
 
@@ -60,7 +60,7 @@ def test_core_event_consumer():
     event_processor_1 = ScenarioCoreEventConsumerProcessor(register_id_1, register_queue_1)
 
     register_id_2, register_queue_2 = Notifier.register(
-        entity_type=EventEntityType.PIPELINE, operation=EventOperation.CREATION
+        entity_type=EventEntityType.TASK, operation=EventOperation.CREATION
     )
     event_processor_2 = PipelineCreationCoreEventConsumerProcessor(register_id_2, register_queue_2)
 
@@ -71,26 +71,25 @@ def test_core_event_consumer():
     Config.configure_global_app(clean_entities_enabled=True)
     dn_config = Config.configure_data_node("dn_config")
     task_config = Config.configure_task("task_config", print, [dn_config])
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
-    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config], frequency=Frequency.DAILY)
+    scenario_config = Config.configure_scenario("scenario_config", [task_config], frequency=Frequency.DAILY)
 
     scenario = tp.create_scenario(scenario_config)
 
-    assert_true_after_time(lambda: len(event_processor_0.event_type_collected) == 5, time=10)
-    assert_true_after_time(lambda: event_processor_0.event_operation_collected[EventOperation.CREATION] == 5, time=10)
+    assert_true_after_time(lambda: len(event_processor_0.event_type_collected) == 4, time=10)
+    assert_true_after_time(lambda: event_processor_0.event_operation_collected[EventOperation.CREATION] == 4, time=10)
     assert_true_after_time(lambda: event_processor_1.scenario_event_collected == 1, time=10)
     assert_true_after_time(lambda: event_processor_1.event_operation_collected[EventOperation.CREATION] == 1, time=10)
     assert_true_after_time(lambda: len(event_processor_1.event_operation_collected) == 1, time=10)
-    assert_true_after_time(lambda: event_processor_2.pipeline_event_collected == 1, time=10)
+    assert_true_after_time(lambda: event_processor_2.task_event_collected == 1, time=10)
     assert_true_after_time(lambda: event_processor_2.creation_event_operation_collected == 1, time=10)
 
     tp.delete(scenario.id)
-    assert_true_after_time(lambda: len(event_processor_0.event_type_collected) == 5, time=10)
-    assert_true_after_time(lambda: event_processor_0.event_operation_collected[EventOperation.DELETION] == 5, time=10)
+    assert_true_after_time(lambda: len(event_processor_0.event_type_collected) == 4, time=10)
+    assert_true_after_time(lambda: event_processor_0.event_operation_collected[EventOperation.DELETION] == 4, time=10)
     assert_true_after_time(lambda: event_processor_1.scenario_event_collected == 2, time=10)
     assert_true_after_time(lambda: event_processor_1.event_operation_collected[EventOperation.DELETION] == 1, time=10)
     assert_true_after_time(lambda: len(event_processor_1.event_operation_collected) == 2, time=10)
-    assert_true_after_time(lambda: event_processor_2.pipeline_event_collected == 1, time=10)
+    assert_true_after_time(lambda: event_processor_2.task_event_collected == 1, time=10)
     assert_true_after_time(lambda: event_processor_2.creation_event_operation_collected == 1, time=10)
 
     event_processor_0.stop()

@@ -60,14 +60,14 @@ class ScenarioConfig(Section):
     ):
 
         if tasks:
-            self._tasks = set(tasks) if isinstance(tasks, TaskConfig) else copy(tasks)
+            self._tasks = set(tasks) if isinstance(tasks, TaskConfig) or isinstance(tasks, List) else copy(tasks)
         else:
             self._tasks = set()
 
         if additional_data_nodes:
             self._additional_data_nodes = (
                 set(additional_data_nodes)
-                if isinstance(additional_data_nodes, DataNodeConfig)
+                if isinstance(additional_data_nodes, DataNodeConfig) or isinstance(additional_data_nodes, List)
                 else copy(additional_data_nodes)
             )
         else:
@@ -180,29 +180,29 @@ class ScenarioConfig(Section):
     def __get_task_configs(task_config_ids: List[str], config: Optional[_Config]):
         task_configs = set()
         if config:
-            task_config_section = config._sections[TaskConfig.name]
-            for task_config_id in task_config_ids:
-                if task_config := task_config_section.get(task_config_id, None):
-                    task_configs.add(task_config)
+            if task_config_section := config._sections.get(TaskConfig.name):
+                for task_config_id in task_config_ids:
+                    if task_config := task_config_section.get(task_config_id, None):
+                        task_configs.add(task_config)
         return task_configs
 
     @staticmethod
     def __get_task_configs_from_pipeline_configs(pipeline_config_ids: List[str], config: Optional[_Config]):
         task_configs = set()
         if config:
-            pipeline_config_section = config._sections[PipelineConfig.name]
-            for pipeline_config_id in pipeline_config_ids:
-                if pipeline_config := pipeline_config_section.get(pipeline_config_id, None):
-                    task_configs.update(pipeline_config.tasks)
+            if pipeline_config_section := config._sections.get(PipelineConfig.name):
+                for pipeline_config_id in pipeline_config_ids:
+                    if pipeline_config := pipeline_config_section.get(pipeline_config_id, None):
+                        task_configs.update(pipeline_config.tasks)
         return task_configs
 
     @staticmethod
     def __get_additional_data_node_configs(additional_data_node_ids: List[str], config: Optional[_Config]):
         additional_data_node_configs = set()
         if config:
-            if data_node_config_section := config._sections.get(DataNodeConfig.name, None):
+            if data_node_config_section := config._sections.get(DataNodeConfig.name):
                 for additional_data_node_id in additional_data_node_ids:
-                    if additional_data_node_config := data_node_config_section.get(additional_data_node_id, None):
+                    if additional_data_node_config := data_node_config_section.get(additional_data_node_id):
                         additional_data_node_configs.add(additional_data_node_config)
         return additional_data_node_configs
 

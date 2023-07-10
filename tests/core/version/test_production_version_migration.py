@@ -116,36 +116,38 @@ def test_migrate_task_in_standalone_mode():
         core.stop()
 
 
-def test_migrate_pipeline():
-    scenario_v1 = submit_v1()
+# TODO: TBD?
 
-    init_config()
-    Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
+# def test_migrate_pipeline():
+#     scenario_v1 = submit_v1()
 
-    submit_v2()
-    v1 = taipy.get(scenario_v1.id)
-    assert v1.my_pipeline.version == "2.0"
-    assert v1.my_pipeline.properties["foo"] == "bar"
+#     init_config()
+#     Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
+
+#     submit_v2()
+#     v1 = taipy.get(scenario_v1.id)
+#     assert v1.my_pipeline.version == "2.0"
+#     assert v1.my_pipeline.properties["foo"] == "bar"
 
 
-def test_migrate_pipeline_in_standalone_mode():
-    scenario_v1 = submit_v1()
+# def test_migrate_pipeline_in_standalone_mode():
+#     scenario_v1 = submit_v1()
 
-    init_config()
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
-    Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
+#     init_config()
+#     Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+#     Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
 
-    scenario_cfg_v2 = config_scenario_v2()
-    with patch("sys.argv", ["prog", "--production", "2.0"]):
-        core = Core()
-        core.run()
-        scenario_v2 = _ScenarioManager._create(scenario_cfg_v2)
-        jobs = _ScenarioManager._submit(scenario_v2)
-        v1 = taipy.get(scenario_v1.id)
-        assert v1.my_pipeline.version == "2.0"
-        assert v1.my_pipeline.properties["foo"] == "bar"
-        assert_true_after_time(jobs[0].is_completed)
-        core.stop()
+#     scenario_cfg_v2 = config_scenario_v2()
+#     with patch("sys.argv", ["prog", "--production", "2.0"]):
+#         core = Core()
+#         core.run()
+#         scenario_v2 = _ScenarioManager._create(scenario_cfg_v2)
+#         jobs = _ScenarioManager._submit(scenario_v2)
+#         v1 = taipy.get(scenario_v1.id)
+#         assert v1.my_pipeline.version == "2.0"
+#         assert v1.my_pipeline.properties["foo"] == "bar"
+#         assert_true_after_time(jobs[0].is_completed)
+#         core.stop()
 
 
 def test_migrate_scenario():
@@ -186,7 +188,6 @@ def test_migrate_all_entities():
     init_config()
     Config.add_migration_function("2.0", "d1", migrate_pickle_path)
     Config.add_migration_function("2.0", "my_task", migrate_skippable_task)
-    Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
     Config.add_migration_function("2.0", "my_scenario", migrate_foo_scenario)
 
     submit_v2()
@@ -194,12 +195,9 @@ def test_migrate_all_entities():
 
     assert v1.d1.version == "2.0"
     assert v1.my_task.version == "2.0"
-    assert v1.my_pipeline.version == "2.0"
-    assert v1.my_pipeline.version == "2.0"
 
     assert v1.d1.path == "bar.pkl"
     assert v1.my_task.skippable is True
-    assert v1.my_pipeline.properties["foo"] == "bar"
     assert v1.properties["foo"] == "bar"
 
 
@@ -300,8 +298,7 @@ def config_scenario_v1():
     dn1 = Config.configure_pickle_data_node(id="d1", default_data=1, scope=Scope.GLOBAL)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", twice, dn1, dn2)
-    pipeline_cfg = Config.configure_pipeline("my_pipeline", task_cfg)
-    scenario_cfg = Config.configure_scenario("my_scenario", pipeline_cfg)
+    scenario_cfg = Config.configure_scenario("my_scenario", [task_cfg])
     return scenario_cfg
 
 
@@ -309,6 +306,5 @@ def config_scenario_v2():
     dn1 = Config.configure_pickle_data_node(id="d1", default_data=2, scope=Scope.GLOBAL)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", triple, dn1, dn2)
-    pipeline_cfg = Config.configure_pipeline("my_pipeline", task_cfg)
-    scenario_cfg = Config.configure_scenario("my_scenario", pipeline_cfg)
+    scenario_cfg = Config.configure_scenario("my_scenario", [task_cfg])
     return scenario_cfg

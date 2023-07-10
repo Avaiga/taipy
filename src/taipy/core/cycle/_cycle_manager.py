@@ -111,18 +111,20 @@ class _CycleManager(_Manager[Cycle]):
 
         scenarios = _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle)
 
+        # TODO: remove pipeline attribute here
+
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)
-            for pipeline in scenario.pipelines.values():
-                owner_ids = {pipeline.id, scenario.id, cycle.id}
-                if pipeline.owner_id in owner_ids:
-                    entity_ids.pipeline_ids.add(pipeline.id)
-                for task in pipeline.tasks.values():
-                    if task.owner_id in owner_ids:
-                        entity_ids.task_ids.add(task.id)
-                    for data_node in task.data_nodes.values():
-                        if data_node.owner_id in owner_ids:
-                            entity_ids.data_node_ids.add(data_node.id)
+            # for pipeline in scenario.pipelines.values():
+            owner_ids = {scenario.id, cycle.id}
+            #     if pipeline.owner_id in owner_ids:
+            #         entity_ids.pipeline_ids.add(pipeline.id)
+            for task in scenario.tasks.values():
+                if task.owner_id in owner_ids:
+                    entity_ids.task_ids.add(task.id)
+                for data_node in task.data_nodes.values():
+                    if data_node.owner_id in owner_ids:
+                        entity_ids.data_node_ids.add(data_node.id)
 
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:

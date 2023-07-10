@@ -115,9 +115,13 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             else None
         )
         cycle_id = cycle.id if cycle else None
-        tasks = _task_manager._bulk_get_or_create(config.task_configs, cycle_id, scenario_id)
-        additional_data_nodes = _data_manager._bulk_get_or_create(
-            config.additional_data_node_configs, cycle_id, scenario_id
+        tasks = (
+            _task_manager._bulk_get_or_create(config.task_configs, cycle_id, scenario_id) if config.task_configs else []
+        )
+        additional_data_nodes = (
+            _data_manager._bulk_get_or_create(config.additional_data_node_configs, cycle_id, scenario_id)
+            if config.additional_data_node_configs
+            else {}
         )
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False

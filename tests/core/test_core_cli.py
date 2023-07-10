@@ -117,7 +117,6 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Initial assertion
     assert len(_DataManager._get_all(version_number="all")) == 2
     assert len(_TaskManager._get_all(version_number="all")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 1
     assert len(_ScenarioManager._get_all(version_number="all")) == 1
     assert len(_CycleManager._get_all(version_number="all")) == 1
     assert len(_JobManager._get_all(version_number="all")) == 1
@@ -131,7 +130,6 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Assert number of entities in 2nd version
     assert len(_DataManager._get_all(version_number="all")) == 4
     assert len(_TaskManager._get_all(version_number="all")) == 2
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
     assert len(_ScenarioManager._get_all(version_number="all")) == 2
     assert (
         len(_CycleManager._get_all(version_number="all")) == 1
@@ -145,7 +143,6 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # The 1st dev version should be deleted run with development mode
     assert len(_DataManager._get_all(version_number="all")) == 2
     assert len(_TaskManager._get_all(version_number="all")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 1
     assert len(_ScenarioManager._get_all(version_number="all")) == 1
     assert len(_CycleManager._get_all(version_number="all")) == 1
     assert len(_JobManager._get_all(version_number="all")) == 1
@@ -157,7 +154,6 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Assert number of entities with 1 dev version and 1 exp version
     assert len(_DataManager._get_all(version_number="all")) == 4
     assert len(_TaskManager._get_all(version_number="all")) == 2
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
     assert len(_ScenarioManager._get_all(version_number="all")) == 2
     assert len(_CycleManager._get_all(version_number="all")) == 1
     assert len(_JobManager._get_all(version_number="all")) == 2
@@ -165,14 +161,12 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Assert number of entities of the latest version only
     assert len(_DataManager._get_all(version_number="latest")) == 2
     assert len(_TaskManager._get_all(version_number="latest")) == 1
-    assert len(_PipelineManager._get_all(version_number="latest")) == 1
     assert len(_ScenarioManager._get_all(version_number="latest")) == 1
     assert len(_JobManager._get_all(version_number="latest")) == 1
 
     # Assert number of entities of the development version only
     assert len(_DataManager._get_all(version_number="development")) == 2
     assert len(_TaskManager._get_all(version_number="development")) == 1
-    assert len(_PipelineManager._get_all(version_number="development")) == 1
     assert len(_ScenarioManager._get_all(version_number="development")) == 1
     assert len(_JobManager._get_all(version_number="development")) == 1
 
@@ -199,8 +193,7 @@ def test_dev_mode_clean_all_entities_when_config_is_alternated():
     )
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice_doppelganger, data_node_1_config, data_node_2_config)
-    pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
-    scenario_config = Config.configure_scenario("my_scenario", pipeline_config, frequency=Frequency.DAILY)
+    scenario_config = Config.configure_scenario("my_scenario", [task_config], frequency=Frequency.DAILY)
 
     # Create a scenario in development mode with the doppelganger function
     with patch("sys.argv", ["prog"]):
@@ -299,7 +292,6 @@ def test_production_mode_load_all_entities_from_previous_production_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -316,7 +308,6 @@ def test_production_mode_load_all_entities_from_previous_production_version():
 
     assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
@@ -337,7 +328,6 @@ def test_force_override_experiment_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -364,7 +354,6 @@ def test_force_override_experiment_version():
 
     assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
@@ -387,7 +376,6 @@ def test_force_override_production_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -414,7 +402,6 @@ def test_force_override_production_version():
 
     assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
@@ -431,7 +418,6 @@ def test_clean_experiment_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -445,7 +431,6 @@ def test_clean_experiment_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -462,7 +447,6 @@ def test_clean_production_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -476,7 +460,6 @@ def test_clean_production_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -536,9 +519,9 @@ def test_modify_config_properties_without_force(caplog):
     assert 'Global Configuration "repository_type" was modified' in error_message
     assert 'JOB "mode" was modified' in error_message
     assert 'JOB "max_nb_of_workers" was modified' in error_message
-    assert 'PIPELINE "my_pipeline" has attribute "tasks" modified' in error_message
+    # assert 'PIPELINE "my_pipeline" has attribute "tasks" modified' in error_message
     assert 'SCENARIO "my_scenario" has attribute "frequency" modified' in error_message
-    assert 'SCENARIO "my_scenario" has attribute "pipelines" modified' in error_message
+    assert 'SCENARIO "my_scenario" has attribute "tasks" modified' in error_message
     assert 'TASK "my_task" has attribute "inputs" modified' in error_message
     assert 'TASK "my_task" has attribute "function" modified' in error_message
     assert 'TASK "my_task" has attribute "outputs" modified' in error_message
@@ -559,8 +542,7 @@ def config_scenario():
     )
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice, data_node_1_config, data_node_2_config)
-    pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
-    scenario_config = Config.configure_scenario("my_scenario", pipeline_config, frequency=Frequency.DAILY)
+    scenario_config = Config.configure_scenario("my_scenario", [task_config], frequency=Frequency.DAILY)
 
     return scenario_config
 
@@ -591,14 +573,9 @@ def config_scenario_2():
         id="d3", storage_type="csv", default_path="baz.csv", has_header=False, exposed_type="numpy"
     )
     # Modify properties of "my_task", including the function and outputs list
-    task_config = Config.configure_task(
-        "my_task", double_twice, data_node_3_config, [data_node_1_config, data_node_2_config]
-    )
-    # Modify properties of "my_pipeline", where tasks is now a list
-    pipeline_config = Config.configure_pipeline("my_pipeline", [task_config, task_config])
-    # Modify properties of "my_scenario", where pipelines is now a list
-    scenario_config = Config.configure_scenario(
-        "my_scenario", [pipeline_config, pipeline_config], frequency=Frequency.MONTHLY
-    )
+    Config.configure_task("my_task", double_twice, data_node_3_config, [data_node_1_config, data_node_2_config])
+    task_config_1 = Config.configure_task("my_task_1", double_twice, data_node_3_config, [data_node_2_config])
+    # Modify properties of "my_scenario", where tasks is now my_task_1
+    scenario_config = Config.configure_scenario("my_scenario", [task_config_1], frequency=Frequency.MONTHLY)
 
     return scenario_config

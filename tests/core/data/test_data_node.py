@@ -260,9 +260,7 @@ class TestDataNode:
         task_a_b = Config.configure_task("task_a_b", funct_a_b, input=a, output=b, skippable=True)
         task_b_c = Config.configure_task("task_b_c", funct_b_c, input=b, output=c)
         task_b_d = Config.configure_task("task_b_d", funct_b_d, input=b, output=d)
-        pipeline_c = Config.configure_pipeline("pipeline_c", [task_a_b, task_b_c])
-        pipeline_d = Config.configure_pipeline("pipeline_d", [task_a_b, task_b_d])
-        scenario_cfg = Config.configure_scenario("scenario", [pipeline_c, pipeline_d])
+        scenario_cfg = Config.configure_scenario("scenario", [task_a_b, task_b_c, task_b_d])
 
         _OrchestratorFactory._build_dispatcher()
 
@@ -273,7 +271,9 @@ class TestDataNode:
         assert scenario.C.read() == "C"
         assert scenario.D.read() == "D"
 
-        assert len(tp.get_jobs()) == 4
+        scenario.submit()
+
+        assert len(tp.get_jobs()) == 6
         jobs_and_status = [(job.task.config_id, job.status) for job in tp.get_jobs()]
         assert ("task_a_b", tp.Status.COMPLETED) in jobs_and_status
         assert ("task_a_b", tp.Status.SKIPPED) in jobs_and_status

@@ -16,6 +16,7 @@ from unittest.mock import ANY, patch
 import pytest
 
 from src.taipy.core import Job
+from src.taipy.core import taipy as tp
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common import _utils
@@ -29,7 +30,6 @@ from src.taipy.core.exceptions.exceptions import (
     DifferentScenarioConfigs,
     InsufficientScenarioToCompare,
     NonExistingComparator,
-    NonExistingPipeline,
     NonExistingScenario,
     NonExistingScenarioConfig,
     NonExistingTask,
@@ -315,75 +315,73 @@ def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
 
     # TODO: assign scenario as parent of tasks and additional data nodes
 
-    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
-    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
+    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.GLOBAL)
+    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.GLOBAL)
     dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.SCENARIO)
+    additional_dn_config_1 = Config.configure_data_node("additional_dn_1", "in_memory", scope=Scope.GLOBAL)
+    additional_dn_config_2 = Config.configure_data_node("additional_dn_2", "in_memory", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("task_1", print, [dn_config_1], [dn_config_2])
     task_config_2 = Config.configure_task("task_2", print, [dn_config_2], [dn_config_3])
     task_config_3 = Config.configure_task("task_3", print, [dn_config_2], [dn_config_3])
-    pipeline_config_1 = Config.configure_pipeline("pipeline_1", [task_config_1, task_config_2])
-    pipeline_config_2 = Config.configure_pipeline("pipeline_2", [task_config_1, task_config_3])
+    scenario_config_1 = Config.configure_scenario(
+        "scenario_1", [task_config_1, task_config_2], [additional_dn_config_1, additional_dn_config_2]
+    )
+    scenario_config_2 = Config.configure_scenario(
+        "scenario_2", [task_config_1, task_config_3], [additional_dn_config_1, additional_dn_config_2]
+    )
 
-    scenario_config_1 = Config.configure_scenario("scenario_1", [pipeline_config_1])
-    scenario_config_2 = Config.configure_scenario("scenario_2", [pipeline_config_1, pipeline_config_2])
+    scenario_1 = _ScenarioManager._create(scenario_config_1)
+    tasks = scenario_1.tasks.values()
+    assert all([task.parent_ids == {scenario_1.id} for task in tasks])
+    data_nodes = {}
+    for task in tasks:
+        data_nodes.update(task.data_nodes)
+    assert data_nodes["dn_1"].parent_ids == {scenario_1.tasks["task_1"].id}
+    assert data_nodes["dn_2"].parent_ids == {scenario_1.tasks["task_1"].id, scenario_1.tasks["task_2"].id}
+    assert data_nodes["dn_3"].parent_ids == {scenario_1.tasks["task_2"].id}
+    # assert all([task.parent_ids == {scenario_1.id} for task in scenario_1.additional_data_nodes.values.value])
 
-    pipeline = _PipelineManager._get_or_create(pipeline_config_1, None, "scenario_id")
+    scenario_2 = _ScenarioManager._create(scenario_config_2)
+    tasks = {**scenario_1.tasks, **scenario_2.tasks}
+    assert tasks["task_1"].parent_ids == {scenario_1.id, scenario_2.id}
+    assert tasks["task_2"].parent_ids == {scenario_1.id}
+    assert tasks["task_3"].parent_ids == {scenario_2.id}
 
-    assert pipeline.parent_ids == {"scenario_id"}
-    assert all([task.parent_ids == {pipeline.id} for task in pipeline.tasks.values()])
-
-    _PipelineManager._delete_all()
-
-    scenario = _ScenarioManager._create(scenario_config_1)
-    pipelines = scenario.pipelines.values()
-    assert all([pipeline.parent_ids == {scenario.id} for pipeline in pipelines])
-    for pipeline in pipelines:
-        assert all([task.parent_ids == {pipeline.id} for task in pipeline.tasks.values()])
-
-    scenario = _ScenarioManager._create(scenario_config_2)
-    pipelines = scenario.pipelines
-    assert all([pipeline.parent_ids == {scenario.id} for pipeline in pipelines.values()])
-    tasks = {}
-    for pipeline in pipelines.values():
-        tasks.update(pipeline.tasks)
-    assert tasks["task_1"].parent_ids == {pipelines["pipeline_1"].id, pipelines["pipeline_2"].id}
-    assert tasks["task_2"].parent_ids == {pipelines["pipeline_1"].id}
-    assert tasks["task_3"].parent_ids == {pipelines["pipeline_2"].id}
-
-    _ScenarioManager._hard_delete(scenario.id)
+    _ScenarioManager._hard_delete(scenario_1.id)
+    _ScenarioManager._hard_delete(scenario_2.id)
+    _TaskManager._delete_all()
+    _DataManager._delete_all()
 
     dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.GLOBAL)
     dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.GLOBAL)
     dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.GLOBAL)
+    additional_dn_config_1 = Config.configure_data_node("additional_dn_1", "in_memory", scope=Scope.GLOBAL)
+    additional_dn_config_2 = Config.configure_data_node("additional_dn_2", "in_memory", scope=Scope.SCENARIO)
     task_config_1 = Config.configure_task("task_1", print, [dn_config_1], [dn_config_2])
     task_config_2 = Config.configure_task("task_2", print, [dn_config_2], [dn_config_3])
     task_config_3 = Config.configure_task("task_3", print, [dn_config_2], [dn_config_3])
-    pipeline_config_1 = Config.configure_pipeline("pipeline_1", [task_config_1, task_config_2])
-    pipeline_config_2 = Config.configure_pipeline("pipeline_2", [task_config_1, task_config_3])
-
-    scenario_config_1 = Config.configure_scenario("scenario_1", [pipeline_config_1])
-    scenario_config_2 = Config.configure_scenario("scenario_2", [pipeline_config_1, pipeline_config_2])
+    scenario_config_1 = Config.configure_scenario(
+        "scenario_1", [task_config_1, task_config_2], [additional_dn_config_1, additional_dn_config_2]
+    )
+    scenario_config_2 = Config.configure_scenario(
+        "scenario_2", [task_config_1, task_config_2, task_config_3], [additional_dn_config_1, additional_dn_config_2]
+    )
 
     scenario_1 = _ScenarioManager._create(scenario_config_1)
-    assert scenario_1.pipelines["pipeline_1"].parent_ids == {scenario_1.id}
-    tasks = {}
-    for pipeline in scenario_1.pipelines.values():
-        tasks.update(pipeline.tasks)
-    assert tasks["task_1"].parent_ids == {scenario_1.pipelines["pipeline_1"].id}
-    assert tasks["task_2"].parent_ids == {scenario_1.pipelines["pipeline_1"].id}
+    tasks = scenario_1.tasks.values()
+    assert all([task.parent_ids == {scenario_1.id} for task in tasks])
+    data_nodes = {}
+    for task in tasks:
+        data_nodes.update(task.data_nodes)
+    assert data_nodes["dn_1"].parent_ids == {scenario_1.tasks["task_1"].id}
+    assert data_nodes["dn_2"].parent_ids == {scenario_1.tasks["task_1"].id, scenario_1.tasks["task_2"].id}
+    assert data_nodes["dn_3"].parent_ids == {scenario_1.tasks["task_2"].id}
 
     scenario_2 = _ScenarioManager._create(scenario_config_2)
-    assert scenario_1.pipelines["pipeline_1"].parent_ids == {scenario_1.id, scenario_2.id}
-    assert scenario_2.pipelines["pipeline_1"].parent_ids == {scenario_1.id, scenario_2.id}
-    assert scenario_2.pipelines["pipeline_2"].parent_ids == {scenario_2.id}
-
-    tasks = {}
-    for pipeline in scenario_2.pipelines.values():
-        tasks.update(pipeline.tasks)
-
-    assert tasks["task_1"].parent_ids == {scenario_2.pipelines["pipeline_1"].id, scenario_2.pipelines["pipeline_2"].id}
-    assert tasks["task_2"].parent_ids == {scenario_2.pipelines["pipeline_1"].id}
-    assert tasks["task_3"].parent_ids == {scenario_2.pipelines["pipeline_2"].id}
+    tasks = {**scenario_1.tasks, **scenario_2.tasks}
+    assert tasks["task_1"].parent_ids == {scenario_1.id, scenario_2.id}
+    assert tasks["task_2"].parent_ids == {scenario_1.id, scenario_2.id}
+    assert tasks["task_3"].parent_ids == {scenario_2.id}
 
 
 def mult_by_2(nb: int):
