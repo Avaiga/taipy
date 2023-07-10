@@ -31,7 +31,9 @@ class _Reloader:
             return obj
 
         entity = _get_manager(manager)._get(obj, obj)
-        if hasattr(entity, "_properties"):
+        if obj._is_in_context and hasattr(entity, "_properties"):
+            if obj._properties._pending_changes:
+                entity._properties._pending_changes = obj._properties._pending_changes
             entity._properties._entity_owner = obj
         return entity
 
@@ -68,7 +70,9 @@ def _self_setter(manager):
                 fct.__name__,
             ]
             if not self._is_in_context:
-                entity_manager._set(self)
+                entity = _Reloader()._reload(manager, self)
+                fct(entity, *args, **kwargs)
+                entity_manager._set(entity)
                 _publish_event(*to_publish_event_parameters)
             else:
                 self._in_context_attributes_changed_collector.append(to_publish_event_parameters)

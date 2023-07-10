@@ -165,7 +165,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             self.write(default_value)
 
         if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
-            self.last_edit_date = datetime.now()  # type: ignore
+            self._last_edit_date = datetime.now()
 
     @classmethod
     def storage_type(cls) -> str:

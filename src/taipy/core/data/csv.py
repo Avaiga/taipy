@@ -120,7 +120,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         properties[self.__PATH_KEY] = self._path
 
         if not self._last_edit_date and isfile(self._path):
-            self.last_edit_date = datetime.now()  # type: ignore
+            self._last_edit_date = datetime.now()
         if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
 

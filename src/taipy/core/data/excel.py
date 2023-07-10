@@ -134,7 +134,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             self.write(default_value)
 
         if not self._last_edit_date and isfile(self._path):
-            self.last_edit_date = datetime.now()  # type: ignore
+            self._last_edit_date = datetime.now()
 
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)
