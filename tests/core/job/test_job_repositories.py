@@ -13,12 +13,12 @@ import os
 
 import pytest
 
-from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
+from src.taipy.core.data._data_fs_repository import _DataFSRepository
 from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.job._job_fs_repository_v2 import _JobFSRepository
-from src.taipy.core.job._job_sql_repository_v2 import _JobSQLRepository
+from src.taipy.core.job._job_fs_repository import _JobFSRepository
+from src.taipy.core.job._job_sql_repository import _JobSQLRepository
 from src.taipy.core.job.job import Job, JobId, Task
-from src.taipy.core.task._task_fs_repository_v2 import _TaskFSRepository
+from src.taipy.core.task._task_fs_repository import _TaskFSRepository
 
 
 class TestJobRepository:
@@ -35,6 +35,19 @@ class TestJobRepository:
 
         obj = repository._load(job.id)
         assert isinstance(obj, Job)
+
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_exists(self, tmpdir, data_node, job, repo):
+        _DataFSRepository()._save(data_node)
+        task = Task("task_config_id", {}, print, [data_node], [data_node])
+        _TaskFSRepository()._save(task)
+        job._task = task
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(job)
+
+        assert repository._exists(job.id)
+        assert not repository._exists("not-existed-job")
 
     @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
     def test_load_all(self, tmpdir, data_node, job, repo):

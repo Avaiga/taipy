@@ -14,8 +14,8 @@ from typing import Any, Dict
 
 from sqlalchemy import Boolean, Column, String, Table
 
-from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import mapper_registry
+from .._repository._base_taipy_model import _BaseModel
+from .._repository.db._sql_base_model import mapper_registry
 
 
 @mapper_registry.mapped

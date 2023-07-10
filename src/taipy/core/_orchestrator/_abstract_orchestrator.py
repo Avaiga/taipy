@@ -42,6 +42,7 @@ class _AbstractOrchestrator:
         cls,
         task: Task,
         submit_id: Optional[str] = None,
+        submit_entity_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,

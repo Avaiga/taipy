@@ -21,7 +21,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from .._manager._manager import _Manager
 from ..exceptions.exceptions import ConflictedConfigurationError, ModelNotFound, NonExistingVersion
 from ._version import _Version
-from ._version_fs_repository_v2 import _VersionFSRepository
+from ._version_fs_repository import _VersionFSRepository
 
 
 class _VersionManager(_Manager[_Version]):
@@ -55,7 +55,9 @@ class _VersionManager(_Manager[_Version]):
             comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
                 if force:
-                    _TaipyLogger._get_logger().warning(f"Overriding version {id} ...")
+                    cls.__logger.warning(
+                        f"Option --taipy-force is detected, overriding the configuration of version {id} ..."
+                    )
                     version.config = Config._applied_config
                 else:
                     raise ConflictedConfigurationError()
@@ -78,7 +80,7 @@ class _VersionManager(_Manager[_Version]):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _get_all_by(cls, by, filters: List[Dict] = None) -> List[_Version]:
+    def _get_all_by(cls, by, filters: Optional[List[Dict]] = None) -> List[_Version]:
         """
         Returns all entities based on a criteria.
         """
@@ -119,7 +121,7 @@ class _VersionManager(_Manager[_Version]):
             cls._get_or_create(version_number, force)
         except ConflictedConfigurationError:
             raise SystemExit(
-                f"Please add a new experiment version or run your application with --force-run option to"
+                f"Please add a new experiment version or run your application with --taipy-force option to"
                 f" override the Config of experiment {version_number}."
             )
         cls._repository._set_latest_version(version_number)
@@ -143,8 +145,8 @@ class _VersionManager(_Manager[_Version]):
             cls._get_or_create(version_number, force)
         except ConflictedConfigurationError:
             raise SystemExit(
-                f"Please add a new production version with a migration function or run your application with"
-                f" --force-run option to override the Config of production version {version_number}."
+                f"Please add a new production version with migration functions or run your application with"
+                f" --taipy-force option to override the Config of production version {version_number}."
             )
         cls._repository._set_production_version(version_number)
         return version_number

@@ -14,8 +14,8 @@ import os
 import pytest
 
 from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.pipeline._pipeline_fs_repository_v2 import _PipelineFSRepository
-from src.taipy.core.pipeline._pipeline_sql_repository_v2 import _PipelineSQLRepository
+from src.taipy.core.pipeline._pipeline_fs_repository import _PipelineFSRepository
+from src.taipy.core.pipeline._pipeline_sql_repository import _PipelineSQLRepository
 from src.taipy.core.pipeline.pipeline import Pipeline, PipelineId
 
 
@@ -28,6 +28,15 @@ class TestPipelineRepository:
 
         obj = repository._load(pipeline.id)
         assert isinstance(obj, Pipeline)
+
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_exists(self, tmpdir, pipeline, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(pipeline)
+
+        assert repository._exists(pipeline.id)
+        assert not repository._exists("not-existed-pipeline")
 
     @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
     def test_load_all(self, tmpdir, pipeline, repo):

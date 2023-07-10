@@ -13,8 +13,8 @@ from typing import Any, Dict, List
 
 from sqlalchemy import JSON, Boolean, Column, Enum, String, Table
 
-from .._repository._v2._base_taipy_model import _BaseModel
-from .._repository._v2.db._sql_base_model import mapper_registry
+from .._repository._base_taipy_model import _BaseModel
+from .._repository.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from .job_id import JobId
 from .status import Status
@@ -31,6 +31,7 @@ class _JobModel(_BaseModel):
         Column("status", Enum(Status)),
         Column("force", Boolean),
         Column("submit_id", String),
+        Column("submit_entity_id", String),
         Column("creation_date", String),
         Column("subscribers", JSON),
         Column("stacktrace", JSON),
@@ -41,6 +42,7 @@ class _JobModel(_BaseModel):
     status: Status
     force: bool
     submit_id: str
+    submit_entity_id: str
     creation_date: str
     subscribers: List[Dict]
     stacktrace: List[str]
@@ -54,6 +56,7 @@ class _JobModel(_BaseModel):
             status=Status._from_repr(data["status"]),
             force=data["force"],
             submit_id=data["submit_id"],
+            submit_entity_id=data["submit_entity_id"],
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
             stacktrace=data["stacktrace"],

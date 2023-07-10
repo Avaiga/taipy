@@ -15,7 +15,7 @@ from typing import Dict, Generic, Iterable, List, Optional, TypeVar, Union
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .._entity._entity_ids import _EntityIds
-from .._repository._v2._abstract_repository import _AbstractRepository
+from .._repository._abstract_repository import _AbstractRepository
 from ..exceptions.exceptions import ModelNotFound
 from ..notification import EventOperation, _publish_event
 
@@ -101,6 +101,13 @@ class _Manager(Generic[EntityType]):
         except ModelNotFound:
             cls._logger.error(f"{cls._ENTITY_NAME} not found: {entity_id}")
             return default
+
+    @classmethod
+    def _exists(cls, entity_id: str) -> bool:
+        """
+        Returns True if the entity id exists.
+        """
+        return cls._repository._exists(entity_id)
 
     @classmethod
     def _delete_entities_of_multiple_types(cls, _entity_ids: _EntityIds):

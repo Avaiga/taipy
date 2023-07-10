@@ -399,8 +399,10 @@ def test_get_set_of_tasks():
 
 def test_auto_set_and_reload(task):
     pipeline_1 = Pipeline("foo", {}, [], owner_id=None, subscribers=None)
+    tmp_task = Task("tmp_task_config_id", {}, print, [], [], TaskId("tmp_task_id"))
 
     _TaskManager._set(task)
+    _TaskManager._set(tmp_task)
     _PipelineManager._set(pipeline_1)
 
     pipeline_2 = _PipelineManager._get(pipeline_1)
@@ -408,15 +410,28 @@ def test_auto_set_and_reload(task):
     assert pipeline_1.config_id == "foo"
     assert pipeline_2.config_id == "foo"
 
+    # auto set & reload on parent_ids attribute (set() object does not have auto set yet)
     assert pipeline_1.parent_ids == set()
     assert pipeline_2.parent_ids == set()
-    pipeline_1._parent_ids.update(["sc1"])
+    pipeline_1._parent_ids.update(["sc2"])
     _PipelineManager._set(pipeline_1)
+    assert pipeline_1.parent_ids == {"sc2"}
+    assert pipeline_2.parent_ids == {"sc2"}
+    pipeline_2._parent_ids.clear()
+    pipeline_2._parent_ids.update(["sc1"])
+    _PipelineManager._set(pipeline_2)
     assert pipeline_1.parent_ids == {"sc1"}
     assert pipeline_2.parent_ids == {"sc1"}
 
+    # auto set & reload on tasks attribute
     assert len(pipeline_1.tasks) == 0
-    pipeline_1.tasks = [task]
+    assert len(pipeline_2.tasks) == 0
+    pipeline_1.tasks = [tmp_task]
+    assert len(pipeline_1.tasks) == 1
+    assert pipeline_1.tasks[tmp_task.config_id].id == tmp_task.id
+    assert len(pipeline_2.tasks) == 1
+    assert pipeline_2.tasks[tmp_task.config_id].id == tmp_task.id
+    pipeline_2.tasks = [task]
     assert len(pipeline_1.tasks) == 1
     assert pipeline_1.tasks[task.config_id].id == task.id
     assert len(pipeline_2.tasks) == 1
@@ -425,15 +440,15 @@ def test_auto_set_and_reload(task):
     assert pipeline_1.owner_id is None
     assert pipeline_2.owner_id is None
 
-    assert pipeline_1.properties == {}
-    pipeline_1.properties["qux"] = 5
-    assert pipeline_1.properties["qux"] == 5
-    assert pipeline_2.properties["qux"] == 5
-
+    # auto set & reload on subscribers attribute
     assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
     pipeline_1.subscribers.append(print)
     assert len(pipeline_1.subscribers) == 1
     assert len(pipeline_2.subscribers) == 1
+    pipeline_2.subscribers.append(print)
+    assert len(pipeline_1.subscribers) == 2
+    assert len(pipeline_2.subscribers) == 2
 
     pipeline_1.subscribers.clear()
     assert len(pipeline_1.subscribers) == 0
@@ -447,13 +462,27 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_1.subscribers) == 1
     assert len(pipeline_2.subscribers) == 1
 
+    pipeline_2.subscribers.clear()
+    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
+
     pipeline_1.subscribers + print + len
-    assert len(pipeline_1.subscribers) == 3
-    assert len(pipeline_2.subscribers) == 3
+    assert len(pipeline_1.subscribers) == 2
+    assert len(pipeline_2.subscribers) == 2
 
     pipeline_1.subscribers = []
     assert len(pipeline_1.subscribers) == 0
     assert len(pipeline_2.subscribers) == 0
+
+    # auto set & reload on properties attribute
+    assert pipeline_1.properties == {}
+    assert pipeline_2.properties == {}
+    pipeline_1.properties["qux"] = 4
+    assert pipeline_1.properties["qux"] == 4
+    assert pipeline_2.properties["qux"] == 4
+    pipeline_2.properties["qux"] = 5
+    assert pipeline_1.properties["qux"] == 5
+    assert pipeline_2.properties["qux"] == 5
 
     with pipeline_1 as pipeline:
         assert pipeline.config_id == "foo"
@@ -462,10 +491,12 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
+        assert pipeline.properties["qux"] == 5
 
         pipeline.tasks = []
         pipeline.owner_id = None
         pipeline.subscribers = [print]
+        pipeline.properties["qux"] = 9
 
         assert pipeline.config_id == "foo"
         assert len(pipeline.tasks) == 1
@@ -473,12 +504,14 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
+        assert pipeline.properties["qux"] == 5
 
     assert pipeline_1.config_id == "foo"
     assert len(pipeline_1.tasks) == 0
     assert pipeline_1.owner_id is None
     assert len(pipeline_1.subscribers) == 1
     assert not pipeline_1._is_in_context
+    assert pipeline_1.properties["qux"] == 9
 
 
 def test_get_parents(pipeline):

@@ -13,10 +13,10 @@ import os
 
 import pytest
 
-from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
+from src.taipy.core.data._data_fs_repository import _DataFSRepository
 from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.task._task_fs_repository_v2 import _TaskFSRepository
-from src.taipy.core.task._task_sql_repository_v2 import _TaskSQLRepository
+from src.taipy.core.task._task_fs_repository import _TaskFSRepository
+from src.taipy.core.task._task_sql_repository import _TaskSQLRepository
 from src.taipy.core.task.task import Task, TaskId
 
 
@@ -32,6 +32,18 @@ class TestTaskFSRepository:
 
         obj = repository._load(task.id)
         assert isinstance(obj, Task)
+
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_exists(self, tmpdir, data_node, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        _DataFSRepository()._save(data_node)
+        task = Task("task_config_id", {}, print, [data_node], [data_node])
+
+        repository._save(task)
+
+        assert repository._exists(task.id)
+        assert not repository._exists("not-existed-task")
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
     def test_load_all(self, tmpdir, data_node, repo):

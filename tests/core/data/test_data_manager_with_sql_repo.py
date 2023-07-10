@@ -126,8 +126,10 @@ class TestDataManager:
             properties={"foo": "bar"},
         )
         assert len(_DataManager._get_all()) == 0
+        assert not _DataManager._exists(dn.id)
         _DataManager._set(dn)
         assert len(_DataManager._get_all()) == 1
+        assert _DataManager._exists(dn.id)
 
         # changing data node attribute
         dn.config_id = "foo"
@@ -150,13 +152,17 @@ class TestDataManager:
         _DataManager._set(dn_2)
         _DataManager._set(dn_3)
         assert len(_DataManager._get_all()) == 3
+        assert all(_DataManager._exists(dn.id) for dn in [dn_1, dn_2, dn_3])
         _DataManager._delete(dn_1.id)
         assert len(_DataManager._get_all()) == 2
         assert _DataManager._get(dn_2.id).id == dn_2.id
         assert _DataManager._get(dn_3.id).id == dn_3.id
         assert _DataManager._get(dn_1.id) is None
+        assert all(_DataManager._exists(dn.id) for dn in [dn_2, dn_3])
+        assert not _DataManager._exists(dn_1.id)
         _DataManager._delete_all()
         assert len(_DataManager._get_all()) == 0
+        assert not any(_DataManager._exists(dn.id) for dn in [dn_2, dn_3])
 
     def test_get_or_create(self):
         def _get_or_create_dn(config, *args):

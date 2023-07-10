@@ -8,12 +8,13 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from copy import copy
 from datetime import datetime, timedelta
 from pydoc import locate
 from typing import Dict, List, Optional
 
-from .._repository._v2._abstract_converter import _AbstractConverter
+from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
 from ..common._warnings import _warn_deprecated
@@ -82,7 +83,7 @@ class _DataNodeConverter(_AbstractConverter):
         return datanode_properties
 
     @classmethod
-    def _serialize_sql_dn_properties(cls, datanode_properties: dict) -> dict:
+    def __serialize_sql_dn_properties(cls, datanode_properties: dict) -> dict:
         query_builder = datanode_properties.get(SQLDataNode._WRITE_QUERY_BUILDER_KEY)
         datanode_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
         datanode_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
@@ -91,7 +92,7 @@ class _DataNodeConverter(_AbstractConverter):
         return datanode_properties
 
     @classmethod
-    def _serialize_mongo_collection_dn_model_properties(cls, datanode_properties: dict) -> dict:
+    def __serialize_mongo_collection_dn_model_properties(cls, datanode_properties: dict) -> dict:
         if MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY in datanode_properties.keys():
             datanode_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY] = (
                 f"{datanode_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY].__module__}."
@@ -101,7 +102,7 @@ class _DataNodeConverter(_AbstractConverter):
         return datanode_properties
 
     @classmethod
-    def _serialize_edits(cls, edits):
+    def __serialize_edits(cls, edits):
         new_edits = []
         for edit in edits:
             new_edit = edit.copy()
@@ -115,6 +116,25 @@ class _DataNodeConverter(_AbstractConverter):
             new_edits.append(new_edit)
         return new_edits
 
+    @staticmethod
+    def __serialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types) -> dict:
+        if not isinstance(properties[exposed_type_key], str):
+            if isinstance(properties[exposed_type_key], dict):
+                properties[exposed_type_key] = {
+                    k: v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
+                    for k, v in properties[exposed_type_key].items()
+                }
+            elif isinstance(properties[exposed_type_key], list):
+                properties[exposed_type_key] = [
+                    v if v in valid_str_exposed_types else f"{v.__module__}.{v.__qualname__}"
+                    for v in properties[exposed_type_key]
+                ]
+            else:
+                properties[
+                    exposed_type_key
+                ] = f"{properties[exposed_type_key].__module__}.{properties[exposed_type_key].__qualname__}"
+        return properties
+
     @classmethod
     def _entity_to_model(cls, data_node: DataNode) -> _DataNodeModel:
         properties = data_node._properties.data.copy()
@@ -125,28 +145,16 @@ class _DataNodeConverter(_AbstractConverter):
             properties = cls.__serialize_json_dn_properties(properties)
 
         if data_node.storage_type() == SQLDataNode.storage_type():
-            properties = cls._serialize_sql_dn_properties(properties)
+            properties = cls.__serialize_sql_dn_properties(properties)
 
         if data_node.storage_type() == MongoCollectionDataNode.storage_type():
-            properties = cls._serialize_mongo_collection_dn_model_properties(properties)
+            properties = cls.__serialize_mongo_collection_dn_model_properties(properties)
 
         if cls._EXPOSED_TYPE_KEY in properties.keys():
-            if not isinstance(properties[cls._EXPOSED_TYPE_KEY], str):
-                if isinstance(properties[cls._EXPOSED_TYPE_KEY], Dict):
-                    properties[cls._EXPOSED_TYPE_KEY] = {
-                        k: v if v in cls._VALID_STRING_EXPOSED_TYPES else f"{v.__module__}.{v.__qualname__}"
-                        for k, v in properties[cls._EXPOSED_TYPE_KEY].items()
-                    }
-                elif isinstance(properties[cls._EXPOSED_TYPE_KEY], List):
-                    properties[cls._EXPOSED_TYPE_KEY] = [
-                        v if v in cls._VALID_STRING_EXPOSED_TYPES else f"{v.__module__}.{v.__qualname__}"
-                        for v in properties[cls._EXPOSED_TYPE_KEY]
-                    ]
-                else:
-                    properties[cls._EXPOSED_TYPE_KEY] = (
-                        f"{properties[cls._EXPOSED_TYPE_KEY].__module__}."
-                        f"{properties[cls._EXPOSED_TYPE_KEY].__qualname__}"
-                    )
+            properties = cls.__serialize_exposed_type(
+                properties, cls._EXPOSED_TYPE_KEY, cls._VALID_STRING_EXPOSED_TYPES
+            )
+
         return _DataNodeModel(
             data_node.id,
             data_node.config_id,
@@ -156,7 +164,7 @@ class _DataNodeConverter(_AbstractConverter):
             data_node.owner_id,
             list(data_node._parent_ids),
             data_node._last_edit_date.isoformat() if data_node._last_edit_date else None,
-            cls._serialize_edits(data_node._edits),
+            cls.__serialize_edits(data_node._edits),
             data_node._version,
             data_node._validity_period.days if data_node._validity_period else None,
             data_node._validity_period.seconds if data_node._validity_period else None,
@@ -215,7 +223,7 @@ class _DataNodeConverter(_AbstractConverter):
         return datanode_model_properties
 
     @classmethod
-    def _deserialize_sql_dn_model_properties(cls, datanode_model_properties: dict) -> dict:
+    def __deserialize_sql_dn_model_properties(cls, datanode_model_properties: dict) -> dict:
 
         if datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]:
             datanode_model_properties[SQLDataNode._WRITE_QUERY_BUILDER_KEY] = _load_fct(
@@ -231,7 +239,7 @@ class _DataNodeConverter(_AbstractConverter):
         return datanode_model_properties
 
     @classmethod
-    def _deserialize_mongo_collection_dn_model_properties(cls, datanode_model_properties: dict) -> dict:
+    def __deserialize_mongo_collection_dn_model_properties(cls, datanode_model_properties: dict) -> dict:
         if MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY in datanode_model_properties.keys():
             if isinstance(datanode_model_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY], str):
                 datanode_model_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY] = locate(
@@ -240,7 +248,7 @@ class _DataNodeConverter(_AbstractConverter):
         return datanode_model_properties
 
     @classmethod
-    def _deserialize_edits(cls, edits):
+    def __deserialize_edits(cls, edits):
         # TODO: didn't process _to_edits_migration in the _data_model.py
         for edit in edits:
             if timestamp := edit.get("timestamp", None):
@@ -251,6 +259,21 @@ class _DataNodeConverter(_AbstractConverter):
                 _warn_deprecated("job_ids", suggest="edits")
                 edit["timestamp"] = datetime.now()
         return edits
+
+    @staticmethod
+    def __deserialize_exposed_type(properties: dict, exposed_type_key: str, valid_str_exposed_types) -> dict:
+        if properties[exposed_type_key] not in valid_str_exposed_types:
+            if isinstance(properties[exposed_type_key], str):
+                properties[exposed_type_key] = locate(properties[exposed_type_key])
+            elif isinstance(properties[exposed_type_key], dict):
+                properties[exposed_type_key] = {
+                    k: v if v in valid_str_exposed_types else locate(v) for k, v in properties[exposed_type_key].items()
+                }
+            elif isinstance(properties[exposed_type_key], list):
+                properties[exposed_type_key] = [
+                    v if v in valid_str_exposed_types else locate(v) for v in properties[exposed_type_key]
+                ]
+        return properties
 
     @classmethod
     def _model_to_entity(cls, model: _DataNodeModel) -> DataNode:
@@ -263,25 +286,15 @@ class _DataNodeConverter(_AbstractConverter):
             data_node_properties = cls.__deserialize_json_dn_properties(data_node_properties)
 
         if model.storage_type == SQLDataNode.storage_type():
-            data_node_properties = cls._deserialize_sql_dn_model_properties(data_node_properties)
-
-        if cls._EXPOSED_TYPE_KEY in data_node_properties.keys():
-            if data_node_properties[cls._EXPOSED_TYPE_KEY] not in cls._VALID_STRING_EXPOSED_TYPES:
-                if isinstance(data_node_properties[cls._EXPOSED_TYPE_KEY], str):
-                    data_node_properties[cls._EXPOSED_TYPE_KEY] = locate(data_node_properties[cls._EXPOSED_TYPE_KEY])
-                elif isinstance(data_node_properties[cls._EXPOSED_TYPE_KEY], Dict):
-                    data_node_properties[cls._EXPOSED_TYPE_KEY] = {
-                        k: v if v in cls._VALID_STRING_EXPOSED_TYPES else locate(v)
-                        for k, v in data_node_properties[cls._EXPOSED_TYPE_KEY].items()
-                    }
-                elif isinstance(data_node_properties[cls._EXPOSED_TYPE_KEY], List):
-                    data_node_properties[cls._EXPOSED_TYPE_KEY] = [
-                        v if v in cls._VALID_STRING_EXPOSED_TYPES else locate(v)
-                        for v in data_node_properties[cls._EXPOSED_TYPE_KEY]
-                    ]
+            data_node_properties = cls.__deserialize_sql_dn_model_properties(data_node_properties)
 
         if model.storage_type == MongoCollectionDataNode.storage_type():
-            data_node_properties = cls._deserialize_mongo_collection_dn_model_properties(data_node_properties)
+            data_node_properties = cls.__deserialize_mongo_collection_dn_model_properties(data_node_properties)
+
+        if cls._EXPOSED_TYPE_KEY in data_node_properties.keys():
+            data_node_properties = cls.__deserialize_exposed_type(
+                data_node_properties, cls._EXPOSED_TYPE_KEY, cls._VALID_STRING_EXPOSED_TYPES
+            )
 
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:
@@ -295,7 +308,7 @@ class _DataNodeConverter(_AbstractConverter):
             owner_id=model.owner_id,
             parent_ids=set(model.parent_ids),
             last_edit_date=datetime.fromisoformat(model.last_edit_date) if model.last_edit_date else None,
-            edits=cls._deserialize_edits(copy(model.edits)),
+            edits=cls.__deserialize_edits(copy(model.edits)),
             version=model.version,
             validity_period=validity_period,
             edit_in_progress=model.edit_in_progress,

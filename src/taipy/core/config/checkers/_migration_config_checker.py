@@ -61,6 +61,6 @@ class _MigrationConfigChecker(_ConfigChecker):
                 self._info(
                     "target_version",
                     None,
-                    f'There is no migration functions from production version "{source_version}"'
+                    f'There is no migration function from production version "{source_version}"'
                     f' to version "{target_version}".',
                 )

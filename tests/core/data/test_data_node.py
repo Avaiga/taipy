@@ -451,7 +451,7 @@ class TestDataNode:
     def test_auto_set_and_reload(self, current_datetime):
         dn_1 = InMemoryDataNode(
             "foo",
-            scope=Scope.SCENARIO,
+            scope=Scope.GLOBAL,
             id=DataNodeId("an_id"),
             name="foo",
             owner_id=None,
@@ -467,49 +467,87 @@ class TestDataNode:
 
         dn_2 = dm._get(dn_1)
 
-        assert dn_1.scope == Scope.SCENARIO
-        dn_1.scope = Scope.SCENARIO
+        # auto set & reload on scope attribute
+        assert dn_1.scope == Scope.GLOBAL
+        assert dn_2.scope == Scope.GLOBAL
+        dn_1.scope = Scope.CYCLE
+        assert dn_1.scope == Scope.CYCLE
+        assert dn_2.scope == Scope.CYCLE
+        dn_2.scope = Scope.SCENARIO
         assert dn_1.scope == Scope.SCENARIO
         assert dn_2.scope == Scope.SCENARIO
 
         new_datetime = current_datetime + timedelta(1)
+        new_datetime_1 = current_datetime + timedelta(3)
 
+        # auto set & reload on last_edition_date attribute
         assert dn_1.last_edition_date == current_datetime
-        dn_1.last_edition_date = new_datetime
+        assert dn_2.last_edition_date == current_datetime
+        dn_1.last_edition_date = new_datetime_1
+        assert dn_1.last_edition_date == new_datetime_1
+        assert dn_2.last_edition_date == new_datetime_1
+        dn_2.last_edition_date = new_datetime
         assert dn_1.last_edition_date == new_datetime
         assert dn_2.last_edition_date == new_datetime
 
+        # auto set & reload on name attribute
         assert dn_1.name == "foo"
-        dn_1.name = "def"
+        assert dn_2.name == "foo"
+        dn_1.name = "fed"
+        assert dn_1.name == "fed"
+        assert dn_2.name == "fed"
+        dn_2.name = "def"
         assert dn_1.name == "def"
         assert dn_2.name == "def"
 
+        # auto set & reload on parent_ids attribute (set() object does not have auto set yet)
         assert dn_1.parent_ids == set()
         assert dn_2.parent_ids == set()
-        dn_1._parent_ids.update(["t1"])
+        dn_1._parent_ids.update(["sc2"])
         _DataManager._set(dn_1)
-        assert dn_1.parent_ids == {"t1"}
-        assert dn_2.parent_ids == {"t1"}
+        assert dn_1.parent_ids == {"sc2"}
+        assert dn_2.parent_ids == {"sc2"}
+        dn_2._parent_ids.clear()
+        dn_2._parent_ids.update(["sc1"])
+        _DataManager._set(dn_2)
+        assert dn_1.parent_ids == {"sc1"}
+        assert dn_2.parent_ids == {"sc1"}
 
+        # auto set & reload on edition_in_progress attribute
+        assert not dn_2.edition_in_progress
         assert not dn_1.edition_in_progress
         dn_1.edition_in_progress = True
         assert dn_1.edition_in_progress
         assert dn_2.edition_in_progress
-        dn_1.unlock_edition()
+        dn_2.unlock_edition()
         assert not dn_1.edition_in_progress
         assert not dn_2.edition_in_progress
         dn_1.lock_edition()
         assert dn_1.edition_in_progress
         assert dn_2.edition_in_progress
 
-        time_period = timedelta(1)
+        # auto set & reload on validity_period attribute
+        time_period_1 = timedelta(1)
+        time_period_2 = timedelta(5)
         assert dn_1.validity_period is None
-        dn_1.validity_period = time_period
-        assert dn_1.validity_period == time_period
-        assert dn_2.validity_period == time_period
+        assert dn_2.validity_period is None
+        dn_1.validity_period = time_period_1
+        assert dn_1.validity_period == time_period_1
+        assert dn_2.validity_period == time_period_1
+        dn_2.validity_period = time_period_2
+        assert dn_1.validity_period == time_period_2
+        assert dn_2.validity_period == time_period_2
 
+        # auto set & reload on properties attribute
         assert dn_1.properties == {}
-        dn_1.properties["qux"] = 5
+        assert dn_2.properties == {}
+        dn_1._properties["qux"] = 4
+        assert dn_1.properties["qux"] == 4
+        assert dn_2.properties["qux"] == 4
+
+        assert dn_1.properties == {"qux": 4}
+        assert dn_2.properties == {"qux": 4}
+        dn_2._properties["qux"] = 5
         assert dn_1.properties["qux"] == 5
         assert dn_2.properties["qux"] == 5
 
@@ -525,17 +563,19 @@ class TestDataNode:
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
-            assert dn.validity_period == time_period
+            assert dn.validity_period == time_period_2
             assert len(dn.job_ids) == 1
             assert dn._is_in_context
+            assert dn.properties["qux"] == 5
 
-            new_datetime_2 = new_datetime + timedelta(1)
+            new_datetime_2 = new_datetime + timedelta(5)
 
             dn.scope = Scope.CYCLE
             dn.last_edition_date = new_datetime_2
             dn.name = "abc"
             dn.edition_in_progress = False
             dn.validity_period = None
+            dn.properties["qux"] = 9
 
             assert dn.config_id == "foo"
             assert dn.owner_id is None
@@ -543,8 +583,9 @@ class TestDataNode:
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
-            assert dn.validity_period == time_period
+            assert dn.validity_period == time_period_2
             assert len(dn.job_ids) == 1
+            assert dn.properties["qux"] == 5
 
         assert dn_1.config_id == "foo"
         assert dn_1.owner_id is None
@@ -555,6 +596,7 @@ class TestDataNode:
         assert dn_1.validity_period is None
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
+        assert dn_1.properties["qux"] == 9
 
     def test_get_parents(self, data_node):
         with mock.patch("src.taipy.core.get_parents") as mck:

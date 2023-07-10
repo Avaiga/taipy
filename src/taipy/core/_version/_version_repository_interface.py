@@ -13,6 +13,10 @@ from abc import ABC, abstractmethod
 
 
 class _VersionRepositoryInterface(ABC):
+    _LATEST_VERSION_KEY = "latest_version"
+    _DEVELOPMENT_VERSION_KEY = "development_version"
+    _PRODUCTION_VERSION_KEY = "production_version"
+
     @abstractmethod
     def _set_latest_version(self, version_number):
         raise NotImplementedError

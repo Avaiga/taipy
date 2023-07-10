@@ -12,7 +12,7 @@
 from datetime import datetime
 from typing import List
 
-from .._repository._v2._abstract_converter import _AbstractConverter
+from .._repository._abstract_converter import _AbstractConverter
 from ..common._utils import _fcts_to_dict, _load_fct
 from ..exceptions import InvalidSubscriber
 from ..job._job_model import _JobModel
@@ -30,8 +30,9 @@ class _JobConverter(_AbstractConverter):
             job._status,
             job._force,
             job.submit_id,
+            job.submit_entity_id,
             job._creation_date.isoformat(),
-            cls._serialize_subscribers(job._subscribers),
+            cls.__serialize_subscribers(job._subscribers),
             job._stacktrace,
             version=job._version,
         )
@@ -42,7 +43,11 @@ class _JobConverter(_AbstractConverter):
         task_repository = task_manager._repository
 
         job = Job(
-            id=model.id, task=task_repository._load(model.task_id), submit_id=model.submit_id, version=model.version
+            id=model.id,
+            task=task_repository._load(model.task_id),
+            submit_id=model.submit_id,
+            submit_entity_id=model.submit_entity_id,
+            version=model.version,
         )
 
         job._status = model.status  # type: ignore
@@ -60,5 +65,5 @@ class _JobConverter(_AbstractConverter):
         return job
 
     @staticmethod
-    def _serialize_subscribers(subscribers: List) -> List:
+    def __serialize_subscribers(subscribers: List) -> List:
         return _fcts_to_dict(subscribers)

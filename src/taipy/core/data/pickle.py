@@ -21,7 +21,7 @@ from taipy.config.common.scope import Scope
 from .._backup._backup import _replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from .abstract_file import _AbstractFileDataNode
+from ._abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -104,7 +104,7 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         if self._path is None:
             self._path = self._build_path(self.storage_type())
         if not self._last_edit_date and os.path.exists(self._path):
-            self.last_edit_date = datetime.now()  # type: ignore
+            self._last_edit_date = datetime.now()
         if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
 

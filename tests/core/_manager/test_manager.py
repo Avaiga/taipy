@@ -12,12 +12,12 @@
 import dataclasses
 import pathlib
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from src.taipy.core._manager._manager import _Manager
-from src.taipy.core._repository._v2._abstract_converter import _AbstractConverter
-from src.taipy.core._repository._v2._abstract_repository import _AbstractRepository
-from src.taipy.core._repository._v2._filesystem_repository import _FileSystemRepository
+from src.taipy.core._repository._abstract_converter import _AbstractConverter
+from src.taipy.core._repository._abstract_repository import _AbstractRepository
+from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
 from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
 
@@ -70,14 +70,14 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _load(self, entity_id: str) -> MockEntity:
         return self.repo._load(entity_id)
 
-    def _load_all(self, version_number: Optional[str] = None) -> List[MockEntity]:
-        return self.repo._load_all(version_number)
-
-    def _load_all_by(self, by, version_number) -> List[MockEntity]:
-        return self.repo._load_all_by(by, version_number)
+    def _load_all(self, filters: Optional[List[Dict]] = None) -> List[MockEntity]:
+        return self.repo._load_all(filters)
 
     def _save(self, entity: MockEntity):
         return self.repo._save(entity)
+
+    def _exists(self, entity_id: str) -> bool:
+        return self.repo._exists(entity_id)
 
     def _delete(self, entity_id: str):
         return self.repo._delete(entity_id)
@@ -88,8 +88,14 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _delete_many(self, ids: Iterable[str]):
         return self.repo._delete_many(ids)
 
-    def _search(self, attribute: str, value: Any, version_number: Optional[str] = None) -> Optional[MockEntity]:
-        return self.repo._search(attribute, value, version_number)
+    def _delete_by(self, attribute: str, value: str):
+        return self.repo._delete_by(attribute, value)
+
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[MockEntity]:
+        return self.repo._search(attribute, value, filters)
+
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
+        return self.repo._export(self, entity_id, folder_path)
 
     @property
     def _storage_folder(self) -> pathlib.Path:
@@ -108,6 +114,11 @@ class TestManager:
 
         fetched_model = MockManager._get(m.id)
         assert m == fetched_model
+
+    def test_exists(self):
+        m = MockEntity("uuid", "foo")
+        MockManager._set(m)
+        assert MockManager._exists(m.id)
 
     def test_get(self):
         m = MockEntity("uuid", "foo")

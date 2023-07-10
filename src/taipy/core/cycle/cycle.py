@@ -21,7 +21,6 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from ..exceptions.exceptions import _SuspiciousFileOperation
-from ._cycle_model import _CycleModel
 from .cycle_id import CycleId
 
 
@@ -177,27 +176,3 @@ class Cycle(_Entity, _Labeled):
             The simple label of the cycle as a string.
         """
         return self._get_simple_label()
-
-    @classmethod
-    def _to_model(cls, cycle) -> _CycleModel:
-        return _CycleModel(
-            id=cycle.id,
-            name=cycle._name,
-            frequency=cycle._frequency,
-            creation_date=cycle._creation_date.isoformat(),
-            start_date=cycle._start_date.isoformat(),
-            end_date=cycle._end_date.isoformat(),
-            properties=cycle._properties.data,
-        )
-
-    @classmethod
-    def _from_model(cls, model: _CycleModel):
-        return Cycle(
-            id=model.id,
-            name=model.name,
-            frequency=model.frequency,
-            properties=model.properties,
-            creation_date=datetime.fromisoformat(model.creation_date),
-            start_date=datetime.fromisoformat(model.start_date),
-            end_date=datetime.fromisoformat(model.end_date),
-        )

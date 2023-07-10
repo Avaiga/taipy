@@ -21,7 +21,7 @@ from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import MissingRequiredProperty
-from .abstract_sql import _AbstractSQLDataNode
+from ._abstract_sql import _AbstractSQLDataNode
 from .data_node_id import DataNodeId, Edit
 
 

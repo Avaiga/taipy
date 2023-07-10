@@ -15,6 +15,77 @@ from unittest import mock
 import pytest
 
 from taipy.config.config import Config
+from tests.core.utils.named_temporary_file import NamedTemporaryFile
+
+
+def _configure_pipeline_in_toml():
+    return NamedTemporaryFile(
+        content="""
+[TAIPY]
+
+[TASK.task1]
+function = "builtins.print:function"
+inputs = []
+outputs = []
+
+[TASK.task2]
+function = "builtins.print:function"
+inputs = []
+outputs = []
+
+[PIPELINE.pipelines1]
+tasks = [ "task1:SECTION", "task2:SECTION"]
+    """
+    )
+
+
+def _check_tasks_instance(task_id, pipeline_id):
+    """Check if the task instance in the pipeline config correctly points to the Config._applied_config,
+    not the Config._python_config or the Config._file_config
+    """
+    task_config_applied_instance = Config.tasks[task_id]
+    for task in Config.pipelines[pipeline_id].tasks:
+        if task.id == task_id:
+            task_config_instance_via_pipeline = task
+
+    task_config_python_instance = None
+    if Config._python_config._sections.get("TASK", None):
+        task_config_python_instance = Config._python_config._sections["TASK"][task_id]
+
+    task_config_file_instance = None
+    if Config._file_config._sections.get("TASK", None):
+        task_config_file_instance = Config._file_config._sections["TASK"][task_id]
+
+    assert task_config_python_instance is not task_config_applied_instance
+    assert task_config_python_instance is not task_config_instance_via_pipeline
+    assert task_config_file_instance is not task_config_applied_instance
+    assert task_config_file_instance is not task_config_instance_via_pipeline
+    assert task_config_instance_via_pipeline is task_config_applied_instance
+
+
+def test_task_instance_when_configure_pipeline_in_python():
+    task1_config = Config.configure_task("task1", print, [], [])
+    task2_config = Config.configure_task("task2", print, [], [])
+    Config.configure_pipeline("pipelines1", [task1_config, task2_config])
+
+    _check_tasks_instance("task1", "pipelines1")
+    _check_tasks_instance("task2", "pipelines1")
+
+
+def test_task_instance_when_configure_pipeline_by_loading_toml():
+    toml_config = _configure_pipeline_in_toml()
+    Config.load(toml_config.filename)
+
+    _check_tasks_instance("task1", "pipelines1")
+    _check_tasks_instance("task2", "pipelines1")
+
+
+def test_task_instance_when_configure_pipeline_by_overriding_toml():
+    toml_config = _configure_pipeline_in_toml()
+    Config.override(toml_config.filename)
+
+    _check_tasks_instance("task1", "pipelines1")
+    _check_tasks_instance("task2", "pipelines1")
 
 
 def test_pipeline_config_creation():
