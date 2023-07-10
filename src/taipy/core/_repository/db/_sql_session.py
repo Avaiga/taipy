@@ -17,7 +17,7 @@ from sqlalchemy.pool import StaticPool
 
 from taipy.config.config import Config
 
-from ....exceptions import MissingRequiredProperty
+from ...exceptions import MissingRequiredProperty
 from .._decoder import loads
 from .._encoder import dumps
 

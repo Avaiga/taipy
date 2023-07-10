@@ -20,14 +20,11 @@ from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
-from .._version._utils import _migrate_entity
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._utils import _load_fct
 from ..common._warnings import _warn_deprecated
 from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingDataNode
-from ._task_model import _TaskModel
 from .task_id import TaskId
 
 if TYPE_CHECKING:
@@ -180,10 +177,6 @@ class Task(_Entity, _Labeled):
     def version(self):
         return self._version
 
-    @version.setter
-    def version(self, val):
-        self._version = val
-
     def submit(
         self,
         callbacks: Optional[List[Callable]] = None,
@@ -208,38 +201,6 @@ class Task(_Entity, _Labeled):
         from ._task_manager_factory import _TaskManagerFactory
 
         return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
-
-    @classmethod
-    def _to_model(cls, task) -> _TaskModel:
-        return _TaskModel(
-            id=task.id,
-            owner_id=task.owner_id,
-            parent_ids=list(task._parent_ids),
-            config_id=task.config_id,
-            input_ids=cls.__to_ids(task.input.values()),
-            function_name=task._function.__name__,
-            function_module=task._function.__module__,
-            output_ids=cls.__to_ids(task.output.values()),
-            version=task.version,
-            skippable=task._skippable,
-            properties=task._properties.data.copy(),
-        )
-
-    @classmethod
-    def _from_model(cls, model: _TaskModel):
-        task = Task(
-            id=TaskId(model.id),
-            owner_id=model.owner_id,
-            parent_ids=set(model.parent_ids),
-            config_id=model.config_id,
-            function=_load_fct(model.function_module, model.function_name),
-            input=cls.__to_data_nodes(model.input_ids),
-            output=cls.__to_data_nodes(model.output_ids),
-            version=model.version,
-            skippable=model.skippable,
-            properties=model.properties,
-        )
-        return _migrate_entity(task)
 
     @staticmethod
     def __to_ids(data_nodes):

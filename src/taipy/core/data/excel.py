@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import os
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -26,8 +27,8 @@ from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import ExposedTypeLengthMismatch, NonExistingExcelSheet
 from ..job.job_id import JobId
+from ._abstract_file import _AbstractFileDataNode
 from ._abstract_tabular import _AbstractTabularDataNode
-from .abstract_file import _AbstractFileDataNode
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 

@@ -25,8 +25,8 @@ from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
-from ._data_fs_repository_v2 import _DataFSRepository
-from .abstract_file import _AbstractFileDataNode
+from ._abstract_file import _AbstractFileDataNode
+from ._data_fs_repository import _DataFSRepository
 from .data_node import DataNode
 from .data_node_id import DataNodeId
 from .pickle import PickleDataNode

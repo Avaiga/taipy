@@ -62,7 +62,6 @@ def _self_setter(manager):
         @functools.wraps(fct)
         def _do_set_entity(self, *args, **kwargs):
             fct(self, *args, **kwargs)
-
             entity_manager = _get_manager(manager)
             to_publish_event_parameters = [
                 entity_manager._EVENT_ENTITY_TYPE,
@@ -70,7 +69,6 @@ def _self_setter(manager):
                 EventOperation.UPDATE,
                 fct.__name__,
             ]
-
             if not self._is_in_context:
                 entity = _Reloader()._reload(manager, self)
                 fct(entity, *args, **kwargs)

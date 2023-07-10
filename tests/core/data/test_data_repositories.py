@@ -13,8 +13,8 @@ import os
 
 import pytest
 
-from src.taipy.core.data._data_fs_repository_v2 import _DataFSRepository
-from src.taipy.core.data._data_sql_repository_v2 import _DataSQLRepository
+from src.taipy.core.data._data_fs_repository import _DataFSRepository
+from src.taipy.core.data._data_sql_repository import _DataSQLRepository
 from src.taipy.core.data.data_node import DataNode, DataNodeId
 from src.taipy.core.exceptions import ModelNotFound
 
@@ -28,6 +28,15 @@ class TestDataNodeRepository:
 
         obj = repository._load(data_node.id)
         assert isinstance(obj, DataNode)
+
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_exists(self, tmpdir, data_node, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(data_node)
+
+        assert repository._exists(data_node.id)
+        assert not repository._exists("not-existed-data-node")
 
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
     def test_load_all(self, tmpdir, data_node, repo):

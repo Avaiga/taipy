@@ -55,6 +55,7 @@ class TestDataManager:
         assert isinstance(csv_dn, CSVDataNode)
         assert isinstance(_DataManager._get(csv_dn.id), CSVDataNode)
 
+        assert _DataManager._exists(csv_dn.id)
         assert _DataManager._get(csv_dn.id) is not None
         assert _DataManager._get(csv_dn.id).id == csv_dn.id
         assert _DataManager._get(csv_dn.id).config_id == "foo"
@@ -113,6 +114,7 @@ class TestDataManager:
         assert isinstance(in_mem_dn, InMemoryDataNode)
         assert isinstance(_DataManager._get(in_mem_dn.id), InMemoryDataNode)
 
+        assert _DataManager._exists(in_mem_dn.id)
         assert _DataManager._get(in_mem_dn.id) is not None
         assert _DataManager._get(in_mem_dn.id).id == in_mem_dn.id
         assert _DataManager._get(in_mem_dn.id).config_id == "baz"
@@ -165,6 +167,7 @@ class TestDataManager:
         assert isinstance(pickle_dn, PickleDataNode)
         assert isinstance(_DataManager._get(pickle_dn.id), PickleDataNode)
 
+        assert _DataManager._exists(pickle_dn.id)
         assert _DataManager._get(pickle_dn.id) is not None
         assert _DataManager._get(pickle_dn.id).id == pickle_dn.id
         assert _DataManager._get(pickle_dn.id).config_id == "plop"
@@ -260,8 +263,10 @@ class TestDataManager:
             properties={"foo": "bar"},
         )
         assert len(_DataManager._get_all()) == 0
+        assert not _DataManager._exists(dn.id)
         _DataManager._set(dn)
         assert len(_DataManager._get_all()) == 1
+        assert _DataManager._exists(dn.id)
 
         # changing data node attribute
         dn.config_id = "foo"
@@ -280,13 +285,17 @@ class TestDataManager:
         _DataManager._set(dn_2)
         _DataManager._set(dn_3)
         assert len(_DataManager._get_all()) == 3
+        assert all(_DataManager._exists(dn.id) for dn in [dn_1, dn_2, dn_3])
         _DataManager._delete(dn_1.id)
         assert len(_DataManager._get_all()) == 2
         assert _DataManager._get(dn_2.id).id == dn_2.id
         assert _DataManager._get(dn_3.id).id == dn_3.id
         assert _DataManager._get(dn_1.id) is None
+        assert all(_DataManager._exists(dn.id) for dn in [dn_2, dn_3])
+        assert not _DataManager._exists(dn_1.id)
         _DataManager._delete_all()
         assert len(_DataManager._get_all()) == 0
+        assert not any(_DataManager._exists(dn.id) for dn in [dn_2, dn_3])
 
     def test_get_or_create(self):
         def _get_or_create_dn(config, *args):

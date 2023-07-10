@@ -11,7 +11,7 @@
 
 from datetime import datetime
 
-from .._repository._v2._abstract_converter import _AbstractConverter
+from .._repository._abstract_converter import _AbstractConverter
 from ..cycle._cycle_model import _CycleModel
 from ..cycle.cycle import Cycle
 

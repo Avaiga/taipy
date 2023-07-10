@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 
-from .._repository._v2._abstract_converter import _AbstractConverter
+from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
 from ..data._data_manager_factory import _DataManagerFactory
@@ -32,7 +32,7 @@ class _TaskConverter(_AbstractConverter):
             function_name=task._function.__name__,
             function_module=task._function.__module__,
             output_ids=cls.__to_ids(task.output.values()),
-            version=task.version,
+            version=task._version,
             skippable=task._skippable,
             properties=task._properties.data.copy(),
         )

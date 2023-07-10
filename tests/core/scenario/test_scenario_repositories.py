@@ -14,8 +14,8 @@ import os
 import pytest
 
 from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.scenario._scenario_fs_repository_v2 import _ScenarioFSRepository
-from src.taipy.core.scenario._scenario_sql_repository_v2 import _ScenarioSQLRepository
+from src.taipy.core.scenario._scenario_fs_repository import _ScenarioFSRepository
+from src.taipy.core.scenario._scenario_sql_repository import _ScenarioSQLRepository
 from src.taipy.core.scenario.scenario import Scenario, ScenarioId
 
 
@@ -28,6 +28,15 @@ class TestScenarioFSRepository:
 
         obj = repository._load(scenario.id)
         assert isinstance(obj, Scenario)
+
+    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
+    def test_exists(self, tmpdir, scenario, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(scenario)
+
+        assert repository._exists(scenario.id)
+        assert not repository._exists("not-existed-scenario")
 
     @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
     def test_load_all(self, tmpdir, scenario, repo):

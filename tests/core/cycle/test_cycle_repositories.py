@@ -10,12 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from copy import copy
 
 import pytest
 
-from src.taipy.core.cycle._cycle_fs_repository_v2 import _CycleFSRepository
-from src.taipy.core.cycle._cycle_sql_repository_v2 import _CycleSQLRepository
+from src.taipy.core.cycle._cycle_fs_repository import _CycleFSRepository
+from src.taipy.core.cycle._cycle_sql_repository import _CycleSQLRepository
 from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.exceptions import ModelNotFound
 
@@ -29,6 +28,15 @@ class TestCycleRepositories:
 
         obj = repository._load(cycle.id)
         assert isinstance(obj, Cycle)
+
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_exists(self, tmpdir, cycle, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(cycle)
+
+        assert repository._exists(cycle.id)
+        assert not repository._exists("not-existed-cycle")
 
     @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
     def test_load_all(self, tmpdir, cycle, repo):

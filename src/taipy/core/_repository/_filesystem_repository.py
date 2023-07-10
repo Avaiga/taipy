@@ -12,18 +12,16 @@
 import json
 import pathlib
 import shutil
-import time
-from abc import abstractmethod
-from typing import Callable, Iterable, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
 
 from taipy.config.config import Config
 
-from ..exceptions.exceptions import InvalidExportPath, ModelNotFound
-from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
-
-ModelType = TypeVar("ModelType")
-Entity = TypeVar("Entity")
-Json = Union[dict, list, str, int, float, bool, None]
+from ..common._utils import _retry
+from ..common.typing import Converter, Entity, Json, ModelType
+from ..exceptions import InvalidExportPath, ModelNotFound
+from ._abstract_repository import _AbstractRepository
+from ._decoder import _Decoder
+from ._encoder import _Encoder
 
 
 class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
@@ -35,29 +33,15 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     should be revised in the future.
 
     Attributes:
-        model (ModelType): Generic dataclass.
+        model_type (ModelType): Generic dataclass.
+        converter: A class that handles conversion to and from a database backend
         dir_name (str): Folder that will hold the files for this dataclass model.
     """
 
-    @abstractmethod
-    def _to_model(self, obj):
-        """
-        Converts the object to be saved to its model.
-        """
-        ...
-
-    @abstractmethod
-    def _from_model(self, model):
-        """
-        Converts a model to its functional object.
-        """
-        ...
-
-    def __init__(self, model: Type[ModelType], dir_name: str, to_model_fct: Callable, from_model_fct: Callable):
-        self.model = model
+    def __init__(self, model_type: Type[ModelType], converter: Type[Converter], dir_name: str):
+        self.model_type = model_type
+        self.converter = converter
         self._dir_name = dir_name
-        self._to_model = to_model_fct  # type: ignore
-        self._from_model = from_model_fct  # type: ignore
 
     @property
     def dir_path(self):
@@ -65,224 +49,62 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     @property
     def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
+        return pathlib.Path(Config.global_config.storage_folder)
 
-    def load(self, model_id: str) -> Entity:
-        try:
-            return self.__to_entity(
-                self._get_model_filepath(model_id), retry=Config.global_config.read_entity_retry or 0
-            )  # type: ignore
-        except FileNotFoundError:
-            raise ModelNotFound(str(self.dir_path), model_id)
-
-    def _load_all(self, version_number: Optional[str] = None) -> List[Entity]:
-        """
-        Load all entities from a specific version.
-        """
-        from .._version._version_manager_factory import _VersionManagerFactory
-
-        version_number = _VersionManagerFactory._build_manager()._replace_version_number(version_number)
-
-        r = []
-        try:
-            for f in self.dir_path.iterdir():
-                if entity := self.__to_entity(
-                    f, retry=Config.global_config.read_entity_retry or 0, version_number=version_number
-                ):
-                    r.append(entity)
-        except FileNotFoundError:
-            pass
-        return r
-
-    def _load_all_by(self, by, version_number: Optional[str] = None):
-        from .._version._version_manager_factory import _VersionManagerFactory
-
-        version_number = _VersionManagerFactory._build_manager()._replace_version_number(version_number)
-
-        r = []
-        try:
-            for f in self.dir_path.iterdir():
-                if entity := self.__to_entity(f, by=by, version_number=version_number):
-                    r.append(entity)
-        except FileNotFoundError:
-            pass
-        return r
-
-    def _save(self, entity):
+    ###############################
+    # ##   Inherited methods   ## #
+    ###############################
+    def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
-
-        model = self._to_model(entity)
-        self._get_model_filepath(model.id).write_text(
-            json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_CustomEncoder, check_circular=False)
+        model = self.converter._entity_to_model(entity)  # type: ignore
+        self.__get_path(model.id).write_text(
+            json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_Encoder, check_circular=False)
         )
+
+    def _exists(self, entity_id: str) -> bool:
+        return self.__get_path(entity_id).exists()
+
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
+    def _load(self, entity_id: str) -> Entity:
+        try:
+            with pathlib.Path(self.__get_path(entity_id)).open(encoding="UTF-8") as source:
+                file_content = json.load(source)
+            return self.__file_content_to_entity(file_content)
+        except FileNotFoundError:
+            raise ModelNotFound(str(self.dir_path), entity_id)
+
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
+    def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
+        if not filters:
+            filters = []
+        entities = []
+        try:
+            for f in self.dir_path.iterdir():
+                if data := self.__filter_by(f, filters):
+                    entities.append(self.__file_content_to_entity(data))
+        except FileNotFoundError:
+            pass
+        return entities
+
+    def _delete(self, entity_id: str):
+        try:
+            self.__get_path(entity_id).unlink()
+        except FileNotFoundError:
+            raise ModelNotFound(str(self.dir_path), entity_id)
 
     def _delete_all(self):
         shutil.rmtree(self.dir_path, ignore_errors=True)
 
-    def _delete(self, model_id: str):
-        try:
-            self._get_model_filepath(model_id).unlink()
-        except FileNotFoundError:
-            raise ModelNotFound(str(self.dir_path), model_id)
-
-    def _delete_many(self, model_ids: Iterable[str]):
-        for model_id in model_ids:
+    def _delete_many(self, ids: Iterable[str]):
+        for model_id in ids:
             self._delete(model_id)
 
-    def _delete_by(self, attribute: str, value: str, version_number: Optional[str] = None):
-        while entity := self._search(attribute, value, version_number):
+    def _delete_by(self, attribute: str, value: str):
+        while entity := self._search(attribute, value):
             self._delete(entity.id)  # type: ignore
 
-    def _search(self, attribute: str, value: str, version_number: Optional[str] = None) -> Optional[Entity]:
-        return next(self.__search(attribute, value, version_number), None)
-
-    def _get_by_config_id(self, config_id: str) -> List[Entity]:
-        entities: List[Entity] = []
-        for f in filter(lambda f: config_id in f.name, self.dir_path.iterdir()):
-            if entity := self.__to_entity(f, retry=Config.global_config.read_entity_retry or 0):
-                entities.append(entity)
-        return entities
-
-    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
-        # Only get the entity from the latest version
-        from .._version._version_manager_factory import _VersionManagerFactory
-
-        version_number = _VersionManagerFactory._build_manager()._replace_version_number(None)
-
-        try:
-            files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
-            entities = map(
-                lambda f: self.__to_entity(
-                    f, by=owner_id, version_number=version_number, retry=Config.global_config.read_entity_retry or 0
-                ),
-                files,
-            )
-            corresponding_entities = filter(
-                lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id,  # type: ignore
-                entities,
-            )
-            return next(corresponding_entities, None)  # type: ignore
-        except FileNotFoundError:
-            pass
-        return None
-
-    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
-        # Design in order to optimize performance on Entity creation.
-        # Maintainability and readability were impacted.
-        res = {}
-        configs_and_owner_ids = set(configs_and_owner_ids)
-
-        try:
-            for f in self.dir_path.iterdir():
-                config_id, owner_id, entity = self.__match_file_and_get_entity(
-                    f, configs_and_owner_ids, retry=Config.global_config.read_entity_retry or 0
-                )
-
-                if entity:
-                    key = config_id, owner_id
-                    res[key] = entity
-                    configs_and_owner_ids.remove(key)
-
-                    if len(configs_and_owner_ids) == 0:
-                        return res
-        except FileNotFoundError:
-            # Folder with data was not created yet.
-            return {}
-
-        return res
-
-    def _get_model_filepath(self, model_id) -> pathlib.Path:
-        return self.dir_path / f"{model_id}.json"
-
-    def __search(self, attribute: str, value: str, version_number: Optional[str] = None) -> Iterator[Entity]:
-        return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(version_number))
-
-    def __to_entity(
-        self,
-        filepath,
-        by: Union[Optional[str], List[Optional[str]]] = None,
-        version_number: Union[Optional[str], List[Optional[str]]] = None,
-        retry: Optional[int] = 0,
-    ) -> Optional[Entity]:
-        if not isinstance(by, List):
-            by = [by] if by else []
-
-        if not isinstance(version_number, List):
-            version_number = [version_number] if version_number else []
-
-        by_version = list(map(lambda version: f'"version": "{version}"', version_number) if version_number else [""])
-
-        try:
-            with open(filepath, "r") as f:
-                file_content = f.read()
-
-            if by or by_version:
-                if all(criteria in file_content for criteria in by if criteria) and any(
-                    version in file_content for version in by_version
-                ):
-                    return self.__model_to_entity(file_content)
-                else:
-                    return None
-
-            return self.__model_to_entity(file_content)
-
-        except Exception as e:
-            if retry and retry > 0:
-                time.sleep(0.5)
-                return self.__to_entity(filepath, by=by, version_number=version_number, retry=retry - 1)
-            raise e
-
-    def __model_to_entity(self, file_content):
-        data = json.loads(file_content, cls=_CustomDecoder)
-        model = self.model.from_dict(data)  # type: ignore
-        entity = self._from_model(model)
-        # Add version attribute on old entities. Used to migrate from <=2.0 to >=2.1 version.
-        # To be removed on later versions
-        if not data.get("version") and hasattr(entity, "version"):
-            self._save(entity)
-            from taipy.logger._taipy_logger import _TaipyLogger
-
-            _TaipyLogger._get_logger().warning(
-                f"Entity {entity.id} has automatically been assigned to version named " f"{entity.version}"
-            )
-        return entity
-
-    def __create_directory_if_not_exists(self):
-        self.dir_path.mkdir(parents=True, exist_ok=True)
-
-    def __match_file_and_get_entity(self, filepath, config_and_owner_ids, retry: Optional[int] = 0):
-        # Only get the entity from the latest version
-        from .._version._version_manager_factory import _VersionManagerFactory
-
-        version_number = _VersionManagerFactory._build_manager()._replace_version_number(None)
-
-        if not isinstance(version_number, List):
-            version_number = [version_number] if version_number else []
-        version_number = [f'"version": "{version}"' for version in version_number]
-
-        filename = filepath.name
-
-        if match := [(c, p) for c, p in config_and_owner_ids if c.id in filename]:
-            try:
-                with open(filepath, "r") as f:
-                    file_content = f.read()
-
-                for config_id, owner_id in match:
-                    if not all(version in file_content for version in version_number):
-                        continue
-
-                    if owner_id and owner_id not in file_content:
-                        continue
-
-                    entity = self.__model_to_entity(file_content)
-                    if entity.owner_id == owner_id and entity.config_id == config_id.id:
-                        return config_id, owner_id, entity
-            except Exception as e:
-                if retry and retry > 0:
-                    return self.__match_file_and_get_entity(filepath, config_and_owner_ids, retry=retry - 1)
-                raise e
-
-        return None, None, None
+    def _search(self, attribute: str, value: Any, filters: List[Dict] = None) -> Optional[Entity]:
+        return next(self.__search(attribute, value), None)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         if isinstance(folder_path, str):
@@ -302,4 +124,115 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         if export_path.exists():
             export_path.unlink()
 
-        shutil.copy2(self._get_model_filepath(entity_id), export_path)
+        shutil.copy2(self.__get_path(entity_id), export_path)
+
+    ###########################################
+    # ##   Specific or optimized methods   ## #
+    ###########################################
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
+        # Design in order to optimize performance on Entity creation.
+        # Maintainability and readability were impacted.
+        if not filters:
+            filters = []
+        res = {}
+        configs_and_owner_ids = set(configs_and_owner_ids)
+
+        try:
+            for f in self.dir_path.iterdir():
+                config_id, owner_id, entity = self.__match_file_and_get_entity(f, configs_and_owner_ids, filters)
+
+                if entity:
+                    key = config_id, owner_id
+                    res[key] = entity
+                    configs_and_owner_ids.remove(key)
+
+                    if len(configs_and_owner_ids) == 0:
+                        return res
+        except FileNotFoundError:
+            # Folder with data was not created yet.
+            return {}
+
+        return res
+
+    def _get_by_config_and_owner_id(
+        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+    ) -> Optional[Entity]:
+        if not filters:
+            filters = []
+        if owner_id is not None:
+            filters.append({"owner_id": owner_id})
+        return self.__filter_files_by_config_and_owner_id(config_id, owner_id, filters)
+
+    #############################
+    # ##   Private methods   ## #
+    #############################
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
+    def __filter_files_by_config_and_owner_id(
+        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+    ):
+        try:
+            files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
+            entities = map(
+                lambda f: self.__file_content_to_entity(self.__filter_by(f, filters)),
+                files,
+            )
+            corresponding_entities = filter(
+                lambda e: e is not None and e.config_id == config_id and e.owner_id == owner_id,  # type: ignore
+                entities,
+            )
+            return next(corresponding_entities, None)  # type: ignore
+        except FileNotFoundError:
+            pass
+        return None
+
+    @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
+    def __match_file_and_get_entity(self, filepath, config_and_owner_ids, filters):
+        versions = [f'"version": "{item.get("version")}"' for item in filters if item.get("version")]
+
+        filename = filepath.name
+
+        if match := [(c, p) for c, p in config_and_owner_ids if c.id in filename]:
+            with open(filepath, "r") as f:
+                file_content = f.read()
+
+            for config_id, owner_id in match:
+                if not all(version in file_content for version in versions):
+                    continue
+
+                if owner_id and owner_id not in file_content:
+                    continue
+
+                entity = self.__file_content_to_entity(file_content)
+                if entity.owner_id == owner_id and entity.config_id == config_id.id:
+                    return config_id, owner_id, entity
+
+        return None, None, None
+
+    def __create_directory_if_not_exists(self):
+        self.dir_path.mkdir(parents=True, exist_ok=True)
+
+    def __search(self, attribute: str, value: str, filters: List[Dict] = None) -> Iterator[Entity]:
+        return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(filters))
+
+    def __get_path(self, model_id) -> pathlib.Path:
+        return self.dir_path / f"{model_id}.json"
+
+    def __file_content_to_entity(self, file_content):
+        if not file_content:
+            return None
+        if isinstance(file_content, str):
+            file_content = json.loads(file_content, cls=_Decoder)
+        model = self.model_type.from_dict(file_content)
+        entity = self.converter._model_to_entity(model)
+        return entity
+
+    def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Json:
+        if not filters:
+            filters = []
+        with open(filepath, "r") as f:
+            contents = f.read()
+            for _filter in filters:
+                if not all(f'"{key}": "{value}"' in contents for key, value in _filter.items()):
+                    return None
+
+        return json.loads(contents, cls=_Decoder)

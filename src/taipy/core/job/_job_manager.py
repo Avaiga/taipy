@@ -13,7 +13,7 @@ import uuid
 from typing import Callable, Iterable, List, Optional, Union
 
 from .._manager._manager import _Manager
-from .._repository._v2._abstract_repository import _AbstractRepository
+from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import JobNotDeletedException
@@ -40,12 +40,15 @@ class _JobManager(_Manager[Job], _VersionMixin):
     _EVENT_ENTITY_TYPE = EventEntityType.JOB
 
     @classmethod
-    def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:
+    def _create(
+        cls, task: Task, callbacks: Iterable[Callable], submit_id: str, submit_entity_id: str, force=False
+    ) -> Job:
         version = _VersionManagerFactory._build_manager()._get_latest_version()
         job = Job(
             id=JobId(f"{Job._ID_PREFIX}_{task.config_id}_{uuid.uuid4()}"),
             task=task,
             submit_id=submit_id,
+            submit_entity_id=submit_entity_id,
             force=force,
             version=version,
         )

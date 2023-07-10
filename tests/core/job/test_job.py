@@ -11,12 +11,13 @@
 
 from datetime import timedelta
 from time import sleep
+from typing import Union
 from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
 
-from src.taipy.core import JobId, TaskId
+from src.taipy.core import JobId, Pipeline, PipelineId, TaskId
 from src.taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -46,9 +47,22 @@ def job_id():
     return JobId("id1")
 
 
+@pytest.fixture(scope="class")
+def pipeline():
+    return Pipeline(
+        "pipeline",
+        {},
+        [],
+        PipelineId(Pipeline._ID_PREFIX + "pipeline_id"),
+        owner_id="owner_id",
+        parent_ids={"parent_id_1", "parent_id_2"},
+        version="random_version_number",
+    )
+
+
 @pytest.fixture
 def job(task, job_id):
-    return Job(job_id, task, "submit_id")
+    return Job(job_id, task, "submit_id", Pipeline._ID_PREFIX + "pipeline_id")
 
 
 @pytest.fixture
@@ -67,11 +81,17 @@ def _error():
     raise RuntimeError("Something bad has happened")
 
 
-def test_create_job(task, job):
+def test_create_job(pipeline, task, job):
+    from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+
+    _PipelineManagerFactory._build_manager()._set(pipeline)
+
     assert job.id == "id1"
     assert task in job
     assert job.is_submitted()
     assert job.submit_id is not None
+    assert job.submit_entity_id == Pipeline._ID_PREFIX + "pipeline_id"
+    assert job.submit_entity == pipeline
     with mock.patch("src.taipy.core.get") as get_mck:
         get_mck.return_value = task
         assert job.get_label() == "name > " + job.id
@@ -82,9 +102,9 @@ def test_comparison(task):
     job_id_1 = JobId("id1")
     job_id_2 = JobId("id2")
 
-    job_1 = Job(job_id_1, task, "submit_id")
+    job_1 = Job(job_id_1, task, "submit_id", "scenario_entity_id")
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = Job(job_id_2, task, "submit_id")
+    job_2 = Job(job_id_2, task, "submit_id", "scenario_entity_id")
 
     assert job_1 < job_2
     assert job_2 > job_1
@@ -140,7 +160,7 @@ def test_notification_job(job):
 
 def test_handle_exception_in_user_function(task_id, job_id):
     task = Task(config_id="name", properties={}, input=[], function=_error, output=[], id=task_id)
-    job = Job(job_id, task, "submit_id")
+    job = Job(job_id, task, "submit_id", "scenario_entity_id")
 
     _dispatch(task, job)
 
@@ -152,7 +172,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 def test_handle_exception_in_input_data_node(task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", properties={}, input=[data_node], function=print, output=[], id=task_id)
-    job = Job(job_id, task, "submit_id")
+    job = Job(job_id, task, "submit_id", "scenario_entity_id")
 
     _dispatch(task, job)
 
@@ -164,7 +184,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", properties={}, input=[], function=_foo, output=[data_node], id=task_id)
-    job = Job(job_id, task, "submit_id")
+    job = Job(job_id, task, "submit_id", "scenario_entity_id")
 
     _dispatch(task, job)
 
@@ -177,7 +197,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
 def test_auto_set_and_reload(current_datetime, job_id):
     task_1 = Task(config_id="name_1", properties={}, function=_foo, id=TaskId("task_1"))
     task_2 = Task(config_id="name_2", properties={}, function=_foo, id=TaskId("task_2"))
-    job_1 = Job(job_id, task_1, "submit_id_1")
+    job_1 = Job(job_id, task_1, "submit_id_1", "scenario_entity_id")
 
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
@@ -256,7 +276,9 @@ def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     _OrchestratorFactory._build_dispatcher()
     _TaskManager._set(task)
     _JobManager._set(job)
-    dispatcher = _StandaloneJobDispatcher(_OrchestratorFactory._orchestrator)
+    dispatcher: Union[_StandaloneJobDispatcher, _DevelopmentJobDispatcher] = _StandaloneJobDispatcher(
+        _OrchestratorFactory._orchestrator
+    )
     if mode == JobConfig._DEVELOPMENT_MODE:
         dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
     dispatcher._dispatch(job)

@@ -12,12 +12,11 @@
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
-from taipy.config import Config
 from taipy.config.common.scope import Scope
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._repository._v2._abstract_repository import _AbstractRepository
+from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..config.pipeline_config import PipelineConfig
@@ -96,9 +95,9 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     ) -> Pipeline:
         pipeline_id = Pipeline._new_id(str(pipeline_config.id))
 
-        task_configs = [Config.tasks[t.id] for t in pipeline_config.task_configs]
         task_manager = _TaskManagerFactory._build_manager()
-        tasks = task_manager._bulk_get_or_create(task_configs, cycle_id, scenario_id)
+        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id)
+
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
         if scope == Scope.SCENARIO:
