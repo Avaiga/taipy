@@ -14,7 +14,6 @@ from typing import Any, List
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 
-from ...config import JobConfig
 from ...data._data_manager_factory import _DataManagerFactory
 from ...data.data_node import DataNode
 from ...exceptions import DataNodeWritingError
@@ -24,10 +23,9 @@ from ...task.task import Task
 
 class _TaskFunctionWrapper:
     @classmethod
-    def _wrapped_function_with_config_load(cls, mode, config_as_string, job_id: JobId, task: Task):
-        if mode != JobConfig._DEVELOPMENT_MODE:
-            Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
-            Config.block_update()
+    def _wrapped_function_with_config_load(cls, config_as_string, job_id: JobId, task: Task):
+        Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
+        Config.block_update()
         return cls._wrapped_function(job_id, task)
 
     @classmethod
