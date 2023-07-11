@@ -289,7 +289,7 @@ def pipeline():
 
 @pytest.fixture(scope="function")
 def job(task):
-    return Job(JobId("job"), task, "foo", "bar")
+    return Job(JobId("job"), task, "foo", "bar", version="random_version_number")
 
 
 @pytest.fixture(scope="function")

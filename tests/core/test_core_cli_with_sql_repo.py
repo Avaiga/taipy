@@ -299,7 +299,12 @@ def test_production_mode_load_all_entities_from_previous_production_version(tmp_
 
     scenario_config = config_scenario()
 
-    with patch("sys.argv", ["prog", "--production"]):
+    with patch("sys.argv", ["prog", "--development"]):
+        Core().run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+
+    with patch("sys.argv", ["prog", "--production", "1.0"]):
         Core().run()
     production_ver_1 = _VersionManager._get_latest_version()
     assert _VersionManager._get_production_versions() == [production_ver_1]

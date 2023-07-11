@@ -76,7 +76,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
         if not filters:
-            filters = []
+            filters = [{}]
         entities = []
         try:
             for f in self.dir_path.iterdir():
@@ -103,8 +103,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         while entity := self._search(attribute, value):
             self._delete(entity.id)  # type: ignore
 
-    def _search(self, attribute: str, value: Any, filters: List[Dict] = None) -> Optional[Entity]:
-        return next(self.__search(attribute, value), None)
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
+        return next(self.__search(attribute, value, filters), None)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         if isinstance(folder_path, str):
@@ -129,11 +129,11 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     ###########################################
     # ##   Specific or optimized methods   ## #
     ###########################################
-    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: Optional[List[Dict]] = None):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
         if not filters:
-            filters = []
+            filters = [{}]
         res = {}
         configs_and_owner_ids = set(configs_and_owner_ids)
 
@@ -155,10 +155,10 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         return res
 
     def _get_by_config_and_owner_id(
-        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+        self, config_id: str, owner_id: Optional[str], filters: Optional[List[Dict]] = None
     ) -> Optional[Entity]:
         if not filters:
-            filters = []
+            filters = [{}]
         if owner_id is not None:
             filters.append({"owner_id": owner_id})
         return self.__filter_files_by_config_and_owner_id(config_id, owner_id, filters)
@@ -168,7 +168,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     @_retry(Config.global_config.read_entity_retry or 0, (Exception,))
     def __filter_files_by_config_and_owner_id(
-        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+        self, config_id: str, owner_id: Optional[str], filters: Optional[List[Dict]] = None
     ):
         try:
             files = filter(lambda f: config_id in f.name, self.dir_path.iterdir())
@@ -211,7 +211,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def __create_directory_if_not_exists(self):
         self.dir_path.mkdir(parents=True, exist_ok=True)
 
-    def __search(self, attribute: str, value: str, filters: List[Dict] = None) -> Iterator[Entity]:
+    def __search(self, attribute: str, value: str, filters: Optional[List[Dict]] = None) -> Iterator[Entity]:
         return filter(lambda e: getattr(e, attribute, None) == value, self._load_all(filters))
 
     def __get_path(self, model_id) -> pathlib.Path:
@@ -228,11 +228,12 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Json:
         if not filters:
-            filters = []
+            filters = [{}]
+
         with open(filepath, "r") as f:
             contents = f.read()
             for _filter in filters:
-                if not all(f'"{key}": "{value}"' in contents for key, value in _filter.items()):
-                    return None
+                if all(f'"{key}": "{value}"' in contents for key, value in _filter.items()):
+                    return json.loads(contents, cls=_Decoder)
 
-        return json.loads(contents, cls=_Decoder)
+        return None

@@ -85,9 +85,10 @@ class _Manager(Generic[EntityType]):
         Returns all entities based on a criteria.
         """
         if not filters:
-            filters = []
+            filters = [{}]
         if by:
-            filters.append(by)
+            for filter in filters:
+                filter.update(by)
         return cls._repository._load_all(filters)
 
     @classmethod
