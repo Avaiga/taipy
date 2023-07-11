@@ -11,24 +11,20 @@
 
 import threading
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Dict, Optional
 
-from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ...config.job_config import JobConfig
 from ...data._data_manager_factory import _DataManagerFactory
-from ...data.data_node import DataNode
-from ...exceptions.exceptions import DataNodeWritingError
 from ...job._job_manager_factory import _JobManagerFactory
 from ...job.job import Job
-from ...job.job_id import JobId
 from ...task.task import Task
 from .._abstract_orchestrator import _AbstractOrchestrator
+from ._task_function_wrapper import _TaskFunctionWrapper
 
 
-class _JobDispatcher(threading.Thread):
+class _JobDispatcher(threading.Thread, _TaskFunctionWrapper):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
     _STOP_FLAG = False
@@ -122,63 +118,6 @@ class _JobDispatcher(threading.Thread):
             job (Job^): The job to submit on an executor with an available worker.
         """
         raise NotImplementedError
-
-    @classmethod
-    def _run_wrapped_function(cls, mode, config_as_string, job_id: JobId, task: Task):
-        """
-        Reads inputs, execute function, and write outputs.
-
-        Parameters:
-            mode: The job execution mode.
-            config_as_string: The applied config passed as string to be reloaded iff the mode is `standalone`.
-            job_id (JobId^): The id of the job.
-            task (Task^): The task to be executed.
-        Returns:
-             True if the task needs to run. False otherwise.
-        """
-        try:
-            if mode != JobConfig._DEVELOPMENT_MODE:
-                Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
-                Config.block_update()
-            inputs: List[DataNode] = list(task.input.values())
-            outputs: List[DataNode] = list(task.output.values())
-
-            fct = task.function
-
-            results = fct(*cls.__read_inputs(inputs))
-            return cls.__write_data(outputs, results, job_id)
-        except Exception as e:
-            return [e]
-
-    @classmethod
-    def __read_inputs(cls, inputs: List[DataNode]) -> List[Any]:
-        data_manager = _DataManagerFactory._build_manager()
-        return [data_manager._get(dn.id).read_or_raise() for dn in inputs]
-
-    @classmethod
-    def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
-        data_manager = _DataManagerFactory._build_manager()
-        try:
-            if outputs:
-                _results = cls.__extract_results(outputs, results)
-                exceptions = []
-                for res, dn in zip(_results, outputs):
-                    try:
-                        data_node = data_manager._get(dn.id)
-                        data_node.write(res, job_id=job_id)
-                        data_manager._set(data_node)
-                    except Exception as e:
-                        exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))
-                return exceptions
-        except Exception as e:
-            return [e]
-
-    @classmethod
-    def __extract_results(cls, outputs: List[DataNode], results: Any) -> List[Any]:
-        _results: List[Any] = [results] if len(outputs) == 1 else results
-        if len(_results) != len(outputs):
-            raise DataNodeWritingError("Error: wrong number of result or task output")
-        return _results
 
     @staticmethod
     def _update_job_status(job: Job, exceptions):
