@@ -24,22 +24,15 @@ from ...task.task import Task
 
 class _TaskFunctionWrapper:
     @classmethod
-    def _wrapped_function(cls, mode, config_as_string, job_id: JobId, task: Task):
-        """
-        Reads inputs, execute function, and write outputs.
+    def _wrapped_function_with_config_load(cls, mode, config_as_string, job_id: JobId, task: Task):
+        if mode != JobConfig._DEVELOPMENT_MODE:
+            Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
+            Config.block_update()
+        return cls._wrapped_function(job_id, task)
 
-        Parameters:
-            mode: The job execution mode.
-            config_as_string: The applied config passed as string to be reloaded iff the mode is `standalone`.
-            job_id (JobId^): The id of the job.
-            task (Task^): The task to be executed.
-        Returns:
-             True if the task needs to run. False otherwise.
-        """
+    @classmethod
+    def _wrapped_function(cls, job_id: JobId, task: Task):
         try:
-            if mode != JobConfig._DEVELOPMENT_MODE:
-                Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
-                Config.block_update()
             inputs: List[DataNode] = list(task.input.values())
             outputs: List[DataNode] = list(task.output.values())
 
