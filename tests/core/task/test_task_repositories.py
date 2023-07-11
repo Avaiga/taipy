@@ -34,6 +34,18 @@ class TestTaskFSRepository:
         assert isinstance(obj, Task)
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_exists(self, tmpdir, data_node, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        _DataFSRepository()._save(data_node)
+        task = Task("task_config_id", {}, print, [data_node], [data_node])
+
+        repository._save(task)
+
+        assert repository._exists(task.id)
+        assert not repository._exists("not-existed-task")
+
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
     def test_load_all(self, tmpdir, data_node, repo):
         repository = repo()
         repository.base_path = tmpdir

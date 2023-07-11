@@ -9,8 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from datetime import timedelta
-from typing import List
+from datetime import datetime, timedelta
 from unittest import mock
 
 import pytest
@@ -18,6 +17,7 @@ import pytest
 from src.taipy.core import DataNode, taipy
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
@@ -29,7 +29,7 @@ from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
-from taipy.config import Config
+from taipy.config import Config, Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
@@ -253,25 +253,42 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         {"name": "bar"},
         set(),
         creation_date=current_datetime,
-        is_primary=False,
+        is_primary=True,
         cycle=None,
     )
     additional_dn = InMemoryDataNode("additional_dn", Scope.SCENARIO)
+    example_date = datetime.fromisoformat("2021-11-11T11:11:01.000001")
+    tmp_cycle = Cycle(
+        Frequency.WEEKLY,
+        {},
+        creation_date=example_date,
+        start_date=example_date,
+        end_date=example_date,
+        name="cc",
+        id=CycleId("tmp_cc_id"),
+    )
 
-    scenario_manager = _ScenarioManagerFactory._build_manager()
     _TaskManagerFactory._build_manager()._set(task)
     _DataManagerFactory._build_manager()._set(data_node)
     _DataManagerFactory._build_manager()._set(additional_dn)
     _CycleManagerFactory._build_manager()._set(cycle)
-
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    cycle_manager = _CycleManagerFactory._build_manager()
+    cycle_manager._set(cycle)
+    cycle_manager._set(tmp_cycle)
     scenario_manager._set(scenario_1)
 
     scenario_2 = scenario_manager._get(scenario_1)
     assert scenario_1.config_id == "foo"
     assert scenario_2.config_id == "foo"
 
+    # auto set & reload on name attribute
     assert scenario_1.name == "bar"
-    scenario_1.name = "baz"
+    assert scenario_2.name == "bar"
+    scenario_1.name = "zab"
+    assert scenario_1.name == "zab"
+    assert scenario_2.name == "zab"
+    scenario_2.name = "baz"
     assert scenario_1.name == "baz"
     assert scenario_2.name == "baz"
 
@@ -295,26 +312,47 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert len(scenario_2.data_nodes) == 3
 
     new_datetime = current_datetime + timedelta(1)
+    new_datetime_1 = current_datetime + timedelta(2)
 
+    # auto set & reload on name attribute
     assert scenario_1.creation_date == current_datetime
-    scenario_1.creation_date = new_datetime
+    assert scenario_2.creation_date == current_datetime
+    scenario_1.creation_date = new_datetime_1
+    assert scenario_1.creation_date == new_datetime_1
+    assert scenario_2.creation_date == new_datetime_1
+    scenario_2.creation_date = new_datetime
     assert scenario_1.creation_date == new_datetime
     assert scenario_2.creation_date == new_datetime
 
+    # auto set & reload on cycle attribute
     assert scenario_1.cycle is None
-    scenario_1.cycle = cycle
+    assert scenario_2.cycle is None
+    scenario_1.cycle = tmp_cycle
+    assert scenario_1.cycle == tmp_cycle
+    assert scenario_2.cycle == tmp_cycle
+    scenario_2.cycle = cycle
     assert scenario_1.cycle == cycle
     assert scenario_2.cycle == cycle
 
+    # auto set & reload on is_primary attribute
+    assert scenario_1.is_primary
+    assert scenario_2.is_primary
+    scenario_1.is_primary = False
     assert not scenario_1.is_primary
-    scenario_1.is_primary = True
+    assert not scenario_2.is_primary
+    scenario_2.is_primary = True
     assert scenario_1.is_primary
     assert scenario_2.is_primary
 
+    # auto set & reload on subscribers attribute
     assert len(scenario_1.subscribers) == 0
+    assert len(scenario_2.subscribers) == 0
     scenario_1.subscribers.append(_Subscriber(print, []))
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_2.subscribers) == 1
+    scenario_2.subscribers.append(_Subscriber(print, []))
+    assert len(scenario_1.subscribers) == 2
+    assert len(scenario_2.subscribers) == 2
 
     scenario_1.subscribers.clear()
     assert len(scenario_1.subscribers) == 0
@@ -341,8 +379,16 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert len(scenario_1.tags) == 1
     assert len(scenario_2.tags) == 1
 
+    # auto set & reload on properties attribute
     assert scenario_1.properties == {"name": "baz"}
-    scenario_1.properties["qux"] = 5
+    assert scenario_2.properties == {"name": "baz"}
+    scenario_1._properties["qux"] = 4
+    assert scenario_1.properties["qux"] == 4
+    assert scenario_2.properties["qux"] == 4
+
+    assert scenario_1.properties == {"name": "baz", "qux": 4}
+    assert scenario_2.properties == {"name": "baz", "qux": 4}
+    scenario_2._properties["qux"] = 5
     assert scenario_1.properties["qux"] == 5
     assert scenario_2.properties["qux"] == 5
 
@@ -359,8 +405,9 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
         assert scenario.name == "baz"
+        assert scenario.properties["qux"] == 5
 
-        new_datetime_2 = new_datetime + timedelta(1)
+        new_datetime_2 = new_datetime + timedelta(5)
         scenario.config_id = "foo"
         scenario.tasks = set()
         scenario.additional_data_nodes = set()
@@ -370,6 +417,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         scenario.subscribers = [print]
         scenario.tags = None
         scenario.name = "qux"
+        scenario.properties["qux"] = 9
 
         assert scenario.config_id == "foo"
         assert len(scenario.tasks) == 1
@@ -383,6 +431,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
         assert scenario.name == "baz"
+        assert scenario.properties["qux"] == 5
 
     assert scenario_1.config_id == "foo"
     assert len(scenario_1.tasks) == 0
@@ -395,7 +444,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context
-    assert scenario_1.name == "qux"
+    assert scenario_1.properties["qux"] == 9
 
 
 def test_is_deletable():

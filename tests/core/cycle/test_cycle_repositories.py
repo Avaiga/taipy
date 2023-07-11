@@ -30,6 +30,15 @@ class TestCycleRepositories:
         assert isinstance(obj, Cycle)
 
     @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
+    def test_exists(self, tmpdir, cycle, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(cycle)
+
+        assert repository._exists(cycle.id)
+        assert not repository._exists("not-existed-cycle")
+
+    @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
     def test_load_all(self, tmpdir, cycle, repo):
         repository = repo()
         repository.base_path = tmpdir

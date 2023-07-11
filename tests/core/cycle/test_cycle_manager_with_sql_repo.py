@@ -38,6 +38,7 @@ def test_save_and_get_cycle_entity(cycle, current_datetime):
     assert len(_CycleManager._get_all()) == 0
 
     _CycleManager._set(cycle)
+    assert _CycleManager._exists(cycle.id)
 
     cycle_1 = _CycleManager._get(cycle.id)
 
@@ -58,6 +59,7 @@ def test_save_and_get_cycle_entity(cycle, current_datetime):
 
     cycle_2_id = CycleId("cycle_2")
     assert _CycleManager._get(cycle_2_id) is None
+    assert not _CycleManager._exists(cycle_2_id)
 
     cycle_3 = Cycle(
         Frequency.MONTHLY,
@@ -73,6 +75,7 @@ def test_save_and_get_cycle_entity(cycle, current_datetime):
 
     cycle_3 = _CycleManager._get(cycle_1.id)
 
+    assert _CycleManager._exists(cycle_1.id)
     assert len(_CycleManager._get_all()) == 1
     assert cycle_3.id == cycle_1.id
     assert cycle_3.name == cycle_3.name
@@ -105,6 +108,7 @@ def test_create_and_delete_cycle_entity():
 
     cycle_1_id = cycle_1.id
 
+    assert _CycleManager._exists(cycle_1.id)
     assert len(_CycleManager._get_all()) == 1
     assert _CycleManager._get(cycle_1_id) == cycle_1
     assert _CycleManager._get(cycle_1_id).name == "foo"
@@ -113,6 +117,7 @@ def test_create_and_delete_cycle_entity():
 
     cycle_2_id = CycleId("cycle_2")
     assert _CycleManager._get(cycle_2_id) is None
+    assert not _CycleManager._exists(cycle_2_id)
 
     cycle_3 = _CycleManager._create(Frequency.MONTHLY, "bar")
 
@@ -123,21 +128,25 @@ def test_create_and_delete_cycle_entity():
 
     cycle_3_id = cycle_3.id
 
+    assert _CycleManager._exists(cycle_3_id)
     assert len(_CycleManager._get_all()) == 2
     assert _CycleManager._get(cycle_3_id).name == "bar"
 
     cycle_4 = _CycleManager._create(Frequency.YEARLY, "baz")
     cycle_4_id = cycle_4.id
 
+    assert _CycleManager._exists(cycle_4_id)
     assert len(_CycleManager._get_all()) == 3
 
     _CycleManager._delete(cycle_4_id)
 
     assert len(_CycleManager._get_all()) == 2
+    assert not _CycleManager._exists(cycle_4_id)
     assert _CycleManager._get(cycle_4_id) is None
 
     _CycleManager._delete_all()
     assert len(_CycleManager._get_all()) == 0
+    assert not any(_CycleManager._exists(cycle_id) for cycle_id in [cycle_1_id, cycle_3_id, cycle_4_id])
 
 
 def test_get_cycle_start_date_and_end_date():

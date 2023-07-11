@@ -30,6 +30,15 @@ class TestPipelineRepository:
         assert isinstance(obj, Pipeline)
 
     @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
+    def test_exists(self, tmpdir, pipeline, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(pipeline)
+
+        assert repository._exists(pipeline.id)
+        assert not repository._exists("not-existed-pipeline")
+
+    @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
     def test_load_all(self, tmpdir, pipeline, repo):
         repository = repo()
         repository.base_path = tmpdir

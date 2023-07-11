@@ -113,6 +113,65 @@ def submit(
 
 
 @overload
+def exists(entity_id: TaskId) -> bool:
+    ...
+
+
+@overload
+def exists(entity_id: DataNodeId) -> bool:
+    ...
+
+
+@overload
+def exists(entity_id: PipelineId) -> bool:
+    ...
+
+
+@overload
+def exists(entity_id: ScenarioId) -> bool:
+    ...
+
+
+@overload
+def exists(entity_id: CycleId) -> bool:
+    ...
+
+
+@overload
+def exists(entity_id: JobId) -> bool:
+    ...
+
+
+@overload
+def exists(entity_id: str) -> bool:
+    ...
+
+
+def exists(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId, str]) -> bool:
+    """Check if an entity exists or not.
+
+    Parameters:
+        entity_id (Union[DataNodeId^, TaskId^, PipelineId^, ScenarioId^, JobId, CycleId]): The identifier
+            of an entity to check if it exists or not.
+    Returns:
+        True if the given entity does exist. False otherwise.
+    """
+    if entity_id.startswith(Job._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._exists(JobId(entity_id))
+    if entity_id.startswith(Cycle._ID_PREFIX):
+        return _CycleManagerFactory._build_manager()._exists(CycleId(entity_id))
+    if entity_id.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()._exists(ScenarioId(entity_id))
+    if entity_id.startswith(Pipeline._ID_PREFIX):
+        return _PipelineManagerFactory._build_manager()._exists(PipelineId(entity_id))
+    if entity_id.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()._exists(TaskId(entity_id))
+    if entity_id.startswith(DataNode._ID_PREFIX):
+        return _DataManagerFactory._build_manager()._exists(DataNodeId(entity_id))
+    raise ModelNotFound("NOT_DETERMINED", entity_id)
+
+
+@overload
 def get(entity_id: TaskId) -> Task:
     ...
 

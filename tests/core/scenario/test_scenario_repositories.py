@@ -30,6 +30,15 @@ class TestScenarioFSRepository:
         assert isinstance(obj, Scenario)
 
     @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
+    def test_exists(self, tmpdir, scenario, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        repository._save(scenario)
+
+        assert repository._exists(scenario.id)
+        assert not repository._exists("not-existed-scenario")
+
+    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
     def test_load_all(self, tmpdir, scenario, repo):
         repository = repo()
         repository.base_path = tmpdir

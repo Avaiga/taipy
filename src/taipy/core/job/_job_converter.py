@@ -32,7 +32,7 @@ class _JobConverter(_AbstractConverter):
             job.submit_id,
             job.submit_entity_id,
             job._creation_date.isoformat(),
-            cls._serialize_subscribers(job._subscribers),
+            cls.__serialize_subscribers(job._subscribers),
             job._stacktrace,
             version=job._version,
         )
@@ -65,5 +65,5 @@ class _JobConverter(_AbstractConverter):
         return job
 
     @staticmethod
-    def _serialize_subscribers(subscribers: List) -> List:
+    def __serialize_subscribers(subscribers: List) -> List:
         return _fcts_to_dict(subscribers)

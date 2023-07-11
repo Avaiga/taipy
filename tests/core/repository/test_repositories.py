@@ -45,6 +45,21 @@ class TestRepositoriesStorage:
             (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
+    def test_exists(self, mock_repo, params):
+        r = mock_repo(**params)
+        m = MockObj("uuid", "foo")
+        r._save(m)
+
+        assert r._exists(m.id)
+        assert not r._exists("not-existed-model")
+
+    @pytest.mark.parametrize(
+        "mock_repo,params",
+        [
+            (MockFSRepository, {"model_type": MockModel, "dir_name": "mock_model", "converter": MockConverter}),
+            (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
+        ],
+    )
     def test_get_all(self, mock_repo, params):
         objs = []
         r = mock_repo(**params)
