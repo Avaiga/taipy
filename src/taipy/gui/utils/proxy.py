@@ -26,7 +26,7 @@ if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-def modifiedHandleResponseEnd(self):
+def _modifiedHandleResponseEnd(self):
     if self._finished:
         return
     self._finished = True
@@ -35,10 +35,10 @@ def modifiedHandleResponseEnd(self):
     self.transport.loseConnection()
 
 
-setattr(ProxyClient, "handleResponseEnd", modifiedHandleResponseEnd)
+setattr(ProxyClient, "handleResponseEnd", _modifiedHandleResponseEnd)
 
 
-class TaipyReverseProxyResource(Resource):
+class _TaipyReverseProxyResource(Resource):
     proxyClientFactoryClass = ProxyClientFactory
 
     def __init__(self, host, path, gui: "Gui", reactor=reactor):
@@ -49,7 +49,7 @@ class TaipyReverseProxyResource(Resource):
         self._gui = gui
 
     def getChild(self, path, request):
-        return TaipyReverseProxyResource(
+        return _TaipyReverseProxyResource(
             self.host,
             self.path + b"/" + urlquote(path, safe=b"").encode("utf-8"),
             self._gui,
@@ -87,7 +87,7 @@ class NotebookProxy(object, metaclass=_Singleton):
         if self._is_running:
             return
         self._is_running = True
-        site = Site(TaipyReverseProxyResource(self._gui._get_config("host", "127.0.0.1"), b"", self._gui))
+        site = Site(_TaipyReverseProxyResource(self._gui._get_config("host", "127.0.0.1"), b"", self._gui))
         reactor.listenTCP(self._listening_port, site)
         Thread(target=reactor.run, args=(False,)).start()
 

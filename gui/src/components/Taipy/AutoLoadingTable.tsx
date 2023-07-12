@@ -332,7 +332,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                       }, "-agg")
                     : "";
                 const cols = colsOrder.map((col) => columns[col].dfid).filter((c) => c != EDIT_COL);
-                const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}`;
+                const afs = appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col));
+                const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}${afs.map(
+                    (af) => `${af.col}${af.action}${af.value}`
+                )}`;
                 page.current = {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
@@ -361,7 +364,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         styles,
                         tooltips,
                         handleNan,
-                        appliedFilters
+                        afs
                     )
                 );
             });

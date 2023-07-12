@@ -143,11 +143,11 @@ def get_user_content_url(
         state (State^): The current user state as received in any callback.
         path: An optional additional path to the URL.
         params: An optional dictionary sent to the *on_user_content* callback.<br/>
-           These arguments are added as query parameters to the generated URL and converted into
-           strings.
+            These arguments are added as query parameters to the generated URL and converted into
+            strings.
 
     Returns:
-        An URL that, when queried, triggers the `on_user_content()^` callback.
+        An URL that, when queried, triggers the *on_user_content* callback.
     """
     if state and isinstance(state._gui, Gui):
         return state._gui._get_user_content_url(path, params)

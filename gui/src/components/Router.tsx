@@ -146,7 +146,7 @@ const Router = () => {
                                             </ErrorBoundary>
                                         </Box>
                                         {state.ackList.length ? (
-                                            <Box sx={progressSx}>
+                                            <Box sx={progressSx} className="taipy-busy">
                                                 <CircularProgress size="1em" disableShrink />
                                             </Box>
                                         ) : null}

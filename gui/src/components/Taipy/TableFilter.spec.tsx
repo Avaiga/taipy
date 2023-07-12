@@ -217,7 +217,7 @@ describe("Table Filter Component", () => {
     it("reset filters", async () => {
         const onValidate = jest.fn();
         const { getByText, getByTestId } = render(
-            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={onValidate} appliedFilters={[{col: "col", action: "action", value: ""}]} />
+            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={onValidate} appliedFilters={[{col: "StringCol", action: "action", value: ""}]} />
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);
@@ -225,5 +225,14 @@ describe("Table Filter Component", () => {
         expect(resetBut).toBeEnabled();
         await userEvent.click(resetBut);
         expect(onValidate).toHaveBeenCalled();
+    });
+    it("ignores unapplicable filters", async () => {
+        const { getByText, getByTestId } = render(
+            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} appliedFilters={[{col: "unknown col", action: "action", value: ""}]} />
+        );
+        const elt = getByTestId("FilterListIcon");
+        await userEvent.click(elt);
+        const resetBut = getByText("Reset list (remove applied filter)");
+        expect(resetBut).not.toBeEnabled();
     });
 });

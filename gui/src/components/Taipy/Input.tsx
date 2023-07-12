@@ -22,12 +22,14 @@ import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../..
 const AUTHORIZED_KEYS = ["Enter", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"];
 
 const getActionKeys = (keys?: string): string[] => {
-    const ak = keys
-        ? keys
-              .split(";")
-              .filter((v) => AUTHORIZED_KEYS.includes(v.trim()))
-              .map((v) => v.trim())
-        : [];
+    const ak = (
+        keys
+            ? keys
+                  .split(";")
+                  .map((v) => v.trim().toLowerCase())
+                  .filter((v) => AUTHORIZED_KEYS.some((k) => k.toLowerCase() === v))
+            : []
+    ).map((v) => AUTHORIZED_KEYS.find((k) => k.toLowerCase() == v) as string);
     return ak.length > 0 ? ak : [AUTHORIZED_KEYS[0]];
 };
 
@@ -38,8 +40,8 @@ const Input = (props: TaipyInputProps) => {
         updateVarName,
         propagate = true,
         defaultValue = "",
-        onAction: onAction,
-        onChange: onChange,
+        onAction,
+        onChange,
         multiline = false,
         linesShown = 5,
     } = props;
@@ -75,7 +77,7 @@ const Input = (props: TaipyInputProps) => {
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (onAction && actionKeys.includes(evt.key)) {
+            if (onAction && !evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay && delayCall.current > 0) {
                     clearTimeout(delayCall.current);

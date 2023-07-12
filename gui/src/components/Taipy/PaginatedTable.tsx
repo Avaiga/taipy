@@ -67,7 +67,15 @@ import {
     getRowIndex,
     getTooltip,
 } from "./tableUtils";
-import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicJsonProperty, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
+import {
+    useClassNames,
+    useDispatch,
+    useDispatchRequestUpdateOnFirstRender,
+    useDynamicJsonProperty,
+    useDynamicProperty,
+    useFormatConfig,
+    useModule,
+} from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
 import { getSuffixedClassNames } from "./utils";
 
@@ -93,7 +101,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         width = "100%",
         size = DEFAULT_SIZE,
     } = props;
-    const pageSize = (props.pageSize === undefined || props.pageSize < 1) ? 100 : Math.round(props.pageSize);
+    const pageSize = props.pageSize === undefined || props.pageSize < 1 ? 100 : Math.round(props.pageSize);
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(pageSize);
@@ -132,10 +140,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         col.tooltip = props.tooltip;
                     }
                 });
-                addDeleteColumn(
-                    (active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
-                    baseColumns
-                );
+                addDeleteColumn((active && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0), baseColumns);
                 const colsOrder = Object.keys(baseColumns).sort(getsortByIndex(baseColumns));
                 const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
                     if (baseColumns[col].style) {
@@ -158,7 +163,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 console.info("PTable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[] as string[], {} as Record<string, ColumnDesc>, {} as Record<string, string>, {} as Record<string, string>, hNan, false];
+        return [
+            [] as string[],
+            {} as Record<string, ColumnDesc>,
+            {} as Record<string, string>,
+            {} as Record<string, string>,
+            hNan,
+            false,
+        ];
     }, [active, editable, onAdd, onDelete, baseColumns, props.lineStyle, props.tooltip, props.nanValue, props.filter]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
@@ -189,8 +201,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                   return pv;
               }, "-agg")
             : "";
-        const cols = colsOrder.map((col) => columns[col].dfid).filter(c => c != EDIT_COL);
-        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}${appliedFilters.map(
+        const cols = colsOrder.map((col) => columns[col].dfid).filter((c) => c != EDIT_COL);
+        const afs = appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col));
+        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}${afs.map(
             (af) => `${af.col}${af.action}${af.value}`
         )}`;
         if (refresh || !props.data || props.data[pageKey.current] === undefined) {
@@ -219,7 +232,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     styles,
                     tooltips,
                     handleNan,
-                    appliedFilters
+                    afs
                 )
             );
         } else {
@@ -306,8 +319,13 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 console.log("PaginatedTable pageSizeOptions is wrong ", pageSizeOptions, e);
             }
         }
-        if (pageSize > 0 && !psOptions.some(ps => typeof ps === "number" ? ps === pageSize: (typeof ps.value === "number" ? ps.value === pageSize : false))) {
-            psOptions.push({ value: pageSize, label: "" + pageSize});
+        if (
+            pageSize > 0 &&
+            !psOptions.some((ps) =>
+                typeof ps === "number" ? ps === pageSize : typeof ps.value === "number" ? ps.value === pageSize : false
+            )
+        ) {
+            psOptions.push({ value: pageSize, label: "" + pageSize });
         }
         if (allowAllRows) {
             psOptions.push({ value: -1, label: "All" });
@@ -372,12 +390,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             <Paper sx={paperSx}>
                 <Tooltip title={hover || ""}>
                     <TableContainer sx={tableContainerSx}>
-                        <Table
-                            sx={tableSx}
-                            aria-labelledby="tableTitle"
-                            size={size}
-                            stickyHeader={true}
-                        >
+                        <Table sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
                                 <TableRow>
                                     {colsOrder.map((col, idx) => (
@@ -482,11 +495,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     formatConfig={formatConfig}
                                                     rowIndex={index}
                                                     onValidation={
-                                                        active && !columns[col].notEditable && onEdit ? onCellValidation : undefined
+                                                        active && !columns[col].notEditable && onEdit
+                                                            ? onCellValidation
+                                                            : undefined
                                                     }
-                                                    onDeletion={
-                                                        active && onDelete ? onRowDeletion : undefined
-                                                    }
+                                                    onDeletion={active && onDelete ? onRowDeletion : undefined}
                                                     onSelection={active && onAction ? onRowSelection : undefined}
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                     tooltip={getTooltip(row, columns[col].tooltip, col)}
