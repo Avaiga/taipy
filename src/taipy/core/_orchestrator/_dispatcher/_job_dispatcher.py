@@ -52,6 +52,7 @@ class _JobDispatcher(threading.Thread, _TaskFunctionWrapper):
         self._STOP_FLAG = True
 
     def run(self):
+        _TaipyLogger._get_logger().info("Start job dispatcher...")
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
