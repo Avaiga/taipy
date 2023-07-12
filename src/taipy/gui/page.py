@@ -50,12 +50,19 @@ class Page(ABC):
 
     def __process_content(self, content: str) -> None:
         if path.exists(content) and path.isfile(content):
-            with open(t.cast(str, content), "r") as f:
-                self._content = f.read()
-                # Save file path for error handling
-                self._filepath = content
-        else:
-            self._content = content
+            return self.__parse_file_content(content)
+        if self._frame is not None:
+            frame_dir_path = path.dirname(path.abspath(self._frame.f_code.co_filename))
+            content_path = path.join(frame_dir_path, content)
+            if path.exists(content_path) and path.isfile(content_path):
+                return self.__parse_file_content(content_path)
+        self._content = content
+
+    def __parse_file_content(self, content):
+        with open(t.cast(str, content), "r") as f:
+            self._content = f.read()
+            # Save file path for error handling
+            self._filepath = content
 
     def set_content(self, content: str) -> None:
         """Set a new page content.
