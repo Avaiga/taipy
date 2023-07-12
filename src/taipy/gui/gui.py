@@ -277,17 +277,11 @@ class Gui:
         # store suspected local containing frame
         self.__frame = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back)
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
+        self._set_css_file(css_file)
 
         # Preserve server config for server initialization
         self._path_mapping = path_mapping
         self._flask = flask
-        if css_file is None:
-            script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
-            if script_file.with_suffix(".css").exists():
-                css_file = f"{script_file.stem}.css"
-            elif script_file.is_dir() and (script_file / "taipy.css").exists():
-                css_file = "taipy.css"
-        self.__css_file = css_file
 
         self._config = _Config()
         self.__content_accessor = None
@@ -1699,6 +1693,15 @@ class Gui:
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
+
+    def _set_css_file(self, css_file: t.Optional[str] = None):
+        if css_file is None:
+            script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
+            if script_file.with_suffix(".css").exists():
+                css_file = f"{script_file.stem}.css"
+            elif script_file.is_dir() and (script_file / "taipy.css").exists():
+                css_file = "taipy.css"
+        self.__css_file = css_file
 
     def _set_state(self, state: State):
         if isinstance(state, State):

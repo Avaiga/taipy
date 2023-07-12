@@ -48,9 +48,11 @@ jobs:
 
       - name: install pipenv and install dependencies
         run: |
+          pip install --upgrade pip
           pip install pipenv
           pipenv install --dev
-          pipenv run pip install jsonschema==4.17.3
+          pipenv run pip install jsonschema==4.17.3 "pandas>=2.0.0,<2.1"
+          pipenv run pip freeze
           pipenv run playwright install chromium --with-deps
       - name: run pytest
         run: |
