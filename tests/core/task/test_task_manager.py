@@ -220,20 +220,26 @@ def test_set_and_get_task():
 
 
 def test_get_all_on_multiple_versions_environment():
-    task_v1 = Task("name_1", {}, print, [], [], id=TaskId("id_v1"), version="1.0")
-    task_v2 = Task("name_2", {}, print, [], [], id=TaskId("id_v2"), version="2.0")
-    _TaskManager._set(task_v1)
-    _TaskManager._set(task_v2)
+    # Create 5 tasks with 2 versions each
+    # Only version 1.0 has the task with config_id = "config_id_1"
+    # Only version 2.0 has the task with config_id = "config_id_6"
+    for version in range(1, 3):
+        for i in range(5):
+            _TaskManager._set(
+                Task(
+                    f"config_id_{i+version}", {}, print, [], [], id=TaskId(f"id{i}_v{version}"), version=f"{version}.0"
+                )
+            )
 
     _VersionManager._set_development_version("1.0")
-    tasks = _TaskManager._get_all()
-    assert len(tasks) == 1
-    assert tasks[0].id == task_v1.id
+    assert len(_TaskManager._get_all()) == 5
+    assert len(_TaskManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "1.0"}])) == 1
+    assert len(_TaskManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "1.0"}])) == 0
 
     _VersionManager._set_development_version("2.0")
-    tasks = _TaskManager._get_all()
-    assert len(tasks) == 1
-    assert tasks[0].id == task_v2.id
+    assert len(_TaskManager._get_all()) == 5
+    assert len(_TaskManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "2.0"}])) == 0
+    assert len(_TaskManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "2.0"}])) == 1
 
 
 def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():

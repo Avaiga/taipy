@@ -251,6 +251,31 @@ class TestDataManager:
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "foo"]) == 1
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
 
+    def test_get_all_on_multiple_versions_environment(self):
+        # Create 5 data nodes with 2 versions each
+        # Only version 1.0 has the data node with config_id = "config_id_1"
+        # Only version 2.0 has the data node with config_id = "config_id_6"
+        for version in range(1, 3):
+            for i in range(5):
+                _DataManager._set(
+                    InMemoryDataNode(
+                        f"config_id_{i+version}",
+                        Scope.SCENARIO,
+                        id=DataNodeId(f"id{i}_v{version}"),
+                        version=f"{version}.0",
+                    )
+                )
+
+        _VersionManager._set_development_version("1.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "1.0"}])) == 1
+        assert len(_DataManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "1.0"}])) == 0
+
+        _VersionManager._set_development_version("2.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "2.0"}])) == 0
+        assert len(_DataManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "2.0"}])) == 1
+
     def test_set(self):
         dn = InMemoryDataNode(
             "config_id",
@@ -276,22 +301,6 @@ class TestDataManager:
         assert len(_DataManager._get_all()) == 1
         assert dn.config_id == "foo"
         assert _DataManager._get(dn.id).config_id == "foo"
-
-    def test_get_all_on_multiple_versions_environment(self):
-        dn_v1 = InMemoryDataNode("config_id", Scope.SCENARIO, id=DataNodeId("id_v1"), version="1.0")
-        dn_v2 = InMemoryDataNode("config_id", Scope.SCENARIO, id=DataNodeId("id_v2"), version="2.0")
-        _DataManager._set(dn_v1)
-        _DataManager._set(dn_v2)
-
-        _VersionManager._set_development_version("1.0")
-        data_nodes = _DataManager._get_all()
-        assert len(data_nodes) == 1
-        assert data_nodes[0].id == dn_v1.id
-
-        _VersionManager._set_development_version("2.0")
-        data_nodes = _DataManager._get_all()
-        assert len(data_nodes) == 1
-        assert data_nodes[0].id == dn_v2.id
 
     def test_delete(self):
         dn_1 = InMemoryDataNode("config_id", Scope.SCENARIO, id="id_1")

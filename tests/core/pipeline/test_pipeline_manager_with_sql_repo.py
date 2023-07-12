@@ -12,6 +12,7 @@
 import pytest
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
@@ -124,6 +125,30 @@ def test_set_and_get_pipeline():
     assert _PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
+
+
+def test_get_all_on_multiple_versions_environment():
+    Config.configure_global_app(repository_type="sql")
+    init_managers()
+
+    # Create 5 pipelines with 2 versions each
+    # Only version 1.0 has the pipeline with config_id = "config_id_1"
+    # Only version 2.0 has the pipeline with config_id = "config_id_6"
+    for version in range(1, 3):
+        for i in range(5):
+            _PipelineManager._set(
+                Pipeline(f"config_id_{i+version}", {}, [], PipelineId(f"id{i}_v{version}"), version=f"{version}.0")
+            )
+
+    _VersionManager._set_development_version("1.0")
+    assert len(_PipelineManager._get_all()) == 5
+    assert len(_PipelineManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "1.0"}])) == 1
+    assert len(_PipelineManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "1.0"}])) == 0
+
+    _VersionManager._set_development_version("2.0")
+    assert len(_PipelineManager._get_all()) == 5
+    assert len(_PipelineManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "2.0"}])) == 0
+    assert len(_PipelineManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "2.0"}])) == 1
 
 
 def mult_by_two(nb: int):

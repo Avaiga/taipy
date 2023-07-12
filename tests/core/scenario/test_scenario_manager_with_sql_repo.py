@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
@@ -149,6 +150,30 @@ def test_set_and_get_scenario(cycle):
     assert _ScenarioManager._get(scenario_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_2).pipelines) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
+
+
+def test_get_all_on_multiple_versions_environment():
+    Config.configure_global_app(repository_type="sql")
+    init_managers()
+
+    # Create 5 scenarios with 2 versions each
+    # Only version 1.0 has the scenario with config_id = "config_id_1"
+    # Only version 2.0 has the scenario with config_id = "config_id_6"
+    for version in range(1, 3):
+        for i in range(5):
+            _ScenarioManager._set(
+                Scenario(f"config_id_{i+version}", [], {}, ScenarioId(f"id{i}_v{version}"), version=f"{version}.0")
+            )
+
+    _VersionManager._set_development_version("1.0")
+    assert len(_ScenarioManager._get_all()) == 5
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "1.0"}])) == 1
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "1.0"}])) == 0
+
+    _VersionManager._set_development_version("2.0")
+    assert len(_ScenarioManager._get_all()) == 5
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "2.0"}])) == 0
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "2.0"}])) == 1
 
 
 def test_create_scenario_does_not_modify_config():
@@ -301,7 +326,7 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario_1.by_4._get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
-    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._create(scenario_config)
 
     assert len(_DataManager._get_all()) == 5
     assert len(_TaskManager._get_all()) == 4

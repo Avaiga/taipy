@@ -157,20 +157,24 @@ def test_set_and_get_scenario(cycle):
 
 
 def test_get_all_on_multiple_versions_environment():
-    scenario_v1 = Scenario("name_1", [], {}, ScenarioId("id_v1"), version="1.0")
-    scenario_v2 = Scenario("name_2", [], {}, ScenarioId("id_v2"), version="2.0")
-    _ScenarioManager._set(scenario_v1)
-    _ScenarioManager._set(scenario_v2)
+    # Create 5 scenarios with 2 versions each
+    # Only version 1.0 has the scenario with config_id = "config_id_1"
+    # Only version 2.0 has the scenario with config_id = "config_id_6"
+    for version in range(1, 3):
+        for i in range(5):
+            _ScenarioManager._set(
+                Scenario(f"config_id_{i+version}", [], {}, ScenarioId(f"id{i}_v{version}"), version=f"{version}.0")
+            )
 
     _VersionManager._set_development_version("1.0")
-    scenarios = _ScenarioManager._get_all()
-    assert len(scenarios) == 1
-    assert scenarios[0].id == scenario_v1.id
+    assert len(_ScenarioManager._get_all()) == 5
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "1.0"}])) == 1
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "1.0"}])) == 0
 
     _VersionManager._set_development_version("2.0")
-    scenarios = _ScenarioManager._get_all()
-    assert len(scenarios) == 1
-    assert scenarios[0].id == scenario_v2.id
+    assert len(_ScenarioManager._get_all()) == 5
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "2.0"}])) == 0
+    assert len(_ScenarioManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "2.0"}])) == 1
 
 
 def test_create_scenario_does_not_modify_config():
