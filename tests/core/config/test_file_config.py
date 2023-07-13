@@ -102,7 +102,7 @@ owner = "Raymond Kopa"
     ):
         Config.configure_global_app(clean_entities_enabled=True)
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
-        Config.configure_default_data_node(
+        Config.set_default_data_node_configuration(
             storage_type="in_memory",
             custom="default_custom_prop",
             validity_period=timedelta(1),
@@ -123,7 +123,7 @@ owner = "Raymond Kopa"
         assert dn2_cfg_v2.scope == Scope.SCENARIO
         t1_cfg_v2 = Config.configure_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
         p1_cfg_v2 = Config.configure_pipeline("p1", t1_cfg_v2, cron="daily")
-        Config.configure_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
+        Config.set_default_scenario_configuration([], Frequency.QUARTERLY, owner="Michel Platini")
         Config.configure_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
         Config.backup(tf.filename)
         actual_config = tf.read().strip()

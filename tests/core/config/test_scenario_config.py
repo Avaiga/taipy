@@ -234,7 +234,7 @@ def test_clean_config():
 
 
 def test_pipeline_config_configure_deprecated():
-    pipeline_config = Config.configure_default_pipeline([])
+    pipeline_config = Config.set_default_pipeline_configuration([])
     scenario_config = Config.configure_scenario("scenario_id", pipeline_configs=[pipeline_config])
     with pytest.warns(DeprecationWarning):
         scenario_config.pipelines
