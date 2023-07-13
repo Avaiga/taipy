@@ -53,7 +53,7 @@ class _OrchestratorFactory:
         elif Config.job_config.is_development:
             cls.__build_development_job_dispatcher()
         elif util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
-            cls.__build_enterprise_job_dispatcher(force_restart)
+            cls.__build_enterprise_job_dispatcher(force_restart=force_restart)
         else:
             raise ModeNotAvailable(f"Job mode {Config.job_config.mode} is not available.")
         return cls._dispatcher
