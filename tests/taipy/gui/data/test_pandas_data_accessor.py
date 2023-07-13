@@ -106,6 +106,7 @@ def test_filters(gui: Gui, helpers, small_dataframe):
     }
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 4
+
     query = {
         "columns": ["name", "value"],
         "start": 0,
@@ -114,6 +115,7 @@ def test_filters(gui: Gui, helpers, small_dataframe):
     }
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 0
+
     query = {
         "columns": ["name", "value"],
         "start": 0,
@@ -122,6 +124,7 @@ def test_filters(gui: Gui, helpers, small_dataframe):
     }
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 2
+
     query = {
         "columns": ["name", "value"],
         "start": 0,
@@ -130,6 +133,7 @@ def test_filters(gui: Gui, helpers, small_dataframe):
     }
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 0
+
     query = {
         "columns": ["name", "value"],
         "start": 0,
@@ -138,6 +142,7 @@ def test_filters(gui: Gui, helpers, small_dataframe):
     }
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 1
+    assert value["value"]["data"][0]["_tp_index"] == 1
 
 
 def test_filter_by_date(gui: Gui, helpers, small_dataframe):
