@@ -101,6 +101,9 @@ def config_test_scenario():
         comparators={test_json_dn_cfg.id: compare_function},
         frequency=Frequency.DAILY,
     )
+    test_scenario_cfg.add_sequences({"sequence1": [test_task_cfg]})
+
+    # Config._register(test_scenario_cfg)
 
     Config.add_migration_function("1.0", test_csv_dn_cfg, migrate_csv_path)
 
@@ -178,9 +181,14 @@ test_csv_dn = "tests.core.config.test_config_serialization.migrate_csv_path:func
 
 [SCENARIO.default.comparators]
 
+[SCENARIO.default.sequences]
+
 [SCENARIO.test_scenario.comparators]
 test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:function",]
-    """.strip()
+
+[SCENARIO.test_scenario.sequences]
+sequence1 = [ "test_task:SECTION",]
+""".strip()
 
     Config.configure_global_app(clean_entities_enabled=True)
     config_test_scenario()
@@ -355,7 +363,8 @@ def test_read_write_json_configuration_file():
 "comparators": {},
 "tasks": [],
 "additional_data_nodes": [],
-"frequency": null
+"frequency": null,
+"sequences": {}
 },
 "test_scenario": {
 "comparators": {
@@ -369,7 +378,12 @@ def test_read_write_json_configuration_file():
 "additional_data_nodes": [
 "test_pickle_dn:SECTION"
 ],
-"frequency": "DAILY:FREQUENCY"
+"frequency": "DAILY:FREQUENCY",
+"sequences": {
+"sequence1": [
+"test_task:SECTION"
+]
+}
 }
 }
 }

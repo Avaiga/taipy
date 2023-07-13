@@ -47,6 +47,7 @@ class ScenarioConfig(Section):
     _TASKS_KEY = "tasks"
     _ADDITIONAL_DATA_NODES_KEY = "additional_data_nodes"
     _FREQUENCY_KEY = "frequency"
+    _SEQUENCES_KEY = "sequences"
     _COMPARATOR_KEY = "comparators"
 
     def __init__(
@@ -73,8 +74,10 @@ class ScenarioConfig(Section):
         else:
             self._additional_data_nodes = []
 
+        self.sequences = {}
         self.frequency = frequency
         self.comparators = defaultdict(list)
+
         if comparators:
             for k, v in comparators.items():
                 if isinstance(v, list):
@@ -85,7 +88,7 @@ class ScenarioConfig(Section):
 
     def __copy__(self):
         comp = None if self.comparators is None else self.comparators
-        return ScenarioConfig(
+        scenario_config = ScenarioConfig(
             self.id,
             copy(self._tasks),
             copy(self._additional_data_nodes),
@@ -93,6 +96,8 @@ class ScenarioConfig(Section):
             copy(comp),
             **copy(self._properties),
         )
+        scenario_config.sequences = copy(self.sequences)
+        return scenario_config
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return _tpl._replace_templates(self._properties.get(item))  # type: ignore
@@ -138,7 +143,8 @@ class ScenarioConfig(Section):
         self._additional_data_nodes = list()
         self.frequency = None
         self.comparators = dict()
-        self._properties.clear()
+        self.sequences = dict()
+        self._properties = dict()
 
     def _to_dict(self) -> Dict[str, Any]:
         return {
@@ -146,7 +152,8 @@ class ScenarioConfig(Section):
             self._TASKS_KEY: self._tasks,
             self._ADDITIONAL_DATA_NODES_KEY: self._additional_data_nodes,
             self._FREQUENCY_KEY: self.frequency,
-            **self._properties,  # type: ignore
+            self._SEQUENCES_KEY: self.sequences,
+            **self._properties,
         }
 
     @classmethod
@@ -167,8 +174,9 @@ class ScenarioConfig(Section):
 
         frequency = as_dict.pop(cls._FREQUENCY_KEY, None)
         comparators = as_dict.pop(cls._COMPARATOR_KEY, dict())
+        sequences = as_dict.pop(cls._SEQUENCES_KEY, {})
 
-        return ScenarioConfig(
+        scenario_config = ScenarioConfig(
             id=id,
             tasks=tasks,
             additional_data_nodes=additional_data_nodes,
@@ -176,6 +184,11 @@ class ScenarioConfig(Section):
             comparators=comparators,
             **as_dict,
         )
+
+        for sequence_name, task_config_ids in sequences.items():
+            scenario_config.sequences.update({sequence_name: cls.__get_task_configs(task_config_ids, config)})
+
+        return scenario_config
 
     @staticmethod
     def __get_task_configs(task_config_ids: List[str], config: Optional[_Config]):
@@ -223,6 +236,10 @@ class ScenarioConfig(Section):
         self.comparators = as_dict.pop(self._COMPARATOR_KEY, self.comparators)
         if self.comparators is None and default_section:
             self.comparators = default_section.comparators
+
+        self.sequences = as_dict.pop(self._SEQUENCES_KEY, self.sequences)
+        if self.sequences is None and default_section:
+            self.sequences = default_section.sequences
 
         self._properties.update(as_dict)  # type: ignore
         if default_section:
@@ -319,3 +336,17 @@ class ScenarioConfig(Section):
         )
         Config._register(section)
         return Config.sections[ScenarioConfig.name][_Config.DEFAULT_KEY]
+
+    def add_sequences(self, sequences: Dict[str, List[TaskConfig]]):
+        # TODO: How about user just provides task config id
+        self.sequences.update(sequences)
+        # breakpoint()
+        Config._register(self)
+
+    def remove_sequences(self, sequence_names: Union[str, List[str]]):
+        if isinstance(sequence_names, List):
+            for sequence_name in sequence_names:
+                self.sequences.pop(sequence_name)
+        else:
+            self.sequences.pop(sequence_names)
+        Config._register(self)

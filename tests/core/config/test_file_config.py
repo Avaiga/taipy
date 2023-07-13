@@ -100,7 +100,11 @@ owner = "Raymond Kopa"
 
 [SCENARIO.default.comparators]
 
+[SCENARIO.default.sequences]
+
 [SCENARIO.s1.comparators]
+
+[SCENARIO.s1.sequences]
     """.strip()
     tf = NamedTemporaryFile()
     with mock.patch.dict(

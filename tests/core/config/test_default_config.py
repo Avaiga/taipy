@@ -59,6 +59,7 @@ def _test_default_scenario_config(scenario_config: ScenarioConfig):
     assert scenario_config.additional_data_node_configs == []
     assert scenario_config.data_nodes == []
     assert scenario_config.data_node_configs == []
+    assert scenario_config.sequences == {}
     assert len(scenario_config.properties) == 0  # type: ignore
 
 
@@ -80,38 +81,38 @@ def _test_default_global_app_config(global_config: GlobalAppConfig):
 
 def test_default_configuration():
     default_config = Config._default_config
-    # assert default_config._global_config is not None
-    # _test_default_global_app_config(default_config._global_config)
-    # _test_default_global_app_config(Config.global_config)
-    # _test_default_global_app_config(GlobalAppConfig().default_config())
+    assert default_config._global_config is not None
+    _test_default_global_app_config(default_config._global_config)
+    _test_default_global_app_config(Config.global_config)
+    _test_default_global_app_config(GlobalAppConfig().default_config())
 
-    # assert default_config._unique_sections is not None
-    # assert len(default_config._unique_sections) == 3
-    # assert len(default_config._sections) == 4
+    assert default_config._unique_sections is not None
+    assert len(default_config._unique_sections) == 3
+    assert len(default_config._sections) == 4
 
-    # _test_default_job_config(default_config._unique_sections[JobConfig.name])
-    # _test_default_job_config(Config.job_config)
-    # _test_default_job_config(JobConfig().default_config())
+    _test_default_job_config(default_config._unique_sections[JobConfig.name])
+    _test_default_job_config(Config.job_config)
+    _test_default_job_config(JobConfig().default_config())
 
-    # _test_default_version_migration_config(default_config._unique_sections[MigrationConfig.name])
-    # _test_default_version_migration_config(Config.migration_functions)
-    # _test_default_version_migration_config(MigrationConfig.default_config())
+    _test_default_version_migration_config(default_config._unique_sections[MigrationConfig.name])
+    _test_default_version_migration_config(Config.migration_functions)
+    _test_default_version_migration_config(MigrationConfig.default_config())
 
-    # _test_default_core_section(default_config._unique_sections[CoreSection.name])
-    # _test_default_core_section(Config.core)
-    # _test_default_core_section(CoreSection().default_config())
+    _test_default_core_section(default_config._unique_sections[CoreSection.name])
+    _test_default_core_section(Config.core)
+    _test_default_core_section(CoreSection().default_config())
 
-    # _test_default_data_node_config(default_config._sections[DataNodeConfig.name][_Config.DEFAULT_KEY])
-    # _test_default_data_node_config(Config.data_nodes[_Config.DEFAULT_KEY])
-    # _test_default_data_node_config(DataNodeConfig.default_config())
-    # assert len(default_config._sections[DataNodeConfig.name]) == 1
-    # assert len(Config.data_nodes) == 1
+    _test_default_data_node_config(default_config._sections[DataNodeConfig.name][_Config.DEFAULT_KEY])
+    _test_default_data_node_config(Config.data_nodes[_Config.DEFAULT_KEY])
+    _test_default_data_node_config(DataNodeConfig.default_config())
+    assert len(default_config._sections[DataNodeConfig.name]) == 1
+    assert len(Config.data_nodes) == 1
 
-    # _test_default_task_config(default_config._sections[TaskConfig.name][_Config.DEFAULT_KEY])
-    # _test_default_task_config(Config.tasks[_Config.DEFAULT_KEY])
-    # _test_default_task_config(TaskConfig.default_config())
-    # assert len(default_config._sections[TaskConfig.name]) == 1
-    # assert len(Config.tasks) == 1
+    _test_default_task_config(default_config._sections[TaskConfig.name][_Config.DEFAULT_KEY])
+    _test_default_task_config(Config.tasks[_Config.DEFAULT_KEY])
+    _test_default_task_config(TaskConfig.default_config())
+    assert len(default_config._sections[TaskConfig.name]) == 1
+    assert len(Config.tasks) == 1
 
     _test_default_scenario_config(default_config._sections[ScenarioConfig.name][_Config.DEFAULT_KEY])
     # TODO: breakpoint()

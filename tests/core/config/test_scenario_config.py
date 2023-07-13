@@ -243,3 +243,44 @@ def test_clean_config():
     assert scenario2_config.frequency is scenario2_config.frequency is None
     assert scenario2_config.comparators == scenario2_config.comparators == {}
     assert scenario2_config.properties == scenario2_config.properties == {}
+
+
+def test_add_sequence():
+    task1_config = Config.configure_task("task1", print, [], [])
+    task2_config = Config.configure_task("task2", print, [], [])
+    task3_config = Config.configure_task("task3", print, [], [])
+    task4_config = Config.configure_task("task4", print, [], [])
+    scenario_config = Config.configure_scenario(
+        "id", [task1_config, task2_config, task3_config, task4_config], [], Frequency.YEARLY, prop="foo"
+    )
+
+    assert Config.scenarios["id"] is scenario_config
+
+    assert scenario_config.id == "id"
+    assert (
+        scenario_config.tasks
+        == scenario_config.task_configs
+        == [task1_config, task2_config, task3_config, task4_config]
+    )
+    assert scenario_config.additional_data_nodes == scenario_config.additional_data_node_configs == []
+    assert scenario_config.data_nodes == scenario_config.data_node_configs == []
+    assert scenario_config.frequency is scenario_config.frequency == Frequency.YEARLY
+    assert scenario_config.comparators == scenario_config.comparators == {}
+    assert scenario_config.properties == {"prop": "foo"}
+
+    scenario_config.add_sequences(
+        {
+            "sequence1": [task1_config],
+            "sequence2": [task2_config, task3_config],
+            "sequence3": [task1_config, task2_config, task4_config],
+        }
+    )
+    assert len(scenario_config.sequences) == 3
+    assert scenario_config.sequences["sequence1"] == [task1_config]
+    assert scenario_config.sequences["sequence2"] == [task2_config, task3_config]
+    assert scenario_config.sequences["sequence3"] == [task1_config, task2_config, task4_config]
+
+    scenario_config.remove_sequences("sequence1")
+    assert len(scenario_config.sequences) == 2
+    scenario_config.remove_sequences(["sequence2", "sequence3"])
+    assert len(scenario_config.sequences) == 0
