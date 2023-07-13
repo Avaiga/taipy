@@ -333,14 +333,13 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario_1.qux.read() == 0
     assert scenario_1.tasks.keys() == {task_mult_by_2_config.id, task_mult_by_3_config.id, task_mult_by_4_config.id}
 
-    # TODO: Inconsistent failed test due to inconsistent order in set()
     scenario_1_sorted_tasks = scenario_1._get_sorted_tasks()
-    assert scenario_1._get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.id
-    assert scenario_1._get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.id
-    assert scenario_1._get_sorted_tasks()[0][1].config_id == task_mult_by_4_config.id
+    expected = [{task_mult_by_2_config.id, task_mult_by_4_config.id}, {task_mult_by_3_config.id}]
+    for i, list_tasks_by_level in enumerate(scenario_1_sorted_tasks):
+        assert set([t.config_id for t in list_tasks_by_level]) == expected[i]
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
-    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._create(scenario_config)
 
     # TODO: discuss that additional data nodes will also be created only once??
 

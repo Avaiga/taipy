@@ -48,6 +48,7 @@ def _check_tasks_instance(task_id, scenario_id):
     not the Config._python_config or the Config._file_config
     """
     task_config_applied_instance = Config.tasks[task_id]
+    task_config_instance_via_scenario = None
     for task in Config.scenarios[scenario_id].tasks:
         if task.id == task_id:
             task_config_instance_via_scenario = task
@@ -148,7 +149,7 @@ def test_scenario_getitem():
 
     assert scenario.tasks == [task_config_1, task_config_2]
     assert scenario.additional_data_node_configs == [dn_config_4]
-    assert scenario.data_nodes == set([dn_config_4, dn_config_1, dn_config_2, dn_config_3])
+    assert set(scenario.data_nodes) == set([dn_config_4, dn_config_1, dn_config_2, dn_config_3])
 
     assert Config.scenarios[scenario_id].properties == scenario.properties
 
@@ -229,16 +230,16 @@ def test_clean_config():
 
     assert scenario1_config.id == "id1"
     assert scenario2_config.id == "id2"
-    assert scenario1_config.tasks == scenario1_config.task_configs == set()
-    assert scenario1_config.additional_data_nodes == scenario1_config.additional_data_node_configs == set()
-    assert scenario1_config.data_nodes == scenario1_config.data_node_configs == set()
+    assert scenario1_config.tasks == scenario1_config.task_configs == []
+    assert scenario1_config.additional_data_nodes == scenario1_config.additional_data_node_configs == []
+    assert scenario1_config.data_nodes == scenario1_config.data_node_configs == []
     assert scenario1_config.frequency is scenario1_config.frequency is None
     assert scenario1_config.comparators == scenario1_config.comparators == {}
     assert scenario1_config.properties == scenario1_config.properties == {}
 
-    assert scenario2_config.tasks == scenario2_config.task_configs == set()
-    assert scenario2_config.additional_data_nodes == scenario2_config.additional_data_node_configs == set()
-    assert scenario2_config.data_nodes == scenario2_config.data_node_configs == set()
+    assert scenario2_config.tasks == scenario2_config.task_configs == []
+    assert scenario2_config.additional_data_nodes == scenario2_config.additional_data_node_configs == []
+    assert scenario2_config.data_nodes == scenario2_config.data_node_configs == []
     assert scenario2_config.frequency is scenario2_config.frequency is None
     assert scenario2_config.comparators == scenario2_config.comparators == {}
     assert scenario2_config.properties == scenario2_config.properties == {}
