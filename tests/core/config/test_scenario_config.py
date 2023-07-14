@@ -12,10 +12,7 @@
 import os
 from unittest import mock
 
-import pytest
-
 from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
@@ -38,7 +35,7 @@ inputs = []
 outputs = []
 
 [SCENARIO.scenarios1]
-tasks = [ "task_1:SECTION", "task2:SECTION"]
+tasks = [ "task1:SECTION", "task2:SECTION"]
     """
     )
 
