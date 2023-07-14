@@ -25,50 +25,39 @@ from tests.config.utils.checker_for_tests import CheckerForTest
 class TestChecker:
     def test_check(self, caplog):
         Config.check()
-        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
-        Config.global_config.clean_entities_enabled = True
+        Config.global_config.repository_type = "filesystem"
         Config.check()
-        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
 
-        Config.global_config.clean_entities_enabled = False
+        Config.global_config.repository_type = "foo"
         Config.check()
-        assert len(Config._collector.errors) == 0
-
-        Config.global_config.clean_entities_enabled = "foo"
-        with pytest.raises(SystemExit):
-            Config.check()
-        expected_error_message = (
-            "`clean_entities_enabled` field of GlobalAppConfig must be populated with a boolean"
-            ' value. Current value of property `clean_entities_enabled` is "foo".'
+        expected_warning_message = (
+            'Unknown value "foo" for field repository_type of GlobalAppConfig. '
+            'Default value "filesystem" is applied.'
         )
-        assert expected_error_message in caplog.text
-        assert len(Config._collector.errors) == 1
+        assert expected_warning_message in caplog.text
+        assert len(Config._collector.warnings) == 1
 
         caplog.clear()
 
-        Config.global_config.clean_entities_enabled = GlobalAppConfig._CLEAN_ENTITIES_ENABLED_TEMPLATE
-        Config._collector = IssueCollector()
-        Config.check()
-        assert len(Config._collector.errors) == 0
-
-        with mock.patch.dict(os.environ, {"FOO": "true"}):
-            Config.global_config.clean_entities_enabled = "ENV[FOO]"
+        with mock.patch.dict(os.environ, {"FOO": "filesystem"}):
+            Config.global_config.repository_type = "ENV[FOO]"
             Config._collector = IssueCollector()
             Config.check()
-            assert len(Config._collector.errors) == 0
+            assert len(Config._collector.warnings) == 0
 
         with mock.patch.dict(os.environ, {"FOO": "foo"}):
-            Config.global_config.clean_entities_enabled = "ENV[FOO]"
+            Config.global_config.repository_type = "ENV[FOO]"
             Config._collector = IssueCollector()
-            with pytest.raises(SystemExit):
-                Config.check()
-            expected_error_message = (
-                "`clean_entities_enabled` field of GlobalAppConfig must be populated with a"
-                ' boolean value. Current value of property `clean_entities_enabled` is "ENV[FOO]".'
+            Config.check()
+            expected_warning_message = (
+                'Unknown value "foo" for field repository_type of GlobalAppConfig. '
+                'Default value "filesystem" is applied.'
             )
-            assert expected_error_message in caplog.text
-            assert len(Config._collector.errors) == 1
+            assert expected_warning_message in caplog.text
+            assert len(Config._collector.warnings) == 1
 
     def test_register_checker(self):
         checker = CheckerForTest

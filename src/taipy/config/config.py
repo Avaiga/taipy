@@ -145,7 +145,6 @@ class Config:
         cls,
         root_folder: str = None,
         storage_folder: str = None,
-        clean_entities_enabled: Union[bool, str] = None,
         **properties,
     ) -> GlobalAppConfig:
         """Configure the global application.
@@ -155,12 +154,10 @@ class Config:
             storage_folder (Optional[str]): The folder name used to store Taipy data.
                 It is used in conjunction with the root_folder field: the storage path is
                 "<root_folder><storage_folder>".
-            clean_entities_enabled (Optional[str]): The field to activate or deactivate the
-                'clean entities' feature. The default value is False.
         Returns:
             The global application configuration.
         """
-        glob_cfg = GlobalAppConfig(root_folder, storage_folder, clean_entities_enabled, **properties)
+        glob_cfg = GlobalAppConfig(root_folder, storage_folder, **properties)
         if cls._python_config._global_config is None:
             cls._python_config._global_config = glob_cfg
         else:

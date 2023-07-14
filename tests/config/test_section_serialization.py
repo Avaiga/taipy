@@ -57,7 +57,6 @@ def test_write_toml_configuration_file():
 [TAIPY]
 root_folder = "./taipy/"
 storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
 repository_type = "filesystem"
 
 [unique_section_name]
@@ -90,7 +89,6 @@ baz = "ENV[QUX]"
     with mock.patch.dict(
         os.environ, {"FOO": "in_memory", "QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}
     ):
-        Config.configure_global_app(clean_entities_enabled=True)
         unique_section = Config.configure_unique_section_for_tests(
             attribute="my_attribute",
             prop="my_prop",
@@ -123,7 +121,6 @@ def test_read_toml_configuration_file():
 [TAIPY]
 root_folder = "./taipy/"
 storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
 repository_type = "filesystem"
 
 [unique_section_name]
@@ -214,7 +211,6 @@ def test_read_toml_configuration_file_without_repository_property():
 [TAIPY]
 root_folder = "./taipy/"
 storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
 repository_type = "filesystem"
     """.strip()
 
@@ -230,7 +226,6 @@ def test_read_write_toml_configuration_file_with_function_and_class():
 [TAIPY]
 root_folder = "./taipy/"
 storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
 repository_type = "filesystem"
 
 [unique_section_name]
@@ -258,7 +253,6 @@ prop_fct_list = [ "builtins.print:function", "builtins.pow:function",]
     """.strip()
 
     tf = NamedTemporaryFile()
-    Config.configure_global_app(clean_entities_enabled=True)
     Config.configure_unique_section_for_tests(
         attribute="my_attribute",
         prop="my_prop",
@@ -295,7 +289,6 @@ def test_write_json_configuration_file():
 "TAIPY": {
 "root_folder": "./taipy/",
 "storage_folder": ".data/",
-"clean_entities_enabled": "True:bool",
 "repository_type": "filesystem"
 },
 "unique_section_name": {
@@ -333,7 +326,6 @@ def test_write_json_configuration_file():
     """.strip()
     tf = NamedTemporaryFile()
     Config._serializer = _JsonSerializer()
-    Config.configure_global_app(clean_entities_enabled=True)
 
     unique_section = Config.configure_unique_section_for_tests(
         attribute="my_attribute",
@@ -364,7 +356,6 @@ def test_read_json_configuration_file():
 "TAIPY": {
 "root_folder": "./taipy/",
 "storage_folder": ".data/",
-"clean_entities_enabled": "True:bool",
 "repository_type": "filesystem"
 },
 "unique_section_name": {
@@ -445,7 +436,6 @@ def test_read_write_json_configuration_file_with_function_and_class():
 "TAIPY": {
 "root_folder": "./taipy/",
 "storage_folder": ".data/",
-"clean_entities_enabled": "True:bool",
 "repository_type": "filesystem"
 },
 "unique_section_name": {
@@ -488,7 +478,6 @@ def test_read_write_json_configuration_file_with_function_and_class():
 
     Config._serializer = _JsonSerializer()
     tf = NamedTemporaryFile()
-    Config.configure_global_app(clean_entities_enabled=True)
     Config.configure_unique_section_for_tests(
         attribute="my_attribute",
         prop="my_prop",

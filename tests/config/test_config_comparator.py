@@ -58,7 +58,6 @@ class TestConfigComparator:
             storage_folder="bar",
             repository_properties={"foo": "bar"},
             repository_type="baz",
-            clean_entities_enabled=True,
         )
 
         config_diff = Config._comparator._find_conflict_config(_config_1, _config_2)
@@ -67,7 +66,7 @@ class TestConfigComparator:
         assert config_diff.get("conflicted_sections") is not None
 
         conflicted_config_diff = config_diff["conflicted_sections"]
-        assert len(conflicted_config_diff["modified_items"]) == 4
+        assert len(conflicted_config_diff["modified_items"]) == 3
         assert conflicted_config_diff["modified_items"][0] == (
             ("Global Configuration", "root_folder", None),
             ("./taipy/", "foo"),
@@ -77,10 +76,6 @@ class TestConfigComparator:
             (".data/", "bar"),
         )
         assert conflicted_config_diff["modified_items"][2] == (
-            ("Global Configuration", "clean_entities_enabled", None),
-            ("ENV[TAIPY_CLEAN_ENTITIES_ENABLED]", "True:bool"),
-        )
-        assert conflicted_config_diff["modified_items"][3] == (
             ("Global Configuration", "repository_type", None),
             ("filesystem", "baz"),
         )

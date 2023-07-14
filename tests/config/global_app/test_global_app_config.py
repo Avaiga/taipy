@@ -28,29 +28,12 @@ def test_global_config_with_env_variable_value():
         assert Config.global_config._storage_folder == "ENV[BAZ]"
 
 
-def test_clean_entities_enabled_default():
-    Config.configure_global_app()
-    assert Config.global_config.clean_entities_enabled is GlobalAppConfig._DEFAULT_CLEAN_ENTITIES_ENABLED
-    with mock.patch.dict(os.environ, {f"{GlobalAppConfig._CLEAN_ENTITIES_ENABLED_ENV_VAR}": "true"}):
-        Config.configure_global_app()  # Trigger config compilation
-        assert Config.global_config.clean_entities_enabled is True
-    with mock.patch.dict(os.environ, {f"{GlobalAppConfig._CLEAN_ENTITIES_ENABLED_ENV_VAR}": "false"}):
-        Config.configure_global_app()
-        assert Config.global_config.clean_entities_enabled is False
-    with mock.patch.dict(os.environ, {f"{GlobalAppConfig._CLEAN_ENTITIES_ENABLED_ENV_VAR}": "foo"}):
-        with pytest.raises(InconsistentEnvVariableError):
-            Config.configure_global_app()
-            assert Config.global_config.clean_entities_enabled is False
-
-
 def test_default_global_app_config():
     global_config = Config.global_config
     assert global_config is not None
     assert not global_config.notification
     assert global_config.root_folder == "./taipy/"
     assert global_config.storage_folder == ".data/"
-    assert global_config._clean_entities_enabled is GlobalAppConfig._CLEAN_ENTITIES_ENABLED_TEMPLATE
-    assert global_config.clean_entities_enabled is False
 
     assert global_config.repository_type == "filesystem"
     assert global_config.repository_properties == {}
@@ -70,9 +53,6 @@ def test_block_update_global_app_config():
         Config.global_config.storage_folder = ".new_storage/"
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        Config.global_config.clean_entities_enabled = True
-
-    with pytest.raises(ConfigurationUpdateBlocked):
         Config.global_config.repository_type = "mongo"
 
     with pytest.raises(ConfigurationUpdateBlocked):
@@ -86,7 +66,6 @@ def test_block_update_global_app_config():
     # Test if the global_config stay as default
     assert global_config.root_folder == "./taipy/"
     assert global_config.storage_folder == ".data/"
-    assert global_config.clean_entities_enabled is False
     assert global_config.repository_type == "filesystem"
     assert global_config.repository_properties == {}
     assert len(global_config.properties) == 0

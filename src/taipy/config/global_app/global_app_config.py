@@ -27,7 +27,6 @@ class GlobalAppConfig:
         storage_folder (str): Folder name used to store Taipy data. The default value is ".data/". It is used in
             conjunction with the `root_folder` field. That means the storage path is <root_folder><storage_folder>
             (The Default path is "./taipy/.data/").
-        clean_entities_enabled (bool): Boolean field to activate/deactivate the clean entities feature. Default: false
         **properties (dict[src, any]): A dictionary of additional properties.
     """
 
@@ -36,11 +35,6 @@ class GlobalAppConfig:
 
     _STORAGE_FOLDER_KEY = "storage_folder"
     _DEFAULT_STORAGE_FOLDER = ".data/"
-
-    _CLEAN_ENTITIES_ENABLED_KEY = "clean_entities_enabled"
-    _DEFAULT_CLEAN_ENTITIES_ENABLED = False
-    _CLEAN_ENTITIES_ENABLED_ENV_VAR = "TAIPY_CLEAN_ENTITIES_ENABLED"
-    _CLEAN_ENTITIES_ENABLED_TEMPLATE = f"ENV[{_CLEAN_ENTITIES_ENABLED_ENV_VAR}]"
 
     _REPOSITORY_TYPE_KEY = "repository_type"
     _DEFAULT_REPOSITORY_TYPE = "filesystem"
@@ -51,14 +45,12 @@ class GlobalAppConfig:
         self,
         root_folder: str = None,
         storage_folder: str = None,
-        clean_entities_enabled: Union[bool, str] = None,
         repository_type: str = None,
         repository_properties: Dict[str, Union[str, int]] = None,
         **properties,
     ):
         self._root_folder = root_folder
         self._storage_folder = storage_folder
-        self._clean_entities_enabled = clean_entities_enabled
         self._repository_type = repository_type
         self._repository_properties = repository_properties
         self._properties = properties
@@ -80,17 +72,6 @@ class GlobalAppConfig:
     @_ConfigBlocker._check()
     def root_folder(self, val):
         self._root_folder = val
-
-    @property
-    def clean_entities_enabled(self):
-        return _tpl._replace_templates(
-            self._clean_entities_enabled, type=bool, required=False, default=self._DEFAULT_CLEAN_ENTITIES_ENABLED
-        )
-
-    @clean_entities_enabled.setter  # type: ignore
-    @_ConfigBlocker._check()
-    def clean_entities_enabled(self, val):
-        self._clean_entities_enabled = val
 
     @property
     def repository_type(self):
@@ -131,7 +112,6 @@ class GlobalAppConfig:
         config = GlobalAppConfig()
         config._root_folder = cls._DEFAULT_ROOT_FOLDER
         config._storage_folder = cls._DEFAULT_STORAGE_FOLDER
-        config._clean_entities_enabled = cls._CLEAN_ENTITIES_ENABLED_TEMPLATE
         config._repository_type = cls._DEFAULT_REPOSITORY_TYPE
         config._repository_properties = cls._DEFAULT_REPOSITORY_PROPERTIES.copy()
         return config
@@ -139,7 +119,6 @@ class GlobalAppConfig:
     def _clean(self):
         self._root_folder = self._DEFAULT_ROOT_FOLDER
         self._storage_folder = self._DEFAULT_STORAGE_FOLDER
-        self._clean_entities_enabled = self._CLEAN_ENTITIES_ENABLED_TEMPLATE
         self._repository_type = self._DEFAULT_REPOSITORY_TYPE
         self._repository_properties = self._DEFAULT_REPOSITORY_PROPERTIES.copy()
 
@@ -149,8 +128,6 @@ class GlobalAppConfig:
             as_dict[self._ROOT_FOLDER_KEY] = self._root_folder
         if self._storage_folder:
             as_dict[self._STORAGE_FOLDER_KEY] = self._storage_folder
-        if self._clean_entities_enabled is not None:
-            as_dict[self._CLEAN_ENTITIES_ENABLED_KEY] = self._clean_entities_enabled
         if self._repository_type:
             as_dict[self._REPOSITORY_TYPE_KEY] = self._repository_type
         if self._repository_properties:
@@ -163,7 +140,6 @@ class GlobalAppConfig:
         config = GlobalAppConfig()
         config._root_folder = config_as_dict.pop(cls._ROOT_FOLDER_KEY, None)
         config._storage_folder = config_as_dict.pop(cls._STORAGE_FOLDER_KEY, None)
-        config._clean_entities_enabled = config_as_dict.pop(cls._CLEAN_ENTITIES_ENABLED_KEY, None)
         config._repository_type = config_as_dict.pop(cls._REPOSITORY_TYPE_KEY, None)
         config._repository_properties = config_as_dict.pop(cls._REPOSITORY_PROPERTIES_KEY, None)
         config._properties = config_as_dict
@@ -172,9 +148,6 @@ class GlobalAppConfig:
     def _update(self, config_as_dict):
         self._root_folder = config_as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder)
         self._storage_folder = config_as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
-        self._clean_entities_enabled = config_as_dict.pop(
-            self._CLEAN_ENTITIES_ENABLED_KEY, self._clean_entities_enabled
-        )
         self._repository_type = config_as_dict.pop(self._REPOSITORY_TYPE_KEY, self._repository_type)
         self._repository_properties = config_as_dict.pop(self._REPOSITORY_PROPERTIES_KEY, self._repository_properties)
         self._properties.update(config_as_dict)
