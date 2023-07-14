@@ -587,29 +587,6 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     return _PipelineManagerFactory._build_manager()._get_or_create(config)
 
 
-def clean_all_entities() -> bool:
-    """Delete all entities from the Taipy data folder.
-
-    !!! important
-        Invoking this function is only recommended for development purposes.
-
-    Returns:
-        True if the operation succeeded, False otherwise.
-    """
-    if not Config.global_config.clean_entities_enabled:
-        __logger.warning("Please set 'clean_entities_enabled' to True to clean all entities.")
-        return False
-
-    _DataManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _PipelineManagerFactory._build_manager()._delete_all()
-    _ScenarioManagerFactory._build_manager()._delete_all()
-    _CycleManagerFactory._build_manager()._delete_all()
-    _JobManagerFactory._build_manager()._delete_all()
-    _VersionManagerFactory._build_manager()._delete_all()
-    return True
-
-
 def clean_all_entities_by_version(version_number) -> bool:
     """Delete all entities belongs to a version from the Taipy data folder.
 

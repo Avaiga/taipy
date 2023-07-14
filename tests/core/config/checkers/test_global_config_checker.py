@@ -33,7 +33,6 @@ def test_check_repository_type_value_sql():
 
 def test_check_repository_type_value_wrong_str():
     config = _Config()
-    config._global_config.clean_entities_enabled = False
     config._global_config.repository_type = "any"
     collector = IssueCollector()
     _GlobalConfigChecker(config, collector)._check()

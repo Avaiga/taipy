@@ -60,29 +60,19 @@ def test_override_default_configuration_with_code_configuration():
 
 def test_override_default_config_with_code_config_including_env_variable_values():
     Config.configure_global_app()
-    assert not Config.global_config.clean_entities_enabled
-    Config.configure_global_app(clean_entities_enabled=True)
-    assert Config.global_config.clean_entities_enabled
+    assert Config.global_config.repository_type == "filesystem"
+    Config.configure_global_app(repository_type="othertype")
+    assert Config.global_config.repository_type == "othertype"
 
-    with mock.patch.dict(os.environ, {"ENV_VAR": "False"}):
-        Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
-        assert not Config.global_config.clean_entities_enabled
-
-    with mock.patch.dict(os.environ, {"ENV_VAR": "true"}):
-        Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
-        assert Config.global_config.clean_entities_enabled
-
-    with mock.patch.dict(os.environ, {"ENV_VAR": "foo"}):
-        with pytest.raises(InconsistentEnvVariableError):
-            Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
-            Config.global_config.clean_entities_enabled
+    with mock.patch.dict(os.environ, {"REPOSITORY_TYPE": "foo"}):
+        Config.configure_global_app(repository_type="ENV[REPOSITORY_TYPE]")
+        assert Config.global_config.repository_type == "foo"
 
 
 def test_override_default_configuration_with_file_configuration():
     tf = NamedTemporaryFile(
         """
 [TAIPY]
-clean_entities_enabled = true
 
 [JOB]
 max_nb_of_workers = -1
@@ -98,7 +88,6 @@ max_nb_of_workers = -1
     )
     Config.configure_global_app()
     assert Config.job_config.max_nb_of_workers == 1
-    assert not Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
     assert len(Config.pipelines) == 1
@@ -107,7 +96,6 @@ max_nb_of_workers = -1
     Config.override(tf.filename)
 
     assert Config.job_config.max_nb_of_workers == -1
-    assert Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 2
     assert "default" in Config.data_nodes
     assert "foo" in Config.data_nodes
@@ -214,24 +202,19 @@ path = "/data/csv"
 max_nb_of_workers = 10
 
 [TAIPY]
-clean_entities_enabled = false
     """
     )
 
     Config.configure_global_app()
     # Default config is applied
     assert Config.job_config.max_nb_of_workers == 1
-    assert Config.global_config.clean_entities_enabled is False
 
     # Code config is applied
     Config.configure_job_executions(max_nb_of_workers=-1)
-    Config.configure_global_app(clean_entities_enabled=True)
-    assert Config.global_config.clean_entities_enabled is True
     assert Config.job_config.max_nb_of_workers == -1
 
     # File config is applied
     Config.override(file_config.filename)
-    assert Config.global_config.clean_entities_enabled is False
     assert Config.job_config.max_nb_of_workers == 10
     assert Config.data_nodes["my_datanode"].has_header
     assert Config.data_nodes["my_datanode"].path == "/data/csv"
@@ -250,7 +233,6 @@ path = "ENV[FOO]"
 max_nb_of_workers = 10
 
 [TAIPY]
-clean_entities_enabled = false
     """
     )
 
@@ -258,19 +240,15 @@ clean_entities_enabled = false
     with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
         assert Config.job_config.max_nb_of_workers == 1
-        assert Config.global_config.clean_entities_enabled is False
 
         # Code config is applied
         Config.configure_job_executions(max_nb_of_workers=-1)
-        Config.configure_global_app(clean_entities_enabled=True)
         Config.configure_data_node("my_datanode", path="ENV[BAR]")
-        assert Config.global_config.clean_entities_enabled is True
         assert Config.job_config.max_nb_of_workers == -1
         assert Config.data_nodes["my_datanode"].path == "/baz/data/csv"
 
         # File config is applied
         Config.override(file_config.filename)
-        assert Config.global_config.clean_entities_enabled is False
         assert Config.job_config.max_nb_of_workers == 10
         assert Config.data_nodes["my_datanode"].has_header
         assert Config.data_nodes["my_datanode"].path == "/data/csv"

@@ -450,61 +450,6 @@ class TestTaipy:
         with pytest.warns(DeprecationWarning):
             tp.create_pipeline(pipeline_config)
 
-    def test_clean_all_entities(self, cycle):
-        data_node_1_config = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
-        data_node_2_config = Config.configure_data_node(
-            id="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
-        )
-        task_config = Config.configure_task(
-            "my_task", print, data_node_1_config, data_node_2_config, scope=Scope.SCENARIO
-        )
-        pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
-        scenario_config = Config.configure_scenario("my_scenario", pipeline_config)
-
-        Core().run()
-        _CycleManager._set(cycle)
-
-        scenario = _ScenarioManager._create(scenario_config)
-        _ScenarioManager._submit(scenario)
-
-        # Initial assertion
-        assert len(_DataManager._get_all()) == 2
-        assert len(_TaskManager._get_all()) == 1
-        assert len(_PipelineManager._get_all()) == 1
-        assert len(_ScenarioManager._get_all()) == 1
-        assert len(_CycleManager._get_all()) == 1
-        assert len(_JobManager._get_all()) == 1
-        assert len(_VersionManager._get_all()) == 1
-
-        # Temporarily unblock config update to test config global app
-        Config.unblock_update()
-
-        # Test with clean entities disabled
-        Config.configure_global_app(clean_entities_enabled=False)
-        success = tp.clean_all_entities()
-        # Everything should be the same after clean_all_entities since clean_entities_enabled is False
-        assert len(_DataManager._get_all()) == 2
-        assert len(_TaskManager._get_all()) == 1
-        assert len(_PipelineManager._get_all()) == 1
-        assert len(_ScenarioManager._get_all()) == 1
-        assert len(_CycleManager._get_all()) == 1
-        assert len(_JobManager._get_all()) == 1
-        assert len(_VersionManager._get_all()) == 1
-        assert not success
-
-        # Test with clean entities enabled
-        Config.configure_global_app(clean_entities_enabled=True)
-        success = tp.clean_all_entities()
-        # File should not exist after clean_all_entities since clean_entities_enabled is True
-        assert len(_VersionManager._get_all()) == 0
-        assert len(_DataManager._get_all()) == 0
-        assert len(_TaskManager._get_all()) == 0
-        assert len(_PipelineManager._get_all()) == 0
-        assert len(_ScenarioManager._get_all()) == 0
-        assert len(_CycleManager._get_all()) == 0
-        assert len(_JobManager._get_all()) == 0
-        assert success
-
     def test_export_scenario_filesystem(self):
         shutil.rmtree("./tmp", ignore_errors=True)
 

@@ -372,15 +372,6 @@
           "description": "Folder name used to store Taipy data. The default value is .data/. It is used in conjunction with the root_folder field",
           "type": "string"
         },
-        "clean_entities_enabled": {
-          "description": "Boolean field to activate/deactivate the clean entities feature.",
-          "type": "string",
-          "enum": [
-            "True:bool",
-            "False:bool"
-          ],
-          "default": "False:bool"
-        },
         "read_entity_retry": {
           "description": "Number of times to retry before return failure to read an entity.",
           "type": [

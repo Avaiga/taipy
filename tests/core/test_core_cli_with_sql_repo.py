@@ -359,7 +359,7 @@ def test_force_override_experiment_version(tmp_sqlite):
 
     # Update Config singleton to simulate conflict Config between versions
     Config.unblock_update()
-    Config.configure_global_app(clean_entities_enabled=True)
+    Config.configure_global_app(root_folder="foo")
 
     # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
@@ -411,7 +411,7 @@ def test_force_override_production_version(tmp_sqlite):
 
     # Update Config singleton to simulate conflict Config between versions
     Config.unblock_update()
-    Config.configure_global_app(clean_entities_enabled=True)
+    Config.configure_global_app(root_folder="foo")
 
     # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
@@ -531,7 +531,6 @@ def test_modify_config_properties_without_force(caplog, tmp_sqlite):
 
     assert 'DATA_NODE "d2" has attribute "default_path" modified' in error_message
     assert 'Global Configuration "root_folder" was modified' in error_message
-    assert 'Global Configuration "clean_entities_enabled" was modified' in error_message
     assert 'JOB "mode" was modified' in error_message
     assert 'JOB "max_nb_of_workers" was modified' in error_message
     assert 'PIPELINE "my_pipeline" has attribute "tasks" modified' in error_message
@@ -604,7 +603,6 @@ def config_scenario_2():
         root_folder="foo_root",
         # Changing the "storage_folder" will fail since older versions are stored in older folder
         # storage_folder="foo_storage",
-        clean_entities_enabled=True,
     )
     Config.configure_job_executions(mode="standalone", max_nb_of_workers=5)
     data_node_1_config = Config.configure_data_node(

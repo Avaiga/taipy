@@ -882,9 +882,7 @@ def modified_config_task(n):
 
 def test_can_exec_task_with_modified_config():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    Config.configure_global_app(
-        storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property"
-    )
+    Config.configure_global_app(storage_folder=".my_data/", custom_property="custom_property")
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
@@ -900,7 +898,6 @@ def test_can_exec_task_with_modified_config():
     assert_true_after_time(
         jobs[0].is_completed
     )  # If the job is completed, that means the asserts in the task are successful
-    taipy.clean_all_entities()
 
 
 def update_config_task(n):

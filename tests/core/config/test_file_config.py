@@ -25,7 +25,6 @@ def test_write_configuration_file():
 [TAIPY]
 root_folder = "./taipy/"
 storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
 repository_type = "filesystem"
 
 [JOB]
@@ -100,7 +99,6 @@ owner = "Raymond Kopa"
     with mock.patch.dict(
         os.environ, {"FOO": "in_memory", "QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}
     ):
-        Config.configure_global_app(clean_entities_enabled=True)
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
         Config.configure_default_data_node(
             storage_type="in_memory",

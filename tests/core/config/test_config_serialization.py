@@ -106,7 +106,6 @@ def test_read_write_toml_configuration_file():
 [TAIPY]
 root_folder = "./taipy/"
 storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
 repository_type = "filesystem"
 
 [JOB]
@@ -171,7 +170,6 @@ test_csv_dn = "tests.core.config.test_config_serialization.migrate_csv_path:func
 test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:function",]
     """.strip()
 
-    Config.configure_global_app(clean_entities_enabled=True)
     config_test_scenario()
 
     tf = NamedTemporaryFile()
@@ -257,7 +255,6 @@ def test_read_write_json_configuration_file():
 "TAIPY": {
 "root_folder": "./taipy/",
 "storage_folder": ".data/",
-"clean_entities_enabled": "True:bool",
 "repository_type": "filesystem"
 },
 "JOB": {
@@ -348,7 +345,6 @@ def test_read_write_json_configuration_file():
     """.strip()
 
     Config._serializer = _JsonSerializer()
-    Config.configure_global_app(clean_entities_enabled=True)
     config_test_scenario()
 
     tf = NamedTemporaryFile()
