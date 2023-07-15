@@ -48,7 +48,6 @@ def test_override_default_configuration_with_code_configuration():
     assert len(Config.tasks[bar_config.id].output_configs) == 0
     assert Config.tasks[bar_config.id].function == print
 
-    # TODO: TBD
     assert len(Config.pipelines) == 1
     assert "default" in Config.pipelines
 

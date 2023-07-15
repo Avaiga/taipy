@@ -181,6 +181,7 @@ def test_rename_version(caplog):
     # All entities are assigned to the new version
     assert len(_DataManager._get_all("1.1")) == 2
     assert len(_TaskManager._get_all("1.1")) == 1
+    assert len(_PipelineManager._get_all("1.1")) == 1
     assert len(_ScenarioManager._get_all("1.1")) == 1
     assert len(_JobManager._get_all("1.1")) == 1
 
@@ -194,6 +195,7 @@ def test_rename_version(caplog):
     # All entities are assigned to the new version
     assert len(_DataManager._get_all("2.1")) == 2
     assert len(_TaskManager._get_all("2.1")) == 1
+    assert len(_PipelineManager._get_all("2.1")) == 1
     assert len(_ScenarioManager._get_all("2.1")) == 1
     assert len(_JobManager._get_all("2.1")) == 1
 
@@ -253,5 +255,6 @@ def config_scenario():
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice, data_node_1_config, data_node_2_config)
     scenario_config = Config.configure_scenario("my_scenario", [task_config], frequency=Frequency.DAILY)
+    scenario_config.add_sequences({"my_pipeline": [task_config]})
 
     return scenario_config

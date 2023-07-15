@@ -14,12 +14,11 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core import DataNode, taipy
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.data.in_memory import DataNode, InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
@@ -29,7 +28,7 @@ from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
-from taipy.config import Config, Frequency
+from taipy.config import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
@@ -41,6 +40,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_1.tasks == {}
     assert scenario_1.additional_data_nodes == {}
     assert scenario_1.data_nodes == {}
+    assert scenario_1.pipelines == {}
     assert scenario_1.properties == {"key": "value"}
     assert scenario_1.key == "value"
     assert scenario_1.creation_date is not None
@@ -65,6 +65,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_2.tasks == {}
     assert scenario_2.additional_data_nodes == {}
     assert scenario_2.data_nodes == {}
+    assert scenario_2.pipelines == {}
     assert scenario_2.properties == {}
     assert scenario_2.creation_date == current_datetime
     assert not scenario_2.is_primary
@@ -76,16 +77,19 @@ def test_create_scenario(cycle, current_datetime):
     dn_1 = DataNode("xyz")
     dn_2 = DataNode("abc")
     task = Task("qux", {}, print, [dn_1])
+    pipeline = Pipeline("acb", {}, [task])
 
-    scenario_3 = Scenario("quux", set([task]), {}, set([dn_2]))
+    scenario_3 = Scenario("quux", set([task]), {}, set([dn_2]), pipelines=[pipeline])
     assert scenario_3.id is not None
     assert scenario_3.config_id == "quux"
     assert len(scenario_3.tasks) == 1
     assert len(scenario_3.additional_data_nodes) == 1
     assert len(scenario_3.data_nodes) == 2
+    assert len(scenario_3.pipelines) == 1
     assert scenario_3.qux == task
     assert scenario_3.xyz == dn_1
     assert scenario_3.abc == dn_2
+    assert scenario_3.acb == pipeline
     assert scenario_3.properties == {}
     assert scenario_3.tags == set()
 
@@ -100,9 +104,12 @@ def test_create_scenario(cycle, current_datetime):
     additional_dn_2 = InMemoryDataNode("additional_2", Scope.SCENARIO)
     task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
     task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
+    pipeline_1 = Pipeline("pipeline_1", {}, [task_1], "pipeline_id_1")
+    pipeline_2 = Pipeline("pipeline_2", {}, [task_1, task_2], "pipeline_id_2")
 
     data_manager = _DataManagerFactory._build_manager()
     task_manager = _TaskManagerFactory._build_manager()
+    pipeline_manager = _PipelineManagerFactory._build_manager()
 
     data_manager._set(input_1)
     data_manager._set(output_1)
@@ -112,8 +119,10 @@ def test_create_scenario(cycle, current_datetime):
     data_manager._set(additional_dn_2)
     task_manager._set(task_1)
     task_manager._set(task_2)
+    pipeline_manager._set(pipeline_1)
+    pipeline_manager._set(pipeline_2)
 
-    scenario_4 = Scenario("scenario_4", set([task_1]), {})
+    scenario_4 = Scenario("scenario_4", set([task_1]), {}, pipelines=[pipeline_1, pipeline_2])
     assert scenario_4.id is not None
     assert scenario_4.config_id == "scenario_4"
     assert len(scenario_4.tasks) == 1
@@ -125,8 +134,10 @@ def test_create_scenario(cycle, current_datetime):
         input_1.config_id: input_1,
         output_1.config_id: output_1,
     }
+    assert scenario_4.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
 
     scenario_5 = Scenario("scenario_5", set([task_1, task_2]), {})
+    scenario_5.add_pipelines([pipeline_1, pipeline_2])
     assert scenario_5.id is not None
     assert scenario_5.config_id == "scenario_5"
     assert len(scenario_5.tasks) == 2
@@ -140,6 +151,11 @@ def test_create_scenario(cycle, current_datetime):
         input_2.config_id: input_2,
         output_2.config_id: output_2,
     }
+    assert scenario_5.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
+    scenario_5.remove_pipelines([pipeline_2])
+    assert scenario_5.pipelines == {pipeline_1.config_id: pipeline_1}
+    scenario_5.remove_pipelines([pipeline_1])
+    assert scenario_5.pipelines == {}
 
     scenario_6 = Scenario("scenario_6", set(), {}, set([additional_dn_1]))
     assert scenario_6.id is not None
@@ -247,6 +263,7 @@ def test_add_and_remove_tag():
 
 
 def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
+    pipeline_1 = Pipeline("pipeline", {}, [], PipelineId("pipeline_id"))
     scenario_1 = Scenario(
         "foo",
         set(),
@@ -267,11 +284,21 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         name="cc",
         id=CycleId("tmp_cc_id"),
     )
+    tmp_pipeline = Pipeline(
+        "tmp_pipeline",
+        {},
+        [],
+        PipelineId("tmp_pipeline_id"),
+        owner_id="owner_id",
+        version="random_version_number",
+    )
 
     _TaskManagerFactory._build_manager()._set(task)
     _DataManagerFactory._build_manager()._set(data_node)
     _DataManagerFactory._build_manager()._set(additional_dn)
     _CycleManagerFactory._build_manager()._set(cycle)
+    _PipelineManagerFactory._build_manager()._set(pipeline_1)
+    _PipelineManagerFactory._build_manager()._set(tmp_pipeline)
     scenario_manager = _ScenarioManagerFactory._build_manager()
     cycle_manager = _CycleManagerFactory._build_manager()
     cycle_manager._set(cycle)
@@ -291,6 +318,25 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     scenario_2.name = "baz"
     assert scenario_1.name == "baz"
     assert scenario_2.name == "baz"
+
+    # auto set & reload on pipelines attribute
+    assert len(scenario_1.pipelines) == 0
+    assert len(scenario_2.pipelines) == 0
+    scenario_1.pipelines = [tmp_pipeline]
+    assert len(scenario_1.pipelines) == 1
+    assert scenario_1.pipelines[tmp_pipeline.config_id] == tmp_pipeline
+    assert len(scenario_2.pipelines) == 1
+    assert scenario_2.pipelines[tmp_pipeline.config_id] == tmp_pipeline
+    scenario_2.add_pipelines([pipeline_1])
+    assert len(scenario_1.pipelines) == 2
+    assert scenario_1.pipelines == {pipeline_1.config_id: pipeline_1, tmp_pipeline.config_id: tmp_pipeline}
+    assert len(scenario_2.pipelines) == 2
+    assert scenario_2.pipelines == {pipeline_1.config_id: pipeline_1, tmp_pipeline.config_id: tmp_pipeline}
+    scenario_2.remove_pipelines([tmp_pipeline])
+    assert len(scenario_1.pipelines) == 1
+    assert scenario_1.pipelines == {pipeline_1.config_id: pipeline_1}
+    assert len(scenario_2.pipelines) == 1
+    assert scenario_2.pipelines == {pipeline_1.config_id: pipeline_1}
 
     assert len(scenario_1.tasks) == 0
     assert len(scenario_1.data_nodes) == 0
@@ -395,6 +441,8 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     with scenario_1 as scenario:
         assert scenario.config_id == "foo"
         assert len(scenario.tasks) == 1
+        assert len(scenario.pipelines) == 1
+        assert scenario.pipelines[pipeline_1.config_id] == pipeline_1
         assert scenario.tasks[task.config_id] == task
         assert len(scenario.additional_data_nodes) == 1
         assert scenario.additional_data_nodes[additional_dn.config_id] == additional_dn
@@ -411,6 +459,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         scenario.config_id = "foo"
         scenario.tasks = set()
         scenario.additional_data_nodes = set()
+        scenario.remove_pipelines([pipeline_1])
         scenario.creation_date = new_datetime_2
         scenario.cycle = None
         scenario.is_primary = False
@@ -420,6 +469,8 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         scenario.properties["qux"] = 9
 
         assert scenario.config_id == "foo"
+        assert len(scenario.pipelines) == 1
+        assert scenario.pipelines[pipeline_1.config_id] == pipeline_1
         assert len(scenario.tasks) == 1
         assert scenario.tasks[task.config_id] == task
         assert len(scenario.additional_data_nodes) == 1
@@ -434,6 +485,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert scenario.properties["qux"] == 5
 
     assert scenario_1.config_id == "foo"
+    assert len(scenario_1.pipelines) == 0
     assert len(scenario_1.tasks) == 0
     assert len(scenario_1.additional_data_nodes) == 0
     assert scenario_1.tasks == {}
@@ -727,3 +779,6 @@ def test_get_inputs():
     assert scenario_8._get_inputs() == {data_node_1, data_node_2, data_node_5}
     assert scenario_8._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     _assert_equal(scenario_8._get_sorted_tasks(), [[task_5, task_2, task_1], [task_3, task_4]])
+
+
+# TODO: add tests for sequences

@@ -605,7 +605,6 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert len(Config.sections[PipelineConfig.name]) == 2
     assert Config.sections[PipelineConfig.name]["default"] is not None
     assert Config.sections[PipelineConfig.name]["default"].tasks == []
-    # TODO: TBD when removing pipeline config
     assert [task.id for task in Config.sections[PipelineConfig.name]["test_pipeline"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
     ]

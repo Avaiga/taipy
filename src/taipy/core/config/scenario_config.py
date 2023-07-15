@@ -338,9 +338,7 @@ class ScenarioConfig(Section):
         return Config.sections[ScenarioConfig.name][_Config.DEFAULT_KEY]
 
     def add_sequences(self, sequences: Dict[str, List[TaskConfig]]):
-        # TODO: How about user just provides task config id
         self.sequences.update(sequences)
-        # breakpoint()
         Config._register(self)
 
     def remove_sequences(self, sequence_names: Union[str, List[str]]):

@@ -374,9 +374,8 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:
         entity_ids = _EntityIds()
-
         for pipeline in scenario.pipelines.values():
-            if pipeline.owner_id in (scenario.id):
+            if pipeline.owner_id == scenario.id:
                 entity_ids.pipeline_ids.add(pipeline.id)
         for task in scenario.tasks.values():
             if task.owner_id == scenario.id:

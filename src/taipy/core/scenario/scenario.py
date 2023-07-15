@@ -165,6 +165,17 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
         self._pipelines = pipelines
 
+    def add_pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
+        _pipelines = list(self.pipelines.values())
+        _pipelines.extend(pipelines)
+        self.pipelines = _pipelines
+
+    def remove_pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
+        _pipelines = list(self.pipelines.values())
+        for pipeline in pipelines:
+            _pipelines.remove(pipeline)
+        self.pipelines = _pipelines
+
     def __get_pipelines(self) -> Dict[str, Pipeline]:
         _pipelines = {}
         pipeline_manager = _PipelineManagerFactory._build_manager()

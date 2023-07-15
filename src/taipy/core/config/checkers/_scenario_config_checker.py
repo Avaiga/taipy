@@ -34,6 +34,8 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 self._check_task_configs(scenario_config_id, scenario_config)
                 self._check_addition_data_node_configs(scenario_config_id, scenario_config)
                 self._check_comparators(scenario_config_id, scenario_config)
+
+        # TODO: check sequences use tasks in tasks
         return self._collector
 
     def _check_task_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):

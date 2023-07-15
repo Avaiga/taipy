@@ -95,31 +95,29 @@ def test_submit_task():
     assert job.is_completed()
 
 
-# def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
+def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
 
-#     # TODO: TBD
+    dn_1 = InMemoryDataNode("dn_config_id_1", Scope.SCENARIO)
+    dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
+    task_1 = Task("task_config_id_1", {}, print, [dn_1])
+    task_2 = Task("task_config_id_2", {}, print, [dn_2])
+    pipeline.tasks = [task_1, task_2]
 
-#     dn_1 = InMemoryDataNode("dn_config_id_1", Scope.SCENARIO)
-#     dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
-#     task_1 = Task("task_config_id_1", {}, print, [dn_1])
-#     task_2 = Task("task_config_id_2", {}, print, [dn_2])
-#     pipeline.tasks = [task_1, task_2]
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+    _TaskManager._set(task_1)
+    _TaskManager._set(task_2)
+    _PipelineManager._set(pipeline)
 
-#     _DataManager._set(dn_1)
-#     _DataManager._set(dn_2)
-#     _TaskManager._set(task_1)
-#     _TaskManager._set(task_2)
-#     _PipelineManager._set(pipeline)
-
-#     jobs_1 = taipy.submit(pipeline)
-#     jobs_2 = taipy.submit(pipeline)
-#     assert len(jobs_1) == 2
-#     assert len(jobs_2) == 2
-#     submit_ids_1 = [job.submit_id for job in jobs_1]
-#     submit_ids_2 = [job.submit_id for job in jobs_2]
-#     assert len(set(submit_ids_1)) == 1
-#     assert len(set(submit_ids_2)) == 1
-#     assert set(submit_ids_1) != set(submit_ids_2)
+    jobs_1 = taipy.submit(pipeline)
+    jobs_2 = taipy.submit(pipeline)
+    assert len(jobs_1) == 2
+    assert len(jobs_2) == 2
+    submit_ids_1 = [job.submit_id for job in jobs_1]
+    submit_ids_2 = [job.submit_id for job in jobs_2]
+    assert len(set(submit_ids_1)) == 1
+    assert len(set(submit_ids_2)) == 1
+    assert set(submit_ids_1) != set(submit_ids_2)
 
 
 def test_submit_scenario_generate_unique_submit_id():
@@ -235,37 +233,37 @@ def test_data_node_not_written_due_to_wrong_result_nb():
     assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
-# def test_scenario_only_submit_same_task_once():
+def test_scenario_only_submit_same_task_once():
 
-#     # TODO: TBD because scenario only expects a set of unique tasks
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _OrchestratorFactory._build_dispatcher()
 
-#     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-#     _OrchestratorFactory._build_dispatcher()
+    dn_0 = InMemoryDataNode("dn_config_0", Scope.SCENARIO, properties={"default_data": 0})
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
+    task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
+    task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
+    pipeline_1 = Pipeline("pipeline_config_1", {}, [task_1, task_2], pipeline_id="pipeline_1")
+    pipeline_2 = Pipeline("pipeline_config_2", {}, [task_1, task_3], pipeline_id="pipeline_2")
+    scenario_1 = Scenario(
+        "scenario_config_1", [task_1, task_2, task_3], {}, "scenario_1", pipelines=[pipeline_1, pipeline_2]
+    )
 
-#     dn_0 = InMemoryDataNode("dn_config_0", Scope.SCENARIO, properties={"default_data": 0})
-#     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
-#     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
-#     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
-#     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
-#     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
-#     pipeline_1 = Pipeline("pipeline_config_1", {}, [task_1, task_2], pipeline_id="pipeline_1")
-#     pipeline_2 = Pipeline("pipeline_config_2", {}, [task_1, task_3], pipeline_id="pipeline_2")
-#     scenario_1 = Scenario("scenario_config_1", [task_1, task_2, task_3], {}, "scenario_1")
+    jobs = _Orchestrator.submit(scenario_1)
+    assert len(jobs) == 3
+    assert all([job.is_completed() for job in jobs])
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-#     jobs = _Orchestrator.submit(scenario_1)
-#     assert len(jobs) == 3
-#     assert all([job.is_completed() for job in jobs])
-#     assert all(not _Orchestrator._is_blocked(job) for job in jobs)
+    jobs = _Orchestrator.submit(pipeline_1)
+    assert len(jobs) == 2
+    assert all([job.is_completed() for job in jobs])
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-#     jobs = _Orchestrator.submit(pipeline_1)
-#     assert len(jobs) == 2
-#     assert all([job.is_completed() for job in jobs])
-#     assert all(not _Orchestrator._is_blocked(job) for job in jobs)
-
-#     jobs = _Orchestrator.submit(pipeline_2)
-#     assert len(jobs) == 2
-#     assert all([job.is_completed() for job in jobs])
-#     assert all(not _Orchestrator._is_blocked(job) for job in jobs)
+    jobs = _Orchestrator.submit(pipeline_2)
+    assert len(jobs) == 2
+    assert all([job.is_completed() for job in jobs])
+    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
 
 def test_update_status_fail_job():
@@ -373,29 +371,27 @@ def test_submit_task_in_parallel():
     assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
-# def test_submit_pipeline_in_parallel():
+def test_submit_pipeline_in_parallel():
 
-#     # TODO: TBD
+    m = multiprocessing.Manager()
+    lock = m.Lock()
 
-#     m = multiprocessing.Manager()
-#     lock = m.Lock()
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
-#     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
+    task = _create_task(partial(lock_multiply, lock))
+    pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
 
-#     task = _create_task(partial(lock_multiply, lock))
-#     pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
+    _OrchestratorFactory._build_dispatcher()
 
-#     _OrchestratorFactory._build_dispatcher()
+    with lock:
+        assert task.output[f"{task.config_id}_output0"].read() == 0
+        job = _Orchestrator.submit(pipeline)[0]
+        assert_true_after_time(job.is_running)
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
-#     with lock:
-#         assert task.output[f"{task.config_id}_output0"].read() == 0
-#         job = _Orchestrator.submit(pipeline)[0]
-#         assert_true_after_time(job.is_running)
-#         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
-
-#     assert_true_after_time(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
-#     assert_true_after_time(job.is_completed)
-#     assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
+    assert_true_after_time(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
+    assert_true_after_time(job.is_completed)
+    assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_submit_scenario_in_parallel():

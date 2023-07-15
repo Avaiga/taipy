@@ -111,8 +111,6 @@ class _CycleManager(_Manager[Cycle]):
 
         scenarios = _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle)
 
-        # TODO: remove pipeline attribute here
-
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)
             owner_ids = {scenario.id, cycle.id}

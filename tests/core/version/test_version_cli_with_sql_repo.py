@@ -192,6 +192,7 @@ def test_rename_version(caplog, tmp_sqlite):
     # All entities are assigned to the new version
     assert len(_DataManager._get_all("1.1")) == 2
     assert len(_TaskManager._get_all("1.1")) == 1
+    assert len(_PipelineManager._get_all("1.1")) == 0
     assert len(_ScenarioManager._get_all("1.1")) == 1
     assert len(_JobManager._get_all("1.1")) == 1
 
@@ -205,6 +206,7 @@ def test_rename_version(caplog, tmp_sqlite):
     # All entities are assigned to the new version
     assert len(_DataManager._get_all("2.1")) == 2
     assert len(_TaskManager._get_all("2.1")) == 1
+    assert len(_PipelineManager._get_all("2.1")) == 0
     assert len(_ScenarioManager._get_all("2.1")) == 1
     assert len(_JobManager._get_all("2.1")) == 1
 

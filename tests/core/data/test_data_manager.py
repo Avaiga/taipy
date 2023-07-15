@@ -539,7 +539,6 @@ class TestDataManager:
         Config.configure_default_data_node(storage_type="csv")
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
-        # assert isinstance(scenario.input, CSVDataNode) TODO Replace the next line by the commented one.
         assert isinstance(scenario.input, PickleDataNode)
         assert isinstance(scenario.output, InMemoryDataNode)
 

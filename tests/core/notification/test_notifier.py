@@ -245,15 +245,17 @@ def test_publish_event():
     scenario_config = Config.configure_scenario(
         "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
     )
+    scenario_config.add_sequences({"pipeline_config": [task_config]})
 
     # Test CREATION Event
 
     scenario = tp.create_scenario(scenario_config)
     cycle = scenario.cycle
+    pipeline = scenario.pipelines["pipeline_config"]
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
 
-    assert registration_queue.qsize() == 4
+    assert registration_queue.qsize() == 5
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -263,9 +265,10 @@ def test_publish_event():
         EventEntityType.CYCLE,
         EventEntityType.DATA_NODE,
         EventEntityType.TASK,
+        EventEntityType.PIPELINE,
         EventEntityType.SCENARIO,
     ]
-    expected_event_entity_id = [cycle.id, dn.id, task.id, scenario.id]
+    expected_event_entity_id = [cycle.id, dn.id, task.id, pipeline.id, scenario.id]
 
     assert all(
         [
@@ -309,17 +312,26 @@ def test_publish_event():
     cycle.properties["valid"] = True
     assert registration_queue.qsize() == 10
 
-    task.skippable = True
+    pipeline.properties["name"] = "weather_forecast"
     assert registration_queue.qsize() == 11
 
-    task.properties["number_of_run"] = 2
+    tp.subscribe_pipeline(print, None, pipeline)
     assert registration_queue.qsize() == 12
 
-    dn.name = "new datanode name"
+    tp.unsubscribe_pipeline(print, None, pipeline)
     assert registration_queue.qsize() == 13
 
-    dn.properties["sorted"] = True
+    task.skippable = True
     assert registration_queue.qsize() == 14
+
+    task.properties["number_of_run"] = 2
+    assert registration_queue.qsize() == 15
+
+    dn.name = "new datanode name"
+    assert registration_queue.qsize() == 16
+
+    dn.properties["sorted"] = True
+    assert registration_queue.qsize() == 17
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -336,6 +348,9 @@ def test_publish_event():
         EventEntityType.SCENARIO,
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
+        EventEntityType.PIPELINE,
+        EventEntityType.PIPELINE,
+        EventEntityType.PIPELINE,
         EventEntityType.TASK,
         EventEntityType.TASK,
         EventEntityType.DATA_NODE,
@@ -352,6 +367,9 @@ def test_publish_event():
         "name",
         "name",
         "valid",
+        "name",
+        "subscribers",
+        "subscribers",
         "skippable",
         "number_of_run",
         "name",
@@ -368,6 +386,9 @@ def test_publish_event():
         scenario.id,
         cycle.id,
         cycle.id,
+        pipeline.id,
+        pipeline.id,
+        pipeline.id,
         task.id,
         task.id,
         dn.id,
@@ -390,7 +411,7 @@ def test_publish_event():
 
     # If multiple entities is in context, the last to enter will be the first to exit
     # So the published event will have the order starting with scenario first and ending with dn
-    with dn as d, task as t, cycle as c, scenario as sc:
+    with dn as d, task as t, pipeline as pl, cycle as c, scenario as sc:
 
         sc.is_primary = True
         assert registration_queue.qsize() == 0
@@ -410,6 +431,9 @@ def test_publish_event():
         c.properties["valid"] = True
         assert registration_queue.qsize() == 0
 
+        pl.properties["name"] = "weather_forecast"
+        assert registration_queue.qsize() == 0
+
         t.skippable = True
         assert registration_queue.qsize() == 0
 
@@ -424,7 +448,7 @@ def test_publish_event():
 
     published_events = []
 
-    assert registration_queue.qsize() == 10
+    assert registration_queue.qsize() == 11
     while registration_queue.qsize() != 0:
         published_events.append(registration_queue.get())
 
@@ -435,6 +459,7 @@ def test_publish_event():
         EventEntityType.SCENARIO,
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
+        EventEntityType.PIPELINE,
         EventEntityType.TASK,
         EventEntityType.TASK,
         EventEntityType.DATA_NODE,
@@ -447,6 +472,7 @@ def test_publish_event():
         "name",
         "name",
         "valid",
+        "name",
         "skippable",
         "number_of_run",
         "name",
@@ -459,6 +485,7 @@ def test_publish_event():
         scenario.id,
         cycle.id,
         cycle.id,
+        pipeline.id,
         task.id,
         task.id,
         dn.id,
@@ -501,7 +528,7 @@ def test_publish_event():
     # Test DELETION Event
 
     tp.delete(scenario.id)
-    assert registration_queue.qsize() == 5
+    assert registration_queue.qsize() == 6
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -510,12 +537,13 @@ def test_publish_event():
     expected_event_types = [
         EventEntityType.CYCLE,
         EventEntityType.SCENARIO,
+        EventEntityType.PIPELINE,
         EventEntityType.TASK,
         EventEntityType.JOB,
         EventEntityType.DATA_NODE,
     ]
 
-    expected_event_entity_id = [cycle.id, scenario.id, task.id, job.id, dn.id]
+    expected_event_entity_id = [cycle.id, scenario.id, pipeline.id, task.id, job.id, dn.id]
 
     assert all(
         [
@@ -528,7 +556,7 @@ def test_publish_event():
     )
 
     scenario = tp.create_scenario(scenario_config)
-    assert registration_queue.qsize() == 4
+    assert registration_queue.qsize() == 5
 
     # only to clear the queue
     while registration_queue.qsize() != 0:
