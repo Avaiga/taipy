@@ -115,16 +115,16 @@ class _CycleManager(_Manager[Cycle]):
 
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)
-            # for pipeline in scenario.pipelines.values():
             owner_ids = {scenario.id, cycle.id}
-            #     if pipeline.owner_id in owner_ids:
-            #         entity_ids.pipeline_ids.add(pipeline.id)
+            for pipeline in scenario.pipelines.values():
+                if pipeline.owner_id in owner_ids:
+                    entity_ids.pipeline_ids.add(pipeline.id)
             for task in scenario.tasks.values():
                 if task.owner_id in owner_ids:
                     entity_ids.task_ids.add(task.id)
-                for data_node in task.data_nodes.values():
-                    if data_node.owner_id in owner_ids:
-                        entity_ids.data_node_ids.add(data_node.id)
+            for data_node in scenario.data_nodes.values():
+                if data_node.owner_id in owner_ids:
+                    entity_ids.data_node_ids.add(data_node.id)
 
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:

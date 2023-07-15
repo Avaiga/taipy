@@ -100,7 +100,7 @@ class ScenarioConfig(Section):
         return scenario_config
 
     def __getattr__(self, item: str) -> Optional[Any]:
-        return _tpl._replace_templates(self._properties.get(item))  # type: ignore
+        return _tpl._replace_templates(self._properties.get(item))
 
     @property
     def task_configs(self) -> List[TaskConfig]:
@@ -241,9 +241,9 @@ class ScenarioConfig(Section):
         if self.sequences is None and default_section:
             self.sequences = default_section.sequences
 
-        self._properties.update(as_dict)  # type: ignore
+        self._properties.update(as_dict)
         if default_section:
-            self._properties = {**default_section.properties, **self._properties}  # type: ignore
+            self._properties = {**default_section.properties, **self._properties}
 
     def add_comparator(self, dn_config_id: str, comparator: Callable):
         self.comparators[dn_config_id].append(comparator)

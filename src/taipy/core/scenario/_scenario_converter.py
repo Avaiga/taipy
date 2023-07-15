@@ -18,6 +18,7 @@ from ..common import _utils
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle, CycleId
 from ..data.data_node import DataNode, DataNodeId
+from ..pipeline.pipeline import Pipeline
 from ..scenario._scenario_model import _ScenarioModel
 from ..scenario.scenario import Scenario
 from ..task.task import Task, TaskId
@@ -40,6 +41,9 @@ class _ScenarioConverter(_AbstractConverter):
             tags=list(scenario._tags),
             version=scenario._version,
             cycle=scenario._cycle.id if scenario._cycle else None,
+            pipelines=[p.id if isinstance(p, Pipeline) else p for p in scenario._pipelines]
+            if scenario._pipelines
+            else [],
         )
 
     @classmethod
@@ -66,6 +70,7 @@ class _ScenarioConverter(_AbstractConverter):
                 for it in model.subscribers
             ],
             version=model.version,
+            pipelines=model.pipelines,
         )
         return _migrate_entity(scenario)
 

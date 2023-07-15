@@ -36,8 +36,7 @@ from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import NonExistingDataNode, NonExistingPipeline, NonExistingTask
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from ..pipeline.pipeline import Pipeline
-from ..pipeline.pipeline_id import PipelineId
+from ..pipeline.pipeline import Pipeline, PipelineId
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from ..task.task_id import TaskId
@@ -48,8 +47,9 @@ from .scenario_id import ScenarioId
 class Scenario(_Entity, _Submittable, _Labeled):
     """Instance of a Business case to solve.
 
-    A scenario holds a list of tasks (instances of `Task^` class) to submit for execution
-    in order to solve the Business case.
+    A scenario holds a list of tasks (instances of `Task^` class) to submit for execution in order to
+    solve the Business case. , It also holds a list of additional data nodes (instances of `DataNode` class)
+    for extra data related to the scenario.
 
     Attributes:
         config_id (str): The identifier of the `ScenarioConfig^`.
@@ -84,19 +84,21 @@ class Scenario(_Entity, _Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
         tags: Optional[Set[str]] = None,
         version: str = None,
+        pipelines: Optional[Union[List[PipelineId], List[Pipeline]]] = None,
     ):
         super().__init__(subscribers)
         self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
 
-        self._tasks = set(tasks) if tasks else set()
-        self._additional_data_nodes = set(additional_data_nodes) if additional_data_nodes else set()
+        self._tasks = tasks or set()
+        self._additional_data_nodes = additional_data_nodes or set()
 
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
         self._primary_scenario = is_primary
         self._tags = tags or set()
         self._properties = _Properties(self, **properties)
+        self._pipelines = pipelines or []
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
@@ -141,6 +143,10 @@ class Scenario(_Entity, _Submittable, _Labeled):
         protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self._properties:
             return _tpl._replace_templates(self._properties[protected_attribute_name])
+
+        pipelines = self.pipelines
+        if protected_attribute_name in pipelines:
+            return pipelines[protected_attribute_name]
         tasks = self.tasks
         if protected_attribute_name in tasks:
             return tasks[protected_attribute_name]
@@ -149,11 +155,27 @@ class Scenario(_Entity, _Submittable, _Labeled):
             return data_nodes[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
 
-    # TODO: TBD
-    # @property  # type: ignore
-    # @_self_reload(_MANAGER_NAME)
-    # def pipelines(self):
-    #     return self.__get_pipelines()
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def pipelines(self) -> Dict[str, Pipeline]:
+        return self.__get_pipelines()
+
+    @pipelines.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
+        self._pipelines = pipelines
+
+    def __get_pipelines(self) -> Dict[str, Pipeline]:
+        _pipelines = {}
+        pipeline_manager = _PipelineManagerFactory._build_manager()
+
+        for pipeline_or_id in self._pipelines:
+            p = pipeline_manager._get(pipeline_or_id, pipeline_or_id)
+
+            if not isinstance(p, Pipeline):
+                raise NonExistingPipeline(pipeline_or_id)
+            _pipelines[p.config_id] = p
+        return _pipelines
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -199,15 +221,14 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def additional_data_nodes(self, val: Union[Set[TaskId], Set[DataNode]]):
         self._additional_data_nodes = set(val)
 
-    # TODO: TBD
     def _get_set_of_tasks(self) -> Set[Task]:
         return set(self.tasks.values())
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def data_nodes(self) -> Dict[str, DataNode]:
-        data_nodes_dict = {dn.config_id: dn for dn in self.__get_additional_data_nodes().values()}
-        for task_id, task in self.__get_tasks().items():
+        data_nodes_dict = self.__get_additional_data_nodes()
+        for _, task in self.__get_tasks().items():
             data_nodes_dict.update(task.data_nodes)
         return data_nodes_dict
 
@@ -418,35 +439,6 @@ class Scenario(_Entity, _Submittable, _Labeled):
         from ... import core as tp
 
         return tp.is_deletable(self)
-
-    # TODO: TBD
-    # def __get_pipelines(self):
-    #     pipelines = {}
-    #     pipeline_manager = _PipelineManagerFactory._build_manager()
-
-    #     for pipeline_or_id in self._pipelines:
-    #         p = pipeline_manager._get(pipeline_or_id, pipeline_or_id)
-
-    #         if not isinstance(p, Pipeline):
-    #             raise NonExistingPipeline(pipeline_or_id)
-    #         pipelines[p.config_id] = p
-    #     return pipelines
-
-    @staticmethod
-    def __to_cycle(cycle_id: Optional[CycleId] = None) -> Optional[Cycle]:
-        return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
-
-    @staticmethod
-    def __to_cycle_id(cycle: Optional[Cycle] = None) -> Optional[CycleId]:
-        return cycle.id if cycle else None
-
-    @staticmethod
-    def __to_task_ids(tasks) -> List[TaskId]:
-        return [t.id if isinstance(t, Task) else t for t in tasks]
-
-    @staticmethod
-    def __to_data_node_ids(data_nodes) -> List[DataNodeId]:
-        return [dn.id if isinstance(dn, DataNode) else dn for dn in data_nodes]
 
     def get_label(self) -> str:
         """Returns the scenario simple label prefixed by its owner label.

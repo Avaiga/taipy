@@ -20,6 +20,7 @@ from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
+from ..config.pipeline_config import PipelineConfig
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
@@ -37,6 +38,8 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, _publish_event
+from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
+from ..pipeline.pipeline import Pipeline
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from .scenario import Scenario
@@ -114,6 +117,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             if config.frequency
             else None
         )
+
         cycle_id = cycle.id if cycle else None
         tasks = (
             _task_manager._bulk_get_or_create(config.task_configs, cycle_id, scenario_id) if config.task_configs else []
@@ -123,6 +127,12 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             if config.additional_data_node_configs
             else {}
         )
+        pipelines = [
+            _PipelineManagerFactory._build_manager()._get_or_create(
+                PipelineConfig(p_config_id, task_configs), cycle.id if cycle else None, scenario_id
+            )
+            for p_config_id, task_configs in config.sequences.items()
+        ]
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
@@ -131,15 +141,16 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         version = cls._get_latest_version()
 
         scenario = Scenario(
-            str(config.id),
-            set(tasks),
-            props,
-            set(additional_data_nodes),
-            scenario_id,
-            creation_date,
+            config_id=str(config.id),
+            tasks=set(tasks),
+            properties=props,
+            additional_data_nodes=set(additional_data_nodes.values()),
+            scenario_id=scenario_id,
+            creation_date=creation_date,
             is_primary=is_primary_scenario,
             cycle=cycle,
             version=version,
+            pipelines=pipelines,
         )
 
         for task in tasks:
@@ -150,9 +161,19 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             dn._parent_ids.update([scenario_id])
             _data_manager._set(dn)
 
+        for pipeline in pipelines:
+            pipeline._parent_ids.update([scenario_id])
+        cls.__save_pipelines(pipelines)
+
         cls._set(scenario)
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)
         return scenario
+
+    @classmethod
+    def __save_pipelines(cls, pipelines):
+        pipeline_manager = _PipelineManagerFactory._build_manager()
+        for i in pipelines:
+            pipeline_manager._set(i)
 
     @classmethod
     def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
@@ -354,14 +375,15 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:
         entity_ids = _EntityIds()
 
+        for pipeline in scenario.pipelines.values():
+            if pipeline.owner_id in (scenario.id):
+                entity_ids.pipeline_ids.add(pipeline.id)
         for task in scenario.tasks.values():
-            if not isinstance(task, Task):
-                task = _TaskManagerFactory._build_manager()._get(task)
             if task.owner_id == scenario.id:
                 entity_ids.task_ids.add(task.id)
-            for data_node in task.data_nodes.values():
-                if data_node.owner_id == scenario.id:
-                    entity_ids.data_node_ids.add(data_node.id)
+        for data_node in scenario.data_nodes.values():
+            if data_node.owner_id == scenario.id:
+                entity_ids.data_node_ids.add(data_node.id)
 
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:

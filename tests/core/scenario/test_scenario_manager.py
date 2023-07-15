@@ -339,7 +339,6 @@ def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
     assert data_nodes["dn_1"].parent_ids == {scenario_1.tasks["task_1"].id}
     assert data_nodes["dn_2"].parent_ids == {scenario_1.tasks["task_1"].id, scenario_1.tasks["task_2"].id}
     assert data_nodes["dn_3"].parent_ids == {scenario_1.tasks["task_2"].id}
-    # assert all([task.parent_ids == {scenario_1.id} for task in scenario_1.additional_data_nodes.values.value])
 
     scenario_2 = _ScenarioManager._create(scenario_config_2)
     tasks = {**scenario_1.tasks, **scenario_2.tasks}
