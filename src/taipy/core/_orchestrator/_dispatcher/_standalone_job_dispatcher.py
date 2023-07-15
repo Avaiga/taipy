@@ -38,9 +38,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._nb_available_workers -= 1
 
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)
-        future = self._executor.submit(
-            self._run_wrapped_function, Config.job_config.mode, config_as_string, job.id, job.task
-        )
+        future = self._executor.submit(self._wrapped_function_with_config_load, config_as_string, job.id, job.task)
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
         future.add_done_callback(self._release_worker)

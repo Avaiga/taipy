@@ -10,9 +10,6 @@
 # specific language governing permissions and limitations under the License.
 from typing import Optional
 
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.config import Config
-
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher
@@ -42,7 +39,5 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
         Parameters:
             job (Job^): The job to submit on an executor with an available worker.
         """
-        config_as_string = _TomlSerializer()._serialize(Config._applied_config)
-
-        rs = self._run_wrapped_function(Config.job_config.mode, config_as_string, job.id, job.task)
+        rs = self._wrapped_function(job.id, job.task)
         self._update_job_status(job, rs)
