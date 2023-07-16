@@ -20,21 +20,21 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_override_default_configuration_with_code_configuration():
-    assert not Config.global_config.root_folder == "foo"
+    assert not Config.core.root_folder == "foo"
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
     assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
     Config.configure_job_executions(max_nb_of_workers=-1)
-    Config.configure_global_app(root_folder="foo")
+    Config.configure_core(root_folder="foo")
     foo_config = Config.configure_data_node("foo", "in_memory")
     bar_config = Config.configure_task("bar", print, [foo_config], [])
     baz_config = Config.configure_pipeline("baz", [bar_config])
     qux_config = Config.configure_scenario("qux", [baz_config])
 
     assert Config.job_config.max_nb_of_workers == -1
-    assert Config.global_config.root_folder == "foo"
+    assert Config.core.root_folder == "foo"
     assert len(Config.data_nodes) == 2
     assert "default" in Config.data_nodes
     assert foo_config.id in Config.data_nodes
@@ -59,14 +59,14 @@ def test_override_default_configuration_with_code_configuration():
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():
-    Config.configure_global_app()
-    assert Config.global_config.repository_type == "filesystem"
-    Config.configure_global_app(repository_type="othertype")
-    assert Config.global_config.repository_type == "othertype"
+    Config.configure_core()
+    assert Config.core.repository_type == "filesystem"
+    Config.configure_core(repository_type="othertype")
+    assert Config.core.repository_type == "othertype"
 
     with mock.patch.dict(os.environ, {"REPOSITORY_TYPE": "foo"}):
-        Config.configure_global_app(repository_type="ENV[REPOSITORY_TYPE]")
-        assert Config.global_config.repository_type == "foo"
+        Config.configure_core(repository_type="ENV[REPOSITORY_TYPE]")
+        assert Config.core.repository_type == "foo"
 
 
 def test_override_default_configuration_with_file_configuration():
@@ -86,7 +86,6 @@ max_nb_of_workers = -1
 [SCENARIO.qux]
 """
     )
-    Config.configure_global_app()
     assert Config.job_config.max_nb_of_workers == 1
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
@@ -205,7 +204,6 @@ max_nb_of_workers = 10
     """
     )
 
-    Config.configure_global_app()
     # Default config is applied
     assert Config.job_config.max_nb_of_workers == 1
 
@@ -236,7 +234,6 @@ max_nb_of_workers = 10
     """
     )
 
-    Config.configure_global_app()
     with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
         assert Config.job_config.max_nb_of_workers == 1

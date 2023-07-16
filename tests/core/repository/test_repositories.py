@@ -167,6 +167,6 @@ class TestRepositoriesStorage:
 
         if mock_repo == MockFSRepository:
             with pytest.raises(InvalidExportPath):
-                r._export("uuid", Config.global_config.storage_folder)
+                r._export("uuid", Config.core.storage_folder)
 
         shutil.rmtree(export_path, ignore_errors=True)

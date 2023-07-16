@@ -23,15 +23,15 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 def test_write_configuration_file():
     expected_config = """
 [TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-repository_type = "filesystem"
 
 [JOB]
 mode = "standalone"
 max_nb_of_workers = "2:int"
 
 [CORE]
+root_folder = "./taipy/"
+storage_folder = ".data/"
+repository_type = "filesystem"
 mode = "development"
 version_number = ""
 force = "False:bool"

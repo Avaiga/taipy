@@ -875,14 +875,14 @@ def test_task_orchestrator_create_standalone_dispatcher():
 def modified_config_task(n):
     from taipy.config import Config
 
-    assert_true_after_time(lambda: Config.global_config.storage_folder == ".my_data/")
-    assert_true_after_time(lambda: Config.global_config.custom_property == "custom_property")
+    assert_true_after_time(lambda: Config.core.storage_folder == ".my_data/")
+    assert_true_after_time(lambda: Config.core.custom_property == "custom_property")
     return n * 2
 
 
 def test_can_exec_task_with_modified_config():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    Config.configure_global_app(storage_folder=".my_data/", custom_property="custom_property")
+    Config.configure_core(storage_folder=".my_data/", custom_property="custom_property")
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
@@ -906,12 +906,12 @@ def update_config_task(n):
     # The exception will be saved to logger, and there is no way to check for it
     # so it will be checked here
     with pytest.raises(ConfigurationUpdateBlocked):
-        Config.global_config.storage_folder = ".new_storage_folder/"
+        Config.core.storage_folder = ".new_storage_folder/"
     with pytest.raises(ConfigurationUpdateBlocked):
-        Config.global_config.properties = {"custom_property": "new_custom_property"}
+        Config.core.properties = {"custom_property": "new_custom_property"}
 
-    Config.global_config.storage_folder = ".new_storage_folder/"
-    Config.global_config.properties = {"custom_property": "new_custom_property"}
+    Config.core.storage_folder = ".new_storage_folder/"
+    Config.core.properties = {"custom_property": "new_custom_property"}
 
     return n * 2
 

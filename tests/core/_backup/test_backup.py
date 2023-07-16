@@ -48,7 +48,7 @@ backup_file_path = ".taipy_backups"
 def test_backup_storage_folder_when_core_run():
     Core().run()
     backup_files = read_backup_file(backup_file_path)
-    assert backup_files == [f"{Config.global_config.storage_folder}\n"]
+    assert backup_files == [f"{Config.core.storage_folder}\n"]
 
 
 def test_no_new_entry_when_file_is_in_storage_folder():

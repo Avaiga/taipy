@@ -587,7 +587,7 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     return _PipelineManagerFactory._build_manager()._get_or_create(config)
 
 
-def clean_all_entities_by_version(version_number) -> bool:
+def clean_all_entities_by_version(version_number=None) -> bool:
     """Delete all entities belongs to a version from the Taipy data folder.
 
     Returns:

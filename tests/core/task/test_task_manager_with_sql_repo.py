@@ -34,9 +34,7 @@ def init_managers():
     _DataManagerFactory._build_manager()._delete_all()
 
 
-def test_create_and_save():
-    Config.configure_global_app(repository_type="sql")
-
+def test_create_and_save(init_sql_repo):
     init_managers()
 
     input_configs = [Config.configure_data_node("my_input", "in_memory")]
@@ -66,9 +64,7 @@ def test_create_and_save():
     assert task_retrieved_from_manager.parent_ids == set()
 
 
-def test_do_not_recreate_existing_data_node():
-    Config.configure_global_app(repository_type="sql")
-
+def test_do_not_recreate_existing_data_node(init_sql_repo):
     init_managers()
 
     input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
@@ -82,9 +78,7 @@ def test_do_not_recreate_existing_data_node():
     assert len(_DataManager._get_all()) == 2
 
 
-def test_do_not_recreate_existing_task():
-    Config.configure_global_app(repository_type="sql")
-
+def test_do_not_recreate_existing_task(init_sql_repo):
     init_managers()
     assert len(_TaskManager._get_all()) == 0
 
@@ -170,9 +164,7 @@ def test_do_not_recreate_existing_task():
     assert task_12.id == task_13.id
 
 
-def test_set_and_get_task():
-    Config.configure_global_app(repository_type="sql")
-
+def test_set_and_get_task(init_sql_repo):
     init_managers()
 
     task_id_1 = TaskId("id1")
@@ -224,9 +216,7 @@ def test_set_and_get_task():
     assert _TaskManager._get(second_task).id == second_task.id
 
 
-def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
-    Config.configure_global_app(repository_type="sql")
-
+def test_ensure_conservation_of_order_of_data_nodes_on_task_creation(init_sql_repo):
     init_managers()
 
     embedded_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
@@ -250,9 +240,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     assert [o.config_id for o in task_2.output.values()] == [embedded_4.id, embedded_5.id]
 
 
-def test_delete_raise_exception():
-    Config.configure_global_app(repository_type="sql")
-
+def test_delete_raise_exception(init_sql_repo):
     init_managers()
 
     dn_input_config_1 = Config.configure_data_node(
@@ -267,9 +255,7 @@ def test_delete_raise_exception():
         _TaskManager._delete(task_1.id)
 
 
-def test_hard_delete():
-    Config.configure_global_app(repository_type="sql")
-
+def test_hard_delete(init_sql_repo):
     init_managers()
 
     dn_input_config_1 = Config.configure_data_node(
@@ -331,9 +317,7 @@ def test_submit_task():
         assert len(MockOrchestrator.submit_ids) == len(set(MockOrchestrator.submit_ids))
 
 
-def test_get_tasks_by_config_id():
-    Config.configure_global_app(repository_type="sql")
-
+def test_get_tasks_by_config_id(init_sql_repo):
     init_managers()
 
     dn_config = Config.configure_data_node("dn", scope=Scope.SCENARIO)

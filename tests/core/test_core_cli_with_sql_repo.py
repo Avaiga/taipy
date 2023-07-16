@@ -30,8 +30,7 @@ from tests.core.utils import assert_true_after_time
 from ..conftest import init_config
 
 
-def test_core_cli_no_arguments(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_no_arguments(init_sql_repo):
     with patch("sys.argv", ["prog"]):
         core = Core()
         core.run()
@@ -41,24 +40,21 @@ def test_core_cli_no_arguments(tmp_sqlite):
         assert not Config.core.clean_entities
 
 
-def test_core_cli_development_mode(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_development_mode(init_sql_repo):
     with patch("sys.argv", ["prog", "--development"]):
         core = Core()
         core.run()
         assert Config.core.mode == "development"
 
 
-def test_core_cli_dev_mode(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_dev_mode(init_sql_repo):
     with patch("sys.argv", ["prog", "-dev"]):
         core = Core()
         core.run()
         assert Config.core.mode == "development"
 
 
-def test_core_cli_experiment_mode(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_experiment_mode(init_sql_repo):
     with patch("sys.argv", ["prog", "--experiment"]):
         core = Core()
         core.run()
@@ -68,8 +64,7 @@ def test_core_cli_experiment_mode(tmp_sqlite):
         assert not Config.core.clean_entities
 
 
-def test_core_cli_experiment_mode_with_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_experiment_mode_with_version(init_sql_repo):
     with patch("sys.argv", ["prog", "--experiment", "2.1"]):
         core = Core()
         core.run()
@@ -79,8 +74,7 @@ def test_core_cli_experiment_mode_with_version(tmp_sqlite):
         assert not Config.core.clean_entities
 
 
-def test_core_cli_experiment_mode_with_force_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_experiment_mode_with_force_version(init_sql_repo):
     with patch("sys.argv", ["prog", "--experiment", "2.1", "--taipy-force"]):
         core = Core()
         core.run()
@@ -90,8 +84,7 @@ def test_core_cli_experiment_mode_with_force_version(tmp_sqlite):
         assert not Config.core.clean_entities
 
 
-def test_core_cli_experiment_mode_with_version_cleaning_entities(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_experiment_mode_with_version_cleaning_entities(init_sql_repo):
     with patch("sys.argv", ["prog", "--experiment", "2.1", "--clean-entities"]):
         core = Core()
         core.run()
@@ -101,8 +94,7 @@ def test_core_cli_experiment_mode_with_version_cleaning_entities(tmp_sqlite):
         assert Config.core.clean_entities
 
 
-def test_core_cli_production_mode(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_core_cli_production_mode(init_sql_repo):
     with patch("sys.argv", ["prog", "--production"]):
         core = Core()
         core.run()
@@ -112,8 +104,7 @@ def test_core_cli_production_mode(tmp_sqlite):
         assert not Config.core.clean_entities
 
 
-def test_dev_mode_clean_all_entities_of_the_latest_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo):
 
     scenario_config = config_scenario()
 
@@ -230,9 +221,7 @@ def test_dev_mode_clean_all_entities_when_config_is_alternated():
     _ScenarioManager._submit(scenario)
 
 
-def test_version_number_when_switching_mode(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_version_number_when_switching_mode(init_sql_repo):
     with patch("sys.argv", ["prog", "--development"]):
         Core().run()
     ver_1 = _VersionManager._get_latest_version()
@@ -294,9 +283,7 @@ def test_version_number_when_switching_mode(tmp_sqlite):
     assert len(_VersionManager._get_all()) == 4
 
 
-def test_production_mode_load_all_entities_from_previous_production_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_production_mode_load_all_entities_from_previous_production_version(init_sql_repo):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--production"]):
@@ -335,9 +322,7 @@ def test_production_mode_load_all_entities_from_previous_production_version(tmp_
     assert len(_JobManager._get_all()) == 2
 
 
-def test_force_override_experiment_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_force_override_experiment_version(init_sql_repo):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -359,7 +344,7 @@ def test_force_override_experiment_version(tmp_sqlite):
 
     # Update Config singleton to simulate conflict Config between versions
     Config.unblock_update()
-    Config.configure_global_app(root_folder="foo")
+    Config.configure_global_app(foo="bar")
 
     # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
@@ -385,9 +370,7 @@ def test_force_override_experiment_version(tmp_sqlite):
     assert len(_JobManager._get_all()) == 2
 
 
-def test_force_override_production_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_force_override_production_version(init_sql_repo):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--production", "1.0"]):
@@ -411,7 +394,7 @@ def test_force_override_production_version(tmp_sqlite):
 
     # Update Config singleton to simulate conflict Config between versions
     Config.unblock_update()
-    Config.configure_global_app(root_folder="foo")
+    Config.configure_global_app(foo="bar")
 
     # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
@@ -437,9 +420,7 @@ def test_force_override_production_version(tmp_sqlite):
     assert len(_JobManager._get_all()) == 2
 
 
-def test_clean_experiment_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_clean_experiment_version(init_sql_repo):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -470,9 +451,7 @@ def test_clean_experiment_version(tmp_sqlite):
     assert len(_JobManager._get_all()) == 1
 
 
-def test_clean_production_version(tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_clean_production_version(init_sql_repo):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--production", "1.0"]):
@@ -503,9 +482,7 @@ def test_clean_production_version(tmp_sqlite):
     assert len(_JobManager._get_all()) == 1
 
 
-def test_modify_config_properties_without_force(caplog, tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_modify_config_properties_without_force(caplog, init_sql_repo):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -514,7 +491,7 @@ def test_modify_config_properties_without_force(caplog, tmp_sqlite):
         _ScenarioManager._submit(scenario)
 
     init_config()
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    Config.configure_core(repository_type="sql", repository_properties={"db_location": init_sql_repo})
 
     scenario_config_2 = config_scenario_2()
 
@@ -530,7 +507,7 @@ def test_modify_config_properties_without_force(caplog, tmp_sqlite):
     assert 'DATA_NODE "d0" was removed' in error_message
 
     assert 'DATA_NODE "d2" has attribute "default_path" modified' in error_message
-    assert 'Global Configuration "root_folder" was modified' in error_message
+    assert 'CORE "root_folder" was modified' in error_message
     assert 'JOB "mode" was modified' in error_message
     assert 'JOB "max_nb_of_workers" was modified' in error_message
     assert 'PIPELINE "my_pipeline" has attribute "tasks" modified' in error_message
@@ -543,9 +520,7 @@ def test_modify_config_properties_without_force(caplog, tmp_sqlite):
     assert 'DATA_NODE "d2" has attribute "exposed_type" modified' in error_message
 
 
-def test_modify_job_configuration_dont_stop_application(caplog, tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-
+def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -558,7 +533,7 @@ def test_modify_job_configuration_dont_stop_application(caplog, tmp_sqlite):
     core.stop()
 
     init_config()
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    Config.configure_core(repository_type="sql", repository_properties={"db_location": init_sql_repo})
 
     scenario_config = config_scenario()
 
@@ -599,7 +574,7 @@ def double_twice(a):
 
 
 def config_scenario_2():
-    Config.configure_global_app(
+    Config.configure_core(
         root_folder="foo_root",
         # Changing the "storage_folder" will fail since older versions are stored in older folder
         # storage_folder="foo_storage",

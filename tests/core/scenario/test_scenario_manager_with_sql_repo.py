@@ -46,9 +46,8 @@ def init_managers():
     _DataManagerFactory._build_manager()._delete_all()
 
 
-def test_set_and_get_scenario(cycle):
+def test_set_and_get_scenario(cycle, init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
 
     init_managers()
     _OrchestratorFactory._build_dispatcher()
@@ -151,9 +150,8 @@ def test_set_and_get_scenario(cycle):
     assert _TaskManager._get(task_2.id).id == task_2.id
 
 
-def test_create_scenario_does_not_modify_config():
+def test_create_scenario_does_not_modify_config(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -184,9 +182,8 @@ def test_create_scenario_does_not_modify_config():
     assert scenario_2.name is None
 
 
-def test_create_and_delete_scenario():
+def test_create_and_delete_scenario(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -256,9 +253,8 @@ def mult_by_2(nb: int):
     return nb * 2
 
 
-def test_scenario_manager_only_creates_data_node_once():
+def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -301,7 +297,7 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario_1.by_4._get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
-    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._create(scenario_config)
 
     assert len(_DataManager._get_all()) == 5
     assert len(_TaskManager._get_all()) == 4
@@ -309,9 +305,7 @@ def test_scenario_manager_only_creates_data_node_once():
     assert len(_ScenarioManager._get_all()) == 2
 
 
-def test_scenario_create_from_task_config():
-    Config.configure_global_app(repository_type="sql")
-
+def test_scenario_create_from_task_config(init_sql_repo):
     init_managers()
 
     data_node_1_config = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
@@ -346,9 +340,7 @@ def test_scenario_create_from_task_config():
     assert scenario_config_2.pipeline_configs[0].id == pipeline_name
 
 
-def test_get_scenarios_by_config_id():
-    Config.configure_global_app(repository_type="sql")
-
+def test_get_scenarios_by_config_id(init_sql_repo):
     init_managers()
 
     scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
