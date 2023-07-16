@@ -11,8 +11,6 @@
 
 from unittest import mock
 
-import pytest
-
 from src.taipy.config import Config
 from src.taipy.config._config import _Config
 from src.taipy.config._config_comparator._comparator_result import _ComparatorResult
@@ -50,15 +48,10 @@ class TestConfigComparator:
 
     def test_comparator_with_updated_global_config(self):
         _config_1 = _Config._default_config()
-        _config_2 = _Config._default_config()
+        _config_1._global_config = GlobalAppConfig(foo="bar")
 
-        # Update global config
-        _config_2._global_config = GlobalAppConfig(
-            root_folder="foo",
-            storage_folder="bar",
-            repository_properties={"foo": "bar"},
-            repository_type="baz",
-        )
+        _config_2 = _Config._default_config()
+        _config_2._global_config = GlobalAppConfig(foo="baz", bar="foo")
 
         config_diff = Config._comparator._find_conflict_config(_config_1, _config_2)
 
@@ -66,23 +59,15 @@ class TestConfigComparator:
         assert config_diff.get("conflicted_sections") is not None
 
         conflicted_config_diff = config_diff["conflicted_sections"]
-        assert len(conflicted_config_diff["modified_items"]) == 3
+        assert len(conflicted_config_diff["modified_items"]) == 1
         assert conflicted_config_diff["modified_items"][0] == (
-            ("Global Configuration", "root_folder", None),
-            ("./taipy/", "foo"),
-        )
-        assert conflicted_config_diff["modified_items"][1] == (
-            ("Global Configuration", "storage_folder", None),
-            (".data/", "bar"),
-        )
-        assert conflicted_config_diff["modified_items"][2] == (
-            ("Global Configuration", "repository_type", None),
-            ("filesystem", "baz"),
+            ("Global Configuration", "foo", None),
+            ("bar", "baz"),
         )
         assert len(conflicted_config_diff["added_items"]) == 1
         assert conflicted_config_diff["added_items"][0] == (
-            ("Global Configuration", "repository_properties", None),
-            {"foo": "bar"},
+            ("Global Configuration", "bar", None),
+            "foo",
         )
 
     def test_comparator_with_new_section(self):

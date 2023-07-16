@@ -15,28 +15,20 @@ from unittest import mock
 import pytest
 
 from src.taipy.config.config import Config
-from src.taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked, InconsistentEnvVariableError
-from src.taipy.config.global_app.global_app_config import GlobalAppConfig
+from src.taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 def test_global_config_with_env_variable_value():
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
-        Config.configure_global_app(root_folder="ENV[FOO]", storage_folder="ENV[BAZ]")
-        assert Config.global_config.root_folder == "bar"
-        assert Config.global_config._root_folder == "ENV[FOO]"
-        assert Config.global_config.storage_folder == "qux"
-        assert Config.global_config._storage_folder == "ENV[BAZ]"
+        Config.configure_global_app(foo="ENV[FOO]", bar="ENV[BAZ]")
+        assert Config.global_config.foo == "bar"
+        assert Config.global_config.bar == "qux"
 
 
 def test_default_global_app_config():
     global_config = Config.global_config
     assert global_config is not None
     assert not global_config.notification
-    assert global_config.root_folder == "./taipy/"
-    assert global_config.storage_folder == ".data/"
-
-    assert global_config.repository_type == "filesystem"
-    assert global_config.repository_properties == {}
     assert len(global_config.properties) == 0
 
 
@@ -44,28 +36,11 @@ def test_block_update_global_app_config():
     Config.block_update()
 
     with pytest.raises(ConfigurationUpdateBlocked):
-        Config.configure_global_app(root_folder="./new_root_folder/", storage_folder=".new_storage/")
-
-    with pytest.raises(ConfigurationUpdateBlocked):
-        Config.global_config.root_folder = "./new_root_folder/"
-
-    with pytest.raises(ConfigurationUpdateBlocked):
-        Config.global_config.storage_folder = ".new_storage/"
-
-    with pytest.raises(ConfigurationUpdateBlocked):
-        Config.global_config.repository_type = "mongo"
-
-    with pytest.raises(ConfigurationUpdateBlocked):
-        Config.global_config.repository_properties = {}
+        Config.configure_global_app(foo="bar")
 
     with pytest.raises(ConfigurationUpdateBlocked):
         Config.global_config.properties = {"foo": "bar"}
 
-    global_config = Config.global_config
-
     # Test if the global_config stay as default
-    assert global_config.root_folder == "./taipy/"
-    assert global_config.storage_folder == ".data/"
-    assert global_config.repository_type == "filesystem"
-    assert global_config.repository_properties == {}
-    assert len(global_config.properties) == 0
+    assert Config.global_config.foo is None
+    assert len(Config.global_config.properties) == 0

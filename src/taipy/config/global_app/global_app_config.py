@@ -22,78 +22,11 @@ class GlobalAppConfig:
     Configuration fields related to the global application.
 
     Attributes:
-
-        root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
-        storage_folder (str): Folder name used to store Taipy data. The default value is ".data/". It is used in
-            conjunction with the `root_folder` field. That means the storage path is <root_folder><storage_folder>
-            (The Default path is "./taipy/.data/").
-        **properties (dict[src, any]): A dictionary of additional properties.
+        **properties (Dict[str, Any]): A dictionary of additional properties.
     """
 
-    _ROOT_FOLDER_KEY = "root_folder"
-    _DEFAULT_ROOT_FOLDER = "./taipy/"
-
-    _STORAGE_FOLDER_KEY = "storage_folder"
-    _DEFAULT_STORAGE_FOLDER = ".data/"
-
-    _REPOSITORY_TYPE_KEY = "repository_type"
-    _DEFAULT_REPOSITORY_TYPE = "filesystem"
-    _REPOSITORY_PROPERTIES_KEY = "repository_properties"
-    _DEFAULT_REPOSITORY_PROPERTIES: Dict = dict()
-
-    def __init__(
-        self,
-        root_folder: str = None,
-        storage_folder: str = None,
-        repository_type: str = None,
-        repository_properties: Dict[str, Union[str, int]] = None,
-        **properties,
-    ):
-        self._root_folder = root_folder
-        self._storage_folder = storage_folder
-        self._repository_type = repository_type
-        self._repository_properties = repository_properties
+    def __init__(self, **properties):
         self._properties = properties
-
-    @property
-    def storage_folder(self):
-        return _tpl._replace_templates(self._storage_folder)
-
-    @storage_folder.setter  # type: ignore
-    @_ConfigBlocker._check()
-    def storage_folder(self, val):
-        self._storage_folder = val
-
-    @property
-    def root_folder(self):
-        return _tpl._replace_templates(self._root_folder)
-
-    @root_folder.setter  # type: ignore
-    @_ConfigBlocker._check()
-    def root_folder(self, val):
-        self._root_folder = val
-
-    @property
-    def repository_type(self):
-        return _tpl._replace_templates(self._repository_type)
-
-    @repository_type.setter  # type: ignore
-    @_ConfigBlocker._check()
-    def repository_type(self, val):
-        self._repository_type = val
-
-    @property
-    def repository_properties(self):
-        return (
-            {k: _tpl._replace_templates(v) for k, v in self._repository_properties.items()}
-            if self._repository_properties
-            else self._DEFAULT_REPOSITORY_PROPERTIES.copy()
-        )
-
-    @repository_properties.setter  # type: ignore
-    @_ConfigBlocker._check()
-    def repository_properties(self, val):
-        self._repository_properties = val
 
     @property
     def properties(self):
@@ -109,45 +42,21 @@ class GlobalAppConfig:
 
     @classmethod
     def default_config(cls) -> GlobalAppConfig:
-        config = GlobalAppConfig()
-        config._root_folder = cls._DEFAULT_ROOT_FOLDER
-        config._storage_folder = cls._DEFAULT_STORAGE_FOLDER
-        config._repository_type = cls._DEFAULT_REPOSITORY_TYPE
-        config._repository_properties = cls._DEFAULT_REPOSITORY_PROPERTIES.copy()
-        return config
+        return GlobalAppConfig()
 
     def _clean(self):
-        self._root_folder = self._DEFAULT_ROOT_FOLDER
-        self._storage_folder = self._DEFAULT_STORAGE_FOLDER
-        self._repository_type = self._DEFAULT_REPOSITORY_TYPE
-        self._repository_properties = self._DEFAULT_REPOSITORY_PROPERTIES.copy()
+        self._properties.clear()
 
     def _to_dict(self):
         as_dict = {}
-        if self._root_folder:
-            as_dict[self._ROOT_FOLDER_KEY] = self._root_folder
-        if self._storage_folder:
-            as_dict[self._STORAGE_FOLDER_KEY] = self._storage_folder
-        if self._repository_type:
-            as_dict[self._REPOSITORY_TYPE_KEY] = self._repository_type
-        if self._repository_properties:
-            as_dict[self._REPOSITORY_PROPERTIES_KEY] = self._repository_properties
         as_dict.update(self._properties)
         return as_dict
 
     @classmethod
     def _from_dict(cls, config_as_dict: Dict[str, Any]):
         config = GlobalAppConfig()
-        config._root_folder = config_as_dict.pop(cls._ROOT_FOLDER_KEY, None)
-        config._storage_folder = config_as_dict.pop(cls._STORAGE_FOLDER_KEY, None)
-        config._repository_type = config_as_dict.pop(cls._REPOSITORY_TYPE_KEY, None)
-        config._repository_properties = config_as_dict.pop(cls._REPOSITORY_PROPERTIES_KEY, None)
         config._properties = config_as_dict
         return config
 
     def _update(self, config_as_dict):
-        self._root_folder = config_as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder)
-        self._storage_folder = config_as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
-        self._repository_type = config_as_dict.pop(self._REPOSITORY_TYPE_KEY, self._repository_type)
-        self._repository_properties = config_as_dict.pop(self._REPOSITORY_PROPERTIES_KEY, self._repository_properties)
         self._properties.update(config_as_dict)

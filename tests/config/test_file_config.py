@@ -34,10 +34,9 @@ attribute = "other_attribute"
 def test_skip_configuration_outside_nodes():
     config = NamedTemporaryFile(
         """
-storage_folder = "foo"
+foo = "bar"
     """
     )
 
     Config.load(config.filename)
-
-    assert Config.global_config.storage_folder == ".data/"
+    assert Config.global_config.foo is None

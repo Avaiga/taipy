@@ -19,8 +19,6 @@ from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 def _test_default_global_app_config(global_config: GlobalAppConfig):
     assert global_config is not None
     assert not global_config.notification
-    assert global_config.root_folder == "./taipy/"
-    assert global_config.storage_folder == ".data/"
     assert len(global_config.properties) == 0
 
 

@@ -55,9 +55,6 @@ class CustomDecoder(json.JSONDecoder):
 def test_write_toml_configuration_file():
     expected_toml_config = """
 [TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-repository_type = "filesystem"
 
 [unique_section_name]
 attribute = "my_attribute"
@@ -119,9 +116,7 @@ baz = "ENV[QUX]"
 def test_read_toml_configuration_file():
     toml_config = """
 [TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-repository_type = "filesystem"
+foo = "bar"
 
 [unique_section_name]
 attribute = "my_attribute"
@@ -135,8 +130,8 @@ baz = "ENV[QUX]"
 quux = "ENV[QUUZ]:bool"
 corge = [ "grault", "ENV[GARPLY]", "ENV[WALDO]:int", "3.0:float",]
 
-[TAIPY.repository_properties]
-db_location = "foo.db"
+[TAIPY.custom_properties]
+bar = "baz"
 
 [section_name.default]
 attribute = "default_attribute"
@@ -158,8 +153,8 @@ baz = "ENV[QUX]"
     ):
         Config.override(tf.filename)
 
-        assert Config.global_config.repository_properties is not None
-        assert Config.global_config.repository_properties.get("db_location") == "foo.db"
+        assert Config.global_config.foo == "bar"
+        assert Config.global_config.custom_properties.get("bar") == "baz"
 
         assert Config.unique_sections is not None
         assert Config.unique_sections[UniqueSectionForTest.name] is not None
@@ -206,27 +201,9 @@ baz = "ENV[QUX]"
         assert actual_config_2 == toml_config
 
 
-def test_read_toml_configuration_file_without_repository_property():
-    toml_config = """
-[TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-repository_type = "filesystem"
-    """.strip()
-
-    tf = NamedTemporaryFile(toml_config)
-    Config.override(tf.filename)
-
-    # Without serializing repository_properties, it should return an empty dict
-    assert Config.global_config.repository_properties == {}
-
-
 def test_read_write_toml_configuration_file_with_function_and_class():
     expected_toml_config = """
 [TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-repository_type = "filesystem"
 
 [unique_section_name]
 attribute = "my_attribute"
@@ -286,11 +263,7 @@ prop_fct_list = [ "builtins.print:function", "builtins.pow:function",]
 def test_write_json_configuration_file():
     expected_json_config = """
 {
-"TAIPY": {
-"root_folder": "./taipy/",
-"storage_folder": ".data/",
-"repository_type": "filesystem"
-},
+"TAIPY": {},
 "unique_section_name": {
 "attribute": "my_attribute",
 "prop": "my_prop",
@@ -433,11 +406,7 @@ def test_read_json_configuration_file():
 def test_read_write_json_configuration_file_with_function_and_class():
     expected_json_config = """
 {
-"TAIPY": {
-"root_folder": "./taipy/",
-"storage_folder": ".data/",
-"repository_type": "filesystem"
-},
+"TAIPY": {},
 "unique_section_name": {
 "attribute": "my_attribute",
 "prop": "my_prop",

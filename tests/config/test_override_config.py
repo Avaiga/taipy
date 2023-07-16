@@ -50,28 +50,28 @@ def test_override_default_configuration_with_code_configuration():
 
 def test_override_default_config_with_code_config_including_env_variable_values():
     Config.configure_global_app()
-    assert Config.global_config.repository_type == "filesystem"
-    Config.configure_global_app(repository_type="othertype")
-    assert Config.global_config.repository_type == "othertype"
+    assert Config.global_config.foo is None
+    Config.configure_global_app(foo="bar")
+    assert Config.global_config.foo == "bar"
 
-    with mock.patch.dict(os.environ, {"REPOSITORY_TYPE": "foo"}):
-        Config.configure_global_app(repository_type="ENV[REPOSITORY_TYPE]")
-        assert Config.global_config.repository_type == "foo"
+    with mock.patch.dict(os.environ, {"FOO": "foo"}):
+        Config.configure_global_app(foo="ENV[FOO]")
+        assert Config.global_config.foo == "foo"
 
 
 def test_override_default_configuration_with_file_configuration():
     tf = NamedTemporaryFile(
         """
 [TAIPY]
-repository_type = "foo"
+foo = "bar"
 
 """
     )
-    assert Config.global_config.repository_type == "filesystem"
+    assert Config.global_config.foo is None
 
     Config.load(tf.filename)
 
-    assert Config.global_config.repository_type == "foo"
+    assert Config.global_config.foo == "bar"
 
 
 def test_override_default_config_with_file_config_including_env_variable_values():
@@ -160,50 +160,41 @@ def test_override_default_configuration_with_multiple_configurations():
     file_config = NamedTemporaryFile(
         """
 [TAIPY]
-repository_type = "foo"
 foo = 10
+bar = "baz"
     """
     )
     # Default config is applied
     assert Config.global_config.foo is None
-    assert Config.global_config.repository_type == "filesystem"
-
-    Config.configure_global_app()
-    assert Config.global_config.foo is None
-    assert Config.global_config.repository_type == "filesystem"
+    assert Config.global_config.bar is None
 
     # Code config is applied
-    Config.configure_global_app(repository_type="bar")
-    Config.configure_global_app(foo=-1)
-    assert Config.global_config.repository_type == "bar"
-    assert Config.global_config.foo == -1
+    Config.configure_global_app(foo="bar")
+    assert Config.global_config.foo == "bar"
+    assert Config.global_config.bar is None
 
     # File config is applied
     Config.load(file_config.filename)
-    assert Config.global_config.repository_type == "foo"
     assert Config.global_config.foo == 10
+    assert Config.global_config.bar == "baz"
 
 
 def test_override_default_configuration_with_multiple_configurations_including_environment_variable_values():
     file_config = NamedTemporaryFile(
         """
 [TAIPY]
-repository_type = "foo"
 att = "ENV[BAZ]"
     """
     )
 
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         # Default config is applied
-        assert Config.global_config.repository_type == "filesystem"
         assert Config.global_config.att is None
 
         # Code config is applied
-        Config.configure_global_app(repository_type="bar", att="ENV[FOO]")
-        assert Config.global_config.repository_type == "bar"
+        Config.configure_global_app(att="ENV[FOO]")
         assert Config.global_config.att == "bar"
 
         # File config is applied
         Config.load(file_config.filename)
-        assert Config.global_config.repository_type == "foo"
         assert Config.global_config.att == "qux"
