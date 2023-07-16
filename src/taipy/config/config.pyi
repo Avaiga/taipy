@@ -107,19 +107,11 @@ class Config:
 
     @classmethod
     @_ConfigBlocker._check()
-    def configure_global_app(
-        cls,
-        root_folder: str = None,
-        storage_folder: str = None,
-        **properties,
-    ) -> GlobalAppConfig:
+    def configure_global_app(cls, **properties) -> GlobalAppConfig:
         """Configure the global application.
 
         Parameters:
-            root_folder (Optional[str]): The path of the base folder for the Taipy application.
-            storage_folder (Optional[str]): The folder name used to store Taipy data.
-                It is used in conjunction with the root_folder field: the storage path is
-                "<root_folder><storage_folder>".
+            **properties (Dict[str, Any]): A dictionary of additional properties.
         Returns:
             The global application configuration.
         """
