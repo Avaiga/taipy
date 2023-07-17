@@ -181,7 +181,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
             values.properties = [...properties];
             setProperties([]);
             submit(actionEdit, false, values);
-            form.resetForm();
+            form.resetForm({values: {...emptyScenario, config: configs?.length === 1 ? configs[0][0] : ""}});
             close();
         },
     });
@@ -196,13 +196,13 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                       date: scenario[ScFProps.creation_date],
                       properties: [],
                   }
-                : emptyScenario
+                : {...emptyScenario, config: configs?.length === 1 ? configs[0][0] : ""}
         );
         setProperties(
             scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : []
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [scenario]);
+    }, [scenario, configs]);
 
     const onDeleteScenario = useCallback(() => {
         submit(actionEdit, true, { id: scenario && scenario[ScFProps.id] });
