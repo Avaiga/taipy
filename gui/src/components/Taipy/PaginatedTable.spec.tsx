@@ -537,6 +537,7 @@ describe("PaginatedTable Component", () => {
             payload: {
                 action: "onSelect",
                 args: [],
+                col: "int",
                 index: 1,
             },
             type: "SEND_ACTION_ACTION",

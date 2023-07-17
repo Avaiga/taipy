@@ -373,11 +373,12 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     );
 
     const onRowSelection: OnRowSelection = useCallback(
-        (rowIndex: number) =>
+        (rowIndex: number, colName: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
+                    col: colName,
                 })
             ),
         [dispatch, updateVarName, onAction, rows, startIndex, module]

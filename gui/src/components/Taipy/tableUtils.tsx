@@ -142,7 +142,7 @@ export interface OnRowDeletion {
 }
 
 export interface OnRowSelection {
-    (rowIndex: number): void;
+    (rowIndex: number, colName: string): void;
 }
 
 interface EditableCellProps {
@@ -323,9 +323,9 @@ export const EditableCell = (props: EditableCellProps) => {
     );
 
     const onSelect = useCallback(() => {
-        onSelection && onSelection(rowIndex);
+        onSelection && onSelection(rowIndex, colDesc.dfid);
         return false;
-    }, [onSelection, rowIndex]);
+    }, [onSelection, rowIndex, colDesc.dfid]);
 
     return (
         <TableCell {...getCellProps(colDesc, tableCellProps)} className={className} title={tooltip}>
