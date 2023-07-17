@@ -64,5 +64,5 @@ class Partial(_Page):
 
     def __copy(self, content: str) -> Partial:
         new_partial = Partial(self._route)
-        new_partial._renderer = type(self._renderer)(content) if self._renderer is not None else None
+        new_partial._renderer = type(self._renderer)(content=content) if self._renderer is not None else None
         return new_partial

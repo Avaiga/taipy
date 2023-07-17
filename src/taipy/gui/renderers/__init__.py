@@ -10,23 +10,95 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
+from abc import ABC, abstractmethod
+from os import path
 
 from ..page import Page
+from ..utils import _is_in_notebook, _varname_from_content
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-class _EmptyPage(Page):
-    def __init__(self) -> None:
-        super().__init__("<PageContent />")
+class _Renderer(Page, ABC):
+    def __init__(self, **kwargs) -> None:
+        """Initialize a new _Renderer with the indicated content.
 
-    def render(self, gui) -> str:
+        Arguments:
+            content (str): The text content or the path to the file holding the text to be transformed.
+
+        If *content* is a path to a readable file, the file is read entirely as the text template.
+        """
+        super().__init__(**kwargs)
+        content: str = kwargs.get("content", None)
+        if content is None:
+            raise ValueError("'content' argument is missing for class '_Renderer'")
+        if not isinstance(content, str):
+            raise ValueError(
+                f"'content' argument has incorrect type '{type(content).__name__}'. Property must be type of 'str'."
+            )
+        self._content = ""
+        self._filepath = ""
+        self.__process_content(content)
+
+    def __process_content(self, content: str) -> None:
+        if path.exists(content) and path.isfile(content):
+            return self.__parse_file_content(content)
+        if self._frame is not None:
+            frame_dir_path = path.dirname(path.abspath(self._frame.f_code.co_filename))
+            content_path = path.join(frame_dir_path, content)
+            if path.exists(content_path) and path.isfile(content_path):
+                return self.__parse_file_content(content_path)
+        self._content = content
+
+    def __parse_file_content(self, content):
+        with open(t.cast(str, content), "r") as f:
+            self._content = f.read()
+            # Save file path for error handling
+            self._filepath = content
+
+    def set_content(self, content: str) -> None:
+        """Set a new renderer content.
+
+        Reads the new renderer content and reinitializes the _Renderer instance to reflect the change.
+
+        !!! important
+            This function can only be used in an IPython notebook context.
+
+        Arguments:
+            content (str): The text content or the path to the file holding the text to be transformed.
+                If *content* is a path to a readable file, the file is read entirely as the text
+                template.
+
+        Exceptions:
+            RuntimeError: If this method is called outside an IPython notebook context.
+        """
+        if not _is_in_notebook():
+            raise RuntimeError("'set_content()' must be used in an IPython notebook context")
+        self.__process_content(content)
+
+    def _get_content_detail(self, gui: "Gui") -> str:
+        if self._filepath:
+            return f"in file '{self._filepath}'"
+        if varname := _varname_from_content(gui, self._content):
+            return f"in variable '{varname}'"
+        return ""
+
+    @abstractmethod
+    def render(self, gui: "Gui") -> str:
+        pass
+
+
+class _EmptyPage(_Renderer):
+    def __init__(self) -> None:
+        super().__init__(content="<PageContent />")
+
+    def render(self, gui: "Gui") -> str:
         return self._content
 
 
-class Markdown(Page):
+class Markdown(_Renderer):
     """
     Page generator for _Markdown_ text.
 
@@ -47,14 +119,15 @@ class Markdown(Page):
                 If _content_ is a path to a readable file, the file is read as the Markdown
                 template content.
         """
-        super().__init__(content, **kwargs)
+        kwargs["content"] = content
+        super().__init__(**kwargs)
 
     # Generate JSX from Markdown
-    def render(self, gui) -> str:
+    def render(self, gui: "Gui") -> str:
         return gui._markdown.convert(self._content)
 
 
-class Html(Page):
+class Html(_Renderer):
     """
     Page generator for _HTML_ text.
 
@@ -75,7 +148,8 @@ class Html(Page):
                 If _content_ is a path to a readable file, the file is read as the HTML
                 template content.
         """
-        super().__init__(content, **kwargs)
+        kwargs["content"] = content
+        super().__init__(**kwargs)
         self.head = None
 
     # Modify path routes
@@ -83,7 +157,7 @@ class Html(Page):
         self._content = self._content.replace("{{taipy_base_url}}", f"{base_url}")
 
     # Generate JSX from HTML
-    def render(self, gui) -> str:
+    def render(self, gui: "Gui") -> str:
         parser = _TaipyHTMLParser(gui)
         parser.feed_data(self._content)
         self.head = parser.head

@@ -1365,7 +1365,8 @@ class Gui:
         # Update locals context
         self.__locals_context.add(page._get_module_name(), page._get_locals())
         # Update variable directory
-        self.__var_dir.add_frame(page._frame)
+        if not page._is_class_module():
+            self.__var_dir.add_frame(page._frame)
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.

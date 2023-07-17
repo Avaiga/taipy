@@ -9,7 +9,7 @@ on:
 
 jobs:
   standard-packages:
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10', '3.11']
@@ -53,7 +53,7 @@ jobs:
 
 
   optional-packages:
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10', '3.11']
