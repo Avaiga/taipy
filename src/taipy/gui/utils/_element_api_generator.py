@@ -73,7 +73,7 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
 
     @staticmethod
     def createElementApi(
-        classname: str, element_name: str, ElementBaseClass: type[BlockElementApi | ControlElementApi]
+        classname: str, element_name: str, ElementBaseClass: t.Union[t.Type[BlockElementApi], t.Type[ControlElementApi]]
     ):
         return type(
             classname,
