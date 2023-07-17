@@ -45,7 +45,7 @@ class _Evaluator:
     __EXPR_EDGE_CASE_F_STRING = re.compile(r"[\{]*[a-zA-Z_][a-zA-Z0-9_]*:.+")
     __IS_TAIPYEXPR_RE = re.compile(r"TpExPr_(.*)")
 
-    def __init__(self, default_bindings: t.Dict[str, t.Any]) -> None:
+    def __init__(self, default_bindings: t.Dict[str, t.Any], shared_variable: t.List[str]) -> None:
         # key = expression, value = hashed value of the expression
         self.__expr_to_hash: t.Dict[str, str] = {}
         # key = hashed value of the expression, value = expression
@@ -62,6 +62,8 @@ class _Evaluator:
         self.__global_ctx = default_bindings
         # expr to holders
         self.__expr_to_holders: t.Dict[str, t.Set[t.Type[_TaipyBase]]] = {}
+        # shared variables between multiple clients
+        self.__shared_variable = shared_variable
 
     @staticmethod
     def _expr_decode(s: str):
@@ -72,6 +74,9 @@ class _Evaluator:
 
     def get_expr_from_hash(self, hash_val: str) -> str:
         return self.__hash_to_expr.get(hash_val, hash_val)
+
+    def get_shared_variables(self) -> t.List[str]:
+        return self.__shared_variable
 
     def _is_expression(self, expr: str) -> bool:
         return len(_Evaluator.__EXPR_IS_EXPR.findall(expr)) != 0
@@ -133,6 +138,14 @@ class _Evaluator:
                     lst.append(expr)
         if expr not in self.__expr_to_var_map:
             self.__expr_to_var_map[expr] = var_map
+        # save expr_hash to shared variable if valid
+        for encoded_var_name in var_map.values():
+            var_name, module_name = _variable_decode(encoded_var_name)
+            # only variables in the main module with be taken into account
+            if module_name is not None and module_name != gui._get_default_module_name():
+                continue
+            if var_name in self.__shared_variable:
+                self.__shared_variable.append(expr_hash)
         return expr_hash
 
     def evaluate_bind_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> str:

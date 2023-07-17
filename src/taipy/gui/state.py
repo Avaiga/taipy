@@ -77,6 +77,7 @@ class State:
     )
     __methods = (
         "assign",
+        "broadcast",
         "refresh",
         "_set_context",
         "_reset_context",
@@ -208,6 +209,19 @@ class State:
         """
         val = attrgetter(name)(self)
         _attrsetter(self, name, val)
+
+    def broadcast(self, name: str, value: t.Any):
+        """Update a variable on all clients.
+
+        Arguments:
+            name (str): The variable name to update.
+            value (Any): The new variable value.
+        """
+        gui: "Gui" = super().__getattribute__(State.__gui_attr)
+        set_context = self._set_context(gui)
+        encoded_name = gui._bind_var(name)
+        gui._broadcast_all_clients(encoded_name, value)
+        self._reset_context(gui, set_context)
 
     def __enter__(self):
         super().__getattribute__(State.__attrs[0]).__enter__()
