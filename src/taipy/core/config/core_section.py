@@ -264,14 +264,15 @@ class CoreSection(UniqueSection):
         """Configure the Core service.
 
         Parameters:
-            root_folder (Optional[str]): Path of the base folder for the taipy application. The default value is "./taipy/"
-            storage_folder (Optional[str]): Folder name used to store Taipy data. The default value is ".data/". It is used in
-                conjunction with the `root_folder` field. That means the storage path is <root_folder><storage_folder>
-                (The default path is "./taipy/.data/").
+            root_folder (Optional[str]): Path of the base folder for the taipy application.
+                The default value is "./taipy/"
+            storage_folder (Optional[str]): Folder name used to store Taipy data. The default value is ".data/".
+                It is used in conjunction with the `root_folder` field. That means the storage path is
+                <root_folder><storage_folder> (The default path is "./taipy/.data/").
             repository_type (Optional[str]): The type of the repository to be used to store Taipy data.
                 The default value is "filesystem".
-            repository_properties (Optional[Dict[str, Union[str, int]]]): A dictionary of additional properties to be used
-                by the repository.
+            repository_properties (Optional[Dict[str, Union[str, int]]]): A dictionary of additional properties
+                to be used by the repository.
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"*, *"experiment"*, or *"production"*.
             version_number (Optional[str]): The string identifier of the version.
