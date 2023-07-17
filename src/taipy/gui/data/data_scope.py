@@ -47,14 +47,6 @@ class _DataScopes:
     def get_all_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__scopes
 
-    def broadcast_data(self, name, value):
-        if self.__single_client:
-            return
-        if not self.__client_id:
-            for _, v in self.__scopes.items():
-                if hasattr(v, name):
-                    setattr(v, name, value)
-
     def create_scope(self, id: str) -> None:
         if self.__single_client:
             return

@@ -198,6 +198,13 @@ class _PandasDataAccessor(_DataAccessor):
             return ret_dict
         return None
 
+    @staticmethod
+    def __add_index_col(value: pd.DataFrame, columns: t.List[str]):
+        if _PandasDataAccessor.__INDEX_COL not in value.columns:
+            value[_PandasDataAccessor.__INDEX_COL] = value.index
+        if _PandasDataAccessor.__INDEX_COL not in columns:
+            columns.append(_PandasDataAccessor.__INDEX_COL)
+
     def __get_data(  # noqa: C901
         self,
         gui: Gui,
@@ -231,6 +238,7 @@ class _PandasDataAccessor(_DataAccessor):
                     query += " and "
                 query += f"`{col}`{right}"
             try:
+                self.__add_index_col(value, columns)
                 value = value.query(query)
             except Exception as e:
                 _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}:\n{e}")
@@ -287,10 +295,7 @@ class _PandasDataAccessor(_DataAccessor):
                         # reverse order
                         new_indexes = new_indexes[::-1]
                     new_indexes = new_indexes[slice(start, end + 1)]
-                    if _PandasDataAccessor.__INDEX_COL not in value.columns:
-                        value[_PandasDataAccessor.__INDEX_COL] = value.index
-                    if _PandasDataAccessor.__INDEX_COL not in columns:
-                        columns.append(_PandasDataAccessor.__INDEX_COL)
+                    self.__add_index_col(value, columns)
                 except Exception:
                     _warn(f"Cannot sort {var_name} on columns {order_by}.")
                     new_indexes = slice(start, end + 1)  # type: ignore

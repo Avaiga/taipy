@@ -9,12 +9,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+# flake8: noqa: E402
 import contextlib
 import typing as t
+import warnings
 from threading import Thread
 from urllib.parse import quote as urlquote
 from urllib.parse import urlparse
 
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    message="You do not have a working installation of the service_identity module: 'No module named 'service_identity''.*",
+)
 from twisted.internet import reactor
 from twisted.web.proxy import ProxyClient, ProxyClientFactory
 from twisted.web.resource import Resource
