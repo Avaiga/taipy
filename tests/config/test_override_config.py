@@ -50,37 +50,28 @@ def test_override_default_configuration_with_code_configuration():
 
 def test_override_default_config_with_code_config_including_env_variable_values():
     Config.configure_global_app()
-    assert not Config.global_config.clean_entities_enabled
-    Config.configure_global_app(clean_entities_enabled=True)
-    assert Config.global_config.clean_entities_enabled
+    assert Config.global_config.foo is None
+    Config.configure_global_app(foo="bar")
+    assert Config.global_config.foo == "bar"
 
-    with mock.patch.dict(os.environ, {"ENV_VAR": "False"}):
-        Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
-        assert not Config.global_config.clean_entities_enabled
-
-    with mock.patch.dict(os.environ, {"ENV_VAR": "true"}):
-        Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
-        assert Config.global_config.clean_entities_enabled
-
-    with mock.patch.dict(os.environ, {"ENV_VAR": "foo"}):
-        with pytest.raises(InconsistentEnvVariableError):
-            Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
-            Config.global_config.clean_entities_enabled
+    with mock.patch.dict(os.environ, {"FOO": "foo"}):
+        Config.configure_global_app(foo="ENV[FOO]")
+        assert Config.global_config.foo == "foo"
 
 
 def test_override_default_configuration_with_file_configuration():
     tf = NamedTemporaryFile(
         """
 [TAIPY]
-clean_entities_enabled = true
+foo = "bar"
 
 """
     )
-    assert not Config.global_config.clean_entities_enabled
+    assert Config.global_config.foo is None
 
     Config.load(tf.filename)
 
-    assert Config.global_config.clean_entities_enabled
+    assert Config.global_config.foo == "bar"
 
 
 def test_override_default_config_with_file_config_including_env_variable_values():
@@ -169,50 +160,41 @@ def test_override_default_configuration_with_multiple_configurations():
     file_config = NamedTemporaryFile(
         """
 [TAIPY]
-clean_entities_enabled = false
 foo = 10
+bar = "baz"
     """
     )
     # Default config is applied
     assert Config.global_config.foo is None
-    assert Config.global_config.clean_entities_enabled is False
-
-    Config.configure_global_app()
-    assert Config.global_config.foo is None
-    assert Config.global_config.clean_entities_enabled is False
+    assert Config.global_config.bar is None
 
     # Code config is applied
-    Config.configure_global_app(clean_entities_enabled=True)
-    Config.configure_global_app(foo=-1)
-    assert Config.global_config.clean_entities_enabled is True
-    assert Config.global_config.foo == -1
+    Config.configure_global_app(foo="bar")
+    assert Config.global_config.foo == "bar"
+    assert Config.global_config.bar is None
 
     # File config is applied
     Config.load(file_config.filename)
-    assert Config.global_config.clean_entities_enabled is False
     assert Config.global_config.foo == 10
+    assert Config.global_config.bar == "baz"
 
 
 def test_override_default_configuration_with_multiple_configurations_including_environment_variable_values():
     file_config = NamedTemporaryFile(
         """
 [TAIPY]
-clean_entities_enabled = false
 att = "ENV[BAZ]"
     """
     )
 
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         # Default config is applied
-        assert Config.global_config.clean_entities_enabled is False
         assert Config.global_config.att is None
 
         # Code config is applied
-        Config.configure_global_app(clean_entities_enabled=True, att="ENV[FOO]")
-        assert Config.global_config.clean_entities_enabled is True
+        Config.configure_global_app(att="ENV[FOO]")
         assert Config.global_config.att == "bar"
 
         # File config is applied
         Config.load(file_config.filename)
-        assert Config.global_config.clean_entities_enabled is False
         assert Config.global_config.att == "qux"
