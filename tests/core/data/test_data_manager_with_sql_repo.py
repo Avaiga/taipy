@@ -122,15 +122,25 @@ class TestDataManager:
                     )
                 )
 
+        _VersionManager._set_experiment_version("1.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_1"}])) == 1
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_6"}])) == 0
+
         _VersionManager._set_development_version("1.0")
         assert len(_DataManager._get_all()) == 5
-        assert len(_DataManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "1.0"}])) == 1
-        assert len(_DataManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "1.0"}])) == 0
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_1"}])) == 1
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_6"}])) == 0
+
+        _VersionManager._set_experiment_version("2.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_1"}])) == 0
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_6"}])) == 1
 
         _VersionManager._set_development_version("2.0")
         assert len(_DataManager._get_all()) == 5
-        assert len(_DataManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "2.0"}])) == 0
-        assert len(_DataManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "2.0"}])) == 1
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_1"}])) == 0
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_6"}])) == 1
 
     def test_set(self, init_sql_repo):
         init_managers()

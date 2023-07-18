@@ -209,7 +209,12 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _get_all_by_cycle(cls, cycle: Cycle) -> List[Scenario]:
         filters = cls._build_filters_with_version("all")
-        return cls._get_all_by({"cycle": cycle.id}, filters)
+
+        if not filters:
+            filters = [{}]
+        for fil in filters:
+            fil.update({"cycle": cycle.id})
+        return cls._get_all_by(filters)
 
     @classmethod
     def _get_primary_scenarios(cls) -> List[Scenario]:
