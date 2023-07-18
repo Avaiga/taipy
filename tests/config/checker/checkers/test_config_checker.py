@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import logging
 from unittest import mock
 
@@ -23,7 +24,7 @@ class MyCustomChecker(_ConfigChecker):
 
 
 def test__error():
-    with mock.patch.object(logging.Logger, 'error') as error_message:
+    with mock.patch.object(logging.Logger, "error"):
         collector = IssueCollector()
         assert len(collector.all) == 0
         _ConfigChecker(_Config(), collector)._error("field", 17, "my message")

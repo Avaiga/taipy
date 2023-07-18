@@ -8,17 +8,17 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from typing import List
 
 from ._checkers._config_checker import _ConfigChecker
-from ._checkers._global_config_checker import _GlobalConfigChecker
 from .issue_collector import IssueCollector
 
 
 class _Checker:
     """Holds the various checkers to perform on the config."""
 
-    _checkers: List[_ConfigChecker] = [_GlobalConfigChecker]  # type: ignore
+    _checkers: List[_ConfigChecker] = []
 
     @classmethod
     def _check(cls, _applied_config):
