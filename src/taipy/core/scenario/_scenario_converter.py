@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Set, Union
 
 from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
@@ -30,9 +30,10 @@ class _ScenarioConverter(_AbstractConverter):
         return _ScenarioModel(
             id=scenario.id,
             config_id=scenario.config_id,
-            tasks=[task.id if isinstance(task, Task) else TaskId(str(task)) for task in scenario._tasks],
+            tasks=[task.id if isinstance(task, Task) else TaskId(str(task)) for task in list(scenario._tasks)],
             additional_data_nodes=[
-                dn.id if isinstance(dn, DataNode) else DataNodeId(str(dn)) for dn in scenario._additional_data_nodes
+                dn.id if isinstance(dn, DataNode) else DataNodeId(str(dn))
+                for dn in list(scenario._additional_data_nodes)  # type: ignore
             ],
             properties=scenario._properties.data,
             creation_date=scenario._creation_date.isoformat(),
@@ -48,7 +49,7 @@ class _ScenarioConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _ScenarioModel) -> Scenario:
-        tasks = None
+        tasks: Union[Set[TaskId], Set[Task], Set]
         if model.tasks:
             tasks = set(model.tasks)
         else:

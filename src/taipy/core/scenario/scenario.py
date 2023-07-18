@@ -74,7 +74,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def __init__(
         self,
         config_id: str,
-        tasks: Union[Set[TaskId], Set[Task]],
+        tasks: Optional[Union[Set[TaskId], Set[Task]]],
         properties: Dict[str, Any],
         additional_data_nodes: Optional[Union[Set[DataNodeId], Set[DataNode]]] = None,
         scenario_id: Optional[ScenarioId] = None,
@@ -90,15 +90,17 @@ class Scenario(_Entity, _Submittable, _Labeled):
         self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
 
-        self._tasks = tasks or set()
-        self._additional_data_nodes = additional_data_nodes or set()
+        self._tasks: Union[Set[TaskId], Set[Task], Set] = tasks or set()
+        self._additional_data_nodes: Optional[Union[Set[DataNodeId], Set[DataNode], Set]] = (
+            additional_data_nodes or set()
+        )
 
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
         self._primary_scenario = is_primary
         self._tags = tags or set()
         self._properties = _Properties(self, **properties)
-        self._pipelines = pipelines or []
+        self._pipelines: Union[List[Pipeline], List] = pipelines or []
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
@@ -109,7 +111,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
     @staticmethod
     def _get_set_of_tasks_from_pipelines(
         pipelines: Union[List[PipelineId], List[Pipeline]]
-    ) -> Union[Set[Task], Set[TaskId]]:
+    ) -> Union[Set[Task], Set[TaskId], Set]:
         tasks = set()
 
         pipeline_manager = _PipelineManagerFactory._build_manager()
@@ -168,13 +170,13 @@ class Scenario(_Entity, _Submittable, _Labeled):
     def add_pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
         _pipelines = list(self.pipelines.values())
         _pipelines.extend(pipelines)
-        self.pipelines = _pipelines
+        self.pipelines = _pipelines  # type: ignore
 
     def remove_pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
         _pipelines = list(self.pipelines.values())
         for pipeline in pipelines:
             _pipelines.remove(pipeline)
-        self.pipelines = _pipelines
+        self.pipelines = _pipelines  # type: ignore
 
     def __get_pipelines(self) -> Dict[str, Pipeline]:
         _pipelines = {}

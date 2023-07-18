@@ -781,4 +781,60 @@ def test_get_inputs():
     _assert_equal(scenario_8._get_sorted_tasks(), [[task_5, task_2, task_1], [task_3, task_4]])
 
 
-# TODO: add tests for sequences
+def test_add_and_remove_pipelines():
+    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
+    data_node_3 = InMemoryDataNode("qux", Scope.SCENARIO, "s3")
+    data_node_4 = InMemoryDataNode("quux", Scope.SCENARIO, "s4")
+    data_node_5 = InMemoryDataNode("quuz", Scope.SCENARIO, "s5")
+    task_1 = Task(
+        "grault",
+        {},
+        print,
+        [data_node_1, data_node_2],
+        [data_node_3],
+        TaskId("t1"),
+    )
+    task_2 = Task("garply", {}, print, output=[data_node_3], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_3], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_3], [data_node_4], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_5], [data_node_3], TaskId("t5"))
+    pipeline_1 = Pipeline("upin", {}, [task_1], PipelineId("p1"))
+    pipeline_2 = Pipeline("ipin", {}, [task_1, task_2], PipelineId("p2"))
+    pipeline_3 = Pipeline("rask", {}, [task_1, task_5, task_3], PipelineId("p3"))
+    scenario_1 = Scenario("quest", [task_1, task_2, task_3, task_4, task_5], {}, [], scenario_id=ScenarioId("s1"))
+
+    task_manager = _TaskManagerFactory._build_manager()
+    data_manager = _DataManagerFactory._build_manager()
+    pipeline_manager = _PipelineManagerFactory._build_manager()
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    for dn in [data_node_1, data_node_2, data_node_3, data_node_4, data_node_5]:
+        data_manager._set(dn)
+    for t in [task_1, task_2, task_3, task_4, task_5]:
+        task_manager._set(t)
+    for p in [pipeline_1, pipeline_2, pipeline_3]:
+        pipeline_manager._set(p)
+    scenario_manager._set(scenario_1)
+
+    assert scenario_1._get_inputs() == {data_node_1, data_node_2, data_node_5}
+    assert scenario_1._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
+    assert len(scenario_1.pipelines) == 0
+
+    scenario_1.pipelines = [pipeline_1]
+    assert scenario_1.pipelines == {pipeline_1.config_id: pipeline_1}
+
+    scenario_1.add_pipelines([pipeline_2])
+    assert scenario_1.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
+
+    scenario_1.remove_pipelines([pipeline_1])
+    assert scenario_1.pipelines == {pipeline_2.config_id: pipeline_2}
+
+    scenario_1.add_pipelines([pipeline_1, pipeline_3])
+    assert scenario_1.pipelines == {
+        pipeline_2.config_id: pipeline_2,
+        pipeline_1.config_id: pipeline_1,
+        pipeline_3.config_id: pipeline_3,
+    }
+
+    scenario_1.remove_pipelines([pipeline_2, pipeline_3])
+    assert scenario_1.pipelines == {pipeline_1.config_id: pipeline_1}

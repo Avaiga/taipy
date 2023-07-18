@@ -19,6 +19,7 @@ from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
 from taipy.config.section import Section
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from .data_node_config import DataNodeConfig
 from .pipeline_config import PipelineConfig
@@ -49,6 +50,7 @@ class ScenarioConfig(Section):
     _FREQUENCY_KEY = "frequency"
     _SEQUENCES_KEY = "sequences"
     _COMPARATOR_KEY = "comparators"
+    __logger = _TaipyLogger._get_logger()
 
     def __init__(
         self,
@@ -74,7 +76,7 @@ class ScenarioConfig(Section):
         else:
             self._additional_data_nodes = []
 
-        self.sequences = {}
+        self.sequences: Dict[str, List[TaskConfig]] = {}
         self.frequency = frequency
         self.comparators = defaultdict(list)
 
@@ -164,9 +166,10 @@ class ScenarioConfig(Section):
             task_config_ids = as_dict.pop(cls._TASKS_KEY, list())
             tasks = cls.__get_task_configs(task_config_ids, config)
         else:
-            # TODO: logger log migration
-            # Check if pipeline configs exist, if yes, migrate by getting all task configs and ignore pipeline configs
             pipeline_config_ids = as_dict.pop(cls._PIPELINES_KEY, list())
+            cls.__logger.info(
+                f"The tasks from these PipelineConfig {pipeline_config_ids} will be migrated to be directly under ScenarioConfig {id}"
+            )
             tasks = cls.__get_task_configs_from_pipeline_configs(pipeline_config_ids, config)
 
         additional_data_node_ids = as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, list())

@@ -707,14 +707,12 @@ def get_parents(
 
     parents = {get(parent) for parent in entity.parent_ids}  # type: ignore
 
-    # TODO: pipeline migration
-
     if isinstance(entity, Pipeline):
         parent_entity_key = "scenarios"
         update_parent_dict(parents, parent_dict, parent_entity_key)
 
     if isinstance(entity, Task):
-        parent_entity_key = "pipelines"
+        parent_entity_key = "scenarios"
         update_parent_dict(parents, parent_dict, parent_entity_key)
         for parent in parent_dict[parent_entity_key]:
             get_parents(parent, parent_dict)

@@ -212,6 +212,66 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.warnings) == 0
         assert len(Config._collector.infos) == 0
 
+    def test_check_additional_data_node_configs_not_in_task_input_output_data_nodes(self, caplog):
+
+        Config._collector = IssueCollector()
+        config = Config._applied_config
+        Config._compile_configs()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        input_dn_config = DataNodeConfig("input_dn")
+        output_dn_config = DataNodeConfig("output_dn")
+        config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
+        config._sections[ScenarioConfig.name]["new"]._tasks = [
+            TaskConfig("bar", print, [input_dn_config], [output_dn_config])
+        ]
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [input_dn_config]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_message = (
+            "The additional data node `input_dn` in additional_data_nodes field of ScenarioConfig "
+            "`new` has already existed as an input or output data node of ScenarioConfig `new` tasks."
+        )
+        assert expected_error_message in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [input_dn_config, output_dn_config]
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 2
+        expected_error_message_1 = (
+            "The additional data node `input_dn` in additional_data_nodes field of ScenarioConfig "
+            "`new` has already existed as an input or output data node of ScenarioConfig `new` tasks."
+        )
+        expected_error_message_2 = (
+            "The additional data node `output_dn` in additional_data_nodes field of ScenarioConfig "
+            "`new` has already existed as an input or output data node of ScenarioConfig `new` tasks."
+        )
+        assert expected_error_message_1 in caplog.text
+        assert expected_error_message_2 in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [DataNodeConfig("bar")]
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
     def test_check_frequency(self, caplog):
         config = Config._applied_config
         Config._compile_configs()
