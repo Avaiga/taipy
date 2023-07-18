@@ -197,7 +197,6 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
 sequence1 = [ "test_task:SECTION",]
 """.strip()
 
-    Config.configure_global_app(clean_entities_enabled=True)
     config_test_scenario()
 
     tf = NamedTemporaryFile()
@@ -292,9 +291,7 @@ sequence1 = [ "test_task:SECTION",]
 def test_read_write_json_configuration_file():
     expected_json_config = """
 {
-"TAIPY": {
-"clean_entities_enabled": "True:bool",
-},
+"TAIPY": {},
 "JOB": {
 "mode": "development",
 "max_nb_of_workers": "1:int"
@@ -397,7 +394,6 @@ def test_read_write_json_configuration_file():
     """.strip()
 
     Config._serializer = _JsonSerializer()
-    Config.configure_global_app(clean_entities_enabled=True)
     config_test_scenario()
 
     tf = NamedTemporaryFile()
