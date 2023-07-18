@@ -171,4 +171,4 @@ def test_pipeline_config_configure_deprecated():
         Config.configure_pipeline("pipeline_id", [])
 
     with pytest.warns(DeprecationWarning):
-        Config.configure_default_pipeline([])
+        Config.set_default_pipeline_configuration([])

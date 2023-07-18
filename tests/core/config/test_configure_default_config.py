@@ -17,33 +17,33 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
-def test_configure_default_data_node():
+def test_set_default_data_node_configuration():
     data_node1 = Config.configure_data_node(id="input_data1")
     assert data_node1.storage_type == "pickle"
     assert data_node1.scope == Scope.SCENARIO
     assert data_node1.validity_period is None
 
-    Config.configure_default_data_node("in_memory", scope=Scope.GLOBAL)
+    Config.set_default_data_node_configuration("in_memory", scope=Scope.GLOBAL)
     data_node2 = Config.configure_data_node(id="input_data2")
     assert data_node2.storage_type == "in_memory"
     assert data_node2.scope == Scope.GLOBAL
     assert data_node2.validity_period is None
 
-    Config.configure_default_data_node("csv")
+    Config.set_default_data_node_configuration("csv")
     data_node3 = Config.configure_data_node(id="input_data3")
     assert data_node3.storage_type == "csv"
     assert data_node3.scope == Scope.SCENARIO
     assert data_node3.validity_period is None
 
-    Config.configure_default_data_node("json", validity_period=timedelta(1))
+    Config.set_default_data_node_configuration("json", validity_period=timedelta(1))
     data_node4 = Config.configure_data_node(id="input_data4")
     assert data_node4.storage_type == "json"
     assert data_node4.scope == Scope.SCENARIO
     assert data_node4.validity_period == timedelta(1)
 
 
-def test_configure_default_data_node_replace_old_default_config():
-    Config.configure_default_data_node(
+def test_set_default_data_node_configuration_replace_old_default_config():
+    Config.set_default_data_node_configuration(
         "in_memory",
         prop1="1",
         prop2="2",
@@ -52,7 +52,7 @@ def test_configure_default_data_node_replace_old_default_config():
     dn1 = Config.configure_data_node(id="dn1")
     assert len(dn1.properties) == 3
 
-    Config.configure_default_data_node(
+    Config.set_default_data_node_configuration(
         "csv",
         prop4="4",
         prop5="5",
@@ -70,7 +70,7 @@ def test_configure_default_data_node_replace_old_default_config():
 
 
 def test_config_storage_type_different_from_default_data_node():
-    Config.configure_default_data_node(
+    Config.set_default_data_node_configuration(
         storage_type="pickle",
         custom_property={"foo": "bar"},
         scope=Scope.GLOBAL,
@@ -84,8 +84,8 @@ def test_config_storage_type_different_from_default_data_node():
     assert csv_dn.scope == Scope.SCENARIO
 
 
-def test_configure_default_csv_data_node():
-    Config.configure_default_data_node(
+def test_set_default_csv_data_node_configuration():
+    Config.set_default_data_node_configuration(
         storage_type="csv",
         default_path="default.csv",
         has_header=False,
@@ -131,14 +131,14 @@ def test_configure_default_csv_data_node():
     assert dn3.validity_period == timedelta(1)
 
 
-def test_configure_default_json_data_node():
+def test_set_default_json_data_node_configuration():
     class MyCustomEncoder(json.JSONEncoder):
         ...
 
     class MyCustomDecoder(json.JSONDecoder):
         ...
 
-    Config.configure_default_data_node(
+    Config.set_default_data_node_configuration(
         storage_type="json",
         default_path="default.json",
         encoder=MyCustomEncoder,
@@ -183,8 +183,8 @@ def test_configure_default_json_data_node():
     assert dn3.validity_period == timedelta(1)
 
 
-def test_configure_default_parquet_data_node():
-    Config.configure_default_data_node(
+def test_set_default_parquet_data_node_configuration():
+    Config.set_default_data_node_configuration(
         storage_type="parquet",
         default_path="default.parquet",
         compression="gzip",
@@ -244,8 +244,8 @@ def test_configure_default_parquet_data_node():
     assert dn3.validity_period == timedelta(1)
 
 
-def test_configure_default_excel_data_node():
-    Config.configure_default_data_node(
+def test_set_default_excel_data_node_configuration():
+    Config.set_default_data_node_configuration(
         storage_type="excel",
         default_path="default.xlsx",
         has_header=False,
@@ -294,8 +294,8 @@ def test_configure_default_excel_data_node():
     assert dn3.validity_period == timedelta(1)
 
 
-def test_configure_default_pickle_data_node():
-    Config.configure_default_data_node(
+def test_set_default_pickle_data_node_configuration():
+    Config.set_default_data_node_configuration(
         storage_type="pickle",
         default_data=1,
         exposed_type="numpy",
@@ -340,8 +340,8 @@ def test_configure_default_pickle_data_node():
     assert dn3.validity_period == timedelta(1)
 
 
-def test_configure_default_sql_table_data_node():
-    Config.configure_default_data_node(
+def test_set_default_sql_table_data_node_configuration():
+    Config.set_default_data_node_configuration(
         storage_type="sql_table",
         db_username="default_user",
         db_password="default_pwd",
@@ -419,11 +419,11 @@ def test_configure_default_sql_table_data_node():
     assert dn3.validity_period == timedelta(1)
 
 
-def test_configure_default_sql_data_node():
+def test_set_default_sql_data_node_configuration():
     def query_builder():
         ...
 
-    Config.configure_default_data_node(
+    Config.set_default_data_node_configuration(
         storage_type="sql",
         db_username="default_user",
         db_password="default_pwd",
@@ -503,8 +503,8 @@ def test_configure_default_sql_data_node():
     assert dn3.validity_period == timedelta(1)
 
 
-def test_configure_default_mongo_collection_data_node():
-    Config.configure_default_data_node(
+def test_set_default_mongo_collection_data_node_configuration():
+    Config.set_default_data_node_configuration(
         storage_type="mongo_collection",
         db_name="default_db_name",
         collection_name="default_collection",

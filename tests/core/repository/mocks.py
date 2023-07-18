@@ -87,7 +87,7 @@ class MockFSRepository(_FileSystemRepository):
 
     @property
     def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
+        return pathlib.Path(Config.core.storage_folder)  # type: ignore
 
 
 def create_database(engine):

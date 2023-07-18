@@ -205,47 +205,67 @@ def test_auto_set_and_reload(current_datetime, job_id):
 
     job_2 = _JobManager._get(job_1, "submit_id_2")
 
+    # auto set & reload on task attribute
     assert job_1.task.id == task_1.id
+    assert job_2.task.id == task_1.id
     job_1.task = task_2
     assert job_1.task.id == task_2.id
-    assert job_1.task.id == task_2.id
+    assert job_2.task.id == task_2.id
+    job_2.task = task_1
+    assert job_1.task.id == task_1.id
+    assert job_2.task.id == task_1.id
 
+    # auto set & reload on force attribute
     assert not job_1.force
+    assert not job_2.force
     job_1.force = True
     assert job_1.force
     assert job_2.force
+    job_2.force = False
+    assert not job_1.force
+    assert not job_2.force
 
+    # auto set & reload on status attribute
     assert job_1.status == Status.SUBMITTED
-    job_1.status = Status.BLOCKED
+    assert job_2.status == Status.SUBMITTED
+    job_1.status = Status.CANCELED
+    assert job_1.status == Status.CANCELED
+    assert job_2.status == Status.CANCELED
+    job_2.status = Status.BLOCKED
     assert job_1.status == Status.BLOCKED
     assert job_2.status == Status.BLOCKED
 
+    # auto set & reload on creation_date attribute
     new_datetime = current_datetime + timedelta(1)
-    job_1.creation_date = new_datetime
+    new_datetime_1 = current_datetime + timedelta(1)
+    job_1.creation_date = new_datetime_1
+    assert job_1.creation_date == new_datetime_1
+    assert job_2.creation_date == new_datetime_1
+    job_2.creation_date = new_datetime
     assert job_1.creation_date == new_datetime
     assert job_2.creation_date == new_datetime
 
     with job_1 as job:
-        assert job.task.id == task_2.id
-        assert job.force
+        assert job.task.id == task_1.id
+        assert not job.force
         assert job.status == Status.BLOCKED
         assert job.creation_date == new_datetime
         assert job._is_in_context
 
         new_datetime_2 = new_datetime + timedelta(1)
-        job.task = task_1
-        job.force = False
+        job.task = task_2
+        job.force = True
         job.status = Status.COMPLETED
         job.creation_date = new_datetime_2
 
-        assert job.task.id == task_2.id
-        assert job.force
+        assert job.task.id == task_1.id
+        assert not job.force
         assert job.status == Status.BLOCKED
         assert job.creation_date == new_datetime
         assert job._is_in_context
 
-    assert job_1.task.id == task_1.id
-    assert not job_1.force
+    assert job_1.task.id == task_2.id
+    assert job_1.force
     assert job_1.status == Status.COMPLETED
     assert job_1.creation_date == new_datetime_2
     assert not job_1._is_in_context

@@ -35,8 +35,7 @@ def init_managers():
 
 
 class TestDataManager:
-    def test_create_data_node_and_modify_properties_does_not_modify_config(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_create_data_node_and_modify_properties_does_not_modify_config(self, init_sql_repo):
         init_managers()
 
         dn_config = Config.configure_data_node(id="name", foo="bar")
@@ -51,16 +50,14 @@ class TestDataManager:
         assert dn.properties.get("foo") == "bar"
         assert dn.properties.get("baz") == "qux"
 
-    def test_create_raises_exception_with_wrong_type(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_create_raises_exception_with_wrong_type(self, init_sql_repo):
         init_managers()
 
         wrong_type_dn_config = DataNodeConfig(id="foo", storage_type="bar", scope=DataNodeConfig._DEFAULT_SCOPE)
         with pytest.raises(InvalidDataNodeType):
             _DataManager._create_and_set(wrong_type_dn_config, None, None)
 
-    def test_create_from_same_config_generates_new_data_node_and_new_id(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_create_from_same_config_generates_new_data_node_and_new_id(self, init_sql_repo):
         init_managers()
 
         dn_config = Config.configure_data_node(id="foo", storage_type="in_memory")
@@ -68,8 +65,7 @@ class TestDataManager:
         dn_2 = _DataManager._create_and_set(dn_config, None, None)
         assert dn_2.id != dn.id
 
-    def test_create_uses_overridden_attributes_in_config_file(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_create_uses_overridden_attributes_in_config_file(self, init_sql_repo):
         init_managers()
 
         Config.override(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
@@ -88,15 +84,13 @@ class TestDataManager:
         assert csv_dn._path == "bar"
         assert csv_dn.has_header
 
-    def test_get_if_not_exists(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_get_if_not_exists(self, init_sql_repo):
         init_managers()
 
         with pytest.raises(ModelNotFound):
             _DataManager._repository._load("test_data_node_2")
 
-    def test_get_all(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_get_all(self, init_sql_repo):
         init_managers()
 
         _DataManager._delete_all()
@@ -111,8 +105,7 @@ class TestDataManager:
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "foo"]) == 1
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
 
-    def test_get_all_on_multiple_versions_environment(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_get_all_on_multiple_versions_environment(self, init_sql_repo):
         init_managers()
 
         # Create 5 data nodes with 2 versions each
@@ -139,8 +132,7 @@ class TestDataManager:
         assert len(_DataManager._get_all_by({"config_id": "config_id_1"}, filters=[{"version": "2.0"}])) == 0
         assert len(_DataManager._get_all_by({"config_id": "config_id_6"}, filters=[{"version": "2.0"}])) == 1
 
-    def test_set(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_set(self, init_sql_repo):
         init_managers()
 
         dn = InMemoryDataNode(
@@ -168,8 +160,7 @@ class TestDataManager:
         assert dn.config_id == "foo"
         assert _DataManager._get(dn.id).config_id == "foo"
 
-    def test_delete(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_delete(self, init_sql_repo):
         init_managers()
         _DataManager._delete_all()
 
@@ -193,11 +184,10 @@ class TestDataManager:
         assert len(_DataManager._get_all()) == 0
         assert not any(_DataManager._exists(dn.id) for dn in [dn_2, dn_3])
 
-    def test_get_or_create(self):
+    def test_get_or_create(self, init_sql_repo):
         def _get_or_create_dn(config, *args):
             return _DataManager._bulk_get_or_create([config], *args)[config]
 
-        Config.configure_global_app(repository_type="sql")
         init_managers()
 
         global_dn_config = Config.configure_data_node(
@@ -258,8 +248,7 @@ class TestDataManager:
         assert cycle_dn_3.id == cycle_dn_4.id
         assert cycle_dn_4.id == cycle_dn_5.id
 
-    def test_get_tasks_by_config_id(self):
-        Config.configure_global_app(repository_type="sql")
+    def test_get_tasks_by_config_id(self, init_sql_repo):
         init_managers()
 
         dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)

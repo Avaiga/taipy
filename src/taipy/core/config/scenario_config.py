@@ -209,13 +209,13 @@ class ScenarioConfig(Section):
         return Config.sections[ScenarioConfig.name][id]
 
     @staticmethod
-    def _configure_default(
+    def _set_default_configuration(
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ) -> "ScenarioConfig":
-        """Configure the default values for scenario configurations.
+        """Set the default values for scenario configurations.
 
         This function creates the *default scenario configuration* object,
         where all scenario configuration objects will find their default

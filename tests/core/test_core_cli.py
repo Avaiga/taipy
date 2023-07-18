@@ -349,7 +349,7 @@ def test_force_override_experiment_version():
 
     # Update Config singleton to simulate conflict Config between versions
     Config.unblock_update()
-    Config.configure_global_app(clean_entities_enabled=True)
+    Config.configure_global_app(foo="bar")
 
     # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
@@ -399,7 +399,7 @@ def test_force_override_production_version():
 
     # Update Config singleton to simulate conflict Config between versions
     Config.unblock_update()
-    Config.configure_global_app(clean_entities_enabled=True)
+    Config.configure_global_app(foo="bar")
 
     # Without --taipy-force parameter, a SystemExit will be raised
     with pytest.raises(SystemExit):
@@ -536,9 +536,8 @@ def test_modify_config_properties_without_force(caplog):
     assert 'DATA_NODE "d0" was removed' in error_message
 
     assert 'DATA_NODE "d2" has attribute "default_path" modified' in error_message
-    assert 'Global Configuration "root_folder" was modified' in error_message
-    assert 'Global Configuration "clean_entities_enabled" was modified' in error_message
-    assert 'Global Configuration "repository_type" was modified' in error_message
+    assert 'CORE "root_folder" was modified' in error_message
+    assert 'CORE "repository_type" was modified' in error_message
     assert 'JOB "mode" was modified' in error_message
     assert 'JOB "max_nb_of_workers" was modified' in error_message
     assert 'PIPELINE "my_pipeline" has attribute "tasks" modified' in error_message
@@ -550,7 +549,7 @@ def test_modify_config_properties_without_force(caplog):
     assert 'DATA_NODE "d2" has attribute "has_header" modified' in error_message
     assert 'DATA_NODE "d2" has attribute "exposed_type" modified' in error_message
 
-    assert 'Global Configuration "repository_properties" was added' in error_message
+    assert 'CORE "repository_properties" was added' in error_message
 
 
 def twice(a):
@@ -575,11 +574,10 @@ def double_twice(a):
 
 
 def config_scenario_2():
-    Config.configure_global_app(
+    Config.configure_core(
         root_folder="foo_root",
         # Changing the "storage_folder" will fail since older versions are stored in older folder
         # storage_folder="foo_storage",
-        clean_entities_enabled=True,
         repository_type="bar",
         repository_properties={"foo": "bar"},
     )

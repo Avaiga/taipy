@@ -111,7 +111,7 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
             self.write(default_value)
 
         if not self._last_edit_date and isfile(self._path):  # type: ignore
-            self.last_edit_date = datetime.now()  # type: ignore
+            self._last_edit_date = datetime.now()
 
     @classmethod
     def storage_type(cls) -> str:

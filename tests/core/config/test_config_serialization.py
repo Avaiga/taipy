@@ -12,7 +12,15 @@
 import datetime
 import json
 
-from src.taipy.core.config import DataNodeConfig, JobConfig, MigrationConfig, PipelineConfig, ScenarioConfig, TaskConfig
+from src.taipy.core.config import (
+    CoreSection,
+    DataNodeConfig,
+    JobConfig,
+    MigrationConfig,
+    PipelineConfig,
+    ScenarioConfig,
+    TaskConfig,
+)
 from taipy.config import Config
 from taipy.config._serializer._json_serializer import _JsonSerializer
 from taipy.config.common.frequency import Frequency
@@ -104,16 +112,15 @@ def config_test_scenario():
 def test_read_write_toml_configuration_file():
     expected_toml_config = """
 [TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
-repository_type = "filesystem"
 
 [JOB]
 mode = "development"
 max_nb_of_workers = "1:int"
 
 [CORE]
+root_folder = "./taipy/"
+storage_folder = ".data/"
+repository_type = "filesystem"
 mode = "development"
 version_number = ""
 force = "False:bool"
@@ -171,7 +178,6 @@ test_csv_dn = "tests.core.config.test_config_serialization.migrate_csv_path:func
 test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:function",]
     """.strip()
 
-    Config.configure_global_app(clean_entities_enabled=True)
     config_test_scenario()
 
     tf = NamedTemporaryFile()
@@ -188,6 +194,14 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
 
     assert Config.unique_sections is not None
     assert len(Config.unique_sections) == 3
+
+    assert Config.unique_sections[CoreSection.name].root_folder == "./taipy/"
+    assert Config.unique_sections[CoreSection.name].storage_folder == ".data/"
+    assert Config.unique_sections[CoreSection.name].repository_type == "filesystem"
+    assert Config.unique_sections[CoreSection.name].repository_properties == {}
+    assert Config.unique_sections[CoreSection.name].mode == "development"
+    assert Config.unique_sections[CoreSection.name].version_number == ""
+    assert Config.unique_sections[CoreSection.name].force is False
 
     assert Config.unique_sections[JobConfig.name].mode == "development"
     assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1
@@ -254,17 +268,15 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
 def test_read_write_json_configuration_file():
     expected_json_config = """
 {
-"TAIPY": {
-"root_folder": "./taipy/",
-"storage_folder": ".data/",
-"clean_entities_enabled": "True:bool",
-"repository_type": "filesystem"
-},
+"TAIPY": {},
 "JOB": {
 "mode": "development",
 "max_nb_of_workers": "1:int"
 },
 "CORE": {
+"root_folder": "./taipy/",
+"storage_folder": ".data/",
+"repository_type": "filesystem",
 "mode": "development",
 "version_number": "",
 "force": "False:bool",
@@ -348,7 +360,6 @@ def test_read_write_json_configuration_file():
     """.strip()
 
     Config._serializer = _JsonSerializer()
-    Config.configure_global_app(clean_entities_enabled=True)
     config_test_scenario()
 
     tf = NamedTemporaryFile()
@@ -365,6 +376,14 @@ def test_read_write_json_configuration_file():
 
     assert Config.unique_sections is not None
     assert len(Config.unique_sections) == 3
+
+    assert Config.unique_sections[CoreSection.name].root_folder == "./taipy/"
+    assert Config.unique_sections[CoreSection.name].storage_folder == ".data/"
+    assert Config.unique_sections[CoreSection.name].repository_type == "filesystem"
+    assert Config.unique_sections[CoreSection.name].repository_properties == {}
+    assert Config.unique_sections[CoreSection.name].mode == "development"
+    assert Config.unique_sections[CoreSection.name].version_number == ""
+    assert Config.unique_sections[CoreSection.name].force is False
 
     assert Config.unique_sections[JobConfig.name].mode == "development"
     assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1

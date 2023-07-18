@@ -105,8 +105,8 @@ class PipelineConfig(Section):
         return Config.sections[PipelineConfig.name][id]
 
     @staticmethod
-    def _configure_default(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
-        """Configure the default values for pipeline configurations.
+    def _set_default_configuration(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
+        """Set the default values for pipeline configurations.
 
         This function creates the *default pipeline configuration* object,
         where all pipeline configuration objects will find their default

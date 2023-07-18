@@ -29,6 +29,14 @@ def _test_default_job_config(job_config: JobConfig):
 def _test_default_core_section(core_section: CoreSection):
     assert core_section is not None
     assert core_section.mode == CoreSection._DEFAULT_MODE
+    assert core_section.version_number == ""
+    assert not core_section.force
+    assert not core_section.clean_entities
+    assert core_section.root_folder == "./taipy/"
+    assert core_section.storage_folder == ".data/"
+    assert core_section.repository_type == "filesystem"
+    assert core_section.repository_properties == {}
+    assert len(core_section.properties) == 0
 
 
 def _test_default_data_node_config(dn_config: DataNodeConfig):
@@ -73,10 +81,6 @@ def _test_default_version_migration_config(version_migration_config: MigrationCo
 def _test_default_global_app_config(global_config: GlobalAppConfig):
     assert global_config is not None
     assert not global_config.notification
-    assert global_config.root_folder == "./taipy/"
-    assert global_config.storage_folder == ".data/"
-    assert global_config._clean_entities_enabled is GlobalAppConfig._CLEAN_ENTITIES_ENABLED_TEMPLATE
-    assert global_config.clean_entities_enabled is False
     assert len(global_config.properties) == 0
 
 
