@@ -54,8 +54,8 @@ class TaskConfig(Section):
         self,
         id: str,
         function,
-        inputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
-        outputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
+        inputs: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        outputs: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         skippable: Optional[bool] = False,
         **properties,
     ):
@@ -185,14 +185,14 @@ class TaskConfig(Section):
         return Config.sections[TaskConfig.name][id]
 
     @staticmethod
-    def _configure_default(
+    def _set_default_configuration(
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         skippable: Optional[bool] = False,
         **properties,
     ) -> "TaskConfig":
-        """Configure the default values for task configurations.
+        """Set the default values for task configurations.
 
         This function creates the *default task configuration* object,
         where all task configuration objects will find their default
