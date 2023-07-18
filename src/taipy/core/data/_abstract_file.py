@@ -22,7 +22,7 @@ class _AbstractFileDataNode(object):
         from taipy.config.config import Config
 
         folder = f"{storage_type}s"
-        dir_path = pathlib.Path(Config.global_config.storage_folder) / folder
+        dir_path = pathlib.Path(Config.core.storage_folder) / folder
         if not dir_path.exists():
             dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path / f"{self.id}.{self.__EXTENSION_MAP.get(storage_type)}"

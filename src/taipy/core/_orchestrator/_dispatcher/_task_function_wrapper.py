@@ -24,7 +24,7 @@ from ...task.task import Task
 class _TaskFunctionWrapper:
     @classmethod
     def _wrapped_function_with_config_load(cls, config_as_string, job_id: JobId, task: Task):
-        Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
+        Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
         Config.block_update()
         return cls._wrapped_function(job_id, task)
 

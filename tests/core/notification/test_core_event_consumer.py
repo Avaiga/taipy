@@ -68,7 +68,6 @@ def test_core_event_consumer():
     event_processor_1.start()
     event_processor_2.start()
 
-    Config.configure_global_app(clean_entities_enabled=True)
     dn_config = Config.configure_data_node("dn_config")
     task_config = Config.configure_task("task_config", print, [dn_config])
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])

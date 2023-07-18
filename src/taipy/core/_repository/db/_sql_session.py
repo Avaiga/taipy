@@ -24,7 +24,7 @@ from .._encoder import dumps
 
 @lru_cache
 def _build_engine():
-    properties = Config.global_config.repository_properties
+    properties = Config.core.repository_properties
     try:
         # More sql databases can be easily added in the future
         engine = create_engine(

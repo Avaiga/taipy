@@ -23,16 +23,15 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 def test_write_configuration_file():
     expected_config = """
 [TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
-repository_type = "filesystem"
 
 [JOB]
 mode = "standalone"
 max_nb_of_workers = "2:int"
 
 [CORE]
+root_folder = "./taipy/"
+storage_folder = ".data/"
+repository_type = "filesystem"
 mode = "development"
 version_number = ""
 force = "False:bool"
@@ -100,7 +99,6 @@ owner = "Raymond Kopa"
     with mock.patch.dict(
         os.environ, {"FOO": "in_memory", "QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}
     ):
-        Config.configure_global_app(clean_entities_enabled=True)
         Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
         Config.set_default_data_node_configuration(
             storage_type="in_memory",
