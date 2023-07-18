@@ -29,9 +29,7 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 
 
-def test_save_and_get_cycle_entity(cycle, current_datetime):
-    Config.configure_global_app(repository_type="sql")
-
+def test_save_and_get_cycle_entity(init_sql_repo, cycle, current_datetime):
     _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
@@ -86,9 +84,7 @@ def test_save_and_get_cycle_entity(cycle, current_datetime):
     assert cycle_3.frequency == cycle_3.frequency
 
 
-def test_create_and_delete_cycle_entity():
-    Config.configure_global_app(repository_type="sql")
-
+def test_create_and_delete_cycle_entity(init_sql_repo):
     _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()
@@ -149,9 +145,7 @@ def test_create_and_delete_cycle_entity():
     assert not any(_CycleManager._exists(cycle_id) for cycle_id in [cycle_1_id, cycle_3_id, cycle_4_id])
 
 
-def test_get_cycle_start_date_and_end_date():
-    Config.configure_global_app(repository_type="sql")
-
+def test_get_cycle_start_date_and_end_date(init_sql_repo):
     _CycleManager._repository = _CycleManagerFactory._build_repository()
 
     _CycleManager._delete_all()

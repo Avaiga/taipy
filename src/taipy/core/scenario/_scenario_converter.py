@@ -49,7 +49,7 @@ class _ScenarioConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _ScenarioModel) -> Scenario:
-        tasks: Union[Set[TaskId], Set[Task], Set]
+        tasks: Union[Set[TaskId], Set[Task], Set] = set()
         if model.tasks:
             tasks = set(model.tasks)
         else:

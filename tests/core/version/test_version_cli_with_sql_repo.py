@@ -30,8 +30,7 @@ from taipy.config.config import Config
 from ...conftest import init_config
 
 
-def test_delete_version(caplog, tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_delete_version(caplog, init_sql_repo):
     _ScenarioManagerFactory._build_manager()
 
     scenario_config = config_scenario()
@@ -111,8 +110,7 @@ def test_delete_version(caplog, tmp_sqlite):
     assert str(e.value) == "Version 'non_exist_version' is not a production version."
 
 
-def test_list_versions(capsys, tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_list_versions(capsys, init_sql_repo):
     _ScenarioManagerFactory._build_manager()
 
     with patch("sys.argv", ["prog", "--development"]):
@@ -152,8 +150,7 @@ def test_list_versions(capsys, tmp_sqlite):
     assert "Development" in version_list[5] and "latest" not in version_list[5]
 
 
-def test_rename_version(caplog, tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_rename_version(caplog, init_sql_repo):
     _ScenarioManagerFactory._build_manager()
 
     scenario_config = config_scenario()
@@ -211,8 +208,7 @@ def test_rename_version(caplog, tmp_sqlite):
     assert len(_JobManager._get_all("2.1")) == 1
 
 
-def test_compare_version_config(caplog, tmp_sqlite):
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+def test_compare_version_config(caplog, init_sql_repo):
     _ScenarioManagerFactory._build_manager()
 
     scenario_config_1 = config_scenario()
@@ -223,7 +219,7 @@ def test_compare_version_config(caplog, tmp_sqlite):
         _ScenarioManager._submit(scenario)
 
     init_config()
-    Config.configure_global_app(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    Config.configure_core(repository_type="sql", repository_properties={"db_location": init_sql_repo})
     _ScenarioManagerFactory._build_manager()
 
     scenario_config_2 = config_scenario()

@@ -20,12 +20,12 @@ __BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME = "TAIPY_BACKUP_FILE_PATH"
 def _init_backup_file_with_storage_folder():
     if preserve_file_path := os.getenv(__BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME):
         with open(preserve_file_path, "a") as f:
-            f.write(f"{Config.global_config.storage_folder}\n")
+            f.write(f"{Config.core.storage_folder}\n")
 
 
 def _append_to_backup_file(new_file_path: str):
     if preserve_file_path := os.getenv(__BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME):
-        storage_folder = os.path.abspath(Config.global_config.storage_folder) + os.sep
+        storage_folder = os.path.abspath(Config.core.storage_folder) + os.sep
         if not os.path.abspath(new_file_path).startswith(storage_folder):
             with open(preserve_file_path, "a") as f:
                 f.write(f"{new_file_path}\n")
@@ -33,7 +33,7 @@ def _append_to_backup_file(new_file_path: str):
 
 def _remove_from_backup_file(to_remove_file_path: str):
     if preserve_file_path := os.getenv(__BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME, None):
-        storage_folder = os.path.abspath(Config.global_config.storage_folder) + os.sep
+        storage_folder = os.path.abspath(Config.core.storage_folder) + os.sep
         if not os.path.abspath(to_remove_file_path).startswith(storage_folder):
             try:
                 with open(preserve_file_path, "r+") as f:

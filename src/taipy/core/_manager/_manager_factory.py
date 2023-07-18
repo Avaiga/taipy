@@ -37,4 +37,4 @@ class _ManagerFactory:
 
     @staticmethod
     def _get_repository_with_repo_map(repository_map: dict):
-        return repository_map.get(Config.global_config.repository_type, repository_map.get("default"))
+        return repository_map.get(Config.core.repository_type, repository_map.get("default"))

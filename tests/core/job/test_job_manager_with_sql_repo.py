@@ -50,9 +50,8 @@ def init_managers():
     _JobManagerFactory._build_manager()._delete_all()
 
 
-def test_create_jobs():
+def test_create_jobs(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
     init_managers()
 
     task = _create_task(multiply, name="get_job")
@@ -78,9 +77,8 @@ def test_create_jobs():
     assert not job_2.force
 
 
-def test_get_job():
+def test_get_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
     init_managers()
 
     task = _create_task(multiply, name="get_job")
@@ -98,9 +96,8 @@ def test_get_job():
     assert _JobManager._get(job_2.id).submit_entity_id == task.id
 
 
-def test_get_latest_job():
+def test_get_latest_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
     init_managers()
 
     task = _create_task(multiply, name="get_latest_job")
@@ -123,15 +120,13 @@ def test_get_latest_job():
     assert _JobManager._get_latest(task_2).id == job_2.id
 
 
-def test_get_job_unknown():
-    Config.configure_global_app(repository_type="sql")
+def test_get_job_unknown(init_sql_repo):
     init_managers()
     assert _JobManager._get(JobId("Unknown")) is None
 
 
-def test_get_jobs():
+def test_get_jobs(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
     init_managers()
 
     task = _create_task(multiply, name="get_all_jobs")
@@ -144,9 +139,8 @@ def test_get_jobs():
     assert {job.id for job in _JobManager._get_all()} == {job_1.id, job_2.id}
 
 
-def test_delete_job():
+def test_delete_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    Config.configure_global_app(repository_type="sql")
 
     init_managers()
 
@@ -163,9 +157,8 @@ def test_delete_job():
     assert _JobManager._get(job_1.id) is None
 
 
-def test_raise_when_trying_to_delete_unfinished_job():
+def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    Config.configure_global_app(repository_type="sql")
     init_managers()
 
     m = multiprocessing.Manager()
@@ -189,9 +182,8 @@ def test_raise_when_trying_to_delete_unfinished_job():
     _JobManager._delete(job)
 
 
-def test_force_deleting_unfinished_job():
+def test_force_deleting_unfinished_job(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
-    Config.configure_global_app(repository_type="sql")
     init_managers()
 
     m = multiprocessing.Manager()

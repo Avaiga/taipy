@@ -14,6 +14,6 @@ from taipy.config.config import Config
 
 
 def test_create_version():
-    v = _Version("foo", config=Config.configure_global_app())
+    v = _Version("foo", config=Config.configure_data_node("dn"))
     assert v.id == "foo"
     assert v.config is not None

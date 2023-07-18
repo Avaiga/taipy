@@ -239,7 +239,6 @@ def test_matching():
 def test_publish_event():
     _, registration_queue = Notifier.register()
 
-    Config.configure_global_app(clean_entities_enabled=True)
     dn_config = Config.configure_data_node("dn_config")
     task_config = Config.configure_task("task_config", print, [dn_config])
     scenario_config = Config.configure_scenario(
@@ -556,13 +555,14 @@ def test_publish_event():
     )
 
     scenario = tp.create_scenario(scenario_config)
+    cycle = scenario.cycle
     assert registration_queue.qsize() == 5
 
     # only to clear the queue
     while registration_queue.qsize() != 0:
         registration_queue.get()
 
-    tp.clean_all_entities()
+    tp.clean_all_entities_by_version()
     assert registration_queue.qsize() == 6
 
     published_events = []
@@ -570,18 +570,19 @@ def test_publish_event():
         published_events.append(registration_queue.get())
 
     expected_event_types = [
-        EventEntityType.DATA_NODE,
-        EventEntityType.TASK,
-        EventEntityType.PIPELINE,
-        EventEntityType.SCENARIO,
-        EventEntityType.CYCLE,
         EventEntityType.JOB,
+        EventEntityType.CYCLE,
+        EventEntityType.SCENARIO,
+        EventEntityType.PIPELINE,
+        EventEntityType.TASK,
+        EventEntityType.DATA_NODE,
     ]
+    expected_event_entity_id = [None, cycle.id, scenario.id, None, None, None]
 
     assert all(
         [
             event.entity_type == expected_event_types[i]
-            and event.entity_id == "all"
+            and event.entity_id == expected_event_entity_id[i]
             and event.operation == EventOperation.DELETION
             and event.attribute_name is None
             for i, event in enumerate(published_events)

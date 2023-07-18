@@ -16,8 +16,8 @@ from taipy.config.common.scope import Scope  # type: ignore
 from taipy.config.config import Config  # type: ignore
 from taipy.config.global_app.global_app_config import GlobalAppConfig  # type: ignore
 
-from .checkers import _global_config_checker
 from .checkers._config_id_checker import _ConfigIdChecker
+from .checkers._core_section_checker import _CoreSectionChecker
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
 from .checkers._job_config_checker import _JobConfigChecker
 from .checkers._pipeline_config_checker import _PipelineConfigChecker
@@ -44,7 +44,7 @@ _inject_section(
     DataNodeConfig.default_config(),
     [
         ("configure_data_node", DataNodeConfig._configure),
-        ("configure_default_data_node", DataNodeConfig._configure_default),
+        ("set_default_data_node_configuration", DataNodeConfig._set_default_configuration),
         ("configure_csv_data_node", DataNodeConfig._configure_csv),
         ("configure_json_data_node", DataNodeConfig._configure_json),
         ("configure_parquet_data_node", DataNodeConfig._configure_parquet),
@@ -61,7 +61,10 @@ _inject_section(
     TaskConfig,
     "tasks",
     TaskConfig.default_config(),
-    [("configure_task", TaskConfig._configure), ("configure_default_task", TaskConfig._configure_default)],
+    [
+        ("configure_task", TaskConfig._configure),
+        ("set_default_task_configuration", TaskConfig._set_default_configuration),
+    ],
 )
 _inject_section(
     PipelineConfig,
@@ -69,7 +72,7 @@ _inject_section(
     PipelineConfig.default_config(),
     [
         ("configure_pipeline", PipelineConfig._configure),
-        ("configure_default_pipeline", PipelineConfig._configure_default),
+        ("set_default_pipeline_configuration", PipelineConfig._set_default_configuration),
     ],
 )
 _inject_section(
@@ -78,7 +81,7 @@ _inject_section(
     ScenarioConfig.default_config(),
     [
         ("configure_scenario", ScenarioConfig._configure),
-        ("configure_default_scenario", ScenarioConfig._configure_default),
+        ("set_default_scenario_configuration", ScenarioConfig._set_default_configuration),
     ],
 )
 _inject_section(
@@ -98,6 +101,7 @@ _inject_section(
 
 _Checker.add_checker(_ConfigIdChecker)
 _Checker.add_checker(_JobConfigChecker)
+_Checker.add_checker(_CoreSectionChecker)
 _Checker.add_checker(_DataNodeConfigChecker)
 _Checker.add_checker(_TaskConfigChecker)
 _Checker.add_checker(_PipelineConfigChecker)

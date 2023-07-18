@@ -33,6 +33,7 @@ from src.taipy.core.config import (
     ScenarioConfig,
     TaskConfig,
     _ConfigIdChecker,
+    _CoreSectionChecker,
     _DataNodeConfigChecker,
     _JobConfigChecker,
     _PipelineConfigChecker,
@@ -62,10 +63,10 @@ from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task.task import Task
+from taipy.config import _inject_section
 from taipy.config._config import _Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.checker._checker import _Checker
-from taipy.config.checker._checkers._global_config_checker import _GlobalConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -354,9 +355,7 @@ def init_config():
     Config._applied_config = _Config()
     Config._collector = IssueCollector()
     Config._serializer = _TomlSerializer()
-    _Checker._checkers = [_GlobalConfigChecker]
-
-    from src.taipy.core.config import _inject_section
+    _Checker._checkers = []
 
     _inject_section(
         JobConfig, "job_config", JobConfig("development"), [("configure_job_executions", JobConfig._configure)], True
@@ -374,7 +373,7 @@ def init_config():
         DataNodeConfig.default_config(),
         [
             ("configure_data_node", DataNodeConfig._configure),
-            ("configure_default_data_node", DataNodeConfig._configure_default),
+            ("set_default_data_node_configuration", DataNodeConfig._set_default_configuration),
             ("configure_csv_data_node", DataNodeConfig._configure_csv),
             ("configure_json_data_node", DataNodeConfig._configure_json),
             ("configure_sql_table_data_node", DataNodeConfig._configure_sql_table),
@@ -390,7 +389,10 @@ def init_config():
         TaskConfig,
         "tasks",
         TaskConfig.default_config(),
-        [("configure_task", TaskConfig._configure), ("configure_default_task", TaskConfig._configure_default)],
+        [
+            ("configure_task", TaskConfig._configure),
+            ("set_default_task_configuration", TaskConfig._set_default_configuration),
+        ],
     )
     _inject_section(
         PipelineConfig,
@@ -398,7 +400,7 @@ def init_config():
         PipelineConfig.default_config(),
         [
             ("configure_pipeline", PipelineConfig._configure),
-            ("configure_default_pipeline", PipelineConfig._configure_default),
+            ("set_default_pipeline_configuration", PipelineConfig._set_default_configuration),
         ],
     )
     _inject_section(
@@ -407,7 +409,7 @@ def init_config():
         ScenarioConfig.default_config(),
         [
             ("configure_scenario", ScenarioConfig._configure),
-            ("configure_default_scenario", ScenarioConfig._configure_default),
+            ("set_default_scenario_configuration", ScenarioConfig._set_default_configuration),
         ],
     )
     _inject_section(
@@ -419,6 +421,7 @@ def init_config():
     )
     _Checker.add_checker(_ConfigIdChecker)
     _Checker.add_checker(_JobConfigChecker)
+    _Checker.add_checker(_CoreSectionChecker)
     _Checker.add_checker(_DataNodeConfigChecker)
     _Checker.add_checker(_TaskConfigChecker)
     _Checker.add_checker(_PipelineConfigChecker)
@@ -450,6 +453,12 @@ def init_notifier():
 @pytest.fixture
 def sql_engine():
     return create_engine("sqlite:///:memory:")
+
+
+@pytest.fixture()
+def init_sql_repo(tmp_sqlite):
+    Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    return tmp_sqlite
 
 
 @pytest.fixture(autouse=True)

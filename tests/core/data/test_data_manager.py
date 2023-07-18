@@ -536,7 +536,7 @@ class TestDataManager:
         from src.taipy import core as tp
 
         Config.load(file_config.filename)
-        Config.configure_default_data_node(storage_type="csv")
+        Config.set_default_data_node_configuration(storage_type="csv")
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
         assert isinstance(scenario.input, PickleDataNode)
