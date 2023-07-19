@@ -30,6 +30,7 @@ from .filename import _get_non_existent_file_path
 from .filter_locals import _filter_locals
 from .get_imported_var import _get_imported_var
 from .get_module_name import _get_module_name_from_frame, _get_module_name_from_imported_var
+from .get_page_from_module import _get_page_from_module
 from .getdatecolstrname import _RE_PD_TYPE, _get_date_col_str_name
 from .html import _get_css_var_value
 from .is_debugging import is_debugging
