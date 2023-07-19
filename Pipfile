@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 cookiecutter = "==2.1.1"
-taipy-gui = "==2.3"
-taipy-rest = "==2.3"
-taipy-templates = "==2.3"
+taipy-gui = "==2.4"
+taipy-rest = "==2.4"
+taipy-templates = "==2.4"
 
 [dev-packages]
 autopep8 = "*"
