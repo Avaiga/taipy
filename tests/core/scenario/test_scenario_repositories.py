@@ -115,8 +115,12 @@ class TestScenarioFSRepository:
         assert len(repository._load_all()) == 10
 
         obj = repository._search("id", "scenario-2")
-
         assert isinstance(obj, Scenario)
+
+        obj = repository._search("id", "scenario-2", filters=[{"version": "random_version_number"}])
+        assert isinstance(obj, Scenario)
+
+        assert repository._search("id", "scenario-2", filters=[{"version": "non_existed_version"}]) is None
 
     @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
     def test_export(self, tmpdir, scenario, repo):

@@ -80,14 +80,12 @@ class _Manager(Generic[EntityType]):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _get_all_by(cls, by, filters: Optional[List[Dict]] = None) -> List[EntityType]:
+    def _get_all_by(cls, filters: Optional[List[Dict]] = None) -> List[EntityType]:
         """
         Returns all entities based on a criteria.
         """
         if not filters:
             filters = []
-        if by:
-            filters.append(by)
         return cls._repository._load_all(filters)
 
     @classmethod

@@ -30,7 +30,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
     _repository: _AbstractRepository
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = "all") -> List[Job]:
+    def _get_all(cls, version_number: Optional[str] = None) -> List[Job]:
         """
         Returns all entities.
         """

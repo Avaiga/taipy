@@ -127,7 +127,7 @@ class TestTaskFSRepository:
         repository = repo()
         repository.base_path = tmpdir
         _DataFSRepository()._save(data_node)
-        task = Task("task_config_id", {}, print, [data_node], [data_node])
+        task = Task("task_config_id", {}, print, [data_node], [data_node], version="random_version_number")
 
         for i in range(10):
             task.id = TaskId(f"task-{i}")
@@ -137,8 +137,12 @@ class TestTaskFSRepository:
         assert len(repository._load_all()) == 10
 
         obj = repository._search("owner_id", "owner-2")
-
         assert isinstance(obj, Task)
+
+        obj = repository._search("owner_id", "owner-2", filters=[{"version": "random_version_number"}])
+        assert isinstance(obj, Task)
+
+        assert repository._search("owner_id", "owner-2", filters=[{"version": "non_existed_version"}]) is None
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
     def test_export(self, tmpdir, data_node, repo):

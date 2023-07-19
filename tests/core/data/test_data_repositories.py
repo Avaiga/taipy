@@ -117,8 +117,12 @@ class TestDataNodeRepository:
         assert len(repository._load_all()) == 10
 
         obj = repository._search("name", "data_node-2")
-
         assert isinstance(obj, DataNode)
+
+        obj = repository._search("name", "data_node-2", filters=[{"version": "random_version_number"}])
+        assert isinstance(obj, DataNode)
+
+        assert repository._search("name", "data_node-2", filters=[{"version": "non_existed_version"}]) is None
 
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
     def test_export(self, tmpdir, data_node, repo):

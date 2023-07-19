@@ -61,12 +61,15 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
         query = self.db.query(self.model_type)
-        try:
-            for f in filters or []:
-                query = query.filter_by(**f)
-            return [self.converter._model_to_entity(m) for m in query.all()]
-        except NoResultFound:
-            return []
+        entities: List[Entity] = []
+
+        for f in filters or [{}]:
+            filtered_query = query.filter_by(**f)
+            try:
+                entities.extend([self.converter._model_to_entity(m) for m in filtered_query.all()])
+            except NoResultFound:
+                continue
+        return entities
 
     def _delete(self, entity_id: str):
         number_of_deleted_entries = self.db.query(self.model_type).filter_by(id=entity_id).delete()
@@ -89,11 +92,11 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
         query = self.db.query(self.model_type).filter_by(**{attribute: value})
 
-        if filters:
-            query.filter(filters)
+        for f in filters or [{}]:
+            filtered_query = query.filter_by(**f)
+            if entry := filtered_query.first():
+                return self.converter._model_to_entity(entry)
 
-        if entry := query.first():
-            return self.converter._model_to_entity(entry)
         return None
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
@@ -125,19 +128,19 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         return self.db.query(self.model_type).filter(self.model_type.config_id == config_id).first()  # type: ignore
 
     def _get_by_config_and_owner_id(
-        self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
+        self, config_id: str, owner_id: Optional[str], filters: Optional[List[Dict]] = None
     ) -> Optional[Entity]:
         if not filters:
-            filters = []
+            filters = [{}]
         if entry := self.__get_entities_by_config_and_owner(config_id, owner_id, filters):
             return self.converter._model_to_entity(entry)
         return None
 
-    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: List[Dict] = None):
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids, filters: Optional[List[Dict]] = None):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
         if not filters:
-            filters = []
+            filters = [{}]
         res = {}
         configs_and_owner_ids = set(configs_and_owner_ids)
 
@@ -151,7 +154,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         return res
 
     def __get_entities_by_config_and_owner(
-        self, config_id: str, owner_id: Optional[str] = "", filters: List[Dict] = None
+        self, config_id: str, owner_id: Optional[str] = "", filters: Optional[List[Dict]] = None
     ) -> ModelType:
         if not filters:
             filters = []

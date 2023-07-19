@@ -14,6 +14,7 @@ import pathlib
 
 import pytest
 
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
@@ -249,6 +250,41 @@ class TestDataManager:
         assert len(_DataManager._get_all()) == 3
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "foo"]) == 1
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
+
+    def test_get_all_on_multiple_versions_environment(self):
+        # Create 5 data nodes with 2 versions each
+        # Only version 1.0 has the data node with config_id = "config_id_1"
+        # Only version 2.0 has the data node with config_id = "config_id_6"
+        for version in range(1, 3):
+            for i in range(5):
+                _DataManager._set(
+                    InMemoryDataNode(
+                        f"config_id_{i+version}",
+                        Scope.SCENARIO,
+                        id=DataNodeId(f"id{i}_v{version}"),
+                        version=f"{version}.0",
+                    )
+                )
+
+        _VersionManager._set_experiment_version("1.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_1"}])) == 1
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_6"}])) == 0
+
+        _VersionManager._set_development_version("1.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_1"}])) == 1
+        assert len(_DataManager._get_all_by(filters=[{"version": "1.0", "config_id": "config_id_6"}])) == 0
+
+        _VersionManager._set_experiment_version("2.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_1"}])) == 0
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_6"}])) == 1
+
+        _VersionManager._set_development_version("2.0")
+        assert len(_DataManager._get_all()) == 5
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_1"}])) == 0
+        assert len(_DataManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_6"}])) == 1
 
     def test_set(self):
         dn = InMemoryDataNode(

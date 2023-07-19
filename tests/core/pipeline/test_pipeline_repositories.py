@@ -117,8 +117,12 @@ class TestPipelineRepository:
         assert len(repository._load_all()) == 10
 
         obj = repository._search("owner_id", "owner-2")
-
         assert isinstance(obj, Pipeline)
+
+        obj = repository._search("owner_id", "owner-2", filters=[{"version": "random_version_number"}])
+        assert isinstance(obj, Pipeline)
+
+        assert repository._search("owner_id", "owner-2", filters=[{"version": "non_existed_version"}]) is None
 
     @pytest.mark.parametrize("repo", [_PipelineFSRepository, _PipelineSQLRepository])
     def test_export(self, tmpdir, pipeline, repo):
