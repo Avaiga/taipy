@@ -37,6 +37,7 @@ class Gui:
     __DO_NOT_UPDATE_VALUE: Incomplete
     __RE_HTML: Incomplete
     __RE_MD: Incomplete
+    __RE_PY: Incomplete
     __RE_PAGE_NAME: Incomplete
     __reserved_routes: t.List[str]
     __LOCAL_TZ: Incomplete

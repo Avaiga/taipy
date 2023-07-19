@@ -20,7 +20,6 @@ from taipy.config import Config
 from taipy.config._config import _Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.checker._checker import _Checker
-from taipy.config.checker._checkers._global_config_checker import _GlobalConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 
 
@@ -48,7 +47,7 @@ def init_config():
     Config._applied_config = _Config._default_config()
     Config._collector = IssueCollector()
     Config._serializer = _TomlSerializer()
-    _Checker._checkers = [_GlobalConfigChecker]
+    _Checker._checkers = []
 
     from taipy.gui._default_config import default_config
     from taipy.gui._gui_section import _GuiSection
