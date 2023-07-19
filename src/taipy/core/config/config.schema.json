@@ -25,7 +25,8 @@
             "type": [
               "integer",
               "string"
-            ]
+            ],
+            "default": "3:int"
           },
           "repository_type": {
             "description": "The repository type that is used to store the entities.",

@@ -14,7 +14,9 @@ import time
 from collections import namedtuple
 from importlib import import_module
 from operator import attrgetter
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
+
+from taipy.config import Config
 
 
 @functools.lru_cache
@@ -23,20 +25,18 @@ def _load_fct(module_name: str, fct_name: str) -> Callable:
     return attrgetter(fct_name)(module)
 
 
-def _retry(times, exceptions):
+def _retry_read_entity(exceptions: Tuple):
     """
-    Retry Decorator
     Retries the wrapped function/method `times` times if the exceptions listed
-    in ``exceptions`` are thrown
-    :param times: The number of times to repeat the wrapped function/method
-    :type times: Int
-    :param exceptions: Lists of exceptions that trigger a retry attempt
-    :type exceptions: Tuple of Exceptions
+    in ``exceptions`` are thrown.
+
+    Parameters:
+        exceptions (tuple): Exceptions that trigger a retry attempt
     """
 
     def decorator(func):
         def newfn(*args, **kwargs):
-            for _ in range(times):
+            for _ in range(Config.core.read_entity_retry):
                 try:
                     return func(*args, **kwargs)
                 except exceptions:
