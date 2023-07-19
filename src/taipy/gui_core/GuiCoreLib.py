@@ -54,8 +54,6 @@ Pipeline.__bases__ += (_GCDoNotUpdate,)
 DataNode.__bases__ += (_GCDoNotUpdate,)
 Job.__bases__ += (_GCDoNotUpdate,)
 
-Config.configure_core(read_entity_retry=3)
-
 
 class _EntityType(Enum):
     CYCLE = 0
