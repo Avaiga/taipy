@@ -463,7 +463,7 @@ class TestDataManager:
         )
         from src.taipy import core as tp
 
-        Config.load(file_config.filename)
+        Config.override(file_config.filename)
         tp.create_scenario(Config.scenarios["s"])
         tp.create_scenario(Config.scenarios["s"])
 
@@ -499,7 +499,7 @@ class TestDataManager:
         )
         from src.taipy import core as tp
 
-        Config.load(file_config.filename)
+        Config.override(file_config.filename)
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
         assert isinstance(scenario.input, PickleDataNode)
@@ -535,7 +535,7 @@ class TestDataManager:
         )
         from src.taipy import core as tp
 
-        Config.load(file_config.filename)
+        Config.override(file_config.filename)
         Config.set_default_data_node_configuration(storage_type="csv")
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 

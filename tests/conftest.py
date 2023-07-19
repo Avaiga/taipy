@@ -426,6 +426,8 @@ def init_config():
     _Checker.add_checker(_PipelineConfigChecker)
     _Checker.add_checker(_ScenarioConfigChecker)
 
+    Config.configure_core(read_entity_retry=0)
+
 
 def init_managers():
     _CycleManagerFactory._build_manager()._delete_all()
