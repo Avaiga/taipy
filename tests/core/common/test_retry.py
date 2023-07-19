@@ -11,16 +11,27 @@
 
 import pytest
 
-from src.taipy.core.common._utils import _retry
+from src.taipy.core.common._utils import _retry_read_entity
+from taipy.config import Config
 
 
 def test_retry_decorator(mocker):
     func = mocker.Mock(side_effect=Exception())
 
-    @_retry(3, (Exception,))
+    @_retry_read_entity((Exception,))
     def decorated_func():
         func()
 
+    with pytest.raises(Exception):
+        decorated_func()
+    # Called once in the normal flow and no retry
+    # The Config.core.read_entity_retry is set to 0 at conftest.py
+    assert Config.core.read_entity_retry == 0
+    assert func.call_count == 1
+
+    func.reset_mock()
+
+    Config.core.read_entity_retry = 3
     with pytest.raises(Exception):
         decorated_func()
     # Called once in the normal flow and 3 more times on the retry flow
@@ -29,8 +40,9 @@ def test_retry_decorator(mocker):
 
 def test_retry_decorator_exception_not_in_list(mocker):
     func = mocker.Mock(side_effect=KeyError())
+    Config.core.read_entity_retry = 3
 
-    @_retry(3, (Exception,))
+    @_retry_read_entity((Exception,))
     def decorated_func():
         func()
 

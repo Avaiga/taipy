@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Type, Union
 
 from taipy.config.config import Config
 
-from ..common._utils import _retry
+from ..common._utils import _retry_read_entity
 from ..common.typing import Converter, Entity, Json, ModelType
 from ..exceptions import InvalidExportPath, ModelNotFound
 from ._abstract_repository import _AbstractRepository
@@ -64,7 +64,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _exists(self, entity_id: str) -> bool:
         return self.__get_path(entity_id).exists()
 
-    @_retry(Config.core.read_entity_retry or 0, (Exception,))
+    @_retry_read_entity((Exception,))
     def _load(self, entity_id: str) -> Entity:
         try:
             with pathlib.Path(self.__get_path(entity_id)).open(encoding="UTF-8") as source:
@@ -73,7 +73,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), entity_id)
 
-    @_retry(Config.core.read_entity_retry or 0, (Exception,))
+    @_retry_read_entity((Exception,))
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
         if not filters:
             filters = []
@@ -166,7 +166,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     # ##   Private methods   ## #
     #############################
-    @_retry(Config.core.read_entity_retry or 0, (Exception,))
+    @_retry_read_entity((Exception,))
     def __filter_files_by_config_and_owner_id(
         self, config_id: str, owner_id: Optional[str], filters: List[Dict] = None
     ):
@@ -185,7 +185,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             pass
         return None
 
-    @_retry(Config.core.read_entity_retry or 0, (Exception,))
+    @_retry_read_entity((Exception,))
     def __match_file_and_get_entity(self, filepath, config_and_owner_ids, filters):
         versions = [f'"version": "{item.get("version")}"' for item in filters if item.get("version")]
 
