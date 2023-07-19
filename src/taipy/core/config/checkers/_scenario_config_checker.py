@@ -103,7 +103,7 @@ class _ScenarioConfigChecker(_ConfigChecker):
 
         for additional_data_node_config in scenario_config.additional_data_node_configs:
             if additional_data_node_config in data_node_configs:
-                self._error(
+                self._warning(
                     ScenarioConfig._ADDITIONAL_DATA_NODES_KEY,
                     scenario_config.additional_data_node_configs,
                     f"The additional data node `{additional_data_node_config.id}` in {ScenarioConfig._ADDITIONAL_DATA_NODES_KEY}"

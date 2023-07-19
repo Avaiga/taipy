@@ -372,7 +372,7 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", set([task_cfg_1]), set(), Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         Core().run()
 
@@ -388,7 +388,7 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", set([task_cfg_1]), set(), Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         Core().run()
 
@@ -454,12 +454,12 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", set([task_cfg_1]), set(), Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         input_cfg_2 = Config.configure_data_node(id="i2", storage_type="pickle", default_data=2, scope=Scope.SCENARIO)
         output_cfg_2 = Config.configure_data_node(id="o2", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_2 = Config.configure_task("t2", print, input_cfg_2, output_cfg_2)
-        scenario_cfg_2 = Config.configure_scenario("s2", set([task_cfg_2]), set(), Frequency.DAILY)
+        scenario_cfg_2 = Config.configure_scenario("s2", [task_cfg_2], [], Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
         job_1 = tp.submit(scenario_1)[0]
@@ -513,41 +513,39 @@ class TestTaipy:
         dn_config_4 = Config.configure_data_node(id="d4", storage_type="in_memory", scope=Scope.SCENARIO)
         task_config_1 = Config.configure_task("t1", print, dn_config_1, dn_config_2)
         task_config_2 = Config.configure_task("t2", print, dn_config_2, dn_config_3)
-        scenario_cfg_1 = Config.configure_scenario(
-            "s1", set([task_config_1, task_config_2]), set([dn_config_4]), Frequency.DAILY
-        )
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_config_1, task_config_2], [dn_config_4], Frequency.DAILY)
 
         scenario = tp.create_scenario(scenario_cfg_1)
         tasks = scenario.tasks
 
         expected_parents = {
-            "scenarios": {scenario},
-            "tasks": {tasks["t1"]},
+            "scenario": {scenario},
+            "task": {tasks["t1"]},
         }
         parents = tp.get_parents(scenario.tasks["t1"].data_nodes["d1"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {
-            "scenarios": {scenario},
-            "tasks": {tasks["t1"], tasks["t2"]},
+            "scenario": {scenario},
+            "task": {tasks["t1"], tasks["t2"]},
         }
         parents = tp.get_parents(scenario.tasks["t1"].data_nodes["d2"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}, "tasks": {tasks["t2"]}}
+        expected_parents = {"scenario": {scenario}, "task": {tasks["t2"]}}
         parents = tp.get_parents(scenario.tasks["t2"].data_nodes["d3"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}}
+        expected_parents = {"scenario": {scenario}}
         parents = tp.get_parents(scenario.tasks["t1"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}}
+        expected_parents = {"scenario": {scenario}}
         parents = tp.get_parents(scenario.tasks["t2"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}}
-        parents = list(tp.get_parents(scenario.additional_data_nodes))[0]
+        expected_parents = {"scenario": {scenario}}
+        parents = tp.get_parents(scenario.additional_data_nodes["d4"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {}

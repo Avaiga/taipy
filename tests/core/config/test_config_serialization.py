@@ -111,8 +111,6 @@ def config_test_scenario():
     )
     test_scenario_cfg.add_sequences({"sequence1": [test_task_cfg]})
 
-    # Config._register(test_scenario_cfg)
-
     Config.add_migration_function("1.0", test_csv_dn_cfg, migrate_csv_path)
 
     return test_scenario_cfg
@@ -486,16 +484,15 @@ def test_read_write_json_configuration_file():
 def test_read_write_toml_configuration_file_migrate_pipeline_in_scenario():
     old_toml_config = """
 [TAIPY]
-root_folder = "./taipy/"
-storage_folder = ".data/"
-clean_entities_enabled = "True:bool"
-repository_type = "filesystem"
 
 [JOB]
 mode = "development"
 max_nb_of_workers = "1:int"
 
 [CORE]
+root_folder = "./taipy/"
+storage_folder = ".data/"
+repository_type = "filesystem"
 mode = "development"
 version_number = ""
 force = "False:bool"

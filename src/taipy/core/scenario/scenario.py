@@ -48,7 +48,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
     """Instance of a Business case to solve.
 
     A scenario holds a list of tasks (instances of `Task^` class) to submit for execution in order to
-    solve the Business case. , It also holds a list of additional data nodes (instances of `DataNode` class)
+    solve the Business case. It also holds a list of additional data nodes (instances of `DataNode` class)
     for extra data related to the scenario.
 
     Attributes:

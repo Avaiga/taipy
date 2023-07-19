@@ -235,34 +235,32 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [input_dn_config]
-        with pytest.raises(SystemExit):
-            Config._collector = IssueCollector()
-            Config.check()
-        assert len(Config._collector.errors) == 1
-        expected_error_message = (
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.warnings) == 1
+        expected_warning_message = (
             "The additional data node `input_dn` in additional_data_nodes field of ScenarioConfig "
             "`new` has already existed as an input or output data node of ScenarioConfig `new` tasks."
         )
-        assert expected_error_message in caplog.text
-        assert len(Config._collector.warnings) == 0
+        assert expected_warning_message in caplog.text
+        assert len(Config._collector.errors) == 0
         assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [input_dn_config, output_dn_config]
-        with pytest.raises(SystemExit):
-            Config._collector = IssueCollector()
-            Config.check()
-        assert len(Config._collector.errors) == 2
-        expected_error_message_1 = (
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.warnings) == 2
+        expected_warning_message_1 = (
             "The additional data node `input_dn` in additional_data_nodes field of ScenarioConfig "
             "`new` has already existed as an input or output data node of ScenarioConfig `new` tasks."
         )
-        expected_error_message_2 = (
+        expected_warning_message_2 = (
             "The additional data node `output_dn` in additional_data_nodes field of ScenarioConfig "
             "`new` has already existed as an input or output data node of ScenarioConfig `new` tasks."
         )
-        assert expected_error_message_1 in caplog.text
-        assert expected_error_message_2 in caplog.text
-        assert len(Config._collector.warnings) == 0
+        assert expected_warning_message_1 in caplog.text
+        assert expected_warning_message_2 in caplog.text
+        assert len(Config._collector.errors) == 0
         assert len(Config._collector.infos) == 0
 
         config._sections[ScenarioConfig.name]["new"]._additional_data_nodes = [DataNodeConfig("bar")]

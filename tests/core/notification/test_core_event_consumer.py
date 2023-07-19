@@ -41,7 +41,7 @@ class ScenarioCoreEventConsumerProcessor(CoreEventConsumerBase):
         self.event_operation_collected[event.operation] = self.event_operation_collected.get(event.operation, 0) + 1
 
 
-class PipelineCreationCoreEventConsumerProcessor(CoreEventConsumerBase):
+class TaskCreationCoreEventConsumerProcessor(CoreEventConsumerBase):
     def __init__(self, registration_id: str, queue: SimpleQueue):
         self.task_event_collected = 0
         self.creation_event_operation_collected = 0
@@ -62,7 +62,7 @@ def test_core_event_consumer():
     register_id_2, register_queue_2 = Notifier.register(
         entity_type=EventEntityType.TASK, operation=EventOperation.CREATION
     )
-    event_processor_2 = PipelineCreationCoreEventConsumerProcessor(register_id_2, register_queue_2)
+    event_processor_2 = TaskCreationCoreEventConsumerProcessor(register_id_2, register_queue_2)
 
     event_processor_0.start()
     event_processor_1.start()
