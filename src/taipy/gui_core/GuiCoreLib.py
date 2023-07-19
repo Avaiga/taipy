@@ -560,6 +560,14 @@ class _GuiCore(ElementLibrary):
         return ["lib/taipy-gui-core.js"]
 
     def on_init(self, gui: Gui) -> t.Optional[t.Tuple[str, t.Any]]:
+        gui._get_default_locals_bind().update(
+            {
+                _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR: "",
+                _GuiCoreContext._SCENARIO_SELECTOR_ID_VAR: "",
+                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR: "",
+                _GuiCoreContext._JOB_SELECTOR_ERROR_VAR: "",
+            }
+        )
         ctx = _GuiCoreContext(gui)
         gui._add_adapter_for_type(_GuiCore.__SCENARIO_ADAPTER, ctx.scenario_adapter)
         gui._add_adapter_for_type(_GuiCore.__DATANODE_ADAPTER, ctx.data_node_adapter)
