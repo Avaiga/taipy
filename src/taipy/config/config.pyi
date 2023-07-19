@@ -152,38 +152,31 @@ class Config:
     def _from_json(cls, config_as_str: str) -> _Config:
         """"""
 
-    @classmethod
-    @property
+    @_Classproperty
     def job_config(cls) -> JobConfig:
         """"""
 
-    @classmethod
-    @property
+    @_Classproperty
     def data_nodes(cls) -> Dict[str, DataNodeConfig]:
         """"""
 
-    @classmethod
-    @property
+    @_Classproperty
     def tasks(cls) -> Dict[str, TaskConfig]:
         """"""
 
-    @classmethod
-    @property
+    @_Classproperty
     def pipelines(cls) -> Dict[str, PipelineConfig]:
         """"""
 
-    @classmethod
-    @property
+    @_Classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """"""
 
-    @classmethod
-    @property
+    @_Classproperty
     def migration_functions(cls) -> Dict[str, MigrationConfig]:
         """"""
 
-    @classmethod
-    @property
+    @_Classproperty
     def core(cls) -> Dict[str, CoreSection]:
         """"""
 
@@ -256,13 +249,13 @@ class Config:
         """
 
     @staticmethod
-    def configure_default_scenario(
+    def set_default_scenario_configuration(
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ) -> "ScenarioConfig":
-        """Configure the default values for scenario configurations.
+        """Set the default values for scenario configurations.
 
         This function creates the *default scenario configuration* object,
         where all scenario configuration objects will find their default
@@ -304,8 +297,8 @@ class Config:
         """
 
     @staticmethod
-    def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
-        """Configure the default values for pipeline configurations.
+    def set_default_pipeline_configuration(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
+        """Set the default values for pipeline configurations.
 
         This function creates the *default pipeline configuration* object,
         where all pipeline configuration objects will find their default
@@ -321,10 +314,10 @@ class Config:
         """
 
     @staticmethod
-    def configure_default_data_node(
+    def set_default_data_node_configuration(
         storage_type: str, scope: Optional[Scope] = None, validity_period: Optional[timedelta] = None, **properties
     ) -> "DataNodeConfig":
-        """Configure the default values for data node configurations.
+        """Set the default values for data node configurations.
 
         This function creates the _default data node configuration_ object,
         where all data node configuration objects will find their default
@@ -364,12 +357,12 @@ class Config:
             storage_type (Optional[str]): The data node configuration storage type. The possible values
                 are None (which is the default value of *"pickle"*, unless it has been overloaded by the
                 *storage_type* value set in the default data node configuration
-                (see `(Config.)configure_default_data_node()^`)), *"pickle"*, *"csv"*, *"excel"*,
+                (see `(Config.)set_default_data_node_configuration()^`)), *"pickle"*, *"csv"*, *"excel"*,
                 *"sql_table"*, *"sql"*, *"json"*, *"parquet"*, *"mongo_collection"*, *"in_memory"*, or
                 *"generic"*.
             scope (Optional[Scope^]): The scope of the data node configuration.<br/>
                 The default value is `Scope.SCENARIO` (or the one specified in
-                `(Config.)configure_default_data_node()^`).
+                `(Config.)set_default_data_node_configuration()^`).
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
                 considered up-to-date. Once the validity period has passed, the data node is considered stale and
                 relevant tasks will run even if they are skippable (see the
@@ -812,14 +805,14 @@ class Config:
         """
 
     @staticmethod
-    def configure_default_task(
+    def set_default_task_configuration(
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         skippable: Optional[bool] = False,
         **properties,
     ) -> "TaskConfig":
-        """Configure the default values for task configurations.
+        """Set the default values for task configurations.
 
         This function creates the *default task configuration* object,
         where all task configuration objects will find their default

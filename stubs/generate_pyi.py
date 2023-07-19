@@ -90,6 +90,8 @@ def _build_entity_config_pyi(base_pyi, filename, entity_map):
         if isinstance(f, ast.FunctionDef):
             if "_configure" in f.name and not f.name.startswith("__"):
                 functions[f.name] = f.lineno
+            elif "_set_default" in f.name and not f.name.startswith("__"):
+                functions[f.name] = f.lineno
 
     for k, v in functions.items():
         begin_line, end_line = _get_function_delimiters(v - 1, lines)
@@ -133,7 +135,7 @@ def _generate_acessors(base_pyi, property_map):
     for property, cls in property_map.items():
         return_template = f"Dict[str, {cls}]" if property != "job_config" else f"{cls}"
         template = (
-            "\t@classmethod\n\t@property\n"
+            "\t@_Classproperty\n"
             + f'\tdef {property}(cls) -> {return_template}:\n\t\t""""""\n'
         ).replace("\t", "    ")
         base_pyi += template + "\n"
