@@ -80,17 +80,6 @@ class _VersionManager(_Manager[_Version]):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _get_all_by(cls, by, filters: Optional[List[Dict]] = None) -> List[_Version]:
-        """
-        Returns all entities based on a criteria.
-        """
-        if not filters:
-            filters = []
-        if by:
-            filters.append(by)
-        return cls._repository._load_all(filters)
-
-    @classmethod
     def _set_development_version(cls, version_number: str) -> str:
         cls._get_or_create(version_number, force=True)
         cls._repository._set_development_version(version_number)
@@ -168,10 +157,10 @@ class _VersionManager(_Manager[_Version]):
             version_number = cls._replace_version_number(cls._DEFAULT_VERSION)
 
             production_versions = cls._get_production_versions()
+            if version_number in production_versions:
+                return production_versions
 
-            if version_number not in production_versions:
-                return version_number
-            return production_versions
+            return version_number
 
         if version_number == cls.__LATEST_VERSION:
             return cls._get_latest_version()

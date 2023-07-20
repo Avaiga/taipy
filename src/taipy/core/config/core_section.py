@@ -31,6 +31,8 @@ class CoreSection(UniqueSection):
         repository_type (str): Type of the repository to be used to store Taipy data. The default value is "filesystem".
         repository_properties (Dict[str, Union[str, int]]): A dictionary of additional properties to be used by the
             repository.
+        read_entity_retry (int): Number of retries to read an entity from the repository before return failure.
+            The default value is 3.
         mode (str): The Taipy operating mode. By default, the `Core^` service runs in "development" mode.
             An "experiment" and a "production" mode are also available. Please refer to the
             [Versioning management](../../core/versioning/) documentation page for more details.
@@ -56,6 +58,9 @@ class CoreSection(UniqueSection):
     _REPOSITORY_PROPERTIES_KEY = "repository_properties"
     _DEFAULT_REPOSITORY_PROPERTIES: Dict = dict()
 
+    _READ_ENTITY_RETRY_KEY = "read_entity_retry"
+    _DEFAULT_READ_ENTITY_RETRY = 3
+
     _MODE_KEY = "mode"
     _DEVELOPMENT_MODE = "development"
     _EXPERIMENT_MODE = "experiment"
@@ -77,6 +82,7 @@ class CoreSection(UniqueSection):
         storage_folder: Optional[str] = None,
         repository_type: Optional[str] = None,
         repository_properties: Optional[Dict[str, Union[str, int]]] = None,
+        read_entity_retry: Optional[int] = None,
         mode: Optional[str] = None,
         version_number: Optional[str] = None,
         force: Optional[bool] = None,
@@ -87,6 +93,9 @@ class CoreSection(UniqueSection):
         self._storage_folder = storage_folder
         self._repository_type = repository_type
         self._repository_properties = repository_properties or {}
+        self._read_entity_retry = (
+            read_entity_retry if read_entity_retry is not None else self._DEFAULT_READ_ENTITY_RETRY
+        )
         self.mode = mode or self._DEFAULT_MODE
         self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
         self.force = force or self._DEFAULT_TAIPY_FORCE
@@ -99,6 +108,7 @@ class CoreSection(UniqueSection):
             self.storage_folder,
             self.repository_type,
             self.repository_properties,
+            self.read_entity_retry,
             self.mode,
             self.version_number,
             self.force,
@@ -146,6 +156,15 @@ class CoreSection(UniqueSection):
     def repository_properties(self, val):
         self._repository_properties = val
 
+    @property
+    def read_entity_retry(self):
+        return _tpl._replace_templates(self._read_entity_retry)
+
+    @read_entity_retry.setter  # type: ignore
+    @_ConfigBlocker._check()
+    def read_entity_retry(self, val):
+        self._read_entity_retry = val
+
     @classmethod
     def default_config(cls):
         return CoreSection(
@@ -153,6 +172,7 @@ class CoreSection(UniqueSection):
             cls._DEFAULT_STORAGE_FOLDER,
             cls._DEFAULT_REPOSITORY_TYPE,
             cls._DEFAULT_REPOSITORY_PROPERTIES,
+            cls._DEFAULT_READ_ENTITY_RETRY,
             cls._DEFAULT_MODE,
             cls._DEFAULT_VERSION_NUMBER,
             cls._DEFAULT_TAIPY_FORCE,
@@ -164,6 +184,7 @@ class CoreSection(UniqueSection):
         self._storage_folder = self._DEFAULT_STORAGE_FOLDER
         self._repository_type = self._DEFAULT_REPOSITORY_TYPE
         self._repository_properties = self._DEFAULT_REPOSITORY_PROPERTIES.copy()
+        self._read_entity_retry = self._DEFAULT_READ_ENTITY_RETRY
         self.mode = self._DEFAULT_MODE
         self.version_number = self._DEFAULT_VERSION_NUMBER
         self.force = self._DEFAULT_TAIPY_FORCE
@@ -180,6 +201,8 @@ class CoreSection(UniqueSection):
             as_dict[self._REPOSITORY_TYPE_KEY] = self._repository_type
         if self._repository_properties:
             as_dict[self._REPOSITORY_PROPERTIES_KEY] = self._repository_properties
+        if self._read_entity_retry is not None:
+            as_dict[self._READ_ENTITY_RETRY_KEY] = self._read_entity_retry
         if self.mode is not None:
             as_dict[self._MODE_KEY] = self.mode
         if self.version_number is not None:
@@ -197,6 +220,7 @@ class CoreSection(UniqueSection):
         storage_folder = as_dict.pop(cls._STORAGE_FOLDER_KEY, None)
         repository_type = as_dict.pop(cls._REPOSITORY_TYPE_KEY, None)
         repository_properties = as_dict.pop(cls._REPOSITORY_PROPERTIES_KEY, None)
+        read_entity_retry = as_dict.pop(cls._READ_ENTITY_RETRY_KEY, None)
         mode = as_dict.pop(cls._MODE_KEY, None)
         version_nb = as_dict.pop(cls._VERSION_NUMBER_KEY, None)
         force = as_dict.pop(cls._TAIPY_FORCE_KEY, None)
@@ -206,6 +230,7 @@ class CoreSection(UniqueSection):
             storage_folder,
             repository_type,
             repository_properties,
+            read_entity_retry,
             mode,
             version_nb,
             force,
@@ -231,6 +256,10 @@ class CoreSection(UniqueSection):
         )
         self._repository_properties.update(repository_properties)
 
+        read_entity_retry = _tpl._replace_templates(as_dict.pop(self._READ_ENTITY_RETRY_KEY, self._read_entity_retry))
+        if self._read_entity_retry != read_entity_retry:
+            self._read_entity_retry = read_entity_retry
+
         mode = _tpl._replace_templates(as_dict.pop(self._MODE_KEY, self.mode))
         if self.mode != mode:
             self.mode = mode
@@ -255,6 +284,7 @@ class CoreSection(UniqueSection):
         storage_folder: Optional[str] = None,
         repository_type: Optional[str] = None,
         repository_properties: Optional[Dict[str, Union[str, int]]] = None,
+        read_entity_retry: Optional[int] = None,
         mode: Optional[str] = None,
         version_number: Optional[str] = None,
         force: Optional[bool] = None,
@@ -273,6 +303,8 @@ class CoreSection(UniqueSection):
                 The default value is "filesystem".
             repository_properties (Optional[Dict[str, Union[str, int]]]): A dictionary of additional properties
                 to be used by the repository.
+            read_entity_retry (Optional[int]): Number of retries to read an entity from the repository
+                before return failure. The default value is 3.
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"*, *"experiment"*, or *"production"*.
             version_number (Optional[str]): The string identifier of the version.
@@ -291,6 +323,7 @@ class CoreSection(UniqueSection):
             storage_folder=storage_folder,
             repository_type=repository_type,
             repository_properties=repository_properties,
+            read_entity_retry=read_entity_retry,
             mode=mode,
             version_number=version_number,
             force=force,

@@ -291,7 +291,7 @@ def pipeline():
 
 @pytest.fixture(scope="function")
 def job(task):
-    return Job(JobId("job"), task, "foo", "bar")
+    return Job(JobId("job"), task, "foo", "bar", version="random_version_number")
 
 
 @pytest.fixture(scope="function")
@@ -426,6 +426,8 @@ def init_config():
     _Checker.add_checker(_TaskConfigChecker)
     _Checker.add_checker(_PipelineConfigChecker)
     _Checker.add_checker(_ScenarioConfigChecker)
+
+    Config.configure_core(read_entity_retry=0)
 
 
 def init_managers():

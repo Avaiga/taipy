@@ -19,7 +19,7 @@ class _VersionMixin:
     _version_manager = _VersionManagerFactory._build_manager()
 
     @classmethod
-    def _fetch_version_number(cls, version_number):
+    def __fetch_version_number(cls, version_number):
         version_number = _VersionManagerFactory._build_manager()._replace_version_number(version_number)
 
         if not isinstance(version_number, List):
@@ -29,7 +29,7 @@ class _VersionMixin:
     @classmethod
     def _build_filters_with_version(cls, version_number) -> List[Dict]:
         filters = []
-        if versions := cls._fetch_version_number(version_number):
+        if versions := cls.__fetch_version_number(version_number):
             filters = [{"version": version} for version in versions]
         return filters
 

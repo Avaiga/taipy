@@ -150,8 +150,12 @@ class TestJobRepository:
         assert len(repository._load_all()) == 10
 
         obj = repository._search("id", "job-2")
-
         assert isinstance(obj, Job)
+
+        obj = repository._search("id", "job-2", filters=[{"version": "random_version_number"}])
+        assert isinstance(obj, Job)
+
+        assert repository._search("id", "job-2", filters=[{"version": "non_existed_version"}]) is None
 
     @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
     def test_export(self, tmpdir, job, repo):

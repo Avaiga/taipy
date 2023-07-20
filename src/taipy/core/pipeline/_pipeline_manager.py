@@ -39,7 +39,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     _EVENT_ENTITY_TYPE = EventEntityType.PIPELINE
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = "all") -> List[Pipeline]:
+    def _get_all(cls, version_number: Optional[str] = None) -> List[Pipeline]:
         """
         Returns all entities.
         """

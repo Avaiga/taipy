@@ -118,7 +118,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return tasks
 
     @classmethod
-    def _get_all(cls, version_number: Optional[str] = "all") -> List[Task]:
+    def _get_all(cls, version_number: Optional[str] = None) -> List[Task]:
         """
         Returns all entities.
         """

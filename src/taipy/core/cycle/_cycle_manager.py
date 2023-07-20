@@ -44,17 +44,6 @@ class _CycleManager(_Manager[Cycle]):
         return cycle
 
     @classmethod
-    def _get_all_by(cls, by, filters: Optional[List[Dict]] = None) -> List[Cycle]:
-        """
-        Returns all entities based on a criteria.
-        """
-        if not filters:
-            filters = []
-        if by:
-            filters.append(by)
-        return cls._repository._load_all(filters)
-
-    @classmethod
     def _get_or_create(
         cls, frequency: Frequency, creation_date: Optional[datetime] = None, name: Optional[str] = None
     ) -> Cycle:
