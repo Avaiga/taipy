@@ -20,7 +20,7 @@ from typing import Callable, Iterable, List, Optional, Set, Union
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .._entity._submittable import _Submittable
+from .._entity.submittable import Submittable
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
@@ -46,7 +46,7 @@ class _Orchestrator(_AbstractOrchestrator):
     @classmethod
     def submit(
         cls,
-        submittable: _Submittable,
+        submittable: Submittable,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,

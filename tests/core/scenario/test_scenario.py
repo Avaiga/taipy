@@ -587,7 +587,7 @@ def test_is_ready_to_run():
     assert scenario.is_ready_to_run()
 
 
-def test_execution_in_progress():
+def test_data_nodes_being_edited():
     data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
     data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
     data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
@@ -618,24 +618,24 @@ def test_execution_in_progress():
     for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7, data_node_8, data_node_9]:
         data_manager._set(dn)
 
-    assert len(scenario.execution_in_progress()) == 0
-    assert scenario.execution_in_progress() == set()
+    assert len(scenario.data_nodes_being_edited()) == 0
+    assert scenario.data_nodes_being_edited() == set()
 
     data_node_1.edit_in_progress = True
-    assert len(scenario.execution_in_progress()) == 1
-    assert scenario.execution_in_progress() == {data_node_1}
+    assert len(scenario.data_nodes_being_edited()) == 1
+    assert scenario.data_nodes_being_edited() == {data_node_1}
 
     data_node_2.edit_in_progress = True
     data_node_6.edit_in_progress = True
     data_node_8.edit_in_progress = True
-    assert len(scenario.execution_in_progress()) == 4
-    assert scenario.execution_in_progress() == {data_node_1, data_node_2, data_node_6, data_node_8}
+    assert len(scenario.data_nodes_being_edited()) == 4
+    assert scenario.data_nodes_being_edited() == {data_node_1, data_node_2, data_node_6, data_node_8}
 
     data_node_4.edit_in_progress = True
     data_node_5.edit_in_progress = True
     data_node_9.edit_in_progress = True
-    assert len(scenario.execution_in_progress()) == 7
-    assert scenario.execution_in_progress() == {
+    assert len(scenario.data_nodes_being_edited()) == 7
+    assert scenario.data_nodes_being_edited() == {
         data_node_1,
         data_node_2,
         data_node_4,
@@ -649,19 +649,19 @@ def test_execution_in_progress():
     data_node_2.edit_in_progress = False
     data_node_6.edit_in_progress = False
     data_node_8.edit_in_progress = False
-    assert len(scenario.execution_in_progress()) == 3
-    assert scenario.execution_in_progress() == {data_node_4, data_node_5, data_node_9}
+    assert len(scenario.data_nodes_being_edited()) == 3
+    assert scenario.data_nodes_being_edited() == {data_node_4, data_node_5, data_node_9}
 
     data_node_4.edit_in_progress = False
     data_node_5.edit_in_progress = False
     data_node_7.edit_in_progress = True
-    assert len(scenario.execution_in_progress()) == 2
-    assert scenario.execution_in_progress() == {data_node_7, data_node_9}
+    assert len(scenario.data_nodes_being_edited()) == 2
+    assert scenario.data_nodes_being_edited() == {data_node_7, data_node_9}
 
     data_node_7.edit_in_progress = False
     data_node_9.edit_in_progress = False
-    assert len(scenario.execution_in_progress()) == 0
-    assert scenario.execution_in_progress() == set()
+    assert len(scenario.data_nodes_being_edited()) == 0
+    assert scenario.data_nodes_being_edited() == set()
 
 
 def test_get_tasks():

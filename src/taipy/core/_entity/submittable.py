@@ -23,8 +23,16 @@ from ..task.task import Task
 from ._dag import _DAG
 
 
-class _Submittable:
-    def __init__(self, subscribers=None):
+class Submittable:
+    """Instance of an entity that can be submitted for execution.
+
+    A submittable holds functions that can be used to build the executional directed acyclic graph.
+
+    Attributes:
+        subscribers (List[Callable]): The list of callbacks to be called on `Job^`'s status change.
+    """
+
+    def __init__(self, subscribers: Optional[List[_Subscriber]] = None):
         self._subscribers = _ListAttributes(self, subscribers or list())
 
     @abc.abstractmethod
@@ -37,26 +45,28 @@ class _Submittable:
     ):
         raise NotImplementedError
 
-    def __get_all_data_nodes_in_dag(self, dag: Optional[nx.DiGraph] = None) -> Set[DataNode]:
-        dag = self._build_dag() if not dag else dag
-        return {node for node in dag.nodes if isinstance(node, DataNode)}
-
-    def get_inputs(self, dag: Optional[nx.DiGraph] = None) -> Set[DataNode]:
+    def get_inputs(self) -> Set[DataNode]:
         """Return the set of input data nodes of the submittable entity.
 
         Returns:
             The set of input data nodes.
         """
-        dag = self._build_dag() if not dag else dag
+        dag = self._build_dag()
+        return self.__get_inputs(dag)
+
+    def __get_inputs(self, dag: nx.DiGraph) -> Set[DataNode]:
         return {node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)}
 
-    def get_outputs(self, dag: Optional[nx.DiGraph] = None) -> Set[DataNode]:
+    def get_outputs(self) -> Set[DataNode]:
         """Return the set of output data nodes of the submittable entity.
 
         Returns:
             The set of output data nodes.
         """
-        dag = self._build_dag() if not dag else dag
+        dag = self._build_dag()
+        return self.__get_outputs(dag)
+
+    def __get_outputs(self, dag: nx.DiGraph) -> set[DataNode]:
         return {node for node, degree in dict(dag.out_degree).items() if degree == 0 and isinstance(node, DataNode)}
 
     def get_intermediate(self) -> Set[DataNode]:
@@ -66,8 +76,8 @@ class _Submittable:
             The set of intermediate data nodes.
         """
         dag = self._build_dag()
-        all_data_nodes_in_dag = self.__get_all_data_nodes_in_dag(dag)
-        return all_data_nodes_in_dag - self.get_inputs(dag) - self.get_outputs(dag)
+        all_data_nodes_in_dag = {node for node in dag.nodes if isinstance(node, DataNode)}
+        return all_data_nodes_in_dag - self.__get_inputs(dag) - self.__get_outputs(dag)
 
     def is_ready_to_run(self) -> bool:
         """Indicate if the entity is ready to be run.
@@ -77,25 +87,21 @@ class _Submittable:
         """
         return all(dn.is_ready_for_reading for dn in self.get_inputs())
 
-    def execution_in_progress(self) -> Set[DataNode]:
-        """Return the set of data nodes of the submittable entity that are being executed.
+    def data_nodes_being_edited(self) -> Set[DataNode]:
+        """Return the set of data nodes of the submittable entity that are being edited.
 
         Returns:
-            The set of data nodes that are being executed.
+            The set of data nodes that are being edited.
         """
-        all_data_nodes_in_dag = self.__get_all_data_nodes_in_dag()
-        data_nodes_in_progress = set()
-        for dn in all_data_nodes_in_dag:
-            if dn.edit_in_progress:
-                data_nodes_in_progress.add(dn)
-        return data_nodes_in_progress
+        dag = self._build_dag()
+        return {node for node in dag.nodes if isinstance(node, DataNode) and node.edit_in_progress}
 
     @abc.abstractmethod
-    def subscribe(self, callback: Callable[[_Submittable, Job], None], params: Optional[List[Any]] = None):
+    def subscribe(self, callback: Callable[[Submittable, Job], None], params: Optional[List[Any]] = None):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def unsubscribe(self, callback: Callable[[_Submittable, Job], None], params: Optional[List[Any]] = None):
+    def unsubscribe(self, callback: Callable[[Submittable, Job], None], params: Optional[List[Any]] = None):
         raise NotImplementedError
 
     @abc.abstractmethod

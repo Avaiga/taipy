@@ -428,7 +428,7 @@ def test_is_ready_to_run():
     assert pipeline.is_ready_to_run()
 
 
-def test_execution_in_progress():
+def test_data_nodes_being_edited():
     data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
     data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
     data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
@@ -450,38 +450,38 @@ def test_execution_in_progress():
     for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7]:
         data_manager._set(dn)
 
-    assert len(pipeline.execution_in_progress()) == 0
-    assert pipeline.execution_in_progress() == set()
+    assert len(pipeline.data_nodes_being_edited()) == 0
+    assert pipeline.data_nodes_being_edited() == set()
 
     data_node_1.edit_in_progress = True
-    assert len(pipeline.execution_in_progress()) == 1
-    assert pipeline.execution_in_progress() == {data_node_1}
+    assert len(pipeline.data_nodes_being_edited()) == 1
+    assert pipeline.data_nodes_being_edited() == {data_node_1}
 
     data_node_2.edit_in_progress = True
     data_node_6.edit_in_progress = True
-    assert len(pipeline.execution_in_progress()) == 3
-    assert pipeline.execution_in_progress() == {data_node_1, data_node_2, data_node_6}
+    assert len(pipeline.data_nodes_being_edited()) == 3
+    assert pipeline.data_nodes_being_edited() == {data_node_1, data_node_2, data_node_6}
 
     data_node_4.edit_in_progress = True
     data_node_5.edit_in_progress = True
-    assert len(pipeline.execution_in_progress()) == 5
-    assert pipeline.execution_in_progress() == {data_node_1, data_node_2, data_node_4, data_node_5, data_node_6}
+    assert len(pipeline.data_nodes_being_edited()) == 5
+    assert pipeline.data_nodes_being_edited() == {data_node_1, data_node_2, data_node_4, data_node_5, data_node_6}
 
     data_node_1.edit_in_progress = False
     data_node_2.edit_in_progress = False
     data_node_6.edit_in_progress = False
-    assert len(pipeline.execution_in_progress()) == 2
-    assert pipeline.execution_in_progress() == {data_node_4, data_node_5}
+    assert len(pipeline.data_nodes_being_edited()) == 2
+    assert pipeline.data_nodes_being_edited() == {data_node_4, data_node_5}
 
     data_node_4.edit_in_progress = False
     data_node_5.edit_in_progress = False
     data_node_7.edit_in_progress = True
-    assert len(pipeline.execution_in_progress()) == 1
-    assert pipeline.execution_in_progress() == {data_node_7}
+    assert len(pipeline.data_nodes_being_edited()) == 1
+    assert pipeline.data_nodes_being_edited() == {data_node_7}
 
     data_node_7.edit_in_progress = False
-    assert len(pipeline.execution_in_progress()) == 0
-    assert pipeline.execution_in_progress() == set()
+    assert len(pipeline.data_nodes_being_edited()) == 0
+    assert pipeline.data_nodes_being_edited() == set()
 
 
 def test_get_tasks():
