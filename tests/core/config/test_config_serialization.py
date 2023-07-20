@@ -299,6 +299,7 @@ def test_read_write_json_configuration_file():
 "root_folder": "./taipy/",
 "storage_folder": ".data/",
 "repository_type": "filesystem",
+"read_entity_retry": "0:int",
 "mode": "development",
 "version_number": "",
 "force": "False:bool",
