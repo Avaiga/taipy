@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import abc
-from typing import Any, List
+from typing import Any, List, Optional, Set
 
 from ..._config import _Config
 from ..issue_collector import IssueCollector
@@ -37,8 +37,16 @@ class _ConfigChecker:
     def _info(self, field: str, value: Any, message: str):
         self._collector._add_info(field, value, message, self.__class__.__name__)
 
-    def _check_children(self, parent_config_class, config_id: str, config_key: str, config_value, child_config_class):
-        if not config_value:
+    def _check_children(
+        self,
+        parent_config_class,
+        config_id: str,
+        config_key: str,
+        config_value,
+        child_config_class,
+        can_be_empty: Optional[bool] = False,
+    ):
+        if not config_value and not can_be_empty:
             self._warning(
                 config_key,
                 config_value,
@@ -46,7 +54,8 @@ class _ConfigChecker:
             )
         else:
             if not (
-                isinstance(config_value, List) and all(map(lambda x: isinstance(x, child_config_class), config_value))
+                (isinstance(config_value, List) or isinstance(config_value, Set))
+                and all(map(lambda x: isinstance(x, child_config_class), config_value))
             ):
                 self._error(
                     config_key,
