@@ -23,7 +23,7 @@ from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
-from .._entity._submittable import _Submittable
+from .._entity.submittable import Submittable
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
@@ -36,7 +36,7 @@ from ..task.task_id import TaskId
 from .pipeline_id import PipelineId
 
 
-class Pipeline(_Entity, _Submittable, _Labeled):
+class Pipeline(_Entity, Submittable, _Labeled):
     """List of `Task^`s and additional attributes representing a set of data processing
     elements connected as a direct acyclic graph.
 
