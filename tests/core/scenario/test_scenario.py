@@ -20,7 +20,7 @@ from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
@@ -90,10 +90,10 @@ def test_create_scenario(cycle, current_datetime):
     with pytest.raises(InvalidConfigurationId):
         Scenario("foo bar", [], {})
 
-    input_1 = InMemoryDataNode("input_1", Scope.SCENARIO)
-    input_2 = InMemoryDataNode("input_2", Scope.SCENARIO)
-    output_1 = InMemoryDataNode("output_1", Scope.SCENARIO)
-    output_2 = InMemoryDataNode("output_2", Scope.SCENARIO)
+    input_1 = PickleDataNode("input_1", Scope.SCENARIO)
+    input_2 = PickleDataNode("input_2", Scope.SCENARIO)
+    output_1 = PickleDataNode("output_1", Scope.SCENARIO)
+    output_2 = PickleDataNode("output_2", Scope.SCENARIO)
     task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
     task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
 
@@ -536,14 +536,14 @@ def test_get_inputs_outputs_intermediate_data_nodes():
 
 
 def test_is_ready_to_run():
-    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
-    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
-    data_node_4 = InMemoryDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
-    data_node_5 = InMemoryDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
-    data_node_6 = InMemoryDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
-    data_node_7 = InMemoryDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
-    data_node_8 = InMemoryDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
-    data_node_9 = InMemoryDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
+    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
+    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
+    data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
+    data_node_5 = PickleDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
+    data_node_6 = PickleDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
+    data_node_7 = PickleDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
+    data_node_8 = PickleDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
+    data_node_9 = PickleDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
     task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
     task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
     task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
@@ -588,14 +588,14 @@ def test_is_ready_to_run():
 
 
 def test_execution_in_progress():
-    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
-    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
-    data_node_4 = InMemoryDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
-    data_node_5 = InMemoryDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
-    data_node_6 = InMemoryDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
-    data_node_7 = InMemoryDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
-    data_node_8 = InMemoryDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
-    data_node_9 = InMemoryDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
+    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
+    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
+    data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
+    data_node_5 = PickleDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
+    data_node_6 = PickleDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
+    data_node_7 = PickleDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
+    data_node_8 = PickleDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
+    data_node_9 = PickleDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
     task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
     task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
     task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
