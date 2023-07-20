@@ -39,7 +39,7 @@ import {
     Pipeline as PipelineIcon,
     Scenario as ScenarioIcon,
 } from "./icons";
-import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, ParentItemSx, tinyIconButtonSx } from "./utils";
+import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, ParentItemSx, tinyIconButtonSx, tinySelPinIconButtonSx } from "./utils";
 
 export interface EditProps {
     id: string;
@@ -83,17 +83,6 @@ const tinyPinIconButtonSx = (theme: Theme) => ({
     ...tinyIconButtonSx,
     backgroundColor: alpha(theme.palette.text.secondary, 0.15),
     color: "text.secondary",
-
-    "&:hover": {
-        backgroundColor: alpha(theme.palette.secondary.main, 0.75),
-        color: "secondary.contrastText",
-    },
-});
-
-const tinySelPinIconButtonSx = (theme: Theme) => ({
-    ...tinyIconButtonSx,
-    backgroundColor: "secondary.main",
-    color: "secondary.contrastText",
 
     "&:hover": {
         backgroundColor: alpha(theme.palette.secondary.main, 0.75),

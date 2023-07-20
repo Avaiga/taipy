@@ -14,7 +14,7 @@
 import React from "react";
 import Box from "@mui/material/Box";
 
-import { MainBoxSx, useClassNames } from "./utils";
+import { MainTreeBoxSx, useClassNames } from "./utils";
 import { Cycles, DataNodes, NodeType, Scenarios } from "./utils/types";
 import CoreSelector from "./CoreSelector";
 
@@ -42,7 +42,7 @@ const NodeSelector = (props: NodeSelectorProps) => {
     const { showPins = true } = props;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     return (
-        <Box sx={MainBoxSx} id={props.id} className={className}>
+        <Box sx={MainTreeBoxSx} id={props.id} className={className}>
             <CoreSelector
                 {...props}
                 entities={props.datanodes}

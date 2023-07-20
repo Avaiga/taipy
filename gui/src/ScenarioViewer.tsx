@@ -25,7 +25,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { FlagOutlined, DeleteOutline, Send, CheckCircle, Cancel, ArrowForwardIosSharp } from "@mui/icons-material";
+import { FlagOutlined, Send, CheckCircle, Cancel, ArrowForwardIosSharp } from "@mui/icons-material";
 
 import {
     createRequestUpdateAction,
@@ -35,19 +35,22 @@ import {
     useModule,
 } from "taipy-gui";
 
-import { FlagSx, ScFProps, ScenarioFull, ScenarioFullLength, disableColor, useClassNames } from "./utils";
+import {
+    AccordionIconSx,
+    AccordionSummarySx,
+    FieldNoMaxWidth,
+    FlagSx,
+    IconPaddingSx,
+    MainBoxSx,
+    ScFProps,
+    ScenarioFull,
+    ScenarioFullLength,
+    disableColor,
+    hoverSx,
+    useClassNames,
+} from "./utils";
 import ConfirmDialog from "./utils/ConfirmDialog";
-
-type Property = {
-    id: string;
-    key: string;
-    value: string;
-};
-type ScenarioEditPayload = {
-    id: string;
-    properties?: Property[];
-    deleted_properties?: Array<Partial<Property>>;
-};
+import PropertiesEditor from "./PropertiesEditor";
 
 interface ScenarioViewerProps {
     id?: string;
@@ -91,43 +94,13 @@ interface PipelinesRowProps {
     submittable: boolean;
 }
 
-const MainBoxSx = {
-    overflowY: "auto",
-};
-
-const FieldNoMaxWidth = {
-    maxWidth: "none",
-};
-
-const AccordionIconSx = { fontSize: "0.9rem" };
 const ChipSx = { ml: 1 };
-const IconPaddingSx = { padding: 0 };
-const DeleteIconSx = { height: 50, width: 50, p: 0 };
 
 const tagsAutocompleteSx = {
     "& .MuiOutlinedInput-root": {
         padding: "3px 15px 3px 3px !important",
     },
     maxWidth: "none",
-};
-
-const hoverSx = {
-    "&:hover": {
-        bgcolor: "action.hover",
-        cursor: "text",
-    },
-    mt: 0,
-};
-
-const AccordionSummarySx = {
-    flexDirection: "row-reverse",
-    "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
-        transform: "rotate(90deg)",
-        mr: 1,
-    },
-    "& .MuiAccordionSummary-content": {
-        mr: 1,
-    },
 };
 
 const PipelineRow = ({
@@ -295,13 +268,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         }
     }, [isScenario, props.onEdit, scId, id, dispatch, module]);
 
-    const [properties, setProperties] = useState<Property[]>([]);
-    const [newProp, setNewProp] = useState<Property>({
-        id: "",
-        key: "",
-        value: "",
-    });
-
     // userExpanded
     const [userExpanded, setUserExpanded] = useState(isScenario && expanded);
     const onExpand = useCallback(
@@ -378,72 +344,6 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     );
     const onChangeTags = useCallback((_: SyntheticEvent, tags: string[]) => setTags(tags), []);
 
-    // Properties
-    const updatePropertyField = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id = "", name = "" } = e.currentTarget.parentElement?.parentElement?.dataset || {};
-        if (name) {
-            if (id) {
-                setProperties((ps) => ps.map((p) => (id === p.id ? { ...p, [name]: e.target.value } : p)));
-            } else {
-                setNewProp((np) => ({ ...np, [name]: e.target.value }));
-            }
-        }
-    }, []);
-
-    const editProperty = useCallback(
-        (e: MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
-            if (isScenario) {
-                const { id: propId = "" } = e.currentTarget.dataset || {};
-                const property = propId ? properties.find((p) => p.id === propId) : newProp;
-                if (property) {
-                    const oldId = property.id;
-                    const payload: ScenarioEditPayload = { id: scId, properties: [property] };
-                    if (oldId && oldId != property.key) {
-                        payload.deleted_properties = [{ key: oldId }];
-                    }
-                    dispatch(createSendActionNameAction(id, module, props.onEdit, payload));
-                }
-                setNewProp((np) => ({ ...np, key: "", value: "" }));
-                setFocusName("");
-            }
-        },
-        [isScenario, props.onEdit, scId, properties, newProp, id, dispatch, module]
-    );
-    const cancelProperty = useCallback(
-        (e: MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
-            if (isScenario) {
-                const { id: propId = "" } = e.currentTarget.dataset || {};
-                const property = scProperties.find(([key]) => key === propId);
-                property &&
-                    setProperties((ps) =>
-                        ps.map((p) => (p.id === property[0] ? { ...p, key: property[0], value: property[1] } : p))
-                    );
-                setFocusName("");
-            }
-        },
-        [isScenario, scProperties]
-    );
-
-    const deleteProperty = useCallback(
-        (e: React.MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
-            const { id: propId = "" } = e.currentTarget.dataset;
-            setProperties((ps) => ps.filter((item) => item.id !== propId));
-            const property = properties.find((p) => p.id === propId);
-            property &&
-                dispatch(
-                    createSendActionNameAction(id, module, props.onEdit, {
-                        id: scId,
-                        deleted_properties: [property],
-                    })
-                );
-            setFocusName("");
-        },
-        [props.onEdit, scId, id, dispatch, module, properties]
-    );
-
     // pipelines
     const editPipeline = useCallback(
         (id: string, label: string) => {
@@ -458,17 +358,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // on scenario change
     useEffect(() => {
         showTags && setTags(scTags);
-        showProperties &&
-            setProperties(
-                scProperties.map(([k, v]) => ({
-                    id: k,
-                    key: k,
-                    value: v,
-                }))
-            );
         setLabel(scLabel);
         setUserExpanded(expanded && isScenario);
-    }, [scTags, scProperties, scLabel, isScenario, showTags, showProperties, expanded]);
+    }, [scTags, scLabel, isScenario, showTags, expanded]);
 
     // Refresh on broadcast
     useEffect(() => {
@@ -589,7 +481,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 <Typography variant="subtitle2">{scLabel}</Typography>
                                             </Grid>
                                         </>
-                                    )}{" "}
+                                    )}
                                 </Grid>
                                 {showTags ? (
                                     <Grid
@@ -665,185 +557,17 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             <Grid item xs={12}>
                                 <Divider />
                             </Grid>
-                            {showProperties ? (
-                                <>
-                                    <Grid item xs={12} container rowSpacing={2}>
-                                        {properties
-                                            ? properties.map((property) => {
-                                                  const propName = `property-${property.id}`;
-                                                  return (
-                                                      <Grid
-                                                          item
-                                                          xs={12}
-                                                          spacing={1}
-                                                          container
-                                                          justifyContent="space-between"
-                                                          key={property.id}
-                                                          data-focus={propName}
-                                                          onClick={onFocus}
-                                                          sx={hoverSx}
-                                                      >
-                                                          {active && focusName === propName ? (
-                                                              <>
-                                                                  <Grid item xs={4}>
-                                                                      <TextField
-                                                                          label="Key"
-                                                                          variant="outlined"
-                                                                          value={property.key}
-                                                                          sx={FieldNoMaxWidth}
-                                                                          disabled={!isScenario}
-                                                                          data-name="key"
-                                                                          data-id={property.id}
-                                                                          onChange={updatePropertyField}
-                                                                      />
-                                                                  </Grid>
-                                                                  <Grid item xs={5}>
-                                                                      <TextField
-                                                                          label="Value"
-                                                                          variant="outlined"
-                                                                          value={property.value}
-                                                                          sx={FieldNoMaxWidth}
-                                                                          disabled={!isScenario}
-                                                                          data-name="value"
-                                                                          data-id={property.id}
-                                                                          onChange={updatePropertyField}
-                                                                      />
-                                                                  </Grid>
-                                                                  <Grid
-                                                                      item
-                                                                      xs={2}
-                                                                      container
-                                                                      alignContent="center"
-                                                                      alignItems="center"
-                                                                      justifyContent="center"
-                                                                  >
-                                                                      <IconButton
-                                                                          sx={IconPaddingSx}
-                                                                          data-id={property.id}
-                                                                          onClick={editProperty}
-                                                                      >
-                                                                          <CheckCircle color="primary" />
-                                                                      </IconButton>
-                                                                      <IconButton
-                                                                          sx={IconPaddingSx}
-                                                                          data-id={property.id}
-                                                                          onClick={cancelProperty}
-                                                                      >
-                                                                          <Cancel color="inherit" />
-                                                                      </IconButton>
-                                                                  </Grid>
-                                                                  <Grid
-                                                                      item
-                                                                      xs={1}
-                                                                      container
-                                                                      alignContent="center"
-                                                                      alignItems="center"
-                                                                      justifyContent="center"
-                                                                  >
-                                                                      <IconButton
-                                                                          sx={DeleteIconSx}
-                                                                          data-id={property.id}
-                                                                          onClick={deleteProperty}
-                                                                          disabled={!isScenario}
-                                                                      >
-                                                                          <DeleteOutline
-                                                                              fontSize="small"
-                                                                              color={disableColor(
-                                                                                  "primary",
-                                                                                  !isScenario
-                                                                              )}
-                                                                          />
-                                                                      </IconButton>
-                                                                  </Grid>
-                                                              </>
-                                                          ) : (
-                                                              <>
-                                                                  <Grid item xs={4}>
-                                                                      <Typography variant="subtitle2">
-                                                                          {property.key}
-                                                                      </Typography>
-                                                                  </Grid>
-                                                                  <Grid item xs={5}>
-                                                                      <Typography variant="subtitle2">
-                                                                          {property.value}
-                                                                      </Typography>
-                                                                  </Grid>{" "}
-                                                                  <Grid item xs={3} />
-                                                              </>
-                                                          )}
-                                                      </Grid>
-                                                  );
-                                              })
-                                            : null}
-                                        <Grid
-                                            item
-                                            xs={12}
-                                            spacing={1}
-                                            container
-                                            justifyContent="space-between"
-                                            data-focus="new-property"
-                                            onClick={onFocus}
-                                            sx={hoverSx}
-                                        >
-                                            {active && focusName == "new-property" ? (
-                                                <>
-                                                    <Grid item xs={4}>
-                                                        <TextField
-                                                            value={newProp.key}
-                                                            data-name="key"
-                                                            onChange={updatePropertyField}
-                                                            label="Key"
-                                                            variant="outlined"
-                                                            sx={FieldNoMaxWidth}
-                                                            disabled={!isScenario}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={5}>
-                                                        <TextField
-                                                            value={newProp.value}
-                                                            data-name="value"
-                                                            onChange={updatePropertyField}
-                                                            label="Value"
-                                                            variant="outlined"
-                                                            sx={FieldNoMaxWidth}
-                                                            disabled={!isScenario}
-                                                        />
-                                                    </Grid>
-                                                    <Grid
-                                                        item
-                                                        xs={2}
-                                                        container
-                                                        alignContent="center"
-                                                        alignItems="center"
-                                                        justifyContent="center"
-                                                    >
-                                                        <IconButton sx={IconPaddingSx} onClick={editProperty}>
-                                                            <CheckCircle color="primary" />
-                                                        </IconButton>
-                                                        <IconButton sx={IconPaddingSx} onClick={cancelProperty}>
-                                                            <Cancel color="inherit" />
-                                                        </IconButton>
-                                                    </Grid>
-                                                    <Grid item xs={1} />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Grid item xs={4}>
-                                                        <Typography variant="subtitle2">New Property Key</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={5}>
-                                                        <Typography variant="subtitle2">Value</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={3} />
-                                                </>
-                                            )}
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Divider />
-                                    </Grid>
-                                </>
-                            ) : null}
+                            <PropertiesEditor
+                                entityId={scId}
+                                active={active}
+                                isDefined={isScenario}
+                                entProperties={scProperties}
+                                show={showProperties}
+                                focusName={focusName}
+                                setFocusName={setFocusName}
+                                onFocus={onFocus}
+                                onEdit={props.onEdit}
+                            />
                             {showPipelines ? (
                                 <>
                                     <Grid item xs={12} container justifyContent="space-between">

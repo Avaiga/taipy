@@ -37,9 +37,9 @@ import { useFormik } from "formik";
 import { useDispatch, useModule, createSendActionNameAction, getUpdateVar, createSendUpdateAction } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
+import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
-import { NodeType } from "./utils/types";
+import { Cycles, NodeType, Scenarios } from "./utils/types";
 
 type Property = {
     id: string;
@@ -47,9 +47,9 @@ type Property = {
     value: string;
 };
 
-type Scenario = [string, string, undefined, number, boolean];
-type Scenarios = Array<Scenario>;
-type Cycles = Array<[string, string, Scenarios, number, boolean]>;
+// type Scenario = [string, string, undefined, number, boolean];
+// type Scenarios = Array<Scenario>;
+// type Cycles = Array<[string, string, Scenarios, number, boolean]>;
 
 interface ScenarioDict {
     id?: string;
@@ -65,11 +65,11 @@ interface ScenarioSelectorProps {
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
     updateVarName?: string;
+    updateVars: string;
     scenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
     coreChanged?: Record<string, unknown>;
-    updateVars: string;
     configs?: Array<[string, string]>;
     error?: string;
     propagate?: boolean;
@@ -466,7 +466,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     return (
         <>
-            <Box sx={MainBoxSx} id={props.id} className={className}>
+            <Box sx={MainTreeBoxSx} id={props.id} className={className}>
                 <CoreSelector
                     {...props}
                     entities={props.scenarios}

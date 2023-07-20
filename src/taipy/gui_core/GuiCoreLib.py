@@ -137,20 +137,62 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
         return _TaipyBase._HOLDER_PREFIX + "ScG"
 
 
+class _GuiCoreDatanodeAdapter(_TaipyBase):
+    __INNER_PROPS = ["name"]
+
+    def get(self):
+        data = super().get()
+        if isinstance(data, DataNode):
+            datanode = core_get(data.id)
+            if datanode:
+                owner = core_get(datanode.owner_id) if datanode.owner_id else None
+                return [
+                    datanode.id,
+                    datanode.storage_type() if hasattr(datanode, "storage_type") else "",
+                    datanode.config_id,
+                    f"{datanode.last_edit_date}" if datanode.last_edit_date else "",
+                    f"{datanode.expiration_date}" if datanode.last_edit_date else "",
+                    datanode.get_simple_label(),
+                    datanode.owner_id or "",
+                    owner.get_simple_label() if owner else "GLOBAL",
+                    _EntityType.CYCLE.value
+                    if isinstance(owner, Cycle)
+                    else _EntityType.SCENARIO.value
+                    if isinstance(owner, Scenario)
+                    else -1,
+                    [
+                        (k, f"{v}")
+                        for k, v in datanode.properties.items()
+                        if k not in _GuiCoreDatanodeAdapter.__INNER_PROPS
+                    ]
+                    if datanode.properties
+                    else [],
+                ]
+        return None
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Dn"
+
+
 class _GuiCoreContext(CoreEventConsumerBase):
     __PROP_ENTITY_ID = "id"
-    __PROP_SCENARIO_CONFIG_ID = "config"
-    __PROP_SCENARIO_DATE = "date"
+    __PROP_CONFIG_ID = "config"
+    __PROP_DATE = "date"
     __PROP_ENTITY_NAME = "name"
     __PROP_SCENARIO_PRIMARY = "primary"
     __PROP_SCENARIO_TAGS = "tags"
-    __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_ENTITY_NAME)
+    __ENTITY_PROPS = (__PROP_CONFIG_ID, __PROP_DATE, __PROP_ENTITY_NAME)
     __ACTION = "action"
     _CORE_CHANGED_NAME = "core_changed"
     _SCENARIO_SELECTOR_ERROR_VAR = "gui_core_sc_error"
     _SCENARIO_SELECTOR_ID_VAR = "gui_core_sc_id"
     _SCENARIO_VIZ_ERROR_VAR = "gui_core_sv_error"
     _JOB_SELECTOR_ERROR_VAR = "gui_core_js_error"
+    _DATANODE_VIZ_ERROR_VAR = "gui_core_dv_error"
+    _DATANODE_VIZ_OWNER_ID_VAR = "gui_core_dv_owner_id"
+    _DATANODE_VIZ_HISTORY_ID_VAR = "gui_core_dv_history_id"
+    _DATANODE_VIZ_DATA_ID_VAR = "gui_core_dv_data_id"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
@@ -195,7 +237,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def scenario_adapter(self, data):
         if hasattr(data, "id") and core_get(data.id) is not None:
-            if isinstance(data, Cycle):
+            if self.scenario_by_cycle and isinstance(data, Cycle):
                 return (
                     data.id,
                     data.get_simple_label(),
@@ -267,12 +309,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             else:
                 scenario = core_get(scenario_id)
         else:
-            config_id = data.get(_GuiCoreContext.__PROP_SCENARIO_CONFIG_ID)
+            config_id = data.get(_GuiCoreContext.__PROP_CONFIG_ID)
             scenario_config = Config.scenarios.get(config_id)
             if scenario_config is None:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid configuration id ({config_id})")
                 return
-            date_str = data.get(_GuiCoreContext.__PROP_SCENARIO_DATE)
+            date_str = data.get(_GuiCoreContext.__PROP_DATE)
             try:
                 date = parser.parse(date_str) if isinstance(date_str, str) else None
             except Exception as e:
@@ -289,11 +331,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     try:
                         new_keys = [prop.get("key") for prop in props]
                         for key in t.cast(dict, sc.properties).keys():
-                            if key and key not in _GuiCoreContext.__SCENARIO_PROPS and key not in new_keys:
+                            if key and key not in _GuiCoreContext.__ENTITY_PROPS and key not in new_keys:
                                 t.cast(dict, sc.properties).pop(key, None)
                         for prop in props:
                             key = prop.get("key")
-                            if key and key not in _GuiCoreContext.__SCENARIO_PROPS:
+                            if key and key not in _GuiCoreContext.__ENTITY_PROPS:
                                 sc._properties[key] = prop.get("value")
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, "")
                     except Exception as e:
@@ -312,27 +354,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
                     if primary is True:
                         set_primary(entity)
-                with entity as ent:
-                    if isinstance(ent, Scenario):
-                        tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
-                        if isinstance(tags, (list, tuple)):
-                            ent.tags = {t for t in tags}
-                    name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
-                    if isinstance(name, str):
-                        ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
-                    props = data.get("properties")
-                    if isinstance(props, (list, tuple)):
-                        for prop in props:
-                            key = prop.get("key")
-                            if key and key not in _GuiCoreContext.__SCENARIO_PROPS:
-                                ent.properties[key] = prop.get("value")
-                    deleted_props = data.get("deleted_properties")
-                    if isinstance(deleted_props, (list, tuple)):
-                        for prop in deleted_props:
-                            key = prop.get("key")
-                            if key and key not in _GuiCoreContext.__SCENARIO_PROPS:
-                                ent.properties.pop(key, None)
-                    state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
+                self.__edit_properties(entity, data)
+                state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
 
@@ -429,6 +452,85 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         errs.append(f"Error canceling job. {e}")
             state.assign(_GuiCoreContext._JOB_SELECTOR_ERROR_VAR, "<br/>".join(errs) if errs else "")
 
+    def edit_data_node(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+            return
+        data = args[0]
+        entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
+        entity: DataNode = core_get(entity_id)
+        if isinstance(entity, DataNode):
+            try:
+                self.__edit_properties(entity, data)
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+            except Exception as e:
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode. {e}")
+
+    def __edit_properties(self, entity: t.Union[Scenario, Pipeline, DataNode], data: t.Dict[str, str]):
+        with entity as ent:
+            if isinstance(ent, Scenario):
+                tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
+                if isinstance(tags, (list, tuple)):
+                    ent.tags = {t for t in tags}
+            name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
+            if isinstance(name, str):
+                ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
+            props = data.get("properties")
+            if isinstance(props, (list, tuple)):
+                for prop in props:
+                    key = prop.get("key")
+                    if key and key not in _GuiCoreContext.__ENTITY_PROPS:
+                        ent.properties[key] = prop.get("value")
+            deleted_props = data.get("deleted_properties")
+            if isinstance(deleted_props, (list, tuple)):
+                for prop in deleted_props:
+                    key = prop.get("key")
+                    if key and key not in _GuiCoreContext.__ENTITY_PROPS:
+                        ent.properties.pop(key, None)
+
+    def get_scenarios_for_owner(self, owner_id: str):
+        cycles_scenarios: t.List[t.Union[Scenario, Cycle]] = []
+        with self.lock:
+            if self.scenario_by_cycle is None:
+                self.scenario_by_cycle = get_cycles_scenarios()
+            if owner_id:
+                if owner_id == "GLOBAL":
+                    for cycle, scenarios in self.scenario_by_cycle.items():
+                        if cycle is None:
+                            cycles_scenarios.extend(scenarios)
+                        else:
+                            cycles_scenarios.append(cycle)
+                else:
+                    entity = core_get(owner_id)
+                    if entity and (scenarios := self.scenario_by_cycle.get(entity)):
+                        cycles_scenarios.extend(scenarios)
+                    elif isinstance(entity, Scenario):
+                        cycles_scenarios.append(entity)
+        return cycles_scenarios
+
+    def get_data_node_history(self, id: str):
+        res = []
+        if id and (dn := core_get(id)) and isinstance(dn, DataNode):
+            for e in dn.edits:
+                res.append(((f"{k}", f"{v}") for k, v in e.items()))
+        return res
+
+    def get_data_node_data(self, id: str):
+        if id and (dn := core_get(id)) and isinstance(dn, DataNode):
+            return dn.read()
+
+    def select_id(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) == 0 and isinstance(args[0], dict):
+            return
+        data = args[0]
+        if owner_id := data.get("owner_id"):
+            state.assign(_GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR, owner_id)
+        elif history_id := data.get("history_id"):
+            state.assign(_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR, history_id)
+        elif data_id := data.get("data_id"):
+            state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
+
 
 class _GuiCore(ElementLibrary):
     __LIB_NAME = "taipy_gui_core"
@@ -524,6 +626,44 @@ class _GuiCore(ElementLibrary):
                 "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
             },
         ),
+        "data_node": Element(
+            "data_node",
+            {
+                "id": ElementProperty(PropertyType.string),
+                "data_node": ElementProperty(_GuiCoreDatanodeAdapter),
+                "active": ElementProperty(PropertyType.dynamic_boolean, True),
+                "expandable": ElementProperty(PropertyType.boolean, True),
+                "expanded": ElementProperty(PropertyType.boolean, True),
+                "show_config": ElementProperty(PropertyType.boolean, False),
+                "show_owner": ElementProperty(PropertyType.boolean, True),
+                "show_edit_date": ElementProperty(PropertyType.boolean, False),
+                "show_expiration_date": ElementProperty(PropertyType.boolean, False),
+                "show_properties": ElementProperty(PropertyType.boolean, True),
+                "show_history": ElementProperty(PropertyType.boolean, True),
+                "show_data": ElementProperty(PropertyType.boolean, True),
+                "chart_config": ElementProperty(PropertyType.dict),
+                "class_name": ElementProperty(PropertyType.dynamic_string),
+            },
+            inner_properties={
+                "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),
+                "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "error": ElementProperty(PropertyType.react, f"{{{_GuiCoreContext._DATANODE_VIZ_ERROR_VAR}}}"),
+                "scenarios": ElementProperty(
+                    PropertyType.lov,
+                    f"{{{__CTX_VAR_NAME}.get_scenarios_for_owner({_GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR})}}",
+                ),
+                "type": ElementProperty(PropertyType.inner, __SCENARIO_ADAPTER),
+                "on_id_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_id}}"),
+                "history": ElementProperty(
+                    PropertyType.lov,
+                    f"{{{__CTX_VAR_NAME}.get_data_node_history({_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
+                ),
+                "data": ElementProperty(
+                    PropertyType.data,
+                    f"{{{__CTX_VAR_NAME}.get_data_node_data({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                ),
+            },
+        ),
         "job_selector": Element(
             "value",
             {
@@ -566,6 +706,10 @@ class _GuiCore(ElementLibrary):
                 _GuiCoreContext._SCENARIO_SELECTOR_ID_VAR: "",
                 _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR: "",
                 _GuiCoreContext._JOB_SELECTOR_ERROR_VAR: "",
+                _GuiCoreContext._DATANODE_VIZ_ERROR_VAR: "",
+                _GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR: "",
+                _GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR: "",
+                _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR: "",
             }
         )
         ctx = _GuiCoreContext(gui)
@@ -580,6 +724,10 @@ class _GuiCore(ElementLibrary):
             _GuiCoreContext._SCENARIO_SELECTOR_ID_VAR,
             _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
             _GuiCoreContext._JOB_SELECTOR_ERROR_VAR,
+            _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+            _GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR,
+            _GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR,
+            _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR,
         ]:
             state._add_attribute(var, "")
 
