@@ -106,8 +106,9 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 self._warning(
                     ScenarioConfig._ADDITIONAL_DATA_NODES_KEY,
                     scenario_config.additional_data_node_configs,
-                    f"The additional data node `{additional_data_node_config.id}` in {ScenarioConfig._ADDITIONAL_DATA_NODES_KEY}"
-                    f" field of ScenarioConfig `{scenario_config_id}` has already existed as an input or output data node of"
+                    f"The additional data node `{additional_data_node_config.id}` in"
+                    f" {ScenarioConfig._ADDITIONAL_DATA_NODES_KEY} field of ScenarioConfig"
+                    f" `{scenario_config_id}` has already existed as an input or output data node of"
                     f" ScenarioConfig `{scenario_config_id}` tasks.",
                 )
 

@@ -160,7 +160,9 @@ class ScenarioConfig(Section):
         }
 
     @classmethod
-    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config] = None) -> "ScenarioConfig":  # type: ignore
+    def _from_dict(
+        cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config] = None
+    ) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
 
         if cls._TASKS_KEY in as_dict:
@@ -169,7 +171,8 @@ class ScenarioConfig(Section):
         else:
             pipeline_config_ids = as_dict.pop(cls._PIPELINES_KEY, list())
             cls.__logger.info(
-                f"The tasks from these PipelineConfig {pipeline_config_ids} will be migrated to be directly under ScenarioConfig {id}"
+                f"The tasks from these PipelineConfig {pipeline_config_ids}"
+                f"will be migrated to be directly under ScenarioConfig {id}"
             )
             tasks = cls.__get_task_configs_from_pipeline_configs(pipeline_config_ids, config)
 
