@@ -37,9 +37,58 @@ class _Submittable:
     ):
         raise NotImplementedError
 
-    def _get_inputs(self) -> Set[DataNode]:
-        dag = self._build_dag()
+    def __get_all_data_nodes_in_dag(self, dag: Optional[nx.DiGraph] = None) -> Set[DataNode]:
+        dag = self._build_dag() if not dag else dag
+        return {node for node in dag.nodes if isinstance(node, DataNode)}
+
+    def get_inputs(self, dag: Optional[nx.DiGraph] = None) -> Set[DataNode]:
+        """Return the set of input data nodes of the submittable entity.
+
+        Returns:
+            The set of input data nodes.
+        """
+        dag = self._build_dag() if not dag else dag
         return {node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)}
+
+    def get_outputs(self, dag: Optional[nx.DiGraph] = None) -> Set[DataNode]:
+        """Return the set of output data nodes of the submittable entity.
+
+        Returns:
+            The set of output data nodes.
+        """
+        dag = self._build_dag() if not dag else dag
+        return {node for node, degree in dict(dag.out_degree).items() if degree == 0 and isinstance(node, DataNode)}
+
+    def get_intermediate(self) -> Set[DataNode]:
+        """Return the set of intermediate data nodes of the submittable entity.
+
+        Returns:
+            The set of intermediate data nodes.
+        """
+        dag = self._build_dag()
+        all_data_nodes_in_dag = self.__get_all_data_nodes_in_dag(dag)
+        return all_data_nodes_in_dag - self.get_inputs(dag) - self.get_outputs(dag)
+
+    def is_ready_to_run(self) -> bool:
+        """Indicate if the entity is ready to be run.
+
+        Returns:
+            True if the given entity is ready to be run. False otherwise.
+        """
+        return all(dn.is_ready_for_reading for dn in self.get_inputs())
+
+    def execution_in_progress(self) -> Set[DataNode]:
+        """Return the set of data nodes of the submittable entity that are being executed.
+
+        Returns:
+            The set of data nodes that are being executed.
+        """
+        all_data_nodes_in_dag = self.__get_all_data_nodes_in_dag()
+        data_nodes_in_progress = set()
+        for dn in all_data_nodes_in_dag:
+            if dn.edit_in_progress:
+                data_nodes_in_progress.add(dn)
+        return data_nodes_in_progress
 
     @abc.abstractmethod
     def subscribe(self, callback: Callable[[_Submittable, Job], None], params: Optional[List[Any]] = None):

@@ -14,7 +14,6 @@ from unittest.mock import ANY
 
 import pytest
 
-from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.common import _utils
@@ -829,13 +828,13 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
     expected_outputs = [
         f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
         f"path : {input_dn.path} "
-        for input_dn in pipeline._get_inputs()
+        for input_dn in pipeline.get_inputs()
     ]
     not_expected_outputs = [
         f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
         f"path : {input_dn.path} "
         for input_dn in pipeline.data_nodes.values()
-        if input_dn not in pipeline._get_inputs()
+        if input_dn not in pipeline.get_inputs()
     ]
     assert all([expected_output in stdout for expected_output in expected_outputs])
     assert all([expected_output not in stdout for expected_output in not_expected_outputs])
@@ -857,7 +856,7 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
     expected_outputs = [
         f"{input_dn.id} cannot be read because it has never been written. Hint: The data node may refer to a wrong "
         f"path : {input_dn.path} "
-        for input_dn in pipeline._get_inputs()
+        for input_dn in pipeline.get_inputs()
         if input_dn.config_id == "wrong_csv_file_path"
     ]
     not_expected_outputs = [

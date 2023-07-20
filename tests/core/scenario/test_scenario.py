@@ -19,6 +19,7 @@ from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle, CycleId
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
@@ -421,7 +422,7 @@ def test_remove_tag_scenario():
         mock_remove_tag.assert_called_once_with(scenario, "tag")
 
 
-def test_get_inputs():
+def test_get_inputs_outputs_intermediate_data_nodes():
     data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
     data_node_3 = DataNode("baz", Scope.SCENARIO, "s3")
@@ -441,9 +442,11 @@ def test_get_inputs():
     #       |---> t1 ---|      -------------------------> t3 ---> s6
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert pipeline_1._get_inputs() == {data_node_1, data_node_2}
-    assert pipeline_2._get_inputs() == {data_node_4, data_node_5}
-    assert scenario._get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_1.get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_2.get_inputs() == {data_node_4, data_node_5}
+    assert scenario.get_inputs() == {data_node_1, data_node_2}
+    assert scenario.get_outputs() == {data_node_6, data_node_7}
+    assert scenario.get_intermediate() == {data_node_3, data_node_4, data_node_5}
 
     data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
@@ -463,9 +466,11 @@ def test_get_inputs():
     #       |---> t1 ---|      -----> t3 ---> s6
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert pipeline_1._get_inputs() == {data_node_1, data_node_2}
-    assert pipeline_2._get_inputs() == {data_node_4, data_node_5}
-    assert scenario._get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_1.get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_2.get_inputs() == {data_node_4, data_node_5}
+    assert scenario.get_inputs() == {data_node_1, data_node_2}
+    assert scenario.get_outputs() == {data_node_6, data_node_7}
+    assert scenario.get_intermediate() == {data_node_4, data_node_5}
 
     data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
@@ -492,10 +497,12 @@ def test_get_inputs():
     # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
     #                                              |
     # s8 -------> t5 -------> s9 ------------------
-    assert pipeline_1._get_inputs() == {data_node_1, data_node_2, data_node_6}
-    assert pipeline_2._get_inputs() == {data_node_4, data_node_5}
-    assert pipeline_3._get_inputs() == {data_node_7, data_node_8}
-    assert scenario._get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
+    assert pipeline_1.get_inputs() == {data_node_1, data_node_2, data_node_6}
+    assert pipeline_2.get_inputs() == {data_node_4, data_node_5}
+    assert pipeline_3.get_inputs() == {data_node_7, data_node_8}
+    assert scenario.get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
+    assert scenario.get_outputs() == set()
+    assert scenario.get_intermediate() == {data_node_5, data_node_4, data_node_7, data_node_9}
 
     data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
@@ -520,10 +527,141 @@ def test_get_inputs():
     # s2 ---             ---> s4 ---> t4 ---> s7
     # t2 ---> s5                   |
     # s8 ---> t5              s6 --|
-    assert pipeline_1._get_inputs() == {data_node_1, data_node_2}
-    assert pipeline_2._get_inputs() == {data_node_4, data_node_6}
-    assert pipeline_3._get_inputs() == {data_node_8}
-    assert scenario._get_inputs() == {data_node_1, data_node_2, data_node_8, data_node_6}
+    assert pipeline_1.get_inputs() == {data_node_1, data_node_2}
+    assert pipeline_2.get_inputs() == {data_node_4, data_node_6}
+    assert pipeline_3.get_inputs() == {data_node_8}
+    assert scenario.get_inputs() == {data_node_1, data_node_2, data_node_8, data_node_6}
+    assert scenario.get_outputs() == {data_node_5, data_node_7}
+    assert scenario.get_intermediate() == {data_node_4}
+
+
+def test_is_ready_to_run():
+    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
+    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
+    data_node_4 = InMemoryDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
+    data_node_5 = InMemoryDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
+    data_node_6 = InMemoryDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
+    data_node_7 = InMemoryDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
+    data_node_8 = InMemoryDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
+    data_node_9 = InMemoryDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
+    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    pipeline_3 = Pipeline("thud", {}, [task_5, task_6], PipelineId("p3"))
+    scenario = Scenario("scenario", [pipeline_1, pipeline_2, pipeline_3], {}, ScenarioId("s1"))
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    #                                              |
+    # s8 -------> t5 -------> s9 ------------------
+    assert scenario.get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
+
+    data_manager = _DataManagerFactory._build_manager()
+    data_manager._delete_all()
+    for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7, data_node_8, data_node_9]:
+        data_manager._set(dn)
+
+    assert scenario.is_ready_to_run()
+
+    data_node_1.edit_in_progress = True
+    assert not scenario.is_ready_to_run()
+
+    data_node_2.edit_in_progress = True
+    assert not scenario.is_ready_to_run()
+
+    data_node_6.edit_in_progress = True
+    data_node_8.edit_in_progress = True
+    assert not scenario.is_ready_to_run()
+
+    data_node_1.edit_in_progress = False
+    data_node_2.edit_in_progress = False
+    data_node_6.edit_in_progress = False
+    data_node_8.edit_in_progress = False
+    assert scenario.is_ready_to_run()
+
+
+def test_execution_in_progress():
+    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
+    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
+    data_node_4 = InMemoryDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
+    data_node_5 = InMemoryDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
+    data_node_6 = InMemoryDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
+    data_node_7 = InMemoryDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
+    data_node_8 = InMemoryDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
+    data_node_9 = InMemoryDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
+    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    pipeline_3 = Pipeline("thud", {}, [task_5, task_6], PipelineId("p3"))
+    scenario = Scenario("scenario", [pipeline_1, pipeline_2, pipeline_3], {}, ScenarioId("s1"))
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    #                                              |
+    # s8 -------> t5 -------> s9 ------------------
+
+    data_manager = _DataManagerFactory._build_manager()
+    for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7, data_node_8, data_node_9]:
+        data_manager._set(dn)
+
+    assert len(scenario.execution_in_progress()) == 0
+    assert scenario.execution_in_progress() == set()
+
+    data_node_1.edit_in_progress = True
+    assert len(scenario.execution_in_progress()) == 1
+    assert scenario.execution_in_progress() == {data_node_1}
+
+    data_node_2.edit_in_progress = True
+    data_node_6.edit_in_progress = True
+    data_node_8.edit_in_progress = True
+    assert len(scenario.execution_in_progress()) == 4
+    assert scenario.execution_in_progress() == {data_node_1, data_node_2, data_node_6, data_node_8}
+
+    data_node_4.edit_in_progress = True
+    data_node_5.edit_in_progress = True
+    data_node_9.edit_in_progress = True
+    assert len(scenario.execution_in_progress()) == 7
+    assert scenario.execution_in_progress() == {
+        data_node_1,
+        data_node_2,
+        data_node_4,
+        data_node_5,
+        data_node_6,
+        data_node_8,
+        data_node_9,
+    }
+
+    data_node_1.edit_in_progress = False
+    data_node_2.edit_in_progress = False
+    data_node_6.edit_in_progress = False
+    data_node_8.edit_in_progress = False
+    assert len(scenario.execution_in_progress()) == 3
+    assert scenario.execution_in_progress() == {data_node_4, data_node_5, data_node_9}
+
+    data_node_4.edit_in_progress = False
+    data_node_5.edit_in_progress = False
+    data_node_7.edit_in_progress = True
+    assert len(scenario.execution_in_progress()) == 2
+    assert scenario.execution_in_progress() == {data_node_7, data_node_9}
+
+    data_node_7.edit_in_progress = False
+    data_node_9.edit_in_progress = False
+    assert len(scenario.execution_in_progress()) == 0
+    assert scenario.execution_in_progress() == set()
 
 
 def test_get_tasks():
