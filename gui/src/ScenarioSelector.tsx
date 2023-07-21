@@ -96,6 +96,7 @@ interface ScenarioSelectorProps {
     scenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
+    onCreate?: string;
     coreChanged?: Record<string, unknown>;
     updateVars: string;
     configs?: Array<[string, string]>;
@@ -305,7 +306,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
             values.properties = [...properties];
             setProperties([]);
             submit(actionEdit, false, values);
-            form.resetForm();
+            form.resetForm({ values: { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" } });
             close();
         },
     });
@@ -320,7 +321,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                       date: scenario[ScFProps.creation_date],
                       properties: [],
                   }
-                : emptyScenario
+                : { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" }
         );
         setProperties(
             scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : []
@@ -594,13 +595,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values));
+            dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values, props.onCreate));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 unselect();
             }
         },
-        [id, props.onScenarioCrud, dispatch, module, unselect]
+        [id, props.onScenarioCrud, dispatch, module, props.onCreate, unselect]
     );
 
     // Refresh on broadcast
