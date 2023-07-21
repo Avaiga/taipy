@@ -725,7 +725,7 @@ class _Builder:
         if hash_name := self.__hashes.get(var_name):
             hash_name = self.__get_typed_hash_name(hash_name, var_type)
             self.__set_react_attribute(
-                var_name,
+                _to_camel_case(var_name),
                 _get_client_var_name(hash_name),
             )
             if with_update:
@@ -747,8 +747,8 @@ class _Builder:
                         with contextlib.suppress(Exception):
                             value = float(value)
                     if isinstance(value, (int, float)):
-                        return self.__set_react_attribute(var_name, value)
-                self.set_attribute(var_name, value)
+                        return self.__set_react_attribute(_to_camel_case(var_name), value)
+                self.set_attribute(_to_camel_case(var_name), value)
         return self
 
     def _set_labels(self, var_name: str = "labels"):
