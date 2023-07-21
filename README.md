@@ -1,5 +1,4 @@
 # Taipy-REST
-[![tests](https://github.com/Avaiga/taipy-rest/actions/workflows/tests.yml/badge.svg)](https://github.com/Avaiga/taipy-rest/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/pypi/pyversions/taipy-rest)](https://pypi.org/project/taipy-rest)
 [![PyPI](https://img.shields.io/pypi/v/taipy-rest.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy-rest)
 
