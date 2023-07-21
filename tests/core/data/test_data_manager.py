@@ -571,12 +571,11 @@ class TestDataManager:
         )
         from src.taipy import core as tp
 
-        Config.override(file_config.filename)
         Config.set_default_data_node_configuration(storage_type="csv")
+        Config.override(file_config.filename)
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
 
-        # assert isinstance(scenario.input, CSVDataNode) TODO Replace the next line by the commented one.
-        assert isinstance(scenario.input, PickleDataNode)
+        assert isinstance(scenario.input, CSVDataNode)
         assert isinstance(scenario.output, InMemoryDataNode)
 
     def test_get_tasks_by_config_id(self):
