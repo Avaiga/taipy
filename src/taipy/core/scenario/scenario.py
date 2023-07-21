@@ -55,7 +55,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         config_id (str): The identifier of the `ScenarioConfig^`.
         tasks (Set[Task^]): The set of tasks.
         additional_data_nodes (Set[DataNode^]): The set of additional data nodes.
-        pipelines (List[Pipeline^]): The list of pipelines: subsets of tasks that can be submitted together independently from the rest of the scenario's tasks.
+        pipelines (List[Pipeline^]): The list of pipelines: subsets of tasks that can be submitted together
+            independently from the rest of the scenario's tasks.
         properties (dict[str, Any]): A dictionary of additional properties.
         scenario_id (str): The unique identifier of this scenario.
         creation_date (datetime): The date and time of the scenario's creation.
@@ -63,8 +64,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         cycle (Cycle^): The cycle of the scenario.
         subscribers (List[Callable]): The list of callbacks to be called on `Job^`'s status change.
         tags (Set[str]): The list of scenario's tags.
-        version (str): The string indicates the application version of the scenario to instantiate. If not provided,
-            the latest version is used.
+        version (str): The string indicates the application version of the scenario to instantiate.
+            If not provided, the latest version is used.
     """
 
     _ID_PREFIX = "SCENARIO"
