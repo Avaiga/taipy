@@ -36,6 +36,7 @@ from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
 from taipy.gui import Gui, State
+from taipy.gui._warnings import _warn
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
@@ -298,6 +299,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         delete = args[1]
         data = args[2]
         scenario = None
+        on_create = None
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
         if update:
             scenario_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
@@ -322,6 +324,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return
             try:
                 scenario = create_scenario(scenario_config, date, name)
+                on_create = args[3] if len(args) > 3 and isinstance(args[3], str) else None
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
@@ -340,6 +343,17 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, "")
                     except Exception as e:
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
+                if on_create:
+                    gui: Gui = state._gui
+                    action_function = gui._get_user_function(on_create)
+                    if callable(action_function):
+                        try:
+                            gui._call_function_with_state(action_function, [id, on_create, {"scenario": scenario}])
+                        except Exception as e:  # pragma: no cover
+                            if not gui._call_on_exception(on_create, e):
+                                _warn(f"on_create(): Exception raised in '{on_create}()':\n{e}")
+                    else:
+                        _warn(f"on_create(): '{on_create}()' is not a function.")
 
     def edit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -552,6 +566,7 @@ class _GuiCore(ElementLibrary):
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "show_pins": ElementProperty(PropertyType.boolean, False),
+                "on_create": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
