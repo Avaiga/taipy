@@ -47,8 +47,8 @@ from .scenario_id import ScenarioId
 class Scenario(_Entity, _Submittable, _Labeled):
     """Instance of a Business case to solve.
 
-    A scenario holds a list of tasks (instances of `Task^` class) to submit for execution in order to
-    solve the Business case. It also holds a list of additional data nodes (instances of `DataNode` class)
+    A scenario holds a set of tasks (instances of `Task^` class) to submit for execution in order to
+    solve the Business case. It also holds a set of additional data nodes (instances of `DataNode` class)
     for extra data related to the scenario.
 
     Attributes:
@@ -92,9 +92,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
 
         self._tasks: Union[Set[TaskId], Set[Task], Set] = tasks or set()
-        self._additional_data_nodes: Optional[Union[Set[DataNodeId], Set[DataNode], Set]] = (
-            additional_data_nodes or set()
-        )
+        self._additional_data_nodes: Union[Set[DataNodeId], Set[DataNode], Set] = additional_data_nodes or set()
 
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle

@@ -319,8 +319,20 @@ def test_update_status_fail_job_in_parallel():
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
-    scenario_1 = Scenario("scenario_config_1", [task_0, task_1, task_2, task_3], {}, "scenario_1")
-    scenario_2 = Scenario("scenario_config_2", [task_0, task_1, task_2, task_3], {}, "scenario_2")
+    pipeline_1 = Pipeline("pipeline_config_1", {}, [task_0, task_1, task_2, task_3], pipeline_id="pipeline_1")
+    pipeline_2 = Pipeline("pipeline_config_2", {}, [task_0, task_1, task_2], pipeline_id="pipeline_2")
+    pipeline_3 = Pipeline("pipeline_config_3", {}, [task_3], pipeline_id="pipeline_3")
+    scenario_1 = Scenario(
+        "scenario_config_1", set([task_0, task_1, task_2, task_3]), {}, set(), "scenario_1", pipelines=[pipeline_1]
+    )
+    scenario_2 = Scenario(
+        "scenario_config_2",
+        set([task_0, task_1, task_2, task_3]),
+        {},
+        set(),
+        "scenario_2",
+        pipelines=[pipeline_2, pipeline_3],
+    )
 
     _DataManager._set(dn_0)
     _DataManager._set(dn_1)
@@ -329,11 +341,28 @@ def test_update_status_fail_job_in_parallel():
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
     _TaskManager._set(task_3)
+    _PipelineManager._set(pipeline_1)
+    _PipelineManager._set(pipeline_2)
+    _PipelineManager._set(pipeline_3)
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
 
     job = _Orchestrator.submit_task(task_0, "submit_id")
     assert_true_after_time(job.is_failed)
+
+    jobs = _Orchestrator.submit(pipeline_1)
+    tasks_jobs = {job._task.id: job for job in jobs}
+    assert_true_after_time(tasks_jobs["task_0"].is_failed)
+    assert_true_after_time(tasks_jobs["task_3"].is_completed)
+    assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
+    assert_true_after_time(lambda: all(not _Orchestrator._is_blocked(job) for job in jobs))
+
+    jobs = _Orchestrator.submit(scenario_1.pipelines["pipeline_config_1"])
+    tasks_jobs = {job._task.id: job for job in jobs}
+    assert_true_after_time(tasks_jobs["task_0"].is_failed)
+    assert_true_after_time(tasks_jobs["task_3"].is_completed)
+    assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
+    assert_true_after_time(lambda: all(not _Orchestrator._is_blocked(job) for job in jobs))
 
     jobs = _Orchestrator.submit(scenario_1)
     tasks_jobs = {job._task.id: job for job in jobs}
@@ -730,51 +759,51 @@ def test_blocked_task():
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
-# def test_blocked_pipeline():
-#     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
+def test_blocked_pipeline():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
-#     m = multiprocessing.Manager()
-#     lock_1 = m.Lock()
-#     lock_2 = m.Lock()
+    m = multiprocessing.Manager()
+    lock_1 = m.Lock()
+    lock_2 = m.Lock()
 
-#     foo_cfg = Config.configure_data_node("foo", default_data=1)
-#     bar_cfg = Config.configure_data_node("bar")
-#     baz_cfg = Config.configure_data_node("baz")
+    foo_cfg = Config.configure_data_node("foo", default_data=1)
+    bar_cfg = Config.configure_data_node("bar")
+    baz_cfg = Config.configure_data_node("baz")
 
-#     _OrchestratorFactory._build_dispatcher()
+    _OrchestratorFactory._build_dispatcher()
 
-#     dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
-#     foo = dns[foo_cfg]
-#     bar = dns[bar_cfg]
-#     baz = dns[baz_cfg]
-#     task_1 = Task("by_2", {}, partial(lock_multiply, lock_1, 2), [foo], [bar])
-#     task_2 = Task("by_3", {}, partial(lock_multiply, lock_2, 3), [bar], [baz])
-#     pipeline = Pipeline("pipeline_config", {}, [task_1, task_2])
+    dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
+    foo = dns[foo_cfg]
+    bar = dns[bar_cfg]
+    baz = dns[baz_cfg]
+    task_1 = Task("by_2", {}, partial(lock_multiply, lock_1, 2), [foo], [bar])
+    task_2 = Task("by_3", {}, partial(lock_multiply, lock_2, 3), [bar], [baz])
+    pipeline = Pipeline("pipeline_config", {}, [task_1, task_2])
 
-#     assert task_1.foo.is_ready_for_reading  # foo is ready
-#     assert not task_1.bar.is_ready_for_reading  # But bar is not ready
-#     assert not task_2.baz.is_ready_for_reading  # neither does baz
+    assert task_1.foo.is_ready_for_reading  # foo is ready
+    assert not task_1.bar.is_ready_for_reading  # But bar is not ready
+    assert not task_2.baz.is_ready_for_reading  # neither does baz
 
-#     assert len(_Orchestrator.blocked_jobs) == 0
-#     with lock_2:
-#         with lock_1:
-#             jobs = _Orchestrator.submit(pipeline)  # pipeline is submitted
-#             tasks_jobs = {job._task.id: job for job in jobs}
-#             job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
-#             assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running
-#             assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
-#             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
-#             assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
-#         assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
-#         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
-#         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
-#         assert_true_after_time(job_2.is_running)  # And job 2 can start running
-#         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
-#         assert len(_Orchestrator.blocked_jobs) == 0
-#     assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
-#     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
-#     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
-#     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
+    assert len(_Orchestrator.blocked_jobs) == 0
+    with lock_2:
+        with lock_1:
+            jobs = _Orchestrator.submit(pipeline)  # pipeline is submitted
+            tasks_jobs = {job._task.id: job for job in jobs}
+            job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
+            assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running
+            assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
+            assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
+            assert_true_after_time(job_2.is_blocked)  # the job_2 remains blocked
+        assert_true_after_time(job_1.is_completed)  # job1 unlocked and can complete
+        assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
+        assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
+        assert_true_after_time(job_2.is_running)  # And job 2 can start running
+        assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
+        assert len(_Orchestrator.blocked_jobs) == 0
+    assert_true_after_time(job_2.is_completed)  # job 2 unlocked so it can complete
+    assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
+    assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
+    assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
 def test_blocked_scenario():

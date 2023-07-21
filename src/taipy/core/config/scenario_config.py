@@ -346,7 +346,6 @@ class ScenarioConfig(Section):
 
     def add_sequences(self, sequences: Dict[str, List[TaskConfig]]):
         self.sequences.update(sequences)
-        Config._register(self)
 
     def remove_sequences(self, sequence_names: Union[str, List[str]]):
         if isinstance(sequence_names, List):
@@ -354,4 +353,3 @@ class ScenarioConfig(Section):
                 self.sequences.pop(sequence_name)
         else:
             self.sequences.pop(sequence_names)
-        Config._register(self)

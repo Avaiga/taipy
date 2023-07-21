@@ -270,6 +270,62 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.warnings) == 0
         assert len(Config._collector.infos) == 0
 
+    def test_check_tasks_in_sequences_exist_in_scenario_tasks(self, caplog):
+
+        Config._collector = IssueCollector()
+        config = Config._applied_config
+        Config._compile_configs()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        input_dn_config = DataNodeConfig("input_dn")
+        output_dn_config = DataNodeConfig("output_dn")
+        task_config_1 = TaskConfig("bar", print, [input_dn_config], [output_dn_config])
+        task_config_2 = TaskConfig("baz", print, [input_dn_config], [output_dn_config])
+        config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
+        config._sections[ScenarioConfig.name]["new"]._tasks = [task_config_1]
+        config._sections[ScenarioConfig.name]["new"].add_sequences({"sequence_1": [task_config_1]})
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        config._sections[ScenarioConfig.name]["new"].add_sequences({"sequence_2": [task_config_2]})
+        Config._collector = IssueCollector()
+        with pytest.raises(SystemExit):
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_messgae = (
+            "The task `baz` in sequences field of ScenarioConfig"
+            " `new` must exist in tasks field of ScenarioConfig `new`."
+        )
+        assert expected_error_messgae in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        config._sections[ScenarioConfig.name]["new"].add_sequences({"sequence_2": [task_config_1, task_config_2]})
+        Config._collector = IssueCollector()
+        with pytest.raises(SystemExit):
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_messgae = (
+            "The task `baz` in sequences field of ScenarioConfig"
+            " `new` must exist in tasks field of ScenarioConfig `new`."
+        )
+        assert expected_error_messgae in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
+        config._sections[ScenarioConfig.name]["new"]._tasks = [task_config_1, task_config_2]
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
     def test_check_frequency(self, caplog):
         config = Config._applied_config
         Config._compile_configs()
