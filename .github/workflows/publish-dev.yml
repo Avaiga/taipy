@@ -21,42 +21,6 @@ jobs:
         id: vars
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
-      - name: Extract branch name
-        shell: bash
-        run: |
-          git fetch origin
-          git branch -r --contains ${{ github.ref }}
-          raw=$(git branch -r --contains ${{ github.ref }})
-          branch=$(echo ${raw##*/} | tr [:upper:] [:lower:])
-          echo "branch=$branch" >> $GITHUB_OUTPUT
-          echo "Branch is $branch."
-        id: extract_branch
-
-      - name: Checkout latest from branch
-        uses: actions/checkout@v3
-        with:
-          repository: Avaiga/taipy-rest
-          ref: ${{ steps.extract_branch.outputs.branch }}
-          path: './latest'
-
-      - name: Validate Github Tag Version
-        run: |
-          echo """
-          import json, sys, os
-          SUFFIX = 'dev'
-          if SUFFIX not in sys.argv[1]:
-              raise ValueError(f'Tag {sys.argv[1]} does not contain suffix {SUFFIX}')
-          with open(f\"latest{os.sep}src{os.sep}taipy{os.sep}rest{os.sep}version.json\") as version_file:
-              version_o = json.load(version_file)
-          version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
-          if vext := version_o.get(\"ext\"):
-              vext = 'dev' + str(int(vext.replace('dev', '')) - 1)
-              version = f'{version}.{vext}'
-          if version != sys.argv[1]:
-              raise ValueError(f'Tag {sys.argv[1]} is not the latest dev version of branch {sys.argv[2]}')
-          """ > /tmp/check.py
-          python /tmp/check.py "${{ steps.vars.outputs.tag }}" "${{ steps.extract_branch.outputs.branch }}"
-
       - name: Ensure package version has 'dev' suffix
         run: |
           echo """

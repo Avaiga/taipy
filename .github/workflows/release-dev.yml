@@ -109,10 +109,15 @@ jobs:
           # Run tests
           python -c "import taipy as tp; tp.rest"
 
+      - name: Extract commit hash
+        shell: bash
+        run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
+        id: extract_hash
+
       - name: Create/update release and tag
         run: |
             echo "Creating release ${{ steps.current-version.outputs.VERSION }}"
-            gh release create ${{ steps.current-version.outputs.VERSION }} ./dist/taipy-rest-${{ steps.current-version.outputs.VERSION }}.tar.gz --prerelease --title ${{ steps.current-version.outputs.VERSION }} --notes "Dev Release ${{ steps.current-version.outputs.VERSION }}"
+            gh release create ${{ steps.current-version.outputs.VERSION }} ./dist/taipy-rest-${{ steps.current-version.outputs.VERSION }}.tar.gz --target ${{ steps.extract_hash.outputs.hash }} --prerelease --title ${{ steps.current-version.outputs.VERSION }} --notes "Dev Release ${{ steps.current-version.outputs.VERSION }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
