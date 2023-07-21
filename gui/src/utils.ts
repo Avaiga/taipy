@@ -11,6 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 import { Theme, alpha } from "@mui/material";
+import { PopoverOrigin } from "@mui/material/Popover";
+
 import { useDynamicProperty } from "taipy-gui";
 
 // id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags, deletable
@@ -174,4 +176,14 @@ export const tinySelPinIconButtonSx = (theme: Theme) => ({
     },
 });
 
+export const popoverOrigin: PopoverOrigin = {
+    vertical: "bottom",
+    horizontal: "left",
+};
+
+export const iconLabelSx = {
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+};
 

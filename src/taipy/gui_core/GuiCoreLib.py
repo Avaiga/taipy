@@ -382,7 +382,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return self.get_scenarios()
 
     def data_node_adapter(self, data):
-        if hasattr(data, "id") and core_get(data.id) is not None:
+        if data and hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, DataNode):
                 return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
             else:
@@ -643,6 +643,7 @@ class _GuiCore(ElementLibrary):
                 "show_data": ElementProperty(PropertyType.boolean, True),
                 "chart_config": ElementProperty(PropertyType.dict),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
+                "scenario": ElementProperty(PropertyType.lov_value),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),

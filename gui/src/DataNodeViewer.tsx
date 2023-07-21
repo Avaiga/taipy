@@ -28,6 +28,7 @@ import { CheckCircle, Cancel, ArrowForwardIosSharp, Launch } from "@mui/icons-ma
 import {
     createRequestUpdateAction,
     createSendActionNameAction,
+    getUpdateVar,
     useDispatch,
     useDynamicProperty,
     useModule,
@@ -41,6 +42,8 @@ import {
     IconPaddingSx,
     MainBoxSx,
     hoverSx,
+    iconLabelSx,
+    popoverOrigin,
     tinySelPinIconButtonSx,
     useClassNames,
 } from "./utils";
@@ -51,6 +54,7 @@ import { Tab, Tabs } from "@mui/material";
 
 const tabBoxSx = { borderBottom: 1, borderColor: "divider" };
 const noDisplay = { display: "none" };
+const gridSx = { mt: 0 };
 
 type DanaNodeFull = [string, string, string, string, string, string, string, string, number, Array<[string, string]>];
 
@@ -188,7 +192,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const onLabelChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
 
     // scenarios
-    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const showScenarios = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
@@ -200,8 +204,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [dnOwnerId, dispatch, id, isDataNode, module, props.onIdSelect]
     );
     const handleClose = useCallback(() => setAnchorEl(null), []);
+    const scenarioUpdateVars = useMemo(
+        () => [getUpdateVar(props.updateVars, "scenario"), getUpdateVar(props.updateVars, "scenarios")],
+        [props.updateVars]
+    );
 
-    // on scenario change
+    // on datanode change
     useEffect(() => {
         setLabel(dnLabel);
         setUserExpanded(expanded && isDataNode);
@@ -245,12 +253,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Grid container alignItems="center" direction="row" spacing={1}>
+                        <Grid container alignItems="baseline" direction="row" spacing={1}>
                             <Grid item>
-                                <Typography variant="h6">{dnLabel}</Typography>
+                                {dnLabel}
                             </Grid>
                             <Grid item>
-                                <Typography variant="subtitle2">{dnType}</Typography>
+                                <Typography fontSize="smaller">{dnType}</Typography>
                             </Grid>
                         </Grid>
                     </AccordionSummary>
@@ -282,7 +290,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             id="dn-tabpanel-properties"
                             aria-labelledby={`${id}-properties`}
                         >
-                            <Grid container rowSpacing={2}>
+                            <Grid container rowSpacing={2} sx={gridSx}>
                                 <Grid item xs={12} container justifyContent="space-between" spacing={1}>
                                     <Grid
                                         item
@@ -362,14 +370,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         <Grid item xs={4}>
                                             <Typography variant="subtitle2">Owner</Typography>
                                         </Grid>
-                                        <Grid item xs={1}>
+                                        <Grid item xs={7} sx={iconLabelSx}>
                                             {dnOwnerType === NodeType.CYCLE ? (
                                                 <CycleIcon fontSize="small" color="primary" />
                                             ) : dnOwnerType === NodeType.SCENARIO ? (
                                                 <ScenarioIcon fontSize="small" color="primary" />
                                             ) : null}
-                                        </Grid>
-                                        <Grid item xs={6}>
                                             <Typography variant="subtitle2">{dnOwnerLabel}</Typography>
                                         </Grid>
                                         <Grid item xs={1}>
@@ -385,19 +391,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 open={Boolean(anchorEl)}
                                                 anchorEl={anchorEl}
                                                 onClose={handleClose}
-                                                anchorOrigin={{
-                                                    vertical: "bottom",
-                                                    horizontal: "left",
-                                                }}
+                                                anchorOrigin={popoverOrigin}
                                             >
                                                 <CoreSelector
-                                                    {...props}
                                                     entities={props.scenarios}
                                                     leafType={NodeType.SCENARIO}
                                                     lovPropertyName="scenarios"
                                                     height="50vh"
                                                     showPins={false}
-                                                    updateVarName=""
+                                                    updateVarName={scenarioUpdateVars[0]}
+                                                    updateVars={`scenarios=${scenarioUpdateVars[1]}`}
+                                                    onSelect={handleClose}
                                                 />
                                             </Popover>
                                         </Grid>
@@ -428,11 +432,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             {Array.isArray(props.history) ? (
                                 <table>
                                     {props.history.map((edit, idx) =>
-                                        edit.map((v, idx2) => <tr key={`edit-${idx}-${idx2}`}>
-                                            {idx2 == 0 ? <td rowSpan={edit.length}>{}`edit-${idx}`</td> : null}
-                                            <td>v[0]</td>
-                                            <td>v[1]</td>
-                                        </tr>)
+                                        edit.map((v, idx2) => (
+                                            <tr key={`edit-${idx}-${idx2}`}>
+                                                {idx2 == 0 ? (
+                                                    <td rowSpan={edit.length}>
+                                                        {}`edit-${idx}`
+                                                    </td>
+                                                ) : null}
+                                                <td>v[0]</td>
+                                                <td>v[1]</td>
+                                            </tr>
+                                        ))
                                     )}
                                 </table>
                             ) : (
