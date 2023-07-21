@@ -23,7 +23,7 @@ from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
-from .._entity._submittable import _Submittable
+from .._entity.submittable import Submittable
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
@@ -44,7 +44,7 @@ from ._scenario_model import _ScenarioModel
 from .scenario_id import ScenarioId
 
 
-class Scenario(_Entity, _Submittable, _Labeled):
+class Scenario(_Entity, Submittable, _Labeled):
     """Instance of a Business case to solve.
 
     A scenario holds a set of tasks (instances of `Task^` class) to submit for execution in order to
@@ -61,7 +61,7 @@ class Scenario(_Entity, _Submittable, _Labeled):
         creation_date (datetime): The date and time of the scenario's creation.
         is_primary (bool): True if the scenario is the primary of its cycle. False otherwise.
         cycle (Cycle^): The cycle of the scenario.
-        subscribers (Set[Callable]): The set of callbacks to be called on `Job^`'s status change.
+        subscribers (List[Callable]): The list of callbacks to be called on `Job^`'s status change.
         tags (Set[str]): The list of scenario's tags.
         version (str): The string indicates the application version of the scenario to instantiate. If not provided,
             the latest version is used.

@@ -86,7 +86,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_1.tasks.keys() == {task_1.config_id}
     assert scenario_1.additional_data_nodes == {}
     assert scenario_1.data_nodes == {d1.config_id: d1, d2.config_id: d2}
-    assert scenario_1._get_inputs() == {d1}
+    assert scenario_1.get_inputs() == {d1}
     assert scenario_1._get_set_of_tasks() == {task_1}
     _assert_equal(scenario_1._get_sorted_tasks(), [[task_1]])
     assert scenario_1.pipelines == {pipeline_1.config_id: pipeline_1}
@@ -136,7 +136,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         d3.config_id: d3,
         d4.config_id: d4,
     }
-    assert scenario_2._get_inputs() == {d1, d3}
+    assert scenario_2.get_inputs() == {d1, d3}
     assert scenario_2._get_set_of_tasks() == {task_1, task_2}
     _assert_equal(scenario_2._get_sorted_tasks(), [[task_1, task_2]])
     assert scenario_2.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
@@ -183,7 +183,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         d3.config_id: d3,
         d4.config_id: d4,
     }
-    assert scenario_3._get_inputs() == {d1, d3}
+    assert scenario_3.get_inputs() == {d1, d3}
     assert scenario_3._get_set_of_tasks() == {task_1, task_2}
     _assert_equal(scenario_3._get_sorted_tasks(), [[task_1, task_2]])
     assert scenario_3.pipelines == {pipeline_1.config_id: pipeline_1}
@@ -240,7 +240,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         d6.config_id: d6,
         d7.config_id: d7,
     }
-    assert scenario_4._get_inputs() == {d1, d2}
+    assert scenario_4.get_inputs() == {d1, d2}
     assert scenario_4._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
     _assert_equal(scenario_4._get_sorted_tasks(), [[task_1], [task_2, task_4], [task_3]])
     assert scenario_4.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
@@ -295,7 +295,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         d6.config_id: d6,
         d7.config_id: d7,
     }
-    assert scenario_5._get_inputs() == {d1, d2}
+    assert scenario_5.get_inputs() == {d1, d2}
     assert scenario_5._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
     _assert_equal(scenario_5._get_sorted_tasks(), [[task_1, task_2], [task_3, task_4]])
     assert scenario_5.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
@@ -370,7 +370,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         d8.config_id: d8,
         d9.config_id: d9,
     }
-    assert scenario_6._get_inputs() == {d1, d2, d6, d8}
+    assert scenario_6.get_inputs() == {d1, d2, d6, d8}
     assert scenario_6._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5, task_6}
     _assert_equal(scenario_6._get_sorted_tasks(), [[task_1, task_2, task_5], [task_3, task_4], [task_6]])
     assert scenario_6.pipelines == {
@@ -443,7 +443,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         d7.config_id: d7,
         d8.config_id: d8,
     }
-    assert scenario_7._get_inputs() == {d1, d2, d6, d8}
+    assert scenario_7.get_inputs() == {d1, d2, d6, d8}
     assert scenario_7._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     _assert_equal(scenario_7._get_sorted_tasks(), [[task_1, task_2, task_5], [task_3, task_4]])
     assert scenario_7.pipelines == {

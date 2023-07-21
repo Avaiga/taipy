@@ -159,7 +159,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         callbacks = callbacks or []
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
         if check_inputs_are_ready:
-            _warn_if_inputs_not_ready(pipeline._get_inputs())
+            _warn_if_inputs_not_ready(pipeline.get_inputs())
 
         jobs = (
             _TaskManagerFactory._build_manager()

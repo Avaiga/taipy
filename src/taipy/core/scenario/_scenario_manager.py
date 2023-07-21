@@ -198,7 +198,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         callbacks = callbacks or []
         scenario_subscription_callback = cls.__get_status_notifier_callbacks(scenario) + callbacks
         if check_inputs_are_ready:
-            _warn_if_inputs_not_ready(scenario._get_inputs())
+            _warn_if_inputs_not_ready(scenario.get_inputs())
 
         jobs = (
             _TaskManagerFactory._build_manager()

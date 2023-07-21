@@ -19,6 +19,7 @@ from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import DataNode, InMemoryDataNode
+from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
@@ -96,12 +97,12 @@ def test_create_scenario(cycle, current_datetime):
     with pytest.raises(InvalidConfigurationId):
         Scenario("foo bar", [], {})
 
-    input_1 = InMemoryDataNode("input_1", Scope.SCENARIO)
-    input_2 = InMemoryDataNode("input_2", Scope.SCENARIO)
-    output_1 = InMemoryDataNode("output_1", Scope.SCENARIO)
-    output_2 = InMemoryDataNode("output_2", Scope.SCENARIO)
-    additional_dn_1 = InMemoryDataNode("additional_1", Scope.SCENARIO)
-    additional_dn_2 = InMemoryDataNode("additional_2", Scope.SCENARIO)
+    input_1 = PickleDataNode("input_1", Scope.SCENARIO)
+    input_2 = PickleDataNode("input_2", Scope.SCENARIO)
+    output_1 = PickleDataNode("output_1", Scope.SCENARIO)
+    output_2 = PickleDataNode("output_2", Scope.SCENARIO)
+    additional_dn_1 = PickleDataNode("additional_1", Scope.SCENARIO)
+    additional_dn_2 = PickleDataNode("additional_2", Scope.SCENARIO)
     task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
     task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_1 = Pipeline("pipeline_1", {}, [task_1], "pipeline_id_1")
@@ -541,7 +542,249 @@ def test_remove_tag_scenario():
         mock_remove_tag.assert_called_once_with(scenario, "tag")
 
 
-def test_get_inputs():
+def test_get_inputs_outputs_intermediate_data_nodes():
+    data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+    data_node_3 = DataNode("baz", Scope.SCENARIO, "s3")
+    data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+    data_node_5 = DataNode("quux", Scope.SCENARIO, "s5")
+    data_node_6 = DataNode("quuz", Scope.SCENARIO, "s6")
+    data_node_7 = DataNode("corge", Scope.SCENARIO, "s7")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_3, data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4}, {}, set(), ScenarioId("s1"))
+    # s1 ---             ---> s3 ---> t2 ---> s5 ----
+    #       |           |                           |
+    #       |---> t1 ---|      -------------------------> t3 ---> s6
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    assert scenario.get_inputs() == {data_node_1, data_node_2}
+    assert scenario.get_outputs() == {data_node_6, data_node_7}
+    assert scenario.get_intermediate() == {data_node_3, data_node_4, data_node_5}
+
+    data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+    data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+    data_node_5 = DataNode("quux", Scope.SCENARIO, "s5")
+    data_node_6 = DataNode("quuz", Scope.SCENARIO, "s6")
+    data_node_7 = DataNode("corge", Scope.SCENARIO, "s7")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, None, [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4}, {}, set(), ScenarioId("s1"))
+    # s1 ---      t2 ---> s5 ------
+    #       |                     |
+    #       |---> t1 ---|      -----> t3 ---> s6
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    assert scenario.get_inputs() == {data_node_1, data_node_2}
+    assert scenario.get_outputs() == {data_node_6, data_node_7}
+    assert scenario.get_intermediate() == {data_node_4, data_node_5}
+
+    data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+    data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+    data_node_5 = DataNode("quux", Scope.SCENARIO, "s5")
+    data_node_6 = DataNode("quuz", Scope.SCENARIO, "s6")
+    data_node_7 = DataNode("corge", Scope.SCENARIO, "s7")
+    data_node_8 = DataNode("d8", Scope.SCENARIO, "s8")
+    data_node_9 = DataNode("d9", Scope.SCENARIO, "s9")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
+    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4, task_5, task_6}, {}, set(), ScenarioId("s1"))
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    #                                              |
+    # s8 -------> t5 -------> s9 ------------------
+    assert scenario.get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
+    assert scenario.get_outputs() == set()
+    assert scenario.get_intermediate() == {data_node_5, data_node_4, data_node_7, data_node_9}
+
+    data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
+    data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
+    data_node_5 = DataNode("quux", Scope.SCENARIO, "s5")
+    data_node_6 = DataNode("quuz", Scope.SCENARIO, "s6")
+    data_node_7 = DataNode("corge", Scope.SCENARIO, "s7")
+    data_node_8 = DataNode("hugh", Scope.SCENARIO, "s8")
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, output=[data_node_5], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4, data_node_6], [data_node_7], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_8], None, TaskId("t5"))
+    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4, task_5}, {}, set(), ScenarioId("sc1"))
+    # s1 ---
+    #       |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    # t2 ---> s5                   |
+    # s8 ---> t5              s6 --|
+    assert scenario.get_inputs() == {data_node_1, data_node_2, data_node_8, data_node_6}
+    assert scenario.get_outputs() == {data_node_5, data_node_7}
+    assert scenario.get_intermediate() == {data_node_4}
+
+
+def test_is_ready_to_run():
+    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
+    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
+    data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
+    data_node_5 = PickleDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
+    data_node_6 = PickleDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
+    data_node_7 = PickleDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
+    data_node_8 = PickleDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
+    data_node_9 = PickleDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
+    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4, task_5, task_6}, {}, set(), ScenarioId("s1"))
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    #                                              |
+    # s8 -------> t5 -------> s9 ------------------
+    assert scenario.get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
+
+    data_manager = _DataManagerFactory._build_manager()
+    data_manager._delete_all()
+    for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7, data_node_8, data_node_9]:
+        data_manager._set(dn)
+
+    assert scenario.is_ready_to_run()
+
+    data_node_1.edit_in_progress = True
+    assert not scenario.is_ready_to_run()
+
+    data_node_2.edit_in_progress = True
+    assert not scenario.is_ready_to_run()
+
+    data_node_6.edit_in_progress = True
+    data_node_8.edit_in_progress = True
+    assert not scenario.is_ready_to_run()
+
+    data_node_1.edit_in_progress = False
+    data_node_2.edit_in_progress = False
+    data_node_6.edit_in_progress = False
+    data_node_8.edit_in_progress = False
+    assert scenario.is_ready_to_run()
+
+
+def test_data_nodes_being_edited():
+    data_node_1 = PickleDataNode("foo", Scope.SCENARIO, "s1", properties={"default_data": 1})
+    data_node_2 = PickleDataNode("bar", Scope.SCENARIO, "s2", properties={"default_data": 2})
+    data_node_4 = PickleDataNode("qux", Scope.SCENARIO, "s4", properties={"default_data": 4})
+    data_node_5 = PickleDataNode("quux", Scope.SCENARIO, "s5", properties={"default_data": 5})
+    data_node_6 = PickleDataNode("quuz", Scope.SCENARIO, "s6", properties={"default_data": 6})
+    data_node_7 = PickleDataNode("corge", Scope.SCENARIO, "s7", properties={"default_data": 7})
+    data_node_8 = PickleDataNode("d8", Scope.SCENARIO, "s8", properties={"default_data": 8})
+    data_node_9 = PickleDataNode("d9", Scope.SCENARIO, "s9", properties={"default_data": 9})
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
+    scenario = Scenario("scenario", {task_1, task_2, task_3, task_4, task_5, task_6}, {}, set(), ScenarioId("s1"))
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    #                                              |
+    # s8 -------> t5 -------> s9 ------------------
+
+    data_manager = _DataManagerFactory._build_manager()
+    for dn in [data_node_1, data_node_2, data_node_4, data_node_5, data_node_6, data_node_7, data_node_8, data_node_9]:
+        data_manager._set(dn)
+
+    assert len(scenario.data_nodes_being_edited()) == 0
+    assert scenario.data_nodes_being_edited() == set()
+
+    data_node_1.edit_in_progress = True
+    assert len(scenario.data_nodes_being_edited()) == 1
+    assert scenario.data_nodes_being_edited() == {data_node_1}
+
+    data_node_2.edit_in_progress = True
+    data_node_6.edit_in_progress = True
+    data_node_8.edit_in_progress = True
+    assert len(scenario.data_nodes_being_edited()) == 4
+    assert scenario.data_nodes_being_edited() == {data_node_1, data_node_2, data_node_6, data_node_8}
+
+    data_node_4.edit_in_progress = True
+    data_node_5.edit_in_progress = True
+    data_node_9.edit_in_progress = True
+    assert len(scenario.data_nodes_being_edited()) == 7
+    assert scenario.data_nodes_being_edited() == {
+        data_node_1,
+        data_node_2,
+        data_node_4,
+        data_node_5,
+        data_node_6,
+        data_node_8,
+        data_node_9,
+    }
+
+    data_node_1.edit_in_progress = False
+    data_node_2.edit_in_progress = False
+    data_node_6.edit_in_progress = False
+    data_node_8.edit_in_progress = False
+    assert len(scenario.data_nodes_being_edited()) == 3
+    assert scenario.data_nodes_being_edited() == {data_node_4, data_node_5, data_node_9}
+
+    data_node_4.edit_in_progress = False
+    data_node_5.edit_in_progress = False
+    data_node_7.edit_in_progress = True
+    assert len(scenario.data_nodes_being_edited()) == 2
+    assert scenario.data_nodes_being_edited() == {data_node_7, data_node_9}
+
+    data_node_7.edit_in_progress = False
+    data_node_9.edit_in_progress = False
+    assert len(scenario.data_nodes_being_edited()) == 0
+    assert scenario.data_nodes_being_edited() == set()
+
+
+def test_get_tasks():
+    task_1 = Task("grault", {}, print, id=TaskId("t1"))
+    task_2 = Task("garply", {}, print, id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, id=TaskId("t4"))
+    scenario_1 = Scenario("scenario_1", {task_1, task_2, task_3, task_4}, {}, set(), ScenarioId("s1"))
+    assert scenario_1.tasks == {"grault": task_1, "garply": task_2, "waldo": task_3, "fred": task_4}
+
+    task_5 = Task("wallo", {}, print, id=TaskId("t5"))
+    scenario_2 = Scenario("scenario_2", {task_1, task_2, task_3, task_4, task_5}, {}, set(), ScenarioId("s2"))
+    assert scenario_2.tasks == {"grault": task_1, "garply": task_2, "waldo": task_3, "fred": task_4, "wallo": task_5}
+
+
+def test_get_set_of_tasks():
+    task_1 = Task("grault", {}, print, id=TaskId("t1"))
+    task_2 = Task("garply", {}, print, id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, id=TaskId("t4"))
+    scenario_1 = Scenario("scenario_1", {task_1, task_2, task_3, task_4}, {}, set(), ScenarioId("s1"))
+    assert scenario_1._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
+
+    task_5 = Task("wallo", {}, print, id=TaskId("t5"))
+    scenario_2 = Scenario("scenario_2", {task_1, task_2, task_3, task_4, task_5}, {}, set(), ScenarioId("s2"))
+    assert scenario_2._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
+
+
+def test_get_sorted_tasks():
     def _assert_equal(tasks_a, tasks_b) -> bool:
         if len(tasks_a) != len(tasks_b):
             return False
@@ -577,7 +820,7 @@ def test_get_inputs():
     task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     scenario_1 = Scenario("scenario_1", {task_1, task_2, task_3, task_4}, {}, [], ScenarioId("s1"))
 
-    assert scenario_1._get_inputs() == {data_node_1, data_node_2}
+    assert scenario_1.get_inputs() == {data_node_1, data_node_2}
     assert scenario_1._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
     _assert_equal(scenario_1._get_sorted_tasks(), [[task_1], [task_2, task_4], [task_3]])
 
@@ -599,7 +842,7 @@ def test_get_inputs():
     task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     scenario_2 = Scenario("scenario_2", {task_1, task_2, task_3, task_4}, {}, [], ScenarioId("s2"))
 
-    assert scenario_2._get_inputs() == {data_node_1, data_node_2}
+    assert scenario_2.get_inputs() == {data_node_1, data_node_2}
     assert scenario_2._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
     _assert_equal(scenario_2._get_sorted_tasks(), [[task_1, task_2], [task_3, task_4]])
 
@@ -628,7 +871,7 @@ def test_get_inputs():
     task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
     scenario_3 = Scenario("quest", [task_4, task_2, task_1, task_3], {}, [], scenario_id=ScenarioId("s3"))
 
-    assert scenario_3._get_inputs() == {data_node_1, data_node_2, data_node_6}
+    assert scenario_3.get_inputs() == {data_node_1, data_node_2, data_node_6}
     assert scenario_3._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
     assert _assert_equal(scenario_3._get_sorted_tasks(), [[task_2, task_1], [task_4, task_3]])
 
@@ -656,7 +899,7 @@ def test_get_inputs():
     task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
     scenario_4 = Scenario("scenario_3", [task_1, task_2, task_3, task_4, task_5, task_6], {}, [], ScenarioId("s4"))
 
-    assert scenario_4._get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
+    assert scenario_4.get_inputs() == {data_node_1, data_node_2, data_node_6, data_node_8}
     assert scenario_4._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5, task_6}
     _assert_equal(scenario_4._get_sorted_tasks(), [[task_1, task_2, task_5], [task_3, task_4], [task_6]])
 
@@ -682,7 +925,7 @@ def test_get_inputs():
     task_5 = Task("bob", {}, print, [data_node_8], None, TaskId("t5"))
     scenario_5 = Scenario("scenario_4", [task_1, task_2, task_3, task_4, task_5], {}, [], ScenarioId("s5"))
 
-    assert scenario_5._get_inputs() == {data_node_1, data_node_2, data_node_8, data_node_6}
+    assert scenario_5.get_inputs() == {data_node_1, data_node_2, data_node_8, data_node_6}
     assert scenario_5._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     _assert_equal(scenario_5._get_sorted_tasks(), [[task_1, task_2, task_5], [task_3, task_4]])
 
@@ -713,7 +956,7 @@ def test_get_inputs():
     task_5 = Task("bob", {}, print, [data_node_6], None, TaskId("t5"))
     scenario_6 = Scenario("quest", [task_1, task_2, task_3, task_4, task_5], {}, [], ScenarioId("s6"))
 
-    assert scenario_6._get_inputs() == {data_node_1, data_node_2, data_node_6}
+    assert scenario_6.get_inputs() == {data_node_1, data_node_2, data_node_6}
     assert scenario_6._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     _assert_equal(scenario_6._get_sorted_tasks(), [[task_5, task_2, task_1], [task_4, task_3]])
 
@@ -744,7 +987,7 @@ def test_get_inputs():
     task_5 = Task("bob", {}, print, [data_node_6], [data_node_4], None, TaskId("t5"))
     scenario_7 = Scenario("quest", [task_4, task_1, task_2, task_3, task_5], {}, [], scenario_id=ScenarioId("s7"))
 
-    assert scenario_7._get_inputs() == {data_node_1, data_node_2, data_node_6}
+    assert scenario_7.get_inputs() == {data_node_1, data_node_2, data_node_6}
     assert scenario_7._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     _assert_equal(scenario_7._get_sorted_tasks(), [[task_5, task_2, task_1], [task_4, task_3]])
 
@@ -776,7 +1019,7 @@ def test_get_inputs():
     task_5 = Task("bob", {}, print, [data_node_5], [data_node_3], TaskId("t5"))
     scenario_8 = Scenario("quest", [task_1, task_2, task_3, task_4, task_5], {}, [], scenario_id=ScenarioId("s8"))
 
-    assert scenario_8._get_inputs() == {data_node_1, data_node_2, data_node_5}
+    assert scenario_8.get_inputs() == {data_node_1, data_node_2, data_node_5}
     assert scenario_8._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     _assert_equal(scenario_8._get_sorted_tasks(), [[task_5, task_2, task_1], [task_3, task_4]])
 
@@ -816,7 +1059,7 @@ def test_add_and_remove_pipelines():
         pipeline_manager._set(p)
     scenario_manager._set(scenario_1)
 
-    assert scenario_1._get_inputs() == {data_node_1, data_node_2, data_node_5}
+    assert scenario_1.get_inputs() == {data_node_1, data_node_2, data_node_5}
     assert scenario_1._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     assert len(scenario_1.pipelines) == 0
 
