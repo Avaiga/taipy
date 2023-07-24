@@ -346,7 +346,7 @@ class Job(_Entity, _Labeled):
         """ Indicate if the job can be deleted.
 
         Returns:
-            True if the scenario can be deleted. False otherwise.
+            True if the job can be deleted. False otherwise.
         """
         from ... import core as tp
 
