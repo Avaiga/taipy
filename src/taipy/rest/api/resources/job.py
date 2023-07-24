@@ -230,7 +230,9 @@ class JobList(Resource):
     def __create_job_from_schema(self, task_config_id: str) -> Optional[Job]:
         task_manager = _TaskManagerFactory._build_manager()
         task = task_manager._bulk_get_or_create([self.fetch_config(task_config_id)])[0]
-        return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task, submit_id=f"SUBMISSION_{uuid.uuid4()}")
+        return Job(
+            id=JobId(f"JOB_{uuid.uuid4()}"), task=task, submit_id=f"SUBMISSION_{uuid.uuid4()}", submit_entity_id=task.id
+        )
 
 
 class JobExecutor(Resource):
