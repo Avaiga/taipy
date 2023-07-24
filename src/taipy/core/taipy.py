@@ -245,13 +245,17 @@ def get_tasks() -> List[Task]:
     return _TaskManagerFactory._build_manager()._get_all()
 
 
-def is_deletable(scenario: Union[Scenario, ScenarioId]) -> bool:
-    """Indicate if a scenario can be deleted.
+def is_deletable(entity: Union[Scenario, Job, ScenarioId, JobId]) -> bool:
+    """Indicate if a scenario or a job can be deleted.
 
     Returns:
-        True if the given scenario can be deleted. False otherwise.
+        True if the given scenario or job can be deleted. False otherwise.
     """
-    return _ScenarioManagerFactory._build_manager()._is_deletable(scenario)
+    if isinstance(entity, str) and entity.startswith(Job._ID_PREFIX) or isinstance(entity, Job):
+        return _JobManagerFactory._build_manager()._is_deletable(entity)  # type: ignore
+    if isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX) or isinstance(entity, Scenario):
+        return _ScenarioManagerFactory._build_manager()._is_deletable(entity)  # type: ignore
+    return True
 
 
 def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):

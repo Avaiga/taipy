@@ -86,3 +86,11 @@ class _JobManager(_Manager[Job], _VersionMixin):
             return jobs_of_task[0]
         else:
             return max(jobs_of_task)
+
+    @classmethod
+    def _is_deletable(cls, job: Union[Job, JobId]) -> bool:
+        if isinstance(job, str):
+            job = cls._get(job)
+        if job.is_finished():
+            return True
+        return False
