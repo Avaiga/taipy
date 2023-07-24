@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import copy
 import json
 import pathlib
 import shutil
@@ -75,8 +76,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     @_retry_read_entity((Exception,))
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
-        if not filters:
-            filters = [{}]
         entities = []
         try:
             for f in self.dir_path.iterdir():
@@ -139,7 +138,9 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
         try:
             for f in self.dir_path.iterdir():
-                config_id, owner_id, entity = self.__match_file_and_get_entity(f, configs_and_owner_ids, filters)
+                config_id, owner_id, entity = self.__match_file_and_get_entity(
+                    f, configs_and_owner_ids, copy.deepcopy(filters)
+                )
 
                 if entity:
                     key = config_id, owner_id
@@ -159,8 +160,12 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     ) -> Optional[Entity]:
         if not filters:
             filters = [{}]
+        else:
+            filters = copy.deepcopy(filters)
+
         if owner_id is not None:
-            filters.append({"owner_id": owner_id})
+            for fil in filters:
+                fil.update({"owner_id": owner_id})
         return self.__filter_files_by_config_and_owner_id(config_id, owner_id, filters)
 
     #############################
@@ -187,24 +192,13 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     @_retry_read_entity((Exception,))
     def __match_file_and_get_entity(self, filepath, config_and_owner_ids, filters):
-        versions = [f'"version": "{item.get("version")}"' for item in filters if item.get("version")]
+        if match := [(c, p) for c, p in config_and_owner_ids if c.id in filepath.name]:
+            for config, owner_id in match:
+                for fil in filters:
+                    fil.update({"config_id": config.id, "owner_id": owner_id})
 
-        filename = filepath.name
-
-        if match := [(c, p) for c, p in config_and_owner_ids if c.id in filename]:
-            with open(filepath, "r") as f:
-                file_content = f.read()
-
-            for config_id, owner_id in match:
-                if not all(version in file_content for version in versions):
-                    continue
-
-                if owner_id and owner_id not in file_content:
-                    continue
-
-                entity = self.__file_content_to_entity(file_content)
-                if entity.owner_id == owner_id and entity.config_id == config_id.id:
-                    return config_id, owner_id, entity
+                if data := self.__filter_by(filepath, filters):
+                    return config, owner_id, self.__file_content_to_entity(data)
 
         return None, None, None
 
@@ -233,7 +227,10 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         with open(filepath, "r") as f:
             contents = f.read()
             for _filter in filters:
-                if all(f'"{key}": "{value}"' in contents for key, value in _filter.items()):
+                conditions = [
+                    f'"{key}": "{value}"' if value is not None else f'"{key}": null' for key, value in _filter.items()
+                ]
+                if all(condition in contents for condition in conditions):
                     return json.loads(contents, cls=_Decoder)
 
         return None

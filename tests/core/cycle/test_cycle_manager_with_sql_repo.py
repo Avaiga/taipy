@@ -11,8 +11,6 @@
 
 from datetime import datetime
 
-import pytest
-
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -23,6 +21,7 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -199,8 +198,9 @@ def test_get_cycle_start_date_and_end_date(init_sql_repo):
     assert yearly_start_date_2 < creation_date_2 < yearly_end_date_2
 
 
-def test_hard_delete_shared_entities():
+def test_hard_delete_shared_entities(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _ScenarioManager._repository = _ScenarioManagerFactory._build_repository()
 
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")

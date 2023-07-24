@@ -245,7 +245,7 @@ def test_migrate_compatible_version():
         _ScenarioManager._submit(scenario_v2)
 
         assert scenario_v2.d2.read() == 2
-        assert len(_DataManager._get_all(version_number="all")) == 6
+        assert len(_DataManager._get_all(version_number="all")) == 4
 
     init_config()
 
@@ -263,7 +263,7 @@ def test_migrate_compatible_version():
         _ScenarioManager._submit(scenario_v2_1)
 
     assert scenario_v2_1.d2.read() == 6
-    assert len(_DataManager._get_all(version_number="all")) == 10
+    assert len(_DataManager._get_all(version_number="all")) == 6
 
     v1 = taipy.get(scenario_v1.id)
     assert v1.d1.version == "2.1"
@@ -296,7 +296,7 @@ def submit_v2():
 
 
 def config_scenario_v1():
-    dn1 = Config.configure_pickle_data_node(id="d1", default_data=1, scope=Scope.GLOBAL)
+    dn1 = Config.configure_pickle_data_node(id="d1", default_data=1)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", twice, dn1, dn2)
     scenario_cfg = Config.configure_scenario("my_scenario", [task_cfg])
@@ -305,7 +305,7 @@ def config_scenario_v1():
 
 
 def config_scenario_v2():
-    dn1 = Config.configure_pickle_data_node(id="d1", default_data=2, scope=Scope.GLOBAL)
+    dn1 = Config.configure_pickle_data_node(id="d1", default_data=2)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", triple, dn1, dn2)
     scenario_cfg = Config.configure_scenario("my_scenario", [task_cfg])
