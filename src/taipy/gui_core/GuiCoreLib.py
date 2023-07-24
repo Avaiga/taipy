@@ -432,7 +432,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if data and hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, DataNode):
                 return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
-            else:
+            elif self.data_nodes_by_owner:
                 with self.lock:
                     if isinstance(data, Cycle):
                         return (

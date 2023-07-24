@@ -155,6 +155,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
+    // history & data
+    const [historyRequested, setHistoryRequested] = useState(false);
+    const [dataRequested, setDataRequested] = useState(false);
+
     // userExpanded
     const [userExpanded, setUserExpanded] = useState(isDataNode && expanded);
     const onExpand = useCallback(
@@ -213,6 +217,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     useEffect(() => {
         setLabel(dnLabel);
         setUserExpanded(expanded && isDataNode);
+        setTabValue(0);
+        setHistoryRequested(false);
+        setDataRequested(false);
     }, [dnLabel, isDataNode, expanded]);
 
     // Refresh on broadcast
@@ -228,11 +235,19 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const handleTabChange = useCallback(
         (_: SyntheticEvent, newValue: number) => {
             if (isDataNode) {
-                newValue > 0 &&
-                    dispatch(
-                        createSendActionNameAction(id, module, props.onIdSelect, {
-                            [newValue == 1 ? "history_id" : "data_id"]: dnId,
-                        })
+                newValue == 1 &&
+                    setHistoryRequested(
+                        (req) =>
+                            req ||
+                            dispatch(createSendActionNameAction(id, module, props.onIdSelect, { history_id: dnId })) ||
+                            true
+                    );
+                newValue == 2 &&
+                    setDataRequested(
+                        (req) =>
+                            req ||
+                            dispatch(createSendActionNameAction(id, module, props.onIdSelect, { data_id: dnId })) ||
+                            true
                     );
                 setTabValue(newValue);
             }
@@ -254,9 +269,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         sx={AccordionSummarySx}
                     >
                         <Grid container alignItems="baseline" direction="row" spacing={1}>
-                            <Grid item>
-                                {dnLabel}
-                            </Grid>
+                            <Grid item>{dnLabel}</Grid>
                             <Grid item>
                                 <Typography fontSize="smaller">{dnType}</Typography>
                             </Grid>
@@ -429,7 +442,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             id="dn-tabpanel-history"
                             aria-labelledby={`${id}-history`}
                         >
-                            {Array.isArray(props.history) ? (
+                            {historyRequested && Array.isArray(props.history) ? (
                                 <table>
                                     {props.history.map((edit, idx) =>
                                         edit.map((v, idx2) => (
@@ -455,7 +468,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             id="dn-tabpanel-data"
                             aria-labelledby={`${id}-data`}
                         >
-                            Data shall be shown here
+                            {dataRequested ? "show data" : "Data shall be shown here"}
                         </div>
                     </AccordionDetails>
                 </Accordion>
