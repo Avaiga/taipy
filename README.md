@@ -1,5 +1,4 @@
 # Taipy Core
-[![tests](https://github.com/Avaiga/taipy-core/actions/workflows/tests.yml/badge.svg)](https://github.com/Avaiga/taipy-core/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/pypi/pyversions/taipy-core)](https://pypi.org/project/taipy-core)
 [![PyPI](https://img.shields.io/pypi/v/taipy-core.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy-core)
 
