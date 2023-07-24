@@ -165,14 +165,14 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Assert number of entities of the latest version only
     assert len(_DataManager._get_all(version_number="latest")) == 2
     assert len(_TaskManager._get_all(version_number="latest")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
+    assert len(_PipelineManager._get_all(version_number="latest")) == 1
     assert len(_ScenarioManager._get_all(version_number="latest")) == 1
     assert len(_JobManager._get_all(version_number="latest")) == 1
 
     # Assert number of entities of the development version only
     assert len(_DataManager._get_all(version_number="development")) == 2
     assert len(_TaskManager._get_all(version_number="development")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
+    assert len(_PipelineManager._get_all(version_number="development")) == 1
     assert len(_ScenarioManager._get_all(version_number="development")) == 1
     assert len(_JobManager._get_all(version_number="development")) == 1
 
@@ -318,7 +318,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario)
 
-    assert len(_DataManager._get_all()) == 6
+    assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 2

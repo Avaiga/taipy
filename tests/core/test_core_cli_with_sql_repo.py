@@ -105,7 +105,6 @@ def test_core_cli_production_mode(init_sql_repo):
 
 
 def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo):
-
     scenario_config = config_scenario()
 
     # Create a scenario in development mode
@@ -165,14 +164,14 @@ def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo):
     # Assert number of entities of the latest version only
     assert len(_DataManager._get_all(version_number="latest")) == 2
     assert len(_TaskManager._get_all(version_number="latest")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
+    assert len(_PipelineManager._get_all(version_number="latest")) == 1
     assert len(_ScenarioManager._get_all(version_number="latest")) == 1
     assert len(_JobManager._get_all(version_number="latest")) == 1
 
     # Assert number of entities of the development version only
     assert len(_DataManager._get_all(version_number="development")) == 2
     assert len(_TaskManager._get_all(version_number="development")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
+    assert len(_PipelineManager._get_all(version_number="development")) == 1
     assert len(_ScenarioManager._get_all(version_number="development")) == 1
     assert len(_JobManager._get_all(version_number="development")) == 1
 
