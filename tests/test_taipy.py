@@ -180,7 +180,7 @@ class TestTaipy:
             tp.exists(task_id)
             mck.assert_called_once_with(task_id)
 
-    def test_is_deletable(self):
+    def test_is_deletable(self, task):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.is_deletable(scenario_id)
@@ -190,6 +190,16 @@ class TestTaipy:
             scenario = Scenario("config_id", [], {})
             tp.is_deletable(scenario)
             mck.assert_called_once_with(scenario)
+
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_deletable") as mck:
+            job_id = JobId("JOB_job_id")
+            tp.is_deletable(job_id)
+            mck.assert_called_once_with(job_id)
+
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_deletable") as mck:
+            job = Job("job_id", task, "submit_id", task.id)
+            tp.is_deletable(job)
+            mck.assert_called_once_with(job)
 
     def test_is_promotable(self):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
