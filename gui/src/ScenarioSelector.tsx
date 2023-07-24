@@ -96,7 +96,7 @@ interface ScenarioSelectorProps {
     scenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
-    onCreate?: string;
+    onCreation?: string;
     coreChanged?: Record<string, unknown>;
     updateVars: string;
     configs?: Array<[string, string]>;
@@ -595,13 +595,13 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values, props.onCreate));
+            dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values, props.onCreation));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 unselect();
             }
         },
-        [id, props.onScenarioCrud, dispatch, module, props.onCreate, unselect]
+        [id, props.onScenarioCrud, dispatch, module, props.onCreation, unselect]
     );
 
     // Refresh on broadcast

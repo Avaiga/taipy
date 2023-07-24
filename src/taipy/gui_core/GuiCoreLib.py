@@ -231,7 +231,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
         delete = args[1]
         data = args[2]
         scenario = None
-        on_create = None
+        on_creation_function = None
+        gui: Gui = state._gui
+
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
         if update:
             scenario_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
@@ -255,8 +257,42 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
                 return
             try:
-                scenario = create_scenario(scenario_config, date, name)
-                on_create = args[3] if len(args) > 3 and isinstance(args[3], str) else None
+                do_create = True
+                on_creation = args[3] if len(args) > 3 and isinstance(args[3], str) else None
+                on_creation_function = gui._get_user_function(on_creation) if on_creation else None
+                if callable(on_creation_function):
+                    try:
+                        res = gui._call_function_with_state(
+                            on_creation_function,
+                            [
+                                id,
+                                on_creation,
+                                {
+                                    "config": scenario_config,
+                                    "date": date,
+                                    "name": name,
+                                    "properties": data.get("properties"),
+                                    "before": True,
+                                },
+                            ],
+                        )
+                        if isinstance(res, Scenario):
+                            # everything's fine
+                            state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, "")
+                            return
+                        if res:
+                            # do not create
+                            on_creation_function = None
+                            do_create = False
+                            state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"{res}")
+                    except Exception as e:  # pragma: no cover
+                        if not gui._call_on_exception(on_creation, e):
+                            _warn(f"on_creation() before: Exception raised in '{on_creation}()':\n{e}")
+                else:
+                    on_creation_function = None
+                    _warn(f"on_creation(): '{on_creation}()' is not a function.")
+                if do_create and not scenario:
+                    scenario = create_scenario(scenario_config, date, name)
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
@@ -275,17 +311,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, "")
                     except Exception as e:
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
-                if on_create:
-                    gui: Gui = state._gui
-                    action_function = gui._get_user_function(on_create)
-                    if callable(action_function):
-                        try:
-                            gui._call_function_with_state(action_function, [id, on_create, {"scenario": scenario}])
-                        except Exception as e:  # pragma: no cover
-                            if not gui._call_on_exception(on_create, e):
-                                _warn(f"on_create(): Exception raised in '{on_create}()':\n{e}")
-                    else:
-                        _warn(f"on_create(): '{on_create}()' is not a function.")
+                if callable(on_creation_function):
+                    try:
+                        gui._call_function_with_state(
+                            on_creation_function, [id, on_creation, {"scenario": scenario, "after": True}]
+                        )
+                    except Exception as e:  # pragma: no cover
+                        if not gui._call_on_exception(on_creation, e):
+                            _warn(f"on_creation() after: Exception raised in '{on_creation}()':\n{e}")
 
     def edit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -403,7 +436,7 @@ class _GuiCore(ElementLibrary):
                 "on_change": ElementProperty(PropertyType.function),
                 "height": ElementProperty(PropertyType.string, "50vh"),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
-                "on_create": ElementProperty(PropertyType.function),
+                "on_creation": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "scenarios": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_scenarios()}}"),
