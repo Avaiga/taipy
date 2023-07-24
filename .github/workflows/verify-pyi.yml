@@ -1,4 +1,4 @@
-name: Generate gui.pyi
+name: Verify pyi file generation
 
 on:
   pull_request:
@@ -26,6 +26,3 @@ jobs:
           pipenv install --dev --skip-lock
       - name: Generate pyi
         run: cp tools/generate_pyi.py temp.py && pipenv run python temp.py && rm temp.py
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update gui.pyi file

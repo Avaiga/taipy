@@ -17,11 +17,6 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: setup node version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
       - name: Extract branch name
         shell: bash
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
@@ -52,21 +47,18 @@ jobs:
           """ > /tmp/check.py
           python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
 
-      - name: Install dependencies
+      - name: Download assets from github release tag
         run: |
-          python -m pip install --upgrade pip
-          pip install build
+          gh release download ${{ github.event.inputs.version }} --dir dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and test the package
+      - name: Verify there is a release asset
         run: |
-          python setup.py build_py && python -m build
-          rm -rf src
-          pip install dist/*.tar.gz
-          pip install pytest pytest-mock playwright pytest-playwright pytest-timeout testbook
-          pip install ipython ipykernel
-          ipython kernel install --name "python3" --user
-          playwright install chromium --with-deps
-          pytest
+          if [ ! -f dist/taipy-gui-${{ github.event.inputs.version }}.tar.gz ]; then
+            echo "No release asset found"
+            exit 1
+          fi
 
   publish-to-pypi:
     needs: [test-package]
@@ -75,23 +67,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
 
-      - name: setup node version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-
-      - name: Install dependencies
+      - name: Download assets from tag
         run: |
-          python -m pip install --upgrade pip
-          pip install build
-
-      - name: Build package
-        run: python setup.py build_py && python -m build
+          gh release download ${{ github.event.inputs.version }} --dir dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

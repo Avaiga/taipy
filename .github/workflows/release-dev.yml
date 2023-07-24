@@ -99,6 +99,13 @@ jobs:
               """ > /tmp/write_setup_taipy.py
               python /tmp/write_setup_taipy.py "${{ github.event.inputs.taipy-config-version }}"
 
+      - name: Generate pyi files
+        run: |
+          pip install pipenv
+          pipenv install --dev --skip-lock
+          cp tools/generate_pyi.py temp.py && pipenv run python temp.py && rm temp.py
+          pipenv --rm
+
       - name: Build package
         run: python setup.py build_py && python -m build
 
