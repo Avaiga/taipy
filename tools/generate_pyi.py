@@ -1,6 +1,6 @@
 import os
 
-os.system('pipenv run stubgen ./src/taipy/gui/gui.py --no-import --parse-only --include-private --export-less -o ./')
+os.system('pipenv run stubgen ./src/taipy/gui/gui.py --no-import --parse-only --export-less -o ./')
 
 from src.taipy.gui.config import Config
 

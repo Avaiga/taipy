@@ -293,42 +293,47 @@
           {
             "name": "lon",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>longitude</i> value. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lon\">Plotly Map traces</a>."
+            "doc": "Column name for the <i>longitude</i> value, for 'scattergeo' charts. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lon\">Plotly Map traces</a>."
           },
           {
             "name": "lat",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>latitude</i> value. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lat\">Plotly Map traces</a>."
+            "doc": "Column name for the <i>latitude</i> value, for 'scattergeo' charts. See <a href=\"https://plotly.com/javascript/reference/scattergeo/#scattergeo-lat\">Plotly Map traces</a>."
           },
           {
             "name": "r",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>r</i> value. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
+            "doc": "Column name for the <i>r</i> value, for 'scatterpolar' charts. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
           },
           {
             "name": "theta",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>theta</i> value. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
+            "doc": "Column name for the <i>theta</i> value, for 'scatterpolar' charts. See <a href=\"https://plotly.com/javascript/polar-chart/\">Plotly Polar charts</a>."
           },
           {
             "name": "high",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>high</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-high\">Plotly Candlestick charts</a>."
+            "doc": "Column name for the <i>high</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-high\">Plotly Candlestick charts</a>."
           },
           {
             "name": "low",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>low</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-low\">Ploty Candlestick charts</a>."
+            "doc": "Column name for the <i>low</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-low\">Ploty Candlestick charts</a>."
           },
           {
             "name": "open",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>open</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-open\">Plotly Candlestick charts</a>."
+            "doc": "Column name for the <i>open</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-open\">Plotly Candlestick charts</a>."
           },
           {
             "name": "close",
             "type": "indexed(str)",
-            "doc": "Column name for the <i>close</i> value. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-close\">Plotly Candlestick charts</a>."
+            "doc": "Column name for the <i>close</i> value, for 'candlestick' charts. See <a href=\"https://plotly.com/javascript/reference/candlestick/#candlestick-close\">Plotly Candlestick charts</a>."
+          },
+          {
+            "name": "measure",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>measure</i> value, for 'waterfall' charts. See <a href=\"https://plotly.com/javascript/reference/waterfall/#waterfall-measure\">Plotly Waterfall charts</a>."
           },
           {
             "name": "locations",
