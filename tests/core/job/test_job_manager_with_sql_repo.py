@@ -28,6 +28,7 @@ from src.taipy.core.exceptions.exceptions import JobNotDeletedException
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job.job_id import JobId
+from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.config.common.scope import Scope
@@ -205,6 +206,56 @@ def test_force_deleting_unfinished_job(init_sql_repo):
         _JobManager._delete(job, force=True)
     assert _JobManager._get(job.id) is None
     assert_true_after_time(lambda: reference_last_edit_date != dn_3.last_edit_date)
+
+
+def test_is_deletable():
+    assert len(_JobManager._get_all()) == 0
+    task = _create_task(print, 0, "task")
+    job = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id")
+
+    assert job.is_completed()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.abandoned()
+    assert job.is_abandoned()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.canceled()
+    assert job.is_canceled()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.failed()
+    assert job.is_failed()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.skipped()
+    assert job.is_skipped()
+    assert _JobManager._is_deletable(job)
+    assert _JobManager._is_deletable(job.id)
+
+    job.blocked()
+    assert job.is_blocked()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
+
+    job.running()
+    assert job.is_running()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
+
+    job.pending()
+    assert job.is_pending()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
+
+    job.status = Status.SUBMITTED
+    assert job.is_submitted()
+    assert not _JobManager._is_deletable(job)
+    assert not _JobManager._is_deletable(job.id)
 
 
 def _create_task(function, nb_outputs=1, name=None):

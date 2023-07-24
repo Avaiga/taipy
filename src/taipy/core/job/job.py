@@ -341,3 +341,13 @@ class Job(_Entity, _Labeled):
             The simple label of the job as a string.
         """
         return self._get_simple_label()
+
+    def is_deletable(self) -> bool:
+        """Indicate if the scenario can be deleted.
+
+        Returns:
+            True if the scenario can be deleted. False otherwise.
+        """
+        from ... import core as tp
+
+        return tp.is_deletable(self)

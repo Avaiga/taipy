@@ -282,3 +282,11 @@ def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     if mode == JobConfig._DEVELOPMENT_MODE:
         dispatcher = _DevelopmentJobDispatcher(_OrchestratorFactory._orchestrator)
     dispatcher._dispatch(job)
+
+
+def test_is_deletable():
+    with mock.patch("src.taipy.core.job._job_manager._JobManager._is_deletable") as mock_submit:
+        task = Task(config_id="name_1", properties={}, function=_foo, id=TaskId("task_1"))
+        job = Job(job_id, task, "submit_id_1", "scenario_entity_id")
+        job.is_deletable()
+        mock_submit.assert_called_once_with(job)
