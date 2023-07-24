@@ -208,7 +208,7 @@ def test_force_deleting_unfinished_job(init_sql_repo):
     assert_true_after_time(lambda: reference_last_edit_date != dn_3.last_edit_date)
 
 
-def test_is_deletable():
+def test_is_deletable(init_sql_repo):
     assert len(_JobManager._get_all()) == 0
     task = _create_task(print, 0, "task")
     job = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id")
