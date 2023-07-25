@@ -686,7 +686,7 @@ class _Builder:
         elif var_type == PropertyType.lov_value:
             # Done by _get_adapter
             return self
-        elif isclass(var_type) and issubclass(var_type, _TaipyBase):
+        elif isclass(var_type) and issubclass(var_type, _TaipyBase):  # type: ignore
             return self.__set_default_value(var_name, t.cast(t.Callable, var_type)(value, "").get())
         else:
             return self.__set_json_attribute(default_var_name, value)

@@ -1,0 +1,4 @@
+
+class {{name}}(ControlElementApi):
+    _ELEMENT_NAME: str
+    def __init__(self, {{properties}}) -> None: ...

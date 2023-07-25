@@ -87,7 +87,7 @@ from .gui_actions import (
 from .icon import Icon
 from .page import Page
 from .partial import Partial
-from .renderers import ClassApi, Html, Markdown
+from .renderers import BlockElementApi, ClassApi, ControlElementApi, Html, Markdown
 from .state import State
 from .utils import is_debugging
 from .utils._element_api_generator import _ElementApiGenerator
