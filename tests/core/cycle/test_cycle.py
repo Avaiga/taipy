@@ -181,6 +181,52 @@ def test_auto_set_and_reload(current_datetime):
     assert cycle_1.properties["qux"] == 5
     assert cycle_2.properties["qux"] == 5
 
+    cycle_1.properties["temp_key_1"] = "temp_value_1"
+    cycle_1.properties["temp_key_2"] = "temp_value_2"
+    assert cycle_1.properties == {
+        "qux": 5,
+        "key": "value",
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    assert cycle_2.properties == {
+        "qux": 5,
+        "key": "value",
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    cycle_1.properties.pop("temp_key_1")
+    assert "temp_key_1" not in cycle_1.properties.keys()
+    assert "temp_key_1" not in cycle_1.properties.keys()
+    assert cycle_1.properties == {
+        "key": "value",
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    assert cycle_2.properties == {
+        "key": "value",
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    cycle_2.properties.pop("temp_key_2")
+    assert cycle_1.properties == {"key": "value", "qux": 5}
+    assert cycle_2.properties == {"key": "value", "qux": 5}
+    assert "temp_key_2" not in cycle_1.properties.keys()
+    assert "temp_key_2" not in cycle_2.properties.keys()
+
+    cycle_1.properties["temp_key_3"] = 0
+    assert cycle_1.properties == {"key": "value", "qux": 5, "temp_key_3": 0}
+    assert cycle_2.properties == {"key": "value", "qux": 5, "temp_key_3": 0}
+    cycle_1.properties.update({"temp_key_3": 1})
+    assert cycle_1.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
+    assert cycle_2.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
+    cycle_1.properties.update(dict())
+    assert cycle_1.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
+    assert cycle_2.properties == {"key": "value", "qux": 5, "temp_key_3": 1}
+    cycle_1.properties.pop("key")
+    cycle_1.properties["temp_key_4"] = 0
+    cycle_1.properties["temp_key_5"] = 0
+
     new_datetime_3 = new_datetime_1 + timedelta(5)
     with cycle_1 as cycle:
         assert cycle.frequency == Frequency.MONTHLY
@@ -190,6 +236,9 @@ def test_auto_set_and_reload(current_datetime):
         assert cycle.name == "def"
         assert cycle._is_in_context
         assert cycle.properties["qux"] == 5
+        assert cycle.properties["temp_key_3"] == 1
+        assert cycle.properties["temp_key_4"] == 0
+        assert cycle.properties["temp_key_5"] == 0
 
         cycle.frequency = Frequency.YEARLY
         cycle.creation_date = new_datetime_3
@@ -199,6 +248,12 @@ def test_auto_set_and_reload(current_datetime):
         assert cycle.name == "def"
         assert cycle._name == "abc"
         cycle.properties["qux"] = 9
+        cycle.properties.pop("temp_key_3")
+        cycle.properties.pop("temp_key_4")
+        cycle.properties.update({"temp_key_4": 1})
+        cycle.properties.update({"temp_key_5": 2})
+        cycle.properties.pop("temp_key_5")
+        cycle.properties.update(dict())
 
         assert cycle.frequency == Frequency.MONTHLY
         assert cycle.creation_date == new_datetime_2
@@ -207,6 +262,9 @@ def test_auto_set_and_reload(current_datetime):
         assert cycle._is_in_context
         assert cycle.properties["qux"] == 5
         assert cycle.name == "def"
+        assert cycle.properties["temp_key_3"] == 1
+        assert cycle.properties["temp_key_4"] == 0
+        assert cycle.properties["temp_key_5"] == 0
 
     assert cycle_1.frequency == Frequency.YEARLY
     assert cycle_1.creation_date == new_datetime_3
@@ -214,3 +272,6 @@ def test_auto_set_and_reload(current_datetime):
     assert cycle_1.end_date == new_datetime_3
     assert cycle_1.name == "abc"
     assert cycle_1.properties["qux"] == 9
+    assert "temp_key_3" not in cycle_1.properties.keys()
+    assert cycle_1.properties["temp_key_4"] == 1
+    assert "temp_key_5" not in cycle_1.properties.keys()

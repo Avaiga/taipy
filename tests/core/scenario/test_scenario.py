@@ -555,9 +555,9 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context
     assert scenario_1.properties["qux"] == 9
-    assert "temp_key_3" not in scenario.properties.keys()
-    assert scenario.properties["temp_key_4"] == 1
-    assert "temp_key_5" not in scenario.properties.keys()
+    assert "temp_key_3" not in scenario_1.properties.keys()
+    assert scenario_1.properties["temp_key_4"] == 1
+    assert "temp_key_5" not in scenario_1.properties.keys()
 
 
 def test_is_deletable():

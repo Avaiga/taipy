@@ -223,6 +223,47 @@ def test_auto_set_and_reload(data_node):
     assert task_1.properties["qux"] == 5
     assert task_2.properties["qux"] == 5
 
+    task_1.properties["temp_key_1"] = "temp_value_1"
+    task_1.properties["temp_key_2"] = "temp_value_2"
+    assert task_1.properties == {
+        "qux": 5,
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    assert task_2.properties == {
+        "qux": 5,
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    task_1.properties.pop("temp_key_1")
+    assert "temp_key_1" not in task_1.properties.keys()
+    assert "temp_key_1" not in task_1.properties.keys()
+    assert task_1.properties == {
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    assert task_2.properties == {
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    task_2.properties.pop("temp_key_2")
+    assert task_1.properties == {"qux": 5}
+    assert task_2.properties == {"qux": 5}
+    assert "temp_key_2" not in task_1.properties.keys()
+    assert "temp_key_2" not in task_2.properties.keys()
+
+    task_1.properties["temp_key_3"] = 0
+    assert task_1.properties == {"qux": 5, "temp_key_3": 0}
+    assert task_2.properties == {"qux": 5, "temp_key_3": 0}
+    task_1.properties.update({"temp_key_3": 1})
+    assert task_1.properties == {"qux": 5, "temp_key_3": 1}
+    assert task_2.properties == {"qux": 5, "temp_key_3": 1}
+    task_1.properties.update(dict())
+    assert task_1.properties == {"qux": 5, "temp_key_3": 1}
+    assert task_2.properties == {"qux": 5, "temp_key_3": 1}
+    task_1.properties["temp_key_4"] = 0
+    task_1.properties["temp_key_5"] = 0
+
     with task_1 as task:
         assert task.config_id == "foo"
         assert task.owner_id is None
@@ -230,10 +271,19 @@ def test_auto_set_and_reload(data_node):
         assert not task.skippable
         assert task._is_in_context
         assert task.properties["qux"] == 5
+        assert task.properties["temp_key_3"] == 1
+        assert task.properties["temp_key_4"] == 0
+        assert task.properties["temp_key_5"] == 0
 
         task.function = print
         task.skippable = True
         task.properties["qux"] = 9
+        task.properties.pop("temp_key_3")
+        task.properties.pop("temp_key_4")
+        task.properties.update({"temp_key_4": 1})
+        task.properties.update({"temp_key_5": 2})
+        task.properties.pop("temp_key_5")
+        task.properties.update(dict())
 
         assert task.config_id == "foo"
         assert task.owner_id is None
@@ -241,6 +291,9 @@ def test_auto_set_and_reload(data_node):
         assert not task.skippable
         assert task._is_in_context
         assert task.properties["qux"] == 5
+        assert task.properties["temp_key_3"] == 1
+        assert task.properties["temp_key_4"] == 0
+        assert task.properties["temp_key_5"] == 0
 
     assert task_1.config_id == "foo"
     assert task_1.owner_id is None
@@ -248,6 +301,9 @@ def test_auto_set_and_reload(data_node):
     assert task.skippable
     assert not task_1._is_in_context
     assert task_1.properties["qux"] == 9
+    assert "temp_key_3" not in task_1.properties.keys()
+    assert task_1.properties["temp_key_4"] == 1
+    assert "temp_key_5" not in task_1.properties.keys()
 
 
 def test_get_parents(task):
