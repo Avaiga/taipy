@@ -38,6 +38,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         dir_name (str): Folder that will hold the files for this dataclass model.
     """
 
+    __EXCEPTIONS_TO_RETRY = (json.JSONDecodeError,)
+
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter], dir_name: str):
         self.model_type = model_type
         self.converter = converter
@@ -64,7 +66,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _exists(self, entity_id: str) -> bool:
         return self.__get_path(entity_id).exists()
 
-    @_retry_read_entity((Exception,))
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def _load(self, entity_id: str) -> Entity:
         try:
             with pathlib.Path(self.__get_path(entity_id)).open(encoding="UTF-8") as source:
@@ -73,7 +75,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), entity_id)
 
-    @_retry_read_entity((Exception,))
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
         if not filters:
             filters = [{}]
@@ -166,7 +168,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     # ##   Private methods   ## #
     #############################
-    @_retry_read_entity((Exception,))
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def __filter_files_by_config_and_owner_id(
         self, config_id: str, owner_id: Optional[str], filters: Optional[List[Dict]] = None
     ):
@@ -185,7 +187,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             pass
         return None
 
-    @_retry_read_entity((Exception,))
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def __match_file_and_get_entity(self, filepath, config_and_owner_ids, filters):
         versions = [f'"version": "{item.get("version")}"' for item in filters if item.get("version")]
 
