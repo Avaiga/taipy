@@ -272,7 +272,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                 {
                                     "config": scenario_config,
                                     "date": date,
-                                    "name": name,
+                                    "label": name,
                                     "properties": {v.get("key"): v.get("value") for v in data.get("properties", [])},
                                 },
                             ],
