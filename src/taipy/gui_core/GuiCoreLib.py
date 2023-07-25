@@ -76,8 +76,12 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                     scenario.cycle.get_simple_label() if scenario.cycle else "",
                     scenario.get_simple_label(),
                     list(scenario.tags) if scenario.tags else [],
-                    [(k, v) for k, v in scenario.properties.items() if k not in _GuiCoreScenarioAdapter.__INNER_PROPS] if scenario.properties else [],
-                    [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.pipelines.values()] if scenario.pipelines else [],
+                    [(k, v) for k, v in scenario.properties.items() if k not in _GuiCoreScenarioAdapter.__INNER_PROPS]
+                    if scenario.properties
+                    else [],
+                    [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.pipelines.values()]
+                    if scenario.pipelines
+                    else [],
                     list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                     is_deletable(scenario),  # deletable
                     is_promotable(scenario),
@@ -231,8 +235,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
         delete = args[1]
         data = args[2]
         scenario = None
-        on_creation_function = None
-        gui: Gui = state._gui
 
         name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
         if update:
@@ -257,7 +259,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
                 return
             try:
-                do_create = True
+                gui: Gui = state._gui
                 on_creation = args[3] if len(args) > 3 and isinstance(args[3], str) else None
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function):
@@ -271,8 +273,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                     "config": scenario_config,
                                     "date": date,
                                     "name": name,
-                                    "properties": data.get("properties"),
-                                    "before": True,
+                                    "properties": {v.get("key"): v.get("value") for v in data.get("properties", [])},
                                 },
                             ],
                         )
@@ -282,17 +283,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             return
                         if res:
                             # do not create
-                            on_creation_function = None
-                            do_create = False
                             state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"{res}")
+                            return
                     except Exception as e:  # pragma: no cover
                         if not gui._call_on_exception(on_creation, e):
-                            _warn(f"on_creation() before: Exception raised in '{on_creation}()':\n{e}")
+                            _warn(f"on_creation(): Exception raised in '{on_creation}()':\n{e}")
                 else:
-                    on_creation_function = None
-                    _warn(f"on_creation(): '{on_creation}()' is not a function.")
-                if do_create and not scenario:
-                    scenario = create_scenario(scenario_config, date, name)
+                    _warn(f"on_creation(): '{on_creation}' is not a function.")
+                scenario = create_scenario(scenario_config, date, name)
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
         if scenario:
@@ -307,18 +305,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         for prop in props:
                             key = prop.get("key")
                             if key and key not in _GuiCoreContext.__SCENARIO_PROPS:
-                                sc._properties[key] = prop.get("value")
+                                sc.properties[key] = prop.get("value")
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, "")
                     except Exception as e:
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
-                if callable(on_creation_function):
-                    try:
-                        gui._call_function_with_state(
-                            on_creation_function, [id, on_creation, {"scenario": scenario, "after": True}]
-                        )
-                    except Exception as e:  # pragma: no cover
-                        if not gui._call_on_exception(on_creation, e):
-                            _warn(f"on_creation() after: Exception raised in '{on_creation}()':\n{e}")
 
     def edit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
