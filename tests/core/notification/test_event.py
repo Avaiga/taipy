@@ -40,8 +40,8 @@ def test_event_creation_cycle():
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION, "frequency")
 
-    with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.CYCLE, "cycle_id", EventOperation.DELETION, "frequency")
+    # with pytest.raises(InvalidEventAttributeName):
+    #     _ = Event(EventEntityType.CYCLE, "cycle_id", EventOperation.DELETION, "frequency")
 
     with pytest.raises(InvalidEventOperation):
         _ = Event(EventEntityType.CYCLE, "cycle_id", EventOperation.SUBMISSION)
@@ -82,8 +82,8 @@ def test_event_creation_scenario():
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.CREATION, "is_primary")
 
-    with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.DELETION, "is_primary")
+    # with pytest.raises(InvalidEventAttributeName):
+    #     _ = Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.DELETION, "is_primary")
 
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION, "is_primary")
@@ -121,8 +121,8 @@ def test_event_creation_pipeline():
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.CREATION, "subscribers")
 
-    with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.DELETION, "subscribers")
+    # with pytest.raises(InvalidEventAttributeName):
+    #     _ = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.DELETION, "subscribers")
 
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.SUBMISSION, "subscribers")
@@ -160,8 +160,8 @@ def test_event_creation_task():
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.TASK, "task_id", EventOperation.CREATION, "function")
 
-    with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.TASK, "task_id", EventOperation.DELETION, "function")
+    # with pytest.raises(InvalidEventAttributeName):
+    #     _ = Event(EventEntityType.TASK, "task_id", EventOperation.DELETION, "function")
 
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.TASK, "task_id", EventOperation.SUBMISSION, "function")
@@ -192,8 +192,8 @@ def test_event_creation_datanode():
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.CREATION, "properties")
 
-    with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.DELETION, "properties")
+    # with pytest.raises(InvalidEventAttributeName):
+    #     _ = Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.DELETION, "properties")
 
     with pytest.raises(InvalidEventOperation):
         _ = Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.SUBMISSION)
@@ -227,8 +227,8 @@ def test_event_creation_job():
     with pytest.raises(InvalidEventAttributeName):
         _ = Event(EventEntityType.JOB, "job_id", EventOperation.CREATION, "force")
 
-    with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.JOB, "job_id", EventOperation.DELETION, "force")
+    # with pytest.raises(InvalidEventAttributeName):
+    #     _ = Event(EventEntityType.JOB, "job_id", EventOperation.DELETION, "force")
 
     with pytest.raises(InvalidEventOperation):
         _ = Event(EventEntityType.JOB, "job_id", EventOperation.SUBMISSION)

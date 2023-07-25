@@ -29,7 +29,9 @@ class _Entity:
         # If multiple entities is in context, the last to enter will be the first to exit
         self._is_in_context = False
         if hasattr(self, "_properties"):
-            self._properties.data = self._properties._pending_changes
+            for to_delete_key in self._properties._pending_deletions:
+                self._properties.data.pop(to_delete_key, None)
+            self._properties.data.update(self._properties._pending_changes)
         _get_manager(self._MANAGER_NAME)._set(self)
 
         while self._in_context_attributes_changed_collector:
