@@ -34,6 +34,8 @@ class _Reloader:
         if obj._is_in_context and hasattr(entity, "_properties"):
             if obj._properties._pending_changes:
                 entity._properties._pending_changes = obj._properties._pending_changes
+            if obj._properties._pending_deletions:
+                entity._properties._pending_deletions = obj._properties._pending_deletions
             entity._properties._entity_owner = obj
         return entity
 

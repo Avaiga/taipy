@@ -439,6 +439,51 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert scenario_1.properties["qux"] == 5
     assert scenario_2.properties["qux"] == 5
 
+    scenario_1.properties["temp_key_1"] = "temp_value_1"
+    scenario_1.properties["temp_key_2"] = "temp_value_2"
+    assert scenario_1.properties == {
+        "name": "baz",
+        "qux": 5,
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    assert scenario_2.properties == {
+        "name": "baz",
+        "qux": 5,
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    scenario_1.properties.pop("temp_key_1")
+    assert "temp_key_1" not in scenario_1.properties.keys()
+    assert "temp_key_1" not in scenario_1.properties.keys()
+    assert scenario_1.properties == {
+        "name": "baz",
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    assert scenario_2.properties == {
+        "name": "baz",
+        "qux": 5,
+        "temp_key_2": "temp_value_2",
+    }
+    scenario_2.properties.pop("temp_key_2")
+    assert scenario_1.properties == {"name": "baz", "qux": 5}
+    assert scenario_2.properties == {"name": "baz", "qux": 5}
+    assert "temp_key_2" not in scenario_1.properties.keys()
+    assert "temp_key_2" not in scenario_2.properties.keys()
+
+    scenario_1.properties["temp_key_3"] = 0
+    assert scenario_1.properties == {"name": "baz", "qux": 5, "temp_key_3": 0}
+    assert scenario_2.properties == {"name": "baz", "qux": 5, "temp_key_3": 0}
+    scenario_1.properties.update({"temp_key_3": 1})
+    assert scenario_1.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
+    assert scenario_2.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
+    scenario_1.properties.update(dict())
+    assert scenario_1.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
+    assert scenario_2.properties == {"name": "baz", "qux": 5, "temp_key_3": 1}
+    scenario_1.properties["temp_key_4"] = 0
+    scenario_1.properties["temp_key_5"] = 0
+
     with scenario_1 as scenario:
         assert scenario.config_id == "foo"
         assert len(scenario.tasks) == 1
@@ -455,6 +500,9 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert scenario._is_in_context
         assert scenario.name == "baz"
         assert scenario.properties["qux"] == 5
+        assert scenario.properties["temp_key_3"] == 1
+        assert scenario.properties["temp_key_4"] == 0
+        assert scenario.properties["temp_key_5"] == 0
 
         new_datetime_2 = new_datetime + timedelta(5)
         scenario.config_id = "foo"
@@ -468,6 +516,12 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         scenario.tags = None
         scenario.name = "qux"
         scenario.properties["qux"] = 9
+        scenario.properties.pop("temp_key_3")
+        scenario.properties.pop("temp_key_4")
+        scenario.properties.update({"temp_key_4": 1})
+        scenario.properties.update({"temp_key_5": 2})
+        scenario.properties.pop("temp_key_5")
+        scenario.properties.update(dict())
 
         assert scenario.config_id == "foo"
         assert len(scenario.pipelines) == 1
@@ -484,6 +538,9 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert scenario._is_in_context
         assert scenario.name == "baz"
         assert scenario.properties["qux"] == 5
+        assert scenario.properties["temp_key_3"] == 1
+        assert scenario.properties["temp_key_4"] == 0
+        assert scenario.properties["temp_key_5"] == 0
 
     assert scenario_1.config_id == "foo"
     assert len(scenario_1.pipelines) == 0
@@ -498,6 +555,9 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context
     assert scenario_1.properties["qux"] == 9
+    assert "temp_key_3" not in scenario.properties.keys()
+    assert scenario.properties["temp_key_4"] == 1
+    assert "temp_key_5" not in scenario.properties.keys()
 
 
 def test_is_deletable():

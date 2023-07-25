@@ -32,7 +32,7 @@ class EventEntityType(_ReprEnum):
     JOB = 6
 
 
-_NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION])
+_NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.SUBMISSION])
 _UNSUBMITTABLE_ENTITY_TYPES = (EventEntityType.CYCLE, EventEntityType.DATA_NODE, EventEntityType.JOB)
 _ENTITY_TO_EVENT_ENTITY_TYPE = {
     "scenario": EventEntityType.SCENARIO,
