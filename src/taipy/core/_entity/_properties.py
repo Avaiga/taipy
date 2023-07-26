@@ -15,6 +15,9 @@ from ..notification import _ENTITY_TO_EVENT_ENTITY_TYPE, EventOperation, _publis
 
 
 class _Properties(UserDict):
+
+    __PROPERTIES_ATTRIBUTE_NAME = "properties"
+
     def __init__(self, entity_owner, **kwargs):
         super().__init__(**kwargs)
         self._entity_owner = entity_owner
@@ -30,7 +33,7 @@ class _Properties(UserDict):
                 _ENTITY_TO_EVENT_ENTITY_TYPE[self._entity_owner._MANAGER_NAME],
                 self._entity_owner.id,
                 EventOperation.UPDATE,
-                key,
+                self.__PROPERTIES_ATTRIBUTE_NAME,
             ]
             if not self._entity_owner._is_in_context:
                 tp.set(self._entity_owner)
@@ -54,8 +57,8 @@ class _Properties(UserDict):
             to_publish_event_parameters = [
                 _ENTITY_TO_EVENT_ENTITY_TYPE[self._entity_owner._MANAGER_NAME],
                 self._entity_owner.id,
-                EventOperation.DELETION,
-                key,
+                EventOperation.UPDATE,
+                self.__PROPERTIES_ATTRIBUTE_NAME,
             ]
             if not self._entity_owner._is_in_context:
                 tp.set(self._entity_owner)
