@@ -25,13 +25,15 @@ def _load_fct(module_name: str, fct_name: str) -> Callable:
     return attrgetter(fct_name)(module)
 
 
-def _retry_read_entity(exceptions: Tuple):
+def _retry_read_entity(exceptions: Tuple, sleep_time: float = 0.2):
     """
-    Retries the wrapped function/method `times` times if the exceptions listed
+    Retries the wrapped function/method if the exceptions listed
     in ``exceptions`` are thrown.
+    The number of retries is defined by Config.core.read_entity_retry.
 
     Parameters:
-        exceptions (tuple): Exceptions that trigger a retry attempt
+        exceptions (tuple): Tuple of exceptions that trigger a retry attempt.
+        sleep_time (float): Time to sleep between retries.
     """
 
     def decorator(func):
@@ -40,7 +42,7 @@ def _retry_read_entity(exceptions: Tuple):
                 try:
                     return func(*args, **kwargs)
                 except exceptions:
-                    time.sleep(0.5)
+                    time.sleep(sleep_time)
             return func(*args, **kwargs)
 
         return newfn
