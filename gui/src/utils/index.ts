@@ -58,6 +58,26 @@ interface StyleKit {
     inputButtonHeight: string;
 }
 
+// return date with right time and tz
+export const getTimeZonedDate = (d: Date, tz: string, withTime: boolean) => {
+    const newDate = d;
+    // dispatch new date which offset by the timeZone differences between client and server
+    const hours = getClientServerTimeZoneOffset(tz) / 60;
+    const minutes = getClientServerTimeZoneOffset(tz) % 60;
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+    if (withTime) {
+        // Parse data with selected time if it is a datetime selector
+        newDate.setHours(newDate.getHours() + hours);
+        newDate.setMinutes(newDate.getMinutes() + minutes);
+    } else {
+        // Parse data with 00:00 UTC time if it is a date selector
+        newDate.setHours(hours);
+        newDate.setMinutes(minutes);
+    }
+    return newDate;
+};
+
 // return client server timeZone offset in minutes
 export const getClientServerTimeZoneOffset = (tz: string): number =>
     (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(tz)) / 60000;
@@ -67,7 +87,7 @@ export const getDateTime = (value: string | null | undefined, tz?: string): Date
         return null;
     }
     try {
-        return (tz && tz !== "Etc/Unknown") ? utcToZonedTime(value, tz) : new Date(value);
+        return tz && tz !== "Etc/Unknown" ? utcToZonedTime(value, tz) : new Date(value);
     } catch (e) {
         return null;
     }
@@ -79,7 +99,11 @@ export const getDateTimeString = (
     formatConf: FormatConfig,
     tz?: string
 ): string =>
-    formatInTimeZone(getDateTime(value) || "", formatConf.forceTZ || !tz ? formatConf.timeZone : tz, datetimeformat || formatConf.dateTime);
+    formatInTimeZone(
+        getDateTime(value) || "",
+        formatConf.forceTZ || !tz ? formatConf.timeZone : tz,
+        datetimeformat || formatConf.dateTime
+    );
 
 export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string => {
     try {
@@ -112,7 +136,7 @@ export const getTypeFromDf = (dataType?: string) => {
             return "boolean";
     }
     return dataType;
-}
+};
 
 export const formatWSValue = (
     value: string | number,

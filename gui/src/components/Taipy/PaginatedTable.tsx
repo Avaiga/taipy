@@ -348,7 +348,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [value]);
 
     const onCellValidation: OnCellValidation = useCallback(
-        (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
+        (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onEdit,
@@ -356,6 +356,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
                     col: colName,
                     user_value: userValue,
+                    tz: tz,
                 })
             ),
         [dispatch, updateVarName, onEdit, rows, startIndex, module]
