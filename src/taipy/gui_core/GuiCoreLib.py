@@ -544,9 +544,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_data_node_history(self, id: str):
         res = []
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
+            res.append((datetime.now(), "Unknown Job Id", "Execution of task that does not exists. But If you want something lon, it can surely be done."))
+            res.append((datetime.now(), "Another Unknown Job Id", "Execution of task that does not exists. But If you want something lon, it can surely be done. Execution of task that does not exists. But If you want something lon, it can surely be done. Execution of task that does not exists. But If you want something lon, it can surely be done."))
             for e in dn.edits:
-                res.append(((f"{k}", f"{v}") for k, v in e.items()))
-        return res
+                job: Job = core_get(e.get("job_id")) if "job_id" in e else None
+                res.append((e.get("timestamp"), job.id if job else e.get("writer_identifier", "Unknown"), f"Execution of task {job.task.get_simple_label()}." if job and job.task else e.get("comments")))
+        return list(reversed(sorted(res, key=lambda r: r[0])))
 
     def get_data_node_data(self, id: str):
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
@@ -690,7 +693,7 @@ class _GuiCore(ElementLibrary):
                 "type": ElementProperty(PropertyType.inner, __SCENARIO_ADAPTER),
                 "on_id_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_id}}"),
                 "history": ElementProperty(
-                    PropertyType.lov,
+                    PropertyType.react,
                     f"{{{__CTX_VAR_NAME}.get_data_node_history({_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
                 ),
                 "data": ElementProperty(

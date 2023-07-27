@@ -24,6 +24,7 @@ import Popover from "@mui/material/Popover";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { CheckCircle, Cancel, ArrowForwardIosSharp, Launch } from "@mui/icons-material";
+import { format } from "date-fns";
 
 import {
     createRequestUpdateAction,
@@ -52,9 +53,12 @@ import { NodeType, Scenarios } from "./utils/types";
 import CoreSelector from "./CoreSelector";
 import { Tab, Tabs } from "@mui/material";
 
+const editTimestampFormat = "YYY/MM/dd HH:mm";
+
 const tabBoxSx = { borderBottom: 1, borderColor: "divider" };
 const noDisplay = { display: "none" };
 const gridSx = { mt: 0 };
+const editSx = { borderLeft: 1, borderColor: "secondary.main" };
 
 type DanaNodeFull = [string, string, string, string, string, string, string, string, number, Array<[string, string]>];
 
@@ -98,7 +102,7 @@ interface DataNodeViewerProps {
     className?: string;
     dynamicClassName?: string;
     scenarios?: Scenarios;
-    history?: Array<Array<[string, string]>>;
+    history?: Array<[string, string, string]>;
     data?: Record<string, unknown>;
 }
 
@@ -443,21 +447,37 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             aria-labelledby={`${id}-history`}
                         >
                             {historyRequested && Array.isArray(props.history) ? (
-                                <table>
-                                    {props.history.map((edit, idx) =>
-                                        edit.map((v, idx2) => (
-                                            <tr key={`edit-${idx}-${idx2}`}>
-                                                {idx2 == 0 ? (
-                                                    <td rowSpan={edit.length}>
-                                                        {}`edit-${idx}`
-                                                    </td>
-                                                ) : null}
-                                                <td>v[0]</td>
-                                                <td>v[1]</td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </table>
+                                <Grid container spacing={1}>
+                                    {props.history.map((edit, idx) => (
+                                        <>
+                                            {idx != 0 ? (
+                                                <Grid item xs={12}>
+                                                    <Divider />
+                                                </Grid>
+                                            ) : null}
+                                            <Grid
+                                                item
+                                                container
+                                                key={`edit-${idx}`}
+                                                sx={editSx}
+                                            >
+                                                <Grid item xs={12}>
+                                                    <Typography variant="subtitle1">
+                                                        {edit[0]
+                                                            ? format(new Date(edit[0]), editTimestampFormat)
+                                                            : "no date"}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    {edit[2]}
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Typography fontSize="smaller">{edit[1]}</Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </>
+                                    ))}
+                                </Grid>
                             ) : (
                                 "History will come here"
                             )}
