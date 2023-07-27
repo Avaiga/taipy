@@ -52,19 +52,49 @@ def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
     return properties
 
 
+def build_doc(element: t.Dict[str, t.Any]):
+    return (
+        f"{element['name']} ({element['type']}): {element['doc']} {'(default: '+element['default_value'] + ')' if 'default_value' in element else ''}"
+        if "doc" in element
+        else ""
+    )
+
+
 for control_element in viselements["controls"]:
     name = control_element[0]
-    properties = ", ".join({f'{p["name"]} = ...' for p in get_properties(control_element[1], viselements) if "[" not in p["name"]})
+    property_list = []
+    property_names = []
+    for property in get_properties(control_element[1], viselements):
+        if property["name"] not in property_names and "[" not in property["name"]:
+            property_list.append(property)
+            property_names.append(property["name"])
+    properties = ", ".join([f"{p} = ..." for p in property_names])
+    doc_arguments = f"\n{12*' '}".join([build_doc(p) for p in property_list])
     # append properties to __init__.pyi
     with open("./src/taipy/gui/__init__.pyi", "a") as file:
-        file.write(control_template.replace("{{name}}", name).replace("{{properties}}", properties))
+        file.write(
+            control_template.replace("{{name}}", name)
+            .replace("{{properties}}", properties)
+            .replace("{{doc_arguments}}", doc_arguments)
+        )
 
 for block_element in viselements["blocks"]:
     name = block_element[0]
-    properties = ", ".join({f'{p["name"]} = ...' for p in get_properties(block_element[1], viselements) if "[" not in p["name"]})
+    property_list = []
+    property_names = []
+    for property in get_properties(block_element[1], viselements):
+        if property["name"] not in property_names and "[" not in property["name"]:
+            property_list.append(property)
+            property_names.append(property["name"])
+    properties = ", ".join([f"{p} = ..." for p in property_names])
+    doc_arguments = f"{8*' '}".join([build_doc(p) for p in property_list])
     # append properties to __init__.pyi
     with open("./src/taipy/gui/__init__.pyi", "a") as file:
-        file.write(block_template.replace("{{name}}", name).replace("{{properties}}", properties))
+        file.write(
+            block_template.replace("{{name}}", name)
+            .replace("{{properties}}", properties)
+            .replace("{{doc_arguments}}", doc_arguments)
+        )
 
 os.system("pipenv run isort src/taipy/gui/*.pyi")
 os.system("pipenv run black src/taipy/gui/*.pyi")
