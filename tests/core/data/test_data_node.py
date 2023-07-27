@@ -551,6 +551,47 @@ class TestDataNode:
         assert dn_1.properties["qux"] == 5
         assert dn_2.properties["qux"] == 5
 
+        dn_1.properties["temp_key_1"] = "temp_value_1"
+        dn_1.properties["temp_key_2"] = "temp_value_2"
+        assert dn_1.properties == {
+            "qux": 5,
+            "temp_key_1": "temp_value_1",
+            "temp_key_2": "temp_value_2",
+        }
+        assert dn_2.properties == {
+            "qux": 5,
+            "temp_key_1": "temp_value_1",
+            "temp_key_2": "temp_value_2",
+        }
+        dn_1.properties.pop("temp_key_1")
+        assert "temp_key_1" not in dn_1.properties.keys()
+        assert "temp_key_1" not in dn_1.properties.keys()
+        assert dn_1.properties == {
+            "qux": 5,
+            "temp_key_2": "temp_value_2",
+        }
+        assert dn_2.properties == {
+            "qux": 5,
+            "temp_key_2": "temp_value_2",
+        }
+        dn_2.properties.pop("temp_key_2")
+        assert dn_1.properties == {"qux": 5}
+        assert dn_2.properties == {"qux": 5}
+        assert "temp_key_2" not in dn_1.properties.keys()
+        assert "temp_key_2" not in dn_2.properties.keys()
+
+        dn_1.properties["temp_key_3"] = 0
+        assert dn_1.properties == {"qux": 5, "temp_key_3": 0}
+        assert dn_2.properties == {"qux": 5, "temp_key_3": 0}
+        dn_1.properties.update({"temp_key_3": 1})
+        assert dn_1.properties == {"qux": 5, "temp_key_3": 1}
+        assert dn_2.properties == {"qux": 5, "temp_key_3": 1}
+        dn_1.properties.update(dict())
+        assert dn_1.properties == {"qux": 5, "temp_key_3": 1}
+        assert dn_2.properties == {"qux": 5, "temp_key_3": 1}
+        dn_1.properties["temp_key_4"] = 0
+        dn_1.properties["temp_key_5"] = 0
+
         dn_1.last_edition_date = new_datetime
 
         assert len(dn_1.job_ids) == 1
@@ -567,6 +608,9 @@ class TestDataNode:
             assert len(dn.job_ids) == 1
             assert dn._is_in_context
             assert dn.properties["qux"] == 5
+            assert dn.properties["temp_key_3"] == 1
+            assert dn.properties["temp_key_4"] == 0
+            assert dn.properties["temp_key_5"] == 0
 
             new_datetime_2 = new_datetime + timedelta(5)
 
@@ -576,6 +620,12 @@ class TestDataNode:
             dn.edition_in_progress = False
             dn.validity_period = None
             dn.properties["qux"] = 9
+            dn.properties.pop("temp_key_3")
+            dn.properties.pop("temp_key_4")
+            dn.properties.update({"temp_key_4": 1})
+            dn.properties.update({"temp_key_5": 2})
+            dn.properties.pop("temp_key_5")
+            dn.properties.update(dict())
 
             assert dn.config_id == "foo"
             assert dn.owner_id is None
@@ -586,6 +636,9 @@ class TestDataNode:
             assert dn.validity_period == time_period_2
             assert len(dn.job_ids) == 1
             assert dn.properties["qux"] == 5
+            assert dn.properties["temp_key_3"] == 1
+            assert dn.properties["temp_key_4"] == 0
+            assert dn.properties["temp_key_5"] == 0
 
         assert dn_1.config_id == "foo"
         assert dn_1.owner_id is None
@@ -597,6 +650,9 @@ class TestDataNode:
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
         assert dn_1.properties["qux"] == 9
+        assert "temp_key_3" not in dn_1.properties.keys()
+        assert dn_1.properties["temp_key_4"] == 1
+        assert "temp_key_5" not in dn_1.properties.keys()
 
     def test_get_parents(self, data_node):
         with mock.patch("src.taipy.core.get_parents") as mck:
