@@ -89,7 +89,7 @@ def test_aggregate(gui: Gui, helpers, small_dataframe):
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)["value"]
     assert value["rowcount"] == 3
     data = value["data"]
-    assert {"name": "A", "value": 5} in data
+    assert next(v.get("value") for v in data if v.get("name") == "A") == 5
 
 
 def test_filters(gui: Gui, helpers, small_dataframe):

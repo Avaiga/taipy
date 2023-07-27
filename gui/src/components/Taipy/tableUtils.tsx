@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, CSSProperties, MouseEvent } from "react";
+import React, { useState, useCallback, useMemo, CSSProperties, MouseEvent } from "react";
 import TableCell, { TableCellProps } from "@mui/material/TableCell";
 import Box from "@mui/material/Box";
 import Input from "@mui/material/Input";
@@ -21,9 +21,13 @@ import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Switch from "@mui/material/Switch";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { isValid } from "date-fns";
 
 import { FormatConfig } from "../../context/taipyReducers";
-import { getDateTimeString, getNumberString } from "../../utils/index";
+import { getDateTime, getDateTimeString, getNumberString, getTimeZonedDate } from "../../utils/index";
 import { TaipyActiveProps, TaipyMultiSelectProps } from "./utils";
 
 /**
@@ -129,12 +133,12 @@ export const paperSx = { width: "100%", mb: 2 };
 export const tableSx = { minWidth: 250 };
 export const headBoxSx = { display: "flex", alignItems: "flex-start" };
 export const iconInRowSx = { fontSize: "body2.fontSize" };
-export const iconsWrapperSx = { gridColumnStart: 2, display: 'flex', alignItems: 'center' } as CSSProperties;
+export const iconsWrapperSx = { gridColumnStart: 2, display: "flex", alignItems: "center" } as CSSProperties;
 const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
 const tableFontSx = { fontSize: "body2.fontSize" };
 
 export interface OnCellValidation {
-    (value: RowValue, rowIndex: number, colName: string, userValue: string): void;
+    (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string): void;
 }
 
 export interface OnRowDeletion {
@@ -206,7 +210,8 @@ const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Part
     return base;
 };
 
-export const getRowIndex = (row: Record<string, RowValue>, rowIndex: number, startIndex = 0) => typeof row["_tp_index"] === "number" ? row["_tp_index"] : rowIndex + startIndex;
+export const getRowIndex = (row: Record<string, RowValue>, rowIndex: number, startIndex = 0) =>
+    typeof row["_tp_index"] === "number" ? row["_tp_index"] : rowIndex + startIndex;
 
 export const addDeleteColumn = (nbToRender: number, columns: Record<string, ColumnDesc>) => {
     if (nbToRender) {
@@ -225,12 +230,14 @@ export const addDeleteColumn = (nbToRender: number, columns: Record<string, Colu
 };
 
 export const getClassName = (row: Record<string, unknown>, style?: string, col?: string) =>
-    style ? ((col && row[`tps__${col}__${style}`]) || row[style]) as string : undefined;
+    style ? (((col && row[`tps__${col}__${style}`]) || row[style]) as string) : undefined;
 
 export const getTooltip = (row: Record<string, unknown>, tooltip?: string, col?: string) =>
-    tooltip ? ((col && row[`tpt__${col}__${tooltip}`]) || row[tooltip]) as string : undefined;
+    tooltip ? (((col && row[`tpt__${col}__${tooltip}`]) || row[tooltip]) as string) : undefined;
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
+
+const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
 
 export const EditableCell = (props: EditableCellProps) => {
     const {
@@ -246,18 +253,21 @@ export const EditableCell = (props: EditableCellProps) => {
         tooltip,
         tableCellProps = {},
     } = props;
-    const [val, setVal] = useState(value);
+    const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
     const [deletion, setDeletion] = useState(false);
 
     const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
     const onBoolChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.checked), []);
+    const onDateChange = useCallback((date: Date | null) => setVal(date), []);
+
+    const withTime = useMemo(() => !!colDesc.format && colDesc.format.toLowerCase().includes("h"), [colDesc.format]);
 
     const onCheckClick = useCallback(() => {
         let castedVal = val;
         switch (colDesc.type) {
             case "bool":
-                castedVal = isBooleanTrue(val);
+                castedVal = isBooleanTrue(val as RowValue);
                 break;
             case "int":
                 try {
@@ -273,16 +283,26 @@ export const EditableCell = (props: EditableCellProps) => {
                     // ignore
                 }
                 break;
+            case "datetime":
+                if (val !== null && isValid(val)) {
+                    castedVal = getTimeZonedDate(val as Date, formatConfig.timeZone, withTime).toISOString();
+                } else {
+                    return;
+                }
+                break;
         }
-        onValidation && onValidation(castedVal, rowIndex, colDesc.dfid, val as string);
+        onValidation && onValidation(castedVal as RowValue, rowIndex, colDesc.dfid, val as string, colDesc.type == "datetime" ? formatConfig.timeZone: undefined);
         setEdit((e) => !e);
-    }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type]);
+    }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type, formatConfig.timeZone, withTime]);
 
-    const onEditClick = useCallback((evt?: MouseEvent) => {
-        onValidation && setEdit((e) => !e);
-        setVal(value);
-        evt && evt.stopPropagation();
-    }, [onValidation, value]);
+    const onEditClick = useCallback(
+        (evt?: MouseEvent) => {
+            evt && evt.stopPropagation();
+            colDesc.type?.startsWith("date") ? setVal(getDateTime(value as string, formatConfig.timeZone)) : setVal(value);
+            onValidation && setEdit((e) => !e);
+        },
+        [onValidation, value, formatConfig.timeZone, colDesc.type]
+    );
 
     const onKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -303,10 +323,13 @@ export const EditableCell = (props: EditableCellProps) => {
         setDeletion((d) => !d);
     }, [onDeletion, rowIndex]);
 
-    const onDeleteClick = useCallback((evt?: MouseEvent) => {
-        onDeletion && setDeletion((d) => !d);
-        evt && evt.stopPropagation();
-    }, [onDeletion]);
+    const onDeleteClick = useCallback(
+        (evt?: MouseEvent) => {
+            onDeletion && setDeletion((d) => !d);
+            evt && evt.stopPropagation();
+        },
+        [onDeletion]
+    );
 
     const onDeleteKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -340,6 +363,34 @@ export const EditableCell = (props: EditableCellProps) => {
                             onChange={onBoolChange}
                             inputRef={setInputFocus}
                         />
+                        <Box sx={iconsWrapperSx}>
+                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                <CheckIcon fontSize="inherit" />
+                            </IconButton>
+                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                <ClearIcon fontSize="inherit" />
+                            </IconButton>
+                        </Box>
+                    </Box>
+                ) : colDesc.type?.startsWith("date") ? (
+                    <Box sx={cellBoxSx}>
+                        {withTime ? (
+                            <DateTimePicker
+                                value={val as Date}
+                                onChange={onDateChange}
+                                slotProps={textFieldProps}
+                                inputRef={setInputFocus}
+                                sx={tableFontSx}
+                            />
+                        ) : (
+                            <DatePicker
+                                value={val as Date}
+                                onChange={onDateChange}
+                                slotProps={textFieldProps}
+                                inputRef={setInputFocus}
+                                sx={tableFontSx}
+                            />
+                        )}
                         <Box sx={iconsWrapperSx}>
                             <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
                                 <CheckIcon fontSize="inherit" />

@@ -400,7 +400,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
 
     const onCellValidation: OnCellValidation = useCallback(
-        (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
+        (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onEdit,
@@ -408,6 +408,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     index: getRowIndex(rows[rowIndex], rowIndex),
                     col: colName,
                     user_value: userValue,
+                    tz: tz,
                 })
             ),
         [dispatch, updateVarName, onEdit, rows, module]

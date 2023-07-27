@@ -202,7 +202,7 @@ class _PandasDataAccessor(_DataAccessor):
     def __add_index_col(value: pd.DataFrame, columns: t.List[str]):
         if _PandasDataAccessor.__INDEX_COL not in value.columns:
             value[_PandasDataAccessor.__INDEX_COL] = value.index
-        if _PandasDataAccessor.__INDEX_COL not in columns:
+        if columns and _PandasDataAccessor.__INDEX_COL not in columns:
             columns.append(_PandasDataAccessor.__INDEX_COL)
 
     def __get_data(  # noqa: C901
@@ -219,6 +219,11 @@ class _PandasDataAccessor(_DataAccessor):
             columns = [c[len(col_prefix) :] if c.startswith(col_prefix) else c for c in columns]
         ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
+
+        # add index if not chart
+        if paged:
+            self.__add_index_col(value, columns)
+
         # filtering
         filters = payload.get("filters")
         if isinstance(filters, list) and len(filters) > 0:
@@ -238,7 +243,6 @@ class _PandasDataAccessor(_DataAccessor):
                     query += " and "
                 query += f"`{col}`{right}"
             try:
-                self.__add_index_col(value, columns)
                 value = value.query(query)
             except Exception as e:
                 _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}:\n{e}")
@@ -295,7 +299,6 @@ class _PandasDataAccessor(_DataAccessor):
                         # reverse order
                         new_indexes = new_indexes[::-1]
                     new_indexes = new_indexes[slice(start, end + 1)]
-                    self.__add_index_col(value, columns)
                 except Exception:
                     _warn(f"Cannot sort {var_name} on columns {order_by}.")
                     new_indexes = slice(start, end + 1)  # type: ignore

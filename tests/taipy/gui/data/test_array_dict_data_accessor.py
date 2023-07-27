@@ -68,7 +68,8 @@ def test_aggregate(gui: Gui, helpers, small_dataframe):
     value = accessor.get_data(gui, "x", a_dict, query, _DataFormat.JSON)["value"]
     assert value["rowcount"] == 3
     data = value["data"]
-    assert {"name": "A", "value": 5} in data
+    agregValue = next(v.get("value") for v in data if v.get("name") == "A")
+    assert agregValue == 5
 
 
 def test_array_of_array(gui: Gui, helpers, small_dataframe):
@@ -81,7 +82,7 @@ def test_array_of_array(gui: Gui, helpers, small_dataframe):
     assert value["rowcount"] == 2
     data = value["data"]
     assert len(data) == 2
-    assert len(data[0]) == 3
+    assert len(data[0]) == 4  # including _tp_index
 
 
 def test_empty_array(gui: Gui, helpers, small_dataframe):

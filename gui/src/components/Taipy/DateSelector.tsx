@@ -22,7 +22,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
-import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
+import { getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
@@ -56,21 +56,7 @@ const DateSelector = (props: DateSelectorProps) => {
         (v: Date | null) => {
             setValue(v);
             if (v !== null && isValid(v)) {
-                const newDate = v;
-                // dispatch new date which offset by the timeZone differences between client and server
-                const hours = getClientServerTimeZoneOffset(tz) / 60;
-                const minutes = getClientServerTimeZoneOffset(tz) % 60;
-                newDate.setSeconds(0);
-                newDate.setMilliseconds(0);
-                if (withTime) {
-                    // Parse data with selected time if it is a datetime selector
-                    newDate.setHours(newDate.getHours() + hours);
-                    newDate.setMinutes(newDate.getMinutes() + minutes);
-                } else {
-                    // Parse data with 00:00 UTC time if it is a date selector
-                    newDate.setHours(hours);
-                    newDate.setMinutes(minutes);
-                }
+                const newDate = getTimeZonedDate(v, tz, withTime);
                 dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), module, props.onChange, propagate));
             }
         },
