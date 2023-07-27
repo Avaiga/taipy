@@ -94,7 +94,9 @@ class _VersionCLI:
         if args.delete_production:
             try:
                 _VersionManagerFactory._build_manager()._delete_production_version(args.delete_production)
-                cls.__logger.info(f"Successfully delete version {args.delete_production} from production version list.")
+                cls.__logger.info(
+                    f"Successfully delete version {args.delete_production} from the production version list."
+                )
                 sys.exit(0)
             except VersionIsNotProductionVersion as e:
                 raise SystemExit(e)

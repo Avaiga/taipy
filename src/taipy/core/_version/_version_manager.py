@@ -135,7 +135,7 @@ class _VersionManager(_Manager[_Version]):
         except ConflictedConfigurationError:
             raise SystemExit(
                 f"Please add a new production version with migration functions or run your application with"
-                f" --taipy-force option to override the Config of production version {version_number}."
+                f" --taipy-force option to override the production configuration of version {version_number}."
             )
         cls._repository._set_production_version(version_number)
         return version_number
