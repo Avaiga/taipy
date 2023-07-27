@@ -50,7 +50,7 @@ jobs:
 
       - name: Code coverage
         if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
-        uses: orgoro/coverage@v2
+        uses: orgoro/coverage@v3
         with:
           coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}

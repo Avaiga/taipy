@@ -89,8 +89,9 @@ def _df_data_filter(
     z_column_name: str,
     decimator: Decimator,
     payload: t.Dict[str, t.Any],
+    is_copied: bool,
 ):
-    df = dataframe.copy()
+    df = dataframe.copy() if not is_copied else dataframe
     if not x_column_name:
         index = 0
         while f"tAiPy_index_{index}" in df.columns:
@@ -100,7 +101,7 @@ def _df_data_filter(
     column_list = [x_column_name, y_column_name, z_column_name] if z_column_name else [x_column_name, y_column_name]
     points = df[column_list].to_numpy()
     mask = decimator.decimate(points, payload)
-    return df[mask]
+    return df[mask], is_copied
 
 
 def _df_relayout(
@@ -112,13 +113,15 @@ def _df_relayout(
     x1: t.Optional[float],
     y0: t.Optional[float],
     y1: t.Optional[float],
+    is_copied: bool,
 ):
     if chart_mode not in ["lines+markers", "markers"]:
-        return dataframe
+        return dataframe, is_copied
     # if chart data is invalid
     if x0 is None or x1 is None or y0 is None or y1 is None:
-        return dataframe
-    df = dataframe.copy()
+        return dataframe, is_copied
+    df = dataframe.copy() if not is_copied else dataframe
+    is_copied = True
     has_x_col = True
 
     if not x_column:
@@ -138,4 +141,4 @@ def _df_relayout(
         df = df.loc[(df[x_column] > x0) & (df[x_column] < x1) & (df[y_column] > y0) & (df[y_column] < y1)]  # noqa
     if not has_x_col:
         df.drop(x_column, axis=1, inplace=True)
-    return df
+    return df, is_copied
