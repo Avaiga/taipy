@@ -1,0 +1,16 @@
+name: Benchmark on taipy-integration-testing
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger taipy-integration-testing
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{secrets.ACTIONS_TOKEN}}
+          repository: avaiga/taipy-integration-testing
+          event-type: benchmark
+          client-payload: '{"repo": "taipy-core", "commitSHA": "${{ github.sha }}"}'
