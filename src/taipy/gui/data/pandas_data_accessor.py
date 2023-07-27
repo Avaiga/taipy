@@ -65,46 +65,47 @@ class _PandasDataAccessor(_DataAccessor):
         self,
         gui: Gui,
         payload_cols: t.Any,
-        data: pd.DataFrame,
+        dataframe: pd.DataFrame,
         styles: t.Optional[t.Dict[str, str]] = None,
         tooltips: t.Optional[t.Dict[str, str]] = None,
+        is_copied: t.Optional[bool] = False,
+        new_indexes: t.Optional[np.ndarray] = None,
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
-            col_types = data.dtypes[data.dtypes.index.astype(str).isin(payload_cols)]
+            col_types = dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(payload_cols)]
         else:
-            col_types = data.dtypes
+            col_types = dataframe.dtypes
         cols = col_types.index.astype(str).tolist()
-        is_copied = False
         if styles:
-            # copy the df so that we don't "mess" with the user's data
-            data = data.copy()
-            is_copied = True
+            if not is_copied:
+                # copy the df so that we don't "mess" with the user's data
+                dataframe = dataframe.copy()
+                is_copied = True
             for k, v in styles.items():
                 col_applied = False
                 func = gui._get_user_function(v)
                 if callable(func):
-                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, data, "tps__")
+                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, dataframe, "tps__")
                 if not col_applied:
-                    data[v] = v
+                    dataframe[v] = v
                 cols.append(col_applied or v)
         if tooltips:
-            # copy the df so that we don't "mess" with the user's data
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
-                data = data.copy()
-            is_copied = True
+                dataframe = dataframe.copy()
+                is_copied = True
             for k, v in tooltips.items():
                 col_applied = False
                 func = gui._get_user_function(v)
                 if callable(func):
-                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, data, "tpt__")
+                    col_applied = self.__apply_user_function(gui, func, k if k in cols else None, v, dataframe, "tpt__")
                 cols.append(col_applied or v)
         # deal with dates
         datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()  # type: ignore
         if len(datecols) != 0:
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
-                data = data.copy()
+                dataframe = dataframe.copy()
             tz = Gui._get_timezone()
             for col in datecols:
                 newcol = _get_date_col_str_name(cols, col)
@@ -112,19 +113,23 @@ class _PandasDataAccessor(_DataAccessor):
                 re_type = _RE_PD_TYPE.match(str(col_types[col]))
                 grps = re_type.groups() if re_type else ()
                 if len(grps) > 4 and grps[4]:
-                    data[newcol] = data[col].dt.tz_convert("UTC").dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
+                    dataframe[newcol] = (
+                        dataframe[col].dt.tz_convert("UTC").dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
+                    )
                 else:
-                    data[newcol] = (
-                        data[col]
+                    dataframe[newcol] = (
+                        dataframe[col]
                         .dt.tz_localize(tz)
                         .dt.tz_convert("UTC")
                         .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
                         .astype(str)
                     )
+
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
-        data = data.loc[:, data.dtypes[data.dtypes.index.astype(str).isin(cols)].index]  # type: ignore
-        return data
+        dataframe = dataframe.iloc[new_indexes] if new_indexes is not None else dataframe
+        dataframe = dataframe.loc[:, dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(cols)].index]  # type: ignore
+        return dataframe
 
     def __apply_user_function(
         self,
@@ -198,13 +203,6 @@ class _PandasDataAccessor(_DataAccessor):
             return ret_dict
         return None
 
-    @staticmethod
-    def __add_index_col(value: pd.DataFrame, columns: t.List[str]):
-        if _PandasDataAccessor.__INDEX_COL not in value.columns:
-            value[_PandasDataAccessor.__INDEX_COL] = value.index
-        if columns and _PandasDataAccessor.__INDEX_COL not in columns:
-            columns.append(_PandasDataAccessor.__INDEX_COL)
-
     def __get_data(  # noqa: C901
         self,
         gui: Gui,
@@ -219,10 +217,16 @@ class _PandasDataAccessor(_DataAccessor):
             columns = [c[len(col_prefix) :] if c.startswith(col_prefix) else c for c in columns]
         ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
+        is_copied = False
 
         # add index if not chart
         if paged:
-            self.__add_index_col(value, columns)
+            if _PandasDataAccessor.__INDEX_COL not in value.columns:
+                value = value.copy()
+                is_copied = True
+                value[_PandasDataAccessor.__INDEX_COL] = value.index
+            if columns and _PandasDataAccessor.__INDEX_COL not in columns:
+                columns.append(_PandasDataAccessor.__INDEX_COL)
 
         # filtering
         filters = payload.get("filters")
@@ -244,6 +248,7 @@ class _PandasDataAccessor(_DataAccessor):
                 query += f"`{col}`{right}"
             try:
                 value = value.query(query)
+                is_copied = True
             except Exception as e:
                 _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}:\n{e}")
 
@@ -305,7 +310,13 @@ class _PandasDataAccessor(_DataAccessor):
             else:
                 new_indexes = slice(start, end + 1)  # type: ignore
             value = self.__build_transferred_cols(
-                gui, columns, value.iloc[new_indexes], styles=payload.get("styles"), tooltips=payload.get("tooltips")
+                gui,
+                columns,
+                value,
+                styles=payload.get("styles"),
+                tooltips=payload.get("tooltips"),
+                is_copied=is_copied,
+                new_indexes=new_indexes,
             )
             dictret = self.__format_data(
                 value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
@@ -334,22 +345,25 @@ class _PandasDataAccessor(_DataAccessor):
                         y0 = relayoutData.get("yaxis.range[0]")
                         y1 = relayoutData.get("yaxis.range[1]")
 
-                        value = _df_relayout(value, x_column, y_column, chart_mode, x0, x1, y0, y1)
+                        value, is_copied = _df_relayout(
+                            value, x_column, y_column, chart_mode, x0, x1, y0, y1, is_copied
+                        )
 
                     if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max, chart_mode):
                         try:
-                            value = _df_data_filter(
+                            value, is_copied = _df_data_filter(
                                 value,
                                 x_column,
                                 y_column,
                                 z_column,
                                 decimator=decimator_instance,
                                 payload=decimator_payload,
+                                is_copied=is_copied,
                             )
                             gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
                         except Exception as e:
                             _warn(f"Limit rows error with {decimator} for Dataframe:\n{e}")
-            value = self.__build_transferred_cols(gui, columns, value)
+            value = self.__build_transferred_cols(gui, columns, value, is_copied=is_copied)
             dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret
         return ret_payload
