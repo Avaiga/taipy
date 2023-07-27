@@ -286,7 +286,7 @@ class TestConfigComparator:
             t in error_messages[0]
             for t in [
                 "INFO",
-                "There are non-conflicting changes between the current Configuration and the current Configuration:",
+                "There are non-conflicting changes between the current configuration and the current configuration:",
             ]
         )
         assert 'section_name "section_2" has attribute "attribute" modified: 2:int -> attribute_2' in error_messages[1]
@@ -295,7 +295,7 @@ class TestConfigComparator:
             t in error_messages[3]
             for t in [
                 "ERROR",
-                "The current Configuration is conflicted with the current Configuration:",
+                "The current configuration conflicts with the current configuration:",
             ]
         )
         assert 'unique_section_name "prop" was modified: unique_prop_1 -> unique_prop_1b' in error_messages[4]
@@ -310,14 +310,14 @@ class TestConfigComparator:
             t in error_messages[0]
             for t in [
                 "INFO",
-                "There are non-conflicting changes between the version 1.0 Configuration and the current Configuration:",
+                "There are non-conflicting changes between the configuration for version 1.0 and the current configuration:",
             ]
         )
         assert all(
             t in error_messages[3]
             for t in [
                 "ERROR",
-                "The version 1.0 Configuration is conflicted with the current Configuration:",
+                "The configuration for version 1.0 conflicts with the current configuration:",
             ]
         )
 
