@@ -544,6 +544,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_data_node_history(self, id: str):
         res = []
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
+            # TODO remove
             res.append((datetime.now(), "Unknown Job Id", "Execution of task that does not exists. But If you want something lon, it can surely be done."))
             res.append((datetime.now(), "Another Unknown Job Id", "Execution of task that does not exists. But If you want something lon, it can surely be done. Execution of task that does not exists. But If you want something lon, it can surely be done. Execution of task that does not exists. But If you want something lon, it can surely be done."))
             for e in dn.edits:
@@ -553,7 +554,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def get_data_node_data(self, id: str):
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
-            return dn.read()
+            if dn.is_ready_for_reading:
+                try:
+                    return dn.read()
+                except Exception as e:
+                    return f"read data_node: {e}"
+            return f"Data unavailable for {dn.get_simple_label()}"
+        return f"Invalid datanode {id}"
 
     def select_id(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -697,7 +704,7 @@ class _GuiCore(ElementLibrary):
                     f"{{{__CTX_VAR_NAME}.get_data_node_history({_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
                 ),
                 "data": ElementProperty(
-                    PropertyType.data,
+                    PropertyType.react,
                     f"{{{__CTX_VAR_NAME}.get_data_node_data({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
             },

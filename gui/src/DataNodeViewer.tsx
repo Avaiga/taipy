@@ -488,7 +488,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             id="dn-tabpanel-data"
                             aria-labelledby={`${id}-data`}
                         >
-                            {dataRequested ? "show data" : "Data shall be shown here"}
+                            {dataRequested ?  `${props.data}` : "Data shall be shown here"}
                         </div>
                     </AccordionDetails>
                 </Accordion>
