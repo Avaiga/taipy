@@ -17,4 +17,4 @@ from .._repository._base_taipy_model import _BaseModel
 ModelType = TypeVar("ModelType", bound=_BaseModel)
 Entity = TypeVar("Entity")
 Converter = TypeVar("Converter", bound=_AbstractConverter)
-Json = Union[dict, list, str, int, float, bool, None]
+Json = Union[dict, list, str, int, float, bool]
