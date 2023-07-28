@@ -105,7 +105,6 @@ def test_core_cli_production_mode(init_sql_repo):
 
 
 def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo):
-
     scenario_config = config_scenario()
 
     # Create a scenario in development mode
@@ -193,7 +192,7 @@ def twice_doppelganger(a):
     return a * 2
 
 
-def test_dev_mode_clean_all_entities_when_config_is_alternated():
+def test_dev_mode_clean_all_entities_when_config_is_alternated(init_sql_repo):
     data_node_1_config = Config.configure_data_node(
         id="d1", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
     )
