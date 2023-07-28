@@ -93,7 +93,7 @@ def test_delete_version(caplog):
         with patch("sys.argv", ["prog", "manage-versions", "--delete-production", "1.1"]):
             _VersionCLI.parse_arguments()
 
-    assert "Successfully delete version 1.1 from production version list." in caplog.text
+    assert "Successfully delete version 1.1 from the production version list." in caplog.text
     all_versions = [version.id for version in _VersionManager._get_all()]
     production_version = _VersionManager._get_production_versions()
     assert len(all_versions) == 4
