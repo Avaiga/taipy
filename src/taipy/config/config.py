@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from typing import Dict, Union
+from typing import Dict
 
 from ..logger._taipy_logger import _TaipyLogger
 from ._config import _Config

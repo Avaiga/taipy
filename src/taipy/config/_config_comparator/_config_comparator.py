@@ -132,10 +132,10 @@ class _ConfigComparator:
         new_version_number: Optional[str] = None,
     ):
         old_config_str = (
-            f"version {old_version_number} Configuration" if old_version_number else "current Configuration"
+            f"configuration for version {old_version_number}" if old_version_number else "current configuration"
         )
         new_config_str = (
-            f"version {new_version_number} Configuration" if new_version_number else "current Configuration"
+            f"configuration for version {new_version_number}" if new_version_number else "current configuration"
         )
 
         if unconflicted_sections := comparator_result.get(_ComparatorResult.UNCONFLICTED_SECTION_KEY):
@@ -148,7 +148,7 @@ class _ConfigComparator:
         if conflicted_sections := comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
             conflicted_messages = self.__get_messages(conflicted_sections)
             self.__logger.error(
-                f"The {old_config_str} is conflicted with the {new_config_str}:\n\t" + "\n\t".join(conflicted_messages)
+                f"The {old_config_str} conflicts with the {new_config_str}:\n\t" + "\n\t".join(conflicted_messages)
             )
 
     def __get_messages(self, diff_sections):
