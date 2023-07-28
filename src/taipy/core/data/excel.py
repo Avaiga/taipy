@@ -241,11 +241,17 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         return sheets.to_numpy()
 
     def _do_read_excel(self, engine, sheet_names, kwargs) -> pd.DataFrame:
-        df = pd.read_excel(
-            self._path,
-            sheet_name=sheet_names,
-            **kwargs,
-        )
+        if sheet_names:
+            df = pd.read_excel(
+                self._path,
+                sheet_name=sheet_names,
+                **kwargs,
+            )
+        else:
+            df = pd.read_excel(
+                self._path,
+                **kwargs,
+            )
         # We are using pandas to load modin dataframes because of a modin issue
         # https://github.com/modin-project/modin/issues/4924
         if engine == "modin":
@@ -288,19 +294,28 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             return modin_pd.DataFrame()
 
     def _write(self, data: Any):
+        def __write_excel(write_excel_fct, *args, **kwargs):
+            sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
+            if sheet_name:
+                sheet_name = sheet_name if isinstance(sheet_name, str) else sheet_name[0]
+                write_excel_fct(*args, **kwargs, sheet_name=sheet_name)
+            else:
+                write_excel_fct(*args, **kwargs)
+
         if isinstance(data, Dict) and all(
             [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
         ):
             with pd.ExcelWriter(self._path) as writer:
+                # Write to excel file with multiple sheets (each key stands for a sheet name)
                 for key in data.keys():
                     if isinstance(data[key], np.ndarray):
                         pd.DataFrame(data[key]).to_excel(writer, key, index=False)
                     else:
                         data[key].to_excel(writer, key, index=False)
         elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-            data.to_excel(self._path, index=False)
+            __write_excel(data.to_excel, self._path, index=False)
         else:
-            pd.DataFrame(data).to_excel(self._path, index=False)
+            __write_excel(pd.DataFrame(data).to_excel, self._path, index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a set of columns.
