@@ -19,7 +19,7 @@ from taipy.config.config import Config
 
 from ..common._utils import _retry_read_entity
 from ..common.typing import Converter, Entity, Json, ModelType
-from ..exceptions import InvalidExportPath, ModelNotFound
+from ..exceptions import FileCannotBeRead, InvalidExportPath, ModelNotFound
 from ._abstract_repository import _AbstractRepository
 from ._decoder import _Decoder
 from ._encoder import _Encoder
@@ -39,7 +39,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         dir_name (str): Folder that will hold the files for this dataclass model.
     """
 
-    __EXCEPTIONS_TO_RETRY = (json.JSONDecodeError,)
+    __EXCEPTIONS_TO_RETRY = (FileCannotBeRead,)
 
     def __init__(self, model_type: Type[ModelType], converter: Type[Converter], dir_name: str):
         self.model_type = model_type
@@ -57,6 +57,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     ###############################
     # ##   Inherited methods   ## #
     ###############################
+
     def _save(self, entity: Entity):
         self.__create_directory_if_not_exists()
         model = self.converter._entity_to_model(entity)  # type: ignore
@@ -67,16 +68,16 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _exists(self, entity_id: str) -> bool:
         return self.__get_path(entity_id).exists()
 
-    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def _load(self, entity_id: str) -> Entity:
+        path = pathlib.Path(self.__get_path(entity_id))
+
         try:
-            with pathlib.Path(self.__get_path(entity_id)).open(encoding="UTF-8") as source:
-                file_content = json.load(source)
-            return self.__file_content_to_entity(file_content)
-        except FileNotFoundError:
+            file_content = self.__read_file(path)
+        except (FileNotFoundError, FileCannotBeRead):
             raise ModelNotFound(str(self.dir_path), entity_id)
 
-    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
+        return self.__file_content_to_entity(file_content)
+
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
         entities = []
         try:
@@ -173,7 +174,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     #############################
     # ##   Private methods   ## #
     #############################
-    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
+
     def __filter_files_by_config_and_owner_id(
         self, config_id: str, owner_id: Optional[str], filters: Optional[List[Dict]] = None
     ):
@@ -192,7 +193,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             pass
         return None
 
-    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
     def __match_file_and_get_entity(self, filepath, config_and_owner_ids, filters):
         if match := [(c, p) for c, p in config_and_owner_ids if c.id in filepath.name]:
             for config, owner_id in match:
@@ -222,17 +222,31 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         entity = self.converter._model_to_entity(model)
         return entity
 
-    def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Json:
+    def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Optional[Json]:
         if not filters:
             filters = [{}]
 
-        with open(filepath, "r") as f:
-            contents = f.read()
-            for _filter in filters:
-                conditions = [
-                    f'"{key}": "{value}"' if value is not None else f'"{key}": null' for key, value in _filter.items()
-                ]
-                if all(condition in contents for condition in conditions):
-                    return json.loads(contents, cls=_Decoder)
+        try:
+            file_content = self.__read_file(filepath)
+        except (FileNotFoundError, FileCannotBeRead):
+            return None
 
+        for _filter in filters:
+            conditions = [
+                f'"{key}": "{value}"' if value is not None else f'"{key}": null' for key, value in _filter.items()
+            ]
+            if all(condition in file_content for condition in conditions):
+                return json.loads(file_content, cls=_Decoder)
         return None
+
+    @_retry_read_entity(__EXCEPTIONS_TO_RETRY)
+    def __read_file(self, filepath: pathlib.Path) -> str:
+        if not filepath.is_file():
+            raise FileNotFoundError
+
+        try:
+            with filepath.open("r", encoding="UTF-8") as f:
+                file_content = f.read()
+            return file_content
+        except:
+            raise FileCannotBeRead(str(filepath))
