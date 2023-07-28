@@ -248,5 +248,5 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             with filepath.open("r", encoding="UTF-8") as f:
                 file_content = f.read()
             return file_content
-        except:
+        except Exception:
             raise FileCannotBeRead(str(filepath))
