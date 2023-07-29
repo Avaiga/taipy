@@ -114,7 +114,9 @@ class TestExcelDataNode:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
-        excel_data_node_as_pandas = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": path})
+        excel_data_node_as_pandas = ExcelDataNode(
+            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": "Sheet1"}
+        )
 
         data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
@@ -177,7 +179,9 @@ class TestExcelDataNode:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
-        excel_data_node_as_pandas = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": path, "has_header": False})
+        excel_data_node_as_pandas = ExcelDataNode(
+            "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "sheet_name": "Sheet1"}
+        )
         data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 6
@@ -263,16 +267,16 @@ class TestExcelDataNode:
         "content,columns,sheet_name",
         [
             ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], None, "sheet_name"),
-            ([[11, 22, 33], [44, 55, 66]], None, None),
+            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"], "sheet_name"),
         ],
     )
     def test_write_with_sheet_name(self, excel_file_with_sheet_name, default_data_frame, content, columns, sheet_name):
         if sheet_name:
             excel_dn = ExcelDataNode(
-                "foo", Scope.PIPELINE, properties={"path": excel_file_with_sheet_name, "sheet_name": sheet_name}
+                "foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name, "sheet_name": sheet_name}
             )
         else:
-            excel_dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": excel_file_with_sheet_name})
+            excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name})
 
         assert np.array_equal(excel_dn.read().values, default_data_frame.values)
         if not columns:
@@ -281,6 +285,8 @@ class TestExcelDataNode:
         else:
             excel_dn.write_with_column_names(content, columns)
             df = pd.DataFrame(content, columns=columns)
+
+        # breakpoint()
 
         assert np.array_equal(excel_dn.read().values, df.values)
 
@@ -352,8 +358,10 @@ class TestExcelDataNode:
         excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.SCENARIO, properties={"path": path})
 
         data_pandas_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
-        assert isinstance(data_pandas_no_sheet_name, pd.DataFrame)
-        assert data_pandas["Sheet1"].equals(data_pandas_no_sheet_name)
+        assert isinstance(data_pandas_no_sheet_name, Dict)
+        for key in data_pandas_no_sheet_name.keys():
+            assert isinstance(data_pandas_no_sheet_name[key], pd.DataFrame)
+            assert data_pandas[key].equals(data_pandas_no_sheet_name[key])
 
         # Create ExcelDataNode with modin exposed_type
         excel_data_node_as_modin = ExcelDataNode(
@@ -376,8 +384,10 @@ class TestExcelDataNode:
         )
 
         data_modin_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
-        assert isinstance(data_modin_no_sheet_name, modin_pd.DataFrame)
-        assert data_modin["Sheet1"].equals(data_modin_no_sheet_name)
+        assert isinstance(data_modin_no_sheet_name, Dict)
+        for key in data_modin_no_sheet_name.keys():
+            assert isinstance(data_modin_no_sheet_name[key], modin_pd.DataFrame)
+            assert data_modin[key].equals(data_modin_no_sheet_name[key])
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
@@ -404,8 +414,10 @@ class TestExcelDataNode:
         )
 
         data_numpy_no_sheet_name = excel_data_node_as_numpy_no_sheet_name.read()
-        assert isinstance(data_numpy_no_sheet_name, np.ndarray)
-        assert np.array_equal(data_numpy["Sheet1"], data_numpy_no_sheet_name)
+        assert isinstance(data_numpy_no_sheet_name, Dict)
+        for key in data_numpy_no_sheet_name.keys():
+            assert isinstance(data_numpy_no_sheet_name[key], np.ndarray)
+            assert np.array_equal(data_numpy[key], data_numpy_no_sheet_name[key])
 
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
@@ -557,9 +569,10 @@ class TestExcelDataNode:
             "bar", Scope.SCENARIO, properties={"path": path, "has_header": False}
         )
         data_pandas_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
-        assert isinstance(data_pandas_no_sheet_name, pd.DataFrame)
-        # assert len(data_pandas_no_sheet_name) == 2
-        assert data_pandas["Sheet1"].equals(data_pandas_no_sheet_name)
+        assert isinstance(data_pandas_no_sheet_name, Dict)
+        for key in data_pandas_no_sheet_name.keys():
+            assert isinstance(data_pandas_no_sheet_name[key], pd.DataFrame)
+            assert data_pandas[key].equals(data_pandas_no_sheet_name[key])
 
         # Create ExcelDataNode with modin exposed_type
         excel_data_node_as_modin = ExcelDataNode(
@@ -580,8 +593,10 @@ class TestExcelDataNode:
             "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "exposed_type": "modin"}
         )
         data_modin_no_sheet_name = excel_data_node_as_modin_no_sheet_name.read()
-        assert isinstance(data_modin_no_sheet_name, modin_pd.DataFrame)
-        assert data_modin["Sheet1"].equals(data_modin_no_sheet_name)
+        assert isinstance(data_modin_no_sheet_name, Dict)
+        for key in data_modin_no_sheet_name.keys():
+            assert isinstance(data_modin_no_sheet_name[key], modin_pd.DataFrame)
+            assert data_modin[key].equals(data_modin_no_sheet_name[key])
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
@@ -610,8 +625,10 @@ class TestExcelDataNode:
         )
 
         data_numpy_no_sheet_name = excel_data_node_as_numpy_no_sheet_name.read()
-        assert isinstance(data_numpy_no_sheet_name, np.ndarray)
-        assert np.array_equal(data_numpy["Sheet1"], data_numpy_no_sheet_name)
+        assert isinstance(data_numpy_no_sheet_name, Dict)
+        for key in data_numpy_no_sheet_name.keys():
+            assert isinstance(data_numpy_no_sheet_name[key], np.ndarray)
+            assert np.array_equal(data_numpy[key], data_numpy_no_sheet_name[key])
 
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
