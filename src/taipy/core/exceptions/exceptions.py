@@ -80,8 +80,8 @@ class ExposedTypeLengthMismatch(Exception):
 
 
 class SheetNameLengthMismatch(Exception):
-    """Raised if length of sheet_name list does not match with
-    number of sheets in the data to be written to Excel file."""
+    """Raised if length of sheet_name list does not match
+    with number of sheets in the data to be written to Excel file."""
 
 
 class InvalidExposedType(Exception):
