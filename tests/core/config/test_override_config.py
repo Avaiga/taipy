@@ -23,22 +23,23 @@ def test_override_default_configuration_with_code_configuration():
     assert not Config.core.root_folder == "foo"
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
-    assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
     Config.configure_job_executions(max_nb_of_workers=-1)
     Config.configure_core(root_folder="foo")
     foo_config = Config.configure_data_node("foo", "in_memory")
+    xyz_config = Config.configure_data_node("xyz")
     bar_config = Config.configure_task("bar", print, [foo_config], [])
-    baz_config = Config.configure_pipeline("baz", [bar_config])
-    qux_config = Config.configure_scenario("qux", [baz_config])
+    qux_config = Config.configure_scenario("qux", [bar_config], [xyz_config])
 
     assert Config.job_config.max_nb_of_workers == -1
     assert Config.core.root_folder == "foo"
-    assert len(Config.data_nodes) == 2
+    assert len(Config.data_nodes) == 3
     assert "default" in Config.data_nodes
     assert foo_config.id in Config.data_nodes
+    assert xyz_config.id in Config.data_nodes
     assert Config.data_nodes[foo_config.id].storage_type == "in_memory"
+    assert Config.data_nodes[xyz_config.id].storage_type == "pickle"
     assert len(Config.tasks) == 2
     assert "default" in Config.tasks
     assert bar_config.id in Config.tasks
@@ -46,16 +47,17 @@ def test_override_default_configuration_with_code_configuration():
     assert Config.tasks[bar_config.id].input_configs[0].id == foo_config.id
     assert len(Config.tasks[bar_config.id].output_configs) == 0
     assert Config.tasks[bar_config.id].function == print
-    assert len(Config.pipelines) == 2
+
+    assert len(Config.pipelines) == 1
     assert "default" in Config.pipelines
-    assert baz_config.id in Config.pipelines
-    assert len(Config.pipelines[baz_config.id].task_configs) == 1
-    assert Config.pipelines[baz_config.id].task_configs[0].id == bar_config.id
+
     assert len(Config.scenarios) == 2
     assert "default" in Config.scenarios
     assert qux_config.id in Config.scenarios
-    assert len(Config.scenarios[qux_config.id].pipeline_configs) == 1
-    assert Config.scenarios[qux_config.id].pipeline_configs[0].id == baz_config.id
+    assert len(Config.scenarios[qux_config.id].tasks) == 1
+    assert Config.scenarios[qux_config.id].tasks[0].id == bar_config.id
+    assert len(Config.scenarios[qux_config.id].additional_data_nodes) == 1
+    assert Config.scenarios[qux_config.id].additional_data_nodes[0].id == xyz_config.id
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():
@@ -81,15 +83,12 @@ max_nb_of_workers = -1
 
 [TASK.bar]
 
-[PIPELINE.baz]
-
 [SCENARIO.qux]
 """
     )
     assert Config.job_config.max_nb_of_workers == 1
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
-    assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
     Config.override(tf.filename)
@@ -101,11 +100,10 @@ max_nb_of_workers = -1
     assert len(Config.tasks) == 2
     assert "default" in Config.tasks
     assert "bar" in Config.tasks
-    assert len(Config.pipelines) == 2
+    assert len(Config.pipelines) == 1
     assert "default" in Config.pipelines
     assert "default" in Config.scenarios
     assert len(Config.scenarios) == 2
-    assert "baz" in Config.pipelines
     assert "qux" in Config.scenarios
 
 

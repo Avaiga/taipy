@@ -194,7 +194,6 @@ def test_migrate_all_entities():
     assert v1.d1.version == "2.0"
     assert v1.my_task.version == "2.0"
     assert v1.my_pipeline.version == "2.0"
-    assert v1.my_pipeline.version == "2.0"
 
     assert v1.d1.path == "bar.pkl"
     assert v1.my_task.skippable is True
@@ -299,8 +298,8 @@ def config_scenario_v1():
     dn1 = Config.configure_pickle_data_node(id="d1", default_data=1)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", twice, dn1, dn2)
-    pipeline_cfg = Config.configure_pipeline("my_pipeline", task_cfg)
-    scenario_cfg = Config.configure_scenario("my_scenario", pipeline_cfg)
+    scenario_cfg = Config.configure_scenario("my_scenario", [task_cfg])
+    scenario_cfg.add_sequences({"my_pipeline": [task_cfg]})
     return scenario_cfg
 
 
@@ -308,6 +307,6 @@ def config_scenario_v2():
     dn1 = Config.configure_pickle_data_node(id="d1", default_data=2)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", triple, dn1, dn2)
-    pipeline_cfg = Config.configure_pipeline("my_pipeline", task_cfg)
-    scenario_cfg = Config.configure_scenario("my_scenario", pipeline_cfg)
+    scenario_cfg = Config.configure_scenario("my_scenario", [task_cfg])
+    scenario_cfg.add_sequences({"my_scenario": [task_cfg]})
     return scenario_cfg

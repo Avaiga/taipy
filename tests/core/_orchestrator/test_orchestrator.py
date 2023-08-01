@@ -96,6 +96,7 @@ def test_submit_task():
 
 
 def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
+
     dn_1 = InMemoryDataNode("dn_config_id_1", Scope.SCENARIO)
     dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
     task_1 = Task("task_config_id_1", {}, print, [dn_1])
@@ -126,17 +127,13 @@ def test_submit_scenario_generate_unique_submit_id():
     task_1 = Task("task_config_id_1", {}, print, [dn_1])
     task_2 = Task("task_config_id_2", {}, print, [dn_2])
     task_3 = Task("task_config_id_3", {}, print, [dn_3])
-    pipeline_1 = Pipeline("pipeline_config_id_1", {}, [task_1, task_2])
-    pipeline_2 = Pipeline("pipeline_config_id_2", {}, [task_3])
-    scenario = Scenario("scenario_config_id", [pipeline_1, pipeline_2], {})
+    scenario = Scenario("scenario_config_id", [task_1, task_2, task_3], {})
 
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
     _TaskManager._set(task_3)
-    _PipelineManager._set(pipeline_1)
-    _PipelineManager._set(pipeline_2)
     _ScenarioManager._set(scenario)
 
     jobs_1 = taipy.submit(scenario)
@@ -153,17 +150,13 @@ def test_submit_entity_store_entity_id_in_job():
     task_1 = Task("task_config_id_1", {}, print, [dn_1])
     task_2 = Task("task_config_id_2", {}, print, [dn_2])
     task_3 = Task("task_config_id_3", {}, print, [dn_3])
-    pipeline_1 = Pipeline("pipeline_config_id_1", {}, [task_1, task_2])
-    pipeline_2 = Pipeline("pipeline_config_id_2", {}, [task_3])
-    scenario = Scenario("scenario_config_id", [pipeline_1, pipeline_2], {})
+    scenario = Scenario("scenario_config_id", [task_1, task_2, task_3], {})
 
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
     _TaskManager._set(task_3)
-    _PipelineManager._set(pipeline_1)
-    _PipelineManager._set(pipeline_2)
     _ScenarioManager._set(scenario)
 
     jobs_1 = taipy.submit(scenario)
@@ -241,6 +234,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
 
 
 def test_scenario_only_submit_same_task_once():
+
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
 
@@ -252,7 +246,9 @@ def test_scenario_only_submit_same_task_once():
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
     pipeline_1 = Pipeline("pipeline_config_1", {}, [task_1, task_2], pipeline_id="pipeline_1")
     pipeline_2 = Pipeline("pipeline_config_2", {}, [task_1, task_3], pipeline_id="pipeline_2")
-    scenario_1 = Scenario("scenario_config_1", [pipeline_1, pipeline_2], {}, "scenario_1")
+    scenario_1 = Scenario(
+        "scenario_config_1", [task_1, task_2, task_3], {}, "scenario_1", pipelines=[pipeline_1, pipeline_2]
+    )
 
     jobs = _Orchestrator.submit(scenario_1)
     assert len(jobs) == 3
@@ -281,11 +277,8 @@ def test_update_status_fail_job():
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
-    pipeline_1 = Pipeline("pipeline_config_1", {}, [task_0, task_1, task_2, task_3], pipeline_id="pipeline_1")
-    pipeline_2 = Pipeline("pipeline_config_2", {}, [task_0, task_1, task_2], pipeline_id="pipeline_2")
-    pipeline_3 = Pipeline("pipeline_config_3", {}, [task_3], pipeline_id="pipeline_3")
-    scenario_1 = Scenario("scenario_config_1", [pipeline_1], {}, "scenario_1")
-    scenario_2 = Scenario("scenario_config_2", [pipeline_2, pipeline_3], {}, "scenario_2")
+    scenario_1 = Scenario("scenario_config_1", [task_0, task_1, task_2, task_3], {}, "scenario_1")
+    scenario_2 = Scenario("scenario_config_2", [task_0, task_1, task_2, task_3], {}, "scenario_2")
 
     _DataManager._set(dn_0)
     _DataManager._set(dn_1)
@@ -294,21 +287,11 @@ def test_update_status_fail_job():
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
     _TaskManager._set(task_3)
-    _PipelineManager._set(pipeline_1)
-    _PipelineManager._set(pipeline_2)
-    _PipelineManager._set(pipeline_3)
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
 
     job = _Orchestrator.submit_task(task_0, "submit_id")
     assert job.is_failed()
-
-    jobs = _Orchestrator.submit(pipeline_1)
-    tasks_jobs = {job._task.id: job for job in jobs}
-    assert tasks_jobs["task_0"].is_failed()
-    assert all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]])
-    assert tasks_jobs["task_3"].is_completed()
-    assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
     jobs = _Orchestrator.submit(scenario_1)
     tasks_jobs = {job._task.id: job for job in jobs}
@@ -339,8 +322,17 @@ def test_update_status_fail_job_in_parallel():
     pipeline_1 = Pipeline("pipeline_config_1", {}, [task_0, task_1, task_2, task_3], pipeline_id="pipeline_1")
     pipeline_2 = Pipeline("pipeline_config_2", {}, [task_0, task_1, task_2], pipeline_id="pipeline_2")
     pipeline_3 = Pipeline("pipeline_config_3", {}, [task_3], pipeline_id="pipeline_3")
-    scenario_1 = Scenario("scenario_config_1", [pipeline_1], {}, "scenario_1")
-    scenario_2 = Scenario("scenario_config_2", [pipeline_2, pipeline_3], {}, "scenario_2")
+    scenario_1 = Scenario(
+        "scenario_config_1", set([task_0, task_1, task_2, task_3]), {}, set(), "scenario_1", pipelines=[pipeline_1]
+    )
+    scenario_2 = Scenario(
+        "scenario_config_2",
+        set([task_0, task_1, task_2, task_3]),
+        {},
+        set(),
+        "scenario_2",
+        pipelines=[pipeline_2, pipeline_3],
+    )
 
     _DataManager._set(dn_0)
     _DataManager._set(dn_1)
@@ -359,6 +351,13 @@ def test_update_status_fail_job_in_parallel():
     assert_true_after_time(job.is_failed)
 
     jobs = _Orchestrator.submit(pipeline_1)
+    tasks_jobs = {job._task.id: job for job in jobs}
+    assert_true_after_time(tasks_jobs["task_0"].is_failed)
+    assert_true_after_time(tasks_jobs["task_3"].is_completed)
+    assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
+    assert_true_after_time(lambda: all(not _Orchestrator._is_blocked(job) for job in jobs))
+
+    jobs = _Orchestrator.submit(scenario_1.pipelines["pipeline_config_1"])
     tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
@@ -402,6 +401,7 @@ def test_submit_task_in_parallel():
 
 
 def test_submit_pipeline_in_parallel():
+
     m = multiprocessing.Manager()
     lock = m.Lock()
 
@@ -430,8 +430,7 @@ def test_submit_scenario_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
     task = _create_task(partial(lock_multiply, lock))
-    pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
-    scenario = Scenario("scenario_config", [pipeline], {}, "scenario_id")
+    scenario = Scenario("scenario_config", [task], {}, [], "scenario_id")
 
     _OrchestratorFactory._build_dispatcher()
 
@@ -488,8 +487,7 @@ def test_submit_scenario_synchronously_in_parallel():
     sleep_period = 1
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep, sleep_period))
-    pipeline = Pipeline("pipeline_config", {}, [task])
-    scenario = Scenario("scenario_config", [pipeline], {})
+    scenario = Scenario("scenario_config", [task], {})
 
     job = _Orchestrator.submit(scenario, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
@@ -529,8 +527,7 @@ def test_submit_fail_scenario_synchronously_in_parallel():
     sleep_period = 1.0
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep_and_raise_error_fct, sleep_period))
-    pipeline = Pipeline("pipeline_config", {}, [task], "pipeline_id")
-    scenario = Scenario("scenario_config", [pipeline], {})
+    scenario = Scenario("scenario_config", [task], {})
 
     job = _Orchestrator.submit(scenario, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
@@ -636,8 +633,7 @@ def test_submit_scenario_multithreading_multiple_task():
     task_1 = _create_task(partial(lock_multiply, lock_1))
     task_2 = _create_task(partial(lock_multiply, lock_2))
 
-    pipeline = Pipeline("pipeline_config", {}, [task_1, task_2])
-    scenario = Scenario("scenario_config", [pipeline], {})
+    scenario = Scenario("scenario_config", [task_1, task_2], {})
 
     _OrchestratorFactory._build_dispatcher()
 
@@ -829,8 +825,7 @@ def test_blocked_scenario():
     baz = dns[baz_cfg]
     task_1 = Task("by_2", {}, partial(lock_multiply, lock_1, 2), [foo], [bar])
     task_2 = Task("by_3", {}, partial(lock_multiply, lock_2, 3), [bar], [baz])
-    pipeline = Pipeline("pipeline_config", {}, [task_1, task_2])
-    scenario = Scenario("scenario_config", [pipeline], {})
+    scenario = Scenario("scenario_config", [task_1, task_2], {})
 
     assert task_1.foo.is_ready_for_reading  # foo is ready
     assert not task_1.bar.is_ready_for_reading  # But bar is not ready
@@ -887,13 +882,13 @@ def test_can_exec_task_with_modified_config():
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
     task_config = Config.configure_task("task_config", modified_config_task, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [task_config])
 
     _OrchestratorFactory._build_dispatcher()
 
-    pipeline = _PipelineManager._get_or_create(pipeline_config)
+    scenario = _ScenarioManager._create(scenario_config)
 
-    jobs = pipeline.submit()
+    jobs = scenario.submit()
     assert_true_after_time(jobs[0].is_finished, time=120)
     assert_true_after_time(
         jobs[0].is_completed
@@ -928,13 +923,13 @@ def test_cannot_exec_task_that_update_config():
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
     task_config = Config.configure_task("task_config", update_config_task, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [task_config])
 
     _OrchestratorFactory._build_dispatcher()
 
-    pipeline = _PipelineManager._get_or_create(pipeline_config)
+    scenario = _ScenarioManager._create(scenario_config)
 
-    jobs = pipeline.submit()
+    jobs = scenario.submit()
 
     # The job should fail due to an exception is raised
     assert_true_after_time(jobs[0].is_failed)
@@ -946,15 +941,15 @@ def test_can_execute_task_with_development_mode():
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.SCENARIO, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
     task_config = Config.configure_task("task_config", mult_by_2, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_pipeline("scenario_config", [task_config])
 
     _OrchestratorFactory._build_dispatcher()
 
-    pipeline = _PipelineManager._get_or_create(pipeline_config)
-    pipeline.submit()
-    while pipeline.output.edit_in_progress:
+    scenario = _PipelineManager._get_or_create(scenario_config)
+    scenario.submit()
+    while scenario.output.edit_in_progress:
         sleep(1)
-    assert 2 == pipeline.output.read()
+    assert 2 == scenario.output.read()
 
 
 def test_need_to_run_no_output():

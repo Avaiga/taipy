@@ -11,8 +11,6 @@
 
 from datetime import datetime
 
-import pytest
-
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -23,6 +21,7 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -199,8 +198,9 @@ def test_get_cycle_start_date_and_end_date(init_sql_repo):
     assert yearly_start_date_2 < creation_date_2 < yearly_end_date_2
 
 
-def test_hard_delete_shared_entities():
+def test_hard_delete_shared_entities(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _ScenarioManager._repository = _ScenarioManagerFactory._build_repository()
 
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
@@ -209,19 +209,24 @@ def test_hard_delete_shared_entities():
     task_config_1 = Config.configure_task("task_config_1", print, dn_config_1, dn_config_2)
     task_config_2 = Config.configure_task("task_config_2", print, dn_config_2, dn_config_3)
     task_config_3 = Config.configure_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
-    pipeline_config_1 = Config.configure_pipeline("pipeline_config_1", [task_config_1, task_config_2])
-    pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_1, task_config_2])
-    pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])  # scope = global
     creation_date = datetime.now()
     scenario_config_1 = Config.configure_scenario(
         "scenario_config_1",
-        [pipeline_config_1, pipeline_config_2, pipeline_config_3],
+        [task_config_1, task_config_2, task_config_3],
         creation_date=creation_date,
         frequency=Frequency.DAILY,
     )
+    scenario_config_1.add_sequences(
+        {
+            "pipeline_config_1": [task_config_1, task_config_2],
+            "pipeline_config_2": [task_config_1, task_config_2],
+            "pipeline_config_3": [task_config_3],
+        }
+    )
     scenario_config_2 = Config.configure_scenario(
-        "scenario_config_2", [pipeline_config_3]
+        "scenario_config_2", [task_config_2, task_config_3]
     )  # No Frequency so cycle attached to scenarios
+    scenario_config_2.add_sequences({"pipeline_config_3": [task_config_3]})
 
     _OrchestratorFactory._build_dispatcher()
 
@@ -234,14 +239,14 @@ def test_hard_delete_shared_entities():
 
     assert len(_ScenarioManager._get_all()) == 3
     assert len(_PipelineManager._get_all()) == 6
-    assert len(_TaskManager._get_all()) == 6
-    assert len(_DataManager._get_all()) == 7
-    assert len(_JobManager._get_all()) == 11
+    assert len(_TaskManager._get_all()) == 7
+    assert len(_DataManager._get_all()) == 8
+    assert len(_JobManager._get_all()) == 8
     assert len(_CycleManager._get_all()) == 1
     _CycleManager._hard_delete(scenario_1.cycle.id)
     assert len(_CycleManager._get_all()) == 0
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 3

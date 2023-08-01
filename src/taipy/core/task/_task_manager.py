@@ -82,7 +82,9 @@ class _TaskManager(_Manager[Task], _VersionMixin):
 
             tasks_configs_and_owner_id.append((task_config, owner_id))
 
-        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(tasks_configs_and_owner_id)  # type: ignore
+        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(  # type: ignore
+            tasks_configs_and_owner_id, cls._build_filters_with_version(None)
+        )
 
         tasks = []
         for task_config, owner_id in tasks_configs_and_owner_id:

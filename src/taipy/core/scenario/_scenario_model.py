@@ -18,7 +18,9 @@ from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from ..cycle.cycle_id import CycleId
+from ..data.data_node_id import DataNodeId
 from ..pipeline.pipeline_id import PipelineId
+from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
 
 
@@ -30,24 +32,28 @@ class _ScenarioModel(_BaseModel):
         mapper_registry.metadata,
         Column("id", String, primary_key=True),
         Column("config_id", String),
-        Column("pipelines", JSON),
+        Column("tasks", JSON),
+        Column("additional_data_nodes", JSON),
         Column("properties", JSON),
         Column("creation_date", String),
         Column("primary_scenario", Boolean),
         Column("subscribers", JSON),
         Column("tags", JSON),
         Column("version", String),
+        Column("pipelines", JSON),
         Column("cycle", String),
     )
     id: ScenarioId
     config_id: str
-    pipelines: List[PipelineId]
+    tasks: List[TaskId]
+    additional_data_nodes: List[DataNodeId]
     properties: Dict[str, Any]
     creation_date: str
     primary_scenario: bool
     subscribers: List[Dict]
     tags: List[str]
     version: str
+    pipelines: Optional[List[PipelineId]] = None
     cycle: Optional[CycleId] = None
 
     @staticmethod
@@ -55,12 +61,14 @@ class _ScenarioModel(_BaseModel):
         return _ScenarioModel(
             id=data["id"],
             config_id=data["config_id"],
-            pipelines=data["pipelines"],
+            tasks=data.get("tasks", None),
+            additional_data_nodes=data.get("additional_data_nodes", None),
             properties=data["properties"],
             creation_date=data["creation_date"],
             primary_scenario=data["primary_scenario"],
             subscribers=data["subscribers"],
             tags=data["tags"],
             version=data["version"] if "version" in data.keys() else _version_migration(),
+            pipelines=data.get("pipelines", None),
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )

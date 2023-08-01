@@ -241,18 +241,18 @@ def test_publish_event():
 
     dn_config = Config.configure_data_node("dn_config")
     task_config = Config.configure_task("task_config", print, [dn_config])
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
     scenario_config = Config.configure_scenario(
-        "scenario_config", [pipeline_config], frequency=Frequency.DAILY, flag="test"
+        "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
     )
+    scenario_config.add_sequences({"pipeline_config": [task_config]})
 
     # Test CREATION Event
 
     scenario = tp.create_scenario(scenario_config)
     cycle = scenario.cycle
-    pipeline = scenario.pipelines[pipeline_config.id]
-    task = pipeline.tasks[task_config.id]
-    dn = task.data_nodes[dn_config.id]
+    pipeline = scenario.pipelines["pipeline_config"]
+    task = scenario.tasks[task_config.id]
+    dn = scenario.data_nodes[dn_config.id]
 
     assert registration_queue.qsize() == 5
 

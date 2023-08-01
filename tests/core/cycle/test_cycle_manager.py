@@ -199,19 +199,24 @@ def test_hard_delete_shared_entities():
     task_config_1 = Config.configure_task("task_config_1", print, dn_config_1, dn_config_2)
     task_config_2 = Config.configure_task("task_config_2", print, dn_config_2, dn_config_3)
     task_config_3 = Config.configure_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
-    pipeline_config_1 = Config.configure_pipeline("pipeline_config_1", [task_config_1, task_config_2])
-    pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_1, task_config_2])
-    pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])  # scope = global
     creation_date = datetime.now()
     scenario_config_1 = Config.configure_scenario(
         "scenario_config_1",
-        [pipeline_config_1, pipeline_config_2, pipeline_config_3],
+        [task_config_1, task_config_2, task_config_3],
         creation_date=creation_date,
         frequency=Frequency.DAILY,
     )
+    scenario_config_1.add_sequences(
+        {
+            "pipeline_config_1": [task_config_1, task_config_2],
+            "pipeline_config_2": [task_config_1, task_config_2],
+            "pipeline_config_3": [task_config_3],
+        }
+    )
     scenario_config_2 = Config.configure_scenario(
-        "scenario_config_2", [pipeline_config_3]
+        "scenario_config_2", [task_config_2, task_config_3]
     )  # No Frequency so cycle attached to scenarios
+    scenario_config_2.add_sequences({"pipeline_config_3": [task_config_3]})
 
     _OrchestratorFactory._build_dispatcher()
 
@@ -224,17 +229,17 @@ def test_hard_delete_shared_entities():
 
     assert len(_ScenarioManager._get_all()) == 3
     assert len(_PipelineManager._get_all()) == 6
-    assert len(_TaskManager._get_all()) == 6
-    assert len(_DataManager._get_all()) == 7
-    assert len(_JobManager._get_all()) == 11
+    assert len(_TaskManager._get_all()) == 7
+    assert len(_DataManager._get_all()) == 8
+    assert len(_JobManager._get_all()) == 8
     assert len(_CycleManager._get_all()) == 1
     _CycleManager._hard_delete(scenario_1.cycle.id)
     assert len(_CycleManager._get_all()) == 0
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 3
 
 
 def test_get_primary(tmpdir, cycle, current_datetime):

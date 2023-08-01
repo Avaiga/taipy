@@ -672,11 +672,12 @@ def get_parents(
         ModelNotFound^: If _entity_ does not match a correct entity pattern.
     """
 
-    def update_parent_dict(parents_set, parent_dict, key):
-        if key in parent_dict.keys():
-            parent_dict[key].update(parents_set)
-        else:
-            parent_dict[key] = parents_set
+    def update_parent_dict(parents_set, parent_dict):
+        for k, value in parents_set.items():
+            if k in parent_dict.keys():
+                parent_dict[k].update(value)
+            else:
+                parent_dict[k] = value
 
     if isinstance(entity, str):
         entity = get(entity)  # type: ignore
@@ -686,22 +687,27 @@ def get_parents(
     if isinstance(entity, (Scenario, Cycle)):
         return parent_dict
 
-    parents = {get(parent) for parent in entity.parent_ids}  # type: ignore
+    current_parent_dict: Dict[str, Set] = {}
+    for parent in entity.parent_ids:
+        parent_entity = get(parent)
+        if parent_entity._MANAGER_NAME in current_parent_dict.keys():
+            current_parent_dict[parent_entity._MANAGER_NAME].add(parent_entity)
+        else:
+            current_parent_dict[parent_entity._MANAGER_NAME] = {parent_entity}
 
     if isinstance(entity, Pipeline):
-        parent_entity_key = "scenarios"
-        update_parent_dict(parents, parent_dict, parent_entity_key)
+        update_parent_dict(current_parent_dict, parent_dict)
 
     if isinstance(entity, Task):
-        parent_entity_key = "pipelines"
-        update_parent_dict(parents, parent_dict, parent_entity_key)
-        for parent in parent_dict[parent_entity_key]:
+        parent_entity_key_to_search_next = "scenario"
+        update_parent_dict(current_parent_dict, parent_dict)
+        for parent in parent_dict.get(parent_entity_key_to_search_next, []):
             get_parents(parent, parent_dict)
 
     if isinstance(entity, DataNode):
-        parent_entity_key = "tasks"
-        update_parent_dict(parents, parent_dict, parent_entity_key)
-        for parent in parent_dict[parent_entity_key]:
+        parent_entity_key_to_search_next = "task"
+        update_parent_dict(current_parent_dict, parent_dict)
+        for parent in parent_dict.get(parent_entity_key_to_search_next, []):
             get_parents(parent, parent_dict)
 
     return parent_dict

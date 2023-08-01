@@ -63,6 +63,14 @@ baz = "ENV[QUX]"
 quux = "ENV[QUUZ]:bool"
 corge = [ "grault", "ENV[GARPLY]", "ENV[WALDO]:int", "3.0:float",]
 
+[DATA_NODE.dn3]
+storage_type = "ENV[FOO]"
+scope = "SCENARIO:SCOPE"
+validity_period = "1d0h0m0s:timedelta"
+foo = "bar"
+default_data = "dn3"
+quux = "ENV[QUUZ]:bool"
+
 [TASK.default]
 inputs = []
 outputs = []
@@ -78,23 +86,25 @@ description = "t1 description"
 [PIPELINE.default]
 tasks = []
 
-[PIPELINE.p1]
-tasks = [ "t1:SECTION",]
-cron = "daily"
-
 [SCENARIO.default]
-pipelines = []
+tasks = []
+additional_data_nodes = []
 frequency = "QUARTERLY:FREQUENCY"
 owner = "Michel Platini"
 
 [SCENARIO.s1]
-pipelines = [ "p1:SECTION",]
+tasks = [ "t1:SECTION",]
+additional_data_nodes = [ "dn3:SECTION",]
 frequency = "QUARTERLY:FREQUENCY"
 owner = "Raymond Kopa"
 
 [SCENARIO.default.comparators]
 
+[SCENARIO.default.sequences]
+
 [SCENARIO.s1.comparators]
+
+[SCENARIO.s1.sequences]
     """.strip()
     tf = NamedTemporaryFile()
     with mock.patch.dict(
@@ -119,13 +129,25 @@ owner = "Raymond Kopa"
             quux="ENV[QUUZ]:bool",
             corge=("grault", "ENV[GARPLY]", "ENV[WALDO]:int", 3.0),
         )
+        dn3_cfg_v2 = Config.configure_data_node(
+            "dn3",
+            storage_type="ENV[FOO]",
+            foo="bar",
+            default_data="dn3",
+            quux="ENV[QUUZ]:bool",
+        )
         assert dn2_cfg_v2.scope == Scope.SCENARIO
         t1_cfg_v2 = Config.configure_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
-        p1_cfg_v2 = Config.configure_pipeline("p1", t1_cfg_v2, cron="daily")
-        Config.set_default_scenario_configuration([], Frequency.QUARTERLY, owner="Michel Platini")
-        Config.configure_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
+        Config.set_default_scenario_configuration([], [], Frequency.QUARTERLY, owner="Michel Platini")
+        Config.configure_scenario(
+            "s1",
+            task_configs=[t1_cfg_v2],
+            additional_data_node_configs=[dn3_cfg_v2],
+            frequency=Frequency.QUARTERLY,
+            owner="Raymond Kopa",
+        )
         Config.backup(tf.filename)
-        actual_config = tf.read().strip()
+        actual_config = tf.read().strip()  # problem here
 
         assert actual_config == expected_config
         Config.override(tf.filename)
@@ -148,31 +170,36 @@ def test_read_configuration_file():
         [DATA_NODE.my_datanode2]
         path = "/data2/csv"
 
+        [DATA_NODE.my_datanode3]
+        path = "/data3/csv"
+        source = "local"
+
         [TASK.my_task]
         inputs = ["my_datanode:SECTION"]
         outputs = ["my_datanode2:SECTION"]
         description = "task description"
 
-        [PIPELINE.my_pipeline]
-        tasks = [ "my_task:SECTION",]
-        cron = "daily"
-
         [SCENARIO.my_scenario]
-        pipelines = [ "my_pipeline:SECTION",]
+        tasks = [ "my_task:SECTION"]
+        additional_data_nodes = ["my_datanode3:SECTION"]
         owner = "John Doe"
         """
     )
     Config.configure_task("my_task", print)
     Config.override(file_config.filename)
 
-    assert len(Config.data_nodes) == 3
+    assert len(Config.data_nodes) == 4
     assert type(Config.data_nodes["my_datanode"]) == DataNodeConfig
     assert type(Config.data_nodes["my_datanode2"]) == DataNodeConfig
+    assert type(Config.data_nodes["my_datanode3"]) == DataNodeConfig
     assert Config.data_nodes["my_datanode"].path == "/data/csv"
     assert Config.data_nodes["my_datanode2"].path == "/data2/csv"
+    assert Config.data_nodes["my_datanode3"].path == "/data3/csv"
     assert Config.data_nodes["my_datanode"].id == "my_datanode"
     assert Config.data_nodes["my_datanode2"].id == "my_datanode2"
+    assert Config.data_nodes["my_datanode3"].id == "my_datanode3"
     assert Config.data_nodes["my_datanode"].validity_period == timedelta(1)
+    assert Config.data_nodes["my_datanode3"].source == "local"
 
     assert len(Config.tasks) == 2
     assert type(Config.tasks["my_task"]) == TaskConfig
@@ -188,20 +215,17 @@ def test_read_configuration_file():
     assert Config.tasks["my_task"].outputs[0].path == "/data2/csv"
     assert Config.tasks["my_task"].outputs[0].id == "my_datanode2"
 
-    assert len(Config.pipelines) == 2
-    assert type(Config.pipelines["my_pipeline"]) == PipelineConfig
-    assert Config.pipelines["my_pipeline"].id == "my_pipeline"
-    assert Config.pipelines["my_pipeline"].cron == "daily"
-    assert len(Config.pipelines["my_pipeline"].tasks) == 1
-    assert type(Config.pipelines["my_pipeline"].tasks[0]) == TaskConfig
-    assert Config.pipelines["my_pipeline"].tasks[0].id == "my_task"
-    assert Config.pipelines["my_pipeline"].tasks[0].description == "task description"
+    assert len(Config.pipelines) == 1
 
     assert len(Config.scenarios) == 2
     assert type(Config.scenarios["my_scenario"]) == ScenarioConfig
     assert Config.scenarios["my_scenario"].id == "my_scenario"
     assert Config.scenarios["my_scenario"].owner == "John Doe"
-    assert len(Config.scenarios["my_scenario"].pipelines) == 1
-    assert type(Config.scenarios["my_scenario"].pipelines[0]) == PipelineConfig
-    assert Config.scenarios["my_scenario"].pipelines[0].id == "my_pipeline"
-    assert Config.scenarios["my_scenario"].pipelines[0].cron == "daily"
+    assert len(Config.scenarios["my_scenario"].tasks) == 1
+    assert type(Config.scenarios["my_scenario"].tasks[0]) == TaskConfig
+    assert len(Config.scenarios["my_scenario"].additional_data_nodes) == 1
+    assert type(Config.scenarios["my_scenario"].additional_data_nodes[0]) == DataNodeConfig
+    assert Config.scenarios["my_scenario"].tasks[0].id == "my_task"
+    assert Config.scenarios["my_scenario"].tasks[0].description == "task description"
+    assert Config.scenarios["my_scenario"].additional_data_nodes[0].id == "my_datanode3"
+    assert Config.scenarios["my_scenario"].additional_data_nodes[0].source == "local"

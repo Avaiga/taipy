@@ -15,8 +15,9 @@ from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 
-from ..pipeline_config import PipelineConfig
+from ..data_node_config import DataNodeConfig
 from ..scenario_config import ScenarioConfig
+from ..task_config import TaskConfig
 
 
 class _ScenarioConfigChecker(_ConfigChecker):
@@ -30,17 +31,31 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 self._check_if_entity_property_key_used_is_predefined(scenario_config)
                 self._check_existing_config_id(scenario_config)
                 self._check_frequency(scenario_config_id, scenario_config)
-                self._check_pipelines(scenario_config_id, scenario_config)
+                self._check_task_configs(scenario_config_id, scenario_config)
+                self._check_addition_data_node_configs(scenario_config_id, scenario_config)
+                self._check_additional_dns_not_overlapping_tasks_dns(scenario_config_id, scenario_config)
+                self._check_tasks_in_sequences_exist_in_scenario_tasks(scenario_config_id, scenario_config)
                 self._check_comparators(scenario_config_id, scenario_config)
+
         return self._collector
 
-    def _check_pipelines(self, scenario_config_id: str, scenario_config: ScenarioConfig):
+    def _check_task_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
         self._check_children(
             ScenarioConfig,
             scenario_config_id,
-            scenario_config._PIPELINE_KEY,
-            scenario_config.pipeline_configs,
-            PipelineConfig,
+            scenario_config._TASKS_KEY,
+            scenario_config.tasks,
+            TaskConfig,
+        )
+
+    def _check_addition_data_node_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
+        self._check_children(
+            ScenarioConfig,
+            scenario_config_id,
+            scenario_config._ADDITIONAL_DATA_NODES_KEY,
+            scenario_config.additional_data_nodes,
+            DataNodeConfig,
+            can_be_empty=True,
         )
 
     def _check_frequency(self, scenario_config_id: str, scenario_config: ScenarioConfig):
@@ -77,3 +92,37 @@ class _ScenarioConfigChecker(_ConfigChecker):
                             f"The value of `{data_node_id}` in {ScenarioConfig._COMPARATOR_KEY} field of ScenarioConfig"
                             f" `{scenario_config_id}` must be populated with a list of Callable values.",
                         )
+
+    def _check_additional_dns_not_overlapping_tasks_dns(self, scenario_config_id: str, scenario_config: ScenarioConfig):
+        data_node_configs = set()
+        for task_config in scenario_config.task_configs:
+            if isinstance(task_config, TaskConfig):
+                input_dn_configs = task_config.input_configs if task_config.input_configs else []
+                output_dn_configs = task_config.output_configs if task_config.output_configs else []
+                data_node_configs.update({*input_dn_configs, *output_dn_configs})
+
+        for additional_data_node_config in scenario_config.additional_data_node_configs:
+            if additional_data_node_config in data_node_configs:
+                self._warning(
+                    ScenarioConfig._ADDITIONAL_DATA_NODES_KEY,
+                    scenario_config.additional_data_node_configs,
+                    f"The additional data node `{additional_data_node_config.id}` in"
+                    f" {ScenarioConfig._ADDITIONAL_DATA_NODES_KEY} field of ScenarioConfig"
+                    f" `{scenario_config_id}` has already existed as an input or output data node of"
+                    f" ScenarioConfig `{scenario_config_id}` tasks.",
+                )
+
+    def _check_tasks_in_sequences_exist_in_scenario_tasks(
+        self, scenario_config_id: str, scenario_config: ScenarioConfig
+    ):
+        scenario_tasks = scenario_config.tasks
+        for sequence in scenario_config.sequences.values():
+            for task in sequence:
+                if task not in scenario_tasks:
+                    self._error(
+                        ScenarioConfig._SEQUENCES_KEY,
+                        scenario_config.sequences,
+                        f"The task `{task.id}` in {ScenarioConfig._SEQUENCES_KEY} field of ScenarioConfig"
+                        f" `{scenario_config_id}` must exist in {ScenarioConfig._TASKS_KEY} field of ScenarioConfig"
+                        f" `{scenario_config_id}`.",
+                    )

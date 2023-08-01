@@ -91,18 +91,25 @@ def config_test_scenario():
         decoder=CustomDecoder,
     )
 
+    test_pickle_dn_cfg = Config.configure_pickle_data_node(
+        id="test_pickle_dn",
+        path="./test.p",
+        scope=Scope.SCENARIO,
+        validity_period=datetime.timedelta(1),
+    )
+
     test_task_cfg = Config.configure_task(
         id="test_task", input=test_csv_dn_cfg, function=multiply, output=test_json_dn_cfg
     )
 
-    test_pipeline_cfg = Config.configure_pipeline(id="test_pipeline", task_configs=[test_task_cfg])
-
     test_scenario_cfg = Config.configure_scenario(
         id="test_scenario",
-        pipeline_configs=[test_pipeline_cfg],
+        task_configs=[test_task_cfg],
+        additional_data_node_configs=[test_pickle_dn_cfg],
         comparators={test_json_dn_cfg.id: compare_function},
         frequency=Frequency.DAILY,
     )
+    test_scenario_cfg.add_sequences({"sequence1": [test_task_cfg]})
 
     Config.add_migration_function("1.0", test_csv_dn_cfg, migrate_csv_path)
 
@@ -122,6 +129,372 @@ root_folder = "./taipy/"
 storage_folder = ".data/"
 repository_type = "filesystem"
 read_entity_retry = "0:int"
+mode = "development"
+version_number = ""
+force = "False:bool"
+clean_entities = "False:bool"
+
+[DATA_NODE.default]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+
+[DATA_NODE.test_csv_dn]
+storage_type = "csv"
+scope = "GLOBAL:SCOPE"
+validity_period = "1d0h0m0s:timedelta"
+path = "./test.csv"
+exposed_type = "tests.core.config.test_config_serialization.CustomClass:class"
+has_header = "True:bool"
+
+[DATA_NODE.test_json_dn]
+storage_type = "json"
+scope = "SCENARIO:SCOPE"
+default_path = "./test.json"
+encoder = "tests.core.config.test_config_serialization.CustomEncoder:class"
+decoder = "tests.core.config.test_config_serialization.CustomDecoder:class"
+
+[DATA_NODE.test_pickle_dn]
+storage_type = "pickle"
+scope = "SCENARIO:SCOPE"
+validity_period = "1d0h0m0s:timedelta"
+path = "./test.p"
+
+[TASK.default]
+inputs = []
+outputs = []
+skippable = "False:bool"
+
+[TASK.test_task]
+function = "tests.core.config.test_config_serialization.multiply:function"
+inputs = [ "test_csv_dn:SECTION",]
+outputs = [ "test_json_dn:SECTION",]
+skippable = "False:bool"
+
+[PIPELINE.default]
+tasks = []
+
+[SCENARIO.default]
+tasks = []
+additional_data_nodes = []
+
+[SCENARIO.test_scenario]
+tasks = [ "test_task:SECTION",]
+additional_data_nodes = [ "test_pickle_dn:SECTION",]
+frequency = "DAILY:FREQUENCY"
+
+[VERSION_MIGRATION.migration_fcts."1.0"]
+test_csv_dn = "tests.core.config.test_config_serialization.migrate_csv_path:function"
+
+[SCENARIO.default.comparators]
+
+[SCENARIO.default.sequences]
+
+[SCENARIO.test_scenario.comparators]
+test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:function",]
+
+[SCENARIO.test_scenario.sequences]
+sequence1 = [ "test_task:SECTION",]
+""".strip()
+
+    config_test_scenario()
+
+    tf = NamedTemporaryFile()
+    Config.backup(tf.filename)
+    actual_config = tf.read().strip()
+    assert actual_config == expected_toml_config
+
+    Config.load(tf.filename)
+    tf2 = NamedTemporaryFile()
+    Config.backup(tf2.filename)
+
+    actual_config_2 = tf2.read().strip()
+    assert actual_config_2 == expected_toml_config
+
+    assert Config.unique_sections is not None
+    assert len(Config.unique_sections) == 3
+
+    assert Config.unique_sections[JobConfig.name].mode == "development"
+    assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1
+
+    assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
+
+    assert Config.sections is not None
+    assert len(Config.sections) == 4
+
+    assert Config.sections[DataNodeConfig.name] is not None
+    assert len(Config.sections[DataNodeConfig.name]) == 4
+    assert Config.sections[DataNodeConfig.name]["default"] is not None
+    assert Config.sections[DataNodeConfig.name]["default"].storage_type == "pickle"
+    assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].storage_type == "csv"
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].scope == Scope.GLOBAL
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].validity_period == datetime.timedelta(1)
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].storage_type == "json"
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].storage_type == "pickle"
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].validity_period == datetime.timedelta(1)
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].path == "./test.p"
+
+    assert Config.sections[TaskConfig.name] is not None
+    assert len(Config.sections[TaskConfig.name]) == 2
+    assert Config.sections[TaskConfig.name]["default"] is not None
+    assert Config.sections[TaskConfig.name]["default"].inputs == []
+    assert Config.sections[TaskConfig.name]["default"].outputs == []
+    assert Config.sections[TaskConfig.name]["default"].function is None
+    assert not Config.sections[TaskConfig.name]["default"].skippable
+    assert [inp.id for inp in Config.sections[TaskConfig.name]["test_task"].inputs] == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id
+    ]
+    assert [outp.id for outp in Config.sections[TaskConfig.name]["test_task"].outputs] == [
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id
+    ]
+    assert Config.sections[TaskConfig.name]["test_task"].function == multiply
+    assert Config.sections[TaskConfig.name]["test_task"].function == multiply
+
+    assert Config.sections[PipelineConfig.name] is not None
+    assert len(Config.sections[PipelineConfig.name]) == 1
+    assert Config.sections[PipelineConfig.name]["default"] is not None
+    assert Config.sections[PipelineConfig.name]["default"].tasks == []
+
+    assert Config.sections[ScenarioConfig.name] is not None
+    assert len(Config.sections[ScenarioConfig.name]) == 2
+    assert Config.sections[ScenarioConfig.name]["default"] is not None
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == []
+    assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
+        Config.sections[TaskConfig.name]["test_task"].id
+    ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == [Config.sections[DataNodeConfig.name]["test_pickle_dn"].id]
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
+    ]
+    assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
+        "test_json_dn": [compare_function]
+    }
+
+
+def test_read_write_json_configuration_file():
+    expected_json_config = """
+{
+"TAIPY": {},
+"JOB": {
+"mode": "development",
+"max_nb_of_workers": "1:int"
+},
+"CORE": {
+"root_folder": "./taipy/",
+"storage_folder": ".data/",
+"repository_type": "filesystem",
+"read_entity_retry": "0:int",
+"mode": "development",
+"version_number": "",
+"force": "False:bool",
+"clean_entities": "False:bool"
+},
+"VERSION_MIGRATION": {
+"migration_fcts": {
+"1.0": {
+"test_csv_dn": "tests.core.config.test_config_serialization.migrate_csv_path:function"
+}
+}
+},
+"DATA_NODE": {
+"default": {
+"storage_type": "pickle",
+"scope": "SCENARIO:SCOPE"
+},
+"test_csv_dn": {
+"storage_type": "csv",
+"scope": "GLOBAL:SCOPE",
+"validity_period": "1d0h0m0s:timedelta",
+"path": "./test.csv",
+"exposed_type": "tests.core.config.test_config_serialization.CustomClass:class",
+"has_header": "True:bool"
+},
+"test_json_dn": {
+"storage_type": "json",
+"scope": "SCENARIO:SCOPE",
+"default_path": "./test.json",
+"encoder": "tests.core.config.test_config_serialization.CustomEncoder:class",
+"decoder": "tests.core.config.test_config_serialization.CustomDecoder:class"
+},
+"test_pickle_dn": {
+"storage_type": "pickle",
+"scope": "SCENARIO:SCOPE",
+"validity_period": "1d0h0m0s:timedelta",
+"path": "./test.p"
+}
+},
+"TASK": {
+"default": {
+"function": null,
+"inputs": [],
+"outputs": [],
+"skippable": "False:bool"
+},
+"test_task": {
+"function": "tests.core.config.test_config_serialization.multiply:function",
+"inputs": [
+"test_csv_dn:SECTION"
+],
+"outputs": [
+"test_json_dn:SECTION"
+],
+"skippable": "False:bool"
+}
+},
+"PIPELINE": {
+"default": {
+"tasks": []
+}
+},
+"SCENARIO": {
+"default": {
+"comparators": {},
+"tasks": [],
+"additional_data_nodes": [],
+"frequency": null,
+"sequences": {}
+},
+"test_scenario": {
+"comparators": {
+"test_json_dn": [
+"tests.core.config.test_config_serialization.compare_function:function"
+]
+},
+"tasks": [
+"test_task:SECTION"
+],
+"additional_data_nodes": [
+"test_pickle_dn:SECTION"
+],
+"frequency": "DAILY:FREQUENCY",
+"sequences": {
+"sequence1": [
+"test_task:SECTION"
+]
+}
+}
+}
+}
+    """.strip()
+
+    Config._serializer = _JsonSerializer()
+    config_test_scenario()
+
+    tf = NamedTemporaryFile()
+    Config.backup(tf.filename)
+    actual_config = tf.read().strip()
+    assert actual_config == expected_json_config
+
+    Config.load(tf.filename)
+    tf2 = NamedTemporaryFile()
+    Config.backup(tf2.filename)
+
+    actual_config_2 = tf2.read().strip()
+    assert actual_config_2 == expected_json_config
+
+    assert Config.unique_sections is not None
+    assert len(Config.unique_sections) == 3
+
+    assert Config.unique_sections[JobConfig.name].mode == "development"
+    assert Config.unique_sections[JobConfig.name].max_nb_of_workers == 1
+
+    assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
+
+    assert Config.sections is not None
+    assert len(Config.sections) == 4
+
+    assert Config.sections[DataNodeConfig.name] is not None
+    assert len(Config.sections[DataNodeConfig.name]) == 4
+    assert Config.sections[DataNodeConfig.name]["default"] is not None
+    assert Config.sections[DataNodeConfig.name]["default"].storage_type == "pickle"
+    assert Config.sections[DataNodeConfig.name]["default"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].storage_type == "csv"
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].scope == Scope.GLOBAL
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].validity_period == datetime.timedelta(1)
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].storage_type == "json"
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].storage_type == "pickle"
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].scope == Scope.SCENARIO
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].validity_period == datetime.timedelta(1)
+    assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].path == "./test.p"
+
+    assert Config.sections[TaskConfig.name] is not None
+    assert len(Config.sections[TaskConfig.name]) == 2
+    assert Config.sections[TaskConfig.name]["default"] is not None
+    assert Config.sections[TaskConfig.name]["default"].inputs == []
+    assert Config.sections[TaskConfig.name]["default"].outputs == []
+    assert Config.sections[TaskConfig.name]["default"].function is None
+    assert [inp.id for inp in Config.sections[TaskConfig.name]["test_task"].inputs] == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id
+    ]
+    assert [outp.id for outp in Config.sections[TaskConfig.name]["test_task"].outputs] == [
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id
+    ]
+    assert Config.sections[TaskConfig.name]["test_task"].function == multiply
+
+    assert Config.sections[PipelineConfig.name] is not None
+    assert len(Config.sections[PipelineConfig.name]) == 1
+    assert Config.sections[PipelineConfig.name]["default"] is not None
+    assert Config.sections[PipelineConfig.name]["default"].tasks == []
+
+    assert Config.sections[ScenarioConfig.name] is not None
+    assert len(Config.sections[ScenarioConfig.name]) == 2
+    assert Config.sections[ScenarioConfig.name]["default"] is not None
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == []
+    assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
+        Config.sections[TaskConfig.name]["test_task"].id
+    ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == [Config.sections[DataNodeConfig.name]["test_pickle_dn"].id]
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
+    ]
+    assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
+        "test_json_dn": [compare_function]
+    }
+
+
+def test_read_write_toml_configuration_file_migrate_pipeline_in_scenario():
+    old_toml_config = """
+[TAIPY]
+
+[JOB]
+mode = "development"
+max_nb_of_workers = "1:int"
+
+[CORE]
+root_folder = "./taipy/"
+storage_folder = ".data/"
+repository_type = "filesystem"
 mode = "development"
 version_number = ""
 force = "False:bool"
@@ -182,16 +555,9 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     config_test_scenario()
 
     tf = NamedTemporaryFile()
-    Config.backup(tf.filename)
-    actual_config = tf.read().strip()
-    assert actual_config == expected_toml_config
-
-    Config.load(tf.filename)
-    tf2 = NamedTemporaryFile()
-    Config.backup(tf2.filename)
-
-    actual_config_2 = tf2.read().strip()
-    assert actual_config_2 == expected_toml_config
+    with open(tf.filename, "w") as fd:
+        fd.writelines(old_toml_config)
+    Config.restore(tf.filename)
 
     assert Config.unique_sections is not None
     assert len(Config.unique_sections) == 3
@@ -256,18 +622,29 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].pipelines == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == []
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
-    assert [pipeline.id for pipeline in Config.sections[ScenarioConfig.name]["test_scenario"].pipelines] == [
-        Config.sections[PipelineConfig.name]["test_pipeline"].id
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
+        Config.sections[TaskConfig.name]["test_task"].id
     ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == []
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
+    ]
+
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
     }
 
 
-def test_read_write_json_configuration_file():
-    expected_json_config = """
+def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
+    old_json_config = """
 {
 "TAIPY": {},
 "JOB": {
@@ -365,16 +742,9 @@ def test_read_write_json_configuration_file():
     config_test_scenario()
 
     tf = NamedTemporaryFile()
-    Config.backup(tf.filename)
-    actual_config = tf.read().strip()
-    assert actual_config == expected_json_config
-
-    Config.load(tf.filename)
-    tf2 = NamedTemporaryFile()
-    Config.backup(tf2.filename)
-
-    actual_config_2 = tf2.read().strip()
-    assert actual_config_2 == expected_json_config
+    with open(tf.filename, "w") as fd:
+        fd.writelines(old_json_config)
+    Config.restore(tf.filename)
 
     assert Config.unique_sections is not None
     assert len(Config.unique_sections) == 3
@@ -437,10 +807,20 @@ def test_read_write_json_configuration_file():
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
-    assert Config.sections[ScenarioConfig.name]["default"].pipelines == []
+    assert Config.sections[ScenarioConfig.name]["default"].tasks == []
+    assert Config.sections[ScenarioConfig.name]["default"].additional_data_nodes == []
+    assert Config.sections[ScenarioConfig.name]["default"].data_nodes == []
     assert len(Config.sections[ScenarioConfig.name]["default"].comparators) == 0
-    assert [pipeline.id for pipeline in Config.sections[ScenarioConfig.name]["test_scenario"].pipelines] == [
-        Config.sections[PipelineConfig.name]["test_pipeline"].id
+    assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
+        Config.sections[TaskConfig.name]["test_task"].id
+    ]
+    assert [
+        additional_data_node.id
+        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
+    ] == []
+    assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
+        Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
+        Config.sections[DataNodeConfig.name]["test_json_dn"].id,
     ]
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]

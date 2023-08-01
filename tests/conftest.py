@@ -210,8 +210,9 @@ def current_datetime():
 def scenario(cycle):
     return Scenario(
         "sc",
-        [],
+        set(),
         {},
+        set(),
         ScenarioId("sc_id"),
         current_time,
         is_primary=False,
@@ -257,7 +258,8 @@ def scenario_model(cycle):
     return _ScenarioModel(
         ScenarioId("sc_id"),
         "sc",
-        [],
+        set(),
+        set(),
         {},
         creation_date=current_time.isoformat(),
         primary_scenario=False,
@@ -416,7 +418,6 @@ def init_config():
         [
             ("configure_scenario", ScenarioConfig._configure),
             ("set_default_scenario_configuration", ScenarioConfig._set_default_configuration),
-            ("configure_scenario_from_tasks", ScenarioConfig._configure_from_tasks),
         ],
     )
     _inject_section(

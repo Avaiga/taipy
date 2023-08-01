@@ -76,9 +76,13 @@ def test_get_label_complex_case():
     dn5_cfg = Config.configure_data_node("dn5", scope=Scope.SCENARIO)
     tA_cfg = Config.configure_task("t_A_C", mult, [dn1_cfg, dn2_cfg], dn3_cfg)
     tB_cfg = Config.configure_task("t_B_S", mult, [dn3_cfg, dn4_cfg], dn5_cfg)
-    pipeline_C_cfg = Config.configure_pipeline("pipeline_C", [tA_cfg])
-    pipeline_S_cfg = Config.configure_pipeline("pipeline_S", [tA_cfg, tB_cfg])
-    scenario_cfg = Config.configure_scenario("scenario_cfg", [pipeline_C_cfg, pipeline_S_cfg], Frequency.DAILY)
+    scenario_cfg = Config.configure_scenario("scenario_cfg", [tA_cfg, tB_cfg], [], Frequency.DAILY)
+    scenario_cfg.add_sequences(
+        {
+            "pipeline_C": [tA_cfg],
+            "pipeline_S": [tA_cfg, tB_cfg],
+        }
+    )
 
     scenario = taipy.create_scenario(scenario_cfg, name="My Name")
     cycle = scenario.cycle

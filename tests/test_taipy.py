@@ -382,8 +382,7 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         Core().run()
 
@@ -391,7 +390,7 @@ class TestTaipy:
         tp.submit(scenario_1)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            Config.configure_scenario("block_scenario", pipeline_cfg_1)
+            Config.configure_scenario("block_scenario", set([task_cfg_1]))
 
     def test_block_config_when_core_is_running_in_standalone_mode(self):
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
@@ -399,8 +398,7 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         Core().run()
 
@@ -408,7 +406,7 @@ class TestTaipy:
         tp.submit(scenario_1, wait=True)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            Config.configure_scenario("block_scenario", pipeline_cfg_1)
+            Config.configure_scenario("block_scenario", set([task_cfg_1]))
 
     def test_get_data_node(self, data_node):
         with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as mck:
@@ -466,14 +464,12 @@ class TestTaipy:
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
-        pipeline_cfg_1 = Config.configure_pipeline("p1", task_cfg_1)
-        scenario_cfg_1 = Config.configure_scenario("s1", pipeline_cfg_1, Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
         input_cfg_2 = Config.configure_data_node(id="i2", storage_type="pickle", default_data=2, scope=Scope.SCENARIO)
         output_cfg_2 = Config.configure_data_node(id="o2", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_2 = Config.configure_task("t2", print, input_cfg_2, output_cfg_2)
-        pipeline_cfg_2 = Config.configure_pipeline("p2", task_cfg_2)
-        scenario_cfg_2 = Config.configure_scenario("s2", pipeline_cfg_2, Frequency.DAILY)
+        scenario_cfg_2 = Config.configure_scenario("s2", [task_cfg_2], [], Frequency.DAILY)
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
         job_1 = tp.submit(scenario_1)[0]
@@ -484,7 +480,6 @@ class TestTaipy:
             [f"{scenario_1.i1.id}.json", f"{scenario_1.o1.id}.json"]
         )
         assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_1.t1.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/pipelines")) == sorted([f"{scenario_1.p1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
@@ -498,7 +493,6 @@ class TestTaipy:
             [f"{scenario_2.i2.id}.json", f"{scenario_2.o2.id}.json"]
         )
         assert sorted(os.listdir("./tmp/exp_scenario_2/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_2/pipelines")) == sorted([f"{scenario_2.p2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/scenarios")) == sorted([f"{scenario_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
@@ -507,7 +501,6 @@ class TestTaipy:
         tp.export_scenario(scenario_2.id, "./tmp/exp_scenario_1")
         # Should have the files as scenario 1 only
         assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
-        assert sorted(os.listdir("./tmp/exp_scenario_1/pipelines")) == sorted([f"{scenario_2.p2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/jobs")) == sorted([f"{job_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
@@ -527,52 +520,42 @@ class TestTaipy:
         dn_config_1 = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node(id="d2", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_3 = Config.configure_data_node(id="d3", storage_type="in_memory", scope=Scope.SCENARIO)
+        dn_config_4 = Config.configure_data_node(id="d4", storage_type="in_memory", scope=Scope.SCENARIO)
         task_config_1 = Config.configure_task("t1", print, dn_config_1, dn_config_2)
         task_config_2 = Config.configure_task("t2", print, dn_config_2, dn_config_3)
-        pipeline_config_1 = Config.configure_pipeline("p1", task_config_1)
-        pipeline_config_2 = Config.configure_pipeline("p2", [task_config_1, task_config_2])
-        scenario_cfg_1 = Config.configure_scenario("s1", [pipeline_config_1, pipeline_config_2], Frequency.DAILY)
+        scenario_cfg_1 = Config.configure_scenario("s1", [task_config_1, task_config_2], [dn_config_4], Frequency.DAILY)
 
         scenario = tp.create_scenario(scenario_cfg_1)
-        pipelines = scenario.pipelines
-        tasks = {}
-        for pipeline in pipelines.values():
-            tasks.update(pipeline.tasks)
+        tasks = scenario.tasks
 
         expected_parents = {
-            "scenarios": {scenario},
-            "pipelines": {pipelines["p1"], pipelines["p2"]},
-            "tasks": {tasks["t1"]},
+            "scenario": {scenario},
+            "task": {tasks["t1"]},
         }
-        parents = tp.get_parents(scenario.pipelines["p1"].tasks["t1"].data_nodes["d1"])
+        parents = tp.get_parents(scenario.tasks["t1"].data_nodes["d1"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {
-            "scenarios": {scenario},
-            "pipelines": {pipelines["p1"], pipelines["p2"]},
-            "tasks": {tasks["t1"], tasks["t2"]},
+            "scenario": {scenario},
+            "task": {tasks["t1"], tasks["t2"]},
         }
-        parents = tp.get_parents(scenario.pipelines["p1"].tasks["t1"].data_nodes["d2"])
+        parents = tp.get_parents(scenario.tasks["t1"].data_nodes["d2"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p2"]}, "tasks": {tasks["t2"]}}
-        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t2"].data_nodes["d3"])
+        expected_parents = {"scenario": {scenario}, "task": {tasks["t2"]}}
+        parents = tp.get_parents(scenario.tasks["t2"].data_nodes["d3"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p1"], pipelines["p2"]}}
-        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t1"])
+        expected_parents = {"scenario": {scenario}}
+        parents = tp.get_parents(scenario.tasks["t1"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p2"]}}
-        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t2"])
+        expected_parents = {"scenario": {scenario}}
+        parents = tp.get_parents(scenario.tasks["t2"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
-        expected_parents = {"scenarios": {scenario}}
-        parents = tp.get_parents(scenario.pipelines["p1"])
-        assert_result_parents_and_expected_parents(parents, expected_parents)
-
-        expected_parents = {"scenarios": {scenario}}
-        parents = tp.get_parents(scenario.pipelines["p2"])
+        expected_parents = {"scenario": {scenario}}
+        parents = tp.get_parents(scenario.additional_data_nodes["d4"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
 
         expected_parents = {}
@@ -586,13 +569,14 @@ class TestTaipy:
     def test_get_cycles_scenarios(self):
         scenario_cfg_1 = Config.configure_scenario(
             "s1",
-            [],
+            set(),
+            set(),
             Frequency.DAILY,
         )
-        scenario_cfg_2 = Config.configure_scenario("s2", [], Frequency.WEEKLY)
-        scenario_cfg_3 = Config.configure_scenario("s3", [], Frequency.MONTHLY)
-        scenario_cfg_4 = Config.configure_scenario("s4", [], Frequency.YEARLY)
-        scenario_cfg_5 = Config.configure_scenario("s5", [], None)
+        scenario_cfg_2 = Config.configure_scenario("s2", set(), set(), Frequency.WEEKLY)
+        scenario_cfg_3 = Config.configure_scenario("s3", set(), set(), Frequency.MONTHLY)
+        scenario_cfg_4 = Config.configure_scenario("s4", set(), set(), Frequency.YEARLY)
+        scenario_cfg_5 = Config.configure_scenario("s5", set(), set(), None)
 
         now = datetime.datetime.now()
         scenario_1_1 = tp.create_scenario(scenario_cfg_1, now)
