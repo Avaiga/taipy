@@ -28,6 +28,7 @@ from src.taipy.core.exceptions.exceptions import (
     InvalidExposedType,
     NoData,
     NonExistingExcelSheet,
+    SheetNameLengthMismatch,
 )
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -264,42 +265,116 @@ class TestExcelDataNode:
         assert len(excel_dn.read()) == 0
 
     @pytest.mark.parametrize(
-        "content,columns,sheet_name",
+        "content,sheet_name",
         [
-            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], None, "sheet_name"),
-            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"], "sheet_name"),
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], "sheet_name"),
+            ([[11, 22, 33], [44, 55, 66]], ["sheet_name"]),
         ],
     )
-    def test_write_with_sheet_name(self, excel_file_with_sheet_name, default_data_frame, content, columns, sheet_name):
-        if sheet_name:
-            excel_dn = ExcelDataNode(
-                "foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name, "sheet_name": sheet_name}
-            )
+    def test_write_with_sheet_name(self, excel_file_with_sheet_name, default_data_frame, content, sheet_name):
+        excel_dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name, "sheet_name": sheet_name}
+        )
+        df = pd.DataFrame(content)
+
+        if isinstance(sheet_name, str):
+            assert np.array_equal(excel_dn.read().values, default_data_frame.values)
         else:
-            excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name})
+            assert np.array_equal(excel_dn.read()["sheet_name"].values, default_data_frame.values)
 
-        assert np.array_equal(excel_dn.read().values, default_data_frame.values)
-        if not columns:
-            excel_dn.write(content)
-            df = pd.DataFrame(content)
+        excel_dn.write(content)
+        if isinstance(sheet_name, str):
+            assert np.array_equal(excel_dn.read().values, df.values)
         else:
-            excel_dn.write_with_column_names(content, columns)
-            df = pd.DataFrame(content, columns=columns)
-
-        # breakpoint()
-
-        assert np.array_equal(excel_dn.read().values, df.values)
+            assert np.array_equal(excel_dn.read()["sheet_name"].values, df.values)
 
         sheet_names = pd.ExcelFile(excel_file_with_sheet_name).sheet_names
-        if sheet_name:
-            expected_sheet_name = sheet_name[0] if isinstance(sheet_name, list) else sheet_name
-        else:
-            expected_sheet_name = "Sheet1"
+        expected_sheet_name = sheet_name[0] if isinstance(sheet_name, list) else sheet_name
 
         assert sheet_names[0] == expected_sheet_name
 
         excel_dn.write(None)
-        assert len(excel_dn.read()) == 0
+        if isinstance(sheet_name, str):
+            assert len(excel_dn.read()) == 0
+        else:
+            assert len(excel_dn.read()) == 1
+
+    @pytest.mark.parametrize(
+        "content,sheet_name",
+        [
+            ([[11, 22, 33], [44, 55, 66]], ["sheet_name_1", "sheet_name_2"]),
+        ],
+    )
+    def test_raise_write_with_sheet_name_length_mismatch(
+        self, excel_file_with_sheet_name, default_data_frame, content, sheet_name
+    ):
+        excel_dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name, "sheet_name": sheet_name}
+        )
+        with pytest.raises(SheetNameLengthMismatch):
+            excel_dn.write(content)
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+        ],
+    )
+    def test_write_without_sheet_name(self, excel_file_with_sheet_name, default_data_frame, content):
+        excel_dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name})
+        default_data_frame = {"sheet_name": default_data_frame}
+        df = {"Sheet1": pd.DataFrame(content)}
+
+        assert np.array_equal(excel_dn.read()["sheet_name"].values, default_data_frame["sheet_name"].values)
+
+        excel_dn.write(content)
+        assert np.array_equal(excel_dn.read()["Sheet1"].values, df["Sheet1"].values)
+
+        sheet_names = pd.ExcelFile(excel_file_with_sheet_name).sheet_names
+        expected_sheet_name = "Sheet1"
+
+        assert sheet_names[0] == expected_sheet_name
+
+        excel_dn.write(None)
+        assert len(excel_dn.read()) == 1
+
+    @pytest.mark.parametrize(
+        "content,columns,sheet_name",
+        [
+            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"], "sheet_name"),
+            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"], ["sheet_name"]),
+        ],
+    )
+    def test_write_with_column_and_sheet_name(
+        self, excel_file_with_sheet_name, default_data_frame, content, columns, sheet_name
+    ):
+        excel_dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file_with_sheet_name, "sheet_name": sheet_name}
+        )
+        df = pd.DataFrame(content)
+
+        if isinstance(sheet_name, str):
+            assert np.array_equal(excel_dn.read().values, default_data_frame.values)
+        else:
+            assert np.array_equal(excel_dn.read()["sheet_name"].values, default_data_frame.values)
+
+        excel_dn.write_with_column_names(content, columns)
+
+        if isinstance(sheet_name, str):
+            assert np.array_equal(excel_dn.read().values, df.values)
+        else:
+            assert np.array_equal(excel_dn.read()["sheet_name"].values, df.values)
+
+        sheet_names = pd.ExcelFile(excel_file_with_sheet_name).sheet_names
+        expected_sheet_name = sheet_name[0] if isinstance(sheet_name, list) else sheet_name
+
+        assert sheet_names[0] == expected_sheet_name
+
+        excel_dn.write(None)
+        if isinstance(sheet_name, str):
+            assert len(excel_dn.read()) == 0
+        else:
+            assert len(excel_dn.read()) == 1
 
     @pytest.mark.parametrize(
         "content,columns",

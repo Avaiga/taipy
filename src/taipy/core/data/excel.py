@@ -25,7 +25,7 @@ from taipy.config.common.scope import Scope
 from .._backup._backup import _replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..exceptions.exceptions import ExposedTypeLengthMismatch, NonExistingExcelSheet
+from ..exceptions.exceptions import ExposedTypeLengthMismatch, NonExistingExcelSheet, SheetNameLengthMismatch
 from ..job.job_id import JobId
 from ._abstract_file import _AbstractFileDataNode
 from ._abstract_tabular import _AbstractTabularDataNode
@@ -287,29 +287,41 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         except pd.errors.EmptyDataError:
             return modin_pd.DataFrame()
 
-    def __write_excel_with_sheet_name(self, write_excel_fct, *args, **kwargs):
+    def __write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
         sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
         if sheet_name:
-            sheet_name = sheet_name if isinstance(sheet_name, str) else sheet_name[0]
+            if not isinstance(sheet_name, str):
+                if len(sheet_name) > 1:
+                    raise SheetNameLengthMismatch
+                else:
+                    sheet_name = sheet_name[0]
             write_excel_fct(*args, **kwargs, sheet_name=sheet_name)
         else:
             write_excel_fct(*args, **kwargs)
+
+    def __write_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
+        with pd.ExcelWriter(self._path) as writer:
+            # Each key stands for a sheet name
+            for key in data.keys():
+                if isinstance(data[key], np.ndarray):
+                    df = pd.DataFrame(data[key])
+                else:
+                    df = data[key]
+
+                if columns:
+                    data[key].columns = columns
+
+                df.to_excel(writer, key, index=False)
 
     def _write(self, data: Any):
         if isinstance(data, Dict) and all(
             [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
         ):
-            with pd.ExcelWriter(self._path) as writer:
-                # Write to excel file with multiple sheets (each key stands for a sheet name)
-                for key in data.keys():
-                    if isinstance(data[key], np.ndarray):
-                        pd.DataFrame(data[key]).to_excel(writer, key, index=False)
-                    else:
-                        data[key].to_excel(writer, key, index=False)
+            self.__write_excel_with_multiple_sheets(data)
         elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-            self.__write_excel_with_sheet_name(data.to_excel, self._path, index=False)
+            self.__write_excel_with_single_sheet(data.to_excel, self._path, index=False)
         else:
-            self.__write_excel_with_sheet_name(pd.DataFrame(data).to_excel, self._path, index=False)
+            self.__write_excel_with_single_sheet(pd.DataFrame(data).to_excel, self._path, index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a set of columns.
@@ -319,10 +331,13 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             columns (List[str]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        if not columns:
-            df = pd.DataFrame(data)
+        if isinstance(data, Dict) and all(
+            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
+        ):
+            self.__write_excel_with_multiple_sheets(data, columns=columns)
         else:
-            df = pd.DataFrame(data, columns=columns)
-
-        self.__write_excel_with_sheet_name(df.to_excel, self.path, index=False)
+            df = pd.DataFrame(data)
+            if columns:
+                df.columns = columns
+            self.__write_excel_with_single_sheet(df.to_excel, self.path, index=False)
         self._track_edit(timestamp=datetime.now(), job_id=job_id)
