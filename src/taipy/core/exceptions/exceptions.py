@@ -255,10 +255,6 @@ class ConflictedConfigurationError(Exception):
     """Conflicts have been detected between the current and previous Configurations."""
 
 
-class _SuspiciousFileOperation(Exception):
-    pass
-
-
 class InvalidEventAttributeName(Exception):
     """
     Raised if the attribute doesn't exist or an attribute name is provided
@@ -268,3 +264,11 @@ class InvalidEventAttributeName(Exception):
 
 class InvalidEventOperation(Exception):
     """Raised when operation doesn't belong to the entity"""
+
+
+class FileCannotBeRead(Exception):
+    """Raised when a file cannot be read."""
+
+
+class _SuspiciousFileOperation(Exception):
+    pass

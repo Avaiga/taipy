@@ -59,7 +59,7 @@ class CoreSection(UniqueSection):
     _DEFAULT_REPOSITORY_PROPERTIES: Dict = dict()
 
     _READ_ENTITY_RETRY_KEY = "read_entity_retry"
-    _DEFAULT_READ_ENTITY_RETRY = 3
+    _DEFAULT_READ_ENTITY_RETRY = 1
 
     _MODE_KEY = "mode"
     _DEVELOPMENT_MODE = "development"

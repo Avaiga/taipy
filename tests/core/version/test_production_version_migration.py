@@ -15,7 +15,6 @@ from unittest.mock import patch
 from src.taipy.core import Core, taipy
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from tests.core.utils import assert_true_after_time
 
@@ -297,7 +296,7 @@ def submit_v2():
 
 
 def config_scenario_v1():
-    dn1 = Config.configure_pickle_data_node(id="d1", default_data=1, scope=Scope.GLOBAL)
+    dn1 = Config.configure_pickle_data_node(id="d1", default_data=1)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", twice, dn1, dn2)
     pipeline_cfg = Config.configure_pipeline("my_pipeline", task_cfg)
@@ -306,7 +305,7 @@ def config_scenario_v1():
 
 
 def config_scenario_v2():
-    dn1 = Config.configure_pickle_data_node(id="d1", default_data=2, scope=Scope.GLOBAL)
+    dn1 = Config.configure_pickle_data_node(id="d1", default_data=2)
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", triple, dn1, dn2)
     pipeline_cfg = Config.configure_pipeline("my_pipeline", task_cfg)
