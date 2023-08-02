@@ -40,8 +40,6 @@ class CoreSection(UniqueSection):
             [Versioning management](../../core/versioning/) documentation page for more details.
         force (bool): If True, force the application run even if there are some conflicts in the
             configuration.
-        clean_entities(bool): If True, remove all entities (from previous run) before running
-            the application.
         **properties (dict[str, any]): A dictionary of additional properties.
     """
 
@@ -73,9 +71,6 @@ class CoreSection(UniqueSection):
     _TAIPY_FORCE_KEY = "force"
     _DEFAULT_TAIPY_FORCE = False
 
-    _CLEAN_ENTITIES_KEY = "clean_entities"
-    _DEFAULT_CLEAN_ENTITIES = False
-
     def __init__(
         self,
         root_folder: Optional[str] = None,
@@ -86,7 +81,6 @@ class CoreSection(UniqueSection):
         mode: Optional[str] = None,
         version_number: Optional[str] = None,
         force: Optional[bool] = None,
-        clean_entities: Optional[bool] = None,
         **properties,
     ):
         self._root_folder = root_folder
@@ -99,7 +93,6 @@ class CoreSection(UniqueSection):
         self.mode = mode or self._DEFAULT_MODE
         self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
         self.force = force or self._DEFAULT_TAIPY_FORCE
-        self.clean_entities = clean_entities or self._DEFAULT_CLEAN_ENTITIES
         super().__init__(**properties)
 
     def __copy__(self):
@@ -112,7 +105,6 @@ class CoreSection(UniqueSection):
             self.mode,
             self.version_number,
             self.force,
-            self.clean_entities,
             **copy(self._properties),
         )
 
@@ -176,7 +168,6 @@ class CoreSection(UniqueSection):
             cls._DEFAULT_MODE,
             cls._DEFAULT_VERSION_NUMBER,
             cls._DEFAULT_TAIPY_FORCE,
-            cls._DEFAULT_CLEAN_ENTITIES,
         )
 
     def _clean(self):
@@ -188,7 +179,6 @@ class CoreSection(UniqueSection):
         self.mode = self._DEFAULT_MODE
         self.version_number = self._DEFAULT_VERSION_NUMBER
         self.force = self._DEFAULT_TAIPY_FORCE
-        self.clean_entities = self._DEFAULT_CLEAN_ENTITIES
         self._properties.clear()
 
     def _to_dict(self):
@@ -209,8 +199,6 @@ class CoreSection(UniqueSection):
             as_dict[self._VERSION_NUMBER_KEY] = self.version_number
         if self.force is not None:
             as_dict[self._TAIPY_FORCE_KEY] = self.force
-        if self.clean_entities is not None:
-            as_dict[self._CLEAN_ENTITIES_KEY] = self.clean_entities
         as_dict.update(self._properties)
         return as_dict
 
@@ -224,7 +212,6 @@ class CoreSection(UniqueSection):
         mode = as_dict.pop(cls._MODE_KEY, None)
         version_nb = as_dict.pop(cls._VERSION_NUMBER_KEY, None)
         force = as_dict.pop(cls._TAIPY_FORCE_KEY, None)
-        clean_entities = as_dict.pop(cls._CLEAN_ENTITIES_KEY, None)
         return CoreSection(
             root_folder,
             storage_folder,
@@ -234,7 +221,6 @@ class CoreSection(UniqueSection):
             mode,
             version_nb,
             force,
-            clean_entities,
             **as_dict,
         )
 
@@ -272,10 +258,6 @@ class CoreSection(UniqueSection):
         if self.force != force:
             self.force = force
 
-        clean_entities = _tpl._replace_templates(as_dict.pop(self._CLEAN_ENTITIES_KEY, self.clean_entities))
-        if self.clean_entities != clean_entities:
-            self.clean_entities = clean_entities
-
         self._properties.update(as_dict)
 
     @staticmethod
@@ -288,7 +270,6 @@ class CoreSection(UniqueSection):
         mode: Optional[str] = None,
         version_number: Optional[str] = None,
         force: Optional[bool] = None,
-        clean_entities: Optional[bool] = None,
         **properties,
     ) -> "CoreSection":
         """Configure the Core service.
@@ -311,8 +292,6 @@ class CoreSection(UniqueSection):
                  In development mode, the version number is ignored.
             force (Optional[bool]): If True, Taipy will override a version even if the configuration
                 has changed and run the application.
-            clean_entities (Optional[bool]): If True, running a Taipy Core service will clean all current
-                version entities before running the application.
             **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
                 behavior of the `Core^` service.
         Returns:
@@ -327,7 +306,6 @@ class CoreSection(UniqueSection):
             mode=mode,
             version_number=version_number,
             force=force,
-            clean_entities=clean_entities,
             **properties,
         )
         Config._register(section)

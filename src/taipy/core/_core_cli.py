@@ -66,18 +66,6 @@ class _CoreCLI:
             help="Stop the application if any Config conflict exists.",
         )
 
-        clean_entities_group = core_parser.add_mutually_exclusive_group()
-        clean_entities_group.add_argument(
-            "--clean-entities",
-            action="store_true",
-            help="Clean all current version entities before running the application. Default to False.",
-        )
-        clean_entities_group.add_argument(
-            "--no-clean-entities",
-            action="store_true",
-            help="Keep all entities of the current experiment version.",
-        )
-
     @classmethod
     def parse_arguments(cls):
         args = _CLI._parse()
@@ -96,8 +84,4 @@ class _CoreCLI:
         elif args.no_taipy_force:
             as_dict[CoreSection._TAIPY_FORCE_KEY] = False
 
-        if args.clean_entities:
-            as_dict[CoreSection._CLEAN_ENTITIES_KEY] = True
-        elif args.no_clean_entities:
-            as_dict[CoreSection._CLEAN_ENTITIES_KEY] = False
         return as_dict

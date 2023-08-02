@@ -132,7 +132,6 @@ read_entity_retry = "0:int"
 mode = "development"
 version_number = ""
 force = "False:bool"
-clean_entities = "False:bool"
 
 [DATA_NODE.default]
 storage_type = "pickle"
@@ -302,8 +301,7 @@ def test_read_write_json_configuration_file():
 "read_entity_retry": "0:int",
 "mode": "development",
 "version_number": "",
-"force": "False:bool",
-"clean_entities": "False:bool"
+"force": "False:bool"
 },
 "VERSION_MIGRATION": {
 "migration_fcts": {
@@ -498,7 +496,6 @@ repository_type = "filesystem"
 mode = "development"
 version_number = ""
 force = "False:bool"
-clean_entities = "False:bool"
 
 [DATA_NODE.default]
 storage_type = "pickle"
@@ -658,8 +655,7 @@ def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
 "read_entity_retry": "0:int",
 "mode": "development",
 "version_number": "",
-"force": "False:bool",
-"clean_entities": "False:bool"
+"force": "False:bool"
 },
 "VERSION_MIGRATION": {
 "migration_fcts": {

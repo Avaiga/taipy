@@ -22,16 +22,14 @@ def test_core_section():
     assert Config.core.mode == "development"
     assert Config.core.version_number == ""
     assert not Config.core.force
-    assert not Config.core.clean_entities
     core.stop()
 
-    Config.configure_core(mode="experiment", version_number="test_num", force=True, clean_entities=True)
+    Config.configure_core(mode="experiment", version_number="test_num", force=True)
     core = Core()
     core.run()
     assert Config.core.mode == "experiment"
     assert Config.core.version_number == "test_num"
     assert Config.core.force
-    assert Config.core.clean_entities
     core.stop()
 
     toml_config = NamedTemporaryFile(
@@ -42,7 +40,6 @@ def test_core_section():
 mode = "production"
 version_number = "test_num_2"
 force = "true:bool"
-clean_entities = "false:bool"
         """
     )
     Config.load(toml_config.filename)
@@ -51,21 +48,19 @@ clean_entities = "false:bool"
     assert Config.core.mode == "production"
     assert Config.core.version_number == "test_num_2"
     assert Config.core.force
-    assert not Config.core.clean_entities
     core.stop()
 
-    with patch("sys.argv", ["prog", "--experiment", "test_num_3", "--no-taipy-force", "--clean-entities"]):
+    with patch("sys.argv", ["prog", "--experiment", "test_num_3", "--no-taipy-force"]):
         core = Core()
         core.run()
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == "test_num_3"
         assert not Config.core.force
-        assert Config.core.clean_entities
         core.stop()
 
 
 def test_clean_config():
-    core_config = Config.configure_core(mode="experiment", version_number="test_num", force=True, clean_entities=True)
+    core_config = Config.configure_core(mode="experiment", version_number="test_num", force=True)
 
     assert Config.core is core_config
 
@@ -77,5 +72,4 @@ def test_clean_config():
     assert core_config.mode == "development"
     assert core_config.version_number == ""
     assert core_config.force is False
-    assert core_config.clean_entities is False
     assert core_config.properties == {}

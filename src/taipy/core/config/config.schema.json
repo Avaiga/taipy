@@ -62,15 +62,6 @@
               "True:bool"
             ],
             "default": "False:bool"
-          },
-          "clean_entities": {
-            "description": "If True, remove all entities (from previous run) before running the application.",
-            "type": "string",
-            "enum": [
-              "False:bool",
-              "True:bool"
-            ],
-            "default": "False:bool"
           }
         }
       }
