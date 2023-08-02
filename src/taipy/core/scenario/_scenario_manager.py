@@ -127,12 +127,15 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             if config.additional_data_node_configs
             else {}
         )
-        pipelines = [
-            _PipelineManagerFactory._build_manager()._get_or_create(
-                PipelineConfig(p_config_id, task_configs), cycle.id if cycle else None, scenario_id
+        pipelines = {}
+        for sequence_name, sequence_task_configs in config.sequences.items():
+            task_config_ids = {sequence_task_config.id for sequence_task_config in sequence_task_configs}
+            pipelines[sequence_name] = _PipelineManagerFactory._build_manager()._get_or_create(
+                sequence_name,
+                [t for t in tasks if t.config_id in task_config_ids],
+                cycle.id if cycle else None,
+                scenario_id,
             )
-            for p_config_id, task_configs in config.sequences.items()
-        ]
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
@@ -161,9 +164,9 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             dn._parent_ids.update([scenario_id])
             _data_manager._set(dn)
 
-        for pipeline in pipelines:
+        for pipeline in pipelines.values():
             pipeline._parent_ids.update([scenario_id])
-        cls.__save_pipelines(pipelines)
+        cls.__save_pipelines(pipelines.values())
 
         cls._set(scenario)
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)

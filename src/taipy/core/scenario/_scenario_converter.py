@@ -42,9 +42,9 @@ class _ScenarioConverter(_AbstractConverter):
             tags=list(scenario._tags),
             version=scenario._version,
             cycle=scenario._cycle.id if scenario._cycle else None,
-            pipelines=[p.id if isinstance(p, Pipeline) else p for p in scenario._pipelines]
+            pipelines={p_name: p.id if isinstance(p, Pipeline) else p for p_name, p in scenario._pipelines.items()}
             if scenario._pipelines
-            else [],
+            else {},
         )
 
     @classmethod

@@ -16,7 +16,6 @@ def test_deprecated_properties():
     model = _PipelineModel.from_dict(
         {
             "id": "id",
-            "config_id": "config_id",
             "parent_id": "owner_id",
             "parent_ids": ["parent_id"],
             "properties": {},
@@ -32,7 +31,6 @@ def test_override_deprecated_properties():
     model = _PipelineModel.from_dict(
         {
             "id": "id",
-            "config_id": "config_id",
             "parent_id": "parent_id",
             "owner_id": "owner_id",
             "parent_ids": ["parent_id"],

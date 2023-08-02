@@ -218,15 +218,15 @@ def test_hard_delete_shared_entities(init_sql_repo):
     )
     scenario_config_1.add_sequences(
         {
-            "pipeline_config_1": [task_config_1, task_config_2],
-            "pipeline_config_2": [task_config_1, task_config_2],
-            "pipeline_config_3": [task_config_3],
+            "pipeline_1": [task_config_1, task_config_2],
+            "pipeline_2": [task_config_1, task_config_2],
+            "pipeline_3": [task_config_3],
         }
     )
     scenario_config_2 = Config.configure_scenario(
         "scenario_config_2", [task_config_2, task_config_3]
     )  # No Frequency so cycle attached to scenarios
-    scenario_config_2.add_sequences({"pipeline_config_3": [task_config_3]})
+    scenario_config_2.add_sequences({"pipeline_3": [task_config_3]})
 
     _OrchestratorFactory._build_dispatcher()
 
@@ -238,7 +238,7 @@ def test_hard_delete_shared_entities(init_sql_repo):
     scenario_3.submit()
 
     assert len(_ScenarioManager._get_all()) == 3
-    assert len(_PipelineManager._get_all()) == 6
+    assert len(_PipelineManager._get_all()) == 7
     assert len(_TaskManager._get_all()) == 7
     assert len(_DataManager._get_all()) == 8
     assert len(_JobManager._get_all()) == 8

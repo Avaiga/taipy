@@ -31,7 +31,6 @@ class _PipelineModel(_BaseModel):
         Column("id", String, primary_key=True),
         Column("owner_id", String),
         Column("parent_ids", JSON),
-        Column("config_id", String),
         Column("properties", JSON),
         Column("tasks", JSON),
         Column("subscribers", JSON),
@@ -40,7 +39,6 @@ class _PipelineModel(_BaseModel):
     id: PipelineId
     owner_id: Optional[str]
     parent_ids: List[str]
-    config_id: str
     properties: Dict[str, Any]
     tasks: List[TaskId]
     subscribers: List[Dict]
@@ -53,7 +51,6 @@ class _PipelineModel(_BaseModel):
     def from_dict(data: Dict[str, Any]):
         return _PipelineModel(
             id=data["id"],
-            config_id=data["config_id"],
             owner_id=data.get("owner_id", data.get("parent_id")),
             parent_ids=data.get("parent_ids", []),
             properties=data["properties"],

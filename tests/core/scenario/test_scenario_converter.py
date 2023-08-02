@@ -58,9 +58,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     d1 = InMemoryDataNode("d1", Scope.SCENARIO, "d1")
     d2 = InMemoryDataNode("d2", Scope.SCENARIO, "d2")
     task_1 = Task("task_1", {}, print, [d1], [d2], "t1")
-    pipeline_1 = Pipeline(
-        "pipeline_1", {"description": "description"}, [task_1], PipelineId("pipeline_1"), owner_id="owner_id"
-    )
+    pipeline_1 = Pipeline({"description": "description"}, [task_1], PipelineId("pipeline_1"), owner_id="owner_id")
     _save_entities([d1, d2], [task_1], [pipeline_1])
 
     scenario_model_1 = _ScenarioModel(
@@ -74,7 +72,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         [],
         [],
         "version",
-        [pipeline_1.id],
+        {"pipeline_1_name": pipeline_1.id},
     )
     scenario_1 = _ScenarioConverter._model_to_entity(scenario_model_1)
 
@@ -89,7 +87,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_1.get_inputs() == {d1}
     assert scenario_1._get_set_of_tasks() == {task_1}
     _assert_equal(scenario_1._get_sorted_tasks(), [[task_1]])
-    assert scenario_1.pipelines == {pipeline_1.config_id: pipeline_1}
+    assert scenario_1.pipelines == {"pipeline_1_name": pipeline_1}
 
     # d1 ---> t1 ---> d2
     # d3 ---> t2 ---> d4
@@ -100,12 +98,8 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     d4 = InMemoryDataNode("d4", Scope.SCENARIO, "d4")
     task_1 = Task("task_1", {}, print, [d1], [d2], "t1")
     task_2 = Task("task_2", {}, print, [d3], [d4], "t2")
-    pipeline_1 = Pipeline(
-        "pipeline_1", {"description": "description"}, [task_1], PipelineId("pipeline_1"), owner_id="owner_id"
-    )
-    pipeline_2 = Pipeline(
-        "pipeline_2", {"description": "description"}, [task_2], PipelineId("pipeline_2"), owner_id="owner_id"
-    )
+    pipeline_1 = Pipeline({"description": "description"}, [task_1], PipelineId("pipeline_1"), owner_id="owner_id")
+    pipeline_2 = Pipeline({"description": "description"}, [task_2], PipelineId("pipeline_2"), owner_id="owner_id")
     _save_entities([d1, d2, d3, d4], [task_1, task_2], [pipeline_1, pipeline_2])
 
     scenario_model_2 = _ScenarioModel(
@@ -119,7 +113,10 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         [],
         [],
         "version",
-        [pipeline_1.id, pipeline_2.id],
+        {
+            "pipeline_1_name": pipeline_1.id,
+            "pipeline_2_name": pipeline_2.id,
+        },
     )
     scenario_2 = _ScenarioConverter._model_to_entity(scenario_model_2)
 
@@ -139,7 +136,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_2.get_inputs() == {d1, d3}
     assert scenario_2._get_set_of_tasks() == {task_1, task_2}
     _assert_equal(scenario_2._get_sorted_tasks(), [[task_1, task_2]])
-    assert scenario_2.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
+    assert scenario_2.pipelines == {"pipeline_1_name": pipeline_1, "pipeline_2_name": pipeline_2}
 
     # d1 ---> t1 ---> d2
     # d3 ---> t2 ---> d4
@@ -151,7 +148,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     task_1 = Task("task_1", {}, print, [d1], [d2], "t1")
     task_2 = Task("task_2", {}, print, [d3], [d4], "t2")
     pipeline_1 = Pipeline(
-        "pipeline_3", {"description": "description"}, [task_1, task_2], PipelineId("pipeline_3"), owner_id="owner_id"
+        {"description": "description"}, [task_1, task_2], PipelineId("pipeline_1"), owner_id="owner_id"
     )
     _save_entities([d1, d2, d3, d4], [task_1, task_2], [pipeline_1])
 
@@ -166,7 +163,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         [],
         [],
         "version",
-        [pipeline_1.id],
+        {"pipeline_1_name": pipeline_1.id},
     )
     scenario_3 = _ScenarioConverter._model_to_entity(scenario_model_3)
 
@@ -186,7 +183,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_3.get_inputs() == {d1, d3}
     assert scenario_3._get_set_of_tasks() == {task_1, task_2}
     _assert_equal(scenario_3._get_sorted_tasks(), [[task_1, task_2]])
-    assert scenario_3.pipelines == {pipeline_1.config_id: pipeline_1}
+    assert scenario_3.pipelines == {"pipeline_1_name": pipeline_1}
 
     # d1 ---             ---> d3 ---> t2 ---> d5 ----
     #       |           |                           |
@@ -205,8 +202,8 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     task_2 = Task("garply", {}, print, [d3], [d5], TaskId("t2"))
     task_3 = Task("waldo", {}, print, [d5, d4], [d6], TaskId("t3"))
     task_4 = Task("fred", {}, print, [d4], [d7], TaskId("t4"))
-    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
-    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    pipeline_1 = Pipeline({}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline({}, [task_3, task_4], PipelineId("p2"))
     _save_entities([d1, d2, d3, d4, d5, d6, d7], [task_1, task_2, task_3, task_4], [pipeline_1, pipeline_2])
 
     scenario_model_4 = _ScenarioModel(
@@ -220,7 +217,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         [],
         [],
         "version",
-        [pipeline_1.id, pipeline_2.id],
+        {"pipeline_1_name": pipeline_1.id, "pipeline_2_name": pipeline_2.id},
     )
     scenario_4 = _ScenarioConverter._model_to_entity(scenario_model_4)
 
@@ -243,7 +240,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_4.get_inputs() == {d1, d2}
     assert scenario_4._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
     _assert_equal(scenario_4._get_sorted_tasks(), [[task_1], [task_2, task_4], [task_3]])
-    assert scenario_4.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
+    assert scenario_4.pipelines == {"pipeline_1_name": pipeline_1, "pipeline_2_name": pipeline_2}
 
     # d1 ---      t2 ---> d5 ------
     #       |                     |
@@ -261,8 +258,8 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     task_2 = Task("garply", {}, print, None, [d5], TaskId("t2"))
     task_3 = Task("waldo", {}, print, [d5, d4], [d6], TaskId("t3"))
     task_4 = Task("fred", {}, print, [d4], [d7], TaskId("t4"))
-    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
-    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
+    pipeline_1 = Pipeline({}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline({}, [task_3, task_4], PipelineId("p2"))
     _save_entities([d1, d2, d4, d5, d6, d7], [task_1, task_2, task_3, task_4], [pipeline_1, pipeline_2])
 
     scenario_model_5 = _ScenarioModel(
@@ -276,7 +273,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         [],
         [],
         "version",
-        [pipeline_1.id, pipeline_2.id],
+        {"pipeline_1_name": pipeline_1.id, "pipeline_2_name": pipeline_2.id},
     )
     scenario_5 = _ScenarioConverter._model_to_entity(scenario_model_5)
 
@@ -298,7 +295,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_5.get_inputs() == {d1, d2}
     assert scenario_5._get_set_of_tasks() == {task_1, task_2, task_3, task_4}
     _assert_equal(scenario_5._get_sorted_tasks(), [[task_1, task_2], [task_3, task_4]])
-    assert scenario_5.pipelines == {pipeline_1.config_id: pipeline_1, pipeline_2.config_id: pipeline_2}
+    assert scenario_5.pipelines == {"pipeline_1_name": pipeline_1, "pipeline_2_name": pipeline_2}
 
     # d1 ---      d6 ---> t2 ---> d5
     #       |                     |
@@ -322,9 +319,9 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     task_4 = Task("fred", {}, print, [d4], [d7], TaskId("t4"))
     task_5 = Task("t5", {}, print, [d8], [d9], TaskId("t5"))
     task_6 = Task("t6", {}, print, [d7, d9], id=TaskId("t6"))
-    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
-    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
-    pipeline_3 = Pipeline("thud", {}, [task_5, task_6], PipelineId("p3"))
+    pipeline_1 = Pipeline({}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline({}, [task_3, task_4], PipelineId("p2"))
+    pipeline_3 = Pipeline({}, [task_5, task_6], PipelineId("p3"))
     _save_entities(
         [d1, d2, d4, d5, d6, d7, d8, d9],
         [task_1, task_2, task_3, task_4, task_5, task_6],
@@ -342,7 +339,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         [],
         [],
         "version",
-        [pipeline_1.id, pipeline_2.id, pipeline_3.id],
+        {"pipeline_1_name": pipeline_1.id, "pipeline_2_name": pipeline_2.id, "pipeline_3_name": pipeline_3.id},
     )
     scenario_6 = _ScenarioConverter._model_to_entity(scenario_model_6)
 
@@ -374,9 +371,9 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_6._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5, task_6}
     _assert_equal(scenario_6._get_sorted_tasks(), [[task_1, task_2, task_5], [task_3, task_4], [task_6]])
     assert scenario_6.pipelines == {
-        pipeline_1.config_id: pipeline_1,
-        pipeline_2.config_id: pipeline_2,
-        pipeline_3.config_id: pipeline_3,
+        "pipeline_1_name": pipeline_1,
+        "pipeline_2_name": pipeline_2,
+        "pipeline_3_name": pipeline_3,
     }
 
     # d1 ---
@@ -399,9 +396,9 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     task_3 = Task("waldo", {}, print, [d4], None, id=TaskId("t3"))
     task_4 = Task("fred", {}, print, [d4, d6], [d7], TaskId("t4"))
     task_5 = Task("bob", {}, print, [d8], None, TaskId("t5"))
-    pipeline_1 = Pipeline("plugh", {}, [task_1, task_2, task_3], PipelineId("p1"))
-    pipeline_2 = Pipeline("xyzzy", {}, [task_3, task_4], PipelineId("p2"))
-    pipeline_3 = Pipeline("p3", {}, [task_5], PipelineId("p3"))
+    pipeline_1 = Pipeline({}, [task_1, task_2, task_3], PipelineId("p1"))
+    pipeline_2 = Pipeline({}, [task_3, task_4], PipelineId("p2"))
+    pipeline_3 = Pipeline({}, [task_5], PipelineId("p3"))
     _save_entities(
         [d1, d2, d4, d5, d6, d7, d8], [task_1, task_2, task_3, task_4, task_5], [pipeline_1, pipeline_2, pipeline_3]
     )
@@ -417,7 +414,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
         [],
         [],
         "version",
-        [pipeline_1.id, pipeline_2.id, pipeline_3.id],
+        {"pipeline_1_name": pipeline_1.id, "pipeline_2_name": pipeline_2.id, "pipeline_3_name": pipeline_3.id},
     )
     scenario_7 = _ScenarioConverter._model_to_entity(scenario_model_7)
 
@@ -447,7 +444,7 @@ def test_preserve_tasks_and_data_nodes_old_scenario_with_pipeline():
     assert scenario_7._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     _assert_equal(scenario_7._get_sorted_tasks(), [[task_1, task_2, task_5], [task_3, task_4]])
     assert scenario_7.pipelines == {
-        pipeline_1.config_id: pipeline_1,
-        pipeline_2.config_id: pipeline_2,
-        pipeline_3.config_id: pipeline_3,
+        "pipeline_1_name": pipeline_1,
+        "pipeline_2_name": pipeline_2,
+        "pipeline_3_name": pipeline_3,
     }

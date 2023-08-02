@@ -61,7 +61,7 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     additional_dn_2 = InMemoryDataNode("zyx", Scope.SCENARIO)
     task_name_2 = "task_2"
     task_2 = Task(task_name_2, {}, print, [input_dn_2], [output_dn_2], TaskId("task_id_2"))
-    pipeline_2 = Pipeline("pipeline_2", {}, [task_2], PipelineId("pipeline_id_2"))
+    pipeline_2 = Pipeline({}, [task_2], PipelineId("pipeline_id_2"))
     scenario_id_2 = ScenarioId("scenario_id_2")
     scenario_2 = Scenario(
         "scenario_name_2",
@@ -72,13 +72,13 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
         datetime.now(),
         True,
         cycle,
-        pipelines=[pipeline_2],
+        pipelines={"pipeline_2": pipeline_2.id},
     )
 
     additional_dn_3 = InMemoryDataNode("baz", Scope.SCENARIO)
     task_name_3 = "task_3"
     task_3 = Task(task_name_3, {}, print, id=TaskId("task_id_3"))
-    pipeline_3 = Pipeline("pipeline_3", {}, [], PipelineId("pipeline_id_3"))
+    pipeline_3 = Pipeline({}, [], PipelineId("pipeline_id_3"))
     scenario_3_with_same_id = Scenario(
         "scenario_name_3",
         [task_3],
@@ -88,7 +88,7 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
         datetime.now(),
         False,
         cycle,
-        pipelines=[pipeline_3],
+        pipelines={"pipeline_3": pipeline_3.id},
     )
 
     # No existing scenario
@@ -424,7 +424,7 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
 
     assert len(_DataManager._get_all()) == 5
     assert len(_TaskManager._get_all()) == 4
-    assert len(_PipelineManager._get_all()) == 3
+    assert len(_PipelineManager._get_all()) == 4
     assert len(_ScenarioManager._get_all()) == 2
 
 

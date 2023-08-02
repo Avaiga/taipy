@@ -35,7 +35,6 @@ class _PipelineConverter(_AbstractConverter):
             pipeline.id,
             pipeline.owner_id,
             list(pipeline._parent_ids),
-            pipeline.config_id,
             pipeline._properties.data,
             cls.__to_task_ids(pipeline._tasks),
             _utils._fcts_to_dict(pipeline._subscribers),
@@ -46,7 +45,6 @@ class _PipelineConverter(_AbstractConverter):
     def _model_to_entity(cls, model: _PipelineModel) -> Pipeline:
         try:
             pipeline = Pipeline(
-                model.config_id,
                 model.properties,
                 model.tasks,
                 model.id,

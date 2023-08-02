@@ -579,18 +579,6 @@ def create_scenario(
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
 
-def create_pipeline(config: PipelineConfig) -> Pipeline:
-    """Create and return a new pipeline from a pipeline configuration.
-
-    Parameters:
-        config (PipelineConfig^): The pipeline configuration.
-    Returns:
-        The new pipeline.
-    """
-    _warn_deprecated("create_pipeline")
-    return _PipelineManagerFactory._build_manager()._get_or_create(config)
-
-
 def clean_all_entities_by_version(version_number=None) -> bool:
     """Delete all entities belongs to a version from the Taipy data folder.
 
@@ -743,8 +731,6 @@ def get_entities_by_config_id(
     entities: List = []
 
     if entities := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
-        return entities
-    if entities := _PipelineManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
     if entities := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
