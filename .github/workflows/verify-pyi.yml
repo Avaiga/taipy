@@ -1,8 +1,9 @@
 name: Verify pyi file generation
 
 on:
+  workflow_dispatch:
   pull_request:
-    branches: [ develop, 'release/**' ]
+    branches: [ develop ]
 
 jobs:
   generate-pyi:
