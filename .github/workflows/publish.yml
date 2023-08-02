@@ -18,8 +18,8 @@ jobs:
           python-version: 3.8
 
       - name: Extract Github Tag Version
-         id: vars
-         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        id: vars
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       - name: Ensure package version is properly set
         run: |
