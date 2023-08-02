@@ -8,11 +8,11 @@ on:
         required: true
 
 jobs:
-  test-package:
+  release-package:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
@@ -44,8 +44,8 @@ jobs:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
               raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
-          """ > /tmp/check.py
-          python /tmp/check.py "${{ steps.extract_branch.outputs.branch }}"
+          """ > /tmp/check2.py
+          python /tmp/check2.py "${{ steps.extract_branch.outputs.branch }}"
 
       - name: Install dependencies
         run: |
@@ -57,15 +57,6 @@ jobs:
           python setup.py build_py && python -m build
           pip install dist/*.tar.gz
 
-  release:
-    needs: [test-package]
-    timeout-minutes: 20
-    name: Release taipy-core Package
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
       - name: Extract commit hash
         shell: bash
         run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
@@ -73,6 +64,6 @@ jobs:
 
       - name: Create/update release and tag
         run: |
-            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --title ${{ github.event.inputs.version }}
+            gh release create ${{ github.event.inputs.version }} ./dist/${{ github.event.repository.name }}-${{ github.event.inputs.version }}.tar.gz --target ${{ steps.extract_hash.outputs.hash }} --title ${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
