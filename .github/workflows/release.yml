@@ -8,8 +8,8 @@ on:
         required: true
 
 jobs:
-  test-package:
-    timeout-minutes: 20
+  release-package:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -75,15 +75,6 @@ jobs:
           ipython kernel install --name "python3" --user
           playwright install chromium --with-deps
           pytest
-
-  release:
-    needs: [test-package]
-    timeout-minutes: 20
-    name: Release package
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
 
       - name: Extract commit hash
         shell: bash

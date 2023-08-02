@@ -1,15 +1,14 @@
-name: Create Github pre-release
+name: Create Github Dev Release
 
 on:
   workflow_dispatch:
     inputs:
       taipy-config-version:
-        description: "The taipy-config version to use (ex: 2.3.0.dev0)"
-        required: true
+        description: "The taipy-config version to use (ex: 1.0.0.dev0)"
 
 jobs:
-  publish:
-    timeout-minutes: 20
+  release-dev-package:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,20 +21,20 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-        id: extract_branch
+      # - name: Extract branch name
+      #   shell: bash
+      #   run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+      #   id: extract_branch
 
-      - name: Validate branch name (has 'dev' prefix)
-        run: |
-          echo """
-          import sys
-          PREFIX = 'dev'
-          if not sys.argv[1].startswith(PREFIX):
-              raise ValueError(f'Branch name must start with \"{PREFIX}\"')
-          """ > /tmp/check.py
-          python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
+      # - name: Validate branch name (has 'dev' prefix)
+      #   run: |
+      #     echo """
+      #     import sys
+      #     PREFIX = 'dev'
+      #     if not sys.argv[1].startswith(PREFIX):
+      #         raise ValueError(f'Branch name must start with \"{PREFIX}\"')
+      #     """ > /tmp/check.py
+      #     python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
 
       - name: Ensure package version has 'dev' suffix
         run: |
@@ -52,11 +51,7 @@ jobs:
           """ > /tmp/check1.py
           python /tmp/check1.py
 
-      - name: Check dependencies are available
-        run: |
-          curl https://pypi.org/simple/taipy-config/ | grep -o ">taipy-config-${{ github.event.inputs.taipy-config-version }}\.tar\.gz<"
-
-      - name: Ensure package version is properly set
+      - name: Extract package version
         id: current-version
         run: |
               echo """
@@ -75,7 +70,13 @@ jobs:
             python -m pip install --upgrade pip
             pip install build
 
+      - name: Check dependencies are available
+        if: github.event.inputs.taipy-config-version != ''
+        run: |
+          curl https://pypi.org/simple/taipy-config/ | grep -o ">taipy-config-${{ github.event.inputs.taipy-config-version }}\.tar\.gz<"
+
       - name: Update setup.py locally
+        if: github.event.inputs.taipy-config-version != ''
         run: |
               mv setup.py setup.taipy.py
               echo """
