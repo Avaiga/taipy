@@ -36,7 +36,6 @@ read_entity_retry = "0:int"
 mode = "development"
 version_number = ""
 force = "False:bool"
-clean_entities = "False:bool"
 
 [VERSION_MIGRATION.migration_fcts]
 

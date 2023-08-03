@@ -37,7 +37,6 @@ def test_core_cli_no_arguments():
         assert Config.core.mode == "development"
         assert Config.core.version_number == ""
         assert not Config.core.force
-        assert not Config.core.clean_entities
 
 
 def test_core_cli_development_mode():
@@ -61,7 +60,6 @@ def test_core_cli_experiment_mode():
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == ""
         assert not Config.core.force
-        assert not Config.core.clean_entities
 
 
 def test_core_cli_experiment_mode_with_version():
@@ -71,7 +69,6 @@ def test_core_cli_experiment_mode_with_version():
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == "2.1"
         assert not Config.core.force
-        assert not Config.core.clean_entities
 
 
 def test_core_cli_experiment_mode_with_force_version():
@@ -82,17 +79,6 @@ def test_core_cli_experiment_mode_with_force_version():
         assert Config.core.mode == "experiment"
         assert Config.core.version_number == "2.1"
         assert Config.core.force
-        assert not Config.core.clean_entities
-
-
-def test_core_cli_experiment_mode_with_version_cleaning_entities():
-    with patch("sys.argv", ["prog", "--experiment", "2.1", "--clean-entities"]):
-        core = Core()
-        core.run()
-        assert Config.core.mode == "experiment"
-        assert Config.core.version_number == "2.1"
-        assert not Config.core.force
-        assert Config.core.clean_entities
 
 
 def test_core_cli_production_mode():
@@ -102,7 +88,6 @@ def test_core_cli_production_mode():
         assert Config.core.mode == "production"
         assert Config.core.version_number == ""
         assert not Config.core.force
-        assert not Config.core.clean_entities
 
 
 def test_dev_mode_clean_all_entities_of_the_latest_version():
@@ -422,68 +407,6 @@ def test_force_override_production_version():
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
-
-
-def test_clean_experiment_version():
-    scenario_config = config_scenario()
-
-    with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Core().run()
-
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
-
-    assert len(_DataManager._get_all()) == 2
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_CycleManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 1
-
-    with patch("sys.argv", ["prog", "--experiment", "1.0", "--clean-entities"]):
-        Core().run()
-
-    # All entities from previous submit should be cleaned and re-created
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
-
-    assert len(_DataManager._get_all()) == 2
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_CycleManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 1
-
-
-def test_clean_production_version():
-    scenario_config = config_scenario()
-
-    with patch("sys.argv", ["prog", "--production", "1.0"]):
-        Core().run()
-
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
-
-    assert len(_DataManager._get_all()) == 2
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_CycleManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 1
-
-    with patch("sys.argv", ["prog", "--production", "1.0", "--clean-entities"]):
-        Core().run()
-
-    # All entities from previous submit should be cleaned and re-created
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
-
-    assert len(_DataManager._get_all()) == 2
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_ScenarioManager._get_all()) == 1
-    assert len(_CycleManager._get_all()) == 1
-    assert len(_JobManager._get_all()) == 1
 
 
 def test_modify_job_configuration_dont_stop_application(caplog):

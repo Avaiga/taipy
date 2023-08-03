@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from taipy.config import Config
 from taipy.config._config_comparator._comparator_result import _ComparatorResult
@@ -199,13 +199,12 @@ class _VersionManager(_Manager[_Version]):
                 "experiment": cls._set_experiment_version,
                 "production": cls._set_production_version,
             }
+
             if Config.core.version_number:
                 current_version_number = Config.core.version_number
             else:
                 current_version_number = default_version_number[Config.core.mode]
-            if Config.core.clean_entities:
-                if clean_all_entities_by_version(current_version_number):
-                    cls.__logger.info(f"Clean all entities of version {current_version_number}")
+
             version_setter[Config.core.mode](current_version_number, Config.core.force)
             if Config.core.mode == "production":
                 cls.__check_production_migration_config()
