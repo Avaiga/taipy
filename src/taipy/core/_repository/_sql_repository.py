@@ -86,18 +86,18 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             self._delete(entity_id)
 
     def _delete_by(self, attribute: str, value: str):
-        while entity := self._search(attribute, value):
+        for entity in self._search(attribute, value):
             self._delete(entity.id)  # type: ignore
 
-    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         query = self.db.query(self.model_type).filter_by(**{attribute: value})
 
+        entities: List[Entity] = []
         for f in filters or [{}]:
             filtered_query = query.filter_by(**f)
-            if entry := filtered_query.first():
-                return self.converter._model_to_entity(entry)
+            entities.extend([self.converter._model_to_entity(m) for m in filtered_query.all()])
 
-        return None
+        return entities
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         if isinstance(folder_path, str):

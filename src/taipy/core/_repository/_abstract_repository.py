@@ -24,8 +24,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         Save an entity in the repository.
 
         Parameters:
-            entity: The data from an object
-
+            entity: The data from an object.
         """
         raise NotImplementedError
 
@@ -70,7 +69,6 @@ class _AbstractRepository(Generic[ModelType, Entity]):
 
         Parameters:
             entity_id: The id of the entity to be deleted.
-
         """
         raise NotImplementedError
 
@@ -103,15 +101,14 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         """
         Parameters:
             attribute: The entity property that is the key to the search.
             value: The value of the attribute that are being searched.
 
         Returns:
-            A list of entities
-
+            A list of entities that match the search criteria.
         """
         raise NotImplementedError
 
@@ -123,6 +120,5 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         Parameters:
             entity_id (str): The id of the entity to be exported.
             folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
-
         """
         raise NotImplementedError
