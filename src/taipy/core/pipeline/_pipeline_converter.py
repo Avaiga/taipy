@@ -11,7 +11,6 @@
 from collections import defaultdict
 
 from .._repository._abstract_converter import _AbstractConverter
-from .._version._utils import _migrate_entity
 from ..common import _utils
 from ..exceptions import NonExistingPipeline, NonExistingTask
 from ..pipeline._pipeline_model import _PipelineModel
@@ -56,7 +55,7 @@ class _PipelineConverter(_AbstractConverter):
                 ],
                 model.version,
             )
-            return _migrate_entity(pipeline)
+            return pipeline
         except NonExistingTask as err:
             raise err
         except KeyError:
