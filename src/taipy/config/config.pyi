@@ -183,7 +183,8 @@ class Config:
     @staticmethod
     def configure_scenario(
         id: str,
-        pipeline_configs: List[PipelineConfig],
+        task_configs: Optional[List[TaskConfig]] = None,
+        additional_data_node_configs: Optional[List[DataNodeConfig]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
@@ -192,8 +193,10 @@ class Config:
 
         Parameters:
             id (str): The unique identifier of the new scenario configuration.
-            pipeline_configs (List[PipelineConfig^]): The list of pipeline configurations used
-                by this new scenario configuration.
+            task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
+                scenario configuration. The default value is None.
+            additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
+                related to this scenario configuration. The default value is None.
             frequency (Optional[Frequency^]): The scenario frequency.<br/>
                 It corresponds to the recurrence of the scenarios instantiated from this
                 configuration. Based on this frequency each scenario will be attached to the
@@ -212,45 +215,9 @@ class Config:
         """
 
     @staticmethod
-    def configure_scenario_from_tasks(
-        id: str,
-        task_configs: List[TaskConfig],
-        frequency: Optional[Frequency] = None,
-        comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
-        pipeline_id: Optional[str] = None,
-        **properties,
-    ) -> "ScenarioConfig":
-        """Configure a new scenario configuration made of a single new pipeline configuration.
-
-        A new pipeline configuration is created as well. If *pipeline_id* is not provided,
-        the new pipeline configuration identifier is set to the scenario configuration identifier
-        post-fixed by '_pipeline'.
-
-        Parameters:
-            id (str): The unique identifier of the scenario configuration.
-            task_configs (List[TaskConfig^]): The list of task configurations used by the
-                new pipeline configuration that is created.
-            frequency (Optional[Frequency^]): The scenario frequency.
-                It corresponds to the recurrence of the scenarios instantiated from this
-                configuration. Based on this frequency each scenario will be attached to the
-                relevant cycle.
-            comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
-                functions used to compare scenarios. A comparator function is attached to a
-                scenario's data node configuration. The key of the dictionary parameter
-                corresponds to the data node configuration id. During the scenarios'
-                comparison, each comparator is applied to all the data nodes instantiated from
-                the data node configuration attached to the comparator. See
-                `(taipy.)compare_scenarios()` more more details.
-            pipeline_id (Optional[str]): The identifier of the new pipeline configuration to be configured.
-            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
-
-        Returns:
-            The new scenario configuration.
-        """
-
-    @staticmethod
     def set_default_scenario_configuration(
-        pipeline_configs: List[PipelineConfig],
+        task_configs: Optional[List[TaskConfig]] = None,
+        additional_data_node_configs: List[DataNodeConfig] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
@@ -262,8 +229,10 @@ class Config:
         values when needed.
 
         Parameters:
-            pipeline_configs (List[PipelineConfig^]): The list of pipeline configurations used
-                by this scenario configuration.
+            task_configs (Optional[List[TaskConfig^]]): The list of task configurations used by this
+                scenario configuration.
+            additional_data_node_configs (Optional[List[DataNodeConfig^]]): The list of additional data nodes
+                related to this scenario configuration.
             frequency (Optional[Frequency^]): The scenario frequency.
                 It corresponds to the recurrence of the scenarios instantiated from this
                 configuration. Based on this frequency each scenario will be attached to
