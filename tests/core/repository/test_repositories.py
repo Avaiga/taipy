@@ -137,8 +137,8 @@ class TestRepositoriesStorage:
         m1 = r._search("name", "bar")
         m2 = r._search("name", "foo")
 
-        assert m1 is None
-        assert m == m2
+        assert m1 == []
+        assert m2 == [m]
 
     @pytest.mark.parametrize(
         "mock_repo,params",

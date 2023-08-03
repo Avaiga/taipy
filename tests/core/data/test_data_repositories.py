@@ -105,6 +105,23 @@ class TestDataNodeRepository:
         assert len(repository._load_all()) == 7
 
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
+    def test_delete_by(self, tmpdir, data_node, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+
+        # Create 5 entities with version 1.0 and 5 entities with version 2.0
+        for i in range(10):
+            data_node.id = DataNodeId(f"data_node-{i}")
+            data_node._version = f"{(i+1) // 5}.0"
+            repository._save(data_node)
+
+        objs = repository._load_all()
+        assert len(objs) == 10
+        repository._delete_by("version", "1.0")
+
+        assert len(repository._load_all()) == 5
+
+    @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
     def test_search(self, tmpdir, data_node, repo):
         repository = repo()
         repository.base_path = tmpdir
@@ -116,13 +133,15 @@ class TestDataNodeRepository:
 
         assert len(repository._load_all()) == 10
 
-        obj = repository._search("name", "data_node-2")
-        assert isinstance(obj, DataNode)
+        objs = repository._search("name", "data_node-2")
+        assert len(objs) == 1
+        assert isinstance(objs[0], DataNode)
 
-        obj = repository._search("name", "data_node-2", filters=[{"version": "random_version_number"}])
-        assert isinstance(obj, DataNode)
+        objs = repository._search("name", "data_node-2", filters=[{"version": "random_version_number"}])
+        assert len(objs) == 1
+        assert isinstance(objs[0], DataNode)
 
-        assert repository._search("name", "data_node-2", filters=[{"version": "non_existed_version"}]) is None
+        assert repository._search("name", "data_node-2", filters=[{"version": "non_existed_version"}]) == []
 
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
     def test_export(self, tmpdir, data_node, repo):

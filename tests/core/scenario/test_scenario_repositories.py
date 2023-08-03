@@ -104,6 +104,23 @@ class TestScenarioFSRepository:
         assert len(repository._load_all()) == 7
 
     @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
+    def test_delete_by(self, tmpdir, scenario, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+
+        # Create 5 entities with version 1.0 and 5 entities with version 2.0
+        for i in range(10):
+            scenario.id = ScenarioId(f"scenario-{i}")
+            scenario._version = f"{(i+1) // 5}.0"
+            repository._save(scenario)
+
+        objs = repository._load_all()
+        assert len(objs) == 10
+        repository._delete_by("version", "1.0")
+
+        assert len(repository._load_all()) == 5
+
+    @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
     def test_search(self, tmpdir, scenario, repo):
         repository = repo()
         repository.base_path = tmpdir
@@ -114,13 +131,15 @@ class TestScenarioFSRepository:
 
         assert len(repository._load_all()) == 10
 
-        obj = repository._search("id", "scenario-2")
-        assert isinstance(obj, Scenario)
+        objs = repository._search("id", "scenario-2")
+        assert len(objs) == 1
+        assert isinstance(objs[0], Scenario)
 
-        obj = repository._search("id", "scenario-2", filters=[{"version": "random_version_number"}])
-        assert isinstance(obj, Scenario)
+        objs = repository._search("id", "scenario-2", filters=[{"version": "random_version_number"}])
+        assert len(objs) == 1
+        assert isinstance(objs[0], Scenario)
 
-        assert repository._search("id", "scenario-2", filters=[{"version": "non_existed_version"}]) is None
+        assert repository._search("id", "scenario-2", filters=[{"version": "non_existed_version"}]) == []
 
     @pytest.mark.parametrize("repo", [_ScenarioFSRepository, _ScenarioSQLRepository])
     def test_export(self, tmpdir, scenario, repo):
