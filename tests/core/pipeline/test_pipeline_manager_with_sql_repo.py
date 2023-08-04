@@ -172,7 +172,7 @@ def test_get_or_create_data(init_sql_repo):
     assert len(_TaskManager._get_all()) == 0
 
     p_tasks = _TaskManager._bulk_get_or_create([task_config_mult_by_two, task_config_mult_by_3])
-    pipeline = _PipelineManager._get_or_create("by_6", p_tasks)
+    pipeline = _PipelineManager._create("by_6", p_tasks)
 
     assert len(_DataManager._get_all()) == 3
     assert len(_TaskManager._get_all()) == 2
@@ -214,7 +214,7 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes(init_sql_repo)
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._get_or_create("pipeline", tasks)
+    pipeline = _PipelineManager._create("pipeline", tasks)
     pipeline.submit()
 
     assert len(_ScenarioManager._get_all()) == 0
@@ -242,7 +242,7 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes(init_sql_repo):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._get_or_create("pipeline", tasks)
+    pipeline = _PipelineManager._create("pipeline", tasks)
     pipeline.submit()
 
     assert len(_ScenarioManager._get_all()) == 0
@@ -273,8 +273,8 @@ def test_hard_delete_shared_entities(init_sql_repo):
 
     tasks_scenario_1 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_1")
     tasks_scenario_2 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_2")
-    pipeline_1 = _PipelineManager._get_or_create("pipeline", tasks_scenario_1, scenario_id="scenario_id_1")
-    pipeline_2 = _PipelineManager._get_or_create("pipeline", tasks_scenario_2, scenario_id="scenario_id_2")
+    pipeline_1 = _PipelineManager._create("pipeline", tasks_scenario_1, scenario_id="scenario_id_1")
+    pipeline_2 = _PipelineManager._create("pipeline", tasks_scenario_2, scenario_id="scenario_id_2")
     _PipelineManager._submit(pipeline_1.id)
     _PipelineManager._submit(pipeline_2.id)
 
@@ -304,8 +304,8 @@ def test_data_node_creation_scenario(init_sql_repo):
 
     tasks_pipeline_1 = _TaskManager._bulk_get_or_create([task_1, task_2])
     tasks_pipeline_2 = _TaskManager._bulk_get_or_create([task_1, task_2])
-    pipeline_1 = _PipelineManager._get_or_create("pipeline", tasks_pipeline_1)
-    pipeline_2 = _PipelineManager._get_or_create("pipeline", tasks_pipeline_2)
+    pipeline_1 = _PipelineManager._create("pipeline", tasks_pipeline_1)
+    pipeline_2 = _PipelineManager._create("pipeline", tasks_pipeline_2)
 
     assert len(_DataManager._get_all()) == 5
     assert pipeline_1.my_input.id == pipeline_2.my_input.id

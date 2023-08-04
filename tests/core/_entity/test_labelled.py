@@ -101,10 +101,10 @@ def test_get_label_complex_case():
     assert cycle.get_simple_label() == scenario.cycle.name
     assert scenario.get_label() == "Today > My Name"
     assert scenario.get_simple_label() == "My Name"
-    assert "Today > PIPELINE_pipeline_C" in pipeline_C.get_label()
-    assert "PIPELINE_pipeline_C" in pipeline_C.get_simple_label()
-    assert "Today > My Name > PIPELINE_pipeline_S" in pipeline_S.get_label()
-    assert "PIPELINE_pipeline_S" in pipeline_S.get_simple_label()
+    assert pipeline_C.get_label() == "Today > pipeline_C"
+    assert pipeline_C.get_simple_label() == "pipeline_C"
+    assert pipeline_S.get_label() == "Today > My Name > pipeline_S"
+    assert pipeline_S.get_simple_label() == "pipeline_S"
     assert tA.get_label() == "Today > t_A_C"
     assert tA.get_simple_label() == "t_A_C"
     assert tB.get_label() == "Today > My Name > t_B_S"

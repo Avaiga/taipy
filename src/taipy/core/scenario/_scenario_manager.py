@@ -130,7 +130,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         pipelines = {}
         for sequence_name, sequence_task_configs in config.sequences.items():
             task_config_ids = {sequence_task_config.id for sequence_task_config in sequence_task_configs}
-            pipelines[sequence_name] = _PipelineManagerFactory._build_manager()._get_or_create(
+            pipelines[sequence_name] = _PipelineManagerFactory._build_manager()._create(
                 sequence_name,
                 [t for t in tasks if t.config_id in task_config_ids],
                 cycle.id if cycle else None,

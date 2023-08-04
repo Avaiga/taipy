@@ -137,7 +137,7 @@ def test_get_all_on_multiple_versions_environment():
 
 def test_is_submittable():
     assert len(_PipelineManager._get_all()) == 0
-    pipeline = _PipelineManager._get_or_create("pipeline", [])
+    pipeline = _PipelineManager._create("pipeline", [])
 
     assert len(_PipelineManager._get_all()) == 1
     assert _PipelineManager._is_submittable(pipeline)
@@ -224,10 +224,9 @@ def test_assign_pipeline_as_parent_of_task():
     task_config_2 = Config.configure_task("task_2", print, [dn_config_2], [dn_config_3])
     task_config_3 = Config.configure_task("task_3", print, [dn_config_2], [dn_config_3])
 
-    p1_tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_2], "scenario_id")
-    p2_tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_3], "scenario_id")
-    pipeline_1 = _PipelineManager._get_or_create("pipeline_1", p1_tasks, "scenario_id")
-    pipeline_2 = _PipelineManager._get_or_create("pipeline_2", p2_tasks, "scenario_id")
+    tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_2, task_config_3], "scenario_id")
+    pipeline_1 = _PipelineManager._create("pipeline_1", [tasks[0], tasks[1]], "scenario_id")
+    pipeline_2 = _PipelineManager._create("pipeline_2", [tasks[0], tasks[2]], "scenario_id")
 
     tasks_1 = list(pipeline_1.tasks.values())
     tasks_2 = list(pipeline_2.tasks.values())
@@ -336,7 +335,8 @@ def test_get_or_create_data():
 
     p_tasks = _TaskManager._bulk_get_or_create([task_config_mult_by_two, task_config_mult_by_3])
 
-    pipeline = _PipelineManager._get_or_create("by_6", p_tasks)
+    pipeline = _PipelineManager._create("by_6", p_tasks)
+    assert pipeline.name == "by_6"
 
     assert len(_DataManager._get_all()) == 3
     assert len(_TaskManager._get_all()) == 2
@@ -395,7 +395,7 @@ def test_pipeline_notification_subscribe(mocker):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs=task_configs)
-    pipeline = _PipelineManager._get_or_create("by_1", tasks)
+    pipeline = _PipelineManager._create("by_1", tasks)
 
     notify_1 = NotifyMock(pipeline)
     notify_1.__name__ = "notify_1"
@@ -447,7 +447,7 @@ def test_pipeline_notification_subscribe_multi_param(mocker):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
-    pipeline = _PipelineManager._get_or_create("by_6", tasks)
+    pipeline = _PipelineManager._create("by_6", tasks)
     notify = mocker.Mock()
 
     # test pipeline subscribe notification
@@ -479,7 +479,7 @@ def test_pipeline_notification_unsubscribe(mocker):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
-    pipeline = _PipelineManager._get_or_create("by_6", tasks)
+    pipeline = _PipelineManager._create("by_6", tasks)
 
     notify_1 = notify1
     notify_2 = notify2
@@ -509,7 +509,7 @@ def test_pipeline_notification_unsubscribe_multi_param():
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
-    pipeline = _PipelineManager._get_or_create("by_6", tasks)
+    pipeline = _PipelineManager._create("by_6", tasks)
 
     _PipelineManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 0], pipeline=pipeline)
     _PipelineManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 1], pipeline=pipeline)
@@ -544,8 +544,8 @@ def test_pipeline_notification_subscribe_all():
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
-    pipeline = _PipelineManager._get_or_create("by_6", tasks)
-    other_pipeline = _PipelineManager._get_or_create("other_pipeline", tasks)
+    pipeline = _PipelineManager._create("by_6", tasks)
+    other_pipeline = _PipelineManager._create("other_pipeline", tasks)
 
     notify_1 = NotifyMock(pipeline)
 
@@ -565,7 +565,7 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._get_or_create("pipeline", tasks)
+    pipeline = _PipelineManager._create("pipeline", tasks)
     pipeline.submit()
 
     assert len(_ScenarioManager._get_all()) == 0
@@ -591,7 +591,7 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._get_or_create("pipeline", tasks)
+    pipeline = _PipelineManager._create("pipeline", tasks)
     pipeline.submit()
 
     assert len(_ScenarioManager._get_all()) == 0
@@ -620,8 +620,8 @@ def test_hard_delete_shared_entities():
 
     tasks_scenario_1 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_1")
     tasks_scenario_2 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_2")
-    pipeline_1 = _PipelineManager._get_or_create("pipeline", tasks_scenario_1, scenario_id="scenario_id_1")
-    pipeline_2 = _PipelineManager._get_or_create("pipeline", tasks_scenario_2, scenario_id="scenario_id_2")
+    pipeline_1 = _PipelineManager._create("pipeline", tasks_scenario_1, scenario_id="scenario_id_1")
+    pipeline_2 = _PipelineManager._create("pipeline", tasks_scenario_2, scenario_id="scenario_id_2")
     _PipelineManager._submit(pipeline_1.id)
     _PipelineManager._submit(pipeline_2.id)
 
@@ -649,8 +649,8 @@ def test_data_node_creation_scenario():
 
     tasks_pipeline_1 = _TaskManager._bulk_get_or_create([task_1, task_2])
     tasks_pipeline_2 = _TaskManager._bulk_get_or_create([task_1, task_2])
-    pipeline_1 = _PipelineManager._get_or_create("pipeline", tasks_pipeline_1)
-    pipeline_2 = _PipelineManager._get_or_create("pipeline", tasks_pipeline_2)
+    pipeline_1 = _PipelineManager._create("pipeline", tasks_pipeline_1)
+    pipeline_2 = _PipelineManager._create("pipeline", tasks_pipeline_2)
 
     assert len(_DataManager._get_all()) == 5
     assert pipeline_1.my_input.id == pipeline_2.my_input.id
@@ -674,7 +674,7 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
 
     tasks = _TaskManager._bulk_get_or_create([task_cfg, task_2_cfg])
     pip_manager = _PipelineManagerFactory._build_manager()
-    pipeline = pip_manager._get_or_create("pipeline", tasks)
+    pipeline = pip_manager._create("pipeline", tasks)
     pip_manager._submit(pipeline)
 
     stdout = caplog.text
@@ -703,7 +703,7 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
 
     tasks = _TaskManager._bulk_get_or_create([task_cfg, task_2_cfg])
     pip_manager = _PipelineManagerFactory._build_manager()
-    pipeline = pip_manager._get_or_create("pipeline", tasks)
+    pipeline = pip_manager._create("pipeline", tasks)
     pip_manager._submit(pipeline)
 
     stdout = caplog.text

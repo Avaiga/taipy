@@ -87,7 +87,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.UPDATE, "subscribers")
 
     @classmethod
-    def _get_or_create(
+    def _create(
         cls,
         pipeline_name: str,
         tasks: List[Task],
@@ -107,7 +107,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
         version = cls._get_latest_version()
         pipeline = Pipeline(
-            {},
+            {"name": pipeline_name},
             tasks,
             pipeline_id,
             owner_id,
@@ -115,7 +115,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             version=version,
         )
         for task in tasks:
-            task._parent_ids = task.parent_ids
             task._parent_ids.update([pipeline_id])
         cls.__save_tasks(tasks)
         cls._set(pipeline)
