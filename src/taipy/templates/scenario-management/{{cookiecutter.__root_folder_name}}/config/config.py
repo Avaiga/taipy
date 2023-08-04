@@ -1,5 +1,6 @@
-from algos import clean_data
 from taipy import Config, Frequency, Scope
+
+from ..algos import clean_data
 
 
 def configure():

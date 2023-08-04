@@ -1,10 +1,6 @@
-from utils import get_inputs, get_outputs
-
 import pandas as pd
 import re
 
-
-CONTENT_VAR_PATTERN = r"contents\['(.*)'\]"
 
 # build partial content for all data nodes
 def build_dn_list_partial(dns, dn_contents):
@@ -33,11 +29,11 @@ def build_dn_partial(dn, dn_label, dn_content):
     if dn_content is None:
         partial_content += f"<center> No data for {dn_label}. </center>\n\n"
     elif isinstance(dn_content, pd.DataFrame):
-        partial_content += "<|{contents['" + dn.id + "']}|table|>\n\n"
+        partial_content += "<|{contents['" + dn.id + "']}|table|rebuild|>\n\n"
     elif isinstance(dn_content, str) \
-            or isinstance(dn_content, int) \
-            or isinstance(dn_content, float) \
-            or isinstance(dn_content, bool):
+        or isinstance(dn_content, int) \
+        or isinstance(dn_content, float) \
+        or isinstance(dn_content, bool):
         partial_content += "<center> <|{contents['" + dn.id + "']}|input|> </center>\n\n"
 
     # ##################################################################################################################
@@ -53,13 +49,13 @@ def build_dn_partial(dn, dn_label, dn_content):
 
     # Default content
     if partial_content == "":
-        partial_content += f"<center> PLACEHOLDER for a Taipy control for data node {dn.id}. </center>\n\n"
+        partial_content += f"<center> No Taipy visual element defined to display data node {dn.id}. </center>\n\n"
     return partial_content
 
 
 def manage_inputs_partial(state):
     # Update inputs variables and partial
-    state.inputs = get_inputs(state.selected_scenario)
+    state.inputs = {d.id: (d.id, d.get_simple_label(), d) for d in state.selected_sceanrio.get_inputs()}
     state.contents = {k: (v[2].read() if v[2].is_ready_for_reading else None) for k, v in state.inputs.items()}
     input_partial_content = build_dn_list_partial(state.inputs, state.contents)
     state.inputs_partial.update_content(state, input_partial_content)
@@ -67,7 +63,7 @@ def manage_inputs_partial(state):
 
 def manage_outputs_partial(state):
     # Update outputs variables and partial
-    state.outputs = get_outputs(state.selected_scenario)
+    state.outputs = {d.id: (d.id, d.get_simple_label(), d) for d in state.selected_sceanrio.get_outputs()}
     state.contents.update(
         {k: (v[2].read() if v[2].is_ready_for_reading else None) for k, v in state.outputs.items()})
     output_partial_content = build_dn_list_partial(state.outputs, state.contents)
@@ -75,6 +71,7 @@ def manage_outputs_partial(state):
 
 
 def write_data_nodes(state, var, val):
+    CONTENT_VAR_PATTERN = r"contents\['(.*)'\]"
     if match := re.match(CONTENT_VAR_PATTERN, var):
         if match.groups()[0] in state.inputs:
             state.inputs[match.groups()[0]][2].write(val)
@@ -88,7 +85,7 @@ def custom_write_data_nodes(state, var, val):
     # PLACEHOLDER: Add here 'on_change' code to be executed when your own use case variables are modified              #
     #                                                                                                                  #
     # Example:                                                                                                         #
-    if match := re.match(r"inputs\['(.*)'\]\[2\].path", var):                                                        #
+    if match := re.match(r"inputs\['(.*)'\]\[2\].path", var):                                                          #
         state.inputs[match.groups()[0]][2].path = val                                                                  #
         state.selected_scenario = state.selected_scenario                                                              #
     # Comment, remove or replace the previous lines with your own use case                                             #

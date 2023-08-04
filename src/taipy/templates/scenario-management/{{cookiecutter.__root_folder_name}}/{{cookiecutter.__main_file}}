@@ -2,7 +2,7 @@ import taipy as tp
 from taipy import Core, Gui
 
 from config.config import configure
-from pages import scenario_page, manage_data_node_partials
+from pages import scenario_page
 from pages.root import *
 
 
@@ -15,7 +15,7 @@ def on_change(state, var, val):
 
     if var == "selected_scenario" and val:
         state.selected_scenario = val #BUG
-        state['scenario'].manage_data_node_partials(state) 
+        state['scenario'].manage_data_node_partials(state)
 
 
 pages = {"/": root,
@@ -41,4 +41,4 @@ if __name__ == "__main__":
     gui = Gui(pages=pages)
     inputs_partial = gui.add_partial("")
     outputs_partial = gui.add_partial("")
-    gui.run(title="{{cookiecutter.application_title}}")
+    gui.run(title="{{cookiecutter.__application_title}}")
