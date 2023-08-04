@@ -58,9 +58,10 @@ def setup_end_to_end():
         output=evaluation_cfg,
     )
 
-    pipeline_cfg = Config.configure_pipeline("pipeline", [forecast_task_cfg, evaluate_task_cfg])
-
-    Config.configure_scenario("scenario", [pipeline_cfg], frequency=Frequency.DAILY)
+    scenario_config = Config.configure_scenario(
+        "scenario", [forecast_task_cfg, evaluate_task_cfg], frequency=Frequency.DAILY
+    )
+    scenario_config.add_sequences({"pipeline": [forecast_task_cfg, evaluate_task_cfg]})
 
 
 @pytest.fixture(scope="session")
@@ -225,7 +226,7 @@ def default_pipeline_config_list():
 def default_scenario_config():
     return Config.configure_scenario(
         f"taipy_{uuid.uuid4().hex}",
-        [Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())],
+        [Config.configure_task(f"taipy_{uuid.uuid4().hex}", __task_config())],
     )
 
 
@@ -236,7 +237,7 @@ def default_scenario_config_list():
         configs.append(
             Config.configure_scenario(
                 f"taipy_{uuid.uuid4().hex}",
-                [Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())],
+                [Config.configure_task(f"taipy_{uuid.uuid4().hex}", print)],
             )
         )
     return configs
@@ -247,7 +248,7 @@ def default_scenario():
     return Scenario(
         config_id="foo",
         properties={},
-        pipelines=[__default_pipeline()],
+        tasks=[__default_task()],
     )
 
 
