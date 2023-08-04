@@ -399,9 +399,18 @@ class DataNodeConfig(Section):
     ) -> "DataNodeConfig":
         """Configure a new data node configuration from an existing one.
 
-        Args:
+        Parameters:
             source_configuration (DataNodeConfig): The source data node configuration.
             id (str): The unique identifier of the new data node configuration.
+            scope (Optional[Scope^]): The scope of the data node configuration.<br/>
+                The default value is the scope of the source data node configuration.
+            validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
+                considered up-to-date. Once the validity period has passed, the data node is considered stale and
+                relevant tasks will run even if they are skippable (see the
+                [Task configs page](../core/config/task-config.md) for more details).
+                If *validity_period* is set to None, the data node is always up-to-date.<br/>
+                The default value is the validity period of the source data node configuration.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new data node configuration.
