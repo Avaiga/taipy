@@ -116,9 +116,9 @@ class TestVersionFSRepository:
 
         assert len(repository._load_all()) == 10
 
-        obj = repository._search("id", "_version_2")
-
-        assert isinstance(obj, _Version)
+        objs = repository._search("id", "_version_2")
+        assert len(objs) == 1
+        assert isinstance(objs[0], _Version)
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
     def test_export(self, tmpdir, _version, repo):

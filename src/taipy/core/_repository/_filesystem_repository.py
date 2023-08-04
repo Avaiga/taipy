@@ -102,11 +102,11 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             self._delete(model_id)
 
     def _delete_by(self, attribute: str, value: str):
-        while entity := self._search(attribute, value):
+        for entity in self.__search(attribute, value):
             self._delete(entity.id)  # type: ignore
 
-    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[Entity]:
-        return next(self.__search(attribute, value, filters), None)
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
+        return list(self.__search(attribute, value, filters))
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         if isinstance(folder_path, str):

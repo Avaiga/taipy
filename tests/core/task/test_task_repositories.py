@@ -123,6 +123,25 @@ class TestTaskFSRepository:
         assert len(repository._load_all()) == 7
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
+    def test_delete_by(self, tmpdir, data_node, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        _DataFSRepository()._save(data_node)
+        task = Task("task_config_id", {}, print, [data_node], [data_node])
+
+        # Create 5 entities with version 1.0 and 5 entities with version 2.0
+        for i in range(10):
+            task.id = TaskId(f"task-{i}")
+            task._version = f"{(i+1) // 5}.0"
+            repository._save(task)
+
+        objs = repository._load_all()
+        assert len(objs) == 10
+        repository._delete_by("version", "1.0")
+
+        assert len(repository._load_all()) == 5
+
+    @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
     def test_search(self, tmpdir, data_node, repo):
         repository = repo()
         repository.base_path = tmpdir
@@ -136,13 +155,15 @@ class TestTaskFSRepository:
 
         assert len(repository._load_all()) == 10
 
-        obj = repository._search("owner_id", "owner-2")
-        assert isinstance(obj, Task)
+        objs = repository._search("owner_id", "owner-2")
+        assert len(objs) == 1
+        assert isinstance(objs[0], Task)
 
-        obj = repository._search("owner_id", "owner-2", filters=[{"version": "random_version_number"}])
-        assert isinstance(obj, Task)
+        objs = repository._search("owner_id", "owner-2", filters=[{"version": "random_version_number"}])
+        assert len(objs) == 1
+        assert isinstance(objs[0], Task)
 
-        assert repository._search("owner_id", "owner-2", filters=[{"version": "non_existed_version"}]) is None
+        assert repository._search("owner_id", "owner-2", filters=[{"version": "non_existed_version"}]) == []
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
     def test_export(self, tmpdir, data_node, repo):

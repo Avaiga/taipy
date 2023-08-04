@@ -135,6 +135,27 @@ class TestJobRepository:
         assert len(repository._load_all()) == 7
 
     @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
+    def test_delete_by(self, tmpdir, data_node, job, repo):
+        repository = repo()
+        repository.base_path = tmpdir
+        _DataFSRepository()._save(data_node)
+        task = Task("task_config_id", {}, print, [data_node], [data_node])
+        _TaskFSRepository()._save(task)
+        job._task = task
+
+        # Create 5 entities with version 1.0 and 5 entities with version 2.0
+        for i in range(10):
+            job.id = JobId(f"job-{i}")
+            job._version = f"{(i+1) // 5}.0"
+            repository._save(job)
+
+        objs = repository._load_all()
+        assert len(objs) == 10
+        repository._delete_by("version", "1.0")
+
+        assert len(repository._load_all()) == 5
+
+    @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
     def test_search(self, tmpdir, data_node, job, repo):
         repository = repo()
         repository.base_path = tmpdir
@@ -149,13 +170,15 @@ class TestJobRepository:
 
         assert len(repository._load_all()) == 10
 
-        obj = repository._search("id", "job-2")
-        assert isinstance(obj, Job)
+        objs = repository._search("id", "job-2")
+        assert len(objs) == 1
+        assert isinstance(objs[0], Job)
 
-        obj = repository._search("id", "job-2", filters=[{"version": "random_version_number"}])
-        assert isinstance(obj, Job)
+        objs = repository._search("id", "job-2", filters=[{"version": "random_version_number"}])
+        assert len(objs) == 1
+        assert isinstance(objs[0], Job)
 
-        assert repository._search("id", "job-2", filters=[{"version": "non_existed_version"}]) is None
+        assert repository._search("id", "job-2", filters=[{"version": "non_existed_version"}]) == []
 
     @pytest.mark.parametrize("repo", [_JobFSRepository, _JobSQLRepository])
     def test_export(self, tmpdir, job, repo):

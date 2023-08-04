@@ -116,9 +116,9 @@ class TestCycleRepositories:
 
         assert len(repository._load_all()) == 10
 
-        obj = repository._search("name", "cycle-2")
-
-        assert isinstance(obj, Cycle)
+        objs = repository._search("name", "cycle-2")
+        assert len(objs) == 1
+        assert isinstance(objs[0], Cycle)
 
     @pytest.mark.parametrize("repo", [_CycleFSRepository, _CycleSQLRepository])
     def test_export(self, tmpdir, cycle, repo):

@@ -91,7 +91,7 @@ class MockRepository(_AbstractRepository):  # type: ignore
     def _delete_by(self, attribute: str, value: str):
         return self.repo._delete_by(attribute, value)
 
-    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> Optional[MockEntity]:
+    def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[MockEntity]:
         return self.repo._search(attribute, value, filters)
 
     def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):

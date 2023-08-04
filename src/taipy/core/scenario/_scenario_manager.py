@@ -371,7 +371,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
         Check if the cycle is only attached to this scenario, then delete it.
         """
-        while scenario := cls._repository._search("version", version_number):
+        for scenario in cls._repository._search("version", version_number):
             if scenario.cycle and len(cls._get_all_by_cycle(scenario.cycle)) == 1:
                 _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
             super()._delete(scenario.id)
