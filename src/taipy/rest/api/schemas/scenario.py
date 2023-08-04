@@ -13,7 +13,7 @@ from marshmallow import Schema, fields
 
 
 class ScenarioSchema(Schema):
-    pipelines = fields.List(fields.String)
+    pipelines = fields.Dict()
     properties = fields.Dict()
     primary_scenario = fields.Boolean(default=False)
     tags = fields.List(fields.String)
