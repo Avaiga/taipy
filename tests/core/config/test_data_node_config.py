@@ -142,6 +142,41 @@ def test_data_node_config_check(caplog):
     assert expected_error_message in caplog.text
 
 
+def test_configure_data_node_from_another_configuration():
+    d1_cfg = Config.configure_sql_table_data_node(
+        "d1",
+        db_username="foo",
+        db_password="bar",
+        db_name="db",
+        db_engine="mssql",
+        db_port=8080,
+        db_host="somewhere",
+        table_name="foo",
+        scope=Scope.GLOBAL,
+        foo="bar",
+    )
+
+    d2_cfg = Config.configure_data_node_from(
+        source_configuration=d1_cfg,
+        id="d2",
+        scope=Scope.SCENARIO,
+        table_name="bar",
+        foo="baz",
+    )
+
+    assert d2_cfg.id == "d2"
+    assert d2_cfg.storage_type == "sql_table"
+    assert d2_cfg.scope == Scope.SCENARIO
+    assert d2_cfg.db_username == "foo"
+    assert d2_cfg.db_password == "bar"
+    assert d2_cfg.db_name == "db"
+    assert d2_cfg.db_engine == "mssql"
+    assert d2_cfg.db_port == 8080
+    assert d2_cfg.db_host == "somewhere"
+    assert d2_cfg.table_name == "bar"
+    assert d2_cfg.foo == "baz"
+
+
 def test_data_node_count():
     Config.configure_data_node("data_nodes1", "pickle")
     assert len(Config.data_nodes) == 2
