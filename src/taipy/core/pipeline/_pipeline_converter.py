@@ -11,7 +11,6 @@
 from collections import defaultdict
 
 from .._repository._abstract_converter import _AbstractConverter
-from .._version._utils import _migrate_entity
 from ..common import _utils
 from ..exceptions import NonExistingPipeline, NonExistingTask
 from ..pipeline._pipeline_model import _PipelineModel
@@ -35,7 +34,6 @@ class _PipelineConverter(_AbstractConverter):
             pipeline.id,
             pipeline.owner_id,
             list(pipeline._parent_ids),
-            pipeline.config_id,
             pipeline._properties.data,
             cls.__to_task_ids(pipeline._tasks),
             _utils._fcts_to_dict(pipeline._subscribers),
@@ -46,7 +44,6 @@ class _PipelineConverter(_AbstractConverter):
     def _model_to_entity(cls, model: _PipelineModel) -> Pipeline:
         try:
             pipeline = Pipeline(
-                model.config_id,
                 model.properties,
                 model.tasks,
                 model.id,
@@ -58,7 +55,7 @@ class _PipelineConverter(_AbstractConverter):
                 ],
                 model.version,
             )
-            return _migrate_entity(pipeline)
+            return pipeline
         except NonExistingTask as err:
             raise err
         except KeyError:

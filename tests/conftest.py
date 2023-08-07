@@ -287,7 +287,6 @@ def cycle():
 @pytest.fixture(scope="class")
 def pipeline():
     return Pipeline(
-        "pipeline",
         {},
         [],
         PipelineId("pipeline_id"),
@@ -326,7 +325,6 @@ def pipeline_model():
         PipelineId("pipeline_id"),
         "owner_id",
         list({"parent_id_1", "parent_id_2"}),
-        "pipeline",
         {},
         [],
         [],

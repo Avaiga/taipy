@@ -50,7 +50,6 @@ def job_id():
 @pytest.fixture(scope="class")
 def pipeline():
     return Pipeline(
-        "pipeline",
         {},
         [],
         PipelineId(Pipeline._ID_PREFIX + "pipeline_id"),

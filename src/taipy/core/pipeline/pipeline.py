@@ -41,7 +41,6 @@ class Pipeline(_Entity, Submittable, _Labeled):
     elements connected as a direct acyclic graph.
 
     Attributes:
-        config_id (str): The identifier of the `PipelineConfig^`.
         properties (dict[str, Any]): A dictionary of additional properties.
         tasks (List[Task^]): The list of `Task`s.
         pipeline_id (str): The Unique identifier of the pipeline.
@@ -57,18 +56,16 @@ class Pipeline(_Entity, Submittable, _Labeled):
 
     def __init__(
         self,
-        config_id: str,
         properties: Dict[str, Any],
         tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
-        pipeline_id: Optional[PipelineId] = None,
+        pipeline_id: PipelineId,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         subscribers: Optional[List[_Subscriber]] = None,
         version: Optional[str] = None,
     ):
         super().__init__(subscribers)
-        self.config_id = _validate_id(config_id)
-        self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
+        self.id: PipelineId = pipeline_id
         self._tasks = tasks
         self.owner_id = owner_id
         self._parent_ids = parent_ids or set()
@@ -76,8 +73,10 @@ class Pipeline(_Entity, Submittable, _Labeled):
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
-    def _new_id(config_id: str) -> PipelineId:
-        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
+    def _new_id(pipeline_name: str) -> PipelineId:
+        return PipelineId(
+            Pipeline.__SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(pipeline_name), str(uuid.uuid4())])
+        )
 
     def __getstate__(self):
         return self.id

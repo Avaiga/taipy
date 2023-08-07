@@ -41,11 +41,6 @@ def migrate_skippable_task(task):
     return task
 
 
-def migrate_foo_pipeline(pipeline):
-    pipeline.properties["foo"] = "bar"
-    return pipeline
-
-
 def migrate_foo_scenario(scenario):
     scenario.properties["foo"] = "bar"
     return scenario
@@ -115,38 +110,6 @@ def test_migrate_task_in_standalone_mode():
         core.stop()
 
 
-def test_migrate_pipeline():
-    scenario_v1 = submit_v1()
-
-    init_config()
-    Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
-
-    submit_v2()
-    v1 = taipy.get(scenario_v1.id)
-    assert v1.my_pipeline.version == "2.0"
-    assert v1.my_pipeline.properties["foo"] == "bar"
-
-
-def test_migrate_pipeline_in_standalone_mode():
-    scenario_v1 = submit_v1()
-
-    init_config()
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
-    Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
-
-    scenario_cfg_v2 = config_scenario_v2()
-    with patch("sys.argv", ["prog", "--production", "2.0"]):
-        core = Core()
-        core.run()
-        scenario_v2 = _ScenarioManager._create(scenario_cfg_v2)
-        jobs = _ScenarioManager._submit(scenario_v2)
-        v1 = taipy.get(scenario_v1.id)
-        assert v1.my_pipeline.version == "2.0"
-        assert v1.my_pipeline.properties["foo"] == "bar"
-        assert_true_after_time(jobs[0].is_completed)
-        core.stop()
-
-
 def test_migrate_scenario():
     scenario_v1 = submit_v1()
 
@@ -185,7 +148,6 @@ def test_migrate_all_entities():
     init_config()
     Config.add_migration_function("2.0", "d1", migrate_pickle_path)
     Config.add_migration_function("2.0", "my_task", migrate_skippable_task)
-    Config.add_migration_function("2.0", "my_pipeline", migrate_foo_pipeline)
     Config.add_migration_function("2.0", "my_scenario", migrate_foo_scenario)
 
     submit_v2()
@@ -193,11 +155,9 @@ def test_migrate_all_entities():
 
     assert v1.d1.version == "2.0"
     assert v1.my_task.version == "2.0"
-    assert v1.my_pipeline.version == "2.0"
 
     assert v1.d1.path == "bar.pkl"
     assert v1.my_task.skippable is True
-    assert v1.my_pipeline.properties["foo"] == "bar"
     assert v1.properties["foo"] == "bar"
 
 

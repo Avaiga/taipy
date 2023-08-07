@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import JSON, Boolean, Column, String, Table
 
@@ -53,7 +53,7 @@ class _ScenarioModel(_BaseModel):
     subscribers: List[Dict]
     tags: List[str]
     version: str
-    pipelines: Optional[List[PipelineId]] = None
+    pipelines: Optional[Union[Dict[str, PipelineId], Dict]] = None
     cycle: Optional[CycleId] = None
 
     @staticmethod

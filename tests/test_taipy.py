@@ -86,7 +86,7 @@ class TestTaipy:
             mck.assert_called_once_with(pipeline_id)
 
         with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._is_submittable") as mck:
-            pipeline = Pipeline("pipeline_config_id", {}, [])
+            pipeline = Pipeline({}, [], "pipeline_id")
             tp.is_submittable(pipeline)
             mck.assert_called_once_with(pipeline)
 
@@ -105,7 +105,7 @@ class TestTaipy:
 
         cycle = Cycle(Frequency.DAILY, {}, current_date, current_date, current_date)
         scenario = Scenario("scenario_config_id", [], {})
-        pipeline = Pipeline("pipeline_config_id", {}, [])
+        pipeline = Pipeline({}, [], "pipeline_id")
         task = Task("task_config_id", {}, print)
         job = Job("job_id", task, "submit_id", scenario.id)
         dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
@@ -446,17 +446,6 @@ class TestTaipy:
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
             tp.create_scenario(scenario_config, datetime.datetime(2022, 2, 5), "displayable_name")
             mck.assert_called_once_with(scenario_config, datetime.datetime(2022, 2, 5), "displayable_name")
-
-    def test_create_pipeline(self):
-        pipeline_config = PipelineConfig("pipeline_config")
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._get_or_create") as mck:
-            tp.create_pipeline(pipeline_config)
-            mck.assert_called_once_with(pipeline_config)
-
-    def test_create_pipeline_deprecated(self):
-        pipeline_config = PipelineConfig("pipeline_config")
-        with pytest.warns(DeprecationWarning):
-            tp.create_pipeline(pipeline_config)
 
     def test_export_scenario_filesystem(self):
         shutil.rmtree("./tmp", ignore_errors=True)

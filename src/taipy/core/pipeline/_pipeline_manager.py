@@ -87,16 +87,14 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.UPDATE, "subscribers")
 
     @classmethod
-    def _get_or_create(
+    def _create(
         cls,
-        pipeline_config: PipelineConfig,
+        pipeline_name: str,
+        tasks: List[Task],
         cycle_id: Optional[CycleId] = None,
         scenario_id: Optional[ScenarioId] = None,
     ) -> Pipeline:
-        pipeline_id = Pipeline._new_id(str(pipeline_config.id))
-
-        task_manager = _TaskManagerFactory._build_manager()
-        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, cycle_id, scenario_id)
+        pipeline_id = Pipeline._new_id(pipeline_name)
 
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
@@ -107,16 +105,9 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         else:
             owner_id = None
 
-        filters = cls._build_filters_with_version(None)
-        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(  # type: ignore
-            str(pipeline_config.id), owner_id, filters
-        ):
-            return pipelines_from_owner
-
         version = cls._get_latest_version()
         pipeline = Pipeline(
-            str(pipeline_config.id),
-            dict(**pipeline_config._properties),
+            {"name": pipeline_name},
             tasks,
             pipeline_id,
             owner_id,
@@ -196,10 +187,3 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
         return entity_ids
-
-    @classmethod
-    def _get_by_config_id(cls, config_id: str) -> List[Pipeline]:
-        """
-        Get all pipelines by its config id.
-        """
-        return cls._repository._load_all([{"config_id": config_id}])
