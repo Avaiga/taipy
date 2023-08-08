@@ -32,6 +32,7 @@ from taipy.core import (
     set_primary,
 )
 from taipy.core import submit as core_submit
+from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event
 from taipy.core.notification.notifier import Notifier
@@ -337,7 +338,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                     "config": scenario_config,
                                     "date": date,
                                     "label": name,
-                                    "properties": {v.get("key"): v.get("value") for v in data.get("properties", dict())},
+                                    "properties": {
+                                        v.get("key"): v.get("value") for v in data.get("properties", dict())
+                                    },
                                 },
                             ],
                         )
@@ -406,39 +409,44 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
+    def __do_datanodes_tree(self):
+        if self.data_nodes_by_owner is None:
+            self.data_nodes_by_owner = defaultdict(list)
+            for dn in get_data_nodes():
+                self.data_nodes_by_owner[dn.owner_id].append(dn)
+
     def get_datanodes_tree(self):
         with self.lock:
-            if self.data_nodes_by_owner is None:
-                self.data_nodes_by_owner = defaultdict(list)
-                for dn in get_data_nodes():
-                    self.data_nodes_by_owner[dn.owner_id].append(dn)
+            self.__do_datanodes_tree()
         return self.get_scenarios()
 
     def data_node_adapter(self, data):
         if data and hasattr(data, "id") and core_get(data.id) is not None:
             if isinstance(data, DataNode):
                 return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
-            elif self.data_nodes_by_owner:
+            else:
                 with self.lock:
-                    if isinstance(data, Cycle):
-                        return (
-                            data.id,
-                            data.get_simple_label(),
-                            self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
-                            _EntityType.CYCLE.value,
-                            False,
-                        )
-                    elif isinstance(data, Scenario):
-                        return (
-                            data.id,
-                            data.get_simple_label(),
-                            self.data_nodes_by_owner[data.id] + list(data.pipelines.values()),
-                            _EntityType.SCENARIO.value,
-                            data.is_primary,
-                        )
-                    elif isinstance(data, Pipeline):
-                        if datanodes := self.data_nodes_by_owner.get(data.id):
-                            return (data.id, data.get_simple_label(), datanodes, _EntityType.PIPELINE.value, False)
+                    self.__do_datanodes_tree()
+                    if self.data_nodes_by_owner:
+                        if isinstance(data, Cycle):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
+                                _EntityType.CYCLE.value,
+                                False,
+                            )
+                        elif isinstance(data, Scenario):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + list(data.pipelines.values()),
+                                _EntityType.SCENARIO.value,
+                                data.is_primary,
+                            )
+                        elif isinstance(data, Pipeline):
+                            if datanodes := self.data_nodes_by_owner.get(data.id):
+                                return (data.id, data.get_simple_label(), datanodes, _EntityType.PIPELINE.value, False)
         return None
 
     def get_jobs_list(self):
@@ -544,23 +552,61 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_data_node_history(self, id: str):
         res = []
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
-            # TODO remove
-            res.append((datetime.now(), "Unknown Job Id", "Execution of task that does not exists. But If you want something lon, it can surely be done."))
-            res.append((datetime.now(), "Another Unknown Job Id", "Execution of task that does not exists. But If you want something lon, it can surely be done. Execution of task that does not exists. But If you want something lon, it can surely be done. Execution of task that does not exists. But If you want something lon, it can surely be done."))
             for e in dn.edits:
                 job: Job = core_get(e.get("job_id")) if "job_id" in e else None
-                res.append((e.get("timestamp"), job.id if job else e.get("writer_identifier", "Unknown"), f"Execution of task {job.task.get_simple_label()}." if job and job.task else e.get("comments")))
+                res.append(
+                    (
+                        e.get("timestamp"),
+                        job.id if job else e.get("writer_identifier", "Unknown"),
+                        f"Execution of task {job.task.get_simple_label()}." if job and job.task else e.get("comments"),
+                    )
+                )
         return list(reversed(sorted(res, key=lambda r: r[0])))
 
     def get_data_node_data(self, id: str):
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
             if dn.is_ready_for_reading:
+                if isinstance(dn, _AbstractTabularDataNode):
+                    return (None, None, True, None)
                 try:
-                    return dn.read()
+                    value = dn.read()
+                    return (value, "date" if "date" in type(value).__name__ else None, None, None)
                 except Exception as e:
-                    return f"read data_node: {e}"
-            return f"Data unavailable for {dn.get_simple_label()}"
-        return f"Invalid datanode {id}"
+                    return (None, None, None, f"read data_node: {e}")
+            return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
+        return (None, None, None, f"Invalid datanode {id}")
+
+    def update_data(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+            return
+        data = args[0]
+        entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
+        entity: DataNode = core_get(entity_id)
+        if isinstance(entity, DataNode):
+            try:
+                entity.write(
+                    parser.parse(data.get("value")) if data.get("type") == "date" else data.get("value"),
+                    comment="Written by CoreGui DataNode viewer Element",
+                )
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+            except Exception as e:
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode value. {e}")
+            state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, entity_id)  # this will update the data value
+
+    def get_data_node_tabular_data(self, id: str):
+        if (
+            id
+            and (dn := core_get(id))
+            and isinstance(dn, DataNode)
+            and dn.is_ready_for_reading
+            and isinstance(dn, _AbstractTabularDataNode)
+        ):
+            try:
+                return dn.read()
+            except Exception as e:
+                return None
+        return None
 
     def select_id(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -707,6 +753,11 @@ class _GuiCore(ElementLibrary):
                     PropertyType.react,
                     f"{{{__CTX_VAR_NAME}.get_data_node_data({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
+                "tabular_data": ElementProperty(
+                    PropertyType.data,
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                ),
+                "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
             },
         ),
         "job_selector": Element(

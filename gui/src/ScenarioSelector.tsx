@@ -34,6 +34,7 @@ import { Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
+
 import { useDispatch, useModule, createSendActionNameAction, getUpdateVar, createSendUpdateAction } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
