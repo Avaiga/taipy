@@ -129,6 +129,8 @@ interface DataNodeViewerProps {
     onDataValue?: string;
 }
 
+const getDataValue = (value?: RowValue, dType?: string | null) => dType == "date" ? new Date(value as string) : value;
+
 const getValidDataNode = (datanode: DataNodeFull | DataNodeFull[]) =>
     datanode.length == DataNodeFullLength && typeof datanode[DataNodeFullProps.id] === "string"
         ? (datanode as DataNodeFull)
@@ -273,16 +275,16 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const cancelDataValue = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            setLabel(dnLabel);
+            setDataValue(getDataValue(dtValue, dtType));
             setFocusName("");
         },
-        [dnLabel, setLabel, setFocusName]
+        [dtValue, dtType, setDataValue, setFocusName]
     );
     const onDataValueChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.value), []);
     const onDataValueDateChange = useCallback((d: Date | null) => d && setDataValue(d), []);
     useEffect(() => {
         if (dtValue !== undefined) {
-            dtType == "date" ? setDataValue(new Date(dtValue as string)) : setDataValue(dtValue);
+            setDataValue(getDataValue(dtValue, dtType));
         }
     }, [dtValue, dtType]);
 
