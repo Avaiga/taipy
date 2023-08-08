@@ -59,6 +59,7 @@ import {
 import PropertiesEditor from "./PropertiesEditor";
 import { NodeType, Scenarios } from "./utils/types";
 import CoreSelector from "./CoreSelector";
+import { useUniqueId } from "./utils/hooks";
 
 const editTimestampFormat = "YYY/MM/dd HH:mm";
 
@@ -129,7 +130,7 @@ interface DataNodeViewerProps {
     onDataValue?: string;
 }
 
-const getDataValue = (value?: RowValue, dType?: string | null) => dType == "date" ? new Date(value as string) : value;
+const getDataValue = (value?: RowValue, dType?: string | null) => (dType == "date" ? new Date(value as string) : value);
 
 const getValidDataNode = (datanode: DataNodeFull | DataNodeFull[]) =>
     datanode.length == DataNodeFullLength && typeof datanode[DataNodeFullProps.id] === "string"
@@ -154,6 +155,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     const dispatch = useDispatch();
     const module = useModule();
+    const uniqid = useUniqueId(id);
 
     const [
         dnId,
@@ -285,6 +287,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     useEffect(() => {
         if (dtValue !== undefined) {
             setDataValue(getDataValue(dtValue, dtType));
+        } else if (dtType == "tabular") {
+            //TODO set tabular values ?
         }
     }, [dtValue, dtType]);
 
@@ -346,19 +350,19 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
                                 <Tab
                                     label="Properties"
-                                    id={`${id}-properties`}
-                                    aria-controls="dn-tabpanel-properties"
+                                    id={`${uniqid}-properties`}
+                                    aria-controls={`${uniqid}-dn-tabpanel-properties`}
                                 />
                                 <Tab
                                     label="History"
-                                    id={`${id}-history`}
-                                    aria-controls="dn-tabpanel-history"
+                                    id={`${uniqid}-history`}
+                                    aria-controls={`${uniqid}-dn-tabpanel-history`}
                                     style={showHistory ? undefined : noDisplay}
                                 />
                                 <Tab
                                     label="Data"
-                                    id={`${id}-data`}
-                                    aria-controls="dn-tabpanel-data"
+                                    id={`${uniqid}-data`}
+                                    aria-controls={`${uniqid}-dn-tabpanel-data`}
                                     style={showData ? undefined : noDisplay}
                                 />
                             </Tabs>
@@ -366,8 +370,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         <div
                             role="tabpanel"
                             hidden={tabValue !== 0}
-                            id="dn-tabpanel-properties"
-                            aria-labelledby={`${id}-properties`}
+                            id={`${uniqid}-dn-tabpanel-properties`}
+                            aria-labelledby={`${uniqid}-properties`}
                         >
                             <Grid container rowSpacing={2} sx={gridSx}>
                                 <Grid item xs={12} container justifyContent="space-between" spacing={1}>
@@ -466,7 +470,6 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 <Launch />
                                             </IconButton>
                                             <Popover
-                                                id={id}
                                                 open={Boolean(anchorEl)}
                                                 anchorEl={anchorEl}
                                                 onClose={handleClose}
@@ -505,8 +508,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         <div
                             role="tabpanel"
                             hidden={tabValue !== 1}
-                            id="dn-tabpanel-history"
-                            aria-labelledby={`${id}-history`}
+                            id={`${uniqid}-dn-tabpanel-history`}
+                            aria-labelledby={`${uniqid}-history`}
                         >
                             {historyRequested && Array.isArray(props.history) ? (
                                 <Grid container spacing={1}>
@@ -548,8 +551,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         <div
                             role="tabpanel"
                             hidden={tabValue !== 2}
-                            id="dn-tabpanel-data"
-                            aria-labelledby={`${id}-data`}
+                            id={`${uniqid}-dn-tabpanel-data`}
+                            aria-labelledby={`${uniqid}-data`}
                         >
                             {dataRequested ? (
                                 dtValue !== undefined ? (
