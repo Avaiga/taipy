@@ -193,11 +193,7 @@ def default_task_config_list():
 
 
 def __default_pipeline():
-    return Pipeline(
-        config_id="foo",
-        properties={},
-        tasks=[__default_task()],
-    )
+    return Pipeline(properties={"name": "foo"}, tasks=[__default_task()], pipeline_id="foo")
 
 
 def __task_config():
@@ -210,36 +206,27 @@ def default_pipeline():
 
 
 @pytest.fixture
-def default_pipeline_config():
-    return Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())
-
-
-@pytest.fixture
-def default_pipeline_config_list():
-    configs = []
-    for i in range(10):
-        configs.append(Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config()))
-    return configs
-
-
-@pytest.fixture
 def default_scenario_config():
-    return Config.configure_scenario(
+    task_config = __task_config()
+    scenario_config = Config.configure_scenario(
         f"taipy_{uuid.uuid4().hex}",
-        [Config.configure_task(f"taipy_{uuid.uuid4().hex}", __task_config())],
+        [task_config],
     )
+    scenario_config.add_sequences({"pipeline": [task_config]})
+    return scenario_config
 
 
 @pytest.fixture
 def default_scenario_config_list():
     configs = []
-    for i in range(10):
-        configs.append(
-            Config.configure_scenario(
-                f"taipy_{uuid.uuid4().hex}",
-                [Config.configure_task(f"taipy_{uuid.uuid4().hex}", print)],
-            )
+    for _ in range(10):
+        task_config = Config.configure_task(f"taipy_{uuid.uuid4().hex}", print)
+        scenario_config = Config.configure_scenario(
+            f"taipy_{uuid.uuid4().hex}",
+            [task_config],
         )
+        scenario_config.add_sequences({"pipeline": [task_config]})
+        configs.append(scenario_config)
     return configs
 
 

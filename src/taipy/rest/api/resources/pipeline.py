@@ -197,36 +197,12 @@ class PipelineList(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
-    def fetch_config(self, config_id):
-        config = Config.pipelines.get(config_id)
-        if not config:
-            raise NonExistingPipelineConfig(config_id)
-        return config
-
     @_middleware
     def get(self):
         schema = PipelineResponseSchema(many=True)
         manager = _PipelineManagerFactory._build_manager()
         pipelines = [_to_model(REPOSITORY, pipeline) for pipeline in manager._get_all()]
         return schema.dump(pipelines)
-
-    @_middleware
-    def post(self):
-        args = request.args
-        config_id = args.get("config_id")
-
-        response_schema = PipelineResponseSchema()
-        manager = _PipelineManagerFactory._build_manager()
-        if not config_id:
-            raise ConfigIdMissingException
-
-        config = self.fetch_config(config_id)
-        pipeline = manager._get_or_create(config)
-
-        return {
-            "message": "Pipeline was created.",
-            "pipeline": response_schema.dump(_to_model(REPOSITORY, pipeline)),
-        }, 201
 
 
 class PipelineExecutor(Resource):

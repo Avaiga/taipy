@@ -43,31 +43,14 @@ def test_delete_pipeline(client):
         assert rep.status_code == 200
 
 
-def test_create_pipeline(client, default_pipeline_config):
-    # without config param
-    pipelines_url = url_for("api.pipelines")
-    rep = client.post(pipelines_url)
-    assert rep.status_code == 400
-
-    # config does not exist
-    pipelines_url = url_for("api.pipelines", config_id="foo")
-    rep = client.post(pipelines_url)
-    assert rep.status_code == 404
-
-    with mock.patch("src.taipy.rest.api.resources.pipeline.PipelineList.fetch_config") as config_mock:
-        config_mock.return_value = default_pipeline_config
-        pipelines_url = url_for("api.pipelines", config_id="bar")
-        rep = client.post(pipelines_url)
-        assert rep.status_code == 201
-
-
-def test_get_all_pipelines(client, default_pipeline_config_list):
+def test_get_all_pipelines(client, default_scenario_config_list):
     for ds in range(10):
-        with mock.patch("src.taipy.rest.api.resources.pipeline.PipelineList.fetch_config") as config_mock:
-            config_mock.return_value = default_pipeline_config_list[ds]
-            pipelines_url = url_for("api.pipelines", config_id=config_mock.name)
-            client.post(pipelines_url)
+        with mock.patch("src.taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
+            config_mock.return_value = default_scenario_config_list[ds]
+            scenario_url = url_for("api.scenarios", config_id=config_mock.name)
+            client.post(scenario_url)
 
+    pipelines_url = url_for("api.pipelines")
     rep = client.get(pipelines_url)
     assert rep.status_code == 200
 
