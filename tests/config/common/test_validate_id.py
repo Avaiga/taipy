@@ -35,3 +35,15 @@ class TestId:
             _validate_id("def")
         with pytest.raises(InvalidConfigurationId):
             _validate_id("with")
+        with pytest.raises(InvalidConfigurationId):
+            _validate_id("CYCLE")
+        with pytest.raises(InvalidConfigurationId):
+            _validate_id("SCENARIO")
+        with pytest.raises(InvalidConfigurationId):
+            _validate_id("PIPELINE")
+        with pytest.raises(InvalidConfigurationId):
+            _validate_id("TASK")
+        with pytest.raises(InvalidConfigurationId):
+            _validate_id("DATANODE")
+        with pytest.raises(InvalidConfigurationId):
+            _validate_id("JOB")

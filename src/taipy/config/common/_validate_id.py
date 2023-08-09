@@ -13,8 +13,15 @@ import keyword
 
 from ..exceptions.exceptions import InvalidConfigurationId
 
+__INVALID_TAIPY_ID_TERMS = ["CYCLE", "SCENARIO", "PIPELINE", "TASK", "DATANODE", "JOB"]
+
 
 def _validate_id(name: str):
+    for invalid_taipy_id_term in __INVALID_TAIPY_ID_TERMS:
+        if invalid_taipy_id_term in name:
+            raise InvalidConfigurationId(f"{name} is not a valid identifier. {invalid_taipy_id_term} is restricted.")
+
     if name.isidentifier() and not keyword.iskeyword(name):
         return name
+
     raise InvalidConfigurationId(f"{name} is not a valid identifier.")
