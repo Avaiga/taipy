@@ -45,3 +45,5 @@ class TestId:
             _validate_id("TASK")
         with pytest.raises(InvalidConfigurationId):
             _validate_id("DATANODE")
+        with pytest.raises(InvalidConfigurationId):
+            _validate_id("JOB")

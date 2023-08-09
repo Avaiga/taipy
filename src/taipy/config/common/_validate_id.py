@@ -13,7 +13,7 @@ import keyword
 
 from ..exceptions.exceptions import InvalidConfigurationId
 
-__INVALID_TAIPY_ID_TERMS = ["CYCLE", "SCENARIO", "PIPELINE", "TASK", "DATANODE"]
+__INVALID_TAIPY_ID_TERMS = ["CYCLE", "SCENARIO", "PIPELINE", "TASK", "DATANODE", "JOB"]
 
 
 def _validate_id(name: str):
