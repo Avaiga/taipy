@@ -10,24 +10,19 @@
 # specific language governing permissions and limitations under the License.
 
 from functools import partial
-from typing import Any, Callable, List, Optional, Union
-
-from taipy.config.common.scope import Scope
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
-from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
-from ..config.pipeline_config import PipelineConfig
-from ..cycle.cycle_id import CycleId
-from ..exceptions.exceptions import NonExistingPipeline
+from ..exceptions.exceptions import InvalidPipelineId, ModelNotFound, NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..scenario.scenario_id import ScenarioId
 from ..task._task_manager_factory import _TaskManagerFactory
-from ..task.task import Task
+from ..task.task import Task, TaskId
 from .pipeline import Pipeline
 from .pipeline_id import PipelineId
 
@@ -35,7 +30,6 @@ from .pipeline_id import PipelineId
 class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
     _ENTITY_NAME = Pipeline.__name__
-    _repository: _AbstractRepository
     _EVENT_ENTITY_TYPE = EventEntityType.PIPELINE
 
     @classmethod
@@ -43,8 +37,15 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Returns all entities.
         """
-        filters = cls._build_filters_with_version(version_number)
-        return cls._repository._load_all(filters)
+        pipelines = set()
+
+        from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
+
+        scenarios = _ScenarioManagerFactory._build_manager()._get_all(version_number)
+        for scenario in scenarios:
+            pipelines.update(scenario.pipelines.values())
+
+        return list(pipelines)
 
     @classmethod
     def _subscribe(
@@ -90,36 +91,68 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     def _create(
         cls,
         pipeline_name: str,
-        tasks: List[Task],
-        cycle_id: Optional[CycleId] = None,
+        tasks: Union[List[Task], List[TaskId]],
         scenario_id: Optional[ScenarioId] = None,
     ) -> Pipeline:
-        pipeline_id = Pipeline._new_id(pipeline_name)
+        pipeline_id = Pipeline._new_id(pipeline_name, scenario_id)
+        owner_id = scenario_id
 
-        scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
-        owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
-        if scope == Scope.SCENARIO:
-            owner_id = scenario_id
-        elif scope == Scope.CYCLE:
-            owner_id = cycle_id
-        else:
-            owner_id = None
+        task_manager = _TaskManagerFactory._build_manager()
+        _tasks = []
+        for task in tasks:
+            if not isinstance(task, Task):
+                _tasks.append(task_manager._get(task))
+            else:
+                _tasks.append(task)
 
         version = cls._get_latest_version()
         pipeline = Pipeline(
             {"name": pipeline_name},
-            tasks,
+            _tasks,
             pipeline_id,
             owner_id,
             {scenario_id} if scenario_id else None,
             version=version,
         )
-        for task in tasks:
+        for task in _tasks:
             task._parent_ids.update([pipeline_id])
-        cls.__save_tasks(tasks)
-        cls._set(pipeline)
+        cls.__save_tasks(_tasks)
         _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.CREATION, None)
         return pipeline
+
+    @classmethod
+    def _get(cls, pipeline: Union[str, Pipeline], default=None) -> Pipeline:
+        """
+        Returns an entity by id or reference.
+        """
+        try:
+            pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
+            pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline_id)
+
+            from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
+
+            scenario_manager = _ScenarioManagerFactory._build_manager()
+
+            if scenario := scenario_manager._get(scenario_id):
+                if pipeline_entity := scenario.pipelines.get(pipeline_name, None):
+                    return pipeline_entity
+            return default
+
+        except (ModelNotFound, InvalidPipelineId):
+            cls._logger.error(f"{cls._ENTITY_NAME} not found: {pipeline_id}")
+            return default
+
+    @classmethod
+    def _breakdown_pipeline_id(cls, pipeline_id: str) -> Tuple[str, str]:
+        from ..scenario.scenario import Scenario
+
+        try:
+            pipeline_name, scenario_id = pipeline_id.split(Scenario._ID_PREFIX)
+            scenario_id = f"{Scenario._ID_PREFIX}{scenario_id}"
+            pipeline_name = pipeline_name.split(Pipeline._ID_PREFIX)[1].strip("_")
+            return pipeline_name, scenario_id
+        except ValueError:
+            raise InvalidPipelineId(pipeline_id)
 
     @classmethod
     def __save_tasks(cls, tasks):

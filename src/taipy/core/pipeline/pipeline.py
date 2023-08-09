@@ -21,11 +21,8 @@ from taipy.config.common._validate_id import _validate_id
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
-from .._entity._properties import _Properties
-from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._entity.submittable import Submittable
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
@@ -50,7 +47,7 @@ class Pipeline(_Entity, Submittable, _Labeled):
     """
 
     _ID_PREFIX = "PIPELINE"
-    __SEPARATOR = "_"
+    _SEPARATOR = "_"
     _MANAGER_NAME = "pipeline"
 
     def __init__(
@@ -68,23 +65,12 @@ class Pipeline(_Entity, Submittable, _Labeled):
         self._tasks = tasks
         self.owner_id = owner_id
         self._parent_ids = parent_ids or set()
-        self._properties = _Properties(self, **properties)
+        self.properties = properties
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
-    def _new_id(pipeline_name: str) -> PipelineId:
-        return PipelineId(
-            Pipeline.__SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(pipeline_name), str(uuid.uuid4())])
-        )
-
-    def __getstate__(self):
-        return self.id
-
-    def __setstate__(self, id):
-        from ... import core as tp
-
-        p = tp.get(id)
-        self.__dict__ = p.__dict__
+    def _new_id(pipeline_name: str, scenario_id) -> PipelineId:
+        return PipelineId(Pipeline._SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(pipeline_name), scenario_id]))
 
     def __hash__(self):
         return hash(self.id)
@@ -107,12 +93,10 @@ class Pipeline(_Entity, Submittable, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of pipeline {self.id}")
 
     @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
     def tasks(self) -> Dict[str, Task]:
         return self._get_tasks()
 
     @tasks.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
     def tasks(self, tasks: Union[List[TaskId], List[Task]]):
         self._tasks = tasks
 
@@ -126,18 +110,12 @@ class Pipeline(_Entity, Submittable, _Labeled):
         return data_nodes
 
     @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
     def parent_ids(self):
         return self._parent_ids
 
     @property
     def version(self):
         return self._version
-
-    @property
-    def properties(self):
-        self._properties = _Reloader()._reload("pipeline", self)._properties
-        return self._properties
 
     def _is_consistent(self) -> bool:
         dag = self._build_dag()
@@ -178,14 +156,12 @@ class Pipeline(_Entity, Submittable, _Labeled):
         return tasks
 
     @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
     def subscribers(self):
         return self._subscribers
 
     @subscribers.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
     def subscribers(self, val):
-        self._subscribers = _ListAttributes(self, val)
+        self._subscribers = [val]
 
     def get_parents(self):
         """Get parents of the pipeline entity"""
@@ -250,10 +226,6 @@ class Pipeline(_Entity, Submittable, _Labeled):
         from ._pipeline_manager_factory import _PipelineManagerFactory
 
         return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
-
-    @staticmethod
-    def __to_task_ids(tasks):
-        return [t.id if isinstance(t, Task) else t for t in tasks]
 
     def get_label(self) -> str:
         """Returns the pipeline simple label prefixed by its owner label.

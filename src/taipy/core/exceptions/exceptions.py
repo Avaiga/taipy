@@ -125,6 +125,13 @@ class InvalidSubscriber(RuntimeError):
     """Raised if the loaded function is not valid."""
 
 
+class InvalidPipelineId(Exception):
+    """Raised if a Pipeline id can not be broken down."""
+
+    def __init__(self, pipeline_id: str):
+        self.message = f"Pipeline: {pipeline_id} is invalid."
+
+
 class NonExistingPipeline(Exception):
     """Raised if a requested Pipeline is not known by the Pipeline Manager."""
 

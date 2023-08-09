@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
-from typing import Optional, Set, Union
+from typing import Dict, List, Optional, Set, Union
 
 from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
@@ -27,6 +27,10 @@ from ..task.task import Task, TaskId
 class _ScenarioConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, scenario: Scenario) -> _ScenarioModel:
+        pipelines: Dict[str, List[TaskId]] = {}
+        for p_name, tasks in scenario._pipelines.items():
+            pipelines[p_name] = [t.id if isinstance(t, Task) else t for t in tasks]
+
         return _ScenarioModel(
             id=scenario.id,
             config_id=scenario.config_id,
@@ -42,9 +46,7 @@ class _ScenarioConverter(_AbstractConverter):
             tags=list(scenario._tags),
             version=scenario._version,
             cycle=scenario._cycle.id if scenario._cycle else None,
-            pipelines={p_name: p.id if isinstance(p, Pipeline) else p for p_name, p in scenario._pipelines.items()}
-            if scenario._pipelines
-            else {},
+            pipelines=pipelines if pipelines else None,
         )
 
     @classmethod
@@ -52,9 +54,6 @@ class _ScenarioConverter(_AbstractConverter):
         tasks: Union[Set[TaskId], Set[Task], Set] = set()
         if model.tasks:
             tasks = set(model.tasks)
-        else:
-            if model.pipelines:
-                tasks = Scenario._get_set_of_tasks_from_pipelines(model.pipelines)
 
         scenario = Scenario(
             scenario_id=model.id,

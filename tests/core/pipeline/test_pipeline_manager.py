@@ -30,6 +30,7 @@ from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFa
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
@@ -42,35 +43,36 @@ def test_set_and_get_pipeline():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
 
-    pipeline_id_1 = PipelineId("id1")
-    pipeline_1 = Pipeline({}, [], pipeline_id_1)
+    input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
+    output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
+    task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
 
-    pipeline_id_2 = PipelineId("id2")
-    input_2 = InMemoryDataNode("foo", Scope.SCENARIO)
-    output_2 = InMemoryDataNode("foo", Scope.SCENARIO)
-    task_2 = Task("task", {}, print, [input_2], [output_2], TaskId("task_id_2"))
-    pipeline_2 = Pipeline({}, [task_2], pipeline_id_2)
+    scenario = Scenario("scenario", set([task]), {}, set())
+    _ScenarioManager._set(scenario)
 
-    pipeline_3_with_same_id = Pipeline({}, [], pipeline_id_1)
+    pipeline_name_1 = "p1"
+    pipeline_id_1 = PipelineId(f"PIPELINE_{pipeline_name_1}_{scenario.id}")
+    pipeline_name_2 = "p2"
+    pipeline_id_2 = PipelineId(f"PIPELINE_{pipeline_name_2}_{scenario.id}")
 
     # No existing Pipeline
     assert _PipelineManager._get(pipeline_id_1) is None
-    assert _PipelineManager._get(pipeline_1) is None
     assert _PipelineManager._get(pipeline_id_2) is None
-    assert _PipelineManager._get(pipeline_2) is None
+
+    scenario.add_pipelines({pipeline_name_1: []})
+    pipeline_1 = scenario.pipelines[pipeline_name_1]
 
     # Save one pipeline. We expect to have only one pipeline stored
-    _PipelineManager._set(pipeline_1)
     assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
     assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
     assert len(_PipelineManager._get(pipeline_1).tasks) == 0
     assert _PipelineManager._get(pipeline_id_2) is None
-    assert _PipelineManager._get(pipeline_2) is None
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
-    _TaskManager._set(task_2)
-    _PipelineManager._set(pipeline_2)
+    _TaskManager._set(task)
+    scenario.add_pipelines({pipeline_name_2: [task]})
+    pipeline_2 = scenario.pipelines[pipeline_name_2]
     assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
     assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
@@ -79,10 +81,11 @@ def test_set_and_get_pipeline():
     assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
     assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
-    assert _TaskManager._get(task_2.id).id == task_2.id
+    assert _TaskManager._get(task.id).id == task.id
 
     # We save the first pipeline again. We expect nothing to change
-    _PipelineManager._set(pipeline_1)
+    scenario.add_pipelines({pipeline_name_1: []})
+    pipeline_1 = scenario.pipelines[pipeline_name_1]
     assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
     assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
@@ -91,21 +94,22 @@ def test_set_and_get_pipeline():
     assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
     assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
-    assert _TaskManager._get(task_2.id).id == task_2.id
+    assert _TaskManager._get(task.id).id == task.id
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
-    _PipelineManager._set(pipeline_3_with_same_id)
+    scenario.add_pipelines({pipeline_name_1: [task]})
+    pipeline_3 = scenario.pipelines[pipeline_name_1]
     assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
-    assert _PipelineManager._get(pipeline_id_1).id == pipeline_3_with_same_id.id
-    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_id_1).id == pipeline_3.id
+    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 1
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
-    assert len(_PipelineManager._get(pipeline_1).tasks) == 0
+    assert len(_PipelineManager._get(pipeline_1).tasks) == 1
     assert _PipelineManager._get(pipeline_id_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
     assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
-    assert _TaskManager._get(task_2.id).id == task_2.id
+    assert _TaskManager._get(task.id).id == task.id
 
 
 def test_get_all_on_multiple_versions_environment():
@@ -136,13 +140,17 @@ def test_get_all_on_multiple_versions_environment():
 
 
 def test_is_submittable():
-    assert len(_PipelineManager._get_all()) == 0
-    pipeline = _PipelineManager._create("pipeline", [])
+    scenario = Scenario("scenario", set(), {}, set())
+    _ScenarioManager._set(scenario)
+
+    scenario.add_pipelines({"pipeline": []})
+    pipeline = scenario.pipelines["pipeline"]
 
     assert len(_PipelineManager._get_all()) == 1
     assert _PipelineManager._is_submittable(pipeline)
     assert _PipelineManager._is_submittable(pipeline.id)
     assert not _PipelineManager._is_submittable("Pipeline_temp")
+    assert not _PipelineManager._is_submittable("PIPELINE_temp_SCENARIO_scenario")
 
 
 def test_submit():

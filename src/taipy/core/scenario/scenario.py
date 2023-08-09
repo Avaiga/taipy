@@ -86,9 +86,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
         tags: Optional[Set[str]] = None,
         version: str = None,
-        pipelines: Optional[Union[Dict[str, PipelineId], Dict[str, Pipeline]]] = None,
+        pipelines: Optional[Union[Dict[str, List[Task]], Dict[str, List[TaskId]]]] = None,
     ):
-        super().__init__(subscribers)
+        super().__init__(subscribers or [])
         self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
 
@@ -100,31 +100,13 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._primary_scenario = is_primary
         self._tags = tags or set()
         self._properties = _Properties(self, **properties)
-        self._pipelines: Union[Dict[str, Pipeline], Dict[str, PipelineId], Dict] = pipelines or {}
+        self._pipelines: Union[Dict[str, List[Task]], Dict[str, List[TaskId]], Dict] = pipelines or {}
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
     def _new_id(config_id: str) -> ScenarioId:
         """Generate a unique scenario identifier."""
         return ScenarioId(Scenario.__SEPARATOR.join([Scenario._ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
-
-    @staticmethod
-    def _get_set_of_tasks_from_pipelines(
-        pipelines: Union[Dict[str, PipelineId], Dict[str, Pipeline]]
-    ) -> Union[Set[Task], Set[TaskId], Set]:
-        tasks = set()
-
-        pipeline_manager = _PipelineManagerFactory._build_manager()
-
-        for pipeline_or_id in pipelines.values():
-            p = pipeline_manager._get(pipeline_or_id, pipeline_or_id)
-
-            if not isinstance(p, Pipeline):
-                raise NonExistingPipeline(pipeline_or_id)
-
-            tasks.update(p.tasks.values())
-
-        return tasks
 
     def __getstate__(self):
         return self.id
@@ -164,29 +146,28 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     @pipelines.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def pipelines(self, pipelines: Union[Dict[str, PipelineId], Dict[str, Pipeline]]):
+    def pipelines(self, pipelines: Union[Dict[str, TaskId], Dict[str, Task]]):
         self._pipelines = pipelines
 
-    def add_pipelines(self, pipelines: Union[Dict[str, PipelineId], Dict[str, Pipeline]]):
-        _pipelines = self.pipelines.copy()
+    def add_pipelines(self, pipelines: Union[Dict[str, TaskId], Dict[str, Task]]):
+        _pipelines = _Reloader()._reload(self._MANAGER_NAME, self)._pipelines
         _pipelines.update(pipelines)
-        self.pipelines = _pipelines  # type: ignore
+        self.pipelines = _pipelines
 
-    def remove_pipelines(self, pipelines: List[PipelineId]):
+    def remove_pipelines(self, pipeline_names: List[str]):
         _pipelines = self.pipelines.copy()
-        for pipeline in pipelines:
-            _pipelines.pop(pipeline)
+        for pipeline_name in pipeline_names:
+            _pipelines.pop(pipeline_name)
         self.pipelines = _pipelines  # type: ignore
 
     def __get_pipelines(self) -> Dict[str, Pipeline]:
         _pipelines = {}
         pipeline_manager = _PipelineManagerFactory._build_manager()
 
-        for pipeline_name, pipeline_or_id in self._pipelines.items():
-            p = pipeline_manager._get(pipeline_or_id, pipeline_or_id)
-
+        for pipeline_name, tasks in self._pipelines.items():
+            p = pipeline_manager._create(pipeline_name, tasks, self.id)
             if not isinstance(p, Pipeline):
-                raise NonExistingPipeline(pipeline_or_id)
+                raise NonExistingPipeline(pipeline_name)
             _pipelines[pipeline_name] = p
         return _pipelines
 
