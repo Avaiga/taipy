@@ -389,6 +389,30 @@ class DataNodeConfig(Section):
         return Config.sections[DataNodeConfig.name][_Config.DEFAULT_KEY]
 
     @classmethod
+    def _configure_from(
+        cls,
+        source_configuration: "DataNodeConfig",
+        id: str,
+        **properties,
+    ) -> "DataNodeConfig":
+        """Configure a new data node configuration from an existing one.
+
+        Parameters:
+            source_configuration (DataNodeConfig): The source data node configuration.
+            id (str): The unique identifier of the new data node configuration.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.<br/>
+                The default properties are the properties of the source data node configuration.
+
+        Returns:
+            The new data node configuration.
+        """
+        scope = properties.pop("scope", None) or source_configuration.scope
+        validity_period = properties.pop("validity_period", None) or source_configuration.validity_period
+        properties = {**source_configuration.properties, **properties}  # type: ignore
+
+        return cls.__configure(id, source_configuration.storage_type, scope, validity_period, **properties)
+
+    @classmethod
     def _configure(
         cls,
         id: str,

@@ -379,6 +379,7 @@ def init_config():
         DataNodeConfig.default_config(),
         [
             ("configure_data_node", DataNodeConfig._configure),
+            ("configure_data_node_from", DataNodeConfig._configure_from),
             ("set_default_data_node_configuration", DataNodeConfig._set_default_configuration),
             ("configure_csv_data_node", DataNodeConfig._configure_csv),
             ("configure_json_data_node", DataNodeConfig._configure_json),
