@@ -94,20 +94,6 @@ def test_create_task():
         assert task.get_simple_label() == task.config_id
 
 
-def test_parent_id_deprecated():
-    task = Task("foo", {}, print, owner_id="owner_id")
-
-    with pytest.warns(DeprecationWarning):
-        task.parent_id
-
-    assert task.owner_id == task.parent_id
-    with pytest.warns(DeprecationWarning):
-        task.parent_id = "owner_id_2"
-
-    assert task.owner_id == task.parent_id
-    assert task.owner_id == "owner_id_2"
-
-
 def test_can_not_change_task_output(output):
     task = Task("name_1", {}, print, output=output)
 

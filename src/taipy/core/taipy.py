@@ -14,13 +14,11 @@ import shutil
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 
-from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
-from .common._warnings import _warn_deprecated, _warn_no_core_service
-from .config.pipeline_config import PipelineConfig
+from .common._warnings import _warn_no_core_service
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
 from .cycle.cycle import Cycle

@@ -93,7 +93,7 @@ class TestJSONDataNode:
         assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
-        assert dn.last_edition_date is None
+        assert dn.last_edit_date is None
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert dn.path == path

@@ -21,7 +21,6 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._warnings import _warn_deprecated
 from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingDataNode
@@ -108,18 +107,6 @@ class Task(_Entity, _Labeled):
     def properties(self):
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
-
-    @property
-    def parent_id(self):
-        """Deprecated. Use owner_id instead."""
-        _warn_deprecated("parent_id", suggest="owner_id")
-        return self.owner_id
-
-    @parent_id.setter
-    def parent_id(self, val):
-        """Deprecated. Use owner_id instead."""
-        _warn_deprecated("parent_id", suggest="owner_id")
-        self.owner_id = val
 
     def get_parents(self):
         """Get parents of the task."""

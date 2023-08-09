@@ -78,7 +78,7 @@ def test_submit_task():
 
     _OrchestratorFactory._build_dispatcher()
 
-    assert _DataManager._get(output_dn_id).last_edition_date > before_creation
+    assert _DataManager._get(output_dn_id).last_edit_date > before_creation
     assert _DataManager._get(output_dn_id).job_ids == []
     assert _DataManager._get(output_dn_id).is_ready_for_reading
 
@@ -88,8 +88,8 @@ def test_submit_task():
     sleep(0.1)
     after_submission_creation = datetime.now()
     assert _DataManager._get(output_dn_id).read() == 42
-    assert _DataManager._get(output_dn_id).last_edition_date > before_submission_creation
-    assert _DataManager._get(output_dn_id).last_edition_date < after_submission_creation
+    assert _DataManager._get(output_dn_id).last_edit_date > before_submission_creation
+    assert _DataManager._get(output_dn_id).last_edit_date < after_submission_creation
     assert _DataManager._get(output_dn_id).job_ids == [job.id]
     assert _DataManager._get(output_dn_id).is_ready_for_reading
     assert job.is_completed()

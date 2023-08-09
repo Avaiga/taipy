@@ -192,7 +192,7 @@ def test_complex():
 
 
 # def test_same_pipeline_submission_with_overlap_datanode():
-#     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+#     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
 #     _Orchestrator._update_job_config()
 
 #     # d1 ---- t1 ---- d2 ---- t2
@@ -242,7 +242,7 @@ def test_complex():
 #     assert _Orchestrator.jobs_to_run.qsize() == 0
 #     assert pipeline_div_print.dn2_div.read() == 10
 
-#     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+#     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 #     _Orchestrator._update_job_config()
 
 #     tp.submit(pipeline_div_print)

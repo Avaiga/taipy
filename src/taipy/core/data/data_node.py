@@ -112,18 +112,6 @@ class DataNode(_Entity, _Labeled):
 
         self._properties = _Properties(self, **kwargs)
 
-    @property
-    def parent_id(self):
-        """Deprecated. Use `owner_id` instead."""
-        _warn_deprecated("parent_id", suggest="owner_id")
-        return self.owner_id
-
-    @parent_id.setter
-    def parent_id(self, val):
-        """Deprecated. Use `owner_id` instead."""
-        _warn_deprecated("parent_id", suggest="owner_id")
-        self.owner_id = val
-
     def get_parents(self):
         """Get all parents of this data node."""
         from ... import core as tp
@@ -165,17 +153,6 @@ class DataNode(_Entity, _Labeled):
     @_self_setter(_MANAGER_NAME)
     def last_edit_date(self, val):
         self._last_edit_date = val
-
-    @property
-    def last_edition_date(self):
-        """Deprecated. Use `last_edit_date` instead."""
-        _warn_deprecated("last_edition_date", suggest="last_edit_date")
-        return self.last_edit_date
-
-    @last_edition_date.setter
-    def last_edition_date(self, val):
-        _warn_deprecated("last_edition_date", suggest="last_edit_date")
-        self.last_edit_date = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -242,18 +219,6 @@ class DataNode(_Entity, _Labeled):
     @_self_setter(_MANAGER_NAME)
     def edit_in_progress(self, val):
         self._edit_in_progress = val
-
-    @property
-    def edition_in_progress(self):
-        """Deprecated. Use `edit_in_progress` instead."""
-        _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
-        return self.edit_in_progress
-
-    @edition_in_progress.setter
-    def edition_in_progress(self, val):
-        """Deprecated. Use `edit_in_progress` instead."""
-        _warn_deprecated("edition_in_progress", suggest="edit_in_progress")
-        self.edit_in_progress = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -372,27 +337,12 @@ class DataNode(_Entity, _Labeled):
         """
         self.edit_in_progress = True
 
-    def lock_edition(self):
-        """Deprecated. Use `lock_edit` instead."""
-        _warn_deprecated("lock_edition", suggest="lock_edit")
-        self.lock_edit()
-
-    def unlock_edit(self, at: Optional[datetime] = None, job_id: Optional[JobId] = None):
+    def unlock_edit(self):
         """Unlocks the data node modification.
-
-        Parameters:
-            at (Optional[datetime]): Deprecated.
-            job_id (Optional[JobId^]): Deprecated.
-
         Note:
             The data node can be locked with the method `(DataNode.)lock_edit()^`.
         """
-        self.edit_in_progress = False  # type: ignore
-
-    def unlock_edition(self, at: Optional[datetime] = None, job_id: Optional[JobId] = None):
-        """Deprecated. Use `(DataNode.)unlock_edit()^` instead."""
-        _warn_deprecated("unlock_edition", suggest="unlock_edit")
-        self.unlock_edit()
+        self.edit_in_progress = False
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """Read and filter the data referenced by this data node.

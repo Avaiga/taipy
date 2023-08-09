@@ -16,7 +16,6 @@ from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.unique_section import UniqueSection
 
-from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import ModeNotAvailable
 
 
@@ -80,10 +79,7 @@ class JobConfig(UniqueSection):
 
     @staticmethod
     def _configure(
-        mode: Optional[str] = None,
-        nb_of_workers: Optional[Union[int, str]] = None,
-        max_nb_of_workers: Optional[Union[int, str]] = None,
-        **properties
+        mode: Optional[str] = None, max_nb_of_workers: Optional[Union[int, str]] = None, **properties
     ) -> "JobConfig":
         """Configure job execution.
 
@@ -96,17 +92,11 @@ class JobConfig(UniqueSection):
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
                 `&lt;env_var&gt;` is the name of an environment variable.
-            nb_of_workers (Optional[int, str]): Deprecated. Use *max_nb_of_workers* instead.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
             The new job execution configuration.
         """
-        if nb_of_workers:
-            _warn_deprecated("nb_or_workers", suggest="max_nb_of_workers")
-            if not max_nb_of_workers:
-                max_nb_of_workers = nb_of_workers
-
         section = JobConfig(mode, max_nb_of_workers=max_nb_of_workers, **properties)
         Config._register(section)
         return Config.unique_sections[JobConfig.name]

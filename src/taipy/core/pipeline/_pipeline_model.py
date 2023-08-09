@@ -51,7 +51,7 @@ class _PipelineModel(_BaseModel):
     def from_dict(data: Dict[str, Any]):
         return _PipelineModel(
             id=data["id"],
-            owner_id=data.get("owner_id", data.get("parent_id")),
+            owner_id=data.get("owner_id"),
             parent_ids=data.get("parent_ids", []),
             properties=data["properties"],
             tasks=data["tasks"],
