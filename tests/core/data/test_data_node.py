@@ -660,19 +660,6 @@ class TestDataNode:
             data_node.get_parents()
             mck.assert_called_once_with(data_node)
 
-    def test_get_custom_properties(self, data_node):
-        with mock.patch("src.taipy.core.data.data_node.DataNode._get_custom_properties") as mck:
-            data_node._get_custom_properties()
-            mck.assert_called_once()
-
-        result = data_node._get_custom_properties()
-        assert result == {}
-
-        result = data_node._get_custom_properties(
-            "config_id", "id", "owner_id", "parent_id", "scope", "last_edit_date", "name"
-        )
-        assert len(result) == 7
-
     def test_unlock_edition_deprecated(self):
         dn = FakeDataNode("foo")
 

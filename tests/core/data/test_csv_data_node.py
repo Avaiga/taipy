@@ -66,6 +66,25 @@ class TestCSVDataNode:
                 "foo bar", Scope.SCENARIO, name="super name", properties={"path": path, "has_header": False}
             )
 
+    def test_get_custom_properties(self, csv_file):
+        dn_1 = CSVDataNode("dn_1", Scope.SCENARIO, properties={"path": "data/node/path"})
+        assert dn_1._get_custom_properties() == {}
+
+        dn_2 = CSVDataNode(
+            "dn_2",
+            Scope.SCENARIO,
+            properties={
+                "exposed_type": "numpy",
+                "default_data": "foo",
+                "default_path": csv_file,
+                "has_header": False,
+                "foo": "bar",
+            },
+        )
+
+        # exposed_type, default_data, default_path, path, has_header, sheet_name are filtered out
+        assert dn_2._get_custom_properties() == {"foo": "bar"}
+
     def test_new_csv_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node("not_ready_data_node_config_id", "csv", path="NOT_EXISTING.csv")
         not_ready_dn = _DataManager._bulk_get_or_create([not_ready_dn_cfg])[not_ready_dn_cfg]

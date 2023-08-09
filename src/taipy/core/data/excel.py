@@ -136,6 +136,17 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         if not self._last_edit_date and isfile(self._path):
             self._last_edit_date = datetime.now()
 
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__EXPOSED_TYPE_PROPERTY,
+                self.__PATH_KEY,
+                self.__DEFAULT_PATH_KEY,
+                self.__DEFAULT_DATA_KEY,
+                self.__HAS_HEADER_PROPERTY,
+                self.__SHEET_NAME_PROPERTY,
+            }
+        )
+
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)
     def path(self):

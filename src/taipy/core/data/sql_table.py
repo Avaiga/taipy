@@ -104,6 +104,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
             edit_in_progress=edit_in_progress,
             properties=properties,
         )
+        self._TAIPY_PROPERTIES.update({self.__TABLE_KEY})
 
     @classmethod
     def storage_type(cls) -> str:

@@ -124,6 +124,16 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
 
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__EXPOSED_TYPE_PROPERTY,
+                self.__PATH_KEY,
+                self.__DEFAULT_PATH_KEY,
+                self.__DEFAULT_DATA_KEY,
+                self.__HAS_HEADER_PROPERTY,
+            }
+        )
+
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE

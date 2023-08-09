@@ -108,6 +108,15 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
 
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__PATH_KEY,
+                self.__DEFAULT_PATH_KEY,
+                self.__DEFAULT_DATA_KEY,
+                self.__IS_GENERATED_KEY,
+            }
+        )
+
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE

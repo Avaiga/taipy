@@ -81,6 +81,8 @@ class DataNode(_Entity, _Labeled):
     _MANAGER_NAME = "data"
     __PATH_KEY = "path"
 
+    _TAIPY_PROPERTIES: Set[str] = set()
+
     def __init__(
         self,
         config_id,
@@ -267,16 +269,9 @@ class DataNode(_Entity, _Labeled):
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
-    def _get_custom_properties(self, *properties) -> Dict[str, Any]:
-        """Get custom properties of the data node.
-
-        Parameters:
-            properties: The list of properties to get.
-
-        Returns:
-            A dictionary containing the values of the requested properties.
-        """
-        return {prop: getattr(self, prop) for prop in properties}
+    def _get_custom_properties(self) -> Dict[str, Any]:
+        """Get custom properties of the data node except from the ones created by TAIPY."""
+        return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
 
     def __eq__(self, other):
         return self.id == other.id
