@@ -23,39 +23,99 @@ import * as React from "react";
 export declare const getUpdateVar: (updateVars: string, name: string) => string | undefined;
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
-	defaultActive?: boolean;
-	active?: boolean;
+    defaultActive?: boolean;
+    active?: boolean;
 }
 export interface TaipyHoverProps {
-	hoverText?: string;
-	defaultHoverText?: string;
+    hoverText?: string;
+    defaultHoverText?: string;
 }
 export interface TaipyDynamicProps extends TaipyBaseProps {
-	updateVarName?: string;
-	propagate?: boolean;
-	updateVars?: string;
+    updateVarName?: string;
+    propagate?: boolean;
+    updateVars?: string;
 }
 export interface TaipyBaseProps {
-	id?: string;
-	libClassName?: string;
-	className?: string;
-	dynamicClassName?: string;
+    id?: string;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
 }
 export interface DialogProps extends TaipyActiveProps {
-	title: string;
-	onAction?: string;
-	closeLabel?: string;
-	labels?: string;
-	page?: string;
-	partial?: boolean;
-	open?: boolean;
-	defaultOpen?: string | boolean;
-	children?: React.ReactNode;
-	height?: string | number;
-	width?: string | number;
+    title: string;
+    onAction?: string;
+    closeLabel?: string;
+    labels?: string;
+    page?: string;
+    partial?: boolean;
+    open?: boolean;
+    defaultOpen?: string | boolean;
+    children?: React.ReactNode;
+    height?: string | number;
+    width?: string | number;
     localAction?: (idx: number) => void;
 }
 export declare const Dialog: (props: DialogProps) => JSX.Element;
+
+export interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
+    title?: string;
+    width?: string | number;
+    height?: string | number;
+    defaultConfig: string;
+    config?: string;
+    data?: Record<string, TraceValueType>;
+    defaultLayout?: string;
+    layout?: string;
+    plotConfig?: string;
+    onRangeChange?: string;
+    testId?: string;
+    render?: boolean;
+    defaultRender?: boolean;
+    template?: string;
+    template_Dark_?: string;
+    template_Light_?: string;
+}
+export type TraceValueType = Record<string, (string | number)[]>;
+export declare const Chart: (props: ChartProp) => JSX.Element;
+
+export interface TaipyMultiSelectProps {
+    selected?: number[];
+}
+export interface TaipyChangeProps {
+    onChange?: string;
+}
+
+export type TableValueType = Record<string, Record<string, any>>;
+export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps {
+    data?: TableValueType;
+    columns?: string;
+    defaultColumns: string;
+    height?: string;
+    width?: string;
+    pageSize?: number;
+    onEdit?: string;
+    onDelete?: string;
+    onAdd?: string;
+    onAction?: string;
+    editable?: boolean;
+    defaultEditable?: boolean;
+    lineStyle?: string;
+    tooltip?: string;
+    cellTooltip?: string;
+    nanValue?: string;
+    filter?: boolean;
+    size?: "small" | "medium";
+    defaultKey?: string;
+}
+export interface TaipyPaginatedTableProps extends TaipyTableProps {
+    pageSizeOptions?: string;
+    allowAllRows?: boolean;
+    showAll?: boolean;
+}
+export interface TableProps extends TaipyPaginatedTableProps {
+    autoLoading?: boolean;
+}
+export declare const Table: (props: TableProps) => JSX.Element;
 
 export declare const Router: () => JSX.Element;
 
@@ -141,7 +201,14 @@ export interface Action {}
  *   example the lov when a lov value is updated).
  * @returns The action fed to the reducer.
  */
-export declare const createSendUpdateAction: (name: string | undefined, value: unknown, context: string | undefined, onChange?: string, propagate?: boolean, relName?: string) => Action;
+export declare const createSendUpdateAction: (
+    name: string | undefined,
+    value: unknown,
+    context: string | undefined,
+    onChange?: string,
+    propagate?: boolean,
+    relName?: string
+) => Action;
 /**
  * Create an *action* `Action` that will be used to update `Context`.
  *
@@ -154,7 +221,12 @@ export declare const createSendUpdateAction: (name: string | undefined, value: u
  * @param args - Additional information associated to the action.
  * @returns The action fed to the reducer.
  */
-export declare const createSendActionNameAction: (name: string | undefined, context: string | undefined, value: unknown, ...args: unknown[]) => Action;
+export declare const createSendActionNameAction: (
+    name: string | undefined,
+    context: string | undefined,
+    value: unknown,
+    ...args: unknown[]
+) => Action;
 /**
  * Create a *request data update* `Action` that will be used to update the `Context`.
  *
@@ -175,7 +247,16 @@ export declare const createSendActionNameAction: (name: string | undefined, cont
  * @param library - The name of the {@link extension} library.
  * @returns The action fed to the reducer.
  */
-export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, context: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
+export declare const createRequestDataUpdateAction: (
+    name: string | undefined,
+    id: string | undefined,
+    context: string | undefined,
+    columns: string[],
+    pageKey: string,
+    payload: Record<string, unknown>,
+    allData?: boolean,
+    library?: string
+) => Action;
 /**
  * Create a *request update* `Action` that will be used to update the `Context`.
  *
@@ -187,64 +268,69 @@ export declare const createRequestDataUpdateAction: (name: string | undefined, i
  * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values.
  * @returns The action fed to the reducer.
  */
-export declare const createRequestUpdateAction: (id: string | undefined, context: string | undefined, names: string[], forceRefresh?: boolean) => Action;
+export declare const createRequestUpdateAction: (
+    id: string | undefined,
+    context: string | undefined,
+    names: string[],
+    forceRefresh?: boolean
+) => Action;
 /**
  * A column description as received by the backend.
  */
 export interface ColumnDesc {
-     /** The unique column identifier. */
-     dfid: string;
-     /** The column type. */
-     type: string;
-     /** The value format. */
-     format?: string;
-     /** The column title. */
-     title?: string;
-     /** The order of the column. */
-     index: number;
-     /** The width. */
-     width?: number | string;
-     /** If set to true, the column should not be editable. */
-     notEditable?: boolean;
-     /** The column name that would hold the css classname to apply to the cell. */
-     style?: string;
-     /** The value that would replace a NaN value. */
-     nanValue?: string;
-     /** The TimeZone identifier used if the type is Date. */
-     tz?: string;
-     /** The flag that allows filtering. */
-     filter?: boolean;
-     /** The identifier for the aggregation function. */
-     apply?: string;
-     /** The flag that would allow the user to aggregate the column. */
-     groupBy?: boolean;
-     widthHint?: number;
- }
+    /** The unique column identifier. */
+    dfid: string;
+    /** The column type. */
+    type: string;
+    /** The value format. */
+    format?: string;
+    /** The column title. */
+    title?: string;
+    /** The order of the column. */
+    index: number;
+    /** The width. */
+    width?: number | string;
+    /** If set to true, the column should not be editable. */
+    notEditable?: boolean;
+    /** The column name that would hold the css classname to apply to the cell. */
+    style?: string;
+    /** The value that would replace a NaN value. */
+    nanValue?: string;
+    /** The TimeZone identifier used if the type is Date. */
+    tz?: string;
+    /** The flag that allows filtering. */
+    filter?: boolean;
+    /** The identifier for the aggregation function. */
+    apply?: string;
+    /** The flag that would allow the user to aggregate the column. */
+    groupBy?: boolean;
+    widthHint?: number;
+}
 /**
  * A cell value type.
  */
- export declare type RowValue = string | number | boolean | null;
+export declare type RowValue = string | number | boolean | null;
 /**
  * The definition of a table row.
  *
  * A row definition associates a name (a string) to a type (a {@link RowValue}).
  */
- export declare type RowType = Record<string, RowValue>;
+export declare type RowType = Record<string, RowValue>;
 /**
  * The Taipy Store.
  */
- export interface Store {
-     /** The State of the Taipy application. */
-     state: State;
-     /** The React *dispatch* function. */
-     dispatch:React.Dispatch<Action>;
- }
+export interface Store {
+    /** The State of the Taipy application. */
+    state: State;
+    /** The React *dispatch* function. */
+    dispatch: React.Dispatch<Action>;
+}
 /**
  * The Taipy-specific React context.
  *
  * The type of this variable is `React.Context<Store>`.
  */
- export declare const Context: React.Context<Store>;
+export declare const Context: React.Context<Store>;
 /**
  * A React hook to manage a dynamic scalar property.
  *
@@ -255,7 +341,7 @@ export interface ColumnDesc {
  * @param defaultStatic - The default static value.
  * @returns The latest updated value.
  */
- export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
+export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
 /**
  * A React hook to manage a dynamic json property.
  *
@@ -275,7 +361,13 @@ export const useDynamicJsonProperty: <T>(value: string | T, defaultValue: string
  * @param updateVars - The content of the property `updateVars`.
  * @param varName - The default property backend provided variable (through property `updateVarName`).
  */
- export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: React.Dispatch<Action>, id?: string, context?: string, updateVars?: string, varName?: string) => void;
+export declare const useDispatchRequestUpdateOnFirstRender: (
+    dispatch: React.Dispatch<Action>,
+    id?: string,
+    context?: string,
+    updateVars?: string,
+    varName?: string
+) => void;
 /**
  * A React hook that returns the *dispatch* function.
  *
@@ -283,7 +375,7 @@ export const useDynamicJsonProperty: <T>(value: string | T, defaultValue: string
  * communications.
  * @returns The *dispatch* function.
  */
- export declare const useDispatch: () => React.Dispatch<Action>;
+export declare const useDispatch: () => React.Dispatch<Action>;
 /**
  * A React hook that returns the page module.
  *
