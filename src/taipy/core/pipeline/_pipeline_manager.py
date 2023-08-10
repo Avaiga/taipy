@@ -10,13 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 from functools import partial
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
+from ..common._utils import _Subscriber
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
-from ..exceptions.exceptions import InvalidPipelineId, ModelNotFound, NonExistingPipeline
+from ..exceptions.exceptions import InvalidPipelineId, ModelNotFound, NonExistingPipeline, NonExistingTask
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, _publish_event
@@ -92,26 +93,33 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         cls,
         pipeline_name: str,
         tasks: Union[List[Task], List[TaskId]],
+        subscribers: Optional[List[_Subscriber]] = None,
+        properties: Optional[Dict] = None,
         scenario_id: Optional[ScenarioId] = None,
     ) -> Pipeline:
         pipeline_id = Pipeline._new_id(pipeline_name, scenario_id)
-        owner_id = scenario_id
 
         task_manager = _TaskManagerFactory._build_manager()
         _tasks = []
         for task in tasks:
             if not isinstance(task, Task):
-                _tasks.append(task_manager._get(task))
+                if _task := task_manager._get(task):
+                    _tasks.append(_task)
+                else:
+                    raise NonExistingTask(task)
             else:
                 _tasks.append(task)
 
+        properties = properties if properties else {}
+        properties["name"] = pipeline_name
         version = cls._get_latest_version()
         pipeline = Pipeline(
-            {"name": pipeline_name},
-            _tasks,
-            pipeline_id,
-            owner_id,
-            {scenario_id} if scenario_id else None,
+            properties=properties,
+            tasks=_tasks,
+            pipeline_id=pipeline_id,
+            owner_id=scenario_id,
+            parent_ids={scenario_id} if scenario_id else None,
+            subscribers=subscribers,
             version=version,
         )
         for task in _tasks:
@@ -123,7 +131,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     @classmethod
     def _get(cls, pipeline: Union[str, Pipeline], default=None) -> Pipeline:
         """
-        Returns an entity by id or reference.
+        Returns a pipeline by id or reference.
         """
         try:
             pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
@@ -141,6 +149,35 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         except (ModelNotFound, InvalidPipelineId):
             cls._logger.error(f"{cls._ENTITY_NAME} not found: {pipeline_id}")
             return default
+
+    @classmethod
+    def _set(cls, pipeline: Pipeline):
+        """
+        Save or update a pipeline.
+        """
+        try:
+            pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline.id)
+
+            from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
+            from ..scenario.scenario import Scenario
+
+            scenario_manager = _ScenarioManagerFactory._build_manager()
+
+            if scenario := scenario_manager._get(scenario_id):
+                pipeline_data = {
+                    Scenario._PIPELINE_TASKS_KEY: pipeline._tasks,
+                    Scenario._PIPELINE_SUBSCRIBERS_KEY: pipeline._subscribers,
+                    Scenario._PIPELINE_PROPERTIES_KEY: pipeline._properties.data,
+                }
+                scenario._pipelines[pipeline_name] = pipeline_data  # type: ignore
+                scenario_manager._set(scenario)
+            else:
+                # TODO: raise error and add test cases
+                pass
+
+        except (ModelNotFound, InvalidPipelineId):
+            # cls._logger.error(f"{cls._ENTITY_NAME} not found: {pipeline_id}")
+            pass
 
     @classmethod
     def _breakdown_pipeline_id(cls, pipeline_id: str) -> Tuple[str, str]:

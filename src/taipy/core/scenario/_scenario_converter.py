@@ -27,9 +27,15 @@ from ..task.task import Task, TaskId
 class _ScenarioConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, scenario: Scenario) -> _ScenarioModel:
-        pipelines: Dict[str, List[TaskId]] = {}
-        for p_name, tasks in scenario._pipelines.items():
-            pipelines[p_name] = [t.id if isinstance(t, Task) else t for t in tasks]
+        pipelines: Dict[str, Dict[str, Union[List[TaskId], Dict, List]]] = {}
+        for p_name, pipeline_data in scenario._pipelines.items():
+            pipelines[p_name] = {
+                Scenario._PIPELINE_TASKS_KEY: [
+                    t.id if isinstance(t, Task) else t for t in pipeline_data.get("tasks", [])
+                ],
+                Scenario._PIPELINE_PROPERTIES_KEY: pipeline_data.get("properties", {}),  # type: ignore
+                Scenario._PIPELINE_SUBSCRIBERS_KEY: _utils._fcts_to_dict(pipeline_data.get("subscribers", [])),
+            }
 
         return _ScenarioModel(
             id=scenario.id,
@@ -54,6 +60,13 @@ class _ScenarioConverter(_AbstractConverter):
         tasks: Union[Set[TaskId], Set[Task], Set] = set()
         if model.tasks:
             tasks = set(model.tasks)
+        if model.pipelines:
+            for pipeline_name, pipeline_data in model.pipelines.items():
+                if subscribers := pipeline_data.get(Scenario._PIPELINE_SUBSCRIBERS_KEY):
+                    model.pipelines[pipeline_name][Scenario._PIPELINE_SUBSCRIBERS_KEY] = [
+                        _utils._Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])  # type: ignore
+                        for it in subscribers
+                    ]
 
         scenario = Scenario(
             scenario_id=model.id,
@@ -70,7 +83,7 @@ class _ScenarioConverter(_AbstractConverter):
                 for it in model.subscribers
             ],
             version=model.version,
-            pipelines=model.pipelines,
+            pipelines=model.pipelines,  # type: ignore
         )
         return _migrate_entity(scenario)
 

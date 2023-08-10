@@ -136,7 +136,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             sequence_tasks = [
                 tasks_and_config_id_maps[sequence_task_config.id] for sequence_task_config in sequence_task_configs
             ]
-            pipelines[sequence_name] = sequence_tasks
+            pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
@@ -154,7 +154,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             is_primary=is_primary_scenario,
             cycle=cycle,
             version=version,
-            pipelines=pipelines,
+            pipelines=pipelines,  # type: ignore
         )
 
         for task in tasks:

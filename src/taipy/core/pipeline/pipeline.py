@@ -11,7 +11,6 @@
 
 from __future__ import annotations
 
-import uuid
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
@@ -21,8 +20,11 @@ from taipy.config.common._validate_id import _validate_id
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
+from .._entity._properties import _Properties
+from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._entity.submittable import Submittable
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
@@ -65,7 +67,7 @@ class Pipeline(_Entity, Submittable, _Labeled):
         self._tasks = tasks
         self.owner_id = owner_id
         self._parent_ids = parent_ids or set()
-        self.properties = properties
+        self._properties = _Properties(self, **properties)
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
@@ -93,10 +95,12 @@ class Pipeline(_Entity, Submittable, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of pipeline {self.id}")
 
     @property  # type: ignore
+    # @_self_reload(_MANAGER_NAME)
     def tasks(self) -> Dict[str, Task]:
         return self._get_tasks()
 
     @tasks.setter  # type: ignore
+    # @_self_setter(_MANAGER_NAME)
     def tasks(self, tasks: Union[List[TaskId], List[Task]]):
         self._tasks = tasks
 
@@ -116,6 +120,11 @@ class Pipeline(_Entity, Submittable, _Labeled):
     @property
     def version(self):
         return self._version
+
+    @property
+    def properties(self):
+        self._properties = _Reloader()._reload("pipeline", self)._properties
+        return self._properties
 
     def _is_consistent(self) -> bool:
         dag = self._build_dag()
@@ -156,12 +165,14 @@ class Pipeline(_Entity, Submittable, _Labeled):
         return tasks
 
     @property  # type: ignore
+    # @_self_reload(_MANAGER_NAME)
     def subscribers(self):
         return self._subscribers
 
     @subscribers.setter  # type: ignore
+    # @_self_setter(_MANAGER_NAME)
     def subscribers(self, val):
-        self._subscribers = [val]
+        self._subscribers = _ListAttributes(self, val)
 
     def get_parents(self):
         """Get parents of the pipeline entity"""

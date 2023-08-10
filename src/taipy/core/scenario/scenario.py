@@ -27,20 +27,17 @@ from .._entity.submittable import Submittable
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
-from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
-from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import NonExistingDataNode, NonExistingPipeline, NonExistingTask
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from ..pipeline.pipeline import Pipeline, PipelineId
+from ..pipeline.pipeline import Pipeline
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from ..task.task_id import TaskId
-from ._scenario_model import _ScenarioModel
 from .scenario_id import ScenarioId
 
 
@@ -72,6 +69,9 @@ class Scenario(_Entity, Submittable, _Labeled):
     _MANAGER_NAME = "scenario"
     _MIGRATED_PIPELINES_KEY = "pipelines"
     __SEPARATOR = "_"
+    _PIPELINE_TASKS_KEY = "tasks"
+    _PIPELINE_PROPERTIES_KEY = "properties"
+    _PIPELINE_SUBSCRIBERS_KEY = "subscribers"
 
     def __init__(
         self,
@@ -86,7 +86,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
         tags: Optional[Set[str]] = None,
         version: str = None,
-        pipelines: Optional[Union[Dict[str, List[Task]], Dict[str, List[TaskId]]]] = None,
+        pipelines: Optional[
+            Dict[str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]]
+        ] = None,
     ):
         super().__init__(subscribers or [])
         self.config_id = _validate_id(config_id)
@@ -100,7 +102,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._primary_scenario = is_primary
         self._tags = tags or set()
         self._properties = _Properties(self, **properties)
-        self._pipelines: Union[Dict[str, List[Task]], Dict[str, List[TaskId]], Dict] = pipelines or {}
+        self._pipelines: Dict[
+            str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]
+        ] = (pipelines or {})
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
@@ -146,13 +150,15 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     @pipelines.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def pipelines(self, pipelines: Union[Dict[str, TaskId], Dict[str, Task]]):
+    def pipelines(
+        self, pipelines: Dict[str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]]
+    ):
         self._pipelines = pipelines
 
-    def add_pipelines(self, pipelines: Union[Dict[str, TaskId], Dict[str, Task]]):
+    def add_pipelines(self, pipelines: Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
         _pipelines = _Reloader()._reload(self._MANAGER_NAME, self)._pipelines
         _pipelines.update(pipelines)
-        self.pipelines = _pipelines
+        self.pipelines = _pipelines  # type: ignore
 
     def remove_pipelines(self, pipeline_names: List[str]):
         _pipelines = self.pipelines.copy()
@@ -164,8 +170,14 @@ class Scenario(_Entity, Submittable, _Labeled):
         _pipelines = {}
         pipeline_manager = _PipelineManagerFactory._build_manager()
 
-        for pipeline_name, tasks in self._pipelines.items():
-            p = pipeline_manager._create(pipeline_name, tasks, self.id)
+        for pipeline_name, pipeline_data in self._pipelines.items():
+            p = pipeline_manager._create(
+                pipeline_name,
+                pipeline_data.get(self._PIPELINE_TASKS_KEY, []),  # type: ignore
+                pipeline_data.get(self._PIPELINE_SUBSCRIBERS_KEY, []),  # type: ignore
+                pipeline_data.get(self._PIPELINE_PROPERTIES_KEY, {}),  # type: ignore
+                self.id,
+            )
             if not isinstance(p, Pipeline):
                 raise NonExistingPipeline(pipeline_name)
             _pipelines[pipeline_name] = p
