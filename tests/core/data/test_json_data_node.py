@@ -103,9 +103,9 @@ class TestJSONDataNode:
                 "foo bar", Scope.SCENARIO, name="super name", properties={"default_path": path, "has_header": False}
             )
 
-    def test_get_custom_properties(self, json_file):
+    def test_get_user_properties(self, json_file):
         dn_1 = JSONDataNode("dn_1", Scope.SCENARIO, properties={"path": json_file})
-        assert dn_1._get_custom_properties() == {}
+        assert dn_1._get_user_properties() == {}
 
         dn_2 = JSONDataNode(
             "dn_2",
@@ -120,7 +120,7 @@ class TestJSONDataNode:
         )
 
         # default_data, default_path, path, encoder, decoder are filtered out
-        assert dn_2._get_custom_properties() == {"foo": "bar"}
+        assert dn_2._get_user_properties() == {"foo": "bar"}
 
     def test_new_json_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node(

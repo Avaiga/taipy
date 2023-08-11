@@ -84,7 +84,7 @@ class TestMongoCollectionDataNode:
         assert mongo_dn.custom_document == MongoDefaultDocument
 
     @pytest.mark.parametrize("properties", __properties)
-    def test_get_custom_properties(self, properties):
+    def test_get_user_properties(self, properties):
         custom_properties = properties.copy()
         custom_properties["foo"] = "bar"
         mongo_dn = MongoCollectionDataNode(
@@ -92,7 +92,7 @@ class TestMongoCollectionDataNode:
             Scope.SCENARIO,
             properties=custom_properties,
         )
-        assert mongo_dn._get_custom_properties() == {"foo": "bar"}
+        assert mongo_dn._get_user_properties() == {"foo": "bar"}
 
     @pytest.mark.parametrize(
         "properties",
