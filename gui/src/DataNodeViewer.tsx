@@ -35,6 +35,8 @@ import { format } from "date-fns";
 
 import {
     RowValue,
+    Table,
+    TableValueType,
     createRequestUpdateAction,
     createSendActionNameAction,
     getUpdateVar,
@@ -126,8 +128,10 @@ interface DataNodeViewerProps {
     scenarios?: Scenarios;
     history?: Array<[string, string, string]>;
     data?: DatanodeData;
-    tabularData?: Record<string, unknown>;
+    tabularData?: TableValueType;
+    tabularColumns?: string;
     onDataValue?: string;
+    onTabularDataEdit?: string;
 }
 
 const getDataValue = (value?: RowValue, dType?: string | null) => (dType == "date" ? new Date(value as string) : value);
@@ -256,6 +260,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     // Datanode data
     const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? undefined;
     const dtType = props.data && props.data[DatanodeDataProps.type];
+    const dtTabular = (props.data && props.data[DatanodeDataProps.tabular]) ?? false;
     const dtError = props.data && props.data[DatanodeDataProps.error];
     const [dataValue, setDataValue] = useState<RowValue | Date>();
     const editDataValue = useCallback(
@@ -675,8 +680,16 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     </Grid>
                                 ) : dtError ? (
                                     <Typography>{dtError}</Typography>
+                                ) : dtTabular ? (
+                                    <Table
+                                        defaultColumns={props.tabularColumns || ""}
+                                        updateVarName={getUpdateVar(props.updateVars, "tabularData")}
+                                        data={props.tabularData}
+                                        userData={dnId}
+                                        onEdit={props.onTabularDataEdit}
+                                    ></Table>
                                 ) : (
-                                    `type: ${props.data && props.data[DatanodeDataProps.tabular] ? "data" : "unknown"}`
+                                    "type: unknown"
                                 )
                             ) : (
                                 "Data shall be shown here"

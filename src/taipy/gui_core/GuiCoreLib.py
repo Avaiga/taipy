@@ -13,9 +13,13 @@ import typing as t
 from collections import defaultdict
 from datetime import datetime
 from enum import Enum
+import json
 from threading import Lock
 
 from dateutil import parser
+from zoneinfo import ZoneInfo
+
+import pandas as pd
 
 from taipy.config import Config
 from taipy.core import Cycle, DataNode, Job, Pipeline, Scenario, cancel_job, create_scenario
@@ -594,6 +598,27 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode value. {e}")
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, entity_id)  # this will update the data value
 
+    def tabular_data_edit(self, state: State, var_name: str, action: str, payload: dict):
+        dn_id = payload.get("user_data")
+        datanode = core_get(dn_id)
+        if isinstance(datanode, DataNode):
+            try:
+                idx = payload.get("index")
+                col = payload.get("col")
+                tz = payload.get("tz")
+                val = parser.parse(str(payload.get("value"))).astimezone(ZoneInfo(tz)).replace(tzinfo=None) if tz is not None else payload.get("value")
+                # user_value = payload.get("user_value")
+                data = self.__read_tabular_data(datanode)
+                data.at[idx, col] = val
+                datanode.write(data)
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+            except Exception as e:
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
+        setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
+
+    def __read_tabular_data(self, datanode: DataNode):
+        return datanode.read()
+
     def get_data_node_tabular_data(self, id: str):
         if (
             id
@@ -603,7 +628,21 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and isinstance(dn, _AbstractTabularDataNode)
         ):
             try:
-                return dn.read()
+                return self.__read_tabular_data(dn)
+            except Exception as e:
+                return None
+        return None
+
+    def get_data_node_tabular_columns(self, id: str):
+        if (
+            id
+            and (dn := core_get(id))
+            and isinstance(dn, DataNode)
+            and dn.is_ready_for_reading
+            and isinstance(dn, _AbstractTabularDataNode)
+        ):
+            try:
+                return self.gui._tbl_cols(True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data = self.__read_tabular_data(dn))
             except Exception as e:
                 return None
         return None
@@ -757,7 +796,12 @@ class _GuiCore(ElementLibrary):
                     PropertyType.data,
                     f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
+                "tabular_columns": ElementProperty(
+                    PropertyType.string,
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                ),
                 "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
+                "on_tabular_data_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.tabular_data_edit}}"),
             },
         ),
         "job_selector": Element(
