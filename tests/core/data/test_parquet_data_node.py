@@ -88,9 +88,9 @@ class TestParquetDataNode:
         with pytest.raises(InvalidConfigurationId):
             dn = ParquetDataNode("foo bar", Scope.SCENARIO, name="super name", properties={"path": path})
 
-    def test_get_custom_properties(self, parquet_file_path):
+    def test_get_user_properties(self, parquet_file_path):
         dn_1 = ParquetDataNode("dn_1", Scope.SCENARIO, properties={"path": parquet_file_path})
-        assert dn_1._get_custom_properties() == {}
+        assert dn_1._get_user_properties() == {}
 
         dn_2 = ParquetDataNode(
             "dn_2",
@@ -109,7 +109,7 @@ class TestParquetDataNode:
 
         # exposed_type, default_data, default_path, path, engine, compression, read_kwargs, write_kwargs
         # are filtered out
-        assert dn_2._get_custom_properties() == {"foo": "bar"}
+        assert dn_2._get_user_properties() == {"foo": "bar"}
 
     def test_new_parquet_data_node_with_existing_file_is_ready_for_reading(self, parquet_file_path):
         not_ready_dn_cfg = Config.configure_data_node(

@@ -197,7 +197,7 @@ class TestSQLDataNode:
         assert dn.write_query_builder == my_write_query_builder_with_modin
 
     @pytest.mark.parametrize("properties", __pandas_properties)
-    def test_get_custom_properties(self, properties):
+    def test_get_user_properties(self, properties):
         custom_properties = properties.copy()
         custom_properties["foo"] = "bar"
         dn = SQLDataNode(
@@ -205,7 +205,7 @@ class TestSQLDataNode:
             Scope.SCENARIO,
             properties=custom_properties,
         )
-        assert dn._get_custom_properties() == {"foo": "bar"}
+        assert dn._get_user_properties() == {"foo": "bar"}
 
     @pytest.mark.parametrize(
         "properties",
