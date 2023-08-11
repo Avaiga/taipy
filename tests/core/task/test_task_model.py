@@ -15,12 +15,47 @@ from src.taipy.core.task._task_model import _TaskModel
 from taipy.config.common.scope import Scope
 
 
+def test_deprecated_parent_id():
+    model = _TaskModel.from_dict(
+        {
+            "id": "id",
+            "config_id": "config_id",
+            "parent_id": "owner_id",
+            "parent_ids": ["parent_id"],
+            "input_ids": ["input_id"],
+            "function_name": "function_name",
+            "function_module": "function_module",
+            "output_ids": ["output_id"],
+            "version": "latest",
+        }
+    )
+    assert model.owner_id == "owner_id"
+
+
+def test_override_deprecated_parent_id():
+    model = _TaskModel.from_dict(
+        {
+            "id": "id",
+            "config_id": "config_id",
+            "parent_id": "parent_id",
+            "owner_id": "owner_id",
+            "parent_ids": ["parent_id"],
+            "input_ids": ["input_id"],
+            "function_name": "function_name",
+            "function_module": "function_module",
+            "output_ids": ["output_id"],
+            "version": "latest",
+        }
+    )
+    assert model.owner_id == "owner_id"
+
+
 def test_none_properties_attribute_compatible():
     model = _TaskModel.from_dict(
         {
             "id": "id",
             "config_id": "config_id",
-            "owner_id": "owner_id",
+            "parent_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",

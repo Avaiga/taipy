@@ -73,7 +73,8 @@ class _TaskModel(_BaseModel):
     def from_dict(data: Dict[str, Any]):
         return _TaskModel(
             id=data["id"],
-            owner_id=data.get("owner_id"),
+            # Migrate parent_id attribute for compatibility between <=2.0 to >=2.1 versions.
+            owner_id=data.get("owner_id", data.get("parent_id")),
             parent_ids=data.get("parent_ids", []),
             config_id=data["config_id"],
             input_ids=data["input_ids"],
