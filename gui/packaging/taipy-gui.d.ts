@@ -105,7 +105,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     nanValue?: string;
     filter?: boolean;
     size?: "small" | "medium";
-    defaultKey?: string;
+    userData?: string;
 }
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
     pageSizeOptions?: string;
