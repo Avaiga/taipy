@@ -1246,22 +1246,22 @@ def test_tags():
         creation_date=datetime.now() + timedelta(days=-1),
     )
 
-    scenario_no_tag = Scenario("SCENARIO_no_tag", [], {}, [], ScenarioId("SCENARIO_no_tag"), cycle=cycle_1)
+    scenario_no_tag = Scenario("scenario_no_tag", [], {}, [], ScenarioId("scenario_no_tag"), cycle=cycle_1)
     scenario_1_tag = Scenario(
-        "SCENARIO_1_tag",
+        "scenario_1_tag",
         [],
         {},
         [],
-        ScenarioId("SCENARIO_1_tag"),
+        ScenarioId("scenario_1_tag"),
         cycle=cycle_1,
         tags={"fst"},
     )
     scenario_2_tags = Scenario(
-        "SCENARIO_2_tags",
+        "scenario_2_tags",
         [],
         {},
         [],
-        ScenarioId("SCENARIO_2_tags"),
+        ScenarioId("scenario_2_tags"),
         cycle=cycle_2,
         tags={"fst", "scd"},
     )
@@ -1287,17 +1287,17 @@ def test_tags():
     _ScenarioManager._set(scenario_1_tag)
     _ScenarioManager._set(scenario_2_tags)
 
-    assert len(_ScenarioManager._get(ScenarioId("SCENARIO_no_tag")).tags) == 0
-    assert not _ScenarioManager._get(ScenarioId("SCENARIO_no_tag")).has_tag("fst")
-    assert not _ScenarioManager._get(ScenarioId("SCENARIO_no_tag")).has_tag("scd")
+    assert len(_ScenarioManager._get(ScenarioId("scenario_no_tag")).tags) == 0
+    assert not _ScenarioManager._get(ScenarioId("scenario_no_tag")).has_tag("fst")
+    assert not _ScenarioManager._get(ScenarioId("scenario_no_tag")).has_tag("scd")
 
-    assert len(_ScenarioManager._get(ScenarioId("SCENARIO_1_tag")).tags) == 1
-    assert "fst" in _ScenarioManager._get(ScenarioId("SCENARIO_1_tag")).tags
-    assert "scd" not in _ScenarioManager._get(ScenarioId("SCENARIO_1_tag")).tags
+    assert len(_ScenarioManager._get(ScenarioId("scenario_1_tag")).tags) == 1
+    assert "fst" in _ScenarioManager._get(ScenarioId("scenario_1_tag")).tags
+    assert "scd" not in _ScenarioManager._get(ScenarioId("scenario_1_tag")).tags
 
-    assert len(_ScenarioManager._get(ScenarioId("SCENARIO_2_tags")).tags) == 2
-    assert "fst" in _ScenarioManager._get(ScenarioId("SCENARIO_2_tags")).tags
-    assert "scd" in _ScenarioManager._get(ScenarioId("SCENARIO_2_tags")).tags
+    assert len(_ScenarioManager._get(ScenarioId("scenario_2_tags")).tags) == 2
+    assert "fst" in _ScenarioManager._get(ScenarioId("scenario_2_tags")).tags
+    assert "scd" in _ScenarioManager._get(ScenarioId("scenario_2_tags")).tags
 
     # Test tag & untag
 
@@ -1373,8 +1373,8 @@ def test_tags():
 def test_authorized_tags():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    scenario = Scenario("SCENARIO_1", [], {"authorized_tags": ["foo", "bar"]}, [], ScenarioId("SCENARIO_1"))
-    scenario_2_cfg = Config.configure_scenario("SCENARIO_2", [], [], Frequency.DAILY, authorized_tags=["foo", "bar"])
+    scenario = Scenario("scenario_1", [], {"authorized_tags": ["foo", "bar"]}, [], ScenarioId("scenario_1"))
+    scenario_2_cfg = Config.configure_scenario("scenario_2", [], [], Frequency.DAILY, authorized_tags=["foo", "bar"])
 
     _OrchestratorFactory._build_dispatcher()
 
