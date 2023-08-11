@@ -63,7 +63,7 @@ class TestGenericDataNode:
         assert dn.scope == Scope.SCENARIO
         assert dn.id is not None
         assert dn.owner_id is None
-        assert dn.last_edition_date is not None
+        assert dn.last_edit_date is not None
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.properties["read_fct"] == read_fct
@@ -77,7 +77,7 @@ class TestGenericDataNode:
         assert dn_1.scope == Scope.SCENARIO
         assert dn_1.id is not None
         assert dn_1.owner_id is None
-        assert dn_1.last_edition_date is not None
+        assert dn_1.last_edit_date is not None
         assert dn_1.job_ids == []
         assert dn_1.is_ready_for_reading
         assert dn_1.properties["read_fct"] == read_fct
@@ -91,7 +91,7 @@ class TestGenericDataNode:
         assert dn_2.scope == Scope.SCENARIO
         assert dn_2.id is not None
         assert dn_2.owner_id is None
-        assert dn_2.last_edition_date is not None
+        assert dn_2.last_edit_date is not None
         assert dn_2.job_ids == []
         assert dn_2.is_ready_for_reading
         assert dn_2.properties["read_fct"] is None
@@ -105,7 +105,7 @@ class TestGenericDataNode:
         assert dn_3.scope == Scope.SCENARIO
         assert dn_3.id is not None
         assert dn_3.owner_id is None
-        assert dn_3.last_edition_date is not None
+        assert dn_3.last_edit_date is not None
         assert dn_3.job_ids == []
         assert dn_3.is_ready_for_reading
         assert dn_3.properties["read_fct"] == read_fct
@@ -119,7 +119,7 @@ class TestGenericDataNode:
         assert dn_4.scope == Scope.SCENARIO
         assert dn_4.id is not None
         assert dn_4.owner_id is None
-        assert dn_4.last_edition_date is not None
+        assert dn_4.last_edit_date is not None
         assert dn_4.job_ids == []
         assert dn_4.is_ready_for_reading
         assert dn_4.properties["read_fct"] is None

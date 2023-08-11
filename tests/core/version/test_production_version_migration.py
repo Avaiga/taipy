@@ -62,7 +62,7 @@ def test_migrate_datanode_in_standalone_mode():
     scenario_v1 = submit_v1()
 
     init_config()
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
     Config.add_migration_function("2.0", "d1", migrate_pickle_path)
 
     scenario_cfg_v2 = config_scenario_v2()
@@ -94,7 +94,7 @@ def test_migrate_task_in_standalone_mode():
     scenario_v1 = submit_v1()
 
     init_config()
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
     Config.add_migration_function("2.0", "my_task", migrate_skippable_task)
 
     scenario_cfg_v2 = config_scenario_v2()
@@ -126,7 +126,7 @@ def test_migrate_scenario_in_standalone_mode():
     scenario_v1 = submit_v1()
 
     init_config()
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
     Config.add_migration_function("2.0", "my_scenario", migrate_foo_scenario)
 
     scenario_cfg_v2 = config_scenario_v2()
@@ -165,7 +165,7 @@ def test_migrate_all_entities_in_standalone_mode():
     scenario_v1 = submit_v1()
 
     init_config()
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
     Config.add_migration_function("2.0", "my_scenario", migrate_foo_scenario)
 
     scenario_cfg_v2 = config_scenario_v2()

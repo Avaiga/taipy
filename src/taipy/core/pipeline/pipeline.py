@@ -27,7 +27,6 @@ from .._entity.submittable import Submittable
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
-from ..common._warnings import _warn_deprecated
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
@@ -125,22 +124,6 @@ class Pipeline(_Entity, Submittable, _Labeled):
             for k, v in data_node.items():
                 data_nodes[k] = v
         return data_nodes
-
-    @property
-    def parent_id(self):
-        """
-        Deprecated. Use owner_id instead.
-        """
-        _warn_deprecated("parent_id", suggest="owner_id")
-        return self.owner_id
-
-    @parent_id.setter
-    def parent_id(self, val):
-        """
-        Deprecated. Use owner_id instead.
-        """
-        _warn_deprecated("parent_id", suggest="owner_id")
-        self.owner_id = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

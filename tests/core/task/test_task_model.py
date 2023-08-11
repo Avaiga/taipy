@@ -15,7 +15,7 @@ from src.taipy.core.task._task_model import _TaskModel
 from taipy.config.common.scope import Scope
 
 
-def test_deprecated_owner_id():
+def test_deprecated_parent_id():
     model = _TaskModel.from_dict(
         {
             "id": "id",
@@ -32,7 +32,7 @@ def test_deprecated_owner_id():
     assert model.owner_id == "owner_id"
 
 
-def test_override_deprecated_owner_id():
+def test_override_deprecated_parent_id():
     model = _TaskModel.from_dict(
         {
             "id": "id",
@@ -72,7 +72,7 @@ def test_skippable_compatibility_with_non_existing_output():
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",
@@ -89,7 +89,7 @@ def test_skippable_compatibility_with_no_output():
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",
@@ -109,7 +109,7 @@ def test_skippable_compatibility_with_one_cacheable_output():
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",
@@ -128,7 +128,7 @@ def test_skippable_compatibility_with_one_non_cacheable_output():
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",
@@ -147,7 +147,7 @@ def test_skippable_compatibility_with_one_non_cacheable_existing_output():
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",
@@ -167,7 +167,7 @@ def test_skippable_compatibility_with_all_cacheable_outputs():
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",
@@ -188,7 +188,7 @@ def test_skippable_compatibility_with_one_cacheable_output_over_two():
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",
@@ -209,7 +209,7 @@ def test_skippable_compatibility_with_one_cacheable_output_and_one_non_cacheable
         {
             "id": "id",
             "config_id": "config_id",
-            "parent_id": "owner_id",
+            "owner_id": "owner_id",
             "parent_ids": ["parent_id"],
             "input_ids": ["input_id"],
             "function_name": "function_name",

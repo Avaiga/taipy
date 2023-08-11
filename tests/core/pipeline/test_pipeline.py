@@ -106,20 +106,6 @@ def test_create_pipeline():
         assert pipeline_2.get_simple_label() == pipeline_2.name
 
 
-def test_parent_id_deprecated():
-    pipeline = Pipeline({}, [], owner_id="owner_id", pipeline_id="foo")
-
-    with pytest.warns(DeprecationWarning):
-        pipeline.parent_id
-
-    assert pipeline.owner_id == pipeline.parent_id
-    with pytest.warns(DeprecationWarning):
-        pipeline.parent_id = "owner_id_2"
-
-    assert pipeline.owner_id == pipeline.parent_id
-    assert pipeline.owner_id == "owner_id_2"
-
-
 def test_check_consistency():
     pipeline_1 = Pipeline({}, [], "name_1")
     assert pipeline_1._is_consistent()

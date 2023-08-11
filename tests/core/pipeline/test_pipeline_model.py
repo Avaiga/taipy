@@ -12,7 +12,7 @@
 from src.taipy.core.pipeline._pipeline_model import _PipelineModel
 
 
-def test_deprecated_properties():
+def test_deprecated_parent_id():
     model = _PipelineModel.from_dict(
         {
             "id": "id",
@@ -27,7 +27,7 @@ def test_deprecated_properties():
     assert model.owner_id == "owner_id"
 
 
-def test_override_deprecated_properties():
+def test_override_deprecated_parent_id():
     model = _PipelineModel.from_dict(
         {
             "id": "id",

@@ -12,7 +12,7 @@
 from copy import copy
 from datetime import datetime, timedelta
 from pydoc import locate
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity

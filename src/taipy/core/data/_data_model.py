@@ -76,7 +76,7 @@ class _DataNodeModel(_BaseModel):
     @staticmethod
     def from_dict(data: Dict[str, Any]):
         dn_properties = data["data_node_properties"]
-        # Used for compatibility between <=2.0 to >=2.1 versions.
+        # Migrate cacheable attribute for compatibility between <=2.0 to >=2.1 versions.
         if data.get("cacheable"):
             dn_properties["cacheable"] = True
         return _DataNodeModel(
@@ -85,13 +85,16 @@ class _DataNodeModel(_BaseModel):
             scope=Scope._from_repr(data["scope"]),
             storage_type=data["storage_type"],
             name=data.get("name"),
+            # Migrate parent_id attribute for compatibility between <=2.0 to >=2.1 versions.
             owner_id=data.get("owner_id", data.get("parent_id")),
             parent_ids=data.get("parent_ids", []),
+            # Migrate last_edition_date attribute for compatibility between <2.0 to >=2.0 versions.
             last_edit_date=data.get("last_edit_date", data.get("last_edition_date")),
             edits=data["edits"] if "edits" in data.keys() else _to_edits_migration(data.get("job_ids")),
             version=data["version"] if "version" in data.keys() else _version_migration(),
             validity_days=data["validity_days"],
             validity_seconds=data["validity_seconds"],
+            # Migrate edition_in_progress attribute for compatibility between <2.0 to >=2.0 versions.
             edit_in_progress=bool(data.get("edit_in_progress", data.get("edition_in_progress", False))),
             data_node_properties=dn_properties,
         )

@@ -67,8 +67,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).owner_id == csv_dn.owner_id
         assert _DataManager._get(csv_dn.id).parent_ids == set()
         assert _DataManager._get(csv_dn.id).parent_ids == csv_dn.parent_ids
-        assert _DataManager._get(csv_dn.id).last_edition_date is None
-        assert _DataManager._get(csv_dn.id).last_edition_date == csv_dn.last_edition_date
+        assert _DataManager._get(csv_dn.id).last_edit_date is None
+        assert _DataManager._get(csv_dn.id).last_edit_date == csv_dn.last_edit_date
         assert _DataManager._get(csv_dn.id).job_ids == []
         assert _DataManager._get(csv_dn.id).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn.id).is_ready_for_reading
@@ -89,8 +89,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).owner_id == csv_dn.owner_id
         assert _DataManager._get(csv_dn).parent_ids == set()
         assert _DataManager._get(csv_dn).parent_ids == csv_dn.parent_ids
-        assert _DataManager._get(csv_dn).last_edition_date is None
-        assert _DataManager._get(csv_dn).last_edition_date == csv_dn.last_edition_date
+        assert _DataManager._get(csv_dn).last_edit_date is None
+        assert _DataManager._get(csv_dn).last_edit_date == csv_dn.last_edit_date
         assert _DataManager._get(csv_dn).job_ids == []
         assert _DataManager._get(csv_dn).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn).is_ready_for_reading
@@ -126,8 +126,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn.id).owner_id == in_mem_dn.owner_id
         assert _DataManager._get(in_mem_dn.id).parent_ids == {"task_id"}
         assert _DataManager._get(in_mem_dn.id).parent_ids == in_mem_dn.parent_ids
-        assert _DataManager._get(in_mem_dn.id).last_edition_date is not None
-        assert _DataManager._get(in_mem_dn.id).last_edition_date == in_mem_dn.last_edition_date
+        assert _DataManager._get(in_mem_dn.id).last_edit_date is not None
+        assert _DataManager._get(in_mem_dn.id).last_edit_date == in_mem_dn.last_edit_date
         assert _DataManager._get(in_mem_dn.id).job_ids == []
         assert _DataManager._get(in_mem_dn.id).job_ids == in_mem_dn.job_ids
         assert _DataManager._get(in_mem_dn.id).is_ready_for_reading
@@ -146,8 +146,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn).owner_id == in_mem_dn.owner_id
         assert _DataManager._get(in_mem_dn).parent_ids == {"task_id"}
         assert _DataManager._get(in_mem_dn).parent_ids == in_mem_dn.parent_ids
-        assert _DataManager._get(in_mem_dn).last_edition_date is not None
-        assert _DataManager._get(in_mem_dn).last_edition_date == in_mem_dn.last_edition_date
+        assert _DataManager._get(in_mem_dn).last_edit_date is not None
+        assert _DataManager._get(in_mem_dn).last_edit_date == in_mem_dn.last_edit_date
         assert _DataManager._get(in_mem_dn).job_ids == []
         assert _DataManager._get(in_mem_dn).job_ids == in_mem_dn.job_ids
         assert _DataManager._get(in_mem_dn).is_ready_for_reading
@@ -179,8 +179,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn.id).owner_id == pickle_dn.owner_id
         assert _DataManager._get(pickle_dn.id).parent_ids == {"task_id_1", "task_id_2"}
         assert _DataManager._get(pickle_dn.id).parent_ids == pickle_dn.parent_ids
-        assert _DataManager._get(pickle_dn.id).last_edition_date is None
-        assert _DataManager._get(pickle_dn.id).last_edition_date == pickle_dn.last_edition_date
+        assert _DataManager._get(pickle_dn.id).last_edit_date is None
+        assert _DataManager._get(pickle_dn.id).last_edit_date == pickle_dn.last_edit_date
         assert _DataManager._get(pickle_dn.id).job_ids == []
         assert _DataManager._get(pickle_dn.id).job_ids == pickle_dn.job_ids
         assert not _DataManager._get(pickle_dn.id).is_ready_for_reading
@@ -198,8 +198,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn).owner_id == pickle_dn.owner_id
         assert _DataManager._get(pickle_dn).parent_ids == {"task_id_1", "task_id_2"}
         assert _DataManager._get(pickle_dn).parent_ids == pickle_dn.parent_ids
-        assert _DataManager._get(pickle_dn).last_edition_date is None
-        assert _DataManager._get(pickle_dn).last_edition_date == pickle_dn.last_edition_date
+        assert _DataManager._get(pickle_dn).last_edit_date is None
+        assert _DataManager._get(pickle_dn).last_edit_date == pickle_dn.last_edit_date
         assert _DataManager._get(pickle_dn).job_ids == []
         assert _DataManager._get(pickle_dn).job_ids == pickle_dn.job_ids
         assert not _DataManager._get(pickle_dn).is_ready_for_reading

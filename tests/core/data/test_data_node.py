@@ -110,7 +110,7 @@ class TestDataNode:
         assert dn.name is None
         assert dn.owner_id is None
         assert dn.parent_ids == set()
-        assert dn.last_edition_date is None
+        assert dn.last_edit_date is None
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert len(dn.properties) == 0
@@ -135,7 +135,7 @@ class TestDataNode:
         assert dn.name == "a name"
         assert dn.owner_id == "a_scenario_id"
         assert dn.parent_ids == {"a_parent_id"}
-        assert dn.last_edition_date == a_date
+        assert dn.last_edit_date == a_date
         assert dn.job_ids == ["a_job_id"]
         assert dn.is_ready_for_reading
         assert len(dn.properties) == 1
@@ -152,15 +152,15 @@ class TestDataNode:
         assert dn.write_has_been_called == 0
         assert dn.read_has_been_called == 0
         assert not dn.is_ready_for_reading
-        assert dn.last_edition_date is None
+        assert dn.last_edit_date is None
         assert dn.job_ids == []
         assert dn.edits == []
 
         dn.write("Any data")
         assert dn.write_has_been_called == 1
         assert dn.read_has_been_called == 0
-        assert dn.last_edition_date is not None
-        first_edition = dn.last_edition_date
+        assert dn.last_edit_date is not None
+        first_edition = dn.last_edit_date
         assert dn.is_ready_for_reading
         assert dn.job_ids == []
         assert len(dn.edits) == 1
@@ -171,7 +171,7 @@ class TestDataNode:
         dn.write("Any other data", job_id := JobId("a_job_id"))
         assert dn.write_has_been_called == 2
         assert dn.read_has_been_called == 0
-        second_edition = dn.last_edition_date
+        second_edition = dn.last_edit_date
         assert first_edition < second_edition
         assert dn.is_ready_for_reading
         assert dn.job_ids == [job_id]
@@ -181,7 +181,7 @@ class TestDataNode:
         dn.read()
         assert dn.write_has_been_called == 2
         assert dn.read_has_been_called == 1
-        second_edition = dn.last_edition_date
+        second_edition = dn.last_edit_date
         assert first_edition < second_edition
         assert dn.is_ready_for_reading
         assert dn.job_ids == [job_id]
@@ -197,7 +197,7 @@ class TestDataNode:
         assert not dn.is_ready_for_reading
         assert dn.job_ids == []
 
-        dn.unlock_edit(datetime.now(), JobId("a_job_id"))
+        dn.unlock_edit()
         assert dn.last_edit_date is None
         assert not dn.is_ready_for_reading
         assert dn.job_ids == []
@@ -481,15 +481,15 @@ class TestDataNode:
         new_datetime = current_datetime + timedelta(1)
         new_datetime_1 = current_datetime + timedelta(3)
 
-        # auto set & reload on last_edition_date attribute
-        assert dn_1.last_edition_date == current_datetime
-        assert dn_2.last_edition_date == current_datetime
-        dn_1.last_edition_date = new_datetime_1
-        assert dn_1.last_edition_date == new_datetime_1
-        assert dn_2.last_edition_date == new_datetime_1
-        dn_2.last_edition_date = new_datetime
-        assert dn_1.last_edition_date == new_datetime
-        assert dn_2.last_edition_date == new_datetime
+        # auto set & reload on last_edit_date attribute
+        assert dn_1.last_edit_date == current_datetime
+        assert dn_2.last_edit_date == current_datetime
+        dn_1.last_edit_date = new_datetime_1
+        assert dn_1.last_edit_date == new_datetime_1
+        assert dn_2.last_edit_date == new_datetime_1
+        dn_2.last_edit_date = new_datetime
+        assert dn_1.last_edit_date == new_datetime
+        assert dn_2.last_edit_date == new_datetime
 
         # auto set & reload on name attribute
         assert dn_1.name == "foo"
@@ -514,18 +514,18 @@ class TestDataNode:
         assert dn_1.parent_ids == {"sc1"}
         assert dn_2.parent_ids == {"sc1"}
 
-        # auto set & reload on edition_in_progress attribute
-        assert not dn_2.edition_in_progress
-        assert not dn_1.edition_in_progress
-        dn_1.edition_in_progress = True
-        assert dn_1.edition_in_progress
-        assert dn_2.edition_in_progress
-        dn_2.unlock_edition()
-        assert not dn_1.edition_in_progress
-        assert not dn_2.edition_in_progress
-        dn_1.lock_edition()
-        assert dn_1.edition_in_progress
-        assert dn_2.edition_in_progress
+        # auto set & reload on edit_in_progress attribute
+        assert not dn_2.edit_in_progress
+        assert not dn_1.edit_in_progress
+        dn_1.edit_in_progress = True
+        assert dn_1.edit_in_progress
+        assert dn_2.edit_in_progress
+        dn_2.unlock_edit()
+        assert not dn_1.edit_in_progress
+        assert not dn_2.edit_in_progress
+        dn_1.lock_edit()
+        assert dn_1.edit_in_progress
+        assert dn_2.edit_in_progress
 
         # auto set & reload on validity_period attribute
         time_period_1 = timedelta(1)
@@ -593,7 +593,7 @@ class TestDataNode:
         dn_1.properties["temp_key_4"] = 0
         dn_1.properties["temp_key_5"] = 0
 
-        dn_1.last_edition_date = new_datetime
+        dn_1.last_edit_date = new_datetime
 
         assert len(dn_1.job_ids) == 1
         assert len(dn_2.job_ids) == 1
@@ -602,9 +602,9 @@ class TestDataNode:
             assert dn.config_id == "foo"
             assert dn.owner_id is None
             assert dn.scope == Scope.SCENARIO
-            assert dn.last_edition_date == new_datetime
+            assert dn.last_edit_date == new_datetime
             assert dn.name == "def"
-            assert dn.edition_in_progress
+            assert dn.edit_in_progress
             assert dn.validity_period == time_period_2
             assert len(dn.job_ids) == 1
             assert dn._is_in_context
@@ -616,9 +616,9 @@ class TestDataNode:
             new_datetime_2 = new_datetime + timedelta(5)
 
             dn.scope = Scope.CYCLE
-            dn.last_edition_date = new_datetime_2
+            dn.last_edit_date = new_datetime_2
             dn.name = "abc"
-            dn.edition_in_progress = False
+            dn.edit_in_progress = False
             dn.validity_period = None
             dn.properties["qux"] = 9
             dn.properties.pop("temp_key_3")
@@ -631,9 +631,9 @@ class TestDataNode:
             assert dn.config_id == "foo"
             assert dn.owner_id is None
             assert dn.scope == Scope.SCENARIO
-            assert dn.last_edition_date == new_datetime
+            assert dn.last_edit_date == new_datetime
             assert dn.name == "def"
-            assert dn.edition_in_progress
+            assert dn.edit_in_progress
             assert dn.validity_period == time_period_2
             assert len(dn.job_ids) == 1
             assert dn.properties["qux"] == 5
@@ -644,9 +644,9 @@ class TestDataNode:
         assert dn_1.config_id == "foo"
         assert dn_1.owner_id is None
         assert dn_1.scope == Scope.CYCLE
-        assert dn_1.last_edition_date == new_datetime_2
+        assert dn_1.last_edit_date == new_datetime_2
         assert dn_1.name == "abc"
-        assert not dn_1.edition_in_progress
+        assert not dn_1.edit_in_progress
         assert dn_1.validity_period is None
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
@@ -659,55 +659,6 @@ class TestDataNode:
         with mock.patch("src.taipy.core.get_parents") as mck:
             data_node.get_parents()
             mck.assert_called_once_with(data_node)
-
-    def test_unlock_edition_deprecated(self):
-        dn = FakeDataNode("foo")
-
-        with pytest.warns(DeprecationWarning):
-            with mock.patch("src.taipy.core.data.data_node.DataNode.unlock_edit") as unlock_edit:
-                dn.unlock_edition(datetime.now(), None)
-                unlock_edit.assert_called_once_with()
-
-    def test_lock_edition_deprecated(self):
-        dn = FakeDataNode("foo")
-
-        with pytest.warns(DeprecationWarning):
-            with mock.patch("src.taipy.core.data.data_node.DataNode.lock_edit") as lock_edit:
-                dn.lock_edition()
-                lock_edit.assert_called_once()
-
-    def test_edition_in_progress_deprecated(self):
-        dn = FakeDataNode("foo")
-
-        with pytest.warns(DeprecationWarning):
-            dn.edition_in_progress
-
-        assert dn.edit_in_progress == dn.edition_in_progress
-        dn.edition_in_progress = True
-        assert dn.edit_in_progress == dn.edition_in_progress
-
-    def test_last_edition_date_deprecated(self):
-        dn = FakeDataNode("foo")
-
-        with pytest.warns(DeprecationWarning):
-            dn.last_edition_date
-
-        assert dn.last_edit_date == dn.last_edition_date
-        dn.last_edition_date = datetime.now()
-        assert dn.last_edit_date == dn.last_edition_date
-
-    def test_parent_id_deprecated(self):
-        dn = FakeDataNode("foo", owner_id="owner_id")
-
-        with pytest.warns(DeprecationWarning):
-            dn.parent_id
-
-        assert dn.owner_id == dn.parent_id
-        with pytest.warns(DeprecationWarning):
-            dn.parent_id = "owner_id_2"
-
-        assert dn.owner_id == dn.parent_id
-        assert dn.owner_id == "owner_id_2"
 
     def test_cacheable_deprecated_false(self):
         dn = FakeDataNode("foo")
