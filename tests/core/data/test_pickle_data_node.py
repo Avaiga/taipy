@@ -64,6 +64,23 @@ class TestPickleDataNodeEntity:
         with pytest.raises(InvalidConfigurationId):
             PickleDataNode("foobar bazxyxea", Scope.SCENARIO, properties={"default_data": "Data"})
 
+    def test_get_custom_properties(self, pickle_file_path):
+        dn_1 = PickleDataNode("dn_1", Scope.SCENARIO, properties={"path": pickle_file_path})
+        assert dn_1._get_custom_properties() == {}
+
+        dn_2 = PickleDataNode(
+            "dn_2",
+            Scope.SCENARIO,
+            properties={
+                "default_data": "foo",
+                "default_path": pickle_file_path,
+                "foo": "bar",
+            },
+        )
+
+        # default_data, default_path, path, is_generated are filtered out
+        assert dn_2._get_custom_properties() == {"foo": "bar"}
+
     def test_new_pickle_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node("not_ready_data_node_config_id", "pickle", path="NOT_EXISTING.p")
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")

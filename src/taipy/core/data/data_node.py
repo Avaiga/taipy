@@ -81,6 +81,8 @@ class DataNode(_Entity, _Labeled):
     _MANAGER_NAME = "data"
     __PATH_KEY = "path"
 
+    _TAIPY_PROPERTIES: Set[str] = set()
+
     def __init__(
         self,
         config_id,
@@ -266,6 +268,10 @@ class DataNode(_Entity, _Labeled):
         """Dictionary of custom properties."""
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
+
+    def _get_user_properties(self) -> Dict[str, Any]:
+        """ Get user properties."""
+        return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
 
     def __eq__(self, other):
         return self.id == other.id

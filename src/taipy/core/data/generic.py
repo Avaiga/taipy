@@ -15,7 +15,6 @@ from typing import Any, Dict, List, Optional, Set
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._utils import _load_fct
 from ..exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -108,6 +107,15 @@ class GenericDataNode(DataNode):
         )
         if not self._last_edit_date:
             self._last_edit_date = datetime.now()
+
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__READ_FUNCTION_ARGS_PROPERTY,
+                self.__WRITE_FUNCTION_ARGS_PROPERTY,
+                self._OPTIONAL_READ_FUNCTION_PROPERTY,
+                self._OPTIONAL_WRITE_FUNCTION_PROPERTY,
+            }
+        )
 
     @classmethod
     def storage_type(cls) -> str:

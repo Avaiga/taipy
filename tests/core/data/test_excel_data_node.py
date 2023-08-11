@@ -98,6 +98,26 @@ class TestExcelDataNode:
         assert dn.has_header is False
         assert dn.sheet_name == sheet_names
 
+    def test_get_custom_properties(self, excel_file):
+        dn_1 = ExcelDataNode("dn_1", Scope.SCENARIO, properties={"path": "data/node/path"})
+        assert dn_1._get_custom_properties() == {}
+
+        dn_2 = ExcelDataNode(
+            "dn_2",
+            Scope.SCENARIO,
+            properties={
+                "exposed_type": "numpy",
+                "default_data": "foo",
+                "default_path": excel_file,
+                "has_header": False,
+                "sheet_name": ["sheet_name_1", "sheet_name_2"],
+                "foo": "bar",
+            },
+        )
+
+        # exposed_type, default_data, default_path, path, has_header are filtered out
+        assert dn_2._get_custom_properties() == {"foo": "bar"}
+
     def test_read_with_header(self):
         with pytest.raises(NoData):
             not_existing_excel = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx"})

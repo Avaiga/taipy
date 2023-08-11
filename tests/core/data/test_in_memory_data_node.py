@@ -47,6 +47,10 @@ class TestInMemoryDataNodeEntity:
         with pytest.raises(InvalidConfigurationId):
             InMemoryDataNode("foo bar", Scope.SCENARIO, DataNodeId("dn_id"))
 
+    def test_get_custom_properties(self):
+        dn = InMemoryDataNode("foo", Scope.SCENARIO, properties={"default_data": 1, "foo": "bar"})
+        assert dn._get_custom_properties() == {"foo": "bar"}
+
     def test_read_and_write(self):
         no_data_dn = InMemoryDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         with pytest.raises(NoData):

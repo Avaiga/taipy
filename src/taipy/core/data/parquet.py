@@ -167,6 +167,19 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         if not self._last_edit_date and (isfile(self._path) or isdir(self._path)):
             self._last_edit_date = datetime.now()
 
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__EXPOSED_TYPE_PROPERTY,
+                self.__PATH_KEY,
+                self.__DEFAULT_PATH_KEY,
+                self.__DEFAULT_DATA_KEY,
+                self.__ENGINE_PROPERTY,
+                self.__COMPRESSION_PROPERTY,
+                self.__READ_KWARGS_PROPERTY,
+                self.__WRITE_KWARGS_PROPERTY,
+            }
+        )
+
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE

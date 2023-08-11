@@ -122,6 +122,22 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         if not self._last_edit_date:
             self._last_edit_date = datetime.now()
 
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__DB_NAME_KEY,
+                self.__DB_USERNAME_KEY,
+                self.__DB_PASSWORD_KEY,
+                self.__DB_HOST_KEY,
+                self.__DB_PORT_KEY,
+                self.__DB_ENGINE_KEY,
+                self.__DB_DRIVER_KEY,
+                self.__DB_EXTRA_ARGS_KEY,
+                self.__SQLITE_FOLDER_PATH,
+                self.__SQLITE_FILE_EXTENSION,
+                self.__EXPOSED_TYPE_PROPERTY,
+            }
+        )
+
     def _check_required_properties(self, properties: Dict):
         db_engine = properties.get(self.__DB_ENGINE_KEY)
         if not db_engine:

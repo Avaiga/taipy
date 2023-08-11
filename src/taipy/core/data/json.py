@@ -113,6 +113,16 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         if not self._last_edit_date and isfile(self._path):  # type: ignore
             self._last_edit_date = datetime.now()
 
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__PATH_KEY,
+                self.__DEFAULT_PATH_KEY,
+                self.__DEFAULT_DATA_KEY,
+                self._ENCODER_KEY,
+                self._DECODER_KEY,
+            }
+        )
+
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE

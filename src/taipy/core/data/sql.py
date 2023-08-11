@@ -107,6 +107,13 @@ class SQLDataNode(_AbstractSQLDataNode):
             properties=properties,
         )
 
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__READ_QUERY_KEY,
+                self._WRITE_QUERY_BUILDER_KEY,
+            }
+        )
+
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE

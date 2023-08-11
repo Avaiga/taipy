@@ -11,7 +11,6 @@
 
 from datetime import datetime, timedelta
 from inspect import isclass
-from pydoc import locate
 from typing import Any, Dict, List, Optional, Set
 
 import pymongo
@@ -63,11 +62,23 @@ class MongoCollectionDataNode(DataNode):
     """
 
     __STORAGE_TYPE = "mongo_collection"
+
+    __DB_NAME_KEY = "db_name"
+    __COLLECTION_KEY = "collection_name"
+    __DB_USERNAME_KEY = "db_username"
+    __DB_PASSWORD_KEY = "db_password"
+    __DB_HOST_KEY = "db_host"
+    __DB_PORT_KEY = "db_port"
+    __DB_EXTRA_ARGS_KEY = "db_extra_args"
+
+    __DB_HOST_DEFAULT = "localhost"
+    __DB_PORT_DEFAULT = 27017
+
     _CUSTOM_DOCUMENT_PROPERTY = "custom_document"
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
     _REQUIRED_PROPERTIES: List[str] = [
-        "db_name",
-        "collection_name",
+        __DB_NAME_KEY,
+        __COLLECTION_KEY,
     ]
 
     def __init__(
@@ -111,13 +122,15 @@ class MongoCollectionDataNode(DataNode):
         )
 
         mongo_client = _connect_mongodb(
-            db_host=properties.get("db_host", "localhost"),
-            db_port=properties.get("db_port", 27017),
-            db_username=properties.get("db_username", ""),
-            db_password=properties.get("db_password", ""),
+            db_host=properties.get(self.__DB_HOST_KEY, self.__DB_HOST_DEFAULT),
+            db_port=properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT),
+            db_username=properties.get(self.__DB_USERNAME_KEY, ""),
+            db_password=properties.get(self.__DB_PASSWORD_KEY, ""),
             db_extra_args=properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
         )
-        self.collection = mongo_client[properties.get("db_name", "")][properties.get("collection_name", "")]
+        self.collection = mongo_client[properties.get(self.__DB_NAME_KEY, "")][
+            properties.get(self.__COLLECTION_KEY, "")
+        ]
 
         self.custom_document = properties[self._CUSTOM_DOCUMENT_PROPERTY]
 
@@ -133,6 +146,19 @@ class MongoCollectionDataNode(DataNode):
 
         if not self._last_edit_date:
             self._last_edit_date = datetime.now()
+
+        self._TAIPY_PROPERTIES.update(
+            {
+                self.__COLLECTION_KEY,
+                self.__DB_NAME_KEY,
+                self._CUSTOM_DOCUMENT_PROPERTY,
+                self.__DB_USERNAME_KEY,
+                self.__DB_PASSWORD_KEY,
+                self.__DB_HOST_KEY,
+                self.__DB_PORT_KEY,
+                self.__DB_EXTRA_ARGS_KEY,
+            }
+        )
 
     def _check_custom_document(self, custom_document):
         if not isclass(custom_document):

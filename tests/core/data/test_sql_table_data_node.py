@@ -175,6 +175,17 @@ class TestSQLTableDataNode:
         assert dn.table_name == "foo"
         assert dn._get_read_query() == "SELECT * FROM foo"
 
+    @pytest.mark.parametrize("properties", __pandas_properties)
+    def test_get_custom_properties(self, properties):
+        custom_properties = properties.copy()
+        custom_properties["foo"] = "bar"
+        dn = SQLTableDataNode(
+            "foo_bar",
+            Scope.SCENARIO,
+            properties=custom_properties,
+        )
+        assert dn._get_custom_properties() == {"foo": "bar"}
+
     @pytest.mark.parametrize(
         "properties",
         [

@@ -128,6 +128,22 @@ class TestGenericDataNode:
         with pytest.raises(InvalidConfigurationId):
             GenericDataNode("foo bar", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": write_fct})
 
+    def test_get_custom_properties(self):
+        dn_1 = GenericDataNode(
+            "dn_1",
+            Scope.SCENARIO,
+            properties={
+                "read_fct": read_fct,
+                "write_fct": write_fct,
+                "read_fct_args": 1,
+                "write_fct_args": 2,
+                "foo": "bar",
+            },
+        )
+
+        # read_fct, read_fct_args, write_fct, write_fct_args are filtered out
+        assert dn_1._get_custom_properties() == {"foo": "bar"}
+
     def test_create_with_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
             GenericDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
