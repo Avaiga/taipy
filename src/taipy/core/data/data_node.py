@@ -269,8 +269,8 @@ class DataNode(_Entity, _Labeled):
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
-    def _get_custom_properties(self) -> Dict[str, Any]:
-        """Get custom properties of the data node except from the ones created by TAIPY."""
+    def _get_user_properties(self) -> Dict[str, Any]:
+        """ Get user properties."""
         return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
 
     def __eq__(self, other):
