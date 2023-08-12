@@ -113,10 +113,20 @@ def test_set_and_get_pipeline():
 
 
 def test_get_all_on_multiple_versions_environment():
-    # Create 5 pipelines with 2 versions each
+    # Create 5 pipelines from Scenario with 2 versions each
     for version in range(1, 3):
         for i in range(5):
-            _PipelineManager._set(Pipeline({}, [], PipelineId(f"id_{i}_v{version}"), version=f"{version}.0"))
+            _ScenarioManager._set(
+                Scenario(
+                    f"config_id_{i+version}",
+                    [],
+                    {},
+                    [],
+                    f"id_{i}_v{version}",
+                    version=f"{version}.0",
+                    pipelines={"pipeline": {}},
+                )
+            )
 
     _VersionManager._set_experiment_version("1.0")
     assert len(_PipelineManager._get_all()) == 5
@@ -235,8 +245,8 @@ def test_assign_pipeline_as_parent_of_task():
     task_config_3 = Config.configure_task("task_3", print, [dn_config_2], [dn_config_3])
 
     tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_2, task_config_3], "scenario_id")
-    pipeline_1 = _PipelineManager._create("pipeline_1", [tasks[0], tasks[1]], "scenario_id")
-    pipeline_2 = _PipelineManager._create("pipeline_2", [tasks[0], tasks[2]], "scenario_id")
+    pipeline_1 = _PipelineManager._create("pipeline_1", [tasks[0], tasks[1]], scenario_id="scenario_id")
+    pipeline_2 = _PipelineManager._create("pipeline_2", [tasks[0], tasks[2]], scenario_id="scenario_id")
 
     tasks_1 = list(pipeline_1.tasks.values())
     tasks_2 = list(pipeline_2.tasks.values())
@@ -601,16 +611,19 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._create("pipeline", tasks)
+    scenario = Scenario("scenario", tasks, {}, pipelines={"pipeline": {"tasks": tasks}})
+    _ScenarioManager._set(scenario)
+
+    pipeline = scenario.pipelines["pipeline"]
     pipeline.submit()
 
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
     _PipelineManager._hard_delete(pipeline.id)
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
@@ -627,16 +640,19 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._create("pipeline", tasks)
+    scenario = Scenario("scenario", tasks, {}, pipelines={"pipeline": {"tasks": tasks}})
+    _ScenarioManager._set(scenario)
+
+    pipeline = scenario.pipelines["pipeline"]
     pipeline.submit()
 
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
     _PipelineManager._hard_delete(pipeline.id)
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
@@ -656,18 +672,24 @@ def test_hard_delete_shared_entities():
 
     tasks_scenario_1 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_1")
     tasks_scenario_2 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_2")
-    pipeline_1 = _PipelineManager._create("pipeline", tasks_scenario_1, scenario_id="scenario_id_1")
-    pipeline_2 = _PipelineManager._create("pipeline", tasks_scenario_2, scenario_id="scenario_id_2")
+
+    scenario_1 = Scenario("scenario_1", tasks_scenario_1, {}, pipelines={"pipeline": {"tasks": tasks_scenario_1}})
+    scenario_2 = Scenario("scenario_2", tasks_scenario_2, {}, pipelines={"pipeline": {"tasks": tasks_scenario_2}})
+    _ScenarioManager._set(scenario_1)
+    _ScenarioManager._set(scenario_2)
+    pipeline_1 = scenario_1.pipelines["pipeline"]
+    pipeline_2 = scenario_2.pipelines["pipeline"]
+
     _PipelineManager._submit(pipeline_1.id)
     _PipelineManager._submit(pipeline_2.id)
 
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 3
     assert len(_DataManager._get_all()) == 4
     assert len(_JobManager._get_all()) == 4
     _PipelineManager._hard_delete(pipeline_1.id)
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 3
     assert len(_DataManager._get_all()) == 4

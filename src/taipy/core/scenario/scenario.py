@@ -33,7 +33,6 @@ from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import NonExistingDataNode, NonExistingPipeline, NonExistingTask
 from ..job.job import Job
-from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ..pipeline.pipeline import Pipeline
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
@@ -161,13 +160,16 @@ class Scenario(_Entity, Submittable, _Labeled):
         self.pipelines = _pipelines  # type: ignore
 
     def remove_pipelines(self, pipeline_names: List[str]):
-        _pipelines = self.pipelines.copy()
+        _pipelines = _Reloader()._reload(self._MANAGER_NAME, self)._pipelines
         for pipeline_name in pipeline_names:
             _pipelines.pop(pipeline_name)
         self.pipelines = _pipelines  # type: ignore
 
     def __get_pipelines(self) -> Dict[str, Pipeline]:
         _pipelines = {}
+
+        from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
+
         pipeline_manager = _PipelineManagerFactory._build_manager()
 
         for pipeline_name, pipeline_data in self._pipelines.items():

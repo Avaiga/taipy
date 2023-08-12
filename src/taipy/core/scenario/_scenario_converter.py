@@ -18,7 +18,6 @@ from ..common import _utils
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle, CycleId
 from ..data.data_node import DataNode, DataNodeId
-from ..pipeline.pipeline import Pipeline
 from ..scenario._scenario_model import _ScenarioModel
 from ..scenario.scenario import Scenario
 from ..task.task import Task, TaskId

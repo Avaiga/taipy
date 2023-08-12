@@ -38,10 +38,7 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, _publish_event
-from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from ..pipeline.pipeline import Pipeline
 from ..task._task_manager_factory import _TaskManagerFactory
-from ..task.task import Task
 from .scenario import Scenario
 from .scenario_id import ScenarioId
 
@@ -117,13 +114,10 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             if config.frequency
             else None
         )
-
         cycle_id = cycle.id if cycle else None
-
         tasks = (
             _task_manager._bulk_get_or_create(config.task_configs, cycle_id, scenario_id) if config.task_configs else []
         )
-
         additional_data_nodes = (
             _data_manager._bulk_get_or_create(config.additional_data_node_configs, cycle_id, scenario_id)
             if config.additional_data_node_configs
@@ -132,11 +126,15 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
         pipelines = {}
         tasks_and_config_id_maps = {task.config_id: task for task in tasks}
-        for sequence_name, sequence_task_configs in config.sequences.items():
-            sequence_tasks = [
-                tasks_and_config_id_maps[sequence_task_config.id] for sequence_task_config in sequence_task_configs
-            ]
-            pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
+        try:
+            for sequence_name, sequence_task_configs in config.sequences.items():
+                sequence_tasks = [
+                    tasks_and_config_id_maps[sequence_task_config.id] for sequence_task_config in sequence_task_configs
+                ]
+                pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
+        except KeyError:
+            # TODO: raise Task of pipeline not in Scenario
+            pass
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
