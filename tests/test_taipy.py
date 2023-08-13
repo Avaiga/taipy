@@ -104,18 +104,18 @@ class TestTaipy:
         current_date = datetime.datetime.now()
 
         cycle = Cycle(Frequency.DAILY, {}, current_date, current_date, current_date)
-        scenario = Scenario("scenario_config_id", [], {})
-        pipeline = Pipeline({}, [], "pipeline_id")
+        scenario = Scenario("scenario_config_id", [], {}, pipelines={"pipeline": {}})
+
         task = Task("task_config_id", {}, print)
         job = Job("job_id", task, "submit_id", scenario.id)
         dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 
         _CycleManager._set(cycle)
         _ScenarioManager._set(scenario)
-        _PipelineManager._set(pipeline)
         _TaskManager._set(task)
         _JobManager._set(job)
         _DataManager._set(dn)
+        pipeline = scenario.pipelines["pipeline"]
 
         assert tp.is_submittable(scenario)
         assert tp.is_submittable(pipeline)

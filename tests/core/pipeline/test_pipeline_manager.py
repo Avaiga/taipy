@@ -440,7 +440,7 @@ def test_pipeline_notification_subscribe(mocker):
     notify_2.__module__ = "notify_2"
     # Mocking this because NotifyMock is a class that does not loads correctly when getting the pipeline
     # from the storage.
-    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_2])
+    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2, notify_2])
 
     # test subscription
     callback = mock.MagicMock()
@@ -449,7 +449,7 @@ def test_pipeline_notification_subscribe(mocker):
 
     # test pipeline subscribe notification
     _PipelineManager._subscribe(callback=notify_1, pipeline=pipeline)
-    _PipelineManager._submit(pipeline)
+    _PipelineManager._submit(pipeline.id)
 
     notify_1.assert_called_3_times()
     notify_1.reset()
@@ -458,7 +458,7 @@ def test_pipeline_notification_subscribe(mocker):
     # test subscribe notification only on new job
     _PipelineManager._unsubscribe(callback=notify_1, pipeline=pipeline)
     _PipelineManager._subscribe(callback=notify_2, pipeline=pipeline)
-    _PipelineManager._submit(pipeline.id)
+    _PipelineManager._submit(pipeline)
 
     notify_1.assert_not_called()
     notify_2.assert_called_3_times()

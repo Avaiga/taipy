@@ -28,13 +28,8 @@ class _PipelineManagerFactory(_ManagerFactory):
             pipeline_manager = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager", "_PipelineManager"
             )  # type: ignore
-            build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager_factory", "_PipelineManagerFactory"
-            )._build_repository  # type: ignore
         else:
             pipeline_manager = _PipelineManager
-            build_repository = cls._build_repository
-        pipeline_manager._repository = build_repository()  # type: ignore
         return pipeline_manager  # type: ignore
 
     @classmethod

@@ -32,14 +32,7 @@ from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-
-
-def init_managers():
-    _ScenarioManagerFactory._build_manager()._delete_all()
-    _PipelineManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _DataManagerFactory._build_manager()._delete_all()
-    _JobManagerFactory._build_manager()._delete_all()
+from tests.conftest import init_managers
 
 
 def test_set_and_get_pipeline(init_sql_repo):

@@ -139,6 +139,20 @@ class NonExistingPipeline(Exception):
         self.message = f"Pipeline: {pipeline_id} does not exist."
 
 
+class PipelineBelongsToNonExistingScenario(Exception):
+    """Raised if a Pipeline does not belong to an existing Scenario."""
+
+    def __init__(self, pipeline_id: str, scenario_id: str):
+        self.message = f"Pipeline: {pipeline_id} belongs to a non-existing Scenario: {scenario_id}."
+
+
+class PipelineTaskDoesNotExistInSameScenario(Exception):
+    """Raised if the Task of a Pipeline does not exist in the same Scenario."""
+
+    def __init__(self, task_id: str, pipeline_id: str, scenario_id: str):
+        self.message = f"Task {task_id} of Pipeline {pipeline_id} does not exist in Scenario {scenario_id}."
+
+
 class NonExistingPipelineConfig(Exception):
     """Raised if a requested Pipeline configuration is not known by the Pipeline Manager."""
 

@@ -37,14 +37,7 @@ from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-
-
-def init_managers():
-    _CycleManagerFactory._build_manager()._delete_all()
-    _ScenarioManagerFactory._build_manager()._delete_all()
-    _PipelineManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _DataManagerFactory._build_manager()._delete_all()
+from tests.conftest import init_managers
 
 
 def test_set_and_get_scenario(cycle, init_sql_repo):
@@ -61,7 +54,6 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     additional_dn_2 = InMemoryDataNode("zyx", Scope.SCENARIO)
     task_name_2 = "task_2"
     task_2 = Task(task_name_2, {}, print, [input_dn_2], [output_dn_2], TaskId("task_id_2"))
-    pipeline_2 = Pipeline({}, [task_2], PipelineId("pipeline_id_2"))
     scenario_id_2 = ScenarioId("scenario_id_2")
     scenario_2 = Scenario(
         "scenario_name_2",
@@ -72,13 +64,12 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
         datetime.now(),
         True,
         cycle,
-        pipelines={"pipeline_2": pipeline_2.id},
+        pipelines={"pipeline_2": {"tasks": [task_2]}},
     )
 
     additional_dn_3 = InMemoryDataNode("baz", Scope.SCENARIO)
     task_name_3 = "task_3"
     task_3 = Task(task_name_3, {}, print, id=TaskId("task_id_3"))
-    pipeline_3 = Pipeline({}, [], PipelineId("pipeline_id_3"))
     scenario_3_with_same_id = Scenario(
         "scenario_name_3",
         [task_3],
@@ -88,7 +79,7 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
         datetime.now(),
         False,
         cycle,
-        pipelines={"pipeline_3": pipeline_3.id},
+        pipelines={"pipeline_3": {}},
     )
 
     # No existing scenario
@@ -118,7 +109,6 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     _TaskManager._set(task_2)
-    _PipelineManager._set(pipeline_2)
     _CycleManager._set(cycle)
     _ScenarioManager._set(scenario_2)
     _DataManager._set(additional_dn_2)
@@ -187,7 +177,6 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     _DataManager._set(additional_dn_3)
     _TaskManager._set(task_3)
     _TaskManager._set(scenario_2.tasks[task_name_2])
-    _PipelineManager._set(pipeline_3)
     _ScenarioManager._set(scenario_3_with_same_id)
     assert len(_ScenarioManager._get_all()) == 2
     assert _ScenarioManager._get(scenario_id_1).id == scenario_1.id

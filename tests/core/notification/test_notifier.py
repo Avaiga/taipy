@@ -616,7 +616,7 @@ def test_publish_event():
     # Test DELETION Event
 
     tp.delete(scenario.id)
-    assert registration_queue.qsize() == 8
+    assert registration_queue.qsize() == 7
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -625,27 +625,24 @@ def test_publish_event():
     expected_event_types = [
         EventEntityType.PIPELINE,
         EventEntityType.CYCLE,
-        EventEntityType.SCENARIO,
         EventEntityType.PIPELINE,
         EventEntityType.SCENARIO,
+        # EventEntityType.SCENARIO,
         EventEntityType.TASK,
         EventEntityType.JOB,
         EventEntityType.DATA_NODE,
     ]
 
-    expected_event_entity_id = [pipeline.id, cycle.id, scenario.id, pipeline.id, scenario.id, task.id, job.id, dn.id]
+    expected_event_entity_id = [pipeline.id, cycle.id, pipeline.id, scenario.id, task.id, job.id, dn.id]
     expected_event_operation_type = [EventOperation.DELETION] * len(expected_event_types)
     expected_event_operation_type[0] = EventOperation.CREATION
-    expected_event_operation_type[2] = EventOperation.UPDATE
-    expected_attribute_names = [None] * len(expected_event_types)
-    expected_attribute_names[2] = "pipelines"
 
     assert all(
         [
             event.entity_type == expected_event_types[i]
             and event.entity_id == expected_event_entity_id[i]
             and event.operation == expected_event_operation_type[i]
-            and event.attribute_name == expected_attribute_names[i]
+            and event.attribute_name is None
             for i, event in enumerate(published_events)
         ]
     )

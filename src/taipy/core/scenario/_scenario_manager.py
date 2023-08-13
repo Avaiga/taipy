@@ -33,6 +33,7 @@ from ..exceptions.exceptions import (
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
+    PipelineTaskDoesNotExistInSameScenario,
     UnauthorizedTagError,
 )
 from ..job._job_manager_factory import _JobManagerFactory
@@ -126,15 +127,17 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
         pipelines = {}
         tasks_and_config_id_maps = {task.config_id: task for task in tasks}
-        try:
-            for sequence_name, sequence_task_configs in config.sequences.items():
-                sequence_tasks = [
-                    tasks_and_config_id_maps[sequence_task_config.id] for sequence_task_config in sequence_task_configs
-                ]
-                pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
-        except KeyError:
-            # TODO: raise Task of pipeline not in Scenario
-            pass
+        for sequence_name, sequence_task_configs in config.sequences.items():
+            sequence_tasks = []
+            for sequence_task_config in sequence_task_configs:
+                if task := tasks_and_config_id_maps.get(sequence_task_config.id):
+                    sequence_tasks.append(task)
+                else:
+                    # TODO: add tests
+                    raise PipelineTaskDoesNotExistInSameScenario(
+                        str(sequence_task_config.id), str(sequence_name), str(scenario_id)
+                    )
+            pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
@@ -156,12 +159,14 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         )
 
         for task in tasks:
-            task._parent_ids.update([scenario_id])
-            _task_manager._set(task)
+            if scenario_id not in task._parent_ids:
+                task._parent_ids.update([scenario_id])
+                _task_manager._set(task)
 
         for dn in additional_data_nodes.values():
-            dn._parent_ids.update([scenario_id])
-            _data_manager._set(dn)
+            if scenario_id not in dn._parent_ids:
+                dn._parent_ids.update([scenario_id])
+                _data_manager._set(dn)
 
         cls._set(scenario)
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)

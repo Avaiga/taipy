@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 import pathlib
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
@@ -18,7 +19,13 @@ from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
 from ..common._utils import _Subscriber
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
-from ..exceptions.exceptions import InvalidPipelineId, ModelNotFound, NonExistingPipeline, NonExistingTask
+from ..exceptions.exceptions import (
+    InvalidPipelineId,
+    ModelNotFound,
+    NonExistingPipeline,
+    NonExistingTask,
+    PipelineBelongsToNonExistingScenario,
+)
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, _publish_event
@@ -35,18 +42,19 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
     _ENTITY_NAME = Pipeline.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.PIPELINE
+    _dir_name = "pipelines"
 
     @classmethod
     def _get_all(cls, version_number: Optional[str] = None) -> List[Pipeline]:
         """
-        Returns all entities.
+        Returns all Pipeline entities.
         """
-        pipelines = set()
+        pipelines = []
         scenarios = _ScenarioManagerFactory._build_manager()._get_all(version_number)
         for scenario in scenarios:
-            pipelines.update(scenario.pipelines.values())
+            pipelines.extend(list(scenario.pipelines.values()))
 
-        return list(pipelines)
+        return pipelines
 
     @classmethod
     def _get_all_by(cls, filters: Optional[List[Dict]] = None) -> List[Pipeline]:
@@ -108,7 +116,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         pipeline_id = Pipeline._new_id(pipeline_name, scenario_id)
 
         task_manager = _TaskManagerFactory._build_manager()
-        _tasks = []
+        _tasks: List[Task] = []
         for task in tasks:
             if not isinstance(task, Task):
                 if _task := task_manager._get(task):
@@ -131,8 +139,9 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             version=version,
         )
         for task in _tasks:
-            task._parent_ids.update([pipeline_id])
-            task_manager._set(task)
+            if pipeline_id not in task._parent_ids:
+                task._parent_ids.update([pipeline_id])
+                task_manager._set(task)
         _publish_event(cls._EVENT_ENTITY_TYPE, pipeline.id, EventOperation.CREATION, None)
         return pipeline
 
@@ -149,11 +158,16 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             if scenario := scenario_manager._get(scenario_id):
                 if pipeline_entity := scenario.pipelines.get(pipeline_name, None):
                     return pipeline_entity
+            cls.__log_error_entity_not_found(pipeline_id)
+            return default
+        except (ModelNotFound, InvalidPipelineId):
+            # TODO: add tests
+            cls.__log_error_entity_not_found(pipeline_id)
             return default
 
-        except (ModelNotFound, InvalidPipelineId):
-            cls._logger.error(f"{cls._ENTITY_NAME} not found: {pipeline_id}")
-            return default
+    @classmethod
+    def __log_error_entity_not_found(cls, pipeline_id: Union[PipelineId, str]):
+        cls._logger.error(f"{cls._ENTITY_NAME} not found: {str(pipeline_id)}")
 
     @classmethod
     def _set(cls, pipeline: Pipeline):
@@ -173,12 +187,11 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
                 scenario._pipelines[pipeline_name] = pipeline_data  # type: ignore
                 scenario_manager._set(scenario)
             else:
-                # TODO: raise error and add test cases
-                pass
+                raise PipelineBelongsToNonExistingScenario(pipeline.id, scenario_id)
 
-        except (ModelNotFound, InvalidPipelineId):
-            # cls._logger.error(f"{cls._ENTITY_NAME} not found: {pipeline_id}")
-            pass
+        except PipelineBelongsToNonExistingScenario:
+            # TODO: add tests
+            cls._logger.error(f"Pipeline {pipeline.id} belongs to a non-existing Scenario {scenario_id}.")
 
     @classmethod
     def _breakdown_pipeline_id(cls, pipeline_id: str) -> Tuple[str, str]:
@@ -188,6 +201,8 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             pipeline_name = pipeline_name.split(Pipeline._ID_PREFIX)[1].strip("_")
             return pipeline_name, scenario_id
         except ValueError:
+            # TODO: add tests
+            cls._logger.error(f"PipelineId {pipeline_id} is invalid.")
             raise InvalidPipelineId(pipeline_id)
 
     @classmethod
@@ -232,7 +247,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Deletes all entities.
         """
-        cls._repository._delete_all()
+        # TODO: add tests
         scenarios = _ScenarioManagerFactory._build_manager()._get_all()
         for scenario in scenarios:
             scenario.pipelines = {}
@@ -242,7 +257,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     @classmethod
     def _delete_many(cls, pipeline_ids: Iterable):
         """
-        Deletes entities by a list of ids.
+        Deletes Pipeline entities by a list of Pipeline ids.
         """
         scenario_manager = _ScenarioManagerFactory._build_manager()
 
@@ -253,12 +268,19 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             pipelines_names.append(pipeline_name)
             scenario_ids_and_pipeline_names_map[scenario_id] = pipelines_names
 
-        for scenario_id, pipeline_names in scenario_ids_and_pipeline_names_map.items():
-            scenario_manager._get(scenario_id).remove_pipelines(pipeline_names)
+        try:
+            for scenario_id, pipeline_names in scenario_ids_and_pipeline_names_map.items():
+                scenario = scenario_manager._get(scenario_id)
+                for pipeline_name in pipeline_names:
+                    del scenario._pipelines[pipeline_name]
+                scenario_manager._set(scenario)
 
-        if hasattr(cls, "_EVENT_ENTITY_TYPE"):
-            for pipeline_id in pipeline_ids:
-                _publish_event(cls._EVENT_ENTITY_TYPE, pipeline_id, EventOperation.DELETION, None)  # type: ignore
+            if hasattr(cls, "_EVENT_ENTITY_TYPE"):
+                for pipeline_id in pipeline_ids:
+                    _publish_event(cls._EVENT_ENTITY_TYPE, pipeline_id, EventOperation.DELETION, None)  # type: ignore
+        except (ModelNotFound, KeyError):
+            cls.__log_error_entity_not_found(pipeline_id)
+            raise ModelNotFound(cls._dir_name, pipeline_id)
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
@@ -281,7 +303,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
                 if hasattr(cls, "_EVENT_ENTITY_TYPE"):
                     _publish_event(cls._EVENT_ENTITY_TYPE, pipeline_id, EventOperation.DELETION, None)
                 return
-        raise ModelNotFound("pipelines", pipeline_id)
+        raise ModelNotFound(cls._dir_name, pipeline_id)
 
     @classmethod
     def _exists(cls, entity_id: str) -> bool:
@@ -292,7 +314,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
     @classmethod
     def _hard_delete(cls, pipeline_id: PipelineId):
-        # TODO: delete based on ScenarioManagerFactory
         pipeline = cls._get(pipeline_id)
         entity_ids_to_delete = cls._get_children_entity_ids(pipeline)
         entity_ids_to_delete.pipeline_ids.add(pipeline.id)
@@ -303,10 +324,28 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Export an entity.
         """
+        # TODO: add tests and fix typing of pipeline_data
+        if isinstance(folder_path, str):
+            folder: pathlib.Path = pathlib.Path(folder_path)
+        else:
+            folder = folder_path
+
+        export_dir = folder / cls._dir_name  # type: ignore
+        if not export_dir.exists():
+            export_dir.mkdir(parents=True)
+
+        export_path = export_dir / f"{id}.json"
+
         pipeline_name, scenario_id = cls._breakdown_pipeline_id(id)
-        # TODO: Dump to json
-        _ScenarioManagerFactory._build_manager()._get(scenario_id)._pipelines[pipeline_name]
-        return cls._repository._export(id, folder_path)
+        pipeline = {"id": id, "owner_id": scenario_id, "parent_ids": [scenario_id], "name": pipeline_name}
+
+        scenario = _ScenarioManagerFactory._build_manager()._get(scenario_id)
+        if pipeline_data := scenario._pipelines.get(pipeline_name, None):
+            pipeline.update(pipeline_data)  # type: ignore
+            with open(export_path, "w", encoding="utf-8") as export_file:
+                export_file.write(json.dumps(pipeline))
+        else:
+            raise ModelNotFound(cls._dir_name, id)
 
     @classmethod
     def _get_children_entity_ids(cls, pipeline: Pipeline) -> _EntityIds:
