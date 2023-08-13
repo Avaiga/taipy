@@ -148,7 +148,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     @classmethod
     def _get(cls, pipeline: Union[str, Pipeline], default=None) -> Pipeline:
         """
-        Returns a pipeline by id or reference.
+        Returns a Pipeline by id or reference.
         """
         try:
             pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
@@ -172,7 +172,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     @classmethod
     def _set(cls, pipeline: Pipeline):
         """
-        Save or update a pipeline.
+        Save or update a Pipeline.
         """
         try:
             pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline.id)
@@ -245,7 +245,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     @classmethod
     def _delete_all(cls):
         """
-        Deletes all entities.
+        Deletes all Pipelines.
         """
         # TODO: add tests
         scenarios = _ScenarioManagerFactory._build_manager()._get_all()
@@ -259,6 +259,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Deletes Pipeline entities by a list of Pipeline ids.
         """
+        # TODO: add tests
         scenario_manager = _ScenarioManagerFactory._build_manager()
 
         scenario_ids_and_pipeline_names_map: Dict[str, List[str]] = {}
@@ -285,15 +286,16 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     @classmethod
     def _delete_by_version(cls, version_number: str):
         """
-        Deletes entities by version number.
+        Deletes Pipelines by version number.
         """
-        while scenario := _ScenarioManagerFactory()._build_manager()._repository._search("version", version_number):
+        # TODO: add tests
+        for scenario in _ScenarioManagerFactory()._build_manager()._repository._search("version", version_number):
             cls._delete_many(scenario.pipelines.values())
 
     @classmethod
     def _delete(cls, pipeline_id: PipelineId):
         """
-        Deletes an entity by id.
+        Deletes a Pipeline by id.
         """
         pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline_id)
 
@@ -310,6 +312,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Returns True if the entity id exists.
         """
+        # TODO: add tests
         return True if cls._get(entity_id) else False
 
     @classmethod
@@ -322,7 +325,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
     @classmethod
     def _export(cls, id: str, folder_path: Union[str, pathlib.Path]):
         """
-        Export an entity.
+        Export a Pipeline entity.
         """
         # TODO: add tests and fix typing of pipeline_data
         if isinstance(folder_path, str):

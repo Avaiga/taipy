@@ -63,7 +63,9 @@ class _ScenarioConverter(_AbstractConverter):
             for pipeline_name, pipeline_data in model.pipelines.items():
                 if subscribers := pipeline_data.get(Scenario._PIPELINE_SUBSCRIBERS_KEY):
                     model.pipelines[pipeline_name][Scenario._PIPELINE_SUBSCRIBERS_KEY] = [
-                        _utils._Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])  # type: ignore
+                        _utils._Subscriber(
+                            _utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"]  # type: ignore
+                        )
                         for it in subscribers
                     ]
 
