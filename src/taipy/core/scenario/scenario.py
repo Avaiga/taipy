@@ -101,9 +101,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._primary_scenario = is_primary
         self._tags = tags or set()
         self._properties = _Properties(self, **properties)
-        self._pipelines: Dict[
-            str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]
-        ] = (pipelines or {})
+        self._pipelines: Dict[str, Dict] = pipelines or {}
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod

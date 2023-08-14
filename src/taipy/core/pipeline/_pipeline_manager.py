@@ -161,7 +161,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             cls.__log_error_entity_not_found(pipeline_id)
             return default
         except (ModelNotFound, InvalidPipelineId):
-            # TODO: add tests
             cls.__log_error_entity_not_found(pipeline_id)
             return default
 
@@ -174,24 +173,20 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Save or update a Pipeline.
         """
-        try:
-            pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline.id)
-            scenario_manager = _ScenarioManagerFactory._build_manager()
+        pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline.id)
+        scenario_manager = _ScenarioManagerFactory._build_manager()
 
-            if scenario := scenario_manager._get(scenario_id):
-                pipeline_data = {
-                    Scenario._PIPELINE_TASKS_KEY: pipeline._tasks,
-                    Scenario._PIPELINE_SUBSCRIBERS_KEY: pipeline._subscribers,
-                    Scenario._PIPELINE_PROPERTIES_KEY: pipeline._properties.data,
-                }
-                scenario._pipelines[pipeline_name] = pipeline_data  # type: ignore
-                scenario_manager._set(scenario)
-            else:
-                raise PipelineBelongsToNonExistingScenario(pipeline.id, scenario_id)
-
-        except PipelineBelongsToNonExistingScenario:
-            # TODO: add tests
+        if scenario := scenario_manager._get(scenario_id):
+            pipeline_data = {
+                Scenario._PIPELINE_TASKS_KEY: pipeline._tasks,
+                Scenario._PIPELINE_SUBSCRIBERS_KEY: pipeline._subscribers,
+                Scenario._PIPELINE_PROPERTIES_KEY: pipeline._properties.data,
+            }
+            scenario._pipelines[pipeline_name] = pipeline_data  # type: ignore
+            scenario_manager._set(scenario)
+        else:
             cls._logger.error(f"Pipeline {pipeline.id} belongs to a non-existing Scenario {scenario_id}.")
+            raise PipelineBelongsToNonExistingScenario(pipeline.id, scenario_id)
 
     @classmethod
     def _breakdown_pipeline_id(cls, pipeline_id: str) -> Tuple[str, str]:
@@ -200,8 +195,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             scenario_id = f"{Scenario._ID_PREFIX}{scenario_id}"
             pipeline_name = pipeline_name.split(Pipeline._ID_PREFIX)[1].strip("_")
             return pipeline_name, scenario_id
-        except ValueError:
-            # TODO: add tests
+        except (ValueError, IndexError):
             cls._logger.error(f"PipelineId {pipeline_id} is invalid.")
             raise InvalidPipelineId(pipeline_id)
 
@@ -247,7 +241,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Deletes all Pipelines.
         """
-        # TODO: add tests
         scenarios = _ScenarioManagerFactory._build_manager()._get_all()
         for scenario in scenarios:
             scenario.pipelines = {}
@@ -255,15 +248,15 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             _publish_event(cls._EVENT_ENTITY_TYPE, "all", EventOperation.DELETION, None)
 
     @classmethod
-    def _delete_many(cls, pipeline_ids: Iterable):
+    def _delete_many(cls, pipeline_ids: Iterable[str]):
         """
         Deletes Pipeline entities by a list of Pipeline ids.
         """
-        # TODO: add tests
         scenario_manager = _ScenarioManagerFactory._build_manager()
 
         scenario_ids_and_pipeline_names_map: Dict[str, List[str]] = {}
-        for pipeline_id in pipeline_ids:
+        for pipeline in pipeline_ids:
+            pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
             pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline_id)
             pipelines_names = scenario_ids_and_pipeline_names_map.get(scenario_id, [])
             pipelines_names.append(pipeline_name)
@@ -278,7 +271,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
             if hasattr(cls, "_EVENT_ENTITY_TYPE"):
                 for pipeline_id in pipeline_ids:
-                    _publish_event(cls._EVENT_ENTITY_TYPE, pipeline_id, EventOperation.DELETION, None)  # type: ignore
+                    _publish_event(cls._EVENT_ENTITY_TYPE, pipeline_id, EventOperation.DELETION, None)
         except (ModelNotFound, KeyError):
             cls.__log_error_entity_not_found(pipeline_id)
             raise ModelNotFound(cls._dir_name, pipeline_id)
@@ -288,7 +281,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Deletes Pipelines by version number.
         """
-        # TODO: add tests
         for scenario in _ScenarioManagerFactory()._build_manager()._repository._search("version", version_number):
             cls._delete_many(scenario.pipelines.values())
 
@@ -312,7 +304,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Returns True if the entity id exists.
         """
-        # TODO: add tests
         return True if cls._get(entity_id) else False
 
     @classmethod
@@ -327,7 +318,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Export a Pipeline entity.
         """
-        # TODO: add tests and fix typing of pipeline_data
         if isinstance(folder_path, str):
             folder: pathlib.Path = pathlib.Path(folder_path)
         else:
@@ -338,7 +328,6 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             export_dir.mkdir(parents=True)
 
         export_path = export_dir / f"{id}.json"
-
         pipeline_name, scenario_id = cls._breakdown_pipeline_id(id)
         pipeline = {"id": id, "owner_id": scenario_id, "parent_ids": [scenario_id], "name": pipeline_name}
 

@@ -133,7 +133,6 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                 if task := tasks_and_config_id_maps.get(sequence_task_config.id):
                     sequence_tasks.append(task)
                 else:
-                    # TODO: add tests
                     raise PipelineTaskDoesNotExistInSameScenario(
                         str(sequence_task_config.id), str(sequence_name), str(scenario_id)
                     )

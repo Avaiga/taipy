@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
+from pathlib import Path
 from typing import Callable, Iterable, Optional
 from unittest import mock
 from unittest.mock import ANY
@@ -23,7 +25,14 @@ from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
+from src.taipy.core.exceptions.exceptions import (
+    InvalidPipelineId,
+    ModelNotFound,
+    NonExistingPipeline,
+    NonExistingTask,
+    PipelineBelongsToNonExistingScenario,
+    PipelineTaskDoesNotExistInSameScenario,
+)
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
@@ -39,9 +48,32 @@ from taipy.config.config import Config
 from tests.core.utils.NotifyMock import NotifyMock
 
 
+def test_breakdown_pipeline_id():
+    with pytest.raises(InvalidPipelineId):
+        _PipelineManager._breakdown_pipeline_id("scenario_id")
+    with pytest.raises(InvalidPipelineId):
+        _PipelineManager._breakdown_pipeline_id("pipeline_id")
+    with pytest.raises(InvalidPipelineId):
+        _PipelineManager._breakdown_pipeline_id("PIPELINE_pipeline_id")
+    with pytest.raises(InvalidPipelineId):
+        _PipelineManager._breakdown_pipeline_id("SCENARIO_scenario_id")
+    with pytest.raises(InvalidPipelineId):
+        _PipelineManager._breakdown_pipeline_id("pipeline_SCENARIO_scenario_id")
+    with pytest.raises(InvalidPipelineId):
+        _PipelineManager._breakdown_pipeline_id("PIPELINE_pipeline_scenario_id")
+    pipeline_name, scenario_id = _PipelineManager._breakdown_pipeline_id("PIPELINE_pipeline_SCENARIO_scenario")
+    assert pipeline_name == "pipeline" and scenario_id == "SCENARIO_scenario"
+    pipeline_name, scenario_id = _PipelineManager._breakdown_pipeline_id("PIPELINEpipelineSCENARIO_scenario")
+    assert pipeline_name == "pipeline" and scenario_id == "SCENARIO_scenario"
+
+
 def test_set_and_get_pipeline():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_dispatcher()
+
+    with pytest.raises(PipelineBelongsToNonExistingScenario):
+        pipeline = Pipeline({"name": "pipeline_name"}, [], "PIPELINE_pipeline_name_SCENARIO_scenario_id")
+        _PipelineManager._set(pipeline)
 
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
@@ -58,6 +90,7 @@ def test_set_and_get_pipeline():
     # No existing Pipeline
     assert _PipelineManager._get(pipeline_id_1) is None
     assert _PipelineManager._get(pipeline_id_2) is None
+    assert _PipelineManager._get("pipeline") is None
 
     scenario.add_pipelines({pipeline_name_1: {"tasks": []}})
     pipeline_1 = scenario.pipelines[pipeline_name_1]
@@ -599,6 +632,155 @@ def test_pipeline_notification_subscribe_all():
 
     assert len(_PipelineManager._get(pipeline.id).subscribers) == 1
     assert len(_PipelineManager._get(other_pipeline.id).subscribers) == 1
+
+
+def test_delete():
+    pipeline_id = "PIPELINE_pipeline_SCENARIO_scenario_id_1"
+    with pytest.raises(ModelNotFound):
+        _PipelineManager._delete(pipeline_id)
+
+    scenario_1 = Scenario("scenario_1", [], {}, scenario_id="SCENARIO_scenario_id_1")
+    scenario_2 = Scenario("scenario_2", [], {}, scenario_id="SCENARIO_scenario_id_2")
+    _ScenarioManager._set(scenario_1)
+    _ScenarioManager._set(scenario_2)
+    with pytest.raises(ModelNotFound):
+        _PipelineManager._delete(pipeline_id)
+
+    scenario_1.add_pipelines({"pipeline": {}})
+    assert len(_PipelineManager._get_all()) == 1
+    _PipelineManager._delete(pipeline_id)
+    assert len(_PipelineManager._get_all()) == 0
+
+    scenario_1.add_pipelines({"pipeline": {}, "pipeline_1": {}})
+    assert len(_PipelineManager._get_all()) == 2
+    _PipelineManager._delete(pipeline_id)
+    assert len(_PipelineManager._get_all()) == 1
+
+    scenario_1.add_pipelines({"pipeline_1": {}, "pipeline_2": {}, "pipeline_3": {}})
+    scenario_2.add_pipelines({"pipeline_1_2": {}, "pipeline_2_2": {}})
+    assert len(_PipelineManager._get_all()) == 5
+    _PipelineManager._delete_all()
+    assert len(_PipelineManager._get_all()) == 0
+
+    scenario_1.add_pipelines({"pipeline_1": {}, "pipeline_2": {}, "pipeline_3": {}, "pipeline_4": {}})
+    scenario_2.add_pipelines({"pipeline_1_2": {}, "pipeline_2_2": {}})
+    assert len(_PipelineManager._get_all()) == 6
+    _PipelineManager._delete_many(
+        [
+            "PIPELINE_pipeline_1_SCENARIO_scenario_id_1",
+            "PIPELINE_pipeline_2_SCENARIO_scenario_id_1",
+            "PIPELINE_pipeline_1_2_SCENARIO_scenario_id_2",
+        ]
+    )
+    assert len(_PipelineManager._get_all()) == 3
+
+    with pytest.raises(ModelNotFound):
+        _PipelineManager._delete_many(
+            ["PIPELINE_pipeline_1_SCENARIO_scenario_id_1", "PIPELINE_pipeline_2_SCENARIO_scenario_id_1"]
+        )
+
+
+def test_delete_version():
+    scenario_1_0 = Scenario(
+        "scenario_config",
+        [],
+        {},
+        scenario_id="SCENARIO_id_1_v1_0",
+        version="1.0",
+        pipelines={"pipeline_1": {}, "pipeline_2": {}},
+    )
+    scenario_1_1 = Scenario(
+        "scenario_config",
+        [],
+        {},
+        scenario_id="SCENARIO_id_1_v1_1",
+        version="1.1",
+        pipelines={"pipeline_1": {}, "pipeline_2": {}},
+    )
+    _ScenarioManager._set(scenario_1_0)
+    _ScenarioManager._set(scenario_1_1)
+
+    _VersionManager._set_experiment_version("1.1")
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 2
+
+    _VersionManager._set_experiment_version("1.0")
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 2
+
+    _PipelineManager._delete_by_version("1.0")
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(scenario_1_0.pipelines) == 0
+    assert len(scenario_1_1.pipelines) == 2
+
+    _VersionManager._set_experiment_version("1.1")
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 2
+    assert len(scenario_1_0.pipelines) == 0
+    assert len(scenario_1_1.pipelines) == 2
+    _PipelineManager._delete_by_version("1.1")
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 0
+
+
+def test_exists():
+    scenario = Scenario("scenario", [], {}, scenario_id="SCENARIO_scenario", pipelines={"pipeline": {}})
+    _ScenarioManager._set(scenario)
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert not _PipelineManager._exists("PIPELINE_pipeline_not_exist_SCENARIO_scenario")
+    assert not _PipelineManager._exists("PIPELINE_pipeline_SCENARIO_scenario_id")
+    assert _PipelineManager._exists("PIPELINE_pipeline_SCENARIO_scenario")
+    assert _PipelineManager._exists(scenario.pipelines["pipeline"])
+
+
+def test_export(tmpdir_factory):
+    path = tmpdir_factory.mktemp("data")
+    task = Task("task", {}, print, id=TaskId("task_id"))
+    scenario = Scenario(
+        "scenario",
+        set([task]),
+        {},
+        set(),
+        version="1.0",
+        pipelines={"pipeline_1": {}, "pipeline_2": {"tasks": [task], "properties": {"xyz": "acb"}}},
+    )
+    _TaskManager._set(task)
+    _ScenarioManager._set(scenario)
+
+    pipeline_1 = scenario.pipelines["pipeline_1"]
+    pipeline_2 = scenario.pipelines["pipeline_2"]
+
+    _PipelineManager._export(pipeline_1.id, Path(path))
+    export_pipeline_json_file_path = f"{path}/pipelines/{pipeline_1.id}.json"
+    with open(export_pipeline_json_file_path, "rb") as f:
+        pipeline_json_file = json.load(f)
+        expected_json = {
+            "id": pipeline_1.id,
+            "owner_id": scenario.id,
+            "parent_ids": [scenario.id],
+            "name": "pipeline_1",
+            "tasks": [],
+            "properties": {},
+            "subscribers": [],
+        }
+        assert expected_json == pipeline_json_file
+
+    _PipelineManager._export(pipeline_2.id, Path(path))
+    export_pipeline_json_file_path = f"{path}/pipelines/{pipeline_2.id}.json"
+    with open(export_pipeline_json_file_path, "rb") as f:
+        pipeline_json_file = json.load(f)
+        expected_json = {
+            "id": pipeline_2.id,
+            "owner_id": scenario.id,
+            "parent_ids": [scenario.id],
+            "name": "pipeline_2",
+            "tasks": [task.id],
+            "properties": {"xyz": "acb"},
+            "subscribers": [],
+        }
+        assert expected_json == pipeline_json_file
 
 
 def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():

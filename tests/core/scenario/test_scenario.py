@@ -304,8 +304,6 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     _DataManagerFactory._build_manager()._set(data_node)
     _DataManagerFactory._build_manager()._set(additional_dn)
     _CycleManagerFactory._build_manager()._set(cycle)
-    _PipelineManagerFactory._build_manager()._set(pipeline_1)
-    _PipelineManagerFactory._build_manager()._set(tmp_pipeline)
     scenario_manager = _ScenarioManagerFactory._build_manager()
     cycle_manager = _CycleManagerFactory._build_manager()
     cycle_manager._set(cycle)
