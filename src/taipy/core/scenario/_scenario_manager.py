@@ -154,7 +154,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             is_primary=is_primary_scenario,
             cycle=cycle,
             version=version,
-            pipelines=pipelines,  # type: ignore
+            pipelines=pipelines,
         )
 
         for task in tasks:

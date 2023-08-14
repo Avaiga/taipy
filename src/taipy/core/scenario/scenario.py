@@ -85,9 +85,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
         tags: Optional[Set[str]] = None,
         version: str = None,
-        pipelines: Optional[
-            Dict[str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]]
-        ] = None,
+        pipelines: Optional[Dict[str, Dict]] = None,
     ):
         super().__init__(subscribers or [])
         self.config_id = _validate_id(config_id)
@@ -173,9 +171,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         for pipeline_name, pipeline_data in self._pipelines.items():
             p = pipeline_manager._create(
                 pipeline_name,
-                pipeline_data.get(self._PIPELINE_TASKS_KEY, []),  # type: ignore
-                pipeline_data.get(self._PIPELINE_SUBSCRIBERS_KEY, []),  # type: ignore
-                pipeline_data.get(self._PIPELINE_PROPERTIES_KEY, {}),  # type: ignore
+                pipeline_data.get(self._PIPELINE_TASKS_KEY, []),
+                pipeline_data.get(self._PIPELINE_SUBSCRIBERS_KEY, []),
+                pipeline_data.get(self._PIPELINE_PROPERTIES_KEY, {}),
                 self.id,
             )
             if not isinstance(p, Pipeline):

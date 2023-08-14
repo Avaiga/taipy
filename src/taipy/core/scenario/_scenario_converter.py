@@ -32,7 +32,7 @@ class _ScenarioConverter(_AbstractConverter):
                 Scenario._PIPELINE_TASKS_KEY: [
                     t.id if isinstance(t, Task) else t for t in pipeline_data.get("tasks", [])
                 ],
-                Scenario._PIPELINE_PROPERTIES_KEY: pipeline_data.get("properties", {}),  # type: ignore
+                Scenario._PIPELINE_PROPERTIES_KEY: pipeline_data.get("properties", {}),
                 Scenario._PIPELINE_SUBSCRIBERS_KEY: _utils._fcts_to_dict(pipeline_data.get("subscribers", [])),
             }
 
@@ -42,7 +42,7 @@ class _ScenarioConverter(_AbstractConverter):
             tasks=[task.id if isinstance(task, Task) else TaskId(str(task)) for task in list(scenario._tasks)],
             additional_data_nodes=[
                 dn.id if isinstance(dn, DataNode) else DataNodeId(str(dn))
-                for dn in list(scenario._additional_data_nodes)  # type: ignore
+                for dn in list(scenario._additional_data_nodes)
             ],
             properties=scenario._properties.data,
             creation_date=scenario._creation_date.isoformat(),
@@ -63,9 +63,7 @@ class _ScenarioConverter(_AbstractConverter):
             for pipeline_name, pipeline_data in model.pipelines.items():
                 if subscribers := pipeline_data.get(Scenario._PIPELINE_SUBSCRIBERS_KEY):
                     model.pipelines[pipeline_name][Scenario._PIPELINE_SUBSCRIBERS_KEY] = [
-                        _utils._Subscriber(
-                            _utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"]  # type: ignore
-                        )
+                        _utils._Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                         for it in subscribers
                     ]
 
@@ -84,7 +82,7 @@ class _ScenarioConverter(_AbstractConverter):
                 for it in model.subscribers
             ],
             version=model.version,
-            pipelines=model.pipelines,  # type: ignore
+            pipelines=model.pipelines,
         )
         return _migrate_entity(scenario)
 

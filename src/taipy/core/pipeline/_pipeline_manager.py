@@ -182,7 +182,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
                 Scenario._PIPELINE_SUBSCRIBERS_KEY: pipeline._subscribers,
                 Scenario._PIPELINE_PROPERTIES_KEY: pipeline._properties.data,
             }
-            scenario._pipelines[pipeline_name] = pipeline_data  # type: ignore
+            scenario._pipelines[pipeline_name] = pipeline_data
             scenario_manager._set(scenario)
         else:
             cls._logger.error(f"Pipeline {pipeline.id} belongs to a non-existing Scenario {scenario_id}.")
@@ -323,7 +323,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         else:
             folder = folder_path
 
-        export_dir = folder / cls._dir_name  # type: ignore
+        export_dir = folder / cls._dir_name
         if not export_dir.exists():
             export_dir.mkdir(parents=True)
 
@@ -333,7 +333,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
         scenario = _ScenarioManagerFactory._build_manager()._get(scenario_id)
         if pipeline_data := scenario._pipelines.get(pipeline_name, None):
-            pipeline.update(pipeline_data)  # type: ignore
+            pipeline.update(pipeline_data)
             with open(export_path, "w", encoding="utf-8") as export_file:
                 export_file.write(json.dumps(pipeline))
         else:

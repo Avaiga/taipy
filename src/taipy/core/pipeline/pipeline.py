@@ -95,12 +95,12 @@ class Pipeline(_Entity, Submittable, _Labeled):
         raise AttributeError(f"{attribute_name} is not an attribute of pipeline {self.id}")
 
     @property  # type: ignore
-    # @_self_reload(_MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def tasks(self) -> Dict[str, Task]:
         return self._get_tasks()
 
     @tasks.setter  # type: ignore
-    # @_self_setter(_MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def tasks(self, tasks: Union[List[TaskId], List[Task]]):
         self._tasks = tasks
 
@@ -165,12 +165,12 @@ class Pipeline(_Entity, Submittable, _Labeled):
         return tasks
 
     @property  # type: ignore
-    # @_self_reload(_MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def subscribers(self):
         return self._subscribers
 
     @subscribers.setter  # type: ignore
-    # @_self_setter(_MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def subscribers(self, val):
         self._subscribers = _ListAttributes(self, val)
 
