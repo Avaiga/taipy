@@ -176,6 +176,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         onAdd = "",
         onAction = "",
         size = DEFAULT_SIZE,
+        userData,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
@@ -392,9 +393,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 createSendActionNameAction(updateVarName, module, {
                     action: onAdd,
                     index: visibleStartIndex,
+                    user_data: userData,
                 })
             ),
-        [visibleStartIndex, dispatch, updateVarName, onAdd, module]
+        [visibleStartIndex, dispatch, updateVarName, onAdd, module, userData]
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
@@ -409,9 +411,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     col: colName,
                     user_value: userValue,
                     tz: tz,
+                    user_data: userData
                 })
             ),
-        [dispatch, updateVarName, onEdit, rows, module]
+        [dispatch, updateVarName, onEdit, rows, module, userData]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
@@ -420,9 +423,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 createSendActionNameAction(updateVarName, module, {
                     action: onDelete,
                     index: getRowIndex(rows[rowIndex], rowIndex),
+                    user_data: userData,
                 })
             ),
-        [dispatch, updateVarName, onDelete, rows, module]
+        [dispatch, updateVarName, onDelete, rows, module, userData]
     );
 
     const onRowSelection: OnRowSelection = useCallback(
@@ -432,9 +436,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex),
                     col: colName,
+                    user_data: userData
                 })
             ),
-        [dispatch, updateVarName, onAction, rows, module]
+        [dispatch, updateVarName, onAction, rows, module, userData]
     );
 
     const onTaipyItemsRendered = useCallback(

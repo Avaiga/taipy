@@ -100,6 +100,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         onAction = "",
         width = "100%",
         size = DEFAULT_SIZE,
+        userData,
     } = props;
     const pageSize = props.pageSize === undefined || props.pageSize < 1 ? 100 : Math.round(props.pageSize);
     const [value, setValue] = useState<Record<string, unknown>>({});
@@ -303,9 +304,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 createSendActionNameAction(updateVarName, module, {
                     action: onAdd,
                     index: startIndex,
+                    user_data: userData
                 })
             ),
-        [startIndex, dispatch, updateVarName, onAdd, module]
+        [startIndex, dispatch, updateVarName, onAdd, module, userData]
     );
 
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
@@ -357,9 +359,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     col: colName,
                     user_value: userValue,
                     tz: tz,
+                    user_data: userData,
                 })
             ),
-        [dispatch, updateVarName, onEdit, rows, startIndex, module]
+        [dispatch, updateVarName, onEdit, rows, startIndex, module, userData]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
@@ -368,9 +371,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 createSendActionNameAction(updateVarName, module, {
                     action: onDelete,
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
+                    user_data: userData,
                 })
             ),
-        [dispatch, updateVarName, onDelete, rows, startIndex, module]
+        [dispatch, updateVarName, onDelete, rows, startIndex, module, userData]
     );
 
     const onRowSelection: OnRowSelection = useCallback(
@@ -380,9 +384,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
                     col: colName,
+                    user_data: userData,
                 })
             ),
-        [dispatch, updateVarName, onAction, rows, startIndex, module]
+        [dispatch, updateVarName, onAction, rows, startIndex, module, userData]
     );
 
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);

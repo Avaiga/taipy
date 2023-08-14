@@ -111,7 +111,7 @@ export const LovImage = ({
     item: Icon;
     disableTypo?: boolean;
     height?: string;
-    titleTypographyProps?: TypographyProps;
+    titleTypographyProps?: TypographyProps<"span", { component?: "span"; }>;
 }) => {
     const sx = useMemo(
         () => (height ? { height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : undefined) as SxProps,
@@ -146,7 +146,7 @@ export interface ItemProps {
     item: stringIcon;
     disabled: boolean;
     withAvatar?: boolean;
-    titleTypographyProps?: TypographyProps;
+    titleTypographyProps?: TypographyProps<"span", { component?: "span"; }>;
 }
 
 export const SingleItem = ({

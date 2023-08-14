@@ -11,8 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
+import Chart from "../components/Taipy/Chart";
 import Dialog from "../components/Taipy/Dialog";
 import Router from "../components/Router";
+import Table from "../components/Taipy/Table";
 import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
 import { LovItem } from "../utils/lov";
 import { getUpdateVar } from "../components/Taipy/utils";
@@ -28,8 +30,10 @@ import {
 } from "../context/taipyReducers";
 
 export {
+    Chart,
     Dialog,
     Router,
+    Table,
     TaipyContext as Context,
     createRequestDataUpdateAction,
     createRequestUpdateAction,
