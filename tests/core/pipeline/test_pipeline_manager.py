@@ -50,20 +50,20 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 def test_breakdown_pipeline_id():
     with pytest.raises(InvalidPipelineId):
-        _PipelineManager.__breakdown_pipeline_id("scenario_id")
+        _PipelineManager._breakdown_pipeline_id("scenario_id")
     with pytest.raises(InvalidPipelineId):
-        _PipelineManager.__breakdown_pipeline_id("pipeline_id")
+        _PipelineManager._breakdown_pipeline_id("pipeline_id")
     with pytest.raises(InvalidPipelineId):
-        _PipelineManager.__breakdown_pipeline_id("PIPELINE_pipeline_id")
+        _PipelineManager._breakdown_pipeline_id("PIPELINE_pipeline_id")
     with pytest.raises(InvalidPipelineId):
-        _PipelineManager.__breakdown_pipeline_id("SCENARIO_scenario_id")
+        _PipelineManager._breakdown_pipeline_id("SCENARIO_scenario_id")
     with pytest.raises(InvalidPipelineId):
-        _PipelineManager.__breakdown_pipeline_id("pipeline_SCENARIO_scenario_id")
+        _PipelineManager._breakdown_pipeline_id("pipeline_SCENARIO_scenario_id")
     with pytest.raises(InvalidPipelineId):
-        _PipelineManager.__breakdown_pipeline_id("PIPELINE_pipeline_scenario_id")
-    pipeline_name, scenario_id = _PipelineManager.__breakdown_pipeline_id("PIPELINE_pipeline_SCENARIO_scenario")
+        _PipelineManager._breakdown_pipeline_id("PIPELINE_pipeline_scenario_id")
+    pipeline_name, scenario_id = _PipelineManager._breakdown_pipeline_id("PIPELINE_pipeline_SCENARIO_scenario")
     assert pipeline_name == "pipeline" and scenario_id == "SCENARIO_scenario"
-    pipeline_name, scenario_id = _PipelineManager.__breakdown_pipeline_id("PIPELINEpipelineSCENARIO_scenario")
+    pipeline_name, scenario_id = _PipelineManager._breakdown_pipeline_id("PIPELINEpipelineSCENARIO_scenario")
     assert pipeline_name == "pipeline" and scenario_id == "SCENARIO_scenario"
 
 
