@@ -81,7 +81,7 @@ def _error():
     raise RuntimeError("Something bad has happened")
 
 
-def test_create_job(scenario, task, job) -> None:
+def test_create_job(scenario, task, job):
     from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
     _ScenarioManagerFactory._build_manager()._set(scenario)

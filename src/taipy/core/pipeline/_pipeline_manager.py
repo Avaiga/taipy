@@ -152,7 +152,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         try:
             pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
-            pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline_id)
+            pipeline_name, scenario_id = cls.__breakdown_pipeline_id(pipeline_id)
 
             scenario_manager = _ScenarioManagerFactory._build_manager()
             if scenario := scenario_manager._get(scenario_id):
@@ -173,7 +173,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Save or update a Pipeline.
         """
-        pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline.id)
+        pipeline_name, scenario_id = cls.__breakdown_pipeline_id(pipeline.id)
         scenario_manager = _ScenarioManagerFactory._build_manager()
 
         if scenario := scenario_manager._get(scenario_id):
@@ -189,7 +189,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             raise PipelineBelongsToNonExistingScenario(pipeline.id, scenario_id)
 
     @classmethod
-    def _breakdown_pipeline_id(cls, pipeline_id: str) -> Tuple[str, str]:
+    def __breakdown_pipeline_id(cls, pipeline_id: str) -> Tuple[str, str]:
         try:
             pipeline_name, scenario_id = pipeline_id.split(Scenario._ID_PREFIX)
             scenario_id = f"{Scenario._ID_PREFIX}{scenario_id}"
@@ -257,7 +257,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         scenario_ids_and_pipeline_names_map: Dict[str, List[str]] = {}
         for pipeline in pipeline_ids:
             pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
-            pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline_id)
+            pipeline_name, scenario_id = cls.__breakdown_pipeline_id(pipeline_id)
             pipelines_names = scenario_ids_and_pipeline_names_map.get(scenario_id, [])
             pipelines_names.append(pipeline_name)
             scenario_ids_and_pipeline_names_map[scenario_id] = pipelines_names
@@ -289,7 +289,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         """
         Deletes a Pipeline by id.
         """
-        pipeline_name, scenario_id = cls._breakdown_pipeline_id(pipeline_id)
+        pipeline_name, scenario_id = cls.__breakdown_pipeline_id(pipeline_id)
 
         if scenario := _ScenarioManagerFactory._build_manager()._get(scenario_id):
             if pipeline_name in scenario._pipelines.keys():
@@ -328,7 +328,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
             export_dir.mkdir(parents=True)
 
         export_path = export_dir / f"{id}.json"
-        pipeline_name, scenario_id = cls._breakdown_pipeline_id(id)
+        pipeline_name, scenario_id = cls.__breakdown_pipeline_id(id)
         pipeline = {"id": id, "owner_id": scenario_id, "parent_ids": [scenario_id], "name": pipeline_name}
 
         scenario = _ScenarioManagerFactory._build_manager()._get(scenario_id)

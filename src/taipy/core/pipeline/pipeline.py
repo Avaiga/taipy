@@ -113,7 +113,7 @@ class Pipeline(_Entity, Submittable, _Labeled):
                 data_nodes[k] = v
         return data_nodes
 
-    @property  # type: ignore
+    @property
     def parent_ids(self):
         return self._parent_ids
 
