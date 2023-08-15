@@ -156,6 +156,60 @@ def mult_by_3(nb: int):
     return nb * 3
 
 
+def test_get_or_create_data(init_sql_repo):
+    # only create intermediate data node once
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+
+    init_managers()
+
+    dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.SCENARIO, default_data=1)
+    dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
+    dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.SCENARIO, default_data=0)
+
+    task_config_mult_by_two = Config.configure_task("mult_by_two", mult_by_two, [dn_config_1], dn_config_2)
+    task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
+    # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
+    scenario_config = Config.configure_scenario("scenario", [task_config_mult_by_two, task_config_mult_by_3])
+
+    _OrchestratorFactory._build_dispatcher()
+
+    assert len(_DataManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+
+    scenario = _ScenarioManager._create(scenario_config)
+    scenario.add_pipelines({"by_6": {"tasks": list(scenario.tasks.values())}})
+    pipeline = scenario.pipelines["by_6"]
+
+    assert pipeline.name == "by_6"
+
+    assert len(_DataManager._get_all()) == 3
+    assert len(_TaskManager._get_all()) == 2
+    assert len(pipeline._get_sorted_tasks()) == 2
+    assert pipeline.foo.read() == 1
+    assert pipeline.bar.read() == 0
+    assert pipeline.baz.read() == 0
+    assert pipeline._get_sorted_tasks()[0][0].config_id == task_config_mult_by_two.id
+    assert pipeline._get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.id
+
+    _PipelineManager._submit(pipeline.id)
+    assert pipeline.foo.read() == 1
+    assert pipeline.bar.read() == 2
+    assert pipeline.baz.read() == 6
+
+    pipeline.foo.write("new data value")
+    assert pipeline.foo.read() == "new data value"
+    assert pipeline.bar.read() == 2
+    assert pipeline.baz.read() == 6
+
+    pipeline.bar.write(7)
+    assert pipeline.foo.read() == "new data value"
+    assert pipeline.bar.read() == 7
+    assert pipeline.baz.read() == 6
+
+    with pytest.raises(AttributeError):
+        pipeline.WRONG.write(7)
+
+
 def test_hard_delete_one_single_pipeline_with_scenario_data_nodes(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 

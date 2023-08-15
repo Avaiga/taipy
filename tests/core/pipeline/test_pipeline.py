@@ -21,11 +21,11 @@ from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
+from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
+from src.taipy.core.task.task import Task, TaskId
 from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 def test_create_pipeline():
@@ -482,6 +482,161 @@ def test_get_set_of_tasks():
     task_3 = Task("waldo", {}, print, id=TaskId("t3"))
     pipeline_1 = Pipeline({}, [task_1, task_2, task_3], PipelineId("p1"))
     assert pipeline_1._get_set_of_tasks() == {task_1, task_2, task_3}
+
+
+def test_auto_set_and_reload(task):
+    tmp_task = Task("tmp_task_config_id", {}, print, [], [], TaskId("tmp_task_id"))
+    scenario = Scenario("scenario", [task, tmp_task], {}, pipelines={"foo": {}})
+
+    _TaskManager._set(task)
+    _TaskManager._set(tmp_task)
+    _ScenarioManager._set(scenario)
+
+    pipeline_1 = scenario.pipelines["foo"]
+    pipeline_2 = _PipelineManager._get(pipeline_1)
+
+    # auto set & reload on tasks attribute
+    assert len(pipeline_1.tasks) == 0
+    assert len(pipeline_2.tasks) == 0
+    pipeline_1.tasks = [tmp_task]
+    assert len(pipeline_1.tasks) == 1
+    assert pipeline_1.tasks[tmp_task.config_id].id == tmp_task.id
+    assert len(pipeline_2.tasks) == 1
+    assert pipeline_2.tasks[tmp_task.config_id].id == tmp_task.id
+    pipeline_2.tasks = [task]
+    assert len(pipeline_1.tasks) == 1
+    assert pipeline_1.tasks[task.config_id].id == task.id
+    assert len(pipeline_2.tasks) == 1
+    assert pipeline_2.tasks[task.config_id].id == task.id
+
+    assert pipeline_1.owner_id == scenario.id
+    assert pipeline_2.owner_id == scenario.id
+
+    # auto set & reload on subscribers attribute
+    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
+    pipeline_1.subscribers.append(print)
+    assert len(pipeline_1.subscribers) == 1
+    assert len(pipeline_2.subscribers) == 1
+    pipeline_2.subscribers.append(print)
+    assert len(pipeline_1.subscribers) == 2
+    assert len(pipeline_2.subscribers) == 2
+
+    pipeline_1.subscribers.clear()
+    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
+
+    pipeline_1.subscribers.extend([print, map])
+    assert len(pipeline_1.subscribers) == 2
+    assert len(pipeline_2.subscribers) == 2
+
+    pipeline_1.subscribers.remove(_Subscriber(print, []))
+    assert len(pipeline_1.subscribers) == 1
+    assert len(pipeline_2.subscribers) == 1
+
+    pipeline_2.subscribers.clear()
+    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
+
+    pipeline_1.subscribers + print + len
+    assert len(pipeline_1.subscribers) == 2
+    assert len(pipeline_2.subscribers) == 2
+
+    pipeline_1.subscribers = []
+    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
+
+    # auto set & reload on properties attribute
+    assert pipeline_1.properties == {"name": "foo"}
+    assert pipeline_2.properties == {"name": "foo"}
+    pipeline_1.properties["qux"] = 4
+    assert pipeline_1.properties["qux"] == 4
+    assert pipeline_2.properties["qux"] == 4
+    pipeline_2.properties["qux"] = 5
+    assert pipeline_1.properties["qux"] == 5
+    assert pipeline_2.properties["qux"] == 5
+
+    pipeline_1.properties["temp_key_1"] = "temp_value_1"
+    pipeline_1.properties["temp_key_2"] = "temp_value_2"
+    assert pipeline_1.properties == {
+        "qux": 5,
+        "name": "foo",
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    assert pipeline_2.properties == {
+        "qux": 5,
+        "name": "foo",
+        "temp_key_1": "temp_value_1",
+        "temp_key_2": "temp_value_2",
+    }
+    pipeline_1.properties.pop("temp_key_1")
+    assert "temp_key_1" not in pipeline_1.properties.keys()
+    assert "temp_key_1" not in pipeline_1.properties.keys()
+    assert pipeline_1.properties == {
+        "qux": 5,
+        "name": "foo",
+        "temp_key_2": "temp_value_2",
+    }
+    assert pipeline_2.properties == {
+        "qux": 5,
+        "name": "foo",
+        "temp_key_2": "temp_value_2",
+    }
+    pipeline_2.properties.pop("temp_key_2")
+    assert pipeline_1.properties == {"name": "foo", "qux": 5}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5}
+    assert "temp_key_2" not in pipeline_1.properties.keys()
+    assert "temp_key_2" not in pipeline_2.properties.keys()
+
+    pipeline_1.properties["temp_key_3"] = 0
+    assert pipeline_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 0}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 0}
+    pipeline_1.properties.update({"temp_key_3": 1})
+    assert pipeline_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
+    pipeline_1.properties.update(dict())
+    assert pipeline_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
+    pipeline_1.properties["temp_key_4"] = 0
+    pipeline_1.properties["temp_key_5"] = 0
+
+    with pipeline_1 as pipeline:
+        assert len(pipeline.tasks) == 1
+        assert pipeline.tasks[task.config_id].id == task.id
+        assert len(pipeline.subscribers) == 0
+        assert pipeline._is_in_context
+        assert pipeline.properties["qux"] == 5
+        assert pipeline.properties["temp_key_3"] == 1
+        assert pipeline.properties["temp_key_4"] == 0
+        assert pipeline.properties["temp_key_5"] == 0
+
+        pipeline.tasks = []
+        pipeline.subscribers = [print]
+        pipeline.properties["qux"] = 9
+        pipeline.properties.pop("temp_key_3")
+        pipeline.properties.pop("temp_key_4")
+        pipeline.properties.update({"temp_key_4": 1})
+        pipeline.properties.update({"temp_key_5": 2})
+        pipeline.properties.pop("temp_key_5")
+        pipeline.properties.update(dict())
+
+        assert len(pipeline.tasks) == 1
+        assert pipeline.tasks[task.config_id].id == task.id
+        assert len(pipeline.subscribers) == 0
+        assert pipeline._is_in_context
+        assert pipeline.properties["qux"] == 5
+        assert pipeline.properties["temp_key_3"] == 1
+        assert pipeline.properties["temp_key_4"] == 0
+        assert pipeline.properties["temp_key_5"] == 0
+
+    assert len(pipeline_1.tasks) == 0
+    assert len(pipeline_1.subscribers) == 1
+    assert not pipeline_1._is_in_context
+    assert pipeline_1.properties["qux"] == 9
+    assert "temp_key_3" not in pipeline_1.properties.keys()
+    assert pipeline_1.properties["temp_key_4"] == 1
+    assert "temp_key_5" not in pipeline_1.properties.keys()
 
 
 def test_get_parents(pipeline):
