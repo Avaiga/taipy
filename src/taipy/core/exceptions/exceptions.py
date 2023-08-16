@@ -96,7 +96,7 @@ class DataNodeConfigIsNotGlobal(Exception):
     """Raised if a DataNode is not global."""
 
     def __init__(self, data_node_config_id: str):
-        self.message = f"Data node config `{data_node_config_id}` does not GLOBAL scope."
+        self.message = f"Data node config `{data_node_config_id}` is not GLOBAL scope."
 
 
 class MissingReadFunction(Exception):
