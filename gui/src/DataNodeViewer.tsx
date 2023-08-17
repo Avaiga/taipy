@@ -685,6 +685,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         data={props.tabularData}
                                         userData={dnId}
                                         onEdit={props.onTabularDataEdit}
+                                        filter={true}
                                     ></Table>
                                 ) : (
                                     "type: unknown"
