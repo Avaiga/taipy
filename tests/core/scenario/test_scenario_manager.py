@@ -30,10 +30,10 @@ from src.taipy.core.exceptions.exceptions import (
     DifferentScenarioConfigs,
     InsufficientScenarioToCompare,
     NonExistingComparator,
-    NonExistingPipeline,
     NonExistingScenario,
     NonExistingScenarioConfig,
     NonExistingTask,
+    PipelineTaskConfigDoesNotExistInSameScenarioConfig,
     UnauthorizedTagError,
 )
 from src.taipy.core.job._job_manager import _JobManager
@@ -218,6 +218,32 @@ def test_set_and_get_scenario(cycle):
     assert len(_ScenarioManager._get(scenario_2).data_nodes) == 3
     assert len(_ScenarioManager._get(scenario_2).pipelines) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
+
+
+def test_raise_pipeline_task_configs_not_in_scenario_config():
+    task_config_1 = Config.configure_task("task_1", print)
+    task_config_2 = Config.configure_task("task_2", print)
+    scenario_config_1 = Config.configure_scenario("scenario_1")
+    scenario_config_1.add_sequences({"pipeline_0": []})
+
+    _ScenarioManager._create(scenario_config_1)
+
+    scenario_config_1.add_sequences({"pipeline_1": [task_config_1]})
+    with pytest.raises(PipelineTaskConfigDoesNotExistInSameScenarioConfig):
+        _ScenarioManager._create(scenario_config_1)
+
+    scenario_config_1._tasks = [task_config_1]
+    _ScenarioManager._create(scenario_config_1)
+
+    scenario_config_1.add_sequences({"pipeline_2": [task_config_1]})
+    _ScenarioManager._create(scenario_config_1)
+
+    scenario_config_1.add_sequences({"pipeline_3": [task_config_1, task_config_2]})
+    with pytest.raises(PipelineTaskConfigDoesNotExistInSameScenarioConfig):
+        _ScenarioManager._create(scenario_config_1)
+
+    scenario_config_1._tasks = [task_config_1, task_config_2]
+    _ScenarioManager._create(scenario_config_1)
 
 
 def test_get_all_on_multiple_versions_environment():

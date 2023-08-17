@@ -20,15 +20,14 @@ from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import DataNode, InMemoryDataNode
 from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+from src.taipy.core.exceptions.exceptions import PipelineTaskDoesNotExistInSameScenario
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
+from src.taipy.core.task.task import Task, TaskId
 from taipy.config import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
@@ -123,7 +122,7 @@ def test_create_scenario(cycle, current_datetime):
         set([task_1]),
         {},
     )
-    scenario_4.pipelines = {"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": [task_1, task_2]}}
+    scenario_4.pipelines = {"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": []}}
 
     pipeline_1 = scenario_4.pipelines["pipeline_1"]
     pipeline_2 = scenario_4.pipelines["pipeline_2"]
@@ -224,6 +223,51 @@ def test_create_scenario(cycle, current_datetime):
         additional_dn_1.config_id: additional_dn_1,
         additional_dn_2.config_id: additional_dn_2,
     }
+
+
+def test_raise_pipeline_tasks_not_in_scenario():
+    task_1 = Task("task_1", {}, print)
+    task_2 = Task("task_2", {}, print)
+    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+        Scenario("scenario", [], {}, pipelines={"pipeline": {"tasks": [task_1]}})
+
+    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+        Scenario("scenario", [task_1], {}, pipelines={"pipeline": {"tasks": [task_1, task_2]}})
+
+    Scenario("scenario", [task_1], {}, pipelines={"pipeline": {"tasks": [task_1]}})
+    Scenario(
+        "scenario",
+        [task_1, task_2],
+        {},
+        pipelines={"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": [task_1, task_2]}},
+    )
+
+    scenario = Scenario("scenario", [], {})
+
+    scenario_manager = _ScenarioManagerFactory._build_manager()
+    task_manager = _TaskManagerFactory._build_manager()
+
+    scenario_manager._set(scenario)
+    task_manager._set(task_1)
+    task_manager._set(task_2)
+
+    scenario.add_pipelines({"pipeline_1": {}})
+
+    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+        scenario.add_pipelines({"pipeline_2": {"tasks": [task_1]}})
+
+    scenario.tasks = [task_1]
+
+    scenario.add_pipelines({"pipeline_2": {"tasks": [task_1]}})
+
+    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+        scenario.add_pipelines({"pipeline_3": {"tasks": [task_2]}})
+
+    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+        scenario.add_pipelines({"pipeline_4": {"tasks": [task_1, task_2]}})
+
+    scenario.tasks = [task_1, task_2]
+    scenario.add_pipelines({"pipeline_5": {"tasks": [task_1, task_2]}})
 
 
 def test_add_property_to_scenario():
