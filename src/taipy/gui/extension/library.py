@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import re
 import sys
 import typing as t
 import xml.etree.ElementTree as etree
@@ -87,6 +88,8 @@ class Element:
     what the default property name is.
     """
 
+    __RE_PROP_VAR = re.compile(r"<tp:prop:(\w+)>")
+
     def __init__(
         self,
         default_property: str,
@@ -153,7 +156,14 @@ class Element:
         if self.inner_properties:
             self.attributes.update(self.inner_properties)
             for prop, attr in self.inner_properties.items():
-                attributes[prop] = attr.default_value
+                val = attr.default_value
+                if val:
+                    # handling property replacement in inner properties <tp:prop:...>
+                    while m := Element.__RE_PROP_VAR.search(val):
+                        var = attributes.get(m.group(1))
+                        hash_value = "None" if var is None else gui._evaluate_expr(var)
+                        val = val[: m.start()] + hash_value + val[m.end() :]
+                attributes[prop] = val
         # this modifies attributes
         hash_names = _Builder._get_variable_hash_names(gui, attributes)  # variable replacement
         # call user render if any

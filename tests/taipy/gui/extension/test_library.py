@@ -51,6 +51,16 @@ class MyLibrary(ElementLibrary):
             "h1",
             render_xhtml=render_xhtml_4_my_library_fail,
         ),
+        "inner": Element(
+            "value",
+            {"value": ElementProperty(PropertyType.string, "")},
+            inner_properties={
+                "with_property": ElementProperty(
+                    PropertyType.react,
+                    f"{{<tp:prop:value>}}",
+                ),
+            },
+        ),
     }
 
     def get_name(self) -> str:
@@ -123,3 +133,22 @@ def test_lib_input_html_2(gui: Gui, test_client, helpers):
         "value={tpec_TpExPr_val_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
+
+
+def test_lib_inner_md(gui: Gui, test_client, helpers):
+    val = "title"  # noqa: F841
+    gui._set_frame(inspect.currentframe())
+    md_string = "<|{val}|test_lib.inner|>"
+    expected = [
+        "<TestLib_Inner",
+        "value={tpec_TpExPr_val_TPMDL_0}",
+        "withProperty={tpec_TpExPr_tpec_TpExPr_val_TPMDL_0_TPMDL_0}",
+    ]
+    helpers.test_control_md(gui, md_string, expected)
+
+
+def test_lib_inner_no_value_md(gui: Gui, test_client, helpers):
+    gui._set_frame(inspect.currentframe())
+    md_string = "<|test_lib.inner|>"
+    expected = ["<TestLib_Inner", "withProperty={tpec_TpExPr_None_TPMDL_0}"]
+    helpers.test_control_md(gui, md_string, expected)
