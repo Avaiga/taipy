@@ -121,7 +121,7 @@ def test_get_all_on_multiple_versions_environment(init_sql_repo):
                     [],
                     {},
                     [],
-                    f"id_{i}_v{version}",
+                    f"SCENARIO_id_{i}_v{version}",
                     version=f"{version}.0",
                     pipelines={"pipeline": {}},
                 )
@@ -129,23 +129,39 @@ def test_get_all_on_multiple_versions_environment(init_sql_repo):
 
     _VersionManager._set_experiment_version("1.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "id_1_v1"}])) == 1
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v1"}])) == 0
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 1
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 0
+    )
 
     _VersionManager._set_experiment_version("2.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v1"}])) == 0
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v2"}])) == 1
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 0
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v2"}])) == 1
+    )
 
     _VersionManager._set_development_version("1.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "id_1_v1"}])) == 1
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "id_1_v2"}])) == 0
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 1
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v2"}])) == 0
+    )
 
     _VersionManager._set_development_version("2.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v1"}])) == 0
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v2"}])) == 1
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 0
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v2"}])) == 1
+    )
 
 
 def mult_by_two(nb: int):

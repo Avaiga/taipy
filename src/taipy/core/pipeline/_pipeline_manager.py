@@ -142,6 +142,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
         subscribers: Optional[List[_Subscriber]] = None,
         properties: Optional[Dict] = None,
         scenario_id: Optional[ScenarioId] = None,
+        version: Optional[str] = None,
     ) -> Pipeline:
         pipeline_id = Pipeline._new_id(pipeline_name, scenario_id)
 
@@ -158,7 +159,7 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
         properties = properties if properties else {}
         properties["name"] = pipeline_name
-        version = cls._get_latest_version()
+        version = version if version else cls._get_latest_version()
         pipeline = Pipeline(
             properties=properties,
             tasks=_tasks,
@@ -219,11 +220,17 @@ class _PipelineManager(_Manager[Pipeline], _VersionMixin):
 
     @classmethod
     def _get_all_by(cls, filters: Optional[List[Dict]] = None) -> List[Pipeline]:
-        pipelines = []
-        scenarios = _ScenarioManagerFactory()._build_manager()._get_all_by(filters)
-        for scenario in scenarios:
-            pipelines.extend(list(scenario.pipelines.values()))
-        return pipelines
+        pipelines = cls._get_all()
+
+        if not filters:
+            return pipelines
+
+        filtered_pipelines = []
+        for pipeline in pipelines:
+            for filter in filters:
+                if all([getattr(pipeline, key) == item for key, item in filter.items()]):
+                    filtered_pipelines.append(pipeline)
+        return filtered_pipelines
 
     @classmethod
     def _get_children_entity_ids(cls, pipeline: Pipeline) -> _EntityIds:

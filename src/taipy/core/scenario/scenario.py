@@ -175,6 +175,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 pipeline_data.get(self._PIPELINE_SUBSCRIBERS_KEY, []),
                 pipeline_data.get(self._PIPELINE_PROPERTIES_KEY, {}),
                 self.id,
+                self.version,
             )
             if not isinstance(p, Pipeline):
                 raise NonExistingPipeline(pipeline_name)
