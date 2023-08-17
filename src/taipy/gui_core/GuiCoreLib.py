@@ -9,17 +9,17 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 import typing as t
 from collections import defaultdict
 from datetime import datetime
 from enum import Enum
-import json
+from numbers import Number
 from threading import Lock
-
-from dateutil import parser
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from dateutil import parser
 
 from taipy.config import Config
 from taipy.core import Cycle, DataNode, Job, Pipeline, Scenario, cancel_job, create_scenario
@@ -199,6 +199,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     _DATANODE_VIZ_OWNER_ID_VAR = "gui_core_dv_owner_id"
     _DATANODE_VIZ_HISTORY_ID_VAR = "gui_core_dv_history_id"
     _DATANODE_VIZ_DATA_ID_VAR = "gui_core_dv_data_id"
+    _DATANODE_VIZ_DATA_NODE_PROP = "data_node"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
@@ -553,9 +554,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         cycles_scenarios.append(entity)
         return cycles_scenarios
 
-    def get_data_node_history(self, id: str):
-        res = []
-        if id and (dn := core_get(id)) and isinstance(dn, DataNode):
+    def get_data_node_history(self, datanode: DataNode, id: str):
+        if (
+            id
+            and isinstance(datanode, DataNode)
+            and id == datanode.id
+            and (dn := core_get(id))
+            and isinstance(dn, DataNode)
+        ):
+            res = []
             for e in dn.edits:
                 job: Job = core_get(e.get("job_id")) if "job_id" in e else None
                 res.append(
@@ -565,20 +572,36 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         f"Execution of task {job.task.get_simple_label()}." if job and job.task else e.get("comments"),
                     )
                 )
-        return list(reversed(sorted(res, key=lambda r: r[0])))
+            return list(reversed(sorted(res, key=lambda r: r[0])))
+        return _DoNotUpdate()
 
-    def get_data_node_data(self, id: str):
-        if id and (dn := core_get(id)) and isinstance(dn, DataNode):
+    def get_data_node_data(self, datanode: DataNode, id: str):
+        if (
+            id
+            and isinstance(datanode, DataNode)
+            and id == datanode.id
+            and (dn := core_get(id))
+            and isinstance(dn, DataNode)
+        ):
             if dn.is_ready_for_reading:
                 if isinstance(dn, _AbstractTabularDataNode):
                     return (None, None, True, None)
                 try:
                     value = dn.read()
-                    return (value, "date" if "date" in type(value).__name__ else None, None, None)
+                    return (
+                        value,
+                        "date"
+                        if "date" in type(value).__name__
+                        else type(value).__name__
+                        if isinstance(value, Number)
+                        else None,
+                        None,
+                        None,
+                    )
                 except Exception as e:
                     return (None, None, None, f"read data_node: {e}")
             return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
-        return (None, None, None, f"Invalid datanode {id}")
+        return _DoNotUpdate()
 
     def update_data(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -590,7 +613,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if isinstance(entity, DataNode):
             try:
                 entity.write(
-                    parser.parse(data.get("value")) if data.get("type") == "date" else data.get("value"),
+                    parser.parse(data.get("value"))
+                    if data.get("type") == "date"
+                    else int(data.get("value"))
+                    if data.get("type") == "int"
+                    else float(data.get("value"))
+                    if data.get("type") == "float"
+                    else data.get("value"),
                     comment="Written by CoreGui DataNode viewer Element",
                 )
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
@@ -606,7 +635,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 idx = payload.get("index")
                 col = payload.get("col")
                 tz = payload.get("tz")
-                val = parser.parse(str(payload.get("value"))).astimezone(ZoneInfo(tz)).replace(tzinfo=None) if tz is not None else payload.get("value")
+                val = (
+                    parser.parse(str(payload.get("value"))).astimezone(ZoneInfo(tz)).replace(tzinfo=None)
+                    if tz is not None
+                    else payload.get("value")
+                )
                 # user_value = payload.get("user_value")
                 data = self.__read_tabular_data(datanode)
                 data.at[idx, col] = val
@@ -619,9 +652,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def __read_tabular_data(self, datanode: DataNode):
         return datanode.read()
 
-    def get_data_node_tabular_data(self, id: str):
+    def get_data_node_tabular_data(self, datanode: DataNode, id: str):
         if (
             id
+            and isinstance(datanode, DataNode)
+            and id == datanode.id
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
             and dn.is_ready_for_reading
@@ -633,19 +668,23 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return None
         return None
 
-    def get_data_node_tabular_columns(self, id: str):
+    def get_data_node_tabular_columns(self, datanode: DataNode, id: str):
         if (
             id
+            and isinstance(datanode, DataNode)
+            and id == datanode.id
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
             and dn.is_ready_for_reading
             and isinstance(dn, _AbstractTabularDataNode)
         ):
             try:
-                return self.gui._tbl_cols(True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data = self.__read_tabular_data(dn))
+                return self.gui._tbl_cols(
+                    True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=self.__read_tabular_data(dn)
+                )
             except Exception as e:
                 return None
-        return None
+        return _DoNotUpdate()
 
     def select_id(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -756,10 +795,10 @@ class _GuiCore(ElementLibrary):
             },
         ),
         "data_node": Element(
-            "data_node",
+            _GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP,
             {
                 "id": ElementProperty(PropertyType.string),
-                "data_node": ElementProperty(_GuiCoreDatanodeAdapter),
+                _GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP: ElementProperty(_GuiCoreDatanodeAdapter),
                 "active": ElementProperty(PropertyType.dynamic_boolean, True),
                 "expandable": ElementProperty(PropertyType.boolean, True),
                 "expanded": ElementProperty(PropertyType.boolean, True),
@@ -786,22 +825,24 @@ class _GuiCore(ElementLibrary):
                 "on_id_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_id}}"),
                 "history": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_history({_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_history(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
                 ),
                 "data": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_data({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_data": ElementProperty(
                     PropertyType.data,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_columns": ElementProperty(
                     PropertyType.string,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns({_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
-                "on_tabular_data_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.tabular_data_edit}}"),
+                "on_tabular_data_edit": ElementProperty(
+                    PropertyType.function, f"{{{__CTX_VAR_NAME}.tabular_data_edit}}"
+                ),
             },
         ),
         "job_selector": Element(

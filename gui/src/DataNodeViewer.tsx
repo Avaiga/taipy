@@ -292,8 +292,6 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     useEffect(() => {
         if (dtValue !== undefined) {
             setDataValue(getDataValue(dtValue, dtType));
-        } else if (dtType == "tabular") {
-            //TODO set tabular values ?
         }
     }, [dtValue, dtType]);
 
