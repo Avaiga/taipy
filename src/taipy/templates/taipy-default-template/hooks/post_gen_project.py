@@ -16,13 +16,7 @@ import taipy
 
 
 def handle_services(use_rest, use_core):
-    if use_rest in ["YES", "Y"]:
-        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
-            import_file.write("from taipy import Rest\n")
-        with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
-            main_file.write("    Rest.run()\n")
-
-    if use_core in ["YES", "Y"]:
+    if use_core in ["YES", "Y"] or use_rest in ["YES", "Y"]:
         # Write "import taipy as tp" at the third line of the import.txt file
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "r") as import_file:
             import_lines = import_file.readlines()
@@ -30,12 +24,19 @@ def handle_services(use_rest, use_core):
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "w") as import_file:
             import_file.writelines(import_lines)
 
+    if use_rest in ["YES", "Y"]:
+        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
+            import_file.write("from taipy import Rest\n")
+        with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
+            main_file.write("    rest = Rest()\n")
+
+    if use_core in ["YES", "Y"]:
         # Import and run Core service if Rest service is not run yet
         if use_rest not in ["YES", "Y"]:
             with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
                 import_file.write("from taipy import Core\n")
             with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
-                main_file.write("    Core.run()\n")
+                main_file.write("    core = Core()\n")
 
         # Create and submit the placeholder scenario
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
@@ -49,13 +50,27 @@ def handle_services(use_rest, use_core):
         shutil.rmtree(os.path.join(os.getcwd(), "configuration"))
 
 
+def handle_run_service():
+    with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a+") as main_file:
+        main_file.seek(0)
+        main_content = main_file.read()
+
+        if "rest = Rest()" in main_content:
+            main_file.write('    tp.run(gui, rest, title="{{cookiecutter.__application_title}}")\n')
+        elif "core = Core()" in main_content:
+            main_file.write('    tp.run(gui, core, title="{{cookiecutter.__application_title}}")\n')
+        else:
+            main_file.write('    gui.run(title="{{cookiecutter.__application_title}}")\n')
+
+
 def handle_single_page_app():
     shutil.rmtree(os.path.join(os.getcwd(), "pages"))
 
     with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
         main_file.write("\n")
         main_file.write("    gui = Gui(page=page)\n")
-        main_file.write('    gui.run(title="{{cookiecutter.__application_title}}")\n')
+
+    handle_run_service()
 
     with open(os.path.join(os.getcwd(), "sections", "page_content.txt"), "a") as page_content_file:
         page_content_file.write(
@@ -87,7 +102,7 @@ def handle_multi_page_app(pages):
         except IndexError:
             page_name = "page_" + str(page_i)
             pages.append(page_name)
-    pages = pages[1:]
+    pages = pages[1 : number_of_pages + 1]
 
     for page_name in pages:
         os.mkdir(os.path.join(os.getcwd(), "pages", page_name))
@@ -114,8 +129,8 @@ def handle_multi_page_app(pages):
     page_dict = """
 \npages = {
     "/": root_page,
-    "Taipy Docs": "https://docs.taipy.io/en/latest/manuals/about/",
-    "Getting Started": "https://docs.taipy.io/en/latest/getting_started/",
+    "Taipy-Docs": "https://docs.taipy.io/en/latest/manuals/about/",
+    "Getting-Started": "https://docs.taipy.io/en/latest/getting_started/",
     {pages}
 }
 """
@@ -127,8 +142,9 @@ def handle_multi_page_app(pages):
 
     with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
         main_file.write("\n")
-        main_file.write("    gui = Gui(page=pages)\n")
-        main_file.write('    gui.run(title="{{cookiecutter.__application_title}}")\n')
+        main_file.write("    gui = Gui(pages=pages)\n")
+
+    handle_run_service()
 
 
 def generate_main_file():

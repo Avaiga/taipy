@@ -4,8 +4,8 @@ Contain the configuration of the application.
 The configuration is run by the Core service.
 """
 
-from taipy import Config
+from algorithms import *
 
-from ..algorithms import *
+from taipy import Config
 
 scenario_config = Config.configure_scenario("placeholder_scenario", [])

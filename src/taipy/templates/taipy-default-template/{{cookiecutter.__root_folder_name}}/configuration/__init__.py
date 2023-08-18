@@ -1,1 +1,1 @@
-from config import scenario_config
+from .config import scenario_config
