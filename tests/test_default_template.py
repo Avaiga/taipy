@@ -33,7 +33,7 @@ def test_default_answer(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
 
     # Assert the message when the application is run successfully is in the stdout
@@ -85,7 +85,7 @@ def test_with_core_service(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
 
     # Assert the message when the application is run successfully is in the stdout
@@ -112,7 +112,7 @@ def test_with_rest_service(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
 
     # Assert the message when the application is run successfully is in the stdout
@@ -141,7 +141,7 @@ def test_with_both_core_rest_services(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
 
     # Assert the message when the application is run successfully is in the stdout
@@ -170,7 +170,7 @@ def test_multipage_gui_template(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "foo_app"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
 
     # Assert the message when the application is run successfully is in the stdout
@@ -199,7 +199,7 @@ def test_multipage_gui_template_with_page_names(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "foo_app"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
 
@@ -224,7 +224,7 @@ def test_multipage_gui_template_with_page_names(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "bar_app"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
 
@@ -249,6 +249,6 @@ def test_multipage_gui_template_with_page_names(tmpdir):
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "baz_app"))
-    stdout = _run_template("main.py", time_out=5)
+    stdout = _run_template("main.py")
     os.chdir(oldpwd)
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
