@@ -10,8 +10,158 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+import shutil
 
 import taipy
 
+
+def handle_services(use_rest, use_core):
+    if use_rest in ["YES", "Y"]:
+        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
+            import_file.write("from taipy import Rest\n")
+        with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
+            main_file.write("    Rest.run()\n")
+
+    if use_core in ["YES", "Y"]:
+        # Write "import taipy as tp" at the third line of the import.txt file
+        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "r") as import_file:
+            import_lines = import_file.readlines()
+            import_lines[1] += "import taipy as tp\n"
+        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "w") as import_file:
+            import_file.writelines(import_lines)
+
+        # Import and run Core service if Rest service is not run yet
+        if use_rest not in ["YES", "Y"]:
+            with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
+                import_file.write("from taipy import Core\n")
+            with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
+                main_file.write("    Core.run()\n")
+
+        # Create and submit the placeholder scenario
+        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
+            import_file.write("\nfrom configuration import scenario_config\n")
+        with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
+            main_file.write("    scenario = tp.create_scenario(scenario_config)\n")
+            main_file.write("    scenario.submit()\n")
+
+    else:
+        shutil.rmtree(os.path.join(os.getcwd(), "algorithms"))
+        shutil.rmtree(os.path.join(os.getcwd(), "configuration"))
+
+
+def handle_single_page_app():
+    shutil.rmtree(os.path.join(os.getcwd(), "pages"))
+
+    with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
+        main_file.write("\n")
+        main_file.write("    gui = Gui(page=page)\n")
+        main_file.write('    gui.run(title="{{cookiecutter.__application_title}}")\n')
+
+    with open(os.path.join(os.getcwd(), "sections", "page_content.txt"), "a") as page_content_file:
+        page_content_file.write(
+            '''
+\npage = """
+<center>
+<|navbar|lov={[("home", "Homepage"), ("https://docs.taipy.io/en/latest/manuals/about/", "Taipy Docs"), ("https://docs.taipy.io/en/latest/getting_started/", "Getting Started")]}|>
+</center>
+
+<|
+<center>
+    <|{logo}|image|height=200px|width=200px|on_action=image_action|>
+</center>
+|>
+
+# Taipy Application
+
+"""
+'''
+        )
+
+
+def handle_multi_page_app(pages):
+    number_of_pages = int(pages[0])
+
+    for page_i in range(1, number_of_pages + 1):
+        try:
+            pages[page_i] = pages[page_i] or "page_" + str(page_i)
+        except IndexError:
+            page_name = "page_" + str(page_i)
+            pages.append(page_name)
+    pages = pages[1:]
+
+    for page_name in pages:
+        os.mkdir(os.path.join(os.getcwd(), "pages", page_name))
+        with open(os.path.join(os.getcwd(), "pages", "page_example", "page_example.md"), "r") as page_md_file:
+            page_md_content = page_md_file.read()
+        page_md_content = page_md_content.replace("Page example", page_name.replace("_", " ").title())
+        with open(os.path.join(os.getcwd(), "pages", page_name, page_name + ".md"), "w") as page_md_file:
+            page_md_file.write(page_md_content)
+
+        with open(os.path.join(os.getcwd(), "pages", "page_example", "page_example.py"), "r") as page_content_file:
+            page_py_content = page_content_file.read()
+        page_py_content = page_py_content.replace("page_example", page_name)
+        with open(os.path.join(os.getcwd(), "pages", page_name, page_name + ".py"), "w") as page_content_file:
+            page_content_file.write(page_py_content)
+
+    with open(os.path.join(os.getcwd(), "pages", "__init__.py"), "a") as page_init_file:
+        for page_name in pages:
+            page_init_file.write(f"from .{page_name}.{page_name} import {page_name}\n")
+
+    shutil.rmtree(os.path.join(os.getcwd(), "pages", "page_example"))
+
+    newline = ",\n\t"
+    user_page_dict = newline.join(f'"{page_name}": {page_name}' for page_name in pages)
+    page_dict = """
+\npages = {
+    "/": root_page,
+    "Taipy Docs": "https://docs.taipy.io/en/latest/manuals/about/",
+    "Getting Started": "https://docs.taipy.io/en/latest/getting_started/",
+    {pages}
+}
+"""
+    with open(os.path.join(os.getcwd(), "sections", "page_content.txt"), "a") as page_content_file:
+        page_content_file.write(page_dict.replace("{pages}", user_page_dict))
+
+    with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
+        import_file.write("from pages import *\n")
+
+    with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
+        main_file.write("\n")
+        main_file.write("    gui = Gui(page=pages)\n")
+        main_file.write('    gui.run(title="{{cookiecutter.__application_title}}")\n')
+
+
+def generate_main_file():
+    with open(os.path.join(os.getcwd(), "sections", "import.txt"), "r") as import_file:
+        import_lines = import_file.read()
+    with open(os.path.join(os.getcwd(), "sections", "page_content.txt"), "r") as page_content_file:
+        page_content = page_content_file.read()
+    with open(os.path.join(os.getcwd(), "sections", "main.txt"), "r") as main_file:
+        main_lines = main_file.read()
+
+    with open(os.path.join(os.getcwd(), "{{cookiecutter.__main_file}}.py"), "a") as app_main_file:
+        app_main_file.write("\n")
+        app_main_file.write(import_lines)
+        app_main_file.write("\n\n")
+        app_main_file.write(page_content)
+        app_main_file.write("\n\n")
+        app_main_file.write(main_lines)
+
+
 with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_file:
     requirement_file.write(f"taipy=={taipy.version._get_version()}\n")
+
+use_core = "{{ cookiecutter.__core }}".upper()
+use_rest = "{{ cookiecutter.__rest }}".upper()
+handle_services(use_rest, use_core)
+
+pages = "{{ cookiecutter.__pages }}".split(" ")
+if pages[0] == "1":
+    handle_single_page_app()
+else:
+    handle_multi_page_app(pages)
+
+generate_main_file()
+
+# Remove the sections folder
+shutil.rmtree(os.path.join(os.getcwd(), "sections"))
