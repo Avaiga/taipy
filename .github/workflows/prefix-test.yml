@@ -49,7 +49,7 @@ jobs:
       - name: install pipenv and install dependencies
         run: |
           pip install --upgrade pip
-          pip install pipenv
+          pip install pipenv==2023.7.23
           pipenv install --dev
           pipenv run pip install jsonschema==4.17.3 "pandas>=2.0.0,<2.1"
           pipenv run pip freeze
