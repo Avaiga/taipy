@@ -102,7 +102,7 @@ jobs:
 
       - name: Generate pyi files
         run: |
-          pip install pipenv
+          pip install pipenv==2023.7.23
           pipenv install --dev
           cp tools/generate_pyi.py temp.py && pipenv run python temp.py && rm temp.py
           pipenv --rm
