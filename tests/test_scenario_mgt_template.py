@@ -10,74 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-import subprocess
-import sys
 
 from cookiecutter.main import cookiecutter
 
-
-def _run_template(main_path, time_out=30):
-    """Run the templates on a subprocess and get stdout after timeout"""
-    with subprocess.Popen([sys.executable, main_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
-        try:
-            stdout, stderr = proc.communicate(timeout=time_out)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            stdout, stderr = proc.communicate()
-
-    # Print the eror if there is any (for debugging)
-    if stderr := str(stderr, "utf-8"):
-        print(stderr)
-
-    return stdout
-
-
-def test_default_template(tmpdir):
-    cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
-        output_dir=str(tmpdir),
-        no_input=True,
-        extra_context={
-            "application_name": "foo_app",
-            "application_main_file": "main.py",
-            "application_title": "bar",
-        },
-    )
-
-    assert os.listdir(tmpdir) == ["foo_app"]
-    assert os.listdir(os.path.join(tmpdir, "foo_app")).sort() == ["requirements.txt", "main.py", "images"].sort()
-    with open(os.path.join(tmpdir, "foo_app", "requirements.txt")) as requirements_file:
-        # Assert post_gen_project hook is successful
-        assert "taipy==" in requirements_file.read()
-
-    stdout = _run_template(os.path.join(tmpdir, "foo_app", "main.py"))
-
-    # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-
-
-def test_multi_page_gui_template(tmpdir):
-    cookiecutter(
-        template="src/taipy/templates/multi-page-gui",
-        output_dir=str(tmpdir),
-        no_input=True,
-        extra_context={
-            "application_name": "foo_app",
-            "application_main_file": "main.py",
-            "application_title": "bar",
-        },
-    )
-
-    assert os.listdir(tmpdir) == ["foo_app"]
-    assert os.listdir(os.path.join(tmpdir, "foo_app")).sort() == ["requirements.txt", "main.py", "pages"].sort()
-    with open(os.path.join(tmpdir, "foo_app", "requirements.txt")) as requirements_file:
-        # Assert post_gen_project hook is successful
-        assert "taipy==" in requirements_file.read()
-
-    stdout = _run_template(os.path.join(tmpdir, "foo_app", "main.py"))
-
-    # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+from .utils import _run_template
 
 
 def test_scenario_management_with_toml_config(tmpdir):
