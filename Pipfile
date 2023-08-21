@@ -14,7 +14,7 @@ flask-marshmallow = "==0.14"
 markupsafe = "==2.1.1"
 marshmallow-sqlalchemy = "==0.25"
 passlib = "==1.7.4"
-taipy-core = {git = "https://git@github.com/avaiga/taipy-core.git@develop"}
+taipy-core = {ref = "develop", git = "https://github.com/avaiga/taipy-core.git"}
 
 [dev-packages]
 tox = ">=3.24.5"
