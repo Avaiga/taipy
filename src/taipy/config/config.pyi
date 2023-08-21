@@ -311,6 +311,25 @@ class Config:
         """
 
     @classmethod
+    def configure_data_node_from(
+        cls,
+        source_configuration: "DataNodeConfig",
+        id: str,
+        **properties,
+    ) -> "DataNodeConfig":
+        """Configure a new data node configuration from an existing one.
+
+        Parameters:
+            source_configuration (DataNodeConfig): The source data node configuration.
+            id (str): The unique identifier of the new data node configuration.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.<br/>
+                The default properties are the properties of the source data node configuration.
+
+        Returns:
+            The new data node configuration.
+        """
+
+    @classmethod
     def configure_data_node(
         cls,
         id: str,
@@ -806,10 +825,7 @@ class Config:
 
     @staticmethod
     def configure_job_executions(
-        mode: Optional[str] = None,
-        nb_of_workers: Optional[Union[int, str]] = None,
-        max_nb_of_workers: Optional[Union[int, str]] = None,
-        **properties
+        mode: Optional[str] = None, max_nb_of_workers: Optional[Union[int, str]] = None, **properties
     ) -> "JobConfig":
         """Configure job execution.
 
@@ -822,7 +838,6 @@ class Config:
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
                 `&lt;env_var&gt;` is the name of an environment variable.
-            nb_of_workers (Optional[int, str]): Deprecated. Use *max_nb_of_workers* instead.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
