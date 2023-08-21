@@ -48,6 +48,7 @@ jobs:
           if [ ! -f dist/${{ github.event.repository.name }}-${{ github.event.inputs.version }}.tar.gz ]; then
             echo "No release asset found"
             exit 1
+          fi
 
   publish-to-pypi:
     needs: [test-package]
