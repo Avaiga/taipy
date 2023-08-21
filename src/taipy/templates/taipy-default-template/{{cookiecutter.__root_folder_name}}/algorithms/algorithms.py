@@ -1,7 +1,7 @@
 """
-This file is to store all of the algorithms that will be used to configure tasks.
+This file is designed to contain the various Python functions used to configure tasks.
 
-All function will be imported by the __init__.py file in this folder.
+The functions will be imported by the __init__.py file in this folder.
 """
 
 

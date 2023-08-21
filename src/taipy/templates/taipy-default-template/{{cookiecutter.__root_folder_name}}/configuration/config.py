@@ -1,5 +1,5 @@
 """
-Contain the configuration of the application.
+Contain the application's configuration including the scenario configurations.
 
 The configuration is run by the Core service.
 """

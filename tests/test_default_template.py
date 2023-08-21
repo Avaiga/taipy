@@ -156,7 +156,7 @@ def test_multipage_gui_template(tmpdir):
         no_input=True,
         extra_context={
             "Application root folder name": "foo_app",
-            "How many pages and the name of the pages?": "3",
+            "How many pages and their names?": "3",
         },
     )
 
@@ -185,7 +185,7 @@ def test_multipage_gui_template_with_page_names(tmpdir):
         no_input=True,
         extra_context={
             "Application root folder name": "foo_app",
-            "How many pages and the name of the pages?": "3 name_1 name_2 name_3",
+            "How many pages and their names?": "3 name_1 name_2 name_3",
         },
     )
 
@@ -210,7 +210,7 @@ def test_multipage_gui_template_with_page_names(tmpdir):
         no_input=True,
         extra_context={
             "Application root folder name": "bar_app",
-            "How many pages and the name of the pages?": "3 name_1 ",
+            "How many pages and their names?": "3 name_1 ",
         },
     )
 
@@ -235,7 +235,7 @@ def test_multipage_gui_template_with_page_names(tmpdir):
         no_input=True,
         extra_context={
             "Application root folder name": "baz_app",
-            "How many pages and the name of the pages?": "3 name_1 name_2 name_3 name_4 name_5",
+            "How many pages and their names?": "3 name_1 name_2 name_3 name_4 name_5",
         },
     )
 
