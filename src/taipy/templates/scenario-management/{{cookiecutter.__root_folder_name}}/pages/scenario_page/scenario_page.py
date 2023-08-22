@@ -1,5 +1,11 @@
 from taipy.gui import Markdown
-from .data_node_management import write_data_nodes, custom_write_data_nodes, manage_inputs_partial, manage_outputs_partial
+
+from .data_node_management import (
+    custom_write_data_nodes,
+    manage_inputs_partial,
+    manage_outputs_partial,
+    write_data_nodes,
+)
 
 
 def manage_data_node_partials(state):
