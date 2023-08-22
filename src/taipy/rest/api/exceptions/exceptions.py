@@ -20,6 +20,6 @@ class ScenarioIdMissingException(Exception):
         self.message = "Scenario id is missing."
 
 
-class PipelineNameMissingException(Exception):
+class SequenceNameMissingException(Exception):
     def __init__(self):
-        self.message = "Pipeline name is missing."
+        self.message = "Sequence name is missing."

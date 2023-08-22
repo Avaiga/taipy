@@ -14,73 +14,73 @@ from unittest import mock
 import pytest
 from flask import url_for
 
-from src.taipy.rest.api.exceptions.exceptions import PipelineNameMissingException, ScenarioIdMissingException
+from src.taipy.rest.api.exceptions.exceptions import ScenarioIdMissingException, SequenceNameMissingException
 from taipy.core.exceptions.exceptions import NonExistingScenario
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
 
-def test_get_pipeline(client, default_pipeline):
+def test_get_sequence(client, default_sequence):
     # test 404
-    user_url = url_for("api.pipeline_by_id", pipeline_id="foo")
+    user_url = url_for("api.sequence_by_id", sequence_id="foo")
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._get") as manager_mock:
-        manager_mock.return_value = default_pipeline
+    with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._get") as manager_mock:
+        manager_mock.return_value = default_sequence
 
-        # test get_pipeline
-        rep = client.get(url_for("api.pipeline_by_id", pipeline_id="foo"))
+        # test get_sequence
+        rep = client.get(url_for("api.sequence_by_id", sequence_id="foo"))
         assert rep.status_code == 200
 
 
-def test_delete_pipeline(client):
+def test_delete_sequence(client):
     # test 404
-    user_url = url_for("api.pipeline_by_id", pipeline_id="foo")
+    user_url = url_for("api.sequence_by_id", sequence_id="foo")
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._delete"), mock.patch(
-        "taipy.core.pipeline._pipeline_manager._PipelineManager._get"
+    with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._delete"), mock.patch(
+        "taipy.core.sequence._sequence_manager._SequenceManager._get"
     ):
-        # test get_pipeline
-        rep = client.delete(url_for("api.pipeline_by_id", pipeline_id="foo"))
+        # test get_sequence
+        rep = client.delete(url_for("api.sequence_by_id", sequence_id="foo"))
         assert rep.status_code == 200
 
 
-def test_create_pipeline(client, default_scenario):
-    pipelines_url = url_for("api.pipelines")
-    rep = client.post(pipelines_url, json={})
+def test_create_sequence(client, default_scenario):
+    sequences_url = url_for("api.sequences")
+    rep = client.post(sequences_url, json={})
     assert rep.status_code == 400
     assert rep.json == {"message": "Scenario id is missing."}
 
-    pipelines_url = url_for("api.pipelines")
-    rep = client.post(pipelines_url, json={"scenario_id": "SCENARIO_scenario_id"})
+    sequences_url = url_for("api.sequences")
+    rep = client.post(sequences_url, json={"scenario_id": "SCENARIO_scenario_id"})
     assert rep.status_code == 400
-    assert rep.json == {"message": "Pipeline name is missing."}
+    assert rep.json == {"message": "Sequence name is missing."}
 
-    pipelines_url = url_for("api.pipelines")
-    rep = client.post(pipelines_url, json={"scenario_id": "SCENARIO_scenario_id", "pipeline_name": "pipeline"})
+    sequences_url = url_for("api.sequences")
+    rep = client.post(sequences_url, json={"scenario_id": "SCENARIO_scenario_id", "sequence_name": "sequence"})
     assert rep.status_code == 404
 
     _ScenarioManagerFactory._build_manager()._set(default_scenario)
     with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get") as config_mock:
         config_mock.return_value = default_scenario
-        pipelines_url = url_for("api.pipelines")
+        sequences_url = url_for("api.sequences")
         rep = client.post(
-            pipelines_url, json={"scenario_id": default_scenario.id, "pipeline_name": "pipeline", "tasks": []}
+            sequences_url, json={"scenario_id": default_scenario.id, "sequence_name": "sequence", "tasks": []}
         )
         assert rep.status_code == 201
 
 
-def test_get_all_pipelines(client, default_scenario_config_list):
+def test_get_all_sequences(client, default_scenario_config_list):
     for ds in range(10):
         with mock.patch("src.taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
             config_mock.return_value = default_scenario_config_list[ds]
             scenario_url = url_for("api.scenarios", config_id=config_mock.name)
             client.post(scenario_url)
 
-    pipelines_url = url_for("api.pipelines")
-    rep = client.get(pipelines_url)
+    sequences_url = url_for("api.sequences")
+    rep = client.get(sequences_url)
     assert rep.status_code == 200
 
     results = rep.get_json()
@@ -88,15 +88,15 @@ def test_get_all_pipelines(client, default_scenario_config_list):
 
 
 @pytest.mark.xfail()
-def test_execute_pipeline(client, default_pipeline):
+def test_execute_sequence(client, default_sequence):
     # test 404
-    user_url = url_for("api.pipeline_submit", pipeline_id="foo")
+    user_url = url_for("api.sequence_submit", sequence_id="foo")
     rep = client.post(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._get") as manager_mock:
-        manager_mock.return_value = default_pipeline
+    with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._get") as manager_mock:
+        manager_mock.return_value = default_sequence
 
-        # test get_pipeline
-        rep = client.post(url_for("api.pipeline_submit", pipeline_id="foo"))
+        # test get_sequence
+        rep = client.post(url_for("api.sequence_submit", sequence_id="foo"))
         assert rep.status_code == 200

@@ -17,15 +17,15 @@ from taipy.core.exceptions.exceptions import (
     NonExistingDataNode,
     NonExistingDataNodeConfig,
     NonExistingJob,
-    NonExistingPipeline,
-    NonExistingPipelineConfig,
     NonExistingScenario,
     NonExistingScenarioConfig,
+    NonExistingSequence,
+    NonExistingSequenceConfig,
     NonExistingTask,
     NonExistingTaskConfig,
 )
 
-from .exceptions.exceptions import ConfigIdMissingException, PipelineNameMissingException, ScenarioIdMissingException
+from .exceptions.exceptions import ConfigIdMissingException, ScenarioIdMissingException, SequenceNameMissingException
 from .views import blueprint
 
 
@@ -53,8 +53,8 @@ def handle_scenario_id_missing_exception(e):
     return jsonify({"message": e.message}), 400
 
 
-@blueprint.errorhandler(PipelineNameMissingException)
-def handle_pipeline_name_missing_exception(e):
+@blueprint.errorhandler(SequenceNameMissingException)
+def handle_sequence_name_missing_exception(e):
     return jsonify({"message": e.message}), 400
 
 
@@ -78,13 +78,13 @@ def handle_job_not_found(e):
     return _create_404(e)
 
 
-@blueprint.errorhandler(NonExistingPipeline)
-def handle_pipeline_not_found(e):
+@blueprint.errorhandler(NonExistingSequence)
+def handle_sequence_not_found(e):
     return _create_404(e)
 
 
-@blueprint.errorhandler(NonExistingPipelineConfig)
-def handle_pipeline_config_not_found(e):
+@blueprint.errorhandler(NonExistingSequenceConfig)
+def handle_sequence_config_not_found(e):
     return _create_404(e)
 
 

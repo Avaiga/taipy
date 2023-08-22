@@ -12,7 +12,7 @@
 from marshmallow import Schema, fields
 
 
-class PipelineSchema(Schema):
+class SequenceSchema(Schema):
     owner_id = fields.String()
     parent_ids = fields.List(fields.String)
     tasks = fields.List(fields.String)
@@ -20,6 +20,6 @@ class PipelineSchema(Schema):
     properties = fields.Dict()
 
 
-class PipelineResponseSchema(PipelineSchema):
+class SequenceResponseSchema(SequenceSchema):
     id = fields.String()
     subscribers = fields.List(fields.Dict)

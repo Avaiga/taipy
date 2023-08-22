@@ -6,8 +6,8 @@
         "TASK_evaluate_task_31f1ecdf-2b75-4cd8-9509-9e70eddc6973"
     ],
     "additional_data_nodes": [],
-    "pipelines": [
-        "PIPELINE_pipeline_0e1c5dd3-9896-4221-bfc8-6924acd11147"
+    "sequences": [
+        "SEQUENCE_sequence_0e1c5dd3-9896-4221-bfc8-6924acd11147"
     ],
     "properties": {},
     "creation_date": "2022-03-31T21:50:52.360872",

@@ -39,7 +39,7 @@ jobs:
           ! grep -rP '_ScenarioManager(?!Factory)' src
           ! grep -rP '_DataManager(?!Factory)' src
           ! grep -rP '_TaskManager(?!Factory)' src
-          ! grep -rP '_PipelineManager(?!Factory)' src
+          ! grep -rP '_SequenceManager(?!Factory)' src
           ! grep -rP '_JobManager(?!Factory)' src
           ! grep -rP '_CycleManager(?!Factory)' src
 

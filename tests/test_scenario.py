@@ -61,7 +61,7 @@ def test_create_scenario(client, default_scenario_config):
         assert rep.status_code == 201
 
 
-def test_get_all_scenarios(client, default_pipeline, default_scenario_config_list):
+def test_get_all_scenarios(client, default_sequence, default_scenario_config_list):
     for ds in range(10):
         with mock.patch("src.taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
             config_mock.return_value = default_scenario_config_list[ds]
