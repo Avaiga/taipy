@@ -825,7 +825,7 @@ class _GuiCore(ElementLibrary):
                 "on_id_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_id}}"),
                 "history": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_history("+
+                    f"{{{__CTX_VAR_NAME}.get_data_node_history(" +
                     f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, " +
                     f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
                 ),
