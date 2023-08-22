@@ -20,7 +20,7 @@ from threading import Lock
 try:
     import zoneinfo
 except ImportError:
-    from backports import zoneinfo # type: ignore[no-redef]
+    from backports import zoneinfo  # type: ignore[no-redef]
 
 from dateutil import parser
 
