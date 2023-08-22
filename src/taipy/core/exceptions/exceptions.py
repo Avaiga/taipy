@@ -167,7 +167,8 @@ class SequenceTaskConfigDoesNotExistInSameScenarioConfig(Exception):
     """Raised if TaskConfigs of a Sequence do not exist in the same ScenarioConfig that the Sequence belongs to."""
 
     def __init__(self, task_config_ids: List[Optional[str]], sequence_name: str, scenario_config_id: str):
-        self.message = f"TaskConfig {task_config_ids} of Sequence name {sequence_name} does not exist in ScenarioConfig {scenario_config_id}."  # type: ignore
+        self.message = f"TaskConfig {task_config_ids} of Sequence name {sequence_name} "
+        self.message += f"does not exist in ScenarioConfig {scenario_config_id}."
 
 
 class NonExistingSequenceConfig(Exception):
