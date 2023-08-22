@@ -16,7 +16,11 @@ from datetime import datetime
 from enum import Enum
 from numbers import Number
 from threading import Lock
-from zoneinfo import ZoneInfo
+try:
+    import zoneinfo
+except ImportError:
+    from backports import zoneinfo
+
 
 import pandas as pd
 from dateutil import parser
@@ -636,7 +640,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 col = payload.get("col")
                 tz = payload.get("tz")
                 val = (
-                    parser.parse(str(payload.get("value"))).astimezone(ZoneInfo(tz)).replace(tzinfo=None)
+                    parser.parse(str(payload.get("value"))).astimezone(zoneinfo.ZoneInfo(tz)).replace(tzinfo=None)
                     if tz is not None
                     else payload.get("value")
                 )
