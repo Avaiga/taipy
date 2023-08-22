@@ -664,7 +664,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         ):
             try:
                 return self.__read_tabular_data(dn)
-            except Exception as e:
+            except Exception:
                 return None
         return None
 
@@ -682,7 +682,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return self.gui._tbl_cols(
                     True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=self.__read_tabular_data(dn)
                 )
-            except Exception as e:
+            except Exception:
                 return None
         return _DoNotUpdate()
 
@@ -825,26 +825,26 @@ class _GuiCore(ElementLibrary):
                 "on_id_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_id}}"),
                 "history": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_history(" +
-                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, " +
-                    f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_history("
+                    + f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "
+                    + f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
                 ),
                 "data": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>," +
-                    f" {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>,"
+                    + f" {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_data": ElementProperty(
                     PropertyType.data,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data(" +
-                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, " +
-                    f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data("
+                    + f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "
+                    + f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_columns": ElementProperty(
                     PropertyType.string,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns(" +
-                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, " +
-                    f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns("
+                    + f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "
+                    + f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
                 "on_tabular_data_edit": ElementProperty(
