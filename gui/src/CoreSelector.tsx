@@ -39,7 +39,7 @@ import {
     Pipeline as PipelineIcon,
     Scenario as ScenarioIcon,
 } from "./icons";
-import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, ParentItemSx, tinyIconButtonSx } from "./utils";
+import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, ParentItemSx, iconLabelSx, tinyIconButtonSx, tinySelPinIconButtonSx } from "./utils";
 
 export interface EditProps {
     id: string;
@@ -71,29 +71,13 @@ interface CoreSelectorProps {
     leafType: NodeType;
     editComponent?: ComponentType<EditProps>;
     showPins?: boolean;
+    onSelect?: (id: string) => void;
 }
-
-const treeItemLabelSx = {
-    display: "flex",
-    alignItems: "center",
-    gap: 1,
-};
 
 const tinyPinIconButtonSx = (theme: Theme) => ({
     ...tinyIconButtonSx,
     backgroundColor: alpha(theme.palette.text.secondary, 0.15),
     color: "text.secondary",
-
-    "&:hover": {
-        backgroundColor: alpha(theme.palette.secondary.main, 0.75),
-        color: "secondary.contrastText",
-    },
-});
-
-const tinySelPinIconButtonSx = (theme: Theme) => ({
-    ...tinyIconButtonSx,
-    backgroundColor: "secondary.main",
-    color: "secondary.contrastText",
 
     "&:hover": {
         backgroundColor: alpha(theme.palette.secondary.main, 0.75),
@@ -139,7 +123,7 @@ const CoreItem = (props: {
             data-selectable={nodeType === props.leafType}
             label={
                 <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
-                    <Grid item xs sx={treeItemLabelSx}>
+                    <Grid item xs sx={iconLabelSx}>
                         {nodeType === NodeType.CYCLE ? (
                             <CycleIcon fontSize="small" color="primary" />
                         ) : nodeType === NodeType.SCENARIO ? (
@@ -240,6 +224,11 @@ const CoreSelector = (props: CoreSelectorProps) => {
         value,
         defaultValue,
         showPins = true,
+        updateVarName,
+        updateVars,
+        onChange,
+        onSelect,
+        coreChanged
     } = props;
 
     const [selected, setSelected] = useState("");
@@ -249,39 +238,40 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, props.updateVars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
-    const onSelect = useCallback(
+    const onNodeSelect = useCallback(
         (e: SyntheticEvent, nodeId: string) => {
             const { selectable = "false" } = e.currentTarget.parentElement?.dataset || {};
-            const scenariosVar = getUpdateVar(props.updateVars, lovPropertyName);
+            const scenariosVar = getUpdateVar(updateVars, lovPropertyName);
             dispatch(
                 createSendUpdateAction(
-                    props.updateVarName,
+                    updateVarName,
                     selectable === "true" ? nodeId : undefined,
                     module,
-                    props.onChange,
+                    onChange,
                     propagate,
                     scenariosVar
                 )
             );
             setSelected(nodeId);
+            onSelect && selectable && onSelect(nodeId);
         },
-        [props.updateVarName, props.updateVars, props.onChange, propagate, dispatch, module, lovPropertyName]
+        [updateVarName, updateVars, onChange, onSelect, propagate, dispatch, module, lovPropertyName]
     );
 
     const unselect = useCallback(() => {
         setSelected((sel) => {
             if (sel) {
-                const lovVar = getUpdateVar(props.updateVars, lovPropertyName);
+                const lovVar = getUpdateVar(updateVars, lovPropertyName);
                 dispatch(
-                    createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, lovVar)
+                    createSendUpdateAction(updateVarName, undefined, module, onChange, propagate, lovVar)
                 );
                 return "";
             }
             return sel;
         });
-    }, [props.updateVarName, props.updateVars, props.onChange, propagate, dispatch, module, lovPropertyName]);
+    }, [updateVarName, updateVars, onChange, propagate, dispatch, module, lovPropertyName]);
 
     useEffect(() => {
         if (value !== undefined && value !== null) {
@@ -310,11 +300,11 @@ const CoreSelector = (props: CoreSelectorProps) => {
 
     // Refresh on broadcast
     useEffect(() => {
-        if (props.coreChanged?.scenario) {
-            const updateVar = getUpdateVar(props.updateVars, lovPropertyName);
+        if (coreChanged?.scenario) {
+            const updateVar = getUpdateVar(updateVars, lovPropertyName);
             updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
         }
-    }, [props.coreChanged, props.updateVars, module, dispatch, id, lovPropertyName]);
+    }, [coreChanged, updateVars, module, dispatch, id, lovPropertyName]);
 
     const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
 
@@ -388,7 +378,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 defaultCollapseIcon={<ExpandMore />}
                 defaultExpandIcon={<ChevronRight />}
                 sx={treeViewSx}
-                onNodeSelect={onSelect}
+                onNodeSelect={onNodeSelect}
                 selected={selected}
                 multiSelect={multiple && !multiple}
             >

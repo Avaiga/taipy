@@ -24,7 +24,7 @@ import InputLabel from "@mui/material/InputLabel";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
-import Popover, { PopoverOrigin } from "@mui/material/Popover";
+import Popover from "@mui/material/Popover";
 import Select from "@mui/material/Select";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -48,7 +48,7 @@ import {
     useModule,
 } from "taipy-gui";
 
-import { disableColor, useClassNames } from "./utils";
+import { disableColor, popoverOrigin, useClassNames } from "./utils";
 
 interface JobSelectorProps {
     updateVarName?: string;
@@ -142,10 +142,6 @@ type FilterData = {
     value: string;
 };
 
-const origin: PopoverOrigin = {
-    vertical: "bottom",
-    horizontal: "left",
-};
 interface FilterProps {
     open: boolean;
     anchorEl: HTMLButtonElement | null;
@@ -210,7 +206,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
             open={open}
             anchorEl={anchorEl}
             onClose={handleFilterClose}
-            anchorOrigin={origin}
+            anchorOrigin={popoverOrigin}
         >
             <form onSubmit={form.handleSubmit}>
                 <Grid container p={3} sx={containerPopupSx}>

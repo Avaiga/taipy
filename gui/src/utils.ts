@@ -10,6 +10,8 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+import { Theme, alpha } from "@mui/material";
+import { PopoverOrigin } from "@mui/material/Popover";
 
 import { useDynamicProperty } from "taipy-gui";
 
@@ -74,7 +76,7 @@ export const BadgeSx = {
     },
 };
 
-export const MainBoxSx = {
+export const MainTreeBoxSx = {
     maxWidth: 300,
     overflowY: "auto",
 };
@@ -131,3 +133,56 @@ export const useClassNames = (libClassName?: string, dynamicClassName?: string, 
     ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();
 
 export const disableColor = <T>(color: T, disabled: boolean) => (disabled ? ("disabled" as T) : color);
+
+export const hoverSx = {
+    "&:hover": {
+        bgcolor: "action.hover",
+        cursor: "text",
+    },
+    mt: 0,
+};
+
+export const FieldNoMaxWidth = {
+    maxWidth: "none",
+};
+
+export const IconPaddingSx = { padding: 0 };
+
+export const MainBoxSx = {
+    overflowY: "auto",
+};
+
+export const AccordionIconSx = { fontSize: "0.9rem" };
+
+export const AccordionSummarySx = {
+    flexDirection: "row-reverse",
+    "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
+        transform: "rotate(90deg)",
+        mr: 1,
+    },
+    "& .MuiAccordionSummary-content": {
+        mr: 1,
+    },
+};
+
+export const tinySelPinIconButtonSx = (theme: Theme) => ({
+    ...tinyIconButtonSx,
+    backgroundColor: "secondary.main",
+    color: "secondary.contrastText",
+
+    "&:hover": {
+        backgroundColor: alpha(theme.palette.secondary.main, 0.75),
+        color: "secondary.contrastText",
+    },
+});
+
+export const popoverOrigin: PopoverOrigin = {
+    vertical: "bottom",
+    horizontal: "left",
+};
+
+export const iconLabelSx = {
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+};

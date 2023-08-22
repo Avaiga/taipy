@@ -34,12 +34,13 @@ import { Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
+
 import { useDispatch, useModule, createSendActionNameAction, getUpdateVar, createSendUpdateAction } from "taipy-gui";
 
 import ConfirmDialog from "./utils/ConfirmDialog";
-import { MainBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
+import { MainTreeBoxSx, ScFProps, ScenarioFull, useClassNames, tinyIconButtonSx } from "./utils";
 import CoreSelector, { EditProps } from "./CoreSelector";
-import { NodeType } from "./utils/types";
+import { Cycles, NodeType, Scenarios } from "./utils/types";
 
 type Property = {
     id: string;
@@ -47,9 +48,9 @@ type Property = {
     value: string;
 };
 
-type Scenario = [string, string, undefined, number, boolean];
-type Scenarios = Array<Scenario>;
-type Cycles = Array<[string, string, Scenarios, number, boolean]>;
+// type Scenario = [string, string, undefined, number, boolean];
+// type Scenarios = Array<Scenario>;
+// type Cycles = Array<[string, string, Scenarios, number, boolean]>;
 
 interface ScenarioDict {
     id?: string;
@@ -65,11 +66,12 @@ interface ScenarioSelectorProps {
     displayCycles?: boolean;
     showPrimaryFlag?: boolean;
     updateVarName?: string;
+    updateVars: string;
     scenarios?: Cycles | Scenarios;
     onScenarioCrud: string;
     onChange?: string;
+    onCreation?: string;
     coreChanged?: Record<string, unknown>;
-    updateVars: string;
     configs?: Array<[string, string]>;
     error?: string;
     propagate?: boolean;
@@ -181,7 +183,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
             values.properties = [...properties];
             setProperties([]);
             submit(actionEdit, false, values);
-            form.resetForm({values: {...emptyScenario, config: configs?.length === 1 ? configs[0][0] : ""}});
+            form.resetForm({ values: { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" } });
             close();
         },
     });
@@ -196,7 +198,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                       date: scenario[ScFProps.creation_date],
                       properties: [],
                   }
-                : {...emptyScenario, config: configs?.length === 1 ? configs[0][0] : ""}
+                : { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" }
         );
         setProperties(
             scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : []
@@ -434,7 +436,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const onSubmit = useCallback(
         (...values: unknown[]) => {
-            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, ...values));
+            dispatch(createSendActionNameAction(props.id, module, props.onScenarioCrud, ...values, props.onCreation));
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 const lovVar = getUpdateVar(props.updateVars, "scenarios");
@@ -452,6 +454,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             props.onChange,
             props.updateVarName,
             props.updateVars,
+            props.onCreation,
         ]
     );
 
@@ -466,7 +469,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     return (
         <>
-            <Box sx={MainBoxSx} id={props.id} className={className}>
+            <Box sx={MainTreeBoxSx} id={props.id} className={className}>
                 <CoreSelector
                     {...props}
                     entities={props.scenarios}
