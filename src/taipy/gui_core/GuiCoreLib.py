@@ -825,19 +825,23 @@ class _GuiCore(ElementLibrary):
                 "on_id_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_id}}"),
                 "history": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_history(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_history(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "\
+                    f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
                 ),
                 "data": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>,"\
+                        f" {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_data": ElementProperty(
                     PropertyType.data,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "\
+                        f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_columns": ElementProperty(
                     PropertyType.string,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "\
+                        f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
                 "on_tabular_data_edit": ElementProperty(
