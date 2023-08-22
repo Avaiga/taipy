@@ -16,13 +16,12 @@ from datetime import datetime
 from enum import Enum
 from numbers import Number
 from threading import Lock
+
 try:
     import zoneinfo
 except ImportError:
     from backports import zoneinfo
 
-
-import pandas as pd
 from dateutil import parser
 
 from taipy.config import Config
