@@ -826,24 +826,24 @@ class _GuiCore(ElementLibrary):
                 "history": ElementProperty(
                     PropertyType.react,
                     f"{{{__CTX_VAR_NAME}.get_data_node_history("+
-                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "+
+                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, " +
                     f"{_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR})}}",
                 ),
                 "data": ElementProperty(
                     PropertyType.react,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>,"+
+                    f"{{{__CTX_VAR_NAME}.get_data_node_data(<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>," +
                     f" {_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_data": ElementProperty(
                     PropertyType.data,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data("+
-                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "+
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_data(" +
+                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, " +
                     f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_columns": ElementProperty(
                     PropertyType.string,
-                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns("+
-                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "+
+                    f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns(" +
+                    f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, " +
                     f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
