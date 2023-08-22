@@ -33,12 +33,12 @@ from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import (
     NonExistingDataNode,
-    NonExistingPipeline,
+    NonExistingSequence,
     NonExistingTask,
-    PipelineTaskDoesNotExistInScenario,
+    SequenceTaskDoesNotExistInScenario,
 )
 from ..job.job import Job
-from ..pipeline.pipeline import Pipeline
+from ..sequence.sequence import Sequence
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from ..task.task_id import TaskId
@@ -56,7 +56,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         config_id (str): The identifier of the `ScenarioConfig^`.
         tasks (Set[Task^]): The set of tasks.
         additional_data_nodes (Set[DataNode^]): The set of additional data nodes.
-        pipelines (Dict[str, Pipeline^]): The dictionary of pipelines: subsets of tasks that can be submitted
+        sequences (Dict[str, Sequence^]): The dictionary of sequences: subsets of tasks that can be submitted
             together independently from the rest of the scenario's tasks.
         properties (dict[str, Any]): A dictionary of additional properties.
         scenario_id (str): The unique identifier of this scenario.
@@ -71,11 +71,11 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     _ID_PREFIX = "SCENARIO"
     _MANAGER_NAME = "scenario"
-    _MIGRATED_PIPELINES_KEY = "pipelines"
+    _MIGRATED_SEQUENCES_KEY = "sequences"
     __SEPARATOR = "_"
-    _PIPELINE_TASKS_KEY = "tasks"
-    _PIPELINE_PROPERTIES_KEY = "properties"
-    _PIPELINE_SUBSCRIBERS_KEY = "subscribers"
+    _SEQUENCE_TASKS_KEY = "tasks"
+    _SEQUENCE_PROPERTIES_KEY = "properties"
+    _SEQUENCE_SUBSCRIBERS_KEY = "subscribers"
 
     def __init__(
         self,
@@ -90,7 +90,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         subscribers: Optional[List[_Subscriber]] = None,
         tags: Optional[Set[str]] = None,
         version: str = None,
-        pipelines: Optional[Dict[str, Dict]] = None,
+        sequences: Optional[Dict[str, Dict]] = None,
     ):
         super().__init__(subscribers or [])
         self.config_id = _validate_id(config_id)
@@ -104,15 +104,15 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._primary_scenario = is_primary
         self._tags = tags or set()
         self._properties = _Properties(self, **properties)
-        self._pipelines: Dict[str, Dict] = pipelines or {}
+        self._sequences: Dict[str, Dict] = sequences or {}
 
         _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in self._tasks])
-        for pipeline_name, pipeline_data in self._pipelines.items():
-            pipeline_task_ids = set(
-                [task.id if isinstance(task, Task) else task for task in pipeline_data.get("tasks", [])]
+        for sequence_name, sequence_data in self._sequences.items():
+            sequence_task_ids = set(
+                [task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])]
             )
-            self.__check_pipeline_tasks_exist_in_scenario_tasks(
-                pipeline_name, pipeline_task_ids, self.id, _scenario_task_ids
+            self.__check_sequence_tasks_exist_in_scenario_tasks(
+                sequence_name, sequence_task_ids, self.id, _scenario_task_ids
             )
 
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
@@ -142,9 +142,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         if protected_attribute_name in self._properties:
             return _tpl._replace_templates(self._properties[protected_attribute_name])
 
-        pipelines = self.__get_pipelines()
-        if protected_attribute_name in pipelines:
-            return pipelines[protected_attribute_name]
+        sequences = self.__get_sequences()
+        if protected_attribute_name in sequences:
+            return sequences[protected_attribute_name]
         tasks = self.tasks
         if protected_attribute_name in tasks:
             return tasks[protected_attribute_name]
@@ -155,71 +155,71 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def pipelines(self) -> Dict[str, Pipeline]:
-        return self.__get_pipelines()
+    def sequences(self) -> Dict[str, Sequence]:
+        return self.__get_sequences()
 
-    @pipelines.setter  # type: ignore
+    @sequences.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def pipelines(
-        self, pipelines: Dict[str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]]
+    def sequences(
+        self, sequences: Dict[str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]]
     ):
-        self._pipelines = pipelines
+        self._sequences = sequences
 
-    def add_pipelines(self, pipelines: Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
+    def add_sequences(self, sequences: Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _pipelines = _scenario._pipelines
+        _sequences = _scenario._sequences
         _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
 
-        for pipeline_name, pipeline_data in pipelines.items():
-            pipeline_task_ids: Set[TaskId] = set(
-                [task.id if isinstance(task, Task) else task for task in pipeline_data.get("tasks", [])]  # type: ignore
+        for sequence_name, sequence_data in sequences.items():
+            sequence_task_ids: Set[TaskId] = set(
+                [task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])]  # type: ignore
             )
-            self.__check_pipeline_tasks_exist_in_scenario_tasks(
-                pipeline_name, pipeline_task_ids, self.id, _scenario_task_ids
+            self.__check_sequence_tasks_exist_in_scenario_tasks(
+                sequence_name, sequence_task_ids, self.id, _scenario_task_ids
             )
 
-        _pipelines.update(pipelines)
-        self.pipelines = _pipelines  # type: ignore
+        _sequences.update(sequences)
+        self.sequences = _sequences  # type: ignore
 
-    def remove_pipelines(self, pipeline_names: List[str]):
-        _pipelines = _Reloader()._reload(self._MANAGER_NAME, self)._pipelines
-        for pipeline_name in pipeline_names:
-            _pipelines.pop(pipeline_name)
-        self.pipelines = _pipelines  # type: ignore
+    def remove_sequences(self, sequence_names: List[str]):
+        _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
+        for sequence_name in sequence_names:
+            _sequences.pop(sequence_name)
+        self.sequences = _sequences  # type: ignore
 
     @staticmethod
-    def __check_pipeline_tasks_exist_in_scenario_tasks(
-        pipeline_name: str, pipeline_task_ids: Set[TaskId], scenario_id: ScenarioId, scenario_task_ids: Set[TaskId]
+    def __check_sequence_tasks_exist_in_scenario_tasks(
+        sequence_name: str, sequence_task_ids: Set[TaskId], scenario_id: ScenarioId, scenario_task_ids: Set[TaskId]
     ):
-        non_existing_pipeline_task_ids_in_scenario = set()
-        for pipeline_task_id in pipeline_task_ids:
-            if pipeline_task_id not in scenario_task_ids:
-                non_existing_pipeline_task_ids_in_scenario.add(pipeline_task_id)
-        if len(non_existing_pipeline_task_ids_in_scenario) > 0:
-            raise PipelineTaskDoesNotExistInScenario(
-                list(non_existing_pipeline_task_ids_in_scenario), pipeline_name, scenario_id
+        non_existing_sequence_task_ids_in_scenario = set()
+        for sequence_task_id in sequence_task_ids:
+            if sequence_task_id not in scenario_task_ids:
+                non_existing_sequence_task_ids_in_scenario.add(sequence_task_id)
+        if len(non_existing_sequence_task_ids_in_scenario) > 0:
+            raise SequenceTaskDoesNotExistInScenario(
+                list(non_existing_sequence_task_ids_in_scenario), sequence_name, scenario_id
             )
 
-    def __get_pipelines(self) -> Dict[str, Pipeline]:
-        _pipelines = {}
+    def __get_sequences(self) -> Dict[str, Sequence]:
+        _sequences = {}
 
-        from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
+        from ..sequence._sequence_manager_factory import _SequenceManagerFactory
 
-        pipeline_manager = _PipelineManagerFactory._build_manager()
+        sequence_manager = _SequenceManagerFactory._build_manager()
 
-        for pipeline_name, pipeline_data in self._pipelines.items():
-            p = pipeline_manager._create(
-                pipeline_name,
-                pipeline_data.get(self._PIPELINE_TASKS_KEY, []),
-                pipeline_data.get(self._PIPELINE_SUBSCRIBERS_KEY, []),
-                pipeline_data.get(self._PIPELINE_PROPERTIES_KEY, {}),
+        for sequence_name, sequence_data in self._sequences.items():
+            p = sequence_manager._create(
+                sequence_name,
+                sequence_data.get(self._SEQUENCE_TASKS_KEY, []),
+                sequence_data.get(self._SEQUENCE_SUBSCRIBERS_KEY, []),
+                sequence_data.get(self._SEQUENCE_PROPERTIES_KEY, {}),
                 self.id,
                 self.version,
             )
-            if not isinstance(p, Pipeline):
-                raise NonExistingPipeline(pipeline_name)
-            _pipelines[pipeline_name] = p
-        return _pipelines
+            if not isinstance(p, Sequence):
+                raise NonExistingSequence(sequence_name)
+            _sequences[sequence_name] = p
+        return _sequences
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

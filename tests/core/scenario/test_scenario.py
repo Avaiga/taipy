@@ -20,12 +20,12 @@ from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import DataNode, InMemoryDataNode
 from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.exceptions.exceptions import PipelineTaskDoesNotExistInScenario
-from src.taipy.core.pipeline.pipeline import Pipeline
-from src.taipy.core.pipeline.pipeline_id import PipelineId
+from src.taipy.core.exceptions.exceptions import SequenceTaskDoesNotExistInScenario
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.scenario.scenario_id import ScenarioId
+from src.taipy.core.sequence.sequence import Sequence
+from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task, TaskId
 from taipy.config import Frequency
@@ -40,7 +40,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_1.tasks == {}
     assert scenario_1.additional_data_nodes == {}
     assert scenario_1.data_nodes == {}
-    assert scenario_1.pipelines == {}
+    assert scenario_1.sequences == {}
     assert scenario_1.properties == {"key": "value"}
     assert scenario_1.key == "value"
     assert scenario_1.creation_date is not None
@@ -65,7 +65,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_2.tasks == {}
     assert scenario_2.additional_data_nodes == {}
     assert scenario_2.data_nodes == {}
-    assert scenario_2.pipelines == {}
+    assert scenario_2.sequences == {}
     assert scenario_2.properties == {}
     assert scenario_2.creation_date == current_datetime
     assert not scenario_2.is_primary
@@ -78,18 +78,18 @@ def test_create_scenario(cycle, current_datetime):
     dn_2 = PickleDataNode("abc", Scope.SCENARIO)
     task = Task("qux", {}, print, [dn_1])
 
-    scenario_3 = Scenario("quux", set([task]), {}, set([dn_2]), pipelines={"acb": {"tasks": [task]}})
-    pipeline = scenario_3.pipelines["acb"]
+    scenario_3 = Scenario("quux", set([task]), {}, set([dn_2]), sequences={"acb": {"tasks": [task]}})
+    sequence = scenario_3.sequences["acb"]
     assert scenario_3.id is not None
     assert scenario_3.config_id == "quux"
     assert len(scenario_3.tasks) == 1
     assert len(scenario_3.additional_data_nodes) == 1
     assert len(scenario_3.data_nodes) == 2
-    assert len(scenario_3.pipelines) == 1
+    assert len(scenario_3.sequences) == 1
     assert scenario_3.qux == task
     assert scenario_3.xyz == dn_1
     assert scenario_3.abc == dn_2
-    assert scenario_3.acb == pipeline
+    assert scenario_3.acb == sequence
     assert scenario_3.properties == {}
     assert scenario_3.tags == set()
 
@@ -122,10 +122,10 @@ def test_create_scenario(cycle, current_datetime):
         set([task_1]),
         {},
     )
-    scenario_4.pipelines = {"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": []}}
+    scenario_4.sequences = {"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": []}}
 
-    pipeline_1 = scenario_4.pipelines["pipeline_1"]
-    pipeline_2 = scenario_4.pipelines["pipeline_2"]
+    sequence_1 = scenario_4.sequences["sequence_1"]
+    sequence_2 = scenario_4.sequences["sequence_2"]
     assert scenario_4.id is not None
     assert scenario_4.config_id == "scenario_4"
     assert len(scenario_4.tasks) == 1
@@ -137,12 +137,12 @@ def test_create_scenario(cycle, current_datetime):
         input_1.config_id: input_1,
         output_1.config_id: output_1,
     }
-    assert scenario_4.pipelines == {"pipeline_1": pipeline_1, "pipeline_2": pipeline_2}
+    assert scenario_4.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
 
     scenario_5 = Scenario("scenario_5", set([task_1, task_2]), {})
-    scenario_5.add_pipelines({"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": [task_1, task_2]}})
-    pipeline_1 = scenario_5.pipelines["pipeline_1"]
-    pipeline_2 = scenario_5.pipelines["pipeline_2"]
+    scenario_5.add_sequences({"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": [task_1, task_2]}})
+    sequence_1 = scenario_5.sequences["sequence_1"]
+    sequence_2 = scenario_5.sequences["sequence_2"]
     assert scenario_5.id is not None
     assert scenario_5.config_id == "scenario_5"
     assert len(scenario_5.tasks) == 2
@@ -156,11 +156,11 @@ def test_create_scenario(cycle, current_datetime):
         input_2.config_id: input_2,
         output_2.config_id: output_2,
     }
-    assert scenario_5.pipelines == {"pipeline_1": pipeline_1, "pipeline_2": pipeline_2}
-    scenario_5.remove_pipelines(["pipeline_2"])
-    assert scenario_5.pipelines == {"pipeline_1": pipeline_1}
-    scenario_5.remove_pipelines(["pipeline_1"])
-    assert scenario_5.pipelines == {}
+    assert scenario_5.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
+    scenario_5.remove_sequences(["sequence_2"])
+    assert scenario_5.sequences == {"sequence_1": sequence_1}
+    scenario_5.remove_sequences(["sequence_1"])
+    assert scenario_5.sequences == {}
 
     scenario_6 = Scenario("scenario_6", set(), {}, set([additional_dn_1]))
     assert scenario_6.id is not None
@@ -225,30 +225,30 @@ def test_create_scenario(cycle, current_datetime):
     }
 
 
-def test_raise_pipeline_tasks_not_in_scenario():
+def test_raise_sequence_tasks_not_in_scenario():
     task_1 = Task("task_1", {}, print)
     task_2 = Task("task_2", {}, print)
 
-    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
-        Scenario("scenario", [], {}, pipelines={"pipeline": {"tasks": [task_1]}}, scenario_id="SCENARIO_scenario")
-    assert err.value.args == ([task_1.id], "pipeline", "SCENARIO_scenario")
+    with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
+        Scenario("scenario", [], {}, sequences={"sequence": {"tasks": [task_1]}}, scenario_id="SCENARIO_scenario")
+    assert err.value.args == ([task_1.id], "sequence", "SCENARIO_scenario")
 
-    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
+    with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
         Scenario(
             "scenario",
             [task_1],
             {},
-            pipelines={"pipeline": {"tasks": [task_1, task_2]}},
+            sequences={"sequence": {"tasks": [task_1, task_2]}},
             scenario_id="SCENARIO_scenario",
         )
-    assert err.value.args == ([task_2.id], "pipeline", "SCENARIO_scenario")
+    assert err.value.args == ([task_2.id], "sequence", "SCENARIO_scenario")
 
-    Scenario("scenario", [task_1], {}, pipelines={"pipeline": {"tasks": [task_1]}})
+    Scenario("scenario", [task_1], {}, sequences={"sequence": {"tasks": [task_1]}})
     Scenario(
         "scenario",
         [task_1, task_2],
         {},
-        pipelines={"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": [task_1, task_2]}},
+        sequences={"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": [task_1, task_2]}},
     )
 
     scenario = Scenario("scenario", [], {})
@@ -260,26 +260,26 @@ def test_raise_pipeline_tasks_not_in_scenario():
     task_manager._set(task_1)
     task_manager._set(task_2)
 
-    scenario.add_pipelines({"pipeline_1": {}})
+    scenario.add_sequences({"sequence_1": {}})
 
-    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
-        scenario.add_pipelines({"pipeline_2": {"tasks": [task_1]}})
-    assert err.value.args == ([task_1.id], "pipeline_2", scenario.id)
+    with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
+        scenario.add_sequences({"sequence_2": {"tasks": [task_1]}})
+    assert err.value.args == ([task_1.id], "sequence_2", scenario.id)
 
     scenario.tasks = [task_1]
 
-    scenario.add_pipelines({"pipeline_2": {"tasks": [task_1]}})
+    scenario.add_sequences({"sequence_2": {"tasks": [task_1]}})
 
-    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
-        scenario.add_pipelines({"pipeline_3": {"tasks": [task_2]}})
-    assert err.value.args == ([task_2.id], "pipeline_3", scenario.id)
+    with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
+        scenario.add_sequences({"sequence_3": {"tasks": [task_2]}})
+    assert err.value.args == ([task_2.id], "sequence_3", scenario.id)
 
-    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
-        scenario.add_pipelines({"pipeline_4": {"tasks": [task_1, task_2]}})
-    assert err.value.args == ([task_2.id], "pipeline_4", scenario.id)
+    with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
+        scenario.add_sequences({"sequence_4": {"tasks": [task_1, task_2]}})
+    assert err.value.args == ([task_2.id], "sequence_4", scenario.id)
 
     scenario.tasks = [task_1, task_2]
-    scenario.add_pipelines({"pipeline_5": {"tasks": [task_1, task_2]}})
+    scenario.add_sequences({"sequence_5": {"tasks": [task_1, task_2]}})
 
 
 def test_add_property_to_scenario():
@@ -346,14 +346,14 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         id=CycleId("tmp_cc_id"),
     )
 
-    pipeline_1_name = "pipeline_1"
-    pipeline_1 = Pipeline({}, [], PipelineId(f"PIPELINE_{pipeline_1_name}_{scenario_1.id}"))
+    sequence_1_name = "sequence_1"
+    sequence_1 = Sequence({}, [], SequenceId(f"SEQUENCE_{sequence_1_name}_{scenario_1.id}"))
 
-    tmp_pipeline_name = "tmp_pipeline"
-    tmp_pipeline = Pipeline(
+    tmp_sequence_name = "tmp_sequence"
+    tmp_sequence = Sequence(
         {},
         [],
-        PipelineId(f"PIPELINE_{tmp_pipeline_name}_{scenario_1.id}"),
+        SequenceId(f"SEQUENCE_{tmp_sequence_name}_{scenario_1.id}"),
     )
 
     _TaskManagerFactory._build_manager()._set(task)
@@ -380,24 +380,24 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert scenario_1.name == "baz"
     assert scenario_2.name == "baz"
 
-    # auto set & reload on pipelines attribute
-    assert len(scenario_1.pipelines) == 0
-    assert len(scenario_2.pipelines) == 0
-    scenario_1.pipelines = {tmp_pipeline_name: {}}
-    assert len(scenario_1.pipelines) == 1
-    assert scenario_1.pipelines[tmp_pipeline_name] == tmp_pipeline
-    assert len(scenario_2.pipelines) == 1
-    assert scenario_2.pipelines[tmp_pipeline_name] == tmp_pipeline
-    scenario_2.add_pipelines({pipeline_1_name: {}})
-    assert len(scenario_1.pipelines) == 2
-    assert scenario_1.pipelines == {pipeline_1_name: pipeline_1, tmp_pipeline_name: tmp_pipeline}
-    assert len(scenario_2.pipelines) == 2
-    assert scenario_2.pipelines == {pipeline_1_name: pipeline_1, tmp_pipeline_name: tmp_pipeline}
-    scenario_2.remove_pipelines([tmp_pipeline_name])
-    assert len(scenario_1.pipelines) == 1
-    assert scenario_1.pipelines == {pipeline_1_name: pipeline_1}
-    assert len(scenario_2.pipelines) == 1
-    assert scenario_2.pipelines == {pipeline_1_name: pipeline_1}
+    # auto set & reload on sequences attribute
+    assert len(scenario_1.sequences) == 0
+    assert len(scenario_2.sequences) == 0
+    scenario_1.sequences = {tmp_sequence_name: {}}
+    assert len(scenario_1.sequences) == 1
+    assert scenario_1.sequences[tmp_sequence_name] == tmp_sequence
+    assert len(scenario_2.sequences) == 1
+    assert scenario_2.sequences[tmp_sequence_name] == tmp_sequence
+    scenario_2.add_sequences({sequence_1_name: {}})
+    assert len(scenario_1.sequences) == 2
+    assert scenario_1.sequences == {sequence_1_name: sequence_1, tmp_sequence_name: tmp_sequence}
+    assert len(scenario_2.sequences) == 2
+    assert scenario_2.sequences == {sequence_1_name: sequence_1, tmp_sequence_name: tmp_sequence}
+    scenario_2.remove_sequences([tmp_sequence_name])
+    assert len(scenario_1.sequences) == 1
+    assert scenario_1.sequences == {sequence_1_name: sequence_1}
+    assert len(scenario_2.sequences) == 1
+    assert scenario_2.sequences == {sequence_1_name: sequence_1}
 
     assert len(scenario_1.tasks) == 0
     assert len(scenario_1.data_nodes) == 0
@@ -547,8 +547,8 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     with scenario_1 as scenario:
         assert scenario.config_id == "foo"
         assert len(scenario.tasks) == 1
-        assert len(scenario.pipelines) == 1
-        assert scenario.pipelines["pipeline_1"] == pipeline_1
+        assert len(scenario.sequences) == 1
+        assert scenario.sequences["sequence_1"] == sequence_1
         assert scenario.tasks[task.config_id] == task
         assert len(scenario.additional_data_nodes) == 1
         assert scenario.additional_data_nodes[additional_dn.config_id] == additional_dn
@@ -568,7 +568,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         scenario.config_id = "foo"
         scenario.tasks = set()
         scenario.additional_data_nodes = set()
-        scenario.remove_pipelines([pipeline_1_name])
+        scenario.remove_sequences([sequence_1_name])
         scenario.creation_date = new_datetime_2
         scenario.cycle = None
         scenario.is_primary = False
@@ -584,8 +584,8 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         scenario.properties.update(dict())
 
         assert scenario.config_id == "foo"
-        assert len(scenario.pipelines) == 1
-        assert scenario.pipelines[pipeline_1_name] == pipeline_1
+        assert len(scenario.sequences) == 1
+        assert scenario.sequences[sequence_1_name] == sequence_1
         assert len(scenario.tasks) == 1
         assert scenario.tasks[task.config_id] == task
         assert len(scenario.additional_data_nodes) == 1
@@ -603,7 +603,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert scenario.properties["temp_key_5"] == 0
 
     assert scenario_1.config_id == "foo"
-    assert len(scenario_1.pipelines) == 0
+    assert len(scenario_1.sequences) == 0
     assert len(scenario_1.tasks) == 0
     assert len(scenario_1.additional_data_nodes) == 0
     assert scenario_1.tasks == {}
@@ -1144,7 +1144,7 @@ def test_get_sorted_tasks():
     _assert_equal(scenario_8._get_sorted_tasks(), [[task_5, task_2, task_1], [task_3, task_4]])
 
 
-def test_add_and_remove_pipelines():
+def test_add_and_remove_sequences():
     data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
     data_node_3 = InMemoryDataNode("qux", Scope.SCENARIO, "s3")
@@ -1164,10 +1164,10 @@ def test_add_and_remove_pipelines():
     task_5 = Task("bob", {}, print, [data_node_5], [data_node_3], TaskId("t5"))
     scenario_1 = Scenario("quest", [task_1, task_2, task_3, task_4, task_5], {}, [], scenario_id=ScenarioId("s1"))
 
-    pipeline_1 = Pipeline({"name": "pipeline_1"}, [task_1], PipelineId(f"PIPELINE_pipeline_1_{scenario_1.id}"))
-    pipeline_2 = Pipeline({"name": "pipeline_2"}, [task_1, task_2], PipelineId(f"PIPELINE_pipeline_2_{scenario_1.id}"))
-    pipeline_3 = Pipeline(
-        {"name": "pipeline_3"}, [task_1, task_5, task_3], PipelineId(f"PIPELINE_pipeline_3_{scenario_1.id}")
+    sequence_1 = Sequence({"name": "sequence_1"}, [task_1], SequenceId(f"SEQUENCE_sequence_1_{scenario_1.id}"))
+    sequence_2 = Sequence({"name": "sequence_2"}, [task_1, task_2], SequenceId(f"SEQUENCE_sequence_2_{scenario_1.id}"))
+    sequence_3 = Sequence(
+        {"name": "sequence_3"}, [task_1, task_5, task_3], SequenceId(f"SEQUENCE_sequence_3_{scenario_1.id}")
     )
 
     task_manager = _TaskManagerFactory._build_manager()
@@ -1181,23 +1181,23 @@ def test_add_and_remove_pipelines():
 
     assert scenario_1.get_inputs() == {data_node_1, data_node_2, data_node_5}
     assert scenario_1._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
-    assert len(scenario_1.pipelines) == 0
+    assert len(scenario_1.sequences) == 0
 
-    scenario_1.pipelines = {"pipeline_1": {"tasks": [task_1]}}
-    assert scenario_1.pipelines == {"pipeline_1": pipeline_1}
+    scenario_1.sequences = {"sequence_1": {"tasks": [task_1]}}
+    assert scenario_1.sequences == {"sequence_1": sequence_1}
 
-    scenario_1.add_pipelines({"pipeline_2": {"tasks": [task_1, task_2]}})
-    assert scenario_1.pipelines == {"pipeline_1": pipeline_1, "pipeline_2": pipeline_2}
+    scenario_1.add_sequences({"sequence_2": {"tasks": [task_1, task_2]}})
+    assert scenario_1.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
 
-    scenario_1.remove_pipelines(["pipeline_1"])
-    assert scenario_1.pipelines == {"pipeline_2": pipeline_2}
+    scenario_1.remove_sequences(["sequence_1"])
+    assert scenario_1.sequences == {"sequence_2": sequence_2}
 
-    scenario_1.add_pipelines({"pipeline_1": {"tasks": [task_1]}, "pipeline_3": {"tasks": [task_1, task_5, task_3]}})
-    assert scenario_1.pipelines == {
-        "pipeline_2": pipeline_2,
-        "pipeline_1": pipeline_1,
-        "pipeline_3": pipeline_3,
+    scenario_1.add_sequences({"sequence_1": {"tasks": [task_1]}, "sequence_3": {"tasks": [task_1, task_5, task_3]}})
+    assert scenario_1.sequences == {
+        "sequence_2": sequence_2,
+        "sequence_1": sequence_1,
+        "sequence_3": sequence_3,
     }
 
-    scenario_1.remove_pipelines(["pipeline_2", "pipeline_3"])
-    assert scenario_1.pipelines == {"pipeline_1": pipeline_1}
+    scenario_1.remove_sequences(["sequence_2", "sequence_3"])
+    assert scenario_1.sequences == {"sequence_1": sequence_1}

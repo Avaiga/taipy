@@ -56,7 +56,7 @@ class DataNode(_Entity, _Labeled):
         scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
-        owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
+        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or
             None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
@@ -235,7 +235,7 @@ class DataNode(_Entity, _Labeled):
         return self._properties
 
     def _get_user_properties(self) -> Dict[str, Any]:
-        """ Get user properties."""
+        """Get user properties."""
         return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
 
     def __eq__(self, other):

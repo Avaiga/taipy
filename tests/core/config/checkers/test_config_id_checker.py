@@ -29,14 +29,14 @@ class TestConfigIdChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
 
-        Config.configure_pipeline(id="bar", task_configs=[])
+        Config.configure_sequence(id="bar", task_configs=[])
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
         assert len(Config._collector.errors) == 1
 
         expected_error_message = (
-            "`bar` is used as the config_id of multiple configurations ['PIPELINE', 'SCENARIO']"
+            "`bar` is used as the config_id of multiple configurations ['SEQUENCE', 'SCENARIO']"
             ' Current value of property `config_id` is "bar".'
         )
         assert expected_error_message in caplog.text
@@ -47,7 +47,7 @@ class TestConfigIdChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "`bar` is used as the config_id of multiple configurations ['TASK', 'PIPELINE', 'SCENARIO']"
+            "`bar` is used as the config_id of multiple configurations ['TASK', 'SEQUENCE', 'SCENARIO']"
             ' Current value of property `config_id` is "bar".'
         )
         assert expected_error_message in caplog.text

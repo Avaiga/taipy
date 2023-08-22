@@ -363,8 +363,8 @@
         }
       }
     },
-    "PIPELINE": {
-      "description": "Pipelines",
+    "SEQUENCE": {
+      "description": "Sequences",
       "type": "object",
       "properties": {},
       "required": [],
@@ -390,8 +390,8 @@
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "pipelines": {
-            "description": "The list of pipeline configs.",
+          "sequences": {
+            "description": "The list of sequence configs.",
             "type": "array",
             "items": {
               "type": "string"

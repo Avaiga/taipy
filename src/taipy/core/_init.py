@@ -17,10 +17,10 @@ from .data.data_node_id import DataNodeId
 from .job.job import Job
 from .job.job_id import JobId
 from .job.status import Status
-from .pipeline.pipeline import Pipeline
-from .pipeline.pipeline_id import PipelineId
 from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
+from .sequence.sequence import Sequence
+from .sequence.sequence_id import SequenceId
 from .taipy import (
     cancel_job,
     clean_all_entities_by_version,
@@ -40,10 +40,10 @@ from .taipy import (
     get_jobs,
     get_latest_job,
     get_parents,
-    get_pipelines,
     get_primary,
     get_primary_scenarios,
     get_scenarios,
+    get_sequences,
     get_tasks,
     is_deletable,
     is_promotable,
@@ -51,11 +51,11 @@ from .taipy import (
     set,
     set_primary,
     submit,
-    subscribe_pipeline,
     subscribe_scenario,
+    subscribe_sequence,
     tag,
-    unsubscribe_pipeline,
     unsubscribe_scenario,
+    unsubscribe_sequence,
     untag,
 )
 from .task.task import Task

@@ -97,7 +97,7 @@ def test_do_not_recreate_existing_task(init_sql_repo):
     assert len(_TaskManager._get_all()) == 1
     assert task_1.id == task_2.id
     assert task_2.id == task_3.id
-    task_4 = _create_task_from_config(task_config_1, None, "scenario_1")  # Create even if pipeline is the same.
+    task_4 = _create_task_from_config(task_config_1, None, "scenario_1")  # Create even if sequence is the same.
     assert len(_TaskManager._get_all()) == 2
     assert task_1.id == task_2.id
     assert task_2.id == task_3.id

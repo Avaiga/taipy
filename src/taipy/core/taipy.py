@@ -37,12 +37,12 @@ from .exceptions.exceptions import (
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
-from .pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from .pipeline.pipeline import Pipeline
-from .pipeline.pipeline_id import PipelineId
 from .scenario._scenario_manager_factory import _ScenarioManagerFactory
 from .scenario.scenario import Scenario
 from .scenario.scenario_id import ScenarioId
+from .sequence._sequence_manager_factory import _SequenceManagerFactory
+from .sequence.sequence import Sequence
+from .sequence.sequence_id import SequenceId
 from .task._task_manager_factory import _TaskManagerFactory
 from .task.task import Task
 from .task.task_id import TaskId
@@ -50,26 +50,26 @@ from .task.task_id import TaskId
 __logger = _TaipyLogger._get_logger()
 
 
-def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
+def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
     """Save or update an entity.
 
     Parameters:
-        entity (Union[DataNode^, Task^, Job^, Pipeline^, Scenario^, Cycle^]): The
+        entity (Union[DataNode^, Task^, Job^, Sequence^, Scenario^, Cycle^]): The
             entity to save.
     """
     if isinstance(entity, Cycle):
         return _CycleManagerFactory._build_manager()._set(entity)
     if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._set(entity)
-    if isinstance(entity, Pipeline):
-        return _PipelineManagerFactory._build_manager()._set(entity)
+    if isinstance(entity, Sequence):
+        return _SequenceManagerFactory._build_manager()._set(entity)
     if isinstance(entity, Task):
         return _TaskManagerFactory._build_manager()._set(entity)
     if isinstance(entity, DataNode):
         return _DataManagerFactory._build_manager()._set(entity)
 
 
-def is_submittable(entity: Union[Scenario, ScenarioId, Pipeline, PipelineId, Task, TaskId]) -> bool:
+def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId]) -> bool:
     """Indicate if an entity can be submitted.
 
     Returns:
@@ -77,8 +77,8 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Pipeline, PipelineId, Tas
     """
     if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
         return _ScenarioManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
-    if isinstance(entity, Pipeline) or (isinstance(entity, str) and entity.startswith(Pipeline._ID_PREFIX)):
-        return _PipelineManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
+    if isinstance(entity, Sequence) or (isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX)):
+        return _SequenceManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
     if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
         return _TaskManagerFactory._build_manager()._is_submittable(entity)  # type: ignore
     return False
@@ -86,18 +86,18 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Pipeline, PipelineId, Tas
 
 @_warn_no_core_service()
 def submit(
-    entity: Union[Scenario, Pipeline, Task],
+    entity: Union[Scenario, Sequence, Task],
     force: bool = False,
     wait: bool = False,
     timeout: Optional[Union[float, int]] = None,
 ) -> Union[Job, List[Job]]:
     """Submit an entity for execution.
 
-    If the entity is a pipeline or a scenario, all the tasks of the entity are
+    If the entity is a sequence or a scenario, all the tasks of the entity are
     submitted for execution.
 
     Parameters:
-        entity (Union[Scenario^, Pipeline^, Task^]): The entity to submit.
+        entity (Union[Scenario^, Sequence^, Task^]): The entity to submit.
         force (bool): If True, the execution is forced even if the data nodes are in cache.
         wait (bool): Wait for the orchestrated jobs created from the submission to be finished
             in asynchronous mode.
@@ -106,13 +106,13 @@ def submit(
     Returns:
         The created `Job^` or a collection of the created `Job^` depends on the submitted entity.
 
-        - If a `Scenario^` or a `Pipeline^` is provided, it will return a list of `Job^`.
+        - If a `Scenario^` or a `Sequence^` is provided, it will return a list of `Job^`.
         - If a `Task^` is provided, it will return the created `Job^`.
     """
     if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
-    if isinstance(entity, Pipeline):
-        return _PipelineManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
+    if isinstance(entity, Sequence):
+        return _SequenceManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
     if isinstance(entity, Task):
         return _TaskManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
 
@@ -128,7 +128,7 @@ def exists(entity_id: DataNodeId) -> bool:
 
 
 @overload
-def exists(entity_id: PipelineId) -> bool:
+def exists(entity_id: SequenceId) -> bool:
     ...
 
 
@@ -152,11 +152,11 @@ def exists(entity_id: str) -> bool:
     ...
 
 
-def exists(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId, str]) -> bool:
+def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, str]) -> bool:
     """Check if an entity exists or not.
 
     Parameters:
-        entity_id (Union[DataNodeId^, TaskId^, PipelineId^, ScenarioId^, JobId, CycleId]): The identifier
+        entity_id (Union[DataNodeId^, TaskId^, SequenceId^, ScenarioId^, JobId, CycleId]): The identifier
             of an entity to check if it exists or not.
     Returns:
         True if the given entity does exist. False otherwise.
@@ -167,8 +167,8 @@ def exists(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
         return _CycleManagerFactory._build_manager()._exists(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManagerFactory._build_manager()._exists(ScenarioId(entity_id))
-    if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManagerFactory._build_manager()._exists(PipelineId(entity_id))
+    if entity_id.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._exists(SequenceId(entity_id))
     if entity_id.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._exists(TaskId(entity_id))
     if entity_id.startswith(DataNode._ID_PREFIX):
@@ -187,7 +187,7 @@ def get(entity_id: DataNodeId) -> DataNode:
 
 
 @overload
-def get(entity_id: PipelineId) -> Pipeline:
+def get(entity_id: SequenceId) -> Sequence:
     ...
 
 
@@ -207,20 +207,20 @@ def get(entity_id: JobId) -> Job:
 
 
 @overload
-def get(entity_id: str) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
+def get(entity_id: str) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle]:
     ...
 
 
 def get(
-    entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId, str]
-) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
+    entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, str]
+) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle]:
     """Get an entity from its identifier.
 
     Parameters:
-        entity_id (Union[TaskId^, DataNodeId^, PipelineId^, ScenarioId^]): The identifier
+        entity_id (Union[TaskId^, DataNodeId^, SequenceId^, ScenarioId^]): The identifier
             of the entity to get.<br/>
             It must match the identifier pattern of one of the entities (`Task^`, `DataNode^`,
-            `Pipeline^` or `Scenario^`).
+            `Sequence^` or `Scenario^`).
     Returns:
         The entity matching the corresponding identifier. None if no entity is found.
     Raises:
@@ -232,8 +232,8 @@ def get(
         return _CycleManagerFactory._build_manager()._get(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManagerFactory._build_manager()._get(ScenarioId(entity_id))
-    if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManagerFactory._build_manager()._get(PipelineId(entity_id))
+    if entity_id.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._get(SequenceId(entity_id))
     if entity_id.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._get(TaskId(entity_id))
     if entity_id.startswith(DataNode._ID_PREFIX):
@@ -263,22 +263,22 @@ def is_deletable(entity: Union[Scenario, Job, ScenarioId, JobId]) -> bool:
     return True
 
 
-def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
+def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId]):
     """Delete an entity and its nested entities.
 
     The given entity is deleted. The deletion is propagated to all nested entities that are
     not shared by another entity.
 
-    - If a `CycleId^` is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
-    - If a `ScenarioId^` is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
+    - If a `CycleId^` is provided, the nested scenarios, sequences, data nodes, and jobs are deleted.
+    - If a `ScenarioId^` is provided, the nested sequences, tasks, data nodes, and jobs are deleted.
         If the scenario is primary, it can only be deleted if it is the only scenario in the cycle.
         In that case, its cycle is also deleted. Please use the `is_deletable()` function to check if
         the scenario can be deleted.
-    - If a `PipelineId^` is provided, the nested tasks, data nodes, and jobs are deleted.
+    - If a `SequenceId^` is provided, the nested tasks, data nodes, and jobs are deleted.
     - If a `TaskId^` is provided, the nested data nodes, and jobs are deleted.
 
     Parameters:
-        entity_id (Union[TaskId^, DataNodeId^, PipelineId^, ScenarioId^, JobId^, CycleId^]): The
+        entity_id (Union[TaskId^, DataNodeId^, SequenceId^, ScenarioId^, JobId^, CycleId^]): The
             identifier of the entity to delete.
     Raises:
         ModelNotFound^: No entity corresponds to _entity_id_.
@@ -290,8 +290,8 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
         return _CycleManagerFactory._build_manager()._hard_delete(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManagerFactory._build_manager()._hard_delete(ScenarioId(entity_id))
-    if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManagerFactory._build_manager()._hard_delete(PipelineId(entity_id))
+    if entity_id.startswith(Sequence._ID_PREFIX):
+        return _SequenceManagerFactory._build_manager()._hard_delete(SequenceId(entity_id))
     if entity_id.startswith(Task._ID_PREFIX):
         return _TaskManagerFactory._build_manager()._hard_delete(TaskId(entity_id))
     if entity_id.startswith(DataNode._ID_PREFIX):
@@ -453,49 +453,49 @@ def unsubscribe_scenario(
     return _ScenarioManagerFactory._build_manager()._unsubscribe(callback, params, scenario)
 
 
-def subscribe_pipeline(
-    callback: Callable[[Pipeline, Job], None], params: Optional[List[Any]] = None, pipeline: Optional[Pipeline] = None
+def subscribe_sequence(
+    callback: Callable[[Sequence, Job], None], params: Optional[List[Any]] = None, sequence: Optional[Sequence] = None
 ):
     """Subscribe a function to be called on job status change.
 
-    The subscription is applied to all jobs created for the execution of _pipeline_.
+    The subscription is applied to all jobs created for the execution of _sequence_.
 
     Parameters:
-        callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
+        callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
             status change.
         params (Optional[List[Any]]): The parameters to be passed to the _callback_.
-        pipeline (Optional[Pipeline^]): The pipeline to subscribe on. If None, the subscription
-            is actived for all pipelines.
+        sequence (Optional[Sequence^]): The sequence to subscribe on. If None, the subscription
+            is actived for all sequences.
     Note:
         Notifications are applied only for jobs created **after** this subscription.
     """
-    return _PipelineManagerFactory._build_manager()._subscribe(callback, params, pipeline)
+    return _SequenceManagerFactory._build_manager()._subscribe(callback, params, sequence)
 
 
-def unsubscribe_pipeline(
-    callback: Callable[[Pipeline, Job], None], params: Optional[List[Any]] = None, pipeline: Optional[Pipeline] = None
+def unsubscribe_sequence(
+    callback: Callable[[Sequence, Job], None], params: Optional[List[Any]] = None, sequence: Optional[Sequence] = None
 ):
     """Unsubscribe a function that is called when the status of a Job changes.
 
     Parameters:
-        callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
+        callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
             status change.
         params (Optional[List[Any]]): The parameters to be passed to the _callback_.
-        pipeline (Optional[Pipeline^]): The pipeline to unsubscribe to. If None, all pipelines
+        sequence (Optional[Sequence^]): The sequence to unsubscribe to. If None, all sequences
             unsubscribe to _callback_.
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return _PipelineManagerFactory._build_manager()._unsubscribe(callback, params, pipeline)
+    return _SequenceManagerFactory._build_manager()._unsubscribe(callback, params, sequence)
 
 
-def get_pipelines() -> List[Pipeline]:
-    """Return all existing pipelines.
+def get_sequences() -> List[Sequence]:
+    """Return all existing sequences.
 
     Returns:
-        The list of all pipelines.
+        The list of all sequences.
     """
-    return _PipelineManagerFactory._build_manager()._get_all()
+    return _SequenceManagerFactory._build_manager()._get_all()
 
 
 def get_jobs() -> List[Job]:
@@ -618,7 +618,7 @@ def clean_all_entities_by_version(version_number=None) -> bool:
 
     _JobManagerFactory._build_manager()._delete_by_version(version_number)
     _ScenarioManagerFactory._build_manager()._delete_by_version(version_number)
-    _PipelineManagerFactory._build_manager()._delete_by_version(version_number)
+    _SequenceManagerFactory._build_manager()._delete_by_version(version_number)
     _TaskManagerFactory._build_manager()._delete_by_version(version_number)
     _DataManagerFactory._build_manager()._delete_by_version(version_number)
 
@@ -654,8 +654,8 @@ def export_scenario(
         _DataManagerFactory._build_manager()._export(data_node_id, folder_path)
     for task_id in entity_ids.task_ids:
         _TaskManagerFactory._build_manager()._export(task_id, folder_path)
-    for pipeline_id in entity_ids.pipeline_ids:
-        _PipelineManagerFactory._build_manager()._export(pipeline_id, folder_path)
+    for sequence_id in entity_ids.sequence_ids:
+        _SequenceManagerFactory._build_manager()._export(sequence_id, folder_path)
     for cycle_id in entity_ids.cycle_ids:
         _CycleManagerFactory._build_manager()._export(cycle_id, folder_path)
     for scenario_id in entity_ids.scenario_ids:
@@ -665,21 +665,21 @@ def export_scenario(
 
 
 def get_parents(
-    entity: Union[TaskId, DataNodeId, PipelineId, Task, DataNode, Pipeline], parent_dict=None
+    entity: Union[TaskId, DataNodeId, SequenceId, Task, DataNode, Sequence], parent_dict=None
 ) -> Dict[str, Set[_Entity]]:
     """Get the parents of an entity from itself or its identifier.
 
     Parameters:
-        entity (Union[TaskId^, DataNodeId^, PipelineId^, Task, DataNode, Pipeline]): The entity or its
+        entity (Union[TaskId^, DataNodeId^, SequenceId^, Task^, DataNode^, Sequence^]): The entity or its
             identifier to get the parents.<br/>
     Returns:
         The dictionary of all parent entities.
-            They are grouped by their type (Scenario^, Pipelines^, or tasks^) so each key corresponds
+            They are grouped by their type (Scenario^, Sequences^, or tasks^) so each key corresponds
             to a level of the parents and the value is a set of the parent entities.
             An empty dictionary is returned if the entity does not have parents.<br/>
-            Example: The following instruction returns all the pipelines that include the
+            Example: The following instruction returns all the sequences that include the
             datanode identified by "my_datanode_id".
-            `taipy.get_parents("id_of_my_datanode")["pipelines"]`
+            `taipy.get_parents("id_of_my_datanode")["sequences"]`
     Raises:
         ModelNotFound^: If _entity_ does not match a correct entity pattern.
     """
@@ -707,7 +707,7 @@ def get_parents(
         else:
             current_parent_dict[parent_entity._MANAGER_NAME] = {parent_entity}
 
-    if isinstance(entity, Pipeline):
+    if isinstance(entity, Sequence):
         update_parent_dict(current_parent_dict, parent_dict)
 
     if isinstance(entity, Task):
@@ -743,7 +743,7 @@ def get_cycles_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
 
 def get_entities_by_config_id(
     config_id: str,
-) -> Union[List, List[Task], List[DataNode], List[Pipeline], List[Scenario]]:
+) -> Union[List, List[Task], List[DataNode], List[Sequence], List[Scenario]]:
     """Get the entities by its config id.
 
     Parameters:

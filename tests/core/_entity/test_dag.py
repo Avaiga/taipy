@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 from typing import List
 
-from src.taipy.core import DataNode, Pipeline, PipelineId, Task, TaskId
+from src.taipy.core import DataNode, Sequence, SequenceId, Task, TaskId
 from src.taipy.core._entity._dag import _DAG
 from taipy.config.common.scope import Scope
 
@@ -51,9 +51,9 @@ class TestDAG:
         task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
         task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
         task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
-        pipeline = Pipeline({}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
+        sequence = Sequence({}, [task_4, task_2, task_1, task_3], SequenceId("p1"))
 
-        dag = pipeline._get_dag()
+        dag = sequence._get_dag()
         # s1 ---             ---> s3 ---> t2 ---> s5 ----
         #       |           |                           |
         #       |---> t1 ---|      -------------------------> t3 ---> s6
@@ -96,7 +96,7 @@ class TestDAG:
         task_2 = Task("garply", {}, print, None, [data_node_5], TaskId("t2"))
         task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
         task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
-        pipeline = Pipeline({}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
+        sequence = Sequence({}, [task_4, task_2, task_1, task_3], SequenceId("p1"))
 
         #  6  |   t2 _____
         #  5  |           \
@@ -108,7 +108,7 @@ class TestDAG:
         #     |________________________________________________
         #         0        1         2          3          4
 
-        dag = pipeline._get_dag()
+        dag = sequence._get_dag()
 
         assert dag.length == 5
         assert dag.width == 3
@@ -145,7 +145,7 @@ class TestDAG:
         task_3 = Task("fred", {}, print, [data_node_4], [data_node_5], TaskId("t3"))
         task_4 = Task("garply", {}, print, output=[data_node_6], id=TaskId("t4"))
         task_5 = Task("bob", {}, print, [data_node_7], None, TaskId("t5"))
-        pipeline = Pipeline({}, [task_5, task_3, task_4, task_1, task_2], PipelineId("p1"))
+        sequence = Sequence({}, [task_5, task_3, task_4, task_1, task_2], SequenceId("p1"))
 
         #  12 |  s7 __
         #  11 |       \
@@ -162,7 +162,7 @@ class TestDAG:
         #  0  |  s1 _/
         #     |________________________________________________
         #         0         1         2          3          4
-        dag = pipeline._get_dag()
+        dag = sequence._get_dag()
 
         assert dag.length == 5
         assert dag.width == 5
@@ -200,7 +200,7 @@ class TestDAG:
         task_2 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t2"))
         task_3 = Task("fred", {}, print, [data_node_4], [data_node_5], TaskId("t3"))
         task_4 = Task("garply", {}, print, output=[data_node_6], id=TaskId("t4"))
-        pipeline = Pipeline({}, [task_3, task_4, task_1, task_2], PipelineId("p1"))
+        sequence = Sequence({}, [task_3, task_4, task_1, task_2], SequenceId("p1"))
 
         #  6  |  t4 __
         #  5  |       \
@@ -211,7 +211,7 @@ class TestDAG:
         #  0  |  s1 _/
         #     |________________________________________________
         #         0         1         2          3          4
-        dag = pipeline._get_dag()
+        dag = sequence._get_dag()
 
         assert dag.length == 5
         assert dag.width == 4
@@ -238,13 +238,13 @@ class TestDAG:
         data_node_1 = DataNode("foo", Scope.SCENARIO, "s1")
         data_node_2 = DataNode("bar", Scope.SCENARIO, "s2")
         task_1 = Task("baz", {}, print, [data_node_1], [data_node_2], TaskId("t1"))
-        pipeline = Pipeline({}, [task_1], PipelineId("p1"))
+        sequence = Sequence({}, [task_1], SequenceId("p1"))
 
         #  1  |
         #  0  |  s1 __ t1 __ s2
         #     |_________________
         #         0    1     2
-        dag = pipeline._get_dag()
+        dag = sequence._get_dag()
 
         assert dag.length == 3
         assert dag.width == 1
@@ -266,7 +266,7 @@ class TestDAG:
         data_node_4 = DataNode("qux", Scope.SCENARIO, "s4")
         task_1 = Task("quux", {}, print, [data_node_1, data_node_2], [data_node_3], TaskId("t1"))
         task_2 = Task("quuz", {}, print, [data_node_2], [data_node_4], TaskId("t2"))
-        pipeline = Pipeline({}, [task_1, task_2], PipelineId("p1"))
+        sequence = Sequence({}, [task_1, task_2], SequenceId("p1"))
 
         #  2  |
         #     |
@@ -275,7 +275,7 @@ class TestDAG:
         #  0  |  s2 /__ t2 __ s4
         #     |_________________
         #         0     1     2
-        dag = pipeline._get_dag()
+        dag = sequence._get_dag()
 
         assert dag.length == 3
         assert dag.width == 2

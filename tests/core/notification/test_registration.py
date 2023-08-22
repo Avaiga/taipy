@@ -43,8 +43,8 @@ def test_create_registration():
     assert registration_1.topic.attribute_name is None
 
     registration_2 = Registration(
-        entity_type=EventEntityType.PIPELINE,
-        entity_id="PIPELINE_scenario_id",
+        entity_type=EventEntityType.SEQUENCE,
+        entity_id="SEQUENCE_scenario_id",
         operation=EventOperation.UPDATE,
         attribute_name="tasks",
     )
@@ -53,7 +53,7 @@ def test_create_registration():
     assert isinstance(registration_2.queue, SimpleQueue)
     assert registration_2.queue.qsize() == 0
     assert isinstance(registration_2.topic, Topic)
-    assert registration_2.topic.entity_type == EventEntityType.PIPELINE
-    assert registration_2.topic.entity_id == "PIPELINE_scenario_id"
+    assert registration_2.topic.entity_type == EventEntityType.SEQUENCE
+    assert registration_2.topic.entity_id == "SEQUENCE_scenario_id"
     assert registration_2.topic.operation == EventOperation.UPDATE
     assert registration_2.topic.attribute_name == "tasks"

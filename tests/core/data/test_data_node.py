@@ -250,7 +250,7 @@ class TestDataNode:
         _DataManager()._set(dn)
         assert dn.is_up_to_date is False
 
-    def test_do_not_recompute_data_node_up_to_date_but_continue_pipeline_execution(self):
+    def test_do_not_recompute_data_node_up_to_date_but_continue_sequence_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
         a = Config.configure_data_node("A", "pickle", default_data="A")

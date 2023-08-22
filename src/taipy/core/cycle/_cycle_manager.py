@@ -103,9 +103,9 @@ class _CycleManager(_Manager[Cycle]):
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)
             owner_ids = {scenario.id, cycle.id}
-            for pipeline in scenario.pipelines.values():
-                if pipeline.owner_id in owner_ids:
-                    entity_ids.pipeline_ids.add(pipeline.id)
+            for sequence in scenario.sequences.values():
+                if sequence.owner_id in owner_ids:
+                    entity_ids.sequence_ids.add(sequence.id)
             for task in scenario.tasks.values():
                 if task.owner_id in owner_ids:
                     entity_ids.task_ids.add(task.id)

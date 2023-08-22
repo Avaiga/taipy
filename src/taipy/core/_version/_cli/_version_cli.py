@@ -19,8 +19,8 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from ...data._data_manager_factory import _DataManagerFactory
 from ...exceptions.exceptions import VersionIsNotProductionVersion
 from ...job._job_manager_factory import _JobManagerFactory
-from ...pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from ...scenario._scenario_manager_factory import _ScenarioManagerFactory
+from ...sequence._sequence_manager_factory import _SequenceManagerFactory
 from ...taipy import clean_all_entities_by_version
 from ...task._task_manager_factory import _TaskManagerFactory
 from .._version_manager_factory import _VersionManagerFactory
@@ -165,7 +165,7 @@ class _VersionCLI:
 
         jobs = _JobManagerFactory._build_manager()._get_all(version_number=old_version)
         scenarios = _ScenarioManagerFactory._build_manager()._get_all(version_number=old_version)
-        pipelines = _PipelineManagerFactory._build_manager()._get_all(version_number=old_version)
+        sequences = _SequenceManagerFactory._build_manager()._get_all(version_number=old_version)
         tasks = _TaskManagerFactory._build_manager()._get_all(version_number=old_version)
         datanodes = _DataManagerFactory._build_manager()._get_all(version_number=old_version)
 
@@ -176,9 +176,9 @@ class _VersionCLI:
         for scenario in scenarios:
             scenario._version = new_version
             _ScenarioManagerFactory._build_manager()._set(scenario)
-        for pipeline in pipelines:
-            pipeline._version = new_version
-            _PipelineManagerFactory._build_manager()._set(pipeline)
+        for sequence in sequences:
+            sequence._version = new_version
+            _SequenceManagerFactory._build_manager()._set(sequence)
         for task in tasks:
             task._version = new_version
             _TaskManagerFactory._build_manager()._set(task)

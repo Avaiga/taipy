@@ -12,9 +12,9 @@
 
 class NotifyMock:
     """
-    A shared class for testing notification on jobStatus of pipeline level and scenario level
+    A shared class for testing notification on jobStatus of sequence level and scenario level
 
-    "entity" can be understood as either "scenario" or "pipeline".
+    "entity" can be understood as either "scenario" or "sequence".
     """
 
     def __init__(self, entity):

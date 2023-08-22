@@ -26,7 +26,7 @@ class EventOperation(_ReprEnum):
 class EventEntityType(_ReprEnum):
     CYCLE = 1
     SCENARIO = 2
-    PIPELINE = 3
+    SEQUENCE = 3
     TASK = 4
     DATA_NODE = 5
     JOB = 6
@@ -36,7 +36,7 @@ _NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DEL
 _UNSUBMITTABLE_ENTITY_TYPES = (EventEntityType.CYCLE, EventEntityType.DATA_NODE, EventEntityType.JOB)
 _ENTITY_TO_EVENT_ENTITY_TYPE = {
     "scenario": EventEntityType.SCENARIO,
-    "pipeline": EventEntityType.PIPELINE,
+    "sequence": EventEntityType.SEQUENCE,
     "task": EventEntityType.TASK,
     "data": EventEntityType.DATA_NODE,
     "job": EventEntityType.JOB,

@@ -31,39 +31,39 @@ from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
 from ..task.task import Task
 from ..task.task_id import TaskId
-from .pipeline_id import PipelineId
+from .sequence_id import SequenceId
 
 
-class Pipeline(_Entity, Submittable, _Labeled):
+class Sequence(_Entity, Submittable, _Labeled):
     """List of `Task^`s and additional attributes representing a set of data processing
     elements connected as a direct acyclic graph.
 
     Attributes:
         properties (dict[str, Any]): A dictionary of additional properties.
         tasks (List[Task^]): The list of `Task`s.
-        pipeline_id (str): The Unique identifier of the pipeline.
+        sequence_id (str): The Unique identifier of the sequence.
         owner_id (str):  The identifier of the owner (scenario_id, cycle_id) or None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent scenarios.
-        version (str): The string indicates the application version of the pipeline to instantiate. If not provided,
+        version (str): The string indicates the application version of the sequence to instantiate. If not provided,
             the latest version is used.
     """
 
-    _ID_PREFIX = "PIPELINE"
+    _ID_PREFIX = "SEQUENCE"
     _SEPARATOR = "_"
-    _MANAGER_NAME = "pipeline"
+    _MANAGER_NAME = "sequence"
 
     def __init__(
         self,
         properties: Dict[str, Any],
         tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
-        pipeline_id: PipelineId,
+        sequence_id: SequenceId,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         subscribers: Optional[List[_Subscriber]] = None,
         version: Optional[str] = None,
     ):
         super().__init__(subscribers)
-        self.id: PipelineId = pipeline_id
+        self.id: SequenceId = sequence_id
         self._tasks = tasks
         self.owner_id = owner_id
         self._parent_ids = parent_ids or set()
@@ -71,8 +71,8 @@ class Pipeline(_Entity, Submittable, _Labeled):
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
-    def _new_id(pipeline_name: str, scenario_id) -> PipelineId:
-        return PipelineId(Pipeline._SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(pipeline_name), scenario_id]))
+    def _new_id(sequence_name: str, scenario_id) -> SequenceId:
+        return SequenceId(Sequence._SEPARATOR.join([Sequence._ID_PREFIX, _validate_id(sequence_name), scenario_id]))
 
     def __hash__(self):
         return hash(self.id)
@@ -92,7 +92,7 @@ class Pipeline(_Entity, Submittable, _Labeled):
                 return task.input[protected_attribute_name]
             if protected_attribute_name in task.output:
                 return task.output[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of pipeline {self.id}")
+        raise AttributeError(f"{attribute_name} is not an attribute of sequence {self.id}")
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -123,7 +123,7 @@ class Pipeline(_Entity, Submittable, _Labeled):
 
     @property
     def properties(self):
-        self._properties = _Reloader()._reload("pipeline", self)._properties
+        self._properties = _Reloader()._reload("sequence", self)._properties
         return self._properties
 
     def _is_consistent(self) -> bool:
@@ -175,21 +175,21 @@ class Pipeline(_Entity, Submittable, _Labeled):
         self._subscribers = _ListAttributes(self, val)
 
     def get_parents(self):
-        """Get parents of the pipeline entity"""
+        """Get parents of the sequence entity"""
         from ... import core as tp
 
         return tp.get_parents(self)
 
     def subscribe(
         self,
-        callback: Callable[[Pipeline, Job], None],
+        callback: Callable[[Sequence, Job], None],
         params: Optional[List[Any]] = None,
     ):
         """Subscribe a function to be called on `Job^` status change.
-        The subscription is applied to all jobs created from the pipeline's execution.
+        The subscription is applied to all jobs created from the sequence's execution.
 
         Parameters:
-            callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
+            callback (Callable[[Sequence^, Job^], None]): The callable function to be called on
                 status change.
             params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         Note:
@@ -197,20 +197,20 @@ class Pipeline(_Entity, Submittable, _Labeled):
         """
         from ... import core as tp
 
-        return tp.subscribe_pipeline(callback, params, self)
+        return tp.subscribe_sequence(callback, params, self)
 
-    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], params: Optional[List[Any]] = None):
+    def unsubscribe(self, callback: Callable[[Sequence, Job], None], params: Optional[List[Any]] = None):
         """Unsubscribe a function that is called when the status of a `Job^` changes.
 
         Parameters:
-            callback (Callable[[Pipeline^, Job^], None]): The callable function to unsubscribe.
+            callback (Callable[[Sequence^, Job^], None]): The callable function to unsubscribe.
             params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         Note:
             The function will continue to be called for ongoing jobs.
         """
         from ... import core as tp
 
-        return tp.unsubscribe_pipeline(callback, params, self)
+        return tp.unsubscribe_sequence(callback, params, self)
 
     def submit(
         self,
@@ -219,37 +219,37 @@ class Pipeline(_Entity, Submittable, _Labeled):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
     ) -> List[Job]:
-        """Submit the pipeline for execution.
+        """Submit the sequence for execution.
 
-        All the `Task^`s of the pipeline will be submitted for execution.
+        All the `Task^`s of the sequence will be submitted for execution.
 
         Parameters:
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
-            wait (bool): Wait for the orchestrated jobs created from the pipeline submission to be finished
+            wait (bool): Wait for the orchestrated jobs created from the sequence submission to be finished
                 in asynchronous mode.
             timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before
                 returning.
         Returns:
             A list of created `Job^`s.
         """
-        from ._pipeline_manager_factory import _PipelineManagerFactory
+        from ._sequence_manager_factory import _SequenceManagerFactory
 
-        return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
+        return _SequenceManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
 
     def get_label(self) -> str:
-        """Returns the pipeline simple label prefixed by its owner label.
+        """Returns the sequence simple label prefixed by its owner label.
 
         Returns:
-            The label of the pipeline as a string.
+            The label of the sequence as a string.
         """
         return self._get_label()
 
     def get_simple_label(self) -> str:
-        """Returns the pipeline simple label.
+        """Returns the sequence simple label.
 
         Returns:
-            The simple label of the pipeline as a string.
+            The simple label of the sequence as a string.
         """
         return self._get_simple_label()

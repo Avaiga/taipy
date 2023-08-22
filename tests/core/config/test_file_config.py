@@ -13,7 +13,7 @@ import os
 from datetime import timedelta
 from unittest import mock
 
-from src.taipy.core.config import DataNodeConfig, PipelineConfig, ScenarioConfig, TaskConfig
+from src.taipy.core.config import DataNodeConfig, ScenarioConfig, SequenceConfig, TaskConfig
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -82,7 +82,7 @@ outputs = [ "dn2:SECTION",]
 skippable = "False:bool"
 description = "t1 description"
 
-[PIPELINE.default]
+[SEQUENCE.default]
 tasks = []
 
 [SCENARIO.default]
@@ -214,7 +214,7 @@ def test_read_configuration_file():
     assert Config.tasks["my_task"].outputs[0].path == "/data2/csv"
     assert Config.tasks["my_task"].outputs[0].id == "my_datanode2"
 
-    assert len(Config.pipelines) == 1
+    assert len(Config.sequences) == 1
 
     assert len(Config.scenarios) == 2
     assert type(Config.scenarios["my_scenario"]) == ScenarioConfig

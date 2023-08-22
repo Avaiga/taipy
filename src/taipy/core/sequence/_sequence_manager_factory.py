@@ -13,18 +13,18 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
-from ._pipeline_fs_repository import _PipelineFSRepository
-from ._pipeline_manager import _PipelineManager
-from ._pipeline_sql_repository import _PipelineSQLRepository
+from ._sequence_fs_repository import _SequenceFSRepository
+from ._sequence_manager import _SequenceManager
+from ._sequence_sql_repository import _SequenceSQLRepository
 
 
-class _PipelineManagerFactory(_ManagerFactory):
+class _SequenceManagerFactory(_ManagerFactory):
     @classmethod
-    def _build_manager(cls) -> Type[_PipelineManager]:  # type: ignore
+    def _build_manager(cls) -> Type[_SequenceManager]:  # type: ignore
         if cls._using_enterprise():
-            pipeline_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_manager", "_PipelineManager"
+            sequence_manager = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".sequence._sequence_manager", "_SequenceManager"
             )  # type: ignore
         else:
-            pipeline_manager = _PipelineManager
-        return pipeline_manager  # type: ignore
+            sequence_manager = _SequenceManager
+        return sequence_manager  # type: ignore

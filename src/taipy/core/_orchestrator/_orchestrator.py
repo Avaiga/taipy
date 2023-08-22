@@ -52,14 +52,14 @@ class _Orchestrator(_AbstractOrchestrator):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
     ) -> List[Job]:
-        """Submit the given `Scenario^` or `Pipeline^` for an execution.
+        """Submit the given `Scenario^` or `Sequence^` for an execution.
 
         Parameters:
-             submittable (Union[SCenario^, Pipeline^]): The scenario or pipeline to submit for execution.
+             submittable (Union[SCenario^, Sequence^]): The scenario or sequence to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
-             force (bool) : Enforce execution of the scenario's or pipeline's tasks even if their output data
+             force (bool) : Enforce execution of the scenario's or sequence's tasks even if their output data
                 nodes are cached.
-             wait (bool): Wait for the orchestrated jobs created from the scenario or pipeline submission to be
+             wait (bool): Wait for the orchestrated jobs created from the scenario or sequence submission to be
                 finished in asynchronous mode.
              timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished
                 before returning.

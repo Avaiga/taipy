@@ -22,7 +22,7 @@ from taipy.config.section import Section
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .data_node_config import DataNodeConfig
-from .pipeline_config import PipelineConfig
+from .sequence_config import SequenceConfig
 from .task_config import TaskConfig
 
 
@@ -45,7 +45,7 @@ class ScenarioConfig(Section):
 
     name = "SCENARIO"
 
-    _PIPELINES_KEY = "pipelines"
+    _SEQUENCES_KEY = "sequences"
     _TASKS_KEY = "tasks"
     _ADDITIONAL_DATA_NODES_KEY = "additional_data_nodes"
     _FREQUENCY_KEY = "frequency"
@@ -169,12 +169,12 @@ class ScenarioConfig(Section):
             task_config_ids = as_dict.pop(cls._TASKS_KEY, list())
             tasks = cls.__get_task_configs(task_config_ids, config)
         else:
-            pipeline_config_ids = as_dict.pop(cls._PIPELINES_KEY, list())
+            sequence_config_ids = as_dict.pop(cls._SEQUENCES_KEY, list())
             cls.__logger.info(
-                f"The tasks from these PipelineConfig {pipeline_config_ids}"
+                f"The tasks from these SequenceConfig {sequence_config_ids}"
                 f"will be migrated to be directly under ScenarioConfig {id}"
             )
-            tasks = cls.__get_task_configs_from_pipeline_configs(pipeline_config_ids, config)
+            tasks = cls.__get_task_configs_from_sequence_configs(sequence_config_ids, config)
 
         additional_data_node_ids = as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, list())
         additional_data_nodes = cls.__get_additional_data_node_configs(additional_data_node_ids, config)
@@ -208,13 +208,13 @@ class ScenarioConfig(Section):
         return list(task_configs)
 
     @staticmethod
-    def __get_task_configs_from_pipeline_configs(pipeline_config_ids: List[str], config: Optional[_Config]):
+    def __get_task_configs_from_sequence_configs(sequence_config_ids: List[str], config: Optional[_Config]):
         task_configs = set()
         if config:
-            if pipeline_config_section := config._sections.get(PipelineConfig.name):
-                for pipeline_config_id in pipeline_config_ids:
-                    if pipeline_config := pipeline_config_section.get(pipeline_config_id, None):
-                        task_configs.update(pipeline_config.tasks)
+            if sequence_config_section := config._sections.get(SequenceConfig.name):
+                for sequence_config_id in sequence_config_ids:
+                    if sequence_config := sequence_config_section.get(sequence_config_id, None):
+                        task_configs.update(sequence_config.tasks)
         return list(task_configs)
 
     @staticmethod

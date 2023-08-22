@@ -12,8 +12,8 @@ from src.taipy.core.config import CoreSection
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.migration_config import MigrationConfig
-from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
+from src.taipy.core.config.sequence_config import SequenceConfig
 from src.taipy.core.config.task_config import TaskConfig
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope

@@ -22,14 +22,14 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import DeletingPrimaryScenario
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
-from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from src.taipy.core.pipeline.pipeline import Pipeline
-from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.scenario.scenario_id import ScenarioId
+from src.taipy.core.sequence._sequence_manager import _SequenceManager
+from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+from src.taipy.core.sequence.sequence import Sequence
+from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
@@ -64,7 +64,7 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
         datetime.now(),
         True,
         cycle,
-        pipelines={"pipeline_2": {"tasks": [task_2]}},
+        sequences={"sequence_2": {"tasks": [task_2]}},
     )
 
     additional_dn_3 = InMemoryDataNode("baz", Scope.SCENARIO)
@@ -79,7 +79,7 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
         datetime.now(),
         False,
         cycle,
-        pipelines={"pipeline_3": {}},
+        sequences={"sequence_3": {}},
     )
 
     # No existing scenario
@@ -97,13 +97,13 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     assert len(_ScenarioManager._get(scenario_id_1).tasks) == 0
     assert len(_ScenarioManager._get(scenario_id_1).additional_data_nodes) == 0
     assert len(_ScenarioManager._get(scenario_id_1).data_nodes) == 0
-    assert len(_ScenarioManager._get(scenario_id_1).pipelines) == 0
+    assert len(_ScenarioManager._get(scenario_id_1).sequences) == 0
     assert _ScenarioManager._get(scenario_1).id == scenario_1.id
     assert _ScenarioManager._get(scenario_1).config_id == scenario_1.config_id
     assert len(_ScenarioManager._get(scenario_1).tasks) == 0
     assert len(_ScenarioManager._get(scenario_1).additional_data_nodes) == 0
     assert len(_ScenarioManager._get(scenario_1).data_nodes) == 0
-    assert len(_ScenarioManager._get(scenario_1).pipelines) == 0
+    assert len(_ScenarioManager._get(scenario_1).sequences) == 0
     assert _ScenarioManager._get(scenario_id_2) is None
     assert _ScenarioManager._get(scenario_2) is None
 
@@ -118,25 +118,25 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     assert len(_ScenarioManager._get(scenario_id_1).tasks) == 0
     assert len(_ScenarioManager._get(scenario_id_1).additional_data_nodes) == 0
     assert len(_ScenarioManager._get(scenario_id_1).data_nodes) == 0
-    assert len(_ScenarioManager._get(scenario_id_1).pipelines) == 0
+    assert len(_ScenarioManager._get(scenario_id_1).sequences) == 0
     assert _ScenarioManager._get(scenario_1).id == scenario_1.id
     assert _ScenarioManager._get(scenario_1).config_id == scenario_1.config_id
     assert len(_ScenarioManager._get(scenario_1).tasks) == 0
     assert len(_ScenarioManager._get(scenario_1).additional_data_nodes) == 0
     assert len(_ScenarioManager._get(scenario_1).data_nodes) == 0
-    assert len(_ScenarioManager._get(scenario_1).pipelines) == 0
+    assert len(_ScenarioManager._get(scenario_1).sequences) == 0
     assert _ScenarioManager._get(scenario_id_2).id == scenario_2.id
     assert _ScenarioManager._get(scenario_id_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_id_2).tasks) == 1
     assert len(_ScenarioManager._get(scenario_id_2).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_id_2).data_nodes) == 3
-    assert len(_ScenarioManager._get(scenario_id_2).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_id_2).sequences) == 1
     assert _ScenarioManager._get(scenario_2).id == scenario_2.id
     assert _ScenarioManager._get(scenario_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_2).tasks) == 1
     assert len(_ScenarioManager._get(scenario_2).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_2).data_nodes) == 3
-    assert len(_ScenarioManager._get(scenario_2).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_2).sequences) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
     assert _ScenarioManager._get(scenario_id_2).cycle == cycle
     assert _ScenarioManager._get(scenario_2).cycle == cycle
@@ -150,25 +150,25 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     assert len(_ScenarioManager._get(scenario_id_1).tasks) == 0
     assert len(_ScenarioManager._get(scenario_id_1).additional_data_nodes) == 0
     assert len(_ScenarioManager._get(scenario_id_1).data_nodes) == 0
-    assert len(_ScenarioManager._get(scenario_id_1).pipelines) == 0
+    assert len(_ScenarioManager._get(scenario_id_1).sequences) == 0
     assert _ScenarioManager._get(scenario_1).id == scenario_1.id
     assert _ScenarioManager._get(scenario_1).config_id == scenario_1.config_id
     assert len(_ScenarioManager._get(scenario_1).tasks) == 0
     assert len(_ScenarioManager._get(scenario_1).additional_data_nodes) == 0
     assert len(_ScenarioManager._get(scenario_1).data_nodes) == 0
-    assert len(_ScenarioManager._get(scenario_1).pipelines) == 0
+    assert len(_ScenarioManager._get(scenario_1).sequences) == 0
     assert _ScenarioManager._get(scenario_id_2).id == scenario_2.id
     assert _ScenarioManager._get(scenario_id_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_id_2).tasks) == 1
     assert len(_ScenarioManager._get(scenario_id_2).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_id_2).data_nodes) == 3
-    assert len(_ScenarioManager._get(scenario_id_2).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_id_2).sequences) == 1
     assert _ScenarioManager._get(scenario_2).id == scenario_2.id
     assert _ScenarioManager._get(scenario_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_2).tasks) == 1
     assert len(_ScenarioManager._get(scenario_2).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_2).data_nodes) == 3
-    assert len(_ScenarioManager._get(scenario_2).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_2).sequences) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
     assert _CycleManager._get(cycle.id).id == cycle.id
 
@@ -184,27 +184,27 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     assert len(_ScenarioManager._get(scenario_id_1).tasks) == 1
     assert len(_ScenarioManager._get(scenario_id_1).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_id_1).data_nodes) == 1
-    assert len(_ScenarioManager._get(scenario_id_1).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_id_1).sequences) == 1
     assert _ScenarioManager._get(scenario_id_1).cycle == cycle
     assert _ScenarioManager._get(scenario_1).id == scenario_1.id
     assert _ScenarioManager._get(scenario_1).config_id == scenario_3_with_same_id.config_id
     assert len(_ScenarioManager._get(scenario_1).tasks) == 1
     assert len(_ScenarioManager._get(scenario_1).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_1).data_nodes) == 1
-    assert len(_ScenarioManager._get(scenario_1).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_1).sequences) == 1
     assert _ScenarioManager._get(scenario_1).cycle == cycle
     assert _ScenarioManager._get(scenario_id_2).id == scenario_2.id
     assert _ScenarioManager._get(scenario_id_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_id_2).tasks) == 1
     assert len(_ScenarioManager._get(scenario_id_2).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_id_2).data_nodes) == 3
-    assert len(_ScenarioManager._get(scenario_id_2).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_id_2).sequences) == 1
     assert _ScenarioManager._get(scenario_2).id == scenario_2.id
     assert _ScenarioManager._get(scenario_2).config_id == scenario_2.config_id
     assert len(_ScenarioManager._get(scenario_2).tasks) == 1
     assert len(_ScenarioManager._get(scenario_2).additional_data_nodes) == 1
     assert len(_ScenarioManager._get(scenario_2).data_nodes) == 3
-    assert len(_ScenarioManager._get(scenario_2).pipelines) == 1
+    assert len(_ScenarioManager._get(scenario_2).sequences) == 1
     assert _TaskManager._get(task_2.id).id == task_2.id
 
 
@@ -292,7 +292,7 @@ def test_create_and_delete_scenario(init_sql_repo):
 
     scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
     assert scenario_1.config_id == "sc"
-    assert scenario_1.pipelines == {}
+    assert scenario_1.sequences == {}
     assert scenario_1.tasks == {}
     assert scenario_1.additional_data_nodes == {}
     assert scenario_1.data_nodes == {}
@@ -317,7 +317,7 @@ def test_create_and_delete_scenario(init_sql_repo):
 
     scenario_2 = _ScenarioManager._create(scenario_config, creation_date=creation_date_2)
     assert scenario_2.config_id == "sc"
-    assert scenario_2.pipelines == {}
+    assert scenario_2.sequences == {}
     assert scenario_2.tasks == {}
     assert scenario_2.additional_data_nodes == {}
     assert scenario_2.data_nodes == {}
@@ -384,7 +384,7 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
-    assert len(_PipelineManager._get_all()) == 0
+    assert len(_SequenceManager._get_all()) == 0
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_CycleManager._get_all()) == 0
 
@@ -392,7 +392,7 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
 
     assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 3
-    assert len(_PipelineManager._get_all()) == 2
+    assert len(_SequenceManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 1
     assert scenario_1.foo.read() == 1
     assert scenario_1.bar.read() == 0
@@ -413,16 +413,16 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
 
     assert len(_DataManager._get_all()) == 5
     assert len(_TaskManager._get_all()) == 4
-    assert len(_PipelineManager._get_all()) == 4
+    assert len(_SequenceManager._get_all()) == 4
     assert len(_ScenarioManager._get_all()) == 2
 
 
 def test_get_scenarios_by_config_id(init_sql_repo):
     init_managers()
 
-    scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
-    scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
-    scenario_config_3 = Config.configure_scenario("s3", pipeline_configs=[])
+    scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
+    scenario_config_2 = Config.configure_scenario("s2", sequence_configs=[])
+    scenario_config_3 = Config.configure_scenario("s3", sequence_configs=[])
 
     s_1_1 = _ScenarioManager._create(scenario_config_1)
     s_1_2 = _ScenarioManager._create(scenario_config_1)
@@ -452,8 +452,8 @@ def test_get_scenarios_by_config_id(init_sql_repo):
 def test_get_scenarios_by_config_id_in_multiple_versions_environment(init_sql_repo):
     init_managers()
 
-    scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
-    scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+    scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
+    scenario_config_2 = Config.configure_scenario("s2", sequence_configs=[])
 
     _VersionManager._set_experiment_version("1.0")
     _ScenarioManager._create(scenario_config_1)

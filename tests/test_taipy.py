@@ -24,10 +24,10 @@ from src.taipy.core import (
     CycleId,
     DataNodeId,
     JobId,
-    Pipeline,
-    PipelineId,
     Scenario,
     ScenarioId,
+    Sequence,
+    SequenceId,
     Task,
     TaskId,
 )
@@ -36,14 +36,15 @@ from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
+from src.taipy.core.config.sequence_config import SequenceConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal, InvalidExportPath
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job import Job
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -52,16 +53,16 @@ from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 class TestTaipy:
-    def test_set(self, scenario, cycle, pipeline, data_node, task):
+    def test_set(self, scenario, cycle, sequence, data_node, task):
         with mock.patch("src.taipy.core.data._data_manager._DataManager._set") as mck:
             tp.set(data_node)
             mck.assert_called_once_with(data_node)
         with mock.patch("src.taipy.core.task._task_manager._TaskManager._set") as mck:
             tp.set(task)
             mck.assert_called_once_with(task)
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._set") as mck:
-            tp.set(pipeline)
-            mck.assert_called_once_with(pipeline)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._set") as mck:
+            tp.set(sequence)
+            mck.assert_called_once_with(sequence)
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._set") as mck:
             tp.set(scenario)
             mck.assert_called_once_with(scenario)
@@ -80,15 +81,15 @@ class TestTaipy:
             tp.is_submittable(scenario)
             mck.assert_called_once_with(scenario)
 
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._is_submittable") as mck:
-            pipeline_id = PipelineId("PIPELINE_id")
-            tp.is_submittable(pipeline_id)
-            mck.assert_called_once_with(pipeline_id)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_submittable") as mck:
+            sequence_id = SequenceId("SEQUENCE_id")
+            tp.is_submittable(sequence_id)
+            mck.assert_called_once_with(sequence_id)
 
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._is_submittable") as mck:
-            pipeline = Pipeline({}, [], "pipeline_id")
-            tp.is_submittable(pipeline)
-            mck.assert_called_once_with(pipeline)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_submittable") as mck:
+            sequence = Sequence({}, [], "sequence_id")
+            tp.is_submittable(sequence)
+            mck.assert_called_once_with(sequence)
 
         with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
             task_id = TaskId("TASK_id")
@@ -104,7 +105,7 @@ class TestTaipy:
         current_date = datetime.datetime.now()
 
         cycle = Cycle(Frequency.DAILY, {}, current_date, current_date, current_date)
-        scenario = Scenario("scenario_config_id", [], {}, pipelines={"pipeline": {}})
+        scenario = Scenario("scenario_config_id", [], {}, sequences={"sequence": {}})
 
         task = Task("task_config_id", {}, print)
         job = Job("job_id", task, "submit_id", scenario.id)
@@ -115,40 +116,40 @@ class TestTaipy:
         _TaskManager._set(task)
         _JobManager._set(job)
         _DataManager._set(dn)
-        pipeline = scenario.pipelines["pipeline"]
+        sequence = scenario.sequences["sequence"]
 
         assert tp.is_submittable(scenario)
-        assert tp.is_submittable(pipeline)
+        assert tp.is_submittable(sequence)
         assert tp.is_submittable(task)
         assert not tp.is_submittable(cycle)
         assert not tp.is_submittable(job)
         assert not tp.is_submittable(dn)
 
-    def test_submit(self, scenario, pipeline, task):
+    def test_submit(self, scenario, sequence, task):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario)
             mck.assert_called_once_with(scenario, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
-            tp.submit(pipeline)
-            mck.assert_called_once_with(pipeline, force=False, wait=False, timeout=None)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
+            tp.submit(sequence)
+            mck.assert_called_once_with(sequence, force=False, wait=False, timeout=None)
         with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mck:
             tp.submit(task)
             mck.assert_called_once_with(task, force=False, wait=False, timeout=None)
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario, False, False, None)
             mck.assert_called_once_with(scenario, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
-            tp.submit(pipeline, False, False, None)
-            mck.assert_called_once_with(pipeline, force=False, wait=False, timeout=None)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
+            tp.submit(sequence, False, False, None)
+            mck.assert_called_once_with(sequence, force=False, wait=False, timeout=None)
         with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mck:
             tp.submit(task, False, False, None)
             mck.assert_called_once_with(task, force=False, wait=False, timeout=None)
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario, True, True, 60)
             mck.assert_called_once_with(scenario, force=True, wait=True, timeout=60)
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
-            tp.submit(pipeline, True, True, 60)
-            mck.assert_called_once_with(pipeline, force=True, wait=True, timeout=60)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
+            tp.submit(sequence, True, True, 60)
+            mck.assert_called_once_with(sequence, force=True, wait=True, timeout=60)
         with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mck:
             tp.submit(task, True, True, 60)
             mck.assert_called_once_with(task, force=True, wait=True, timeout=60)
@@ -291,44 +292,44 @@ class TestTaipy:
             tp.unsubscribe_scenario(print, scenario=scenario)
             mck.assert_called_once_with(print, None, scenario)
 
-    def test_subscribe_pipeline(self, pipeline):
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._subscribe") as mck:
-            tp.subscribe_pipeline(print)
+    def test_subscribe_sequence(self, sequence):
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
+            tp.subscribe_sequence(print)
             mck.assert_called_once_with(print, None, None)
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._subscribe") as mck:
-            tp.subscribe_pipeline(print, pipeline=pipeline)
-            mck.assert_called_once_with(print, None, pipeline)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
+            tp.subscribe_sequence(print, sequence=sequence)
+            mck.assert_called_once_with(print, None, sequence)
 
-    def test_unsubscribe_pipeline(self, pipeline):
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._unsubscribe") as mck:
-            tp.unsubscribe_pipeline(callback=print)
+    def test_unsubscribe_sequence(self, sequence):
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
+            tp.unsubscribe_sequence(callback=print)
             mck.assert_called_once_with(print, None, None)
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._unsubscribe") as mck:
-            tp.unsubscribe_pipeline(callback=print, pipeline=pipeline)
-            mck.assert_called_once_with(print, None, pipeline)
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
+            tp.unsubscribe_sequence(callback=print, sequence=sequence)
+            mck.assert_called_once_with(print, None, sequence)
 
-    def test_delete_pipeline(self):
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._hard_delete") as mck:
-            pipeline_id = PipelineId("PIPELINE_id")
-            tp.delete(pipeline_id)
-            mck.assert_called_once_with(pipeline_id)
+    def test_delete_sequence(self):
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._hard_delete") as mck:
+            sequence_id = SequenceId("SEQUENCE_id")
+            tp.delete(sequence_id)
+            mck.assert_called_once_with(sequence_id)
 
-    def test_get_pipeline(self, pipeline):
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._get") as mck:
-            pipeline_id = PipelineId("PIPELINE_id")
-            tp.get(pipeline_id)
-            mck.assert_called_once_with(pipeline_id)
+    def test_get_sequence(self, sequence):
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._get") as mck:
+            sequence_id = SequenceId("SEQUENCE_id")
+            tp.get(sequence_id)
+            mck.assert_called_once_with(sequence_id)
 
-    def test_get_pipelines(self):
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._get_all") as mck:
-            tp.get_pipelines()
+    def test_get_sequences(self):
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._get_all") as mck:
+            tp.get_sequences()
             mck.assert_called_once_with()
 
-    def test_pipeline_exists(self):
-        with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._exists") as mck:
-            pipeline_id = PipelineId("PIPELINE_id")
-            tp.exists(pipeline_id)
-            mck.assert_called_once_with(pipeline_id)
+    def test_sequence_exists(self):
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._exists") as mck:
+            sequence_id = SequenceId("SEQUENCE_id")
+            tp.exists(sequence_id)
+            mck.assert_called_once_with(sequence_id)
 
     def test_get_job(self):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._get") as mck:
@@ -617,8 +618,8 @@ class TestTaipy:
             assert sorted([scenario.id for scenario in scenarios]) == sorted(expected_scenarios)
 
     def test_get_entities_by_config_id(self):
-        scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
-        scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+        scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
+        scenario_config_2 = Config.configure_scenario("s2", sequence_configs=[])
 
         s_1_1 = tp.create_scenario(scenario_config_1)
         s_1_2 = tp.create_scenario(scenario_config_1)
@@ -639,8 +640,8 @@ class TestTaipy:
         assert sorted([s_2_1.id, s_2_2.id]) == sorted([scenario.id for scenario in s2_scenarios])
 
     def test_get_entities_by_config_id_in_multiple_versions_environment(self):
-        scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
-        scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+        scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
+        scenario_config_2 = Config.configure_scenario("s2", sequence_configs=[])
 
         _VersionManager._set_experiment_version("1.0")
         tp.create_scenario(scenario_config_1)

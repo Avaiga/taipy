@@ -115,12 +115,12 @@ class _Manager(Generic[EntityType]):
         from ..cycle._cycle_manager_factory import _CycleManagerFactory
         from ..data._data_manager_factory import _DataManagerFactory
         from ..job._job_manager_factory import _JobManagerFactory
-        from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
         from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
+        from ..sequence._sequence_manager_factory import _SequenceManagerFactory
         from ..task._task_manager_factory import _TaskManagerFactory
 
         _CycleManagerFactory._build_manager()._delete_many(_entity_ids.cycle_ids)
-        _PipelineManagerFactory._build_manager()._delete_many(_entity_ids.pipeline_ids)
+        _SequenceManagerFactory._build_manager()._delete_many(_entity_ids.sequence_ids)
         _ScenarioManagerFactory._build_manager()._delete_many(_entity_ids.scenario_ids)
         _TaskManagerFactory._build_manager()._delete_many(_entity_ids.task_ids)
         _JobManagerFactory._build_manager()._delete_many(_entity_ids.job_ids)

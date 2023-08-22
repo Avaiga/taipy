@@ -48,8 +48,8 @@ def test_override_default_configuration_with_code_configuration():
     assert len(Config.tasks[bar_config.id].output_configs) == 0
     assert Config.tasks[bar_config.id].function == print
 
-    assert len(Config.pipelines) == 1
-    assert "default" in Config.pipelines
+    assert len(Config.sequences) == 1
+    assert "default" in Config.sequences
 
     assert len(Config.scenarios) == 2
     assert "default" in Config.scenarios
@@ -100,8 +100,8 @@ max_nb_of_workers = -1
     assert len(Config.tasks) == 2
     assert "default" in Config.tasks
     assert "bar" in Config.tasks
-    assert len(Config.pipelines) == 1
-    assert "default" in Config.pipelines
+    assert len(Config.sequences) == 1
+    assert "default" in Config.sequences
     assert "default" in Config.scenarios
     assert len(Config.scenarios) == 2
     assert "qux" in Config.scenarios

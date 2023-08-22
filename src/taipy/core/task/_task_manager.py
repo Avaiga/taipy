@@ -26,8 +26,8 @@ from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..notification import EventEntityType, EventOperation, _publish_event
-from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
+from ..sequence.sequence_id import SequenceId
 from ..task.task import Task
 from .task_id import TaskId
 
@@ -72,7 +72,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
             ]
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
             scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
-            owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
+            owner_id: Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]
             if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:

@@ -44,8 +44,8 @@ class Task(_Entity, _Labeled):
         input (Union[DataNode^, List[DataNode^]]): The list of inputs.
         output (Union[DataNode^, List[DataNode^]]): The list of outputs.
         id (str): The unique identifier of the task.
-        owner_id (str):  The identifier of the owner (pipeline_id, scenario_id, cycle_id) or None.
-        parent_ids (Optional[Set[str]]): The set of identifiers of the parent pipelines.
+        owner_id (str):  The identifier of the owner (sequence_id, scenario_id, cycle_id) or None.
+        parent_ids (Optional[Set[str]]): The set of identifiers of the parent sequences.
         version (str): The string indicates the application version of the task to instantiate. If not provided, the
             latest version is used.
         skippable (bool): If True, indicates that the task can be skipped if no change has been made on inputs. The

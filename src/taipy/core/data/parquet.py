@@ -39,7 +39,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
-        owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or `None`.
+        owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or `None`.
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The ordered list of edits for that job.

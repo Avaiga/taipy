@@ -1,7 +1,7 @@
 {
     "name": "foo",
     "type": "csv",
-    "scope": "PIPELINE",
+    "scope": "SEQUENCE",
     "path": "foo",
     "has_header": true
 }

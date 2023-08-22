@@ -29,15 +29,15 @@ from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,
     MigrationConfig,
-    PipelineConfig,
     ScenarioConfig,
+    SequenceConfig,
     TaskConfig,
     _ConfigIdChecker,
     _CoreSectionChecker,
     _DataNodeConfigChecker,
     _JobConfigChecker,
-    _PipelineConfigChecker,
     _ScenarioConfigChecker,
+    _SequenceConfigChecker,
     _TaskConfigChecker,
 )
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
@@ -52,14 +52,14 @@ from src.taipy.core.job._job_model import _JobModel
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.job_id import JobId
 from src.taipy.core.notification.notifier import Notifier
-from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from src.taipy.core.pipeline._pipeline_model import _PipelineModel
-from src.taipy.core.pipeline.pipeline import Pipeline
-from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.scenario.scenario_id import ScenarioId
+from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+from src.taipy.core.sequence._sequence_model import _SequenceModel
+from src.taipy.core.sequence.sequence import Sequence
+from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task.task import Task
@@ -285,11 +285,11 @@ def cycle():
 
 
 @pytest.fixture(scope="class")
-def pipeline():
-    return Pipeline(
+def sequence():
+    return Sequence(
         {},
         [],
-        PipelineId("pipeline_id"),
+        SequenceId("sequence_id"),
         owner_id="owner_id",
         parent_ids=set(["parent_id_1", "parent_id_2"]),
         version="random_version_number",
@@ -320,9 +320,9 @@ def cycle_model():
 
 
 @pytest.fixture(scope="class")
-def pipeline_model():
-    return _PipelineModel(
-        PipelineId("pipeline_id"),
+def sequence_model():
+    return _SequenceModel(
+        SequenceId("sequence_id"),
         "owner_id",
         list({"parent_id_1", "parent_id_2"}),
         {},
@@ -402,12 +402,12 @@ def init_config():
         ],
     )
     _inject_section(
-        PipelineConfig,
-        "pipelines",
-        PipelineConfig.default_config(),
+        SequenceConfig,
+        "sequences",
+        SequenceConfig.default_config(),
         [
-            ("configure_pipeline", PipelineConfig._configure),
-            ("set_default_pipeline_configuration", PipelineConfig._set_default_configuration),
+            ("configure_sequence", SequenceConfig._configure),
+            ("set_default_sequence_configuration", SequenceConfig._set_default_configuration),
         ],
     )
     _inject_section(
@@ -431,7 +431,7 @@ def init_config():
     _Checker.add_checker(_CoreSectionChecker)
     _Checker.add_checker(_DataNodeConfigChecker)
     _Checker.add_checker(_TaskConfigChecker)
-    _Checker.add_checker(_PipelineConfigChecker)
+    _Checker.add_checker(_SequenceConfigChecker)
     _Checker.add_checker(_ScenarioConfigChecker)
 
     Config.configure_core(read_entity_retry=0)
@@ -440,7 +440,7 @@ def init_config():
 def init_managers():
     _CycleManagerFactory._build_manager()._delete_all()
     _ScenarioManagerFactory._build_manager()._delete_all()
-    _PipelineManagerFactory._build_manager()._delete_all()
+    _SequenceManagerFactory._build_manager()._delete_all()
     _JobManagerFactory._build_manager()._delete_all()
     _TaskManagerFactory._build_manager()._delete_all()
     _DataManagerFactory._build_manager()._delete_all()
@@ -475,7 +475,7 @@ def clean_sql_db():
     _CycleModel.__table__.drop(engine, checkfirst=True)
     _DataNodeModel.__table__.drop(bind=engine, checkfirst=True)
     _JobModel.__table__.drop(bind=engine, checkfirst=True)
-    _PipelineModel.__table__.drop(bind=engine, checkfirst=True)
+    _SequenceModel.__table__.drop(bind=engine, checkfirst=True)
     _ScenarioModel.__table__.drop(bind=engine, checkfirst=True)
     _TaskModel.__table__.drop(bind=engine, checkfirst=True)
     _VersionModel.__table__.drop(bind=engine, checkfirst=True)
@@ -483,7 +483,7 @@ def clean_sql_db():
     _CycleModel.__table__.create(engine, checkfirst=True)
     _DataNodeModel.__table__.create(bind=engine, checkfirst=True)
     _JobModel.__table__.create(bind=engine, checkfirst=True)
-    _PipelineModel.__table__.create(bind=engine, checkfirst=True)
+    _SequenceModel.__table__.create(bind=engine, checkfirst=True)
     _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
     _TaskModel.__table__.create(bind=engine, checkfirst=True)
     _VersionModel.__table__.create(bind=engine, checkfirst=True)

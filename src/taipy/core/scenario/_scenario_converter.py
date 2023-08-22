@@ -26,14 +26,14 @@ from ..task.task import Task, TaskId
 class _ScenarioConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, scenario: Scenario) -> _ScenarioModel:
-        pipelines: Dict[str, Dict[str, Union[List[TaskId], Dict, List]]] = {}
-        for p_name, pipeline_data in scenario._pipelines.items():
-            pipelines[p_name] = {
-                Scenario._PIPELINE_TASKS_KEY: [
-                    t.id if isinstance(t, Task) else t for t in pipeline_data.get("tasks", [])
+        sequences: Dict[str, Dict[str, Union[List[TaskId], Dict, List]]] = {}
+        for p_name, sequence_data in scenario._sequences.items():
+            sequences[p_name] = {
+                Scenario._SEQUENCE_TASKS_KEY: [
+                    t.id if isinstance(t, Task) else t for t in sequence_data.get("tasks", [])
                 ],
-                Scenario._PIPELINE_PROPERTIES_KEY: pipeline_data.get("properties", {}),
-                Scenario._PIPELINE_SUBSCRIBERS_KEY: _utils._fcts_to_dict(pipeline_data.get("subscribers", [])),
+                Scenario._SEQUENCE_PROPERTIES_KEY: sequence_data.get("properties", {}),
+                Scenario._SEQUENCE_SUBSCRIBERS_KEY: _utils._fcts_to_dict(sequence_data.get("subscribers", [])),
             }
 
         return _ScenarioModel(
@@ -51,7 +51,7 @@ class _ScenarioConverter(_AbstractConverter):
             tags=list(scenario._tags),
             version=scenario._version,
             cycle=scenario._cycle.id if scenario._cycle else None,
-            pipelines=pipelines if pipelines else None,
+            sequences=sequences if sequences else None,
         )
 
     @classmethod
@@ -59,10 +59,10 @@ class _ScenarioConverter(_AbstractConverter):
         tasks: Union[Set[TaskId], Set[Task], Set] = set()
         if model.tasks:
             tasks = set(model.tasks)
-        if model.pipelines:
-            for pipeline_name, pipeline_data in model.pipelines.items():
-                if subscribers := pipeline_data.get(Scenario._PIPELINE_SUBSCRIBERS_KEY):
-                    model.pipelines[pipeline_name][Scenario._PIPELINE_SUBSCRIBERS_KEY] = [
+        if model.sequences:
+            for sequence_name, sequence_data in model.sequences.items():
+                if subscribers := sequence_data.get(Scenario._SEQUENCE_SUBSCRIBERS_KEY):
+                    model.sequences[sequence_name][Scenario._SEQUENCE_SUBSCRIBERS_KEY] = [
                         _utils._Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                         for it in subscribers
                     ]
@@ -82,7 +82,7 @@ class _ScenarioConverter(_AbstractConverter):
                 for it in model.subscribers
             ],
             version=model.version,
-            pipelines=model.pipelines,
+            sequences=model.sequences,
         )
         return _migrate_entity(scenario)
 
