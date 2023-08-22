@@ -175,15 +175,16 @@ class PipelineList(Resource):
         ```
 
       parameters:
-        - name: scenario_id
+        - in: query
+          name: scenario_id
           schema:
             type: string
           description: The Scenario the Pipeline belongs to.
-        - name: pipeline_name
+          name: pipeline_name
           schema:
             type: string
           description: The name of the Pipeline.
-        - name: tasks
+          name: tasks
           schema:
             type: list[string]
           description: A list of task id of the Pipeline.
