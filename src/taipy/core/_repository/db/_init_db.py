@@ -30,12 +30,10 @@ def init_db() -> None:
     from ....core.job._job_model import _JobModel
     from ....core.scenario._scenario_model import _ScenarioModel
     from ....core.task._task_model import _TaskModel
-    from ...sequence._sequence_model import _SequenceModel
 
     _CycleModel.__table__.create(bind=engine, checkfirst=True)
     _DataNodeModel.__table__.create(bind=engine, checkfirst=True)
     _JobModel.__table__.create(bind=engine, checkfirst=True)
-    _SequenceModel.__table__.create(bind=engine, checkfirst=True)
     _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
     _TaskModel.__table__.create(bind=engine, checkfirst=True)
     _VersionModel.__table__.create(bind=engine, checkfirst=True)

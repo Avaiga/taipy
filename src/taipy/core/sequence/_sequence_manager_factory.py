@@ -13,9 +13,7 @@ from typing import Type
 
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
-from ._sequence_fs_repository import _SequenceFSRepository
 from ._sequence_manager import _SequenceManager
-from ._sequence_sql_repository import _SequenceSQLRepository
 
 
 class _SequenceManagerFactory(_ManagerFactory):
