@@ -25,7 +25,7 @@ from taipy.core.exceptions.exceptions import (
     NonExistingTaskConfig,
 )
 
-from .exceptions.exceptions import ConfigIdMissingException
+from .exceptions.exceptions import ConfigIdMissingException, PipelineNameMissingException, ScenarioIdMissingException
 from .views import blueprint
 
 
@@ -45,6 +45,16 @@ def handle_marshmallow_error(e):
 
 @blueprint.errorhandler(ConfigIdMissingException)
 def handle_config_id_missing_exception(e):
+    return jsonify({"message": e.message}), 400
+
+
+@blueprint.errorhandler(ScenarioIdMissingException)
+def handle_scenario_id_missing_exception(e):
+    return jsonify({"message": e.message}), 400
+
+
+@blueprint.errorhandler(PipelineNameMissingException)
+def handle_pipeline_name_missing_exception(e):
     return jsonify({"message": e.message}), 400
 
 

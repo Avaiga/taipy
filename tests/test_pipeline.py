@@ -14,6 +14,10 @@ from unittest import mock
 import pytest
 from flask import url_for
 
+from src.taipy.rest.api.exceptions.exceptions import PipelineNameMissingException, ScenarioIdMissingException
+from taipy.core.exceptions.exceptions import NonExistingScenario
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+
 
 def test_get_pipeline(client, default_pipeline):
     # test 404
@@ -41,6 +45,31 @@ def test_delete_pipeline(client):
         # test get_pipeline
         rep = client.delete(url_for("api.pipeline_by_id", pipeline_id="foo"))
         assert rep.status_code == 200
+
+
+def test_create_pipeline(client, default_scenario):
+    pipelines_url = url_for("api.pipelines")
+    rep = client.post(pipelines_url, json={})
+    assert rep.status_code == 400
+    assert rep.json == {"message": "Scenario id is missing."}
+
+    pipelines_url = url_for("api.pipelines")
+    rep = client.post(pipelines_url, json={"scenario_id": "SCENARIO_scenario_id"})
+    assert rep.status_code == 400
+    assert rep.json == {"message": "Pipeline name is missing."}
+
+    pipelines_url = url_for("api.pipelines")
+    rep = client.post(pipelines_url, json={"scenario_id": "SCENARIO_scenario_id", "pipeline_name": "pipeline"})
+    assert rep.status_code == 404
+
+    _ScenarioManagerFactory._build_manager()._set(default_scenario)
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get") as config_mock:
+        config_mock.return_value = default_scenario
+        pipelines_url = url_for("api.pipelines")
+        rep = client.post(
+            pipelines_url, json={"scenario_id": default_scenario.id, "pipeline_name": "pipeline", "tasks": []}
+        )
+        assert rep.status_code == 201
 
 
 def test_get_all_pipelines(client, default_scenario_config_list):

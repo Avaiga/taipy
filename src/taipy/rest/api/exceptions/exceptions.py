@@ -13,3 +13,13 @@
 class ConfigIdMissingException(Exception):
     def __init__(self):
         self.message = "Config id is missing."
+
+
+class ScenarioIdMissingException(Exception):
+    def __init__(self):
+        self.message = "Scenario id is missing."
+
+
+class PipelineNameMissingException(Exception):
+    def __init__(self):
+        self.message = "Pipeline name is missing."
