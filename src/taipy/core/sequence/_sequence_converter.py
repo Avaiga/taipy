@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from collections import defaultdict
 from typing import Dict
 
 from .._repository._abstract_converter import _AbstractConverter
