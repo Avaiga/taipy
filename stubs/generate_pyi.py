@@ -152,7 +152,7 @@ if __name__ == "__main__":
     config_init = Path("taipy-core/src/taipy/core/config/__init__.py")
     base_config = "src/taipy/config/config.py"
 
-    pipeline_filename = "taipy-core/src/taipy/core/config/pipeline_config.py"
+    sequence_filename = "taipy-core/src/taipy/core/config/sequence_config.py"
     dn_filename = "taipy-core/src/taipy/core/config/data_node_config.py"
     job_filename = "taipy-core/src/taipy/core/config/job_config.py"
     scenario_filename = "taipy-core/src/taipy/core/config/scenario_config.py"
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         pyi, scenario_filename, entities_map["ScenarioConfig"]
     )
     pyi = _build_entity_config_pyi(
-        pyi, pipeline_filename, entities_map["PipelineConfig"]
+        pyi, sequence_filename, entities_map["SequenceConfig"]
     )
     pyi = _build_entity_config_pyi(pyi, dn_filename, entities_map["DataNodeConfig"])
     pyi = _build_entity_config_pyi(pyi, task_filename, entities_map["TaskConfig"])
