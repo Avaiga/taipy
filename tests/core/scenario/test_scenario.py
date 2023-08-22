@@ -20,7 +20,7 @@ from src.taipy.core.cycle.cycle import Cycle, CycleId
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import DataNode, InMemoryDataNode
 from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.exceptions.exceptions import PipelineTaskDoesNotExistInSameScenario
+from src.taipy.core.exceptions.exceptions import PipelineTaskDoesNotExistInScenario
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
@@ -228,11 +228,20 @@ def test_create_scenario(cycle, current_datetime):
 def test_raise_pipeline_tasks_not_in_scenario():
     task_1 = Task("task_1", {}, print)
     task_2 = Task("task_2", {}, print)
-    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
-        Scenario("scenario", [], {}, pipelines={"pipeline": {"tasks": [task_1]}})
 
-    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
-        Scenario("scenario", [task_1], {}, pipelines={"pipeline": {"tasks": [task_1, task_2]}})
+    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
+        Scenario("scenario", [], {}, pipelines={"pipeline": {"tasks": [task_1]}}, scenario_id="SCENARIO_scenario")
+    assert err.value.args == ([task_1.id], "pipeline", "SCENARIO_scenario")
+
+    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
+        Scenario(
+            "scenario",
+            [task_1],
+            {},
+            pipelines={"pipeline": {"tasks": [task_1, task_2]}},
+            scenario_id="SCENARIO_scenario",
+        )
+    assert err.value.args == ([task_2.id], "pipeline", "SCENARIO_scenario")
 
     Scenario("scenario", [task_1], {}, pipelines={"pipeline": {"tasks": [task_1]}})
     Scenario(
@@ -253,18 +262,21 @@ def test_raise_pipeline_tasks_not_in_scenario():
 
     scenario.add_pipelines({"pipeline_1": {}})
 
-    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
         scenario.add_pipelines({"pipeline_2": {"tasks": [task_1]}})
+    assert err.value.args == ([task_1.id], "pipeline_2", scenario.id)
 
     scenario.tasks = [task_1]
 
     scenario.add_pipelines({"pipeline_2": {"tasks": [task_1]}})
 
-    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
         scenario.add_pipelines({"pipeline_3": {"tasks": [task_2]}})
+    assert err.value.args == ([task_2.id], "pipeline_3", scenario.id)
 
-    with pytest.raises(PipelineTaskDoesNotExistInSameScenario):
+    with pytest.raises(PipelineTaskDoesNotExistInScenario) as err:
         scenario.add_pipelines({"pipeline_4": {"tasks": [task_1, task_2]}})
+    assert err.value.args == ([task_2.id], "pipeline_4", scenario.id)
 
     scenario.tasks = [task_1, task_2]
     scenario.add_pipelines({"pipeline_5": {"tasks": [task_1, task_2]}})

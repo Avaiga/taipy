@@ -31,7 +31,6 @@ from src.taipy.core.exceptions.exceptions import (
     NonExistingPipeline,
     NonExistingTask,
     PipelineBelongsToNonExistingScenario,
-    PipelineTaskDoesNotExistInSameScenario,
 )
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager

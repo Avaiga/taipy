@@ -136,7 +136,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                     non_existing_pipeline_task_config_in_scenario_config.add(sequence_task_config.id)
             if len(non_existing_pipeline_task_config_in_scenario_config) > 0:
                 raise PipelineTaskConfigDoesNotExistInSameScenarioConfig(
-                    list(non_existing_pipeline_task_config_in_scenario_config), sequence_name, str(scenario_id)
+                    list(non_existing_pipeline_task_config_in_scenario_config), sequence_name, str(config.id)
                 )
             pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
 

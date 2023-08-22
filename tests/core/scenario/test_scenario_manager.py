@@ -229,8 +229,9 @@ def test_raise_pipeline_task_configs_not_in_scenario_config():
     _ScenarioManager._create(scenario_config_1)
 
     scenario_config_1.add_sequences({"pipeline_1": [task_config_1]})
-    with pytest.raises(PipelineTaskConfigDoesNotExistInSameScenarioConfig):
+    with pytest.raises(PipelineTaskConfigDoesNotExistInSameScenarioConfig) as err:
         _ScenarioManager._create(scenario_config_1)
+    assert err.value.args == ([task_config_1.id], "pipeline_1", scenario_config_1.id)
 
     scenario_config_1._tasks = [task_config_1]
     _ScenarioManager._create(scenario_config_1)
@@ -239,8 +240,9 @@ def test_raise_pipeline_task_configs_not_in_scenario_config():
     _ScenarioManager._create(scenario_config_1)
 
     scenario_config_1.add_sequences({"pipeline_3": [task_config_1, task_config_2]})
-    with pytest.raises(PipelineTaskConfigDoesNotExistInSameScenarioConfig):
+    with pytest.raises(PipelineTaskConfigDoesNotExistInSameScenarioConfig) as err:
         _ScenarioManager._create(scenario_config_1)
+    assert err.value.args == ([task_config_2.id], "pipeline_3", scenario_config_1.id)
 
     scenario_config_1._tasks = [task_config_1, task_config_2]
     _ScenarioManager._create(scenario_config_1)

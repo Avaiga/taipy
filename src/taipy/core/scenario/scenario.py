@@ -35,7 +35,7 @@ from ..exceptions.exceptions import (
     NonExistingDataNode,
     NonExistingPipeline,
     NonExistingTask,
-    PipelineTaskDoesNotExistInSameScenario,
+    PipelineTaskDoesNotExistInScenario,
 )
 from ..job.job import Job
 from ..pipeline.pipeline import Pipeline
@@ -196,7 +196,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             if pipeline_task_id not in scenario_task_ids:
                 non_existing_pipeline_task_ids_in_scenario.add(pipeline_task_id)
         if len(non_existing_pipeline_task_ids_in_scenario) > 0:
-            raise PipelineTaskDoesNotExistInSameScenario(
+            raise PipelineTaskDoesNotExistInScenario(
                 list(non_existing_pipeline_task_ids_in_scenario), pipeline_name, scenario_id
             )
 
