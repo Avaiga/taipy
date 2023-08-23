@@ -1,5 +1,6 @@
-import pandas as pd
 import re
+
+import pandas as pd
 
 
 # build partial content for all data nodes
@@ -30,10 +31,12 @@ def build_dn_partial(dn, dn_label, dn_content):
         partial_content += f"<center> No data for {dn_label}. </center>\n\n"
     elif isinstance(dn_content, pd.DataFrame):
         partial_content += "<|{contents['" + dn.id + "']}|table|rebuild|>\n\n"
-    elif isinstance(dn_content, str) \
-        or isinstance(dn_content, int) \
-        or isinstance(dn_content, float) \
-        or isinstance(dn_content, bool):
+    elif (
+        isinstance(dn_content, str)
+        or isinstance(dn_content, int)
+        or isinstance(dn_content, float)
+        or isinstance(dn_content, bool)
+    ):
         partial_content += "<center> <|{contents['" + dn.id + "']}|input|> </center>\n\n"
 
     # ##################################################################################################################
@@ -64,8 +67,7 @@ def manage_inputs_partial(state):
 def manage_outputs_partial(state):
     # Update outputs variables and partial
     state.outputs = {d.id: (d.id, d.get_simple_label(), d) for d in state.selected_sceanrio.get_outputs()}
-    state.contents.update(
-        {k: (v[2].read() if v[2].is_ready_for_reading else None) for k, v in state.outputs.items()})
+    state.contents.update({k: (v[2].read() if v[2].is_ready_for_reading else None) for k, v in state.outputs.items()})
     output_partial_content = build_dn_list_partial(state.outputs, state.contents)
     state.outputs_partial.update_content(state, output_partial_content)
 
