@@ -168,8 +168,13 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
 
     @classmethod
-    def _get_by_config_id(cls, config_id: str) -> List[DataNode]:
+    def _get_by_config_id(cls, config_id: str, version_number: Optional[str] = None) -> List[DataNode]:
         """
         Get all datanodes by its config id.
         """
-        return cls._repository._load_all([{"config_id": config_id}])
+        filters = cls._build_filters_with_version(version_number)
+        if not filters:
+            filters = [{}]
+        for fil in filters:
+            fil.update({"config_id": config_id})
+        return cls._repository._load_all(filters)

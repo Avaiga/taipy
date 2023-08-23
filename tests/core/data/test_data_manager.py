@@ -606,3 +606,27 @@ class TestDataManager:
         dn_3_datanodes = _DataManager._get_by_config_id(dn_config_3.id)
         assert len(dn_3_datanodes) == 1
         assert sorted([dn_3_1.id]) == sorted([pipeline.id for pipeline in dn_3_datanodes])
+
+    def test_get_data_nodes_by_config_id_in_multiple_versions_environment(self):
+        dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)
+        dn_config_2 = Config.configure_data_node("dn_2", scope=Scope.SCENARIO)
+
+        _VersionManager._set_experiment_version("1.0")
+        _DataManager._create_and_set(dn_config_1, None, None)
+        _DataManager._create_and_set(dn_config_1, None, None)
+        _DataManager._create_and_set(dn_config_1, None, None)
+        _DataManager._create_and_set(dn_config_2, None, None)
+        _DataManager._create_and_set(dn_config_2, None, None)
+
+        assert len(_DataManager._get_by_config_id(dn_config_1.id)) == 3
+        assert len(_DataManager._get_by_config_id(dn_config_2.id)) == 2
+
+        _VersionManager._set_experiment_version("2.0")
+        _DataManager._create_and_set(dn_config_1, None, None)
+        _DataManager._create_and_set(dn_config_1, None, None)
+        _DataManager._create_and_set(dn_config_1, None, None)
+        _DataManager._create_and_set(dn_config_2, None, None)
+        _DataManager._create_and_set(dn_config_2, None, None)
+
+        assert len(_DataManager._get_by_config_id(dn_config_1.id)) == 3
+        assert len(_DataManager._get_by_config_id(dn_config_2.id)) == 2

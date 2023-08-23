@@ -32,6 +32,7 @@ from src.taipy.core import (
     TaskId,
 )
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
@@ -636,3 +637,27 @@ class TestTaipy:
         s2_scenarios = tp.get_entities_by_config_id(scenario_config_2.id)
         assert len(s2_scenarios) == 2
         assert sorted([s_2_1.id, s_2_2.id]) == sorted([scenario.id for scenario in s2_scenarios])
+
+    def test_get_entities_by_config_id_in_multiple_versions_environment(self):
+        scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
+        scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+
+        _VersionManager._set_experiment_version("1.0")
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_2)
+        tp.create_scenario(scenario_config_2)
+        assert len(tp.get_scenarios()) == 5
+        assert len(tp.get_entities_by_config_id(scenario_config_1.id)) == 3
+        assert len(tp.get_entities_by_config_id(scenario_config_2.id)) == 2
+
+        _VersionManager._set_experiment_version("2.0")
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_2)
+        tp.create_scenario(scenario_config_2)
+        assert len(tp.get_scenarios()) == 5
+        assert len(tp.get_entities_by_config_id(scenario_config_1.id)) == 3
+        assert len(tp.get_entities_by_config_id(scenario_config_2.id)) == 2

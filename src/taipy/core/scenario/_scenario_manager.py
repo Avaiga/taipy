@@ -400,8 +400,13 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         return entity_ids
 
     @classmethod
-    def _get_by_config_id(cls, config_id: str) -> List[Scenario]:
+    def _get_by_config_id(cls, config_id: str, version_number: Optional[str] = None) -> List[Scenario]:
         """
         Get all scenarios by its config id.
         """
-        return cls._repository._load_all([{"config_id": config_id}])
+        filters = cls._build_filters_with_version(version_number)
+        if not filters:
+            filters = [{}]
+        for fil in filters:
+            fil.update({"config_id": config_id})
+        return cls._repository._load_all(filters)

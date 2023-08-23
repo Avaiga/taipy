@@ -1439,3 +1439,28 @@ def test_get_scenarios_by_config_id():
     s3_scenarios = _ScenarioManager._get_by_config_id(scenario_config_3.id)
     assert len(s3_scenarios) == 1
     assert sorted([s_3_1.id]) == sorted([scenario.id for scenario in s3_scenarios])
+
+
+def test_get_scenarios_by_config_id_in_multiple_versions_environment():
+    scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
+    scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+
+    _VersionManager._set_experiment_version("1.0")
+    _ScenarioManager._create(scenario_config_1)
+    _ScenarioManager._create(scenario_config_1)
+    _ScenarioManager._create(scenario_config_1)
+    _ScenarioManager._create(scenario_config_2)
+    _ScenarioManager._create(scenario_config_2)
+
+    assert len(_ScenarioManager._get_by_config_id(scenario_config_1.id)) == 3
+    assert len(_ScenarioManager._get_by_config_id(scenario_config_2.id)) == 2
+
+    _VersionManager._set_experiment_version("2.0")
+    _ScenarioManager._create(scenario_config_1)
+    _ScenarioManager._create(scenario_config_1)
+    _ScenarioManager._create(scenario_config_1)
+    _ScenarioManager._create(scenario_config_2)
+    _ScenarioManager._create(scenario_config_2)
+
+    assert len(_ScenarioManager._get_by_config_id(scenario_config_1.id)) == 3
+    assert len(_ScenarioManager._get_by_config_id(scenario_config_2.id)) == 2

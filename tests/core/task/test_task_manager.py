@@ -443,5 +443,31 @@ def test_get_tasks_by_config_id():
     assert sorted([t_3_1.id]) == sorted([task.id for task in t3_tasks])
 
 
+def test_get_scenarios_by_config_id_in_multiple_versions_environment():
+    dn_config = Config.configure_data_node("dn", scope=Scope.SCENARIO)
+    task_config_1 = Config.configure_task("t1", print, dn_config)
+    task_config_2 = Config.configure_task("t2", print, dn_config)
+
+    _VersionManager._set_experiment_version("1.0")
+    _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_1")[0]
+    _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_2")[0]
+    _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_3")[0]
+    _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_4")[0]
+    _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_5")[0]
+
+    assert len(_TaskManager._get_by_config_id(task_config_1.id)) == 3
+    assert len(_TaskManager._get_by_config_id(task_config_2.id)) == 2
+
+    _VersionManager._set_experiment_version("2.0")
+    _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_1")[0]
+    _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_2")[0]
+    _TaskManager._bulk_get_or_create([task_config_1], scenario_id="scenario_3")[0]
+    _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_4")[0]
+    _TaskManager._bulk_get_or_create([task_config_2], scenario_id="scenario_5")[0]
+
+    assert len(_TaskManager._get_by_config_id(task_config_1.id)) == 3
+    assert len(_TaskManager._get_by_config_id(task_config_2.id)) == 2
+
+
 def _create_task_from_config(task_config, *args, **kwargs):
     return _TaskManager._bulk_get_or_create([task_config], *args, **kwargs)[0]
