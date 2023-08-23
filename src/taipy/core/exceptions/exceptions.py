@@ -92,6 +92,13 @@ class InvalidCustomDocument(Exception):
     """Raised if an invalid custom document class is provided to a `MongoCollectionDataNode`."""
 
 
+class DataNodeConfigIsNotGlobal(Exception):
+    """Raised if a DataNode is not global."""
+
+    def __init__(self, data_node_config_id: str):
+        self.message = f"Data node config `{data_node_config_id}` does not have GLOBAL scope."
+
+
 class MissingReadFunction(Exception):
     """Raised if no read function is provided for the GenericDataNode."""
 

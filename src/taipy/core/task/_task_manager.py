@@ -180,8 +180,13 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return job
 
     @classmethod
-    def _get_by_config_id(cls, config_id: str) -> List[Task]:
+    def _get_by_config_id(cls, config_id: str, version_number: Optional[str] = None) -> List[Task]:
         """
         Get all tasks by its config id.
         """
-        return cls._repository._load_all([{"config_id": config_id}])
+        filters = cls._build_filters_with_version(version_number)
+        if not filters:
+            filters = [{}]
+        for fil in filters:
+            fil.update({"config_id": config_id})
+        return cls._repository._load_all(filters)

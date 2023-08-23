@@ -33,13 +33,13 @@ from src.taipy.core import (
 )
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._version._version_manager import _VersionManager
+from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.config.pipeline_config import PipelineConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.exceptions.exceptions import InvalidExportPath
+from src.taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal, InvalidExportPath
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job import Job
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
@@ -435,6 +435,24 @@ class TestTaipy:
             tp.exists(cycle_id)
             mck.assert_called_once_with(cycle_id)
 
+    def test_create_global_data_node(self):
+        dn_cfg = DataNodeConfig("id", "pickle", Scope.GLOBAL)
+        with mock.patch("src.taipy.core.data._data_manager._DataManager._create_and_set") as mck:
+            dn = tp.create_global_data_node(dn_cfg)
+            mck.assert_called_once_with(dn_cfg, None, None)
+
+        dn = tp.create_global_data_node(dn_cfg)
+        assert dn.scope == Scope.GLOBAL
+        assert dn.config_id == dn_cfg.id
+
+        # Create a global data node from the same configuration should return the same data node
+        dn_2 = tp.create_global_data_node(dn_cfg)
+        assert dn_2.id == dn.id
+
+        dn_cfg.scope = Scope.SCENARIO
+        with pytest.raises(DataNodeConfigIsNotGlobal):
+            tp.create_global_data_node(dn_cfg)
+
     def test_create_scenario(self, scenario):
         scenario_config = ScenarioConfig("scenario_config")
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
@@ -619,3 +637,27 @@ class TestTaipy:
         s2_scenarios = tp.get_entities_by_config_id(scenario_config_2.id)
         assert len(s2_scenarios) == 2
         assert sorted([s_2_1.id, s_2_2.id]) == sorted([scenario.id for scenario in s2_scenarios])
+
+    def test_get_entities_by_config_id_in_multiple_versions_environment(self):
+        scenario_config_1 = Config.configure_scenario("s1", pipeline_configs=[])
+        scenario_config_2 = Config.configure_scenario("s2", pipeline_configs=[])
+
+        _VersionManager._set_experiment_version("1.0")
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_2)
+        tp.create_scenario(scenario_config_2)
+        assert len(tp.get_scenarios()) == 5
+        assert len(tp.get_entities_by_config_id(scenario_config_1.id)) == 3
+        assert len(tp.get_entities_by_config_id(scenario_config_2.id)) == 2
+
+        _VersionManager._set_experiment_version("2.0")
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_1)
+        tp.create_scenario(scenario_config_2)
+        tp.create_scenario(scenario_config_2)
+        assert len(tp.get_scenarios()) == 5
+        assert len(tp.get_entities_by_config_id(scenario_config_1.id)) == 3
+        assert len(tp.get_entities_by_config_id(scenario_config_2.id)) == 2

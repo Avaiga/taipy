@@ -14,11 +14,13 @@ import shutil
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 
+from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
 from .common._warnings import _warn_no_core_service
+from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
 from .cycle.cycle import Cycle
@@ -26,7 +28,12 @@ from .cycle.cycle_id import CycleId
 from .data._data_manager_factory import _DataManagerFactory
 from .data.data_node import DataNode
 from .data.data_node_id import DataNodeId
-from .exceptions.exceptions import ModelNotFound, NonExistingVersion, VersionIsNotProductionVersion
+from .exceptions.exceptions import (
+    DataNodeConfigIsNotGlobal,
+    ModelNotFound,
+    NonExistingVersion,
+    VersionIsNotProductionVersion,
+)
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .job.job_id import JobId
@@ -575,6 +582,25 @@ def create_scenario(
         The new scenario.
     """
     return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
+
+
+def create_global_data_node(config: DataNodeConfig) -> DataNode:
+    """Create and return a new data node from a data node configuration with GLOBAL scope.
+
+    Parameters:
+        config (DataNodeConfig^): The data node configuration. The configuration must have GLOBAL scope.
+    Returns:
+        The new global data node.
+    Raises:
+        DataNodeConfigIsNotGlobal^: If the data node configuration does not have GLOBAL scope.
+    """
+    # Check if the data node config has GLOBAL scope
+    if config.scope is not Scope.GLOBAL:
+        raise DataNodeConfigIsNotGlobal(config.id)  # type: ignore
+
+    if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):  # type: ignore
+        return dns[0]
+    return _DataManagerFactory._build_manager()._create_and_set(config, None, None)
 
 
 def clean_all_entities_by_version(version_number=None) -> bool:
