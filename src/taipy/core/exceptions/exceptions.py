@@ -10,6 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 
+from typing import List, Optional
+
+
 class CycleAlreadyExists(Exception):
     """Raised if it is trying to create a Cycle that has already exists."""
 
@@ -153,11 +156,18 @@ class PipelineBelongsToNonExistingScenario(Exception):
         self.message = f"Pipeline: {pipeline_id} belongs to a non-existing Scenario: {scenario_id}."
 
 
-class PipelineTaskDoesNotExistInSameScenario(Exception):
-    """Raised if the Task of a Pipeline does not exist in the same Scenario."""
+class PipelineTaskDoesNotExistInScenario(Exception):
+    """Raised if Tasks of a Pipeline do not exist in the same Scenario that the Pipeline belongs to."""
 
-    def __init__(self, task_id: str, pipeline_id: str, scenario_id: str):
-        self.message = f"Task {task_id} of Pipeline {pipeline_id} does not exist in Scenario {scenario_id}."
+    def __init__(self, task_ids: List[Optional[str]], pipeline_name: str, scenario_id: str):
+        self.message = f"Tasks {task_ids} of Pipeline {pipeline_name} does not exist in Scenario {scenario_id}."
+
+
+class PipelineTaskConfigDoesNotExistInSameScenarioConfig(Exception):
+    """Raised if TaskConfigs of a Pipeline do not exist in the same ScenarioConfig that the Pipeline belongs to."""
+
+    def __init__(self, task_config_ids: List[Optional[str]], pipeline_name: str, scenario_config_id: str):
+        self.message = f"TaskConfig {task_config_ids} of Pipeline name {pipeline_name} does not exist in ScenarioConfig {scenario_config_id}."
 
 
 class NonExistingPipelineConfig(Exception):

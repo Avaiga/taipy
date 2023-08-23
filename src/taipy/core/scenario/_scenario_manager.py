@@ -20,7 +20,6 @@ from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
-from ..config.pipeline_config import PipelineConfig
 from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
@@ -33,7 +32,7 @@ from ..exceptions.exceptions import (
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
-    PipelineTaskDoesNotExistInSameScenario,
+    PipelineTaskConfigDoesNotExistInSameScenarioConfig,
     UnauthorizedTagError,
 )
 from ..job._job_manager_factory import _JobManagerFactory
@@ -129,13 +128,16 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         tasks_and_config_id_maps = {task.config_id: task for task in tasks}
         for sequence_name, sequence_task_configs in config.sequences.items():
             sequence_tasks = []
+            non_existing_pipeline_task_config_in_scenario_config = set()
             for sequence_task_config in sequence_task_configs:
                 if task := tasks_and_config_id_maps.get(sequence_task_config.id):
                     sequence_tasks.append(task)
                 else:
-                    raise PipelineTaskDoesNotExistInSameScenario(
-                        str(sequence_task_config.id), str(sequence_name), str(scenario_id)
-                    )
+                    non_existing_pipeline_task_config_in_scenario_config.add(sequence_task_config.id)
+            if len(non_existing_pipeline_task_config_in_scenario_config) > 0:
+                raise PipelineTaskConfigDoesNotExistInSameScenarioConfig(
+                    list(non_existing_pipeline_task_config_in_scenario_config), sequence_name, str(config.id)
+                )
             pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False

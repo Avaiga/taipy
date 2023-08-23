@@ -31,7 +31,12 @@ from ..cycle.cycle import Cycle
 from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
-from ..exceptions.exceptions import NonExistingDataNode, NonExistingPipeline, NonExistingTask
+from ..exceptions.exceptions import (
+    NonExistingDataNode,
+    NonExistingPipeline,
+    NonExistingTask,
+    PipelineTaskDoesNotExistInScenario,
+)
 from ..job.job import Job
 from ..pipeline.pipeline import Pipeline
 from ..task._task_manager_factory import _TaskManagerFactory
@@ -100,6 +105,16 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._tags = tags or set()
         self._properties = _Properties(self, **properties)
         self._pipelines: Dict[str, Dict] = pipelines or {}
+
+        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in self._tasks])
+        for pipeline_name, pipeline_data in self._pipelines.items():
+            pipeline_task_ids = set(
+                [task.id if isinstance(task, Task) else task for task in pipeline_data.get("tasks", [])]
+            )
+            self.__check_pipeline_tasks_exist_in_scenario_tasks(
+                pipeline_name, pipeline_task_ids, self.id, _scenario_task_ids
+            )
+
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
@@ -151,7 +166,18 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._pipelines = pipelines
 
     def add_pipelines(self, pipelines: Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
-        _pipelines = _Reloader()._reload(self._MANAGER_NAME, self)._pipelines
+        _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
+        _pipelines = _scenario._pipelines
+        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
+
+        for pipeline_name, pipeline_data in pipelines.items():
+            pipeline_task_ids: Set[TaskId] = set(
+                [task.id if isinstance(task, Task) else task for task in pipeline_data.get("tasks", [])]  # type: ignore
+            )
+            self.__check_pipeline_tasks_exist_in_scenario_tasks(
+                pipeline_name, pipeline_task_ids, self.id, _scenario_task_ids
+            )
+
         _pipelines.update(pipelines)
         self.pipelines = _pipelines  # type: ignore
 
@@ -160,6 +186,19 @@ class Scenario(_Entity, Submittable, _Labeled):
         for pipeline_name in pipeline_names:
             _pipelines.pop(pipeline_name)
         self.pipelines = _pipelines  # type: ignore
+
+    @staticmethod
+    def __check_pipeline_tasks_exist_in_scenario_tasks(
+        pipeline_name: str, pipeline_task_ids: Set[TaskId], scenario_id: ScenarioId, scenario_task_ids: Set[TaskId]
+    ):
+        non_existing_pipeline_task_ids_in_scenario = set()
+        for pipeline_task_id in pipeline_task_ids:
+            if pipeline_task_id not in scenario_task_ids:
+                non_existing_pipeline_task_ids_in_scenario.add(pipeline_task_id)
+        if len(non_existing_pipeline_task_ids_in_scenario) > 0:
+            raise PipelineTaskDoesNotExistInScenario(
+                list(non_existing_pipeline_task_ids_in_scenario), pipeline_name, scenario_id
+            )
 
     def __get_pipelines(self) -> Dict[str, Pipeline]:
         _pipelines = {}
