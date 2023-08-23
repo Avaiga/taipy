@@ -21,8 +21,8 @@ def build_dn_partial(dn, dn_label, dn_content):
     # PLACEHOLDER: data node specific content before automatic content                                                 #
     #                                                                                                                  #
     # Example:                                                                                                         #
-    if dn_label == "replacement_type":                                                                                 #
-        partial_content += "All missing values will be replaced by "                                                  #
+    if dn_label == "replacement_type":
+        partial_content += "All missing values will be replaced by "
     # Comment, remove or replace the previous lines with your own use case                                             #
     # ##################################################################################################################
 
@@ -43,10 +43,10 @@ def build_dn_partial(dn, dn_label, dn_content):
     # PLACEHOLDER: data node specific content after automatic content                                                  #
     #                                                                                                                  #
     # Example:                                                                                                         #
-    if dn_label == "initial_dataset":                                                                                  #
-        partial_content += "Select your CSV file: <|{inputs['"                                                         #
-        partial_content += dn.id                                                                                       #
-        partial_content += "'][2].path}|file_selector|extensions=.csv|>\n\n"                                           #
+    if dn_label == "initial_dataset":
+        partial_content += "Select your CSV file: <|{inputs['"
+        partial_content += dn.id
+        partial_content += "'][2].path}|file_selector|extensions=.csv|>\n\n"
     # Comment, remove or replace the previous lines with your own use case                                             #
     # ##################################################################################################################
 
@@ -87,8 +87,8 @@ def custom_write_data_nodes(state, var, val):
     # PLACEHOLDER: Add here 'on_change' code to be executed when your own use case variables are modified              #
     #                                                                                                                  #
     # Example:                                                                                                         #
-    if match := re.match(r"inputs\['(.*)'\]\[2\].path", var):                                                          #
-        state.inputs[match.groups()[0]][2].path = val                                                                  #
-        state.selected_scenario = state.selected_scenario                                                              #
+    if match := re.match(r"inputs\['(.*)'\]\[2\].path", var):
+        state.inputs[match.groups()[0]][2].path = val
+        state.selected_scenario = state.selected_scenario
     # Comment, remove or replace the previous lines with your own use case                                             #
     # ##################################################################################################################
