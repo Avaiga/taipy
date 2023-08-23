@@ -83,8 +83,8 @@ class DataNodeConfig(Section):
         _EXPOSED_TYPE_NUMPY,
     ]
 
-    _ENCODING_TYPE_KEY = "encoding"
-    _DEFAULT_ENCODING_TYPE = "utf-8"
+    _OPTIONAL_ENCODING_PROPERTY = "encoding"
+    _DEFAULT_ENCODING_VALUE = "utf-8"
 
     # Generic
     _OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY = "read_fct"
@@ -178,7 +178,7 @@ class DataNodeConfig(Section):
         },
         _STORAGE_TYPE_VALUE_CSV: {
             _OPTIONAL_DEFAULT_PATH_CSV_PROPERTY: None,
-            _ENCODING_TYPE_KEY: _DEFAULT_ENCODING_TYPE,
+            _OPTIONAL_ENCODING_PROPERTY: _DEFAULT_ENCODING_VALUE,
             _OPTIONAL_HAS_HEADER_CSV_PROPERTY: True,
             _OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY: _DEFAULT_EXPOSED_TYPE,
         },
@@ -225,7 +225,7 @@ class DataNodeConfig(Section):
         },
         _STORAGE_TYPE_VALUE_JSON: {
             _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY: None,
-            _ENCODING_TYPE_KEY: _DEFAULT_ENCODING_TYPE,
+            _OPTIONAL_ENCODING_PROPERTY: _DEFAULT_ENCODING_VALUE,
             _OPTIONAL_ENCODER_JSON_PROPERTY: None,
             _OPTIONAL_DECODER_JSON_PROPERTY: None,
         },
@@ -504,7 +504,7 @@ class DataNodeConfig(Section):
         if default_path is not None:
             properties[cls._OPTIONAL_DEFAULT_PATH_CSV_PROPERTY] = default_path
         if encoding is not None:
-            properties[cls._ENCODING_TYPE_KEY] = encoding
+            properties[cls._OPTIONAL_ENCODING_PROPERTY] = encoding
         if has_header is not None:
             properties[cls._OPTIONAL_HAS_HEADER_CSV_PROPERTY] = has_header
         if exposed_type is not None:
@@ -546,7 +546,7 @@ class DataNodeConfig(Section):
         if default_path is not None:
             properties[cls._OPTIONAL_DEFAULT_PATH_JSON_PROPERTY] = default_path
         if encoding is not None:
-            properties[cls._ENCODING_TYPE_KEY] = encoding
+            properties[cls._OPTIONAL_ENCODING_PROPERTY] = encoding
         if encoder is not None:
             properties[cls._OPTIONAL_ENCODER_JSON_PROPERTY] = encoder
         if decoder is not None:
