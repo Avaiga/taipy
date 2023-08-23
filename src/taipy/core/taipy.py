@@ -598,6 +598,8 @@ def create_global_data_node(config: DataNodeConfig) -> DataNode:
     if config.scope is not Scope.GLOBAL:
         raise DataNodeConfigIsNotGlobal(config.id)  # type: ignore
 
+    if dns := _DataManagerFactory._build_manager()._get_by_config_id(config.id):  # type: ignore
+        return dns[0]
     return _DataManagerFactory._build_manager()._create_and_set(config, None, None)
 
 

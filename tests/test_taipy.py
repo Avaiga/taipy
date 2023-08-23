@@ -444,6 +444,10 @@ class TestTaipy:
         assert dn.scope == Scope.GLOBAL
         assert dn.config_id == dn_cfg.id
 
+        # Create a global data node from the same configuration should return the same data node
+        dn_2 = tp.create_global_data_node(dn_cfg)
+        assert dn_2.id == dn.id
+
         dn_cfg.scope = Scope.SCENARIO
         with pytest.raises(DataNodeConfigIsNotGlobal):
             tp.create_global_data_node(dn_cfg)
