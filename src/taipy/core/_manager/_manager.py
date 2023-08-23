@@ -120,8 +120,8 @@ class _Manager(Generic[EntityType]):
         from ..task._task_manager_factory import _TaskManagerFactory
 
         _CycleManagerFactory._build_manager()._delete_many(_entity_ids.cycle_ids)
-        _ScenarioManagerFactory._build_manager()._delete_many(_entity_ids.scenario_ids)
         _PipelineManagerFactory._build_manager()._delete_many(_entity_ids.pipeline_ids)
+        _ScenarioManagerFactory._build_manager()._delete_many(_entity_ids.scenario_ids)
         _TaskManagerFactory._build_manager()._delete_many(_entity_ids.task_ids)
         _JobManagerFactory._build_manager()._delete_many(_entity_ids.job_ids)
         _DataManagerFactory._build_manager()._delete_many(_entity_ids.data_node_ids)

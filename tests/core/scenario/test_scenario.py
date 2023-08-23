@@ -75,12 +75,12 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_2.get_simple_label() == scenario_2.config_id
     assert scenario_2.get_label() == scenario_2.config_id
 
-    dn_1 = DataNode("xyz")
-    dn_2 = DataNode("abc")
+    dn_1 = PickleDataNode("xyz", Scope.SCENARIO)
+    dn_2 = PickleDataNode("abc", Scope.SCENARIO)
     task = Task("qux", {}, print, [dn_1])
-    pipeline = Pipeline({}, [task], "pipeline")
 
-    scenario_3 = Scenario("quux", set([task]), {}, set([dn_2]), pipelines={"acb": pipeline})
+    scenario_3 = Scenario("quux", set([task]), {}, set([dn_2]), pipelines={"acb": {"tasks": [task]}})
+    pipeline = scenario_3.pipelines["acb"]
     assert scenario_3.id is not None
     assert scenario_3.config_id == "quux"
     assert len(scenario_3.tasks) == 1
@@ -105,12 +105,9 @@ def test_create_scenario(cycle, current_datetime):
     additional_dn_2 = PickleDataNode("additional_2", Scope.SCENARIO)
     task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
     task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
-    pipeline_1 = Pipeline({}, [task_1], "pipeline_id_1")
-    pipeline_2 = Pipeline({}, [task_1, task_2], "pipeline_id_2")
 
     data_manager = _DataManagerFactory._build_manager()
     task_manager = _TaskManagerFactory._build_manager()
-    pipeline_manager = _PipelineManagerFactory._build_manager()
 
     data_manager._set(input_1)
     data_manager._set(output_1)
@@ -120,12 +117,16 @@ def test_create_scenario(cycle, current_datetime):
     data_manager._set(additional_dn_2)
     task_manager._set(task_1)
     task_manager._set(task_2)
-    pipeline_manager._set(pipeline_1)
-    pipeline_manager._set(pipeline_2)
 
     scenario_4 = Scenario(
-        "scenario_4", set([task_1]), {}, pipelines={"pipeline_1": pipeline_1, "pipeline_2": pipeline_2}
+        "scenario_4",
+        set([task_1]),
+        {},
     )
+    scenario_4.pipelines = {"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": [task_1, task_2]}}
+
+    pipeline_1 = scenario_4.pipelines["pipeline_1"]
+    pipeline_2 = scenario_4.pipelines["pipeline_2"]
     assert scenario_4.id is not None
     assert scenario_4.config_id == "scenario_4"
     assert len(scenario_4.tasks) == 1
@@ -140,7 +141,9 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_4.pipelines == {"pipeline_1": pipeline_1, "pipeline_2": pipeline_2}
 
     scenario_5 = Scenario("scenario_5", set([task_1, task_2]), {})
-    scenario_5.add_pipelines({"pipeline_1": pipeline_1, "pipeline_2": pipeline_2})
+    scenario_5.add_pipelines({"pipeline_1": {"tasks": [task_1]}, "pipeline_2": {"tasks": [task_1, task_2]}})
+    pipeline_1 = scenario_5.pipelines["pipeline_1"]
+    pipeline_2 = scenario_5.pipelines["pipeline_2"]
     assert scenario_5.id is not None
     assert scenario_5.config_id == "scenario_5"
     assert len(scenario_5.tasks) == 2
@@ -266,9 +269,6 @@ def test_add_and_remove_tag():
 
 
 def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
-    pipeline_1 = Pipeline({}, [], PipelineId("pipeline_id"))
-    pipeline_1_name = "pipeline_1"
-
     scenario_1 = Scenario(
         "foo",
         set(),
@@ -290,21 +290,20 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         id=CycleId("tmp_cc_id"),
     )
 
+    pipeline_1_name = "pipeline_1"
+    pipeline_1 = Pipeline({}, [], PipelineId(f"PIPELINE_{pipeline_1_name}_{scenario_1.id}"))
+
+    tmp_pipeline_name = "tmp_pipeline"
     tmp_pipeline = Pipeline(
         {},
         [],
-        PipelineId("tmp_pipeline_id"),
-        owner_id="owner_id",
-        version="random_version_number",
+        PipelineId(f"PIPELINE_{tmp_pipeline_name}_{scenario_1.id}"),
     )
-    tmp_pipeline_name = "tmp_pipeline"
 
     _TaskManagerFactory._build_manager()._set(task)
     _DataManagerFactory._build_manager()._set(data_node)
     _DataManagerFactory._build_manager()._set(additional_dn)
     _CycleManagerFactory._build_manager()._set(cycle)
-    _PipelineManagerFactory._build_manager()._set(pipeline_1)
-    _PipelineManagerFactory._build_manager()._set(tmp_pipeline)
     scenario_manager = _ScenarioManagerFactory._build_manager()
     cycle_manager = _CycleManagerFactory._build_manager()
     cycle_manager._set(cycle)
@@ -328,12 +327,12 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     # auto set & reload on pipelines attribute
     assert len(scenario_1.pipelines) == 0
     assert len(scenario_2.pipelines) == 0
-    scenario_1.pipelines = {tmp_pipeline_name: tmp_pipeline}
+    scenario_1.pipelines = {tmp_pipeline_name: {}}
     assert len(scenario_1.pipelines) == 1
     assert scenario_1.pipelines[tmp_pipeline_name] == tmp_pipeline
     assert len(scenario_2.pipelines) == 1
     assert scenario_2.pipelines[tmp_pipeline_name] == tmp_pipeline
-    scenario_2.add_pipelines({pipeline_1_name: pipeline_1})
+    scenario_2.add_pipelines({pipeline_1_name: {}})
     assert len(scenario_1.pipelines) == 2
     assert scenario_1.pipelines == {pipeline_1_name: pipeline_1, tmp_pipeline_name: tmp_pipeline}
     assert len(scenario_2.pipelines) == 2
@@ -1107,37 +1106,37 @@ def test_add_and_remove_pipelines():
     task_3 = Task("waldo", {}, print, [data_node_3], None, id=TaskId("t3"))
     task_4 = Task("fred", {}, print, [data_node_3], [data_node_4], TaskId("t4"))
     task_5 = Task("bob", {}, print, [data_node_5], [data_node_3], TaskId("t5"))
-    pipeline_1 = Pipeline({}, [task_1], PipelineId("p1"))
-    pipeline_2 = Pipeline({}, [task_1, task_2], PipelineId("p2"))
-    pipeline_3 = Pipeline({}, [task_1, task_5, task_3], PipelineId("p3"))
     scenario_1 = Scenario("quest", [task_1, task_2, task_3, task_4, task_5], {}, [], scenario_id=ScenarioId("s1"))
+
+    pipeline_1 = Pipeline({"name": "pipeline_1"}, [task_1], PipelineId(f"PIPELINE_pipeline_1_{scenario_1.id}"))
+    pipeline_2 = Pipeline({"name": "pipeline_2"}, [task_1, task_2], PipelineId(f"PIPELINE_pipeline_2_{scenario_1.id}"))
+    pipeline_3 = Pipeline(
+        {"name": "pipeline_3"}, [task_1, task_5, task_3], PipelineId(f"PIPELINE_pipeline_3_{scenario_1.id}")
+    )
 
     task_manager = _TaskManagerFactory._build_manager()
     data_manager = _DataManagerFactory._build_manager()
-    pipeline_manager = _PipelineManagerFactory._build_manager()
     scenario_manager = _ScenarioManagerFactory._build_manager()
     for dn in [data_node_1, data_node_2, data_node_3, data_node_4, data_node_5]:
         data_manager._set(dn)
     for t in [task_1, task_2, task_3, task_4, task_5]:
         task_manager._set(t)
-    for p in [pipeline_1, pipeline_2, pipeline_3]:
-        pipeline_manager._set(p)
     scenario_manager._set(scenario_1)
 
     assert scenario_1.get_inputs() == {data_node_1, data_node_2, data_node_5}
     assert scenario_1._get_set_of_tasks() == {task_1, task_2, task_3, task_4, task_5}
     assert len(scenario_1.pipelines) == 0
 
-    scenario_1.pipelines = {"pipeline_1": pipeline_1}
+    scenario_1.pipelines = {"pipeline_1": {"tasks": [task_1]}}
     assert scenario_1.pipelines == {"pipeline_1": pipeline_1}
 
-    scenario_1.add_pipelines({"pipeline_2": pipeline_2})
+    scenario_1.add_pipelines({"pipeline_2": {"tasks": [task_1, task_2]}})
     assert scenario_1.pipelines == {"pipeline_1": pipeline_1, "pipeline_2": pipeline_2}
 
     scenario_1.remove_pipelines(["pipeline_1"])
     assert scenario_1.pipelines == {"pipeline_2": pipeline_2}
 
-    scenario_1.add_pipelines({"pipeline_1": pipeline_1, "pipeline_3": pipeline_3})
+    scenario_1.add_pipelines({"pipeline_1": {"tasks": [task_1]}, "pipeline_3": {"tasks": [task_1, task_5, task_3]}})
     assert scenario_1.pipelines == {
         "pipeline_2": pipeline_2,
         "pipeline_1": pipeline_1,

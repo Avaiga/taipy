@@ -11,7 +11,6 @@
 
 from __future__ import annotations
 
-import uuid
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
@@ -50,7 +49,7 @@ class Pipeline(_Entity, Submittable, _Labeled):
     """
 
     _ID_PREFIX = "PIPELINE"
-    __SEPARATOR = "_"
+    _SEPARATOR = "_"
     _MANAGER_NAME = "pipeline"
 
     def __init__(
@@ -72,19 +71,8 @@ class Pipeline(_Entity, Submittable, _Labeled):
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
-    def _new_id(pipeline_name: str) -> PipelineId:
-        return PipelineId(
-            Pipeline.__SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(pipeline_name), str(uuid.uuid4())])
-        )
-
-    def __getstate__(self):
-        return self.id
-
-    def __setstate__(self, id):
-        from ... import core as tp
-
-        p = tp.get(id)
-        self.__dict__ = p.__dict__
+    def _new_id(pipeline_name: str, scenario_id) -> PipelineId:
+        return PipelineId(Pipeline._SEPARATOR.join([Pipeline._ID_PREFIX, _validate_id(pipeline_name), scenario_id]))
 
     def __hash__(self):
         return hash(self.id)
@@ -125,8 +113,7 @@ class Pipeline(_Entity, Submittable, _Labeled):
                 data_nodes[k] = v
         return data_nodes
 
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
+    @property
     def parent_ids(self):
         return self._parent_ids
 
@@ -250,10 +237,6 @@ class Pipeline(_Entity, Submittable, _Labeled):
         from ._pipeline_manager_factory import _PipelineManagerFactory
 
         return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
-
-    @staticmethod
-    def __to_task_ids(tasks):
-        return [t.id if isinstance(t, Task) else t for t in tasks]
 
     def get_label(self) -> str:
         """Returns the pipeline simple label prefixed by its owner label.

@@ -53,7 +53,7 @@ class _ScenarioModel(_BaseModel):
     subscribers: List[Dict]
     tags: List[str]
     version: str
-    pipelines: Optional[Union[Dict[str, PipelineId], Dict]] = None
+    pipelines: Optional[Dict[str, Dict]] = None
     cycle: Optional[CycleId] = None
 
     @staticmethod

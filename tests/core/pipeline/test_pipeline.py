@@ -21,11 +21,11 @@ from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
+from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
+from src.taipy.core.task.task import Task, TaskId
 from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 def test_create_pipeline():
@@ -485,27 +485,15 @@ def test_get_set_of_tasks():
 
 
 def test_auto_set_and_reload(task):
-    pipeline_1 = Pipeline({}, [], "foo", owner_id=None, subscribers=None)
     tmp_task = Task("tmp_task_config_id", {}, print, [], [], TaskId("tmp_task_id"))
+    scenario = Scenario("scenario", [task, tmp_task], {}, pipelines={"foo": {}})
 
     _TaskManager._set(task)
     _TaskManager._set(tmp_task)
-    _PipelineManager._set(pipeline_1)
+    _ScenarioManager._set(scenario)
 
+    pipeline_1 = scenario.pipelines["foo"]
     pipeline_2 = _PipelineManager._get(pipeline_1)
-
-    # auto set & reload on parent_ids attribute (set() object does not have auto set yet)
-    assert pipeline_1.parent_ids == set()
-    assert pipeline_2.parent_ids == set()
-    pipeline_1._parent_ids.update(["sc2"])
-    _PipelineManager._set(pipeline_1)
-    assert pipeline_1.parent_ids == {"sc2"}
-    assert pipeline_2.parent_ids == {"sc2"}
-    pipeline_2._parent_ids.clear()
-    pipeline_2._parent_ids.update(["sc1"])
-    _PipelineManager._set(pipeline_2)
-    assert pipeline_1.parent_ids == {"sc1"}
-    assert pipeline_2.parent_ids == {"sc1"}
 
     # auto set & reload on tasks attribute
     assert len(pipeline_1.tasks) == 0
@@ -521,8 +509,8 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_2.tasks) == 1
     assert pipeline_2.tasks[task.config_id].id == task.id
 
-    assert pipeline_1.owner_id is None
-    assert pipeline_2.owner_id is None
+    assert pipeline_1.owner_id == scenario.id
+    assert pipeline_2.owner_id == scenario.id
 
     # auto set & reload on subscribers attribute
     assert len(pipeline_1.subscribers) == 0
@@ -559,8 +547,8 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_2.subscribers) == 0
 
     # auto set & reload on properties attribute
-    assert pipeline_1.properties == {}
-    assert pipeline_2.properties == {}
+    assert pipeline_1.properties == {"name": "foo"}
+    assert pipeline_2.properties == {"name": "foo"}
     pipeline_1.properties["qux"] = 4
     assert pipeline_1.properties["qux"] == 4
     assert pipeline_2.properties["qux"] == 4
@@ -572,11 +560,13 @@ def test_auto_set_and_reload(task):
     pipeline_1.properties["temp_key_2"] = "temp_value_2"
     assert pipeline_1.properties == {
         "qux": 5,
+        "name": "foo",
         "temp_key_1": "temp_value_1",
         "temp_key_2": "temp_value_2",
     }
     assert pipeline_2.properties == {
         "qux": 5,
+        "name": "foo",
         "temp_key_1": "temp_value_1",
         "temp_key_2": "temp_value_2",
     }
@@ -585,34 +575,35 @@ def test_auto_set_and_reload(task):
     assert "temp_key_1" not in pipeline_1.properties.keys()
     assert pipeline_1.properties == {
         "qux": 5,
+        "name": "foo",
         "temp_key_2": "temp_value_2",
     }
     assert pipeline_2.properties == {
         "qux": 5,
+        "name": "foo",
         "temp_key_2": "temp_value_2",
     }
     pipeline_2.properties.pop("temp_key_2")
-    assert pipeline_1.properties == {"qux": 5}
-    assert pipeline_2.properties == {"qux": 5}
+    assert pipeline_1.properties == {"name": "foo", "qux": 5}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5}
     assert "temp_key_2" not in pipeline_1.properties.keys()
     assert "temp_key_2" not in pipeline_2.properties.keys()
 
     pipeline_1.properties["temp_key_3"] = 0
-    assert pipeline_1.properties == {"qux": 5, "temp_key_3": 0}
-    assert pipeline_2.properties == {"qux": 5, "temp_key_3": 0}
+    assert pipeline_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 0}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 0}
     pipeline_1.properties.update({"temp_key_3": 1})
-    assert pipeline_1.properties == {"qux": 5, "temp_key_3": 1}
-    assert pipeline_2.properties == {"qux": 5, "temp_key_3": 1}
+    assert pipeline_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
     pipeline_1.properties.update(dict())
-    assert pipeline_1.properties == {"qux": 5, "temp_key_3": 1}
-    assert pipeline_2.properties == {"qux": 5, "temp_key_3": 1}
+    assert pipeline_1.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
+    assert pipeline_2.properties == {"name": "foo", "qux": 5, "temp_key_3": 1}
     pipeline_1.properties["temp_key_4"] = 0
     pipeline_1.properties["temp_key_5"] = 0
 
     with pipeline_1 as pipeline:
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
-        assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
         assert pipeline.properties["qux"] == 5
@@ -621,7 +612,6 @@ def test_auto_set_and_reload(task):
         assert pipeline.properties["temp_key_5"] == 0
 
         pipeline.tasks = []
-        pipeline.owner_id = None
         pipeline.subscribers = [print]
         pipeline.properties["qux"] = 9
         pipeline.properties.pop("temp_key_3")
@@ -633,7 +623,6 @@ def test_auto_set_and_reload(task):
 
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
-        assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
         assert pipeline.properties["qux"] == 5
@@ -642,7 +631,6 @@ def test_auto_set_and_reload(task):
         assert pipeline.properties["temp_key_5"] == 0
 
     assert len(pipeline_1.tasks) == 0
-    assert pipeline_1.owner_id is None
     assert len(pipeline_1.subscribers) == 1
     assert not pipeline_1._is_in_context
     assert pipeline_1.properties["qux"] == 9

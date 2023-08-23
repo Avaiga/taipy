@@ -192,21 +192,6 @@ class Task(_Entity, _Labeled):
 
         return _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)
 
-    @staticmethod
-    def __to_ids(data_nodes):
-        return [i.id for i in data_nodes]
-
-    @staticmethod
-    def __to_data_nodes(data_nodes_ids):
-        data_nodes = []
-        data_manager = _DataManagerFactory._build_manager()
-        for _id in data_nodes_ids:
-            if data_node := data_manager._get(_id):
-                data_nodes.append(data_node)
-            else:
-                raise NonExistingDataNode(_id)
-        return data_nodes
-
     def get_label(self) -> str:
         """Returns the task simple label prefixed by its owner label.
 

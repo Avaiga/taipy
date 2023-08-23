@@ -101,13 +101,16 @@ def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
     dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
     task_1 = Task("task_config_id_1", {}, print, [dn_1])
     task_2 = Task("task_config_id_2", {}, print, [dn_2])
-    pipeline.tasks = [task_1, task_2]
 
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
-    _PipelineManager._set(pipeline)
+
+    scenario = Scenario("scenario", [task_1, task_2], {}, pipelines={"pipeline": {"tasks": [task_1, task_2]}})
+    _ScenarioManager._set(scenario)
+
+    pipeline = scenario.pipelines["pipeline"]
 
     jobs_1 = taipy.submit(pipeline)
     jobs_2 = taipy.submit(pipeline)
@@ -244,15 +247,15 @@ def test_scenario_only_submit_same_task_once():
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
-    pipeline_1 = Pipeline({}, [task_1, task_2], pipeline_id="pipeline_1")
-    pipeline_2 = Pipeline({}, [task_1, task_3], pipeline_id="pipeline_2")
     scenario_1 = Scenario(
         "scenario_config_1",
         [task_1, task_2, task_3],
         {},
         "scenario_1",
-        pipelines={"pipeline_1": pipeline_1, "pipeline_2": pipeline_2},
+        pipelines={"pipeline_1": {"tasks": [task_1, task_2]}, "pipeline_2": {"tasks": [task_1, task_3]}},
     )
+    pipeline_1 = scenario_1.pipelines["pipeline_1"]
+    pipeline_2 = scenario_1.pipelines["pipeline_2"]
 
     jobs = _Orchestrator.submit(scenario_1)
     assert len(jobs) == 3
@@ -323,16 +326,13 @@ def test_update_status_fail_job_in_parallel():
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
-    pipeline_1 = Pipeline({}, [task_0, task_1, task_2, task_3], pipeline_id="pipeline_1")
-    pipeline_2 = Pipeline({}, [task_0, task_1, task_2], pipeline_id="pipeline_2")
-    pipeline_3 = Pipeline({}, [task_3], pipeline_id="pipeline_3")
     scenario_1 = Scenario(
         "scenario_config_1",
         set([task_0, task_1, task_2, task_3]),
         {},
         set(),
         "scenario_1",
-        pipelines={"pipeline_1": pipeline_1},
+        pipelines={"pipeline_1": {"tasks": [task_0, task_1, task_2, task_3]}},
     )
     scenario_2 = Scenario(
         "scenario_config_2",
@@ -340,7 +340,6 @@ def test_update_status_fail_job_in_parallel():
         {},
         set(),
         "scenario_2",
-        pipelines={"pipeline_2": pipeline_2, "pipeline_3": pipeline_3},
     )
 
     _DataManager._set(dn_0)
@@ -350,11 +349,10 @@ def test_update_status_fail_job_in_parallel():
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
     _TaskManager._set(task_3)
-    _PipelineManager._set(pipeline_1)
-    _PipelineManager._set(pipeline_2)
-    _PipelineManager._set(pipeline_3)
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
+
+    pipeline_1 = scenario_1.pipelines["pipeline_1"]
 
     job = _Orchestrator.submit_task(task_0, "submit_id")
     assert_true_after_time(job.is_failed)

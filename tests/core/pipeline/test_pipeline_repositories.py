@@ -42,6 +42,7 @@ class TestPipelineRepository:
     def test_load_all(self, tmpdir, pipeline, repo):
         repository = repo()
         repository.base_path = tmpdir
+        repository._delete_all()
         for i in range(10):
             pipeline.id = PipelineId(f"pipeline-{i}")
             repository._save(pipeline)
@@ -77,6 +78,7 @@ class TestPipelineRepository:
     def test_delete_all(self, tmpdir, pipeline, repo):
         repository = repo()
         repository.base_path = tmpdir
+        repository._delete_all()
 
         for i in range(10):
             pipeline.id = PipelineId(f"pipeline-{i}")
@@ -92,6 +94,7 @@ class TestPipelineRepository:
     def test_delete_many(self, tmpdir, pipeline, repo):
         repository = repo()
         repository.base_path = tmpdir
+        repository._delete_all()
 
         for i in range(10):
             pipeline.id = PipelineId(f"pipeline-{i}")
@@ -108,6 +111,7 @@ class TestPipelineRepository:
     def test_search(self, tmpdir, pipeline, repo):
         repository = repo()
         repository.base_path = tmpdir
+        repository._delete_all()
 
         for i in range(10):
             pipeline.id = PipelineId(f"pipeline-{i}")

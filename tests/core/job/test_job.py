@@ -26,6 +26,7 @@ from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
+from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
@@ -48,20 +49,20 @@ def job_id():
 
 
 @pytest.fixture(scope="class")
-def pipeline():
-    return Pipeline(
+def scenario():
+    return Scenario(
+        "scenario_config",
+        [],
         {},
         [],
-        PipelineId(Pipeline._ID_PREFIX + "pipeline_id"),
-        owner_id="owner_id",
-        parent_ids={"parent_id_1", "parent_id_2"},
+        "SCENARIO_scenario_config",
         version="random_version_number",
     )
 
 
 @pytest.fixture
 def job(task, job_id):
-    return Job(job_id, task, "submit_id", Pipeline._ID_PREFIX + "pipeline_id")
+    return Job(job_id, task, "submit_id", "SCENARIO_scenario_config")
 
 
 @pytest.fixture
@@ -80,17 +81,17 @@ def _error():
     raise RuntimeError("Something bad has happened")
 
 
-def test_create_job(pipeline, task, job):
-    from src.taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+def test_create_job(scenario, task, job):
+    from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
-    _PipelineManagerFactory._build_manager()._set(pipeline)
+    _ScenarioManagerFactory._build_manager()._set(scenario)
 
     assert job.id == "id1"
     assert task in job
     assert job.is_submitted()
     assert job.submit_id is not None
-    assert job.submit_entity_id == Pipeline._ID_PREFIX + "pipeline_id"
-    assert job.submit_entity == pipeline
+    assert job.submit_entity_id == "SCENARIO_scenario_config"
+    assert job.submit_entity == scenario
     with mock.patch("src.taipy.core.get") as get_mck:
         get_mck.return_value = task
         assert job.get_label() == "name > " + job.id

@@ -66,7 +66,6 @@ def test_set_and_get_scenario(cycle):
     additional_dn_2 = InMemoryDataNode("zyx", Scope.SCENARIO)
     task_name_2 = "task_2"
     task_2 = Task(task_name_2, {}, print, [input_dn_2], [output_dn_2], TaskId("task_id_2"))
-    pipeline_2 = Pipeline({}, [task_2], PipelineId("pipeline_id_2"))
     scenario_id_2 = ScenarioId("scenario_id_2")
     scenario_2 = Scenario(
         "scenario_name_2",
@@ -77,13 +76,12 @@ def test_set_and_get_scenario(cycle):
         datetime.now(),
         True,
         cycle,
-        pipelines={"pipeline_2": pipeline_2},
+        pipelines={"pipeline_2": {"tasks": [task_2]}},
     )
 
     additional_dn_3 = InMemoryDataNode("baz", Scope.SCENARIO)
     task_name_3 = "task_3"
     task_3 = Task(task_name_3, {}, print, id=TaskId("task_id_3"))
-    pipeline_3 = Pipeline({}, [], PipelineId("pipeline_id_3"))
     scenario_3_with_same_id = Scenario(
         "scenario_name_3",
         [task_3],
@@ -93,7 +91,7 @@ def test_set_and_get_scenario(cycle):
         datetime.now(),
         False,
         cycle,
-        pipelines={"pipeline_3": pipeline_3},
+        pipelines={"pipeline_3": {}},
     )
 
     # No existing scenario
@@ -123,7 +121,6 @@ def test_set_and_get_scenario(cycle):
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     _TaskManager._set(task_2)
-    _PipelineManager._set(pipeline_2)
     _CycleManager._set(cycle)
     _ScenarioManager._set(scenario_2)
     _DataManager._set(additional_dn_2)
@@ -192,7 +189,6 @@ def test_set_and_get_scenario(cycle):
     _DataManager._set(additional_dn_3)
     _TaskManager._set(task_3)
     _TaskManager._set(scenario_2.tasks[task_name_2])
-    _PipelineManager._set(pipeline_3)
     _ScenarioManager._set(scenario_3_with_same_id)
     assert len(_ScenarioManager._get_all()) == 2
     assert _ScenarioManager._get(scenario_id_1).id == scenario_1.id
@@ -231,7 +227,7 @@ def test_get_all_on_multiple_versions_environment():
     for version in range(1, 3):
         for i in range(5):
             _ScenarioManager._set(
-                Scenario(f"config_id_{i+version}", [], {}, ScenarioId(f"id{i}_v{version}"), version=f"{version}.0")
+                Scenario(f"config_id_{i+version}", [], {}, [], ScenarioId(f"id{i}_v{version}"), version=f"{version}.0")
             )
 
     _VersionManager._set_experiment_version("1.0")
@@ -394,7 +390,7 @@ def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
     )
     scenario_config_1.add_sequences({"pipeline_1": [task_config_1, task_config_2]})
     scenario_config_2 = Config.configure_scenario(
-        "scenario_2", [task_config_1, task_config_3], [additional_dn_config_1, additional_dn_config_2]
+        "scenario_2", [task_config_1, task_config_2, task_config_3], [additional_dn_config_1, additional_dn_config_2]
     )
     scenario_config_2.add_sequences(
         {"pipeline_1": [task_config_1, task_config_2], "pipeline_2": [task_config_1, task_config_3]}
@@ -421,16 +417,17 @@ def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
     pipeline_2_s2 = scenario_2.pipelines["pipeline_2"]
 
     assert all([pipeline.parent_ids == {scenario_2.id} for pipeline in scenario_2.pipelines.values()])
-    tasks = {**scenario_1.tasks, **scenario_2.tasks}
-    assert tasks["task_1"].parent_ids == {
+    assert scenario_1.tasks["task_1"] == scenario_2.tasks["task_1"]
+    assert scenario_1.tasks["task_1"].parent_ids == {
         scenario_1.id,
-        scenario_2.id,
         pipeline_1_s1.id,
+        scenario_2.id,
         pipeline_1_s2.id,
         pipeline_2_s2.id,
     }
-    assert tasks["task_2"].parent_ids == {scenario_1.id, pipeline_1_s1.id}
-    assert tasks["task_3"].parent_ids == {scenario_2.id, pipeline_2_s2.id}
+    assert scenario_1.tasks["task_2"].parent_ids == {scenario_1.id, pipeline_1_s1.id}
+    assert scenario_2.tasks["task_2"].parent_ids == {scenario_2.id, pipeline_1_s2.id}
+    assert scenario_2.tasks["task_3"].parent_ids == {scenario_2.id, pipeline_2_s2.id}
     additional_data_nodes = scenario_2.additional_data_nodes
     assert additional_data_nodes["additional_dn_1"].parent_ids == {scenario_1.id, scenario_2.id}
     assert additional_data_nodes["additional_dn_2"].parent_ids == {scenario_2.id}
@@ -909,7 +906,7 @@ def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
     assert len(_JobManager._get_all()) == 2
     _ScenarioManager._hard_delete(scenario_1.id)
     assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 2
+    assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 2
@@ -957,7 +954,7 @@ def test_hard_delete_shared_entities():
     _ScenarioManager._hard_delete(scenario_2.id)
     assert len(_CycleManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 6
+    assert len(_PipelineManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 4
     assert len(_DataManager._get_all()) == 4
     assert len(_JobManager._get_all()) == 6

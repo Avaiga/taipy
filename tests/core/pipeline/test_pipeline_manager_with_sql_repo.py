@@ -25,20 +25,14 @@ from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.pipeline.pipeline_id import PipelineId
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-
-
-def init_managers():
-    _ScenarioManagerFactory._build_manager()._delete_all()
-    _PipelineManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _DataManagerFactory._build_manager()._delete_all()
-    _JobManagerFactory._build_manager()._delete_all()
+from tests.conftest import init_managers
 
 
 def test_set_and_get_pipeline(init_sql_repo):
@@ -47,22 +41,24 @@ def test_set_and_get_pipeline(init_sql_repo):
     init_managers()
     _OrchestratorFactory._build_dispatcher()
 
-    pipeline_id_1 = PipelineId("id1")
-    pipeline_1 = Pipeline({}, [], pipeline_id_1)
+    input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
+    output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
+    task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
 
-    pipeline_id_2 = PipelineId("id2")
-    input_2 = InMemoryDataNode("foo", Scope.SCENARIO)
-    output_2 = InMemoryDataNode("foo", Scope.SCENARIO)
-    task_2 = Task("task", {}, print, [input_2], [output_2], TaskId("task_id_2"))
-    pipeline_2 = Pipeline({}, [task_2], pipeline_id_2)
+    scenario = Scenario("scenario", set([task]), {}, set())
+    _ScenarioManager._set(scenario)
 
-    pipeline_3_with_same_id = Pipeline({}, [], pipeline_id_1)
+    pipeline_name_1 = "p1"
+    pipeline_id_1 = PipelineId(f"PIPELINE_{pipeline_name_1}_{scenario.id}")
+    pipeline_name_2 = "p2"
+    pipeline_id_2 = PipelineId(f"PIPELINE_{pipeline_name_2}_{scenario.id}")
 
     # No existing Pipeline
     assert _PipelineManager._get(pipeline_id_1) is None
-    assert _PipelineManager._get(pipeline_1) is None
     assert _PipelineManager._get(pipeline_id_2) is None
-    assert _PipelineManager._get(pipeline_2) is None
+
+    scenario.add_pipelines({pipeline_name_1: {"tasks": []}})
+    pipeline_1 = scenario.pipelines[pipeline_name_1]
 
     # Save one pipeline. We expect to have only one pipeline stored
     _PipelineManager._set(pipeline_1)
@@ -71,11 +67,11 @@ def test_set_and_get_pipeline(init_sql_repo):
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
     assert len(_PipelineManager._get(pipeline_1).tasks) == 0
     assert _PipelineManager._get(pipeline_id_2) is None
-    assert _PipelineManager._get(pipeline_2) is None
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
-    _TaskManager._set(task_2)
-    _PipelineManager._set(pipeline_2)
+    _TaskManager._set(task)
+    scenario.add_pipelines({pipeline_name_2: {"tasks": [task]}})
+    pipeline_2 = scenario.pipelines[pipeline_name_2]
     assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
     assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
@@ -84,10 +80,10 @@ def test_set_and_get_pipeline(init_sql_repo):
     assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
     assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
-    assert _TaskManager._get(task_2.id).id == task_2.id
 
     # We save the first pipeline again. We expect nothing to change
-    _PipelineManager._set(pipeline_1)
+    scenario.add_pipelines({pipeline_name_1: {}})
+    pipeline_1 = scenario.pipelines[pipeline_name_1]
     assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
     assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
@@ -96,52 +92,76 @@ def test_set_and_get_pipeline(init_sql_repo):
     assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
     assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
-    assert _TaskManager._get(task_2.id).id == task_2.id
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
-    _PipelineManager._set(pipeline_3_with_same_id)
+    scenario.add_pipelines({pipeline_name_1: {"tasks": [task]}})
+    pipeline_3 = scenario.pipelines[pipeline_name_1]
     assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
-    assert _PipelineManager._get(pipeline_id_1).id == pipeline_3_with_same_id.id
-    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_id_1).id == pipeline_3.id
+    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 1
     assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
-    assert len(_PipelineManager._get(pipeline_1).tasks) == 0
+    assert len(_PipelineManager._get(pipeline_1).tasks) == 1
     assert _PipelineManager._get(pipeline_id_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
     assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
     assert len(_PipelineManager._get(pipeline_2).tasks) == 1
-    assert _TaskManager._get(task_2.id).id == task_2.id
+    assert _TaskManager._get(task.id).id == task.id
 
 
 def test_get_all_on_multiple_versions_environment(init_sql_repo):
     init_managers()
 
-    # Create 5 pipelines with 2 versions each
-    # Only version 1.0 has the pipeline with config_id = "config_id_1"
-    # Only version 2.0 has the pipeline with config_id = "config_id_6"
+    # Create 5 pipelines from Scenario with 2 versions each
     for version in range(1, 3):
         for i in range(5):
-            _PipelineManager._set(Pipeline({}, [], PipelineId(f"id_{i}_v{version}"), version=f"{version}.0"))
+            _ScenarioManager._set(
+                Scenario(
+                    f"config_id_{i+version}",
+                    [],
+                    {},
+                    [],
+                    f"SCENARIO_id_{i}_v{version}",
+                    version=f"{version}.0",
+                    pipelines={"pipeline": {}},
+                )
+            )
 
     _VersionManager._set_experiment_version("1.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "id_1_v1"}])) == 1
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v1"}])) == 0
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 1
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 0
+    )
 
     _VersionManager._set_experiment_version("2.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v1"}])) == 0
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v2"}])) == 1
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 0
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v2"}])) == 1
+    )
 
     _VersionManager._set_development_version("1.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "id_1_v1"}])) == 1
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "id_1_v2"}])) == 0
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 1
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "1.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v2"}])) == 0
+    )
 
     _VersionManager._set_development_version("2.0")
     assert len(_PipelineManager._get_all()) == 5
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v1"}])) == 0
-    assert len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "id_1_v2"}])) == 1
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v1"}])) == 0
+    )
+    assert (
+        len(_PipelineManager._get_all_by(filters=[{"version": "2.0", "id": "PIPELINE_pipeline_SCENARIO_id_1_v2"}])) == 1
+    )
 
 
 def mult_by_two(nb: int):
@@ -165,14 +185,18 @@ def test_get_or_create_data(init_sql_repo):
     task_config_mult_by_two = Config.configure_task("mult_by_two", mult_by_two, [dn_config_1], dn_config_2)
     task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
     # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
+    scenario_config = Config.configure_scenario("scenario", [task_config_mult_by_two, task_config_mult_by_3])
 
     _OrchestratorFactory._build_dispatcher()
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
 
-    p_tasks = _TaskManager._bulk_get_or_create([task_config_mult_by_two, task_config_mult_by_3])
-    pipeline = _PipelineManager._create("by_6", p_tasks)
+    scenario = _ScenarioManager._create(scenario_config)
+    scenario.add_pipelines({"by_6": {"tasks": list(scenario.tasks.values())}})
+    pipeline = scenario.pipelines["by_6"]
+
+    assert pipeline.name == "by_6"
 
     assert len(_DataManager._get_all()) == 3
     assert len(_TaskManager._get_all()) == 2
@@ -214,16 +238,19 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes(init_sql_repo)
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._create("pipeline", tasks)
+    scenario = Scenario("scenario", tasks, {}, pipelines={"pipeline": {"tasks": tasks}})
+    _ScenarioManager._set(scenario)
+
+    pipeline = scenario.pipelines["pipeline"]
     pipeline.submit()
 
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
     _PipelineManager._hard_delete(pipeline.id)
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
@@ -242,16 +269,19 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes(init_sql_repo):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    pipeline = _PipelineManager._create("pipeline", tasks)
+    scenario = Scenario("scenario", tasks, {}, pipelines={"pipeline": {"tasks": tasks}})
+    _ScenarioManager._set(scenario)
+
+    pipeline = scenario.pipelines["pipeline"]
     pipeline.submit()
 
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
     _PipelineManager._hard_delete(pipeline.id)
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
@@ -273,43 +303,25 @@ def test_hard_delete_shared_entities(init_sql_repo):
 
     tasks_scenario_1 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_1")
     tasks_scenario_2 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_2")
-    pipeline_1 = _PipelineManager._create("pipeline", tasks_scenario_1, scenario_id="scenario_id_1")
-    pipeline_2 = _PipelineManager._create("pipeline", tasks_scenario_2, scenario_id="scenario_id_2")
+
+    scenario_1 = Scenario("scenario_1", tasks_scenario_1, {}, pipelines={"pipeline": {"tasks": tasks_scenario_1}})
+    scenario_2 = Scenario("scenario_2", tasks_scenario_2, {}, pipelines={"pipeline": {"tasks": tasks_scenario_2}})
+    _ScenarioManager._set(scenario_1)
+    _ScenarioManager._set(scenario_2)
+    pipeline_1 = scenario_1.pipelines["pipeline"]
+    pipeline_2 = scenario_2.pipelines["pipeline"]
+
     _PipelineManager._submit(pipeline_1.id)
     _PipelineManager._submit(pipeline_2.id)
 
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 3
     assert len(_DataManager._get_all()) == 4
     assert len(_JobManager._get_all()) == 4
     _PipelineManager._hard_delete(pipeline_1.id)
-    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 3
     assert len(_DataManager._get_all()) == 4
     assert len(_JobManager._get_all()) == 4
-
-
-def test_data_node_creation_scenario(init_sql_repo):
-    init_managers()
-
-    input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
-    input_global_dn = Config.configure_data_node("my_global_input", "in_memory", scope=Scope.GLOBAL)
-    input_global_dn_2 = Config.configure_data_node("my_global_input_2", "in_memory", scope=Scope.GLOBAL)
-    intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.SCENARIO)
-    output_dn = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
-    task_1 = Config.configure_task("task_1", print, [input_dn, input_global_dn, input_global_dn_2], intermediate_dn)
-    task_2 = Config.configure_task("task_2", print, [input_dn, intermediate_dn], output_dn)
-
-    tasks_pipeline_1 = _TaskManager._bulk_get_or_create([task_1, task_2])
-    tasks_pipeline_2 = _TaskManager._bulk_get_or_create([task_1, task_2])
-    pipeline_1 = _PipelineManager._create("pipeline", tasks_pipeline_1)
-    pipeline_2 = _PipelineManager._create("pipeline", tasks_pipeline_2)
-
-    assert len(_DataManager._get_all()) == 5
-    assert pipeline_1.my_input.id == pipeline_2.my_input.id
-    assert pipeline_1.my_global_input.id == pipeline_2.my_global_input.id
-    assert pipeline_1.my_global_input_2.id == pipeline_2.my_global_input_2.id
-    assert pipeline_1.my_inter.id == pipeline_2.my_inter.id
-    assert pipeline_1.my_output.id == pipeline_2.my_output.id

@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
-from typing import Optional, Set, Union
+from typing import Dict, List, Optional, Set, Union
 
 from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
@@ -18,7 +18,6 @@ from ..common import _utils
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle, CycleId
 from ..data.data_node import DataNode, DataNodeId
-from ..pipeline.pipeline import Pipeline
 from ..scenario._scenario_model import _ScenarioModel
 from ..scenario.scenario import Scenario
 from ..task.task import Task, TaskId
@@ -27,13 +26,23 @@ from ..task.task import Task, TaskId
 class _ScenarioConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, scenario: Scenario) -> _ScenarioModel:
+        pipelines: Dict[str, Dict[str, Union[List[TaskId], Dict, List]]] = {}
+        for p_name, pipeline_data in scenario._pipelines.items():
+            pipelines[p_name] = {
+                Scenario._PIPELINE_TASKS_KEY: [
+                    t.id if isinstance(t, Task) else t for t in pipeline_data.get("tasks", [])
+                ],
+                Scenario._PIPELINE_PROPERTIES_KEY: pipeline_data.get("properties", {}),
+                Scenario._PIPELINE_SUBSCRIBERS_KEY: _utils._fcts_to_dict(pipeline_data.get("subscribers", [])),
+            }
+
         return _ScenarioModel(
             id=scenario.id,
             config_id=scenario.config_id,
             tasks=[task.id if isinstance(task, Task) else TaskId(str(task)) for task in list(scenario._tasks)],
             additional_data_nodes=[
                 dn.id if isinstance(dn, DataNode) else DataNodeId(str(dn))
-                for dn in list(scenario._additional_data_nodes)  # type: ignore
+                for dn in list(scenario._additional_data_nodes)
             ],
             properties=scenario._properties.data,
             creation_date=scenario._creation_date.isoformat(),
@@ -42,9 +51,7 @@ class _ScenarioConverter(_AbstractConverter):
             tags=list(scenario._tags),
             version=scenario._version,
             cycle=scenario._cycle.id if scenario._cycle else None,
-            pipelines={p_name: p.id if isinstance(p, Pipeline) else p for p_name, p in scenario._pipelines.items()}
-            if scenario._pipelines
-            else {},
+            pipelines=pipelines if pipelines else None,
         )
 
     @classmethod
@@ -52,9 +59,13 @@ class _ScenarioConverter(_AbstractConverter):
         tasks: Union[Set[TaskId], Set[Task], Set] = set()
         if model.tasks:
             tasks = set(model.tasks)
-        else:
-            if model.pipelines:
-                tasks = Scenario._get_set_of_tasks_from_pipelines(model.pipelines)
+        if model.pipelines:
+            for pipeline_name, pipeline_data in model.pipelines.items():
+                if subscribers := pipeline_data.get(Scenario._PIPELINE_SUBSCRIBERS_KEY):
+                    model.pipelines[pipeline_name][Scenario._PIPELINE_SUBSCRIBERS_KEY] = [
+                        _utils._Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                        for it in subscribers
+                    ]
 
         scenario = Scenario(
             scenario_id=model.id,
