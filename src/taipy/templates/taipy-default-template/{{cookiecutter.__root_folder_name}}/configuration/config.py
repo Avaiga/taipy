@@ -8,10 +8,10 @@ from algorithms import *
 
 from taipy import Config
 
-# ##################################################################################################################
-# PLACEHOLDER: Put your application's configurations here                                                                      #
-#                                                                                                                  #
-# Example:                                                                                                         #
-# scenario_config = Config.configure_scenario("placeholder_scenario", [])                                          #                                                                                                        #
-# Comment, remove or replace the previous lines with your own use case                                             #
-# ##################################################################################################################
+# #############################################################################
+# PLACEHOLDER: Put your application's configurations here                     #
+#                                                                             #
+# Example:                                                                    #
+# scenario_config = Config.configure_scenario("placeholder_scenario", [])     #
+# Comment, remove or replace the previous lines with your own use case        #
+# #############################################################################
