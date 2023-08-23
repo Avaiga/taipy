@@ -143,6 +143,7 @@ scope = "GLOBAL:SCOPE"
 validity_period = "1d0h0m0s:timedelta"
 path = "./test.csv"
 exposed_type = "tests.core.config.test_config_serialization.CustomClass:class"
+encoding = "utf-8"
 has_header = "True:bool"
 
 [DATA_NODE.test_json_dn]
@@ -151,6 +152,7 @@ scope = "SCENARIO:SCOPE"
 default_path = "./test.json"
 encoder = "tests.core.config.test_config_serialization.CustomEncoder:class"
 decoder = "tests.core.config.test_config_serialization.CustomDecoder:class"
+encoding = "utf-8"
 
 [DATA_NODE.test_pickle_dn]
 storage_type = "pickle"
@@ -230,10 +232,12 @@ sequence1 = [ "test_task:SECTION",]
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].validity_period == datetime.timedelta(1)
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].encoding == "utf-8"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].storage_type == "json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].scope == Scope.SCENARIO
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoding == "utf-8"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
     assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].storage_type == "pickle"
@@ -321,6 +325,7 @@ def test_read_write_json_configuration_file():
 "validity_period": "1d0h0m0s:timedelta",
 "path": "./test.csv",
 "exposed_type": "tests.core.config.test_config_serialization.CustomClass:class",
+"encoding": "utf-8",
 "has_header": "True:bool"
 },
 "test_json_dn": {
@@ -328,7 +333,8 @@ def test_read_write_json_configuration_file():
 "scope": "SCENARIO:SCOPE",
 "default_path": "./test.json",
 "encoder": "tests.core.config.test_config_serialization.CustomEncoder:class",
-"decoder": "tests.core.config.test_config_serialization.CustomDecoder:class"
+"decoder": "tests.core.config.test_config_serialization.CustomDecoder:class",
+"encoding": "utf-8"
 },
 "test_pickle_dn": {
 "storage_type": "pickle",
@@ -427,10 +433,12 @@ def test_read_write_json_configuration_file():
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].validity_period == datetime.timedelta(1)
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].has_header is True
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].path == "./test.csv"
+    assert Config.sections[DataNodeConfig.name]["test_csv_dn"].encoding == "utf-8"
     assert Config.sections[DataNodeConfig.name]["test_csv_dn"].exposed_type == CustomClass
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].storage_type == "json"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].scope == Scope.SCENARIO
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].default_path == "./test.json"
+    assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoding == "utf-8"
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].encoder == CustomEncoder
     assert Config.sections[DataNodeConfig.name]["test_json_dn"].decoder == CustomDecoder
     assert Config.sections[DataNodeConfig.name]["test_pickle_dn"].storage_type == "pickle"

@@ -57,6 +57,8 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             must have a _"default_path"_ or _"path"_ entry with the path of the CSV file:
 
             - _"default_path"_ `(str)`: The default path of the CSV file.\n
+            - _"encoding"_ `(str)`: The encoding of the CSV file. The default value is `utf-8`.\n
+            - _"default_data"_: The default data of the data nodes instantiated from this csv data node.\n
             - _"has_header"_ `(bool)`: If True, indicates that the CSV file has a header.\n
             - _"exposed_type"_: The exposed type of the data read from CSV file. The default value is `pandas`.\n
     """
@@ -69,6 +71,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_PATH_KEY = "default_path"
+    __ENCODING_KEY = "encoding"
     __DEFAULT_DATA_KEY = "default_data"
     __HAS_HEADER_PROPERTY = "has_header"
     _REQUIRED_PROPERTIES: List[str] = []
@@ -82,16 +85,19 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
-        version: str = None,
+        edits: Optional[List[Edit]] = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
-        properties: Dict = None,
+        properties: Optional[Dict] = None,
     ):
         if properties is None:
             properties = {}
 
         default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
+
+        if self.__ENCODING_KEY not in properties.keys():
+            properties[self.__ENCODING_KEY] = "utf-8"
 
         if self.__HAS_HEADER_PROPERTY not in properties.keys():
             properties[self.__HAS_HEADER_PROPERTY] = True
@@ -129,6 +135,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                 self.__EXPOSED_TYPE_PROPERTY,
                 self.__PATH_KEY,
                 self.__DEFAULT_PATH_KEY,
+                self.__ENCODING_KEY,
                 self.__DEFAULT_DATA_KEY,
                 self.__HAS_HEADER_PROPERTY,
             }
@@ -161,7 +168,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
     def _read_as(self):
         custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
-        with open(self._path) as csvFile:
+        with open(self._path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
             res = list()
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
@@ -184,12 +191,14 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         try:
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return pd.read_csv(self._path)[column_names]
-                return pd.read_csv(self._path)
+                    return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
+                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
             else:
                 if usecols:
-                    return pd.read_csv(self._path, header=None, usecols=usecols)
-                return pd.read_csv(self._path, header=None)
+                    return pd.read_csv(
+                        self._path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
+                    )
+                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], header=None)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
@@ -199,32 +208,34 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         try:
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return modin_pd.read_csv(self._path)[column_names]
-                return modin_pd.read_csv(self._path)
+                    return modin_pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
+                return modin_pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
             else:
                 if usecols:
-                    return modin_pd.read_csv(self._path, header=None, usecols=usecols)
-                return modin_pd.read_csv(self._path, header=None)
+                    return modin_pd.read_csv(
+                        self._path, header=None, usecols=usecols, encoding=self.properties[self.__ENCODING_KEY]
+                    )
+                return modin_pd.read_csv(self._path, header=None, encoding=self.properties[self.__ENCODING_KEY])
         except pd.errors.EmptyDataError:
             return modin_pd.DataFrame()
 
     def _write(self, data: Any):
         if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-            data.to_csv(self._path, index=False)
+            data.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
         else:
-            pd.DataFrame(data).to_csv(self._path, index=False)
+            pd.DataFrame(data).to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
 
-    def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
+    def write_with_column_names(self, data: Any, columns: Optional[List[str]] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.
 
         Parameters:
             data (Any): The data to write.
-            columns (List[str]): The list of column names to write.
+            columns (Optional[List[str]]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
         if not columns:
             df = pd.DataFrame(data)
         else:
             df = pd.DataFrame(data, columns=columns)
-        df.to_csv(self._path, index=False)
+        df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
         self._track_edit(timestamp=datetime.now(), job_id=job_id)

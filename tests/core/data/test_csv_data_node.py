@@ -218,6 +218,24 @@ class TestCSVDataNode:
         csv_dn.write(None)
         assert len(csv_dn.read()) == 0
 
+    def test_write_with_different_encoding(self, csv_file):
+        data = pd.DataFrame([{"≥a": 1, "b": 2}])
+
+        utf8_dn = CSVDataNode("utf8_dn", Scope.SCENARIO, properties={"default_path": csv_file})
+        utf16_dn = CSVDataNode("utf16_dn", Scope.SCENARIO, properties={"default_path": csv_file, "encoding": "utf-16"})
+
+        # If a file is written with utf-8 encoding, it can only be read with utf-8, not utf-16 encoding
+        utf8_dn.write(data)
+        assert np.array_equal(utf8_dn.read(), data)
+        with pytest.raises(UnicodeError):
+            utf16_dn.read()
+
+        # If a file is written with utf-16 encoding, it can only be read with utf-16, not utf-8 encoding
+        utf16_dn.write(data)
+        assert np.array_equal(utf16_dn.read(), data)
+        with pytest.raises(UnicodeError):
+            utf8_dn.read()
+
     @pytest.mark.parametrize(
         "content,columns",
         [
@@ -240,6 +258,26 @@ class TestCSVDataNode:
 
         csv_dn.write(None)
         assert len(csv_dn.read()) == 0
+
+    def test_write_modin_with_different_encoding(self, csv_file):
+        data = pd.DataFrame([{"≥a": 1, "b": 2}])
+
+        utf8_dn = CSVDataNode("utf8_dn", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "modin"})
+        utf16_dn = CSVDataNode(
+            "utf16_dn", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "modin", "encoding": "utf-16"}
+        )
+
+        # If a file is written with utf-8 encoding, it can only be read with utf-8, not utf-16 encoding
+        utf8_dn.write(data)
+        assert np.array_equal(utf8_dn.read(), data)
+        with pytest.raises(UnicodeError):
+            utf16_dn.read()
+
+        # If a file is written with utf-16 encoding, it can only be read with utf-16, not utf-8 encoding
+        utf16_dn.write(data)
+        assert np.array_equal(utf16_dn.read(), data)
+        with pytest.raises(UnicodeError):
+            utf8_dn.read()
 
     def test_set_path(self):
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"default_path": "foo.csv"})

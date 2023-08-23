@@ -82,6 +82,10 @@ class DataNodeConfig(Section):
         _EXPOSED_TYPE_MODIN,
         _EXPOSED_TYPE_NUMPY,
     ]
+
+    _OPTIONAL_ENCODING_PROPERTY = "encoding"
+    _DEFAULT_ENCODING_VALUE = "utf-8"
+
     # Generic
     _OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY = "read_fct"
     _OPTIONAL_READ_FUNCTION_ARGS_GENERIC_PROPERTY = "read_fct_args"
@@ -174,6 +178,7 @@ class DataNodeConfig(Section):
         },
         _STORAGE_TYPE_VALUE_CSV: {
             _OPTIONAL_DEFAULT_PATH_CSV_PROPERTY: None,
+            _OPTIONAL_ENCODING_PROPERTY: _DEFAULT_ENCODING_VALUE,
             _OPTIONAL_HAS_HEADER_CSV_PROPERTY: True,
             _OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY: _DEFAULT_EXPOSED_TYPE,
         },
@@ -220,6 +225,7 @@ class DataNodeConfig(Section):
         },
         _STORAGE_TYPE_VALUE_JSON: {
             _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY: None,
+            _OPTIONAL_ENCODING_PROPERTY: _DEFAULT_ENCODING_VALUE,
             _OPTIONAL_ENCODER_JSON_PROPERTY: None,
             _OPTIONAL_DECODER_JSON_PROPERTY: None,
         },
@@ -467,6 +473,7 @@ class DataNodeConfig(Section):
         cls,
         id: str,
         default_path: Optional[str] = None,
+        encoding: Optional[str] = None,
         has_header: Optional[bool] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
@@ -478,6 +485,7 @@ class DataNodeConfig(Section):
         Parameters:
             id (str): The unique identifier of the new CSV data node configuration.
             default_path (Optional[str]): The default path of the CSV file.
+            encoding (Optional[str]): The encoding of the CSV file.
             has_header (Optional[bool]): If True, indicates that the CSV file has a header.
             exposed_type (Optional[str]): The exposed type of the data read from CSV file.<br/>
                 The default value is `pandas`.
@@ -495,6 +503,8 @@ class DataNodeConfig(Section):
         """
         if default_path is not None:
             properties[cls._OPTIONAL_DEFAULT_PATH_CSV_PROPERTY] = default_path
+        if encoding is not None:
+            properties[cls._OPTIONAL_ENCODING_PROPERTY] = encoding
         if has_header is not None:
             properties[cls._OPTIONAL_HAS_HEADER_CSV_PROPERTY] = has_header
         if exposed_type is not None:
@@ -507,6 +517,7 @@ class DataNodeConfig(Section):
         cls,
         id: str,
         default_path: Optional[str] = None,
+        encoding: Optional[str] = None,
         encoder: Optional[json.JSONEncoder] = None,
         decoder: Optional[json.JSONDecoder] = None,
         scope: Optional[Scope] = None,
@@ -518,6 +529,7 @@ class DataNodeConfig(Section):
         Parameters:
             id (str): The unique identifier of the new JSON data node configuration.
             default_path (Optional[str]): The default path of the JSON file.
+            encoding (Optional[str]): The encoding of the JSON file.
             encoder (Optional[json.JSONEncoder]): The JSON encoder used to write data into the JSON file.
             decoder (Optional[json.JSONDecoder]): The JSON decoder used to read data from the JSON file.
             scope (Optional[Scope^]): The scope of the JSON data node configuration.<br/>
@@ -533,6 +545,8 @@ class DataNodeConfig(Section):
         """
         if default_path is not None:
             properties[cls._OPTIONAL_DEFAULT_PATH_JSON_PROPERTY] = default_path
+        if encoding is not None:
+            properties[cls._OPTIONAL_ENCODING_PROPERTY] = encoding
         if encoder is not None:
             properties[cls._OPTIONAL_ENCODER_JSON_PROPERTY] = encoder
         if decoder is not None:
