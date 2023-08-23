@@ -39,12 +39,16 @@ def handle_services(use_rest, use_core):
                 main_file.write("    core = Core()\n")
 
         # Create and submit the placeholder scenario
-        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
-            import_file.write("\nfrom configuration import scenario_config\n")
         with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
-            main_file.write("    scenario = tp.create_scenario(scenario_config)\n")
-            main_file.write("    scenario.submit()\n")
-
+            main_file.write("    # #############################################################################\n")
+            main_file.write("    # PLACEHOLDER: Initialize your data application here                          #\n")
+            main_file.write("    #                                                                             #\n")
+            main_file.write("    # Example:                                                                    #\n")
+            main_file.write("    # from configuration import scenario_config                                   #\n")
+            main_file.write("    # scenario = tp.create_scenario(scenario_config)                              #\n")
+            main_file.write("    # scenario.submit()                                                           #\n")
+            main_file.write("    # Comment, remove or replace the previous lines with your own use case        #\n")
+            main_file.write("    # #############################################################################\n")
     else:
         shutil.rmtree(os.path.join(os.getcwd(), "algorithms"))
         shutil.rmtree(os.path.join(os.getcwd(), "configuration"))
