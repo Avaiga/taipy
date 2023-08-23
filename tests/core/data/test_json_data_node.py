@@ -177,6 +177,26 @@ class TestJSONDataNode:
         json_dn.write(data)
         assert np.array_equal(json_dn.read(), data)
 
+    def test_write_with_different_encoding(self, json_file):
+        data = {"≥a": 1, "b": 2}
+
+        utf8_dn = JSONDataNode("utf8_dn", Scope.SCENARIO, properties={"default_path": json_file})
+        utf16_dn = JSONDataNode(
+            "utf16_dn", Scope.SCENARIO, properties={"default_path": json_file, "encoding": "utf-16"}
+        )
+
+        # If a file is written with utf-8 encoding, it can only be read with utf-8, not utf-16 encoding
+        utf8_dn.write(data)
+        assert np.array_equal(utf8_dn.read(), data)
+        with pytest.raises(UnicodeError):
+            utf16_dn.read()
+
+        # If a file is written with utf-16 encoding, it can only be read with utf-16, not utf-8 encoding
+        utf16_dn.write(data)
+        assert np.array_equal(utf16_dn.read(), data)
+        with pytest.raises(UnicodeError):
+            utf8_dn.read()
+
     def test_write_non_serializable(self, json_file):
         json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})
         data = {"a": 1, "b": json_dn}

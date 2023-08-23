@@ -60,7 +60,7 @@ def test_set_default_data_node_configuration_replace_old_default_config():
     )
     dn2 = Config.configure_data_node(id="dn2")
     assert dn2.storage_type == "csv"
-    assert len(dn2.properties) == 5  # exposed_type and has_header too
+    assert len(dn2.properties) == 6  # encoding, exposed_type, and has_header too
     assert dn2.prop4 == "4"
     assert dn2.prop5 == "5"
     assert dn2.prop6 == "6"
@@ -79,7 +79,7 @@ def test_config_storage_type_different_from_default_data_node():
     # Config a datanode with specific "storage_type" different than "pickle"
     # should ignore the default datanode
     csv_dn = Config.configure_data_node(id="csv_dn", storage_type="csv")
-    assert len(csv_dn.properties) == 2
+    assert len(csv_dn.properties) == 3  # encoding, exposed_type, and has_header
     assert csv_dn.properties.get("custom_property") is None
     assert csv_dn.scope == Scope.SCENARIO
 

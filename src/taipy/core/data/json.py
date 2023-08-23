@@ -54,13 +54,18 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         encoder (json.JSONEncoder): The JSON encoder that is used to write into the JSON file.
         decoder (json.JSONDecoder): The JSON decoder that is used to read from the JSON file.
         properties (dict[str, Any]): A dictionary of additional properties. The _properties_
-            must have a _"default_path"_ or _"path"_ entry with the path of the JSON file.
+            must have a _"default_path"_ or _"path"_ entry with the path of the JSON file:
+
+            - _"default_path"_ `(str)`: The default path of the CSV file.\n
+            - _"encoding"_ `(str)`: The encoding of the CSV file. The default value is `utf-8`.\n
+            - _"default_data"_: The default data of the data nodes instantiated from this json data node.\n
     """
 
     __STORAGE_TYPE = "json"
     __DEFAULT_DATA_KEY = "default_data"
     __DEFAULT_PATH_KEY = "default_path"
     __PATH_KEY = "path"
+    __ENCODING_KEY = "encoding"
     _ENCODER_KEY = "encoder"
     _DECODER_KEY = "decoder"
     _REQUIRED_PROPERTIES: List[str] = []
@@ -74,16 +79,19 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
-        version: str = None,
+        edits: Optional[List[Edit]] = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
-        properties: Dict = None,
+        properties: Optional[Dict] = None,
     ):
         if properties is None:
             properties = {}
 
         default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
+
+        if self.__ENCODING_KEY not in properties.keys():
+            properties[self.__ENCODING_KEY] = "utf-8"
 
         super().__init__(
             config_id,
@@ -117,6 +125,7 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
             {
                 self.__PATH_KEY,
                 self.__DEFAULT_PATH_KEY,
+                self.__ENCODING_KEY,
                 self.__DEFAULT_DATA_KEY,
                 self._ENCODER_KEY,
                 self._DECODER_KEY,
@@ -158,11 +167,11 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         self.properties[self._DECODER_KEY] = decoder
 
     def _read(self):
-        with open(self._path, "r") as f:
+        with open(self._path, "r", encoding=self.properties[self.__ENCODING_KEY]) as f:
             return json.load(f, cls=self._decoder)
 
     def _write(self, data: Any):
-        with open(self._path, "w") as f:  # type: ignore
+        with open(self._path, "w", encoding=self.properties[self.__ENCODING_KEY]) as f:  # type: ignore
             json.dump(data, f, indent=4, cls=self._encoder)
 
 
