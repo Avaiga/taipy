@@ -22,7 +22,7 @@ def build_dn_partial(dn, dn_label, dn_content):
     #                                                                                                                  #
     # Example:                                                                                                         #
     if dn_label == "replacement_type":                                                                                 #
-        partial_content += f"All missing values will be replaced by "                                                  #
+        partial_content += "All missing values will be replaced by "                                                  #
     # Comment, remove or replace the previous lines with your own use case                                             #
     # ##################################################################################################################
 
