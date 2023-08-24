@@ -12,7 +12,7 @@
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from taipy.core.config import DataNodeConfig, JobConfig, PipelineConfig, ScenarioConfig, TaskConfig
+from taipy.core.config import DataNodeConfig, JobConfig, ScenarioConfig, SequenceConfig, TaskConfig
 
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
@@ -165,7 +165,7 @@ class Config:
         """"""
 
     @_Classproperty
-    def pipelines(cls) -> Dict[str, PipelineConfig]:
+    def sequences(cls) -> Dict[str, SequenceConfig]:
         """"""
 
     @_Classproperty
@@ -251,35 +251,35 @@ class Config:
         """
 
     @staticmethod
-    def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
-        """Configure a new pipeline configuration.
+    def configure_sequence(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "SequenceConfig":
+        """Configure a new sequence configuration.
 
         Parameters:
-            id (str): The unique identifier of the new pipeline configuration.
+            id (str): The unique identifier of the new sequence configuration.
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
-                configurations that make this new pipeline. This can be a single task
-                configuration object is this pipeline holds a single task.
+                configurations that make this new sequence. This can be a single task
+                configuration object if this sequence holds a single task.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
-            The new pipeline configuration.
+            The new sequence configuration.
         """
 
     @staticmethod
-    def set_default_pipeline_configuration(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
-        """Set the default values for pipeline configurations.
+    def set_default_sequence_configuration(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "SequenceConfig":
+        """Set the default values for sequence configurations.
 
-        This function creates the *default pipeline configuration* object,
-        where all pipeline configuration objects will find their default
+        This function creates the *default sequence configuration* object,
+        where all sequence configuration objects will find their default
         values when needed.
 
         Parameters:
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
-                configurations that make the default pipeline configuration. This can be
-                a single task configuration object is this pipeline holds a single task.
+                configurations that make the default sequence configuration. This can be
+                a single task configuration object if this sequence holds a single task.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            The default pipeline configuration.
+            The default sequence configuration.
         """
 
     @staticmethod
@@ -367,6 +367,7 @@ class Config:
         cls,
         id: str,
         default_path: Optional[str] = None,
+        encoding: Optional[str] = None,
         has_header: Optional[bool] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
@@ -378,6 +379,7 @@ class Config:
         Parameters:
             id (str): The unique identifier of the new CSV data node configuration.
             default_path (Optional[str]): The default path of the CSV file.
+            encoding (Optional[str]): The encoding of the CSV file.
             has_header (Optional[bool]): If True, indicates that the CSV file has a header.
             exposed_type (Optional[str]): The exposed type of the data read from CSV file.<br/>
                 The default value is `pandas`.
@@ -399,6 +401,7 @@ class Config:
         cls,
         id: str,
         default_path: Optional[str] = None,
+        encoding: Optional[str] = None,
         encoder: Optional[json.JSONEncoder] = None,
         decoder: Optional[json.JSONDecoder] = None,
         scope: Optional[Scope] = None,
@@ -410,6 +413,7 @@ class Config:
         Parameters:
             id (str): The unique identifier of the new JSON data node configuration.
             default_path (Optional[str]): The default path of the JSON file.
+            encoding (Optional[str]): The encoding of the JSON file.
             encoder (Optional[json.JSONEncoder]): The JSON encoder used to write data into the JSON file.
             decoder (Optional[json.JSONDecoder]): The JSON decoder used to read data from the JSON file.
             scope (Optional[Scope^]): The scope of the JSON data node configuration.<br/>

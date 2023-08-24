@@ -88,7 +88,7 @@ dataset
 .airflow
 *.dags
 data_sources
-pipelines
+sequences
 tasks
 pickles
 

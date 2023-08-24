@@ -40,7 +40,7 @@ class TestId:
         with pytest.raises(InvalidConfigurationId):
             _validate_id("SCENARIO")
         with pytest.raises(InvalidConfigurationId):
-            _validate_id("PIPELINE")
+            _validate_id("SEQUENCE")
         with pytest.raises(InvalidConfigurationId):
             _validate_id("TASK")
         with pytest.raises(InvalidConfigurationId):
