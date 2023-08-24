@@ -12,15 +12,7 @@
 import datetime
 import json
 
-from src.taipy.core.config import (
-    CoreSection,
-    DataNodeConfig,
-    JobConfig,
-    MigrationConfig,
-    ScenarioConfig,
-    SequenceConfig,
-    TaskConfig,
-)
+from src.taipy.core.config import CoreSection, DataNodeConfig, JobConfig, MigrationConfig, ScenarioConfig, TaskConfig
 from taipy.config import Config
 from taipy.config._serializer._json_serializer import _JsonSerializer
 from taipy.config.common.frequency import Frequency
@@ -171,9 +163,6 @@ inputs = [ "test_csv_dn:SECTION",]
 outputs = [ "test_json_dn:SECTION",]
 skippable = "False:bool"
 
-[SEQUENCE.default]
-tasks = []
-
 [SCENARIO.default]
 tasks = []
 additional_data_nodes = []
@@ -220,7 +209,7 @@ sequence1 = [ "test_task:SECTION",]
     assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
 
     assert Config.sections is not None
-    assert len(Config.sections) == 4
+    assert len(Config.sections) == 3
 
     assert Config.sections[DataNodeConfig.name] is not None
     assert len(Config.sections[DataNodeConfig.name]) == 4
@@ -261,11 +250,6 @@ sequence1 = [ "test_task:SECTION",]
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[SequenceConfig.name] is not None
-    assert len(Config.sections[SequenceConfig.name]) == 1
-    assert Config.sections[SequenceConfig.name]["default"] is not None
-    assert Config.sections[SequenceConfig.name]["default"].tasks == []
-
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
@@ -285,6 +269,11 @@ sequence1 = [ "test_task:SECTION",]
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,
         Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
     ]
+    sequences = {}
+    for sequence_name, sequence_tasks in Config.sections[ScenarioConfig.name]["test_scenario"].sequences.items():
+        sequences[sequence_name] = [task.id for task in sequence_tasks]
+    assert sequences == {"sequence1": [Config.sections[TaskConfig.name]["test_task"].id]}
+
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
     }
@@ -361,11 +350,6 @@ def test_read_write_json_configuration_file():
 "skippable": "False:bool"
 }
 },
-"SEQUENCE": {
-"default": {
-"tasks": []
-}
-},
 "SCENARIO": {
 "default": {
 "comparators": {},
@@ -421,7 +405,7 @@ def test_read_write_json_configuration_file():
     assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
 
     assert Config.sections is not None
-    assert len(Config.sections) == 4
+    assert len(Config.sections) == 3
 
     assert Config.sections[DataNodeConfig.name] is not None
     assert len(Config.sections[DataNodeConfig.name]) == 4
@@ -460,11 +444,6 @@ def test_read_write_json_configuration_file():
     ]
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[SequenceConfig.name] is not None
-    assert len(Config.sections[SequenceConfig.name]) == 1
-    assert Config.sections[SequenceConfig.name]["default"] is not None
-    assert Config.sections[SequenceConfig.name]["default"].tasks == []
-
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
@@ -484,6 +463,11 @@ def test_read_write_json_configuration_file():
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,
         Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
     ]
+    sequences = {}
+    for sequence_name, sequence_tasks in Config.sections[ScenarioConfig.name]["test_scenario"].sequences.items():
+        sequences[sequence_name] = [task.id for task in sequence_tasks]
+    assert sequences == {"sequence1": [Config.sections[TaskConfig.name]["test_task"].id]}
+
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
     }
@@ -535,17 +519,11 @@ inputs = [ "test_csv_dn:SECTION",]
 outputs = [ "test_json_dn:SECTION",]
 skippable = "False:bool"
 
-[SEQUENCE.default]
-tasks = []
-
-[SEQUENCE.test_sequence]
-tasks = [ "test_task:SECTION",]
-
 [SCENARIO.default]
-sequences = []
 
 [SCENARIO.test_scenario]
-sequences = [ "test_sequence:SECTION",]
+tasks = [ "test_task:SECTION",]
+sequences.test_sequence = [ "test_task:SECTION",]
 frequency = "DAILY:FREQUENCY"
 
 [VERSION_MIGRATION.migration_fcts."1.0"]
@@ -581,7 +559,7 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
 
     assert Config.sections is not None
-    assert len(Config.sections) == 4
+    assert len(Config.sections) == 3
 
     assert Config.sections[DataNodeConfig.name] is not None
     assert len(Config.sections[DataNodeConfig.name]) == 3
@@ -616,14 +594,6 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[SequenceConfig.name] is not None
-    assert len(Config.sections[SequenceConfig.name]) == 2
-    assert Config.sections[SequenceConfig.name]["default"] is not None
-    assert Config.sections[SequenceConfig.name]["default"].tasks == []
-    assert [task.id for task in Config.sections[SequenceConfig.name]["test_sequence"].tasks] == [
-        Config.sections[TaskConfig.name]["test_task"].id
-    ]
-
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
@@ -642,6 +612,9 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
         Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,
     ]
+    assert Config.sections[ScenarioConfig.name]["test_scenario"].sequences == {
+        "test_sequence": [Config.sections[TaskConfig.name]["test_task"]]
+    }
 
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
@@ -711,20 +684,10 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
 "skippable": "False:bool"
 }
 },
-"SEQUENCE": {
-"default": {
-"tasks": []
-},
-"test_sequence": {
-"tasks": [
-"test_task:SECTION"
-]
-}
-},
 "SCENARIO": {
 "default": {
 "comparators": {},
-"sequences": [],
+"sequences": {},
 "frequency": null
 },
 "test_scenario": {
@@ -733,9 +696,14 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
 "tests.core.config.test_config_serialization.compare_function:function"
 ]
 },
-"sequences": [
-"test_sequence:SECTION"
+"tasks": [
+"test_task:SECTION"
 ],
+"sequences": {
+"test_sequence": [
+"test_task:SECTION"
+]
+},
 "frequency": "DAILY:FREQUENCY"
 }
 }
@@ -767,7 +735,7 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
     assert Config.unique_sections[MigrationConfig.name].migration_fcts["1.0"] == {"test_csv_dn": migrate_csv_path}
 
     assert Config.sections is not None
-    assert len(Config.sections) == 4
+    assert len(Config.sections) == 3
 
     assert Config.sections[DataNodeConfig.name] is not None
     assert len(Config.sections[DataNodeConfig.name]) == 3
@@ -800,14 +768,6 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
     ]
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[SequenceConfig.name] is not None
-    assert len(Config.sections[SequenceConfig.name]) == 2
-    assert Config.sections[SequenceConfig.name]["default"] is not None
-    assert Config.sections[SequenceConfig.name]["default"].tasks == []
-    assert [task.id for task in Config.sections[SequenceConfig.name]["test_sequence"].tasks] == [
-        Config.sections[TaskConfig.name]["test_task"].id
-    ]
-
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
     assert Config.sections[ScenarioConfig.name]["default"] is not None
@@ -826,6 +786,10 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
         Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,
     ]
+    assert Config.sections[ScenarioConfig.name]["test_scenario"].sequences == {
+        "test_sequence": [Config.sections[TaskConfig.name]["test_task"]]
+    }
+
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
         "test_json_dn": [compare_function]
     }

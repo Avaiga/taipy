@@ -11,7 +11,6 @@
 
 import pytest
 
-from src.taipy.core.config.job_config import JobConfig
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
 
@@ -29,14 +28,14 @@ class TestConfigIdChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
 
-        Config.configure_sequence(id="bar", task_configs=[])
+        Config.configure_data_node(id="bar", task_configs=[])
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
         assert len(Config._collector.errors) == 1
 
         expected_error_message = (
-            "`bar` is used as the config_id of multiple configurations ['SEQUENCE', 'SCENARIO']"
+            "`bar` is used as the config_id of multiple configurations ['DATA_NODE', 'SCENARIO']"
             ' Current value of property `config_id` is "bar".'
         )
         assert expected_error_message in caplog.text
@@ -47,7 +46,7 @@ class TestConfigIdChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         expected_error_message = (
-            "`bar` is used as the config_id of multiple configurations ['TASK', 'SEQUENCE', 'SCENARIO']"
+            "`bar` is used as the config_id of multiple configurations ['DATA_NODE', 'TASK', 'SCENARIO']"
             ' Current value of property `config_id` is "bar".'
         )
         assert expected_error_message in caplog.text

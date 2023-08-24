@@ -98,7 +98,11 @@ def test_scenario_creation():
     task_config_1 = Config.configure_task("task1", sum, [dn_config_1, dn_config_2], dn_config_3)
     task_config_2 = Config.configure_task("task2", print, dn_config_3)
     scenario = Config.configure_scenario(
-        "scenarios1", [task_config_1, task_config_2], [dn_config_4], comparators={"dn_cfg": [my_func]}
+        "scenarios1",
+        [task_config_1, task_config_2],
+        [dn_config_4],
+        comparators={"dn_cfg": [my_func]},
+        sequences={"sequence": []},
     )
 
     assert list(Config.scenarios) == ["default", scenario.id]
@@ -209,10 +213,22 @@ def test_clean_config():
     task1_config = Config.configure_task("task1", print, [], [])
     task2_config = Config.configure_task("task2", print, [], [])
     scenario1_config = Config.configure_scenario(
-        "id1", [task1_config, task2_config], [], Frequency.YEARLY, {"foo": "bar"}, prop="foo"
+        "id1",
+        [task1_config, task2_config],
+        [],
+        Frequency.YEARLY,
+        {"foo": "bar"},
+        prop="foo",
+        sequences={"sequence_1": []},
     )
     scenario2_config = Config.configure_scenario(
-        "id2", [task2_config, task1_config], [], Frequency.MONTHLY, {"foz": "baz"}, prop="bar"
+        "id2",
+        [task2_config, task1_config],
+        [],
+        Frequency.MONTHLY,
+        {"foz": "baz"},
+        prop="bar",
+        sequences={"sequence_2": []},
     )
 
     assert Config.scenarios["id1"] is scenario1_config
@@ -230,6 +246,7 @@ def test_clean_config():
     assert scenario1_config.tasks == scenario1_config.task_configs == []
     assert scenario1_config.additional_data_nodes == scenario1_config.additional_data_node_configs == []
     assert scenario1_config.data_nodes == scenario1_config.data_node_configs == []
+    assert scenario1_config.sequences == scenario1_config.sequences == {}
     assert scenario1_config.frequency is scenario1_config.frequency is None
     assert scenario1_config.comparators == scenario1_config.comparators == {}
     assert scenario1_config.properties == scenario1_config.properties == {}
@@ -237,6 +254,7 @@ def test_clean_config():
     assert scenario2_config.tasks == scenario2_config.task_configs == []
     assert scenario2_config.additional_data_nodes == scenario2_config.additional_data_node_configs == []
     assert scenario2_config.data_nodes == scenario2_config.data_node_configs == []
+    assert scenario2_config.sequences == scenario1_config.sequences == {}
     assert scenario2_config.frequency is scenario2_config.frequency is None
     assert scenario2_config.comparators == scenario2_config.comparators == {}
     assert scenario2_config.properties == scenario2_config.properties == {}

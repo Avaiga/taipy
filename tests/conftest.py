@@ -30,14 +30,12 @@ from src.taipy.core.config import (
     JobConfig,
     MigrationConfig,
     ScenarioConfig,
-    SequenceConfig,
     TaskConfig,
     _ConfigIdChecker,
     _CoreSectionChecker,
     _DataNodeConfigChecker,
     _JobConfigChecker,
     _ScenarioConfigChecker,
-    _SequenceConfigChecker,
     _TaskConfigChecker,
 )
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
@@ -388,15 +386,6 @@ def init_config():
         ],
     )
     _inject_section(
-        SequenceConfig,
-        "sequences",
-        SequenceConfig.default_config(),
-        [
-            ("configure_sequence", SequenceConfig._configure),
-            ("set_default_sequence_configuration", SequenceConfig._set_default_configuration),
-        ],
-    )
-    _inject_section(
         ScenarioConfig,
         "scenarios",
         ScenarioConfig.default_config(),
@@ -417,7 +406,6 @@ def init_config():
     _Checker.add_checker(_CoreSectionChecker)
     _Checker.add_checker(_DataNodeConfigChecker)
     _Checker.add_checker(_TaskConfigChecker)
-    _Checker.add_checker(_SequenceConfigChecker)
     _Checker.add_checker(_ScenarioConfigChecker)
 
     Config.configure_core(read_entity_retry=0)

@@ -19,10 +19,8 @@ from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
 from taipy.config.section import Section
-from taipy.logger._taipy_logger import _TaipyLogger
 
 from .data_node_config import DataNodeConfig
-from .sequence_config import SequenceConfig
 from .task_config import TaskConfig
 
 
@@ -51,7 +49,6 @@ class ScenarioConfig(Section):
     _FREQUENCY_KEY = "frequency"
     _SEQUENCES_KEY = "sequences"
     _COMPARATOR_KEY = "comparators"
-    __logger = _TaipyLogger._get_logger()
 
     def __init__(
         self,
@@ -60,6 +57,7 @@ class ScenarioConfig(Section):
         additional_data_nodes: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
+        sequences: Optional[Dict[str, List[TaskConfig]]] = None,
         **properties,
     ):
 
@@ -77,7 +75,7 @@ class ScenarioConfig(Section):
         else:
             self._additional_data_nodes = []
 
-        self.sequences: Dict[str, List[TaskConfig]] = {}
+        self.sequences = sequences if sequences else {}
         self.frequency = frequency
         self.comparators = defaultdict(list)
 
@@ -97,9 +95,9 @@ class ScenarioConfig(Section):
             copy(self._additional_data_nodes),
             self.frequency,
             copy(comp),
+            copy(self.sequences),
             **copy(self._properties),
         )
-        scenario_config.sequences = copy(self.sequences)
         return scenario_config
 
     def __getattr__(self, item: str) -> Optional[Any]:
@@ -165,16 +163,7 @@ class ScenarioConfig(Section):
     ) -> "ScenarioConfig":  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
 
-        if cls._TASKS_KEY in as_dict:
-            task_config_ids = as_dict.pop(cls._TASKS_KEY, list())
-            tasks = cls.__get_task_configs(task_config_ids, config)
-        else:
-            sequence_config_ids = as_dict.pop(cls._SEQUENCES_KEY, list())
-            cls.__logger.info(
-                f"The tasks from these SequenceConfig {sequence_config_ids}"
-                f"will be migrated to be directly under ScenarioConfig {id}"
-            )
-            tasks = cls.__get_task_configs_from_sequence_configs(sequence_config_ids, config)
+        tasks = cls.__get_task_configs(as_dict.pop(cls._TASKS_KEY, list()), config)
 
         additional_data_node_ids = as_dict.pop(cls._ADDITIONAL_DATA_NODES_KEY, list())
         additional_data_nodes = cls.__get_additional_data_node_configs(additional_data_node_ids, config)
@@ -183,17 +172,18 @@ class ScenarioConfig(Section):
         comparators = as_dict.pop(cls._COMPARATOR_KEY, dict())
         sequences = as_dict.pop(cls._SEQUENCES_KEY, {})
 
+        for sequence_name, sequence_tasks in sequences.items():
+            sequences[sequence_name] = cls.__get_task_configs(sequence_tasks, config)
+
         scenario_config = ScenarioConfig(
             id=id,
             tasks=tasks,
             additional_data_nodes=additional_data_nodes,
             frequency=frequency,
             comparators=comparators,
+            sequences=sequences,
             **as_dict,
         )
-
-        for sequence_name, task_config_ids in sequences.items():
-            scenario_config.sequences.update({sequence_name: cls.__get_task_configs(task_config_ids, config)})
 
         return scenario_config
 
@@ -205,16 +195,6 @@ class ScenarioConfig(Section):
                 for task_config_id in task_config_ids:
                     if task_config := task_config_section.get(task_config_id, None):
                         task_configs.add(task_config)
-        return list(task_configs)
-
-    @staticmethod
-    def __get_task_configs_from_sequence_configs(sequence_config_ids: List[str], config: Optional[_Config]):
-        task_configs = set()
-        if config:
-            if sequence_config_section := config._sections.get(SequenceConfig.name):
-                for sequence_config_id in sequence_config_ids:
-                    if sequence_config := sequence_config_section.get(sequence_config_id, None):
-                        task_configs.update(sequence_config.tasks)
         return list(task_configs)
 
     @staticmethod
@@ -266,6 +246,7 @@ class ScenarioConfig(Section):
         additional_data_node_configs: Optional[List[DataNodeConfig]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
+        sequences: Optional[Dict[str, List[TaskConfig]]] = None,
         **properties,
     ) -> "ScenarioConfig":
         """Configure a new scenario configuration.
@@ -293,7 +274,13 @@ class ScenarioConfig(Section):
             The new scenario configuration.
         """
         section = ScenarioConfig(
-            id, task_configs, additional_data_node_configs, frequency=frequency, comparators=comparators, **properties
+            id,
+            task_configs,
+            additional_data_node_configs,
+            frequency=frequency,
+            comparators=comparators,
+            sequences=sequences,
+            **properties,
         )
         Config._register(section)
         return Config.sections[ScenarioConfig.name][id]
@@ -304,6 +291,7 @@ class ScenarioConfig(Section):
         additional_data_node_configs: List[DataNodeConfig] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
+        sequences: Optional[Dict[str, List[TaskConfig]]] = None,
         **properties,
     ) -> "ScenarioConfig":
         """Set the default values for scenario configurations.
@@ -339,6 +327,7 @@ class ScenarioConfig(Section):
             additional_data_node_configs,
             frequency=frequency,
             comparators=comparators,
+            sequences=sequences,
             **properties,
         )
         Config._register(section)

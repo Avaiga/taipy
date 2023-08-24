@@ -13,7 +13,6 @@ from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.migration_config import MigrationConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
-from src.taipy.core.config.sequence_config import SequenceConfig
 from src.taipy.core.config.task_config import TaskConfig
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
@@ -91,7 +90,7 @@ def test_default_configuration():
 
     assert default_config._unique_sections is not None
     assert len(default_config._unique_sections) == 3
-    assert len(default_config._sections) == 4
+    assert len(default_config._sections) == 3
 
     _test_default_job_config(default_config._unique_sections[JobConfig.name])
     _test_default_job_config(Config.job_config)

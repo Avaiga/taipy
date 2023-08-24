@@ -21,14 +21,12 @@ from .checkers._core_section_checker import _CoreSectionChecker
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
 from .checkers._job_config_checker import _JobConfigChecker
 from .checkers._scenario_config_checker import _ScenarioConfigChecker
-from .checkers._sequence_config_checker import _SequenceConfigChecker
 from .checkers._task_config_checker import _TaskConfigChecker
 from .core_section import CoreSection
 from .data_node_config import DataNodeConfig
 from .job_config import JobConfig
 from .migration_config import MigrationConfig
 from .scenario_config import ScenarioConfig
-from .sequence_config import SequenceConfig
 from .task_config import TaskConfig
 
 _inject_section(
@@ -68,15 +66,6 @@ _inject_section(
     ],
 )
 _inject_section(
-    SequenceConfig,
-    "sequences",
-    SequenceConfig.default_config(),
-    [
-        ("configure_sequence", SequenceConfig._configure),
-        ("set_default_sequence_configuration", SequenceConfig._set_default_configuration),
-    ],
-)
-_inject_section(
     ScenarioConfig,
     "scenarios",
     ScenarioConfig.default_config(),
@@ -105,5 +94,4 @@ _Checker.add_checker(_JobConfigChecker)
 _Checker.add_checker(_CoreSectionChecker)
 _Checker.add_checker(_DataNodeConfigChecker)
 _Checker.add_checker(_TaskConfigChecker)
-_Checker.add_checker(_SequenceConfigChecker)
 _Checker.add_checker(_ScenarioConfigChecker)

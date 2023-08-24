@@ -490,11 +490,9 @@ class TestDataManager:
             outputs = [ "b:SECTION",]
             skippable = "False:bool"
 
-            [SEQUENCE.s_sequence]
-            tasks = [ "t:SECTION",]
-
             [SCENARIO.s]
-            sequences = [ "s_sequence:SECTION",]
+            tasks = [ "t:SECTION",]
+            sequences.s_sequence = [ "t:SECTION",]
 
             [SCENARIO.s.comparators]
             """
@@ -526,11 +524,9 @@ class TestDataManager:
             outputs = [ "output:SECTION",]
             skippable = "False:bool"
 
-            [SEQUENCE.my_sequence]
-            tasks = [ "double:SECTION",]
-
             [SCENARIO.my_scenario]
-            sequences = [ "my_sequence:SECTION",]
+            tasks = [ "double:SECTION",]
+            sequences.my_sequence = [ "double:SECTION",]
 
             [SCENARIO.my_scenario.comparators]
             """
@@ -562,11 +558,9 @@ class TestDataManager:
             outputs = [ "output:SECTION",]
             skippable = "False:bool"
 
-            [SEQUENCE.my_sequence]
-            tasks = [ "double:SECTION",]
-
             [SCENARIO.my_scenario]
-            sequences = [ "my_sequence:SECTION",]
+            tasks = [ "double:SECTION",]
+            sequences.my_sequence = [ "double:SECTION",]
 
             [SCENARIO.my_scenario.comparators]
             """
