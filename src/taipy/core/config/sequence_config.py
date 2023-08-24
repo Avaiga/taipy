@@ -93,7 +93,7 @@ class SequenceConfig(Section):
             id (str): The unique identifier of the new sequence configuration.
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
                 configurations that make this new sequence. This can be a single task
-                configuration object is this sequence holds a single task.
+                configuration object if this sequence holds a single task.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
@@ -114,7 +114,7 @@ class SequenceConfig(Section):
         Parameters:
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
                 configurations that make the default sequence configuration. This can be
-                a single task configuration object is this sequence holds a single task.
+                a single task configuration object if this sequence holds a single task.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
             The default sequence configuration.
