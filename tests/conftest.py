@@ -22,7 +22,7 @@ from src.taipy.rest.app import create_app
 from taipy.config import Config
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
-from taipy.core import Cycle, DataNodeId, Job, JobId, Pipeline, Scenario, Task
+from taipy.core import Cycle, DataNodeId, Job, JobId, Scenario, Sequence, Task
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager
@@ -61,7 +61,7 @@ def setup_end_to_end():
     scenario_config = Config.configure_scenario(
         "scenario", [forecast_task_cfg, evaluate_task_cfg], frequency=Frequency.DAILY
     )
-    scenario_config.add_sequences({"pipeline": [forecast_task_cfg, evaluate_task_cfg]})
+    scenario_config.add_sequences({"sequence": [forecast_task_cfg, evaluate_task_cfg]})
 
 
 @pytest.fixture(scope="session")
@@ -93,7 +93,7 @@ def task_data():
 
 
 @pytest.fixture
-def pipeline_data():
+def sequence_data():
     return {
         "name": "foo",
         "task_ids": ["TASK_foo_3b888e17-1974-4a56-a42c-c7c96bc9cd54"],
@@ -104,7 +104,7 @@ def pipeline_data():
 def scenario_data():
     return {
         "name": "foo",
-        "pipeline_ids": ["PIPELINE_foo_3b888e17-1974-4a56-a42c-c7c96bc9cd54"],
+        "sequence_ids": ["SEQUENCE_foo_3b888e17-1974-4a56-a42c-c7c96bc9cd54"],
         "properties": {},
     }
 
@@ -192,8 +192,8 @@ def default_task_config_list():
     return configs
 
 
-def __default_pipeline():
-    return Pipeline(properties={"name": "foo"}, tasks=[__default_task()], pipeline_id="PIPELINE_foo_SCENARIO_acb")
+def __default_sequence():
+    return Sequence(properties={"name": "foo"}, tasks=[__default_task()], sequence_id="SEQUENCE_foo_SCENARIO_acb")
 
 
 def __task_config():
@@ -201,8 +201,8 @@ def __task_config():
 
 
 @pytest.fixture
-def default_pipeline():
-    return __default_pipeline()
+def default_sequence():
+    return __default_sequence()
 
 
 @pytest.fixture
@@ -212,7 +212,7 @@ def default_scenario_config():
         f"taipy_{uuid.uuid4().hex}",
         [task_config],
     )
-    scenario_config.add_sequences({"pipeline": [task_config]})
+    scenario_config.add_sequences({"sequence": [task_config]})
     return scenario_config
 
 
@@ -225,7 +225,7 @@ def default_scenario_config_list():
             f"taipy_{uuid.uuid4().hex}",
             [task_config],
         )
-        scenario_config.add_sequences({"pipeline": [task_config]})
+        scenario_config.add_sequences({"sequence": [task_config]})
         configs.append(scenario_config)
     return configs
 

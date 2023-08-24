@@ -19,22 +19,22 @@ from .datanode import (
     GenericDataNodeConfigSchema,
     InMemoryDataNodeConfigSchema,
     JSONDataNodeConfigSchema,
-    PickleDataNodeConfigSchema,
-    SQLTableDataNodeConfigSchema,
-    SQLDataNodeConfigSchema,
     MongoCollectionDataNodeConfigSchema,
+    PickleDataNodeConfigSchema,
+    SQLDataNodeConfigSchema,
+    SQLTableDataNodeConfigSchema,
 )
 from .job import JobSchema
-from .pipeline import PipelineResponseSchema, PipelineSchema
 from .scenario import ScenarioResponseSchema, ScenarioSchema
+from .sequence import SequenceResponseSchema, SequenceSchema
 from .task import TaskSchema
 
 __all__ = [
     "DataNodeSchema",
     "DataNodeFilterSchema",
     "TaskSchema",
-    "PipelineSchema",
-    "PipelineResponseSchema",
+    "SequenceSchema",
+    "SequenceResponseSchema",
     "ScenarioSchema",
     "ScenarioResponseSchema",
     "CycleSchema",

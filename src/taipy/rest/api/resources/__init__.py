@@ -11,9 +11,9 @@
 
 from .cycle import CycleList, CycleResource
 from .datanode import DataNodeList, DataNodeReader, DataNodeResource, DataNodeWriter
-from .job import JobList, JobResource, JobExecutor
-from .pipeline import PipelineExecutor, PipelineList, PipelineResource
+from .job import JobExecutor, JobList, JobResource
 from .scenario import ScenarioExecutor, ScenarioList, ScenarioResource
+from .sequence import SequenceExecutor, SequenceList, SequenceResource
 from .task import TaskExecutor, TaskList, TaskResource
 
 __all__ = [
@@ -24,9 +24,9 @@ __all__ = [
     "TaskList",
     "TaskResource",
     "TaskExecutor",
-    "PipelineList",
-    "PipelineResource",
-    "PipelineExecutor",
+    "SequenceList",
+    "SequenceResource",
+    "SequenceExecutor",
     "ScenarioList",
     "ScenarioResource",
     "ScenarioExecutor",

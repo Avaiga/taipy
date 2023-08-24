@@ -11,13 +11,13 @@
 
 from taipy.core.cycle._cycle_converter import _CycleConverter
 from taipy.core.data._data_converter import _DataNodeConverter
-from taipy.core.pipeline._pipeline_converter import _PipelineConverter
 from taipy.core.scenario._scenario_converter import _ScenarioConverter
+from taipy.core.sequence._sequence_converter import _SequenceConverter
 from taipy.core.task._task_converter import _TaskConverter
 
 entity_to_models = {
     "scenario": _ScenarioConverter._entity_to_model,
-    "pipeline": _PipelineConverter._entity_to_model,
+    "sequence": _SequenceConverter._entity_to_model,
     "task": _TaskConverter._entity_to_model,
     "data": _DataNodeConverter._entity_to_model,
     "cycle": _CycleConverter._entity_to_model,

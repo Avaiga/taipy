@@ -39,4 +39,4 @@ evaluate_task_cfg = Config.configure_task(
 )
 
 scenario_cfg = Config.configure_scenario("scenario", [forecast_task_cfg, evaluate_task_cfg], frequency=Frequency.DAILY)
-scenario_cfg.add_sequences({"pipeline": [forecast_task_cfg, evaluate_task_cfg]})
+scenario_cfg.add_sequences({"sequence": [forecast_task_cfg, evaluate_task_cfg]})

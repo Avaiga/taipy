@@ -18,7 +18,7 @@ $ pip install pipenv && pipenv install
 
 ## Configuration
 Before running, we need to define some variables. Taipy rest APIs depend on pre-configuration of taipy config objects,
-i.e, is mandatory to define all configuration of DataNodes, Tasks, Pipelines, etc. The file containing this
+i.e, is mandatory to define all configuration of DataNodes, Tasks, Sequences, etc. The file containing this
 configuration needs to be passed to the application at runtime. The following variable needs to be defined:
  - TAIPY_SETUP_FILE: the path to the file containing all of taipy object configuration
 

@@ -13,37 +13,37 @@
 from flask import request
 from flask_restful import Resource
 
-from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingScenario
-from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+from taipy.core.exceptions.exceptions import NonExistingScenario, NonExistingSequence
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
 
 from ...commons.to_from_model import _to_model
-from ..exceptions.exceptions import PipelineNameMissingException, ScenarioIdMissingException
+from ..exceptions.exceptions import ScenarioIdMissingException, SequenceNameMissingException
 from ..middlewares._middleware import _middleware
-from ..schemas import PipelineResponseSchema
+from ..schemas import SequenceResponseSchema
 
 
-def _get_or_raise(pipeline_id: str):
-    manager = _PipelineManagerFactory._build_manager()
-    pipeline = manager._get(pipeline_id)
-    if pipeline is None:
-        raise NonExistingPipeline(pipeline_id)
-    return pipeline
+def _get_or_raise(sequence_id: str):
+    manager = _SequenceManagerFactory._build_manager()
+    sequence = manager._get(sequence_id)
+    if sequence is None:
+        raise NonExistingSequence(sequence_id)
+    return sequence
 
 
-REPOSITORY = "pipeline"
+REPOSITORY = "sequence"
 
 
-class PipelineResource(Resource):
+class SequenceResource(Resource):
     """Single object resource
 
     ---
     get:
       tags:
         - api
-      summary: Get a pipeline.
+      summary: Get a sequence.
       description: |
-        Return a single pipeline by pipeline_id. If the pipeline does not exist, a 404 error is returned.
+        Return a single sequence by sequence_id. If the sequence does not exist, a 404 error is returned.
 
         !!! Note
           When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
@@ -52,15 +52,15 @@ class PipelineResource(Resource):
         Code example:
 
         ```shell
-          curl -X GET http://localhost:5000/api/v1/pipelines/PIPELINE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+          curl -X GET http://localhost:5000/api/v1/sequences/SEQUENCE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
       parameters:
         - in: path
-          name: pipeline_id
+          name: sequence_id
           schema:
             type: string
-          description: The identifier of the pipeline.
+          description: The identifier of the sequence.
       responses:
         200:
           content:
@@ -68,15 +68,15 @@ class PipelineResource(Resource):
               schema:
                 type: object
                 properties:
-                  pipeline: PipelineSchema
+                  sequence: SequenceSchema
         404:
-          description: No pipeline has the *pipeline_id* identifier.
+          description: No sequence has the *sequence_id* identifier.
     delete:
       tags:
         - api
-      summary: Delete a pipeline.
+      summary: Delete a sequence.
       description: |
-        Delete a pipeline. If the pipeline does not exist, a 404 error is returned.
+        Delete a sequence. If the sequence does not exist, a 404 error is returned.
 
         !!! Note
           When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
@@ -85,15 +85,15 @@ class PipelineResource(Resource):
         Code example:
 
         ```shell
-          curl -X DELETE http://localhost:5000/api/v1/pipelines/PIPELINE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+          curl -X DELETE http://localhost:5000/api/v1/sequences/SEQUENCE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
       parameters:
         - in: path
-          name: pipeline_id
+          name: sequence_id
           schema:
             type: string
-          description: The identifier of the pipeline.
+          description: The identifier of the sequence.
       responses:
         200:
           content:
@@ -105,36 +105,36 @@ class PipelineResource(Resource):
                     type: string
                     description: Status message.
         404:
-          description: No pipeline has the *pipeline_id* identifier.
+          description: No sequence has the *sequence_id* identifier.
     """
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
     @_middleware
-    def get(self, pipeline_id):
-        schema = PipelineResponseSchema()
-        pipeline = _get_or_raise(pipeline_id)
-        return {"pipeline": schema.dump(_to_model(REPOSITORY, pipeline))}
+    def get(self, sequence_id):
+        schema = SequenceResponseSchema()
+        sequence = _get_or_raise(sequence_id)
+        return {"sequence": schema.dump(_to_model(REPOSITORY, sequence))}
 
     @_middleware
-    def delete(self, pipeline_id):
-        manager = _PipelineManagerFactory._build_manager()
-        _get_or_raise(pipeline_id)
-        manager._delete(pipeline_id)
-        return {"message": f"Pipeline {pipeline_id} was deleted."}
+    def delete(self, sequence_id):
+        manager = _SequenceManagerFactory._build_manager()
+        _get_or_raise(sequence_id)
+        manager._delete(sequence_id)
+        return {"message": f"Sequence {sequence_id} was deleted."}
 
 
-class PipelineList(Resource):
+class SequenceList(Resource):
     """Creation and get_all
 
     ---
     get:
       tags:
         - api
-      summary: Get all pipelines.
+      summary: Get all sequences.
       description: |
-        Return an array of all pipelines.
+        Return an array of all sequences.
 
         !!! Note
           When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
@@ -143,7 +143,7 @@ class PipelineList(Resource):
         Code example:
 
         ```shell
-          curl -X GET http://localhost:5000/api/v1/pipelines
+          curl -X GET http://localhost:5000/api/v1/sequences
         ```
 
       responses:
@@ -157,13 +157,13 @@ class PipelineList(Resource):
                       results:
                         type: array
                         items:
-                          $ref: '#/components/schemas/PipelineSchema'
+                          $ref: '#/components/schemas/SequenceSchema'
     post:
       tags:
         - api
-      summary: Create a pipeline.
+      summary: Create a sequence.
       description: |
-        Create a pipeline from scenario_id, pipeline_name and task_ids. If the scenario_id does not exist or pipeline_name is not provided, a 404 error is returned.
+        Create a sequence from scenario_id, sequence_name and task_ids. If the scenario_id does not exist or sequence_name is not provided, a 404 error is returned.
         !!! Note
           When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
           requires _TAIPY_EDITOR_ role.
@@ -171,7 +171,7 @@ class PipelineList(Resource):
         Code example:
 
         ```shell
-          curl -X POST --data '{"scenario_id": "SCENARIO_scenario_id", "pipeline_name": "pipeline", "tasks": []}' http://localhost:5000/api/v1/pipelines
+          curl -X POST --data '{"scenario_id": "SCENARIO_scenario_id", "sequence_name": "sequence", "tasks": []}' http://localhost:5000/api/v1/sequences
         ```
 
       parameters:
@@ -179,15 +179,15 @@ class PipelineList(Resource):
           name: scenario_id
           schema:
             type: string
-          description: The Scenario the Pipeline belongs to.
-          name: pipeline_name
+          description: The Scenario the Sequence belongs to.
+          name: sequence_name
           schema:
             type: string
-          description: The name of the Pipeline.
+          description: The name of the Sequence.
           name: tasks
           schema:
             type: list[string]
-          description: A list of task id of the Pipeline.
+          description: A list of task id of the Sequence.
 
       responses:
         201:
@@ -199,7 +199,7 @@ class PipelineList(Resource):
                   message:
                     type: string
                     description: Status message.
-                  pipeline: PipelineSchema
+                  sequence: SequenceSchema
     """
 
     def __init__(self, **kwargs):
@@ -207,47 +207,47 @@ class PipelineList(Resource):
 
     @_middleware
     def get(self):
-        schema = PipelineResponseSchema(many=True)
-        manager = _PipelineManagerFactory._build_manager()
-        pipelines = [_to_model(REPOSITORY, pipeline) for pipeline in manager._get_all()]
-        return schema.dump(pipelines)
+        schema = SequenceResponseSchema(many=True)
+        manager = _SequenceManagerFactory._build_manager()
+        sequences = [_to_model(REPOSITORY, sequence) for sequence in manager._get_all()]
+        return schema.dump(sequences)
 
     @_middleware
     def post(self):
-        pipeline_data = request.json
-        scenario_id = pipeline_data.get("scenario_id")
-        pipeline_name = pipeline_data.get("pipeline_name")
-        pipeline_task_ids = pipeline_data.get("task_ids", [])
+        sequence_data = request.json
+        scenario_id = sequence_data.get("scenario_id")
+        sequence_name = sequence_data.get("sequence_name")
+        sequence_task_ids = sequence_data.get("task_ids", [])
 
-        response_schema = PipelineResponseSchema()
+        response_schema = SequenceResponseSchema()
         if not scenario_id:
             raise ScenarioIdMissingException
-        if not pipeline_name:
-            raise PipelineNameMissingException
+        if not sequence_name:
+            raise SequenceNameMissingException
 
         scenario = _ScenarioManagerFactory._build_manager()._get(scenario_id)
         if not scenario:
             raise NonExistingScenario(scenario_id=scenario_id)
 
-        scenario.add_pipelines({pipeline_name: {"tasks": pipeline_task_ids}})
-        pipeline = scenario.pipelines[pipeline_name]
+        scenario.add_sequences({sequence_name: {"tasks": sequence_task_ids}})
+        sequence = scenario.sequences[sequence_name]
 
         return {
-            "message": "Pipeline was created.",
-            "pipeline": response_schema.dump(_to_model(REPOSITORY, pipeline)),
+            "message": "Sequence was created.",
+            "sequence": response_schema.dump(_to_model(REPOSITORY, sequence)),
         }, 201
 
 
-class PipelineExecutor(Resource):
-    """Execute a pipeline
+class SequenceExecutor(Resource):
+    """Execute a sequence
 
     ---
     post:
       tags:
         - api
-      summary: Execute a pipeline.
+      summary: Execute a sequence.
       description: |
-        Execute a pipeline from pipeline_id. If the pipeline does not exist, a 404 error is returned.
+        Execute a sequence from sequence_id. If the sequence does not exist, a 404 error is returned.
 
         !!! Note
           When the authorization feature is activated (available in the **Enterprise** edition only), This endpoint
@@ -256,12 +256,12 @@ class PipelineExecutor(Resource):
         Code example:
 
         ```shell
-          curl -X POST http://localhost:5000/api/v1/pipelines/submit/PIPELINE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+          curl -X POST http://localhost:5000/api/v1/sequences/submit/SEQUENCE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
         ```
 
       parameters:
         - in: path
-          name: pipeline_id
+          name: sequence_id
           schema:
             type: string
       responses:
@@ -274,17 +274,17 @@ class PipelineExecutor(Resource):
                   message:
                     type: string
                     description: Status message.
-                  pipeline: PipelineSchema
+                  sequence: SequenceSchema
         404:
-            description: No pipeline has the *pipeline_id* identifier.
+            description: No sequence has the *sequence_id* identifier.
     """
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
     @_middleware
-    def post(self, pipeline_id):
-        _get_or_raise(pipeline_id)
-        manager = _PipelineManagerFactory._build_manager()
-        manager._submit(pipeline_id)
-        return {"message": f"Pipeline {pipeline_id} was submitted."}
+    def post(self, sequence_id):
+        _get_or_raise(sequence_id)
+        manager = _SequenceManagerFactory._build_manager()
+        manager._submit(sequence_id)
+        return {"message": f"Sequence {sequence_id} was submitted."}

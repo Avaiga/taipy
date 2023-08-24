@@ -11,6 +11,7 @@
 
 from flask import request
 from flask_restful import Resource
+
 from taipy.config.config import Config
 from taipy.core.exceptions.exceptions import NonExistingScenario, NonExistingScenarioConfig
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
@@ -63,9 +64,9 @@ class ScenarioResource(Resource):
                     "properties": {},
                     "tags": [],
                     "version": "latest",
-                    "pipelines": [
-                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "sequences": [
+                        "SEQUENCE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "SEQUENCE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
                     "subscribers": [],
                     "creation_date": "2022-08-15T19:21:01.871587",
                     "primary_scenario": true}}
@@ -97,9 +98,9 @@ class ScenarioResource(Resource):
                     "properties": {},
                     "tags": [],
                     "version": "latest",
-                    "pipelines": [
-                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "sequences": [
+                        "SEQUENCE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "SEQUENCE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
                     "subscribers": [],
                     "creation_date": "2022-08-15T19:21:01.871587",
                     "primary_scenario": true}}
@@ -255,9 +256,9 @@ class ScenarioList(Resource):
                     "properties": {},
                     "tags": [],
                     "version": "latest",
-                    "pipelines": [
-                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "sequences": [
+                        "SEQUENCE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "SEQUENCE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
                     "subscribers": [],
                     "creation_date": "2022-08-15T19:21:01.871587",
                     "primary_scenario": true
@@ -288,9 +289,9 @@ class ScenarioList(Resource):
                     "properties": {},
                     "tags": [],
                     "version": "latest",
-                    "pipelines": [
-                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "sequences": [
+                        "SEQUENCE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "SEQUENCE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
                     "subscribers": [],
                     "creation_date": "2022-08-15T19:21:01.871587",
                     "primary_scenario": true
@@ -347,9 +348,9 @@ class ScenarioList(Resource):
                     "properties": {},
                     "tags": [],
                     "version": "latest",
-                    "pipelines": [
-                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "sequences": [
+                        "SEQUENCE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "SEQUENCE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
                     "subscribers": [],
                     "creation_date": "2022-08-15T19:21:01.871587",
                     "primary_scenario": true}
@@ -377,9 +378,9 @@ class ScenarioList(Resource):
                     "properties": {},
                     "tags": [],
                     "version": "latest",
-                    "pipelines": [
-                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
-                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "sequences": [
+                        "SEQUENCE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "SEQUENCE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
                     "subscribers": [],
                     "creation_date": "2022-08-15T19:21:01.871587",
                     "primary_scenario": true}
@@ -524,4 +525,3 @@ class ScenarioExecutor(Resource):
         manager = _ScenarioManagerFactory._build_manager()
         manager._submit(scenario_id)
         return {"message": f"Scenario {scenario_id} was submitted."}
-

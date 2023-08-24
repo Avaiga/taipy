@@ -27,17 +27,17 @@ from .resources import (
     JobExecutor,
     JobList,
     JobResource,
-    PipelineExecutor,
-    PipelineList,
-    PipelineResource,
     ScenarioExecutor,
     ScenarioList,
     ScenarioResource,
+    SequenceExecutor,
+    SequenceList,
+    SequenceResource,
     TaskExecutor,
     TaskList,
     TaskResource,
 )
-from .schemas import CycleSchema, DataNodeSchema, JobSchema, PipelineSchema, ScenarioSchema, TaskSchema
+from .schemas import CycleSchema, DataNodeSchema, JobSchema, ScenarioSchema, SequenceSchema, TaskSchema
 
 _logger = _TaipyLogger._get_logger()
 
@@ -89,21 +89,21 @@ api.add_resource(
 )
 
 api.add_resource(
-    PipelineResource,
-    "/pipelines/<string:pipeline_id>",
-    endpoint="pipeline_by_id",
+    SequenceResource,
+    "/sequences/<string:sequence_id>",
+    endpoint="sequence_by_id",
     resource_class_kwargs={"logger": _logger},
 )
 api.add_resource(
-    PipelineList,
-    "/pipelines",
-    endpoint="pipelines",
+    SequenceList,
+    "/sequences",
+    endpoint="sequences",
     resource_class_kwargs={"logger": _logger},
 )
 api.add_resource(
-    PipelineExecutor,
-    "/pipelines/submit/<string:pipeline_id>",
-    endpoint="pipeline_submit",
+    SequenceExecutor,
+    "/sequences/submit/<string:sequence_id>",
+    endpoint="sequence_submit",
     resource_class_kwargs={"logger": _logger},
 )
 
@@ -181,10 +181,10 @@ def register_views():
     apispec.spec.path(view=TaskList, app=current_app)
     apispec.spec.path(view=TaskExecutor, app=current_app)
 
-    apispec.spec.components.schema("PipelineSchema", schema=PipelineSchema)
-    apispec.spec.path(view=PipelineResource, app=current_app)
-    apispec.spec.path(view=PipelineList, app=current_app)
-    apispec.spec.path(view=PipelineExecutor, app=current_app)
+    apispec.spec.components.schema("SequenceSchema", schema=SequenceSchema)
+    apispec.spec.path(view=SequenceResource, app=current_app)
+    apispec.spec.path(view=SequenceList, app=current_app)
+    apispec.spec.path(view=SequenceExecutor, app=current_app)
 
     apispec.spec.components.schema("ScenarioSchema", schema=ScenarioSchema)
     apispec.spec.path(view=ScenarioResource, app=current_app)

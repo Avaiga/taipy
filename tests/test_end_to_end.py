@@ -55,17 +55,17 @@ def delete(url, client):
 
 
 def test_end_to_end(client, setup_end_to_end):
-    # Create Scenario: Should also create all of its dependencies(pipelines, tasks, datanodes, etc)
+    # Create Scenario: Should also create all of its dependencies(sequences, tasks, datanodes, etc)
     scenario = create_and_submit_scenario("scenario", client)
 
     # Get other models and verify if they return the necessary fields
     cycle = get(url_for("api.cycle_by_id", cycle_id=scenario.get("cycle")), "cycle", client)
-    pipeline = get(
-        url_for("api.pipeline_by_id", pipeline_id=f"PIPELINE_pipeline_{scenario['id']}"),
-        "pipeline",
+    sequence = get(
+        url_for("api.sequence_by_id", sequence_id=f"SEQUENCE_sequence_{scenario['id']}"),
+        "sequence",
         client,
     )
-    task = get(url_for("api.task_by_id", task_id=pipeline.get("tasks")[0]), "task", client)
+    task = get(url_for("api.task_by_id", task_id=sequence.get("tasks")[0]), "task", client)
     datanode = get(
         url_for("api.datanode_by_id", datanode_id=task.get("input_ids")[0]),
         "datanode",
@@ -74,14 +74,14 @@ def test_end_to_end(client, setup_end_to_end):
     # Get All
     get_all(url_for("api.scenarios"), 1, client)
     get_all(url_for("api.cycles"), 1, client)
-    get_all(url_for("api.pipelines"), 1, client)
+    get_all(url_for("api.sequences"), 1, client)
     get_all(url_for("api.tasks"), 2, client)
     get_all(url_for("api.datanodes"), 5, client)
     get_all(url_for("api.jobs"), 2, client)
 
     # Delete entities
     delete(url_for("api.cycle_by_id", cycle_id=cycle.get("id")), client)
-    delete(url_for("api.pipeline_by_id", pipeline_id=pipeline.get("id")), client)
+    delete(url_for("api.sequence_by_id", sequence_id=sequence.get("id")), client)
     delete(url_for("api.task_by_id", task_id=task.get("id")), client)
     delete(url_for("api.datanode_by_id", datanode_id=datanode.get("id")), client)
 
@@ -89,6 +89,6 @@ def test_end_to_end(client, setup_end_to_end):
     # Non-existing entities should return 404
     get_assert_status(url_for("api.cycle_by_id", cycle_id=9999999), client, 404)
     get_assert_status(url_for("api.scenario_by_id", scenario_id=9999999), client, 404)
-    get_assert_status(url_for("api.pipeline_by_id", pipeline_id=9999999), client, 404)
+    get_assert_status(url_for("api.sequence_by_id", sequence_id=9999999), client, 404)
     get_assert_status(url_for("api.task_by_id", task_id=9999999), client, 404)
     get_assert_status(url_for("api.datanode_by_id", datanode_id=9999999), client, 404)

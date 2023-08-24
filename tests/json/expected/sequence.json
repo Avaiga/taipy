@@ -1,8 +1,8 @@
 {
-    "id": "PIPELINE_pipeline_0e1c5dd3-9896-4221-bfc8-6924pjg11147",
+    "id": "SEQUENCE_sequence_0e1c5dd3-9896-4221-bfc8-6924pjg11147",
     "owner_id": "SCENARIO_scenario_a9c3eea2-2af3-4a85-a0c3-ef98ff5bd586",
     "parent_ids": [],
-    "config_id": "pipeline",
+    "config_id": "sequence",
     "properties": {},
     "tasks": [
         "TASK_forecast_task_7e1bac33-15f1-4cfd-8702-17adeee902cb",
