@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { DataNode, Pipeline, Scenario, Task } from "./names";
+import { DataNode, Sequence, Scenario, Task } from "./names";
 
 const childType: Record<string, string> = {
   [Task]: DataNode,
-  [Pipeline]: Task,
-  [Scenario]: Pipeline,
+  [Sequence]: Task,
+  [Scenario]: Sequence,
 };
 export const getChildType = (nodeType: string) => childType[nodeType] || "";

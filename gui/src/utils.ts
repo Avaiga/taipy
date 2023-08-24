@@ -15,7 +15,7 @@ import { PopoverOrigin } from "@mui/material/Popover";
 
 import { useDynamicProperty } from "taipy-gui";
 
-// id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags, deletable
+// id, is_primary, config_id, creation_date, label, tags, properties(key, value), sequences(id, label), authorized_tags, deletable
 export type ScenarioFull = [
     string,
     boolean,
@@ -39,7 +39,7 @@ export enum ScFProps {
     label,
     tags,
     properties,
-    pipelines,
+    sequences,
     authorized_tags,
     deletable,
     promotable,

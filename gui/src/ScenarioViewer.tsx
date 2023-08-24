@@ -69,17 +69,17 @@ interface ScenarioViewerProps {
     showConfig?: boolean;
     showCycle?: boolean;
     showDelete?: boolean;
-    showPipelines?: boolean;
+    showSequences?: boolean;
     showProperties?: boolean;
     showSubmit?: boolean;
-    showSubmitPipelines?: boolean;
+    showSubmitSequences?: boolean;
     showTags?: boolean;
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
 }
 
-interface PipelinesRowProps {
+interface SequencesRowProps {
     active: boolean;
     number: number;
     id: string;
@@ -103,7 +103,7 @@ const tagsAutocompleteSx = {
     maxWidth: "none",
 };
 
-const PipelineRow = ({
+const SequenceRow = ({
     active,
     number,
     id,
@@ -116,26 +116,26 @@ const PipelineRow = ({
     focusName,
     setFocusName,
     submittable,
-}: PipelinesRowProps) => {
-    const [pipeline, setPipeline] = useState<string>(label);
+}: SequencesRowProps) => {
+    const [sequence, setSequence] = useState<string>(label);
 
-    const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setPipeline(e.currentTarget.value), []);
+    const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setSequence(e.currentTarget.value), []);
     const onSaveField = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            editLabel(id, pipeline);
+            editLabel(id, sequence);
         },
-        [id, pipeline, editLabel]
+        [id, sequence, editLabel]
     );
     const onCancelField = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            setPipeline(label);
+            setSequence(label);
             setFocusName("");
         },
         [label, setFocusName]
     );
-    const onSubmitPipeline = useCallback(
+    const onSubmitSequence = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             submitEntity(id);
@@ -143,9 +143,9 @@ const PipelineRow = ({
         [submitEntity, id]
     );
 
-    useEffect(() => setPipeline(label), [label]);
+    useEffect(() => setSequence(label), [label]);
 
-    const name = `pipeline${number}`;
+    const name = `sequence${number}`;
 
     const index = number + 1;
     return (
@@ -153,9 +153,9 @@ const PipelineRow = ({
             <Grid item container xs={10}>
                 {active && focusName === name ? (
                     <TextField
-                        label={`Pipeline ${index}`}
+                        label={`Sequence ${index}`}
                         variant="outlined"
-                        value={pipeline}
+                        value={sequence}
                         onChange={onChange}
                         sx={FieldNoMaxWidth}
                         disabled={!enableScenarioFields}
@@ -174,14 +174,14 @@ const PipelineRow = ({
                         }}
                     />
                 ) : (
-                    <Typography variant="subtitle2">{pipeline}</Typography>
+                    <Typography variant="subtitle2">{sequence}</Typography>
                 )}
             </Grid>
             <Grid item xs={2} container alignContent="center" alignItems="center" justifyContent="center">
                 {submit ? (
                     <IconButton
                         size="small"
-                        onClick={onSubmitPipeline}
+                        onClick={onSubmitSequence}
                         disabled={!enableScenarioFields || !active || !submittable}
                     >
                         <Send color={disableColor("info", !enableScenarioFields || !active || !submittable)} />
@@ -208,9 +208,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         showCycle = false,
         showDelete = true,
         showProperties = true,
-        showPipelines = true,
+        showSequences = true,
         showSubmit = true,
-        showSubmitPipelines = true,
+        showSubmitSequences = true,
         showTags = true,
     } = props;
 
@@ -225,7 +225,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scLabel,
         scTags,
         scProperties,
-        scPipelines,
+        scSequences,
         scAuthorizedTags,
         scDeletable,
         scPromotable,
@@ -276,9 +276,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     );
 
     // submits
-    const submitPipeline = useCallback(
-        (pipelineId: string) => {
-            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: pipelineId }));
+    const submitSequence = useCallback(
+        (sequenceId: string) => {
+            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: sequenceId }));
         },
         [props.onSubmit, id, dispatch, module]
     );
@@ -344,8 +344,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     );
     const onChangeTags = useCallback((_: SyntheticEvent, tags: string[]) => setTags(tags), []);
 
-    // pipelines
-    const editPipeline = useCallback(
+    // sequences
+    const editSequence = useCallback(
         (id: string, label: string) => {
             if (isScenario) {
                 dispatch(createSendActionNameAction(id, module, props.onEdit, { id: id, name: label }));
@@ -568,26 +568,26 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 onFocus={onFocus}
                                 onEdit={props.onEdit}
                             />
-                            {showPipelines ? (
+                            {showSequences ? (
                                 <>
                                     <Grid item xs={12} container justifyContent="space-between">
-                                        <Typography variant="h6">Pipelines</Typography>
+                                        <Typography variant="h6">Sequences</Typography>
                                     </Grid>
 
-                                    {scPipelines &&
-                                        scPipelines.map((item, index) => {
+                                    {scSequences &&
+                                        scSequences.map((item, index) => {
                                             const [key, value, submittable] = item;
                                             return (
-                                                <PipelineRow
+                                                <SequenceRow
                                                     active={active}
                                                     number={index}
                                                     id={key}
                                                     label={value}
                                                     key={key}
-                                                    submitEntity={submitPipeline}
+                                                    submitEntity={submitSequence}
                                                     enableScenarioFields={isScenario}
-                                                    submit={showSubmitPipelines}
-                                                    editLabel={editPipeline}
+                                                    submit={showSubmitSequences}
+                                                    editLabel={editSequence}
                                                     onFocus={onFocus}
                                                     focusName={focusName}
                                                     setFocusName={setFocusName}

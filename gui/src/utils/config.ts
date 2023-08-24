@@ -11,12 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { DataNode, Pipeline, Scenario, Task } from "./names";
+import { DataNode, Sequence, Scenario, Task } from "./names";
 
 const nodeColor: Record<string, string> = {
   [DataNode]: "#283282",
   [Task]: "#ff462b",
-  [Pipeline]: "#ff462b",
+  [Sequence]: "#ff462b",
   [Scenario]: "#f0faff",
 };
 export const getNodeColor = (nodeType: string) => nodeColor[nodeType] || "pink";
@@ -24,9 +24,9 @@ export const getNodeColor = (nodeType: string) => nodeColor[nodeType] || "pink";
 const nodeIcon: Record<string, string> = {
   [DataNode]: "datanode",
   [Task]: "task",
-  [Pipeline]: "pipeline",
+  [Sequence]: "sequence",
   [Scenario]: "scenario",
 };
 export const getNodeIcon = (nodeType: string) => nodeIcon[nodeType];
 
-export const nodeTypes = [DataNode, Pipeline, Scenario, Task];
+export const nodeTypes = [DataNode, Sequence, Scenario, Task];
