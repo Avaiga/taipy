@@ -61,7 +61,7 @@ def test_end_to_end(client, setup_end_to_end):
     # Get other models and verify if they return the necessary fields
     cycle = get(url_for("api.cycle_by_id", cycle_id=scenario.get("cycle")), "cycle", client)
     pipeline = get(
-        url_for("api.pipeline_by_id", pipeline_id=scenario.get("pipelines")["pipeline"]),
+        url_for("api.pipeline_by_id", pipeline_id=f"PIPELINE_pipeline_{scenario['id']}"),
         "pipeline",
         client,
     )

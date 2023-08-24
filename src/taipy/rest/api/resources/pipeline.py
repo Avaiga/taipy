@@ -13,12 +13,12 @@
 from flask import request
 from flask_restful import Resource
 
-from taipy.config.config import Config
-from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingPipelineConfig
+from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingScenario
 from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
 from ...commons.to_from_model import _to_model
-from ..exceptions.exceptions import ConfigIdMissingException
+from ..exceptions.exceptions import PipelineNameMissingException, ScenarioIdMissingException
 from ..middlewares._middleware import _middleware
 from ..schemas import PipelineResponseSchema
 
@@ -163,8 +163,7 @@ class PipelineList(Resource):
         - api
       summary: Create a pipeline.
       description: |
-        Create a pipeline from its config_id. If the config does not exist, a 404 error is returned.
-
+        Create a pipeline from scenario_id, pipeline_name and task_ids. If the scenario_id does not exist or pipeline_name is not provided, a 404 error is returned.
         !!! Note
           When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
           requires _TAIPY_EDITOR_ role.
@@ -172,15 +171,24 @@ class PipelineList(Resource):
         Code example:
 
         ```shell
-          curl -X POST http://localhost:5000/api/v1/pipelines?config_id=my_pipeline_config
+          curl -X POST --data '{"scenario_id": "SCENARIO_scenario_id", "pipeline_name": "pipeline", "tasks": []}' http://localhost:5000/api/v1/pipelines
         ```
 
       parameters:
         - in: query
-          name: config_id
+          name: scenario_id
           schema:
             type: string
-          description: The identifier of the pipeline configuration.
+          description: The Scenario the Pipeline belongs to.
+          name: pipeline_name
+          schema:
+            type: string
+          description: The name of the Pipeline.
+          name: tasks
+          schema:
+            type: list[string]
+          description: A list of task id of the Pipeline.
+
       responses:
         201:
           content:
@@ -203,6 +211,31 @@ class PipelineList(Resource):
         manager = _PipelineManagerFactory._build_manager()
         pipelines = [_to_model(REPOSITORY, pipeline) for pipeline in manager._get_all()]
         return schema.dump(pipelines)
+
+    @_middleware
+    def post(self):
+        pipeline_data = request.json
+        scenario_id = pipeline_data.get("scenario_id")
+        pipeline_name = pipeline_data.get("pipeline_name")
+        pipeline_task_ids = pipeline_data.get("task_ids", [])
+
+        response_schema = PipelineResponseSchema()
+        if not scenario_id:
+            raise ScenarioIdMissingException
+        if not pipeline_name:
+            raise PipelineNameMissingException
+
+        scenario = _ScenarioManagerFactory._build_manager()._get(scenario_id)
+        if not scenario:
+            raise NonExistingScenario(scenario_id=scenario_id)
+
+        scenario.add_pipelines({pipeline_name: {"tasks": pipeline_task_ids}})
+        pipeline = scenario.pipelines[pipeline_name]
+
+        return {
+            "message": "Pipeline was created.",
+            "pipeline": response_schema.dump(_to_model(REPOSITORY, pipeline)),
+        }, 201
 
 
 class PipelineExecutor(Resource):
