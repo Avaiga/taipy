@@ -18,8 +18,8 @@ from src.taipy.core.cycle.cycle import Cycle
 from src.taipy.core.cycle.cycle_id import CycleId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -208,15 +208,15 @@ def test_hard_delete_shared_entities():
     )
     scenario_config_1.add_sequences(
         {
-            "pipeline_1": [task_config_1, task_config_2],
-            "pipeline_2": [task_config_1, task_config_2],
-            "pipeline_3": [task_config_3],
+            "sequence_1": [task_config_1, task_config_2],
+            "sequence_2": [task_config_1, task_config_2],
+            "sequence_3": [task_config_3],
         }
     )
     scenario_config_2 = Config.configure_scenario(
         "scenario_config_2", [task_config_2, task_config_3]
     )  # No Frequency so cycle attached to scenarios
-    scenario_config_2.add_sequences({"pipeline_3": [task_config_3]})
+    scenario_config_2.add_sequences({"sequence_3": [task_config_3]})
 
     _OrchestratorFactory._build_dispatcher()
 
@@ -228,7 +228,7 @@ def test_hard_delete_shared_entities():
     scenario_3.submit()
 
     assert len(_ScenarioManager._get_all()) == 3
-    assert len(_PipelineManager._get_all()) == 7
+    assert len(_SequenceManager._get_all()) == 7
     assert len(_TaskManager._get_all()) == 7
     assert len(_DataManager._get_all()) == 8
     assert len(_JobManager._get_all()) == 8
@@ -236,7 +236,7 @@ def test_hard_delete_shared_entities():
     _CycleManager._hard_delete(scenario_1.cycle.id)
     assert len(_CycleManager._get_all()) == 0
     assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
+    assert len(_SequenceManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 2
     assert len(_DataManager._get_all()) == 3

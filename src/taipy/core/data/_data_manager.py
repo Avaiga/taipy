@@ -23,8 +23,8 @@ from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import EventEntityType, EventOperation, _publish_event
-from ..pipeline.pipeline_id import PipelineId
 from ..scenario.scenario_id import ScenarioId
+from ..sequence.sequence_id import SequenceId
 from ._abstract_file import _AbstractFileDataNode
 from ._data_fs_repository import _DataFSRepository
 from .data_node import DataNode
@@ -50,7 +50,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
             scope = dn_config.scope
-            owner_id: Union[Optional[PipelineId], Optional[ScenarioId], Optional[CycleId]]
+            owner_id: Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]
             if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:

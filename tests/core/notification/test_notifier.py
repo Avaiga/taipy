@@ -69,7 +69,7 @@ def test_register():
     assert register_queue_3 in [registration.queue for registration in Notifier._topics_registrations_list[topic_3]]
 
     registration_id_4, register_queue_4 = Notifier.register(
-        EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"
+        EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"
     )
     topic_4, registration_4 = find_registration_and_topic(registration_id_4)
 
@@ -154,39 +154,39 @@ def test_matching():
         Topic(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION),
     )
 
-    assert Notifier.is_matching(Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"), Topic())
+    assert Notifier.is_matching(Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), Topic())
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"), Topic(EventEntityType.PIPELINE)
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), Topic(EventEntityType.SEQUENCE)
     )
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"),
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
         Topic(
-            EventEntityType.PIPELINE,
-            "pipeline_id",
+            EventEntityType.SEQUENCE,
+            "sequence_id",
         ),
     )
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"),
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
         Topic(operation=EventOperation.UPDATE),
     )
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"),
-        Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE),
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
+        Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE),
     )
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"), Topic(attribute_name="tasks")
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), Topic(attribute_name="tasks")
     )
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"),
-        Topic(EventEntityType.PIPELINE, attribute_name="tasks"),
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
+        Topic(EventEntityType.SEQUENCE, attribute_name="tasks"),
     )
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"),
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
         Topic(operation=EventOperation.UPDATE, attribute_name="tasks"),
     )
     assert Notifier.is_matching(
-        Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"),
-        Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "tasks"),
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
+        Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
     )
     assert Notifier.is_matching(Event(EventEntityType.TASK, "task_id", EventOperation.DELETION), Topic())
     assert Notifier.is_matching(
@@ -244,7 +244,7 @@ def test_publish_event():
     scenario_config = Config.configure_scenario(
         "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
     )
-    scenario_config.add_sequences({"pipeline_config": [task_config]})
+    scenario_config.add_sequences({"sequence_config": [task_config]})
 
     # Test CREATION Event
 
@@ -252,8 +252,8 @@ def test_publish_event():
     cycle = scenario.cycle
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
-    # NOTE: pipeline is created only when accessed via scenario.pipelines
-    pipeline = scenario.pipelines["pipeline_config"]
+    # NOTE: sequence is created only when accessed via scenario.sequences
+    sequence = scenario.sequences["sequence_config"]
 
     assert registration_queue.qsize() == 5
 
@@ -266,9 +266,9 @@ def test_publish_event():
         EventEntityType.DATA_NODE,
         EventEntityType.TASK,
         EventEntityType.SCENARIO,
-        EventEntityType.PIPELINE,
+        EventEntityType.SEQUENCE,
     ]
-    expected_event_entity_id = [cycle.id, dn.id, task.id, scenario.id, pipeline.id]
+    expected_event_entity_id = [cycle.id, dn.id, task.id, scenario.id, sequence.id]
 
     assert all(
         [
@@ -324,13 +324,13 @@ def test_publish_event():
     cycle.properties.pop("re_run_periodically")
     assert registration_queue.qsize() == 15
 
-    pipeline.properties["name"] = "weather_forecast"
+    sequence.properties["name"] = "weather_forecast"
     assert registration_queue.qsize() == 17
 
-    tp.subscribe_pipeline(print, None, pipeline)
+    tp.subscribe_sequence(print, None, sequence)
     assert registration_queue.qsize() == 18
 
-    tp.unsubscribe_pipeline(print, None, pipeline)
+    tp.unsubscribe_sequence(print, None, sequence)
     assert registration_queue.qsize() == 19
 
     task.skippable = True
@@ -377,10 +377,10 @@ def test_publish_event():
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
-        EventEntityType.PIPELINE,
-        EventEntityType.PIPELINE,
-        EventEntityType.PIPELINE,
-        EventEntityType.PIPELINE,
+        EventEntityType.SEQUENCE,
+        EventEntityType.SEQUENCE,
+        EventEntityType.SEQUENCE,
+        EventEntityType.SEQUENCE,
         EventEntityType.TASK,
         EventEntityType.TASK,
         EventEntityType.TASK,
@@ -435,10 +435,10 @@ def test_publish_event():
         cycle.id,
         cycle.id,
         cycle.id,
-        pipeline.id,
-        pipeline.id,
-        pipeline.id,
-        pipeline.id,
+        sequence.id,
+        sequence.id,
+        sequence.id,
+        sequence.id,
         task.id,
         task.id,
         task.id,
@@ -468,7 +468,7 @@ def test_publish_event():
 
     # If multiple entities is in context, the last to enter will be the first to exit
     # So the published event will have the order starting with scenario first and ending with dn
-    with dn as d, task as t, pipeline as pl, cycle as c, scenario as sc:
+    with dn as d, task as t, sequence as pl, cycle as c, scenario as sc:
 
         sc.is_primary = True
         assert registration_queue.qsize() == 0
@@ -498,7 +498,7 @@ def test_publish_event():
         assert registration_queue.qsize() == 0
 
         pl.properties["name"] = "weather_forecast"
-        registration_queue.get()  # creation event due to Pipeline was recreated
+        registration_queue.get()  # creation event due to Sequence was recreated
         assert registration_queue.qsize() == 0
 
         t.skippable = True
@@ -535,7 +535,7 @@ def test_publish_event():
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
-        EventEntityType.PIPELINE,
+        EventEntityType.SEQUENCE,
         EventEntityType.TASK,
         EventEntityType.TASK,
         EventEntityType.TASK,
@@ -571,7 +571,7 @@ def test_publish_event():
         cycle.id,
         cycle.id,
         cycle.id,
-        pipeline.id,
+        sequence.id,
         task.id,
         task.id,
         task.id,
@@ -623,9 +623,9 @@ def test_publish_event():
         published_events.append(registration_queue.get())
 
     expected_event_types = [
-        EventEntityType.PIPELINE,
+        EventEntityType.SEQUENCE,
         EventEntityType.CYCLE,
-        EventEntityType.PIPELINE,
+        EventEntityType.SEQUENCE,
         EventEntityType.SCENARIO,
         # EventEntityType.SCENARIO,
         EventEntityType.TASK,
@@ -633,7 +633,7 @@ def test_publish_event():
         EventEntityType.DATA_NODE,
     ]
 
-    expected_event_entity_id = [pipeline.id, cycle.id, pipeline.id, scenario.id, task.id, job.id, dn.id]
+    expected_event_entity_id = [sequence.id, cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id]
     expected_event_operation_type = [EventOperation.DELETION] * len(expected_event_types)
     expected_event_operation_type[0] = EventOperation.CREATION
 

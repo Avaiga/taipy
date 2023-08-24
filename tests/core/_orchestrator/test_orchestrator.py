@@ -25,10 +25,10 @@ from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFact
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
-from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.sequence._sequence_manager import _SequenceManager
+from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config import Config
@@ -95,7 +95,7 @@ def test_submit_task():
     assert job.is_completed()
 
 
-def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
+def test_submit_sequence_generate_unique_submit_id(sequence, task):
 
     dn_1 = InMemoryDataNode("dn_config_id_1", Scope.SCENARIO)
     dn_2 = InMemoryDataNode("dn_config_id_2", Scope.SCENARIO)
@@ -107,13 +107,13 @@ def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
 
-    scenario = Scenario("scenario", [task_1, task_2], {}, pipelines={"pipeline": {"tasks": [task_1, task_2]}})
+    scenario = Scenario("scenario", [task_1, task_2], {}, sequences={"sequence": {"tasks": [task_1, task_2]}})
     _ScenarioManager._set(scenario)
 
-    pipeline = scenario.pipelines["pipeline"]
+    sequence = scenario.sequences["sequence"]
 
-    jobs_1 = taipy.submit(pipeline)
-    jobs_2 = taipy.submit(pipeline)
+    jobs_1 = taipy.submit(sequence)
+    jobs_2 = taipy.submit(sequence)
     assert len(jobs_1) == 2
     assert len(jobs_2) == 2
     submit_ids_1 = [job.submit_id for job in jobs_1]
@@ -252,22 +252,22 @@ def test_scenario_only_submit_same_task_once():
         [task_1, task_2, task_3],
         {},
         "scenario_1",
-        pipelines={"pipeline_1": {"tasks": [task_1, task_2]}, "pipeline_2": {"tasks": [task_1, task_3]}},
+        sequences={"sequence_1": {"tasks": [task_1, task_2]}, "sequence_2": {"tasks": [task_1, task_3]}},
     )
-    pipeline_1 = scenario_1.pipelines["pipeline_1"]
-    pipeline_2 = scenario_1.pipelines["pipeline_2"]
+    sequence_1 = scenario_1.sequences["sequence_1"]
+    sequence_2 = scenario_1.sequences["sequence_2"]
 
     jobs = _Orchestrator.submit(scenario_1)
     assert len(jobs) == 3
     assert all([job.is_completed() for job in jobs])
     assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-    jobs = _Orchestrator.submit(pipeline_1)
+    jobs = _Orchestrator.submit(sequence_1)
     assert len(jobs) == 2
     assert all([job.is_completed() for job in jobs])
     assert all(not _Orchestrator._is_blocked(job) for job in jobs)
 
-    jobs = _Orchestrator.submit(pipeline_2)
+    jobs = _Orchestrator.submit(sequence_2)
     assert len(jobs) == 2
     assert all([job.is_completed() for job in jobs])
     assert all(not _Orchestrator._is_blocked(job) for job in jobs)
@@ -332,7 +332,7 @@ def test_update_status_fail_job_in_parallel():
         {},
         set(),
         "scenario_1",
-        pipelines={"pipeline_1": {"tasks": [task_0, task_1, task_2, task_3]}},
+        sequences={"sequence_1": {"tasks": [task_0, task_1, task_2, task_3]}},
     )
     scenario_2 = Scenario(
         "scenario_config_2",
@@ -352,19 +352,19 @@ def test_update_status_fail_job_in_parallel():
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
 
-    pipeline_1 = scenario_1.pipelines["pipeline_1"]
+    sequence_1 = scenario_1.sequences["sequence_1"]
 
     job = _Orchestrator.submit_task(task_0, "submit_id")
     assert_true_after_time(job.is_failed)
 
-    jobs = _Orchestrator.submit(pipeline_1)
+    jobs = _Orchestrator.submit(sequence_1)
     tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
     assert_true_after_time(lambda: all([job.is_abandoned() for job in [tasks_jobs["task_1"], tasks_jobs["task_2"]]]))
     assert_true_after_time(lambda: all(not _Orchestrator._is_blocked(job) for job in jobs))
 
-    jobs = _Orchestrator.submit(scenario_1.pipelines["pipeline_1"])
+    jobs = _Orchestrator.submit(scenario_1.sequences["sequence_1"])
     tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
     assert_true_after_time(tasks_jobs["task_3"].is_completed)
@@ -407,7 +407,7 @@ def test_submit_task_in_parallel():
     assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
 
-def test_submit_pipeline_in_parallel():
+def test_submit_sequence_in_parallel():
 
     m = multiprocessing.Manager()
     lock = m.Lock()
@@ -415,13 +415,13 @@ def test_submit_pipeline_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
     task = _create_task(partial(lock_multiply, lock))
-    pipeline = Pipeline({}, [task], "pipeline_id")
+    sequence = Sequence({}, [task], "sequence_id")
 
     _OrchestratorFactory._build_dispatcher()
 
     with lock:
         assert task.output[f"{task.config_id}_output0"].read() == 0
-        job = _Orchestrator.submit(pipeline)[0]
+        job = _Orchestrator.submit(sequence)[0]
         assert_true_after_time(job.is_running)
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
@@ -473,16 +473,16 @@ def test_submit_task_synchronously_in_parallel():
     assert_true_after_time(job.is_completed)
 
 
-def test_submit_pipeline_synchronously_in_parallel():
+def test_submit_sequence_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep, sleep_period))
-    pipeline = Pipeline({}, [task], "pipeline_id")
+    sequence = Sequence({}, [task], "sequence_id")
 
-    job = _Orchestrator.submit(pipeline, wait=True)[0]
+    job = _Orchestrator.submit(sequence, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_completed)
 
@@ -513,16 +513,16 @@ def test_submit_fail_task_synchronously_in_parallel():
     assert_true_after_time(job.is_failed)
 
 
-def test_submit_fail_pipeline_synchronously_in_parallel():
+def test_submit_fail_sequence_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _OrchestratorFactory._build_dispatcher()
 
     sleep_period = 1.0
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep_and_raise_error_fct, sleep_period))
-    pipeline = Pipeline({}, [task], "pipeline_id")
+    sequence = Sequence({}, [task], "sequence_id")
 
-    job = _Orchestrator.submit(pipeline, wait=True)[0]
+    job = _Orchestrator.submit(sequence, wait=True)[0]
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_failed)
 
@@ -592,7 +592,7 @@ def test_submit_task_multithreading_multiple_task():
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
-def test_submit_pipeline_multithreading_multiple_task():
+def test_submit_sequence_multithreading_multiple_task():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
     m = multiprocessing.Manager()
@@ -602,13 +602,13 @@ def test_submit_pipeline_multithreading_multiple_task():
     task_1 = _create_task(partial(lock_multiply, lock_1))
     task_2 = _create_task(partial(lock_multiply, lock_2))
 
-    pipeline = Pipeline({}, [task_1, task_2], "pipeline_id")
+    sequence = Sequence({}, [task_1, task_2], "sequence_id")
 
     _OrchestratorFactory._build_dispatcher()
 
     with lock_1:
         with lock_2:
-            tasks_jobs = {job._task.id: job for job in _Orchestrator.submit(pipeline)}
+            tasks_jobs = {job._task.id: job for job in _Orchestrator.submit(sequence)}
             job_1 = tasks_jobs[task_1.id]
             job_2 = tasks_jobs[task_2.id]
 
@@ -766,7 +766,7 @@ def test_blocked_task():
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
 
 
-def test_blocked_pipeline():
+def test_blocked_sequence():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
     m = multiprocessing.Manager()
@@ -785,7 +785,7 @@ def test_blocked_pipeline():
     baz = dns[baz_cfg]
     task_1 = Task("by_2", {}, partial(lock_multiply, lock_1, 2), [foo], [bar])
     task_2 = Task("by_3", {}, partial(lock_multiply, lock_2, 3), [bar], [baz])
-    pipeline = Pipeline({}, [task_1, task_2], "pipeline_id")
+    sequence = Sequence({}, [task_1, task_2], "sequence_id")
 
     assert task_1.foo.is_ready_for_reading  # foo is ready
     assert not task_1.bar.is_ready_for_reading  # But bar is not ready
@@ -794,7 +794,7 @@ def test_blocked_pipeline():
     assert len(_Orchestrator.blocked_jobs) == 0
     with lock_2:
         with lock_1:
-            jobs = _Orchestrator.submit(pipeline)  # pipeline is submitted
+            jobs = _Orchestrator.submit(sequence)  # sequence is submitted
             tasks_jobs = {job._task.id: job for job in jobs}
             job_1, job_2 = tasks_jobs[task_1.id], tasks_jobs[task_2.id]
             assert_true_after_time(job_1.is_running)  # job 1 is submitted and locked so it is still running

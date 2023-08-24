@@ -47,8 +47,8 @@ def test_general_topic_creation():
     assert topic_5.operation == EventOperation.DELETION
     assert topic_5.attribute_name is None
 
-    topic_6 = Topic(entity_type=EventEntityType.PIPELINE)
-    assert topic_6.entity_type == EventEntityType.PIPELINE
+    topic_6 = Topic(entity_type=EventEntityType.SEQUENCE)
+    assert topic_6.entity_type == EventEntityType.SEQUENCE
     assert topic_6.entity_id is None
     assert topic_6.operation is None
     assert topic_6.attribute_name is None
@@ -139,48 +139,48 @@ def test_topic_creation_scenario():
     #     _ = Topic(EventEntityType.SCENARIO, "scenario_id", attribute_name="is_primary")
 
 
-def test_topic_creation_pipeline():
-    topic_1 = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.CREATION)
-    assert topic_1.entity_type == EventEntityType.PIPELINE
-    assert topic_1.entity_id == "pipeline_id"
+def test_topic_creation_sequence():
+    topic_1 = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.CREATION)
+    assert topic_1.entity_type == EventEntityType.SEQUENCE
+    assert topic_1.entity_id == "sequence_id"
     assert topic_1.operation == EventOperation.CREATION
     assert topic_1.attribute_name is None
 
-    topic_2 = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "subscribers")
-    assert topic_2.entity_type == EventEntityType.PIPELINE
-    assert topic_2.entity_id == "pipeline_id"
+    topic_2 = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "subscribers")
+    assert topic_2.entity_type == EventEntityType.SEQUENCE
+    assert topic_2.entity_id == "sequence_id"
     assert topic_2.operation == EventOperation.UPDATE
     assert topic_2.attribute_name == "subscribers"
 
-    topic_3 = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.DELETION)
-    assert topic_3.entity_type == EventEntityType.PIPELINE
-    assert topic_3.entity_id == "pipeline_id"
+    topic_3 = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.DELETION)
+    assert topic_3.entity_type == EventEntityType.SEQUENCE
+    assert topic_3.entity_id == "sequence_id"
     assert topic_3.operation == EventOperation.DELETION
     assert topic_3.attribute_name is None
 
-    topic_4 = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.SUBMISSION)
-    assert topic_4.entity_type == EventEntityType.PIPELINE
-    assert topic_4.entity_id == "pipeline_id"
+    topic_4 = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.SUBMISSION)
+    assert topic_4.entity_type == EventEntityType.SEQUENCE
+    assert topic_4.entity_id == "sequence_id"
     assert topic_4.operation == EventOperation.SUBMISSION
     assert topic_4.attribute_name is None
 
-    topic_5 = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.DELETION)
-    assert topic_5.entity_type == EventEntityType.PIPELINE
-    assert topic_5.entity_id == "pipeline_id"
+    topic_5 = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.DELETION)
+    assert topic_5.entity_type == EventEntityType.SEQUENCE
+    assert topic_5.entity_id == "sequence_id"
     assert topic_5.operation == EventOperation.DELETION
     assert topic_5.attribute_name is None
 
     # with pytest.raises(InvalidEventAttributeName):
-    #     _ = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.CREATION, "subscribers")
+    #     _ = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.CREATION, "subscribers")
 
     # with pytest.raises(InvalidEventAttributeName):
-    #     _ = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.DELETION, "subscribers")
+    #     _ = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.DELETION, "subscribers")
 
     # with pytest.raises(InvalidEventAttributeName):
-    #     _ = Topic(EventEntityType.PIPELINE, "pipeline_id", EventOperation.SUBMISSION, "subscribers")
+    #     _ = Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.SUBMISSION, "subscribers")
 
     # with pytest.raises(InvalidEventAttributeName):
-    #     _ = Topic(EventEntityType.PIPELINE, "pipeline_id", attribute_name="subscribers")
+    #     _ = Topic(EventEntityType.SEQUENCE, "sequence_id", attribute_name="subscribers")
 
 
 def test_topic_creation_task():
@@ -312,7 +312,7 @@ def test_topic_creation_job():
 def test_topic_equal():
     assert Topic() == Topic()
     assert Topic(EventEntityType.SCENARIO) == Topic(EventEntityType.SCENARIO)
-    assert Topic(entity_id="pipeline_id") == Topic(entity_id="pipeline_id")
+    assert Topic(entity_id="sequence_id") == Topic(entity_id="sequence_id")
     assert Topic(operation=EventOperation.SUBMISSION) == Topic(operation=EventOperation.SUBMISSION)
     assert Topic(EventEntityType.JOB, "JOB_id", EventOperation.UPDATE, "status") == Topic(
         EventEntityType.JOB, "JOB_id", EventOperation.UPDATE, "status"

@@ -259,7 +259,7 @@ def config_scenario_v1():
     dn2 = Config.configure_pickle_data_node(id="d2")
     task_cfg = Config.configure_task("my_task", twice, dn1, dn2)
     scenario_cfg = Config.configure_scenario("my_scenario", [task_cfg])
-    scenario_cfg.add_sequences({"my_pipeline": [task_cfg]})
+    scenario_cfg.add_sequences({"my_sequence": [task_cfg]})
     return scenario_cfg
 
 

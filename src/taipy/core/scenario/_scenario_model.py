@@ -19,7 +19,7 @@ from .._repository.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from ..cycle.cycle_id import CycleId
 from ..data.data_node_id import DataNodeId
-from ..pipeline.pipeline_id import PipelineId
+from ..sequence.sequence_id import SequenceId
 from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
 
@@ -40,7 +40,7 @@ class _ScenarioModel(_BaseModel):
         Column("subscribers", JSON),
         Column("tags", JSON),
         Column("version", String),
-        Column("pipelines", JSON),
+        Column("sequences", JSON),
         Column("cycle", String),
     )
     id: ScenarioId
@@ -53,7 +53,7 @@ class _ScenarioModel(_BaseModel):
     subscribers: List[Dict]
     tags: List[str]
     version: str
-    pipelines: Optional[Dict[str, Dict]] = None
+    sequences: Optional[Dict[str, Dict]] = None
     cycle: Optional[CycleId] = None
 
     @staticmethod
@@ -69,6 +69,6 @@ class _ScenarioModel(_BaseModel):
             subscribers=data["subscribers"],
             tags=data["tags"],
             version=data["version"] if "version" in data.keys() else _version_migration(),
-            pipelines=data.get("pipelines", None),
+            sequences=data.get("sequences", None),
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )

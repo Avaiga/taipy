@@ -21,18 +21,18 @@ from ..common._warnings import _warn_deprecated
 from .task_config import TaskConfig
 
 
-class PipelineConfig(Section):
+class SequenceConfig(Section):
     """
-    Configuration fields needed to instantiate an actual `Pipeline^`.
+    Configuration fields needed to instantiate an actual `Sequence^`.
 
     Attributes:
-        id (str): Identifier of the pipeline configuration. It must be a valid Python variable name.
+        id (str): Identifier of the sequence configuration. It must be a valid Python variable name.
         task_configs (Union[TaskConfig, List[TaskConfig]]): List of task configs.<br/>
             The default value is [].
         **properties (dict[str, any]): A dictionary of additional properties.
     """
 
-    name = "PIPELINE"
+    name = "SEQUENCE"
 
     _TASK_KEY = "tasks"
 
@@ -44,7 +44,7 @@ class PipelineConfig(Section):
         super().__init__(id, **properties)
 
     def __copy__(self):
-        return PipelineConfig(self.id, copy(self._tasks), **copy(self._properties))
+        return SequenceConfig(self.id, copy(self._tasks), **copy(self._properties))
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return _tpl._replace_templates(self._properties.get(item))
@@ -59,7 +59,7 @@ class PipelineConfig(Section):
 
     @classmethod
     def default_config(cls):
-        return PipelineConfig(cls._DEFAULT_KEY, [])
+        return SequenceConfig(cls._DEFAULT_KEY, [])
 
     def _clean(self):
         self._tasks = []
@@ -75,7 +75,7 @@ class PipelineConfig(Section):
         tasks = []
         if tasks_ids := as_dict.pop(cls._TASK_KEY, None):
             tasks = [t_configs[task_id] for task_id in tasks_ids if task_id in t_configs]
-        return PipelineConfig(id=id, tasks=tasks, **as_dict)
+        return SequenceConfig(id=id, tasks=tasks, **as_dict)
 
     def _update(self, as_dict, default_section=None):
         self._tasks = as_dict.pop(self._TASK_KEY, self._tasks)
@@ -86,41 +86,39 @@ class PipelineConfig(Section):
             self._properties = {**default_section.properties, **self._properties}
 
     @staticmethod
-    def _configure(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
-        """Configure a new pipeline configuration.
+    def _configure(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "SequenceConfig":
+        """Configure a new sequence configuration.
 
         Parameters:
-            id (str): The unique identifier of the new pipeline configuration.
+            id (str): The unique identifier of the new sequence configuration.
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
-                configurations that make this new pipeline. This can be a single task
-                configuration object is this pipeline holds a single task.
+                configurations that make this new sequence. This can be a single task
+                configuration object if this sequence holds a single task.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
-            The new pipeline configuration.
+            The new sequence configuration.
         """
-        section = PipelineConfig(id, task_configs, **properties)
+        section = SequenceConfig(id, task_configs, **properties)
         Config._register(section)
-        _warn_deprecated("PipelineConfig")
-        return Config.sections[PipelineConfig.name][id]
+        return Config.sections[SequenceConfig.name][id]
 
     @staticmethod
-    def _set_default_configuration(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "PipelineConfig":
-        """Set the default values for pipeline configurations.
+    def _set_default_configuration(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "SequenceConfig":
+        """Set the default values for sequence configurations.
 
-        This function creates the *default pipeline configuration* object,
-        where all pipeline configuration objects will find their default
+        This function creates the *default sequence configuration* object,
+        where all sequence configuration objects will find their default
         values when needed.
 
         Parameters:
             task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
-                configurations that make the default pipeline configuration. This can be
-                a single task configuration object is this pipeline holds a single task.
+                configurations that make the default sequence configuration. This can be
+                a single task configuration object if this sequence holds a single task.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
         Returns:
-            The default pipeline configuration.
+            The default sequence configuration.
         """
-        section = PipelineConfig(_Config.DEFAULT_KEY, task_configs, **properties)
+        section = SequenceConfig(_Config.DEFAULT_KEY, task_configs, **properties)
         Config._register(section)
-        _warn_deprecated("PipelineConfig")
-        return Config.sections[PipelineConfig.name][_Config.DEFAULT_KEY]
+        return Config.sections[SequenceConfig.name][_Config.DEFAULT_KEY]

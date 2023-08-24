@@ -8,8 +8,11 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from .._repository._sql_repository import _SQLRepository
+from ._sequence_converter import _SequenceConverter
+from ._sequence_model import _SequenceModel
 
-from typing import NewType
 
-PipelineId = NewType("PipelineId", str)
-PipelineId.__doc__ = """Type that holds a `Pipeline^` identifier."""
+class _SequenceSQLRepository(_SQLRepository):
+    def __init__(self):
+        super().__init__(model_type=_SequenceModel, converter=_SequenceConverter)

@@ -12,38 +12,38 @@ from collections import defaultdict
 
 from .._repository._abstract_converter import _AbstractConverter
 from ..common import _utils
-from ..exceptions import NonExistingPipeline, NonExistingTask
-from ..pipeline._pipeline_model import _PipelineModel
-from ..pipeline.pipeline import Pipeline
+from ..exceptions import NonExistingSequence, NonExistingTask
 from ..task.task import Task
+from ._sequence_model import _SequenceModel
+from .sequence import Sequence
 
 
-class _PipelineConverter(_AbstractConverter):
+class _SequenceConverter(_AbstractConverter):
     @classmethod
-    def _entity_to_model(cls, pipeline: Pipeline) -> _PipelineModel:
+    def _entity_to_model(cls, sequence: Sequence) -> _SequenceModel:
         datanode_task_edges = defaultdict(list)
         task_datanode_edges = defaultdict(list)
 
-        for task in pipeline._get_tasks().values():
+        for task in sequence._get_tasks().values():
             task_id = str(task.id)
             for predecessor in task.input.values():
                 datanode_task_edges[str(predecessor.id)].append(task_id)
             for successor in task.output.values():
                 task_datanode_edges[task_id].append(str(successor.id))
-        return _PipelineModel(
-            pipeline.id,
-            pipeline.owner_id,
-            list(pipeline._parent_ids),
-            pipeline._properties.data,
-            cls.__to_task_ids(pipeline._tasks),
-            _utils._fcts_to_dict(pipeline._subscribers),
-            pipeline._version,
+        return _SequenceModel(
+            sequence.id,
+            sequence.owner_id,
+            list(sequence._parent_ids),
+            sequence._properties.data,
+            cls.__to_task_ids(sequence._tasks),
+            _utils._fcts_to_dict(sequence._subscribers),
+            sequence._version,
         )
 
     @classmethod
-    def _model_to_entity(cls, model: _PipelineModel) -> Pipeline:
+    def _model_to_entity(cls, model: _SequenceModel) -> Sequence:
         try:
-            pipeline = Pipeline(
+            sequence = Sequence(
                 model.properties,
                 model.tasks,
                 model.id,
@@ -55,12 +55,12 @@ class _PipelineConverter(_AbstractConverter):
                 ],
                 model.version,
             )
-            return pipeline
+            return sequence
         except NonExistingTask as err:
             raise err
         except KeyError:
-            pipeline_err = NonExistingPipeline(model.id)
-            raise pipeline_err
+            sequence_err = NonExistingSequence(model.id)
+            raise sequence_err
 
     @staticmethod
     def __to_task_ids(tasks):

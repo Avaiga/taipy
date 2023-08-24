@@ -19,14 +19,14 @@ from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
 from .._version._utils import _version_migration
 from ..task.task_id import TaskId
-from .pipeline_id import PipelineId
+from .sequence_id import SequenceId
 
 
 @mapper_registry.mapped
 @dataclass
-class _PipelineModel(_BaseModel):
+class _SequenceModel(_BaseModel):
     __table__ = Table(
-        "pipeline",
+        "sequence",
         mapper_registry.metadata,
         Column("id", String, primary_key=True),
         Column("owner_id", String),
@@ -36,7 +36,7 @@ class _PipelineModel(_BaseModel):
         Column("subscribers", JSON),
         Column("version", String),
     )
-    id: PipelineId
+    id: SequenceId
     owner_id: Optional[str]
     parent_ids: List[str]
     properties: Dict[str, Any]
@@ -49,7 +49,7 @@ class _PipelineModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return _PipelineModel(
+        return _SequenceModel(
             id=data["id"],
             # Migrate parent_id attribute for compatibility between <=2.0 to >=2.1 versions.
             owner_id=data.get("owner_id", data.get("parent_id")),

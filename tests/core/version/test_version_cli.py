@@ -19,8 +19,8 @@ from src.taipy.core._version._cli._version_cli import _VersionCLI
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -181,7 +181,7 @@ def test_rename_version(caplog):
     # All entities are assigned to the new version
     assert len(_DataManager._get_all("1.1")) == 2
     assert len(_TaskManager._get_all("1.1")) == 1
-    assert len(_PipelineManager._get_all("1.1")) == 1
+    assert len(_SequenceManager._get_all("1.1")) == 1
     assert len(_ScenarioManager._get_all("1.1")) == 1
     assert len(_JobManager._get_all("1.1")) == 1
 
@@ -195,7 +195,7 @@ def test_rename_version(caplog):
     # All entities are assigned to the new version
     assert len(_DataManager._get_all("2.1")) == 2
     assert len(_TaskManager._get_all("2.1")) == 1
-    assert len(_PipelineManager._get_all("2.1")) == 1
+    assert len(_SequenceManager._get_all("2.1")) == 1
     assert len(_ScenarioManager._get_all("2.1")) == 1
     assert len(_JobManager._get_all("2.1")) == 1
 
@@ -255,6 +255,6 @@ def config_scenario():
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice, data_node_1_config, data_node_2_config)
     scenario_config = Config.configure_scenario("my_scenario", [task_config], frequency=Frequency.DAILY)
-    scenario_config.add_sequences({"my_pipeline": [task_config]})
+    scenario_config.add_sequences({"my_sequence": [task_config]})
 
     return scenario_config

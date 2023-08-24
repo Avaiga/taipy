@@ -279,15 +279,15 @@ class TestDataManager:
 
         dn_1_datanodes = _DataManager._get_by_config_id(dn_config_1.id)
         assert len(dn_1_datanodes) == 3
-        assert sorted([dn_1_1.id, dn_1_2.id, dn_1_3.id]) == sorted([pipeline.id for pipeline in dn_1_datanodes])
+        assert sorted([dn_1_1.id, dn_1_2.id, dn_1_3.id]) == sorted([sequence.id for sequence in dn_1_datanodes])
 
         dn_2_datanodes = _DataManager._get_by_config_id(dn_config_2.id)
         assert len(dn_2_datanodes) == 2
-        assert sorted([dn_2_1.id, dn_2_2.id]) == sorted([pipeline.id for pipeline in dn_2_datanodes])
+        assert sorted([dn_2_1.id, dn_2_2.id]) == sorted([sequence.id for sequence in dn_2_datanodes])
 
         dn_3_datanodes = _DataManager._get_by_config_id(dn_config_3.id)
         assert len(dn_3_datanodes) == 1
-        assert sorted([dn_3_1.id]) == sorted([pipeline.id for pipeline in dn_3_datanodes])
+        assert sorted([dn_3_1.id]) == sorted([sequence.id for sequence in dn_3_datanodes])
 
     def test_get_data_nodes_by_config_id_in_multiple_versions_environment(self, init_sql_repo):
         init_managers()

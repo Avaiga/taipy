@@ -17,8 +17,8 @@ from src.taipy.core.config import (
     DataNodeConfig,
     JobConfig,
     MigrationConfig,
-    PipelineConfig,
     ScenarioConfig,
+    SequenceConfig,
     TaskConfig,
 )
 from taipy.config import Config
@@ -171,7 +171,7 @@ inputs = [ "test_csv_dn:SECTION",]
 outputs = [ "test_json_dn:SECTION",]
 skippable = "False:bool"
 
-[PIPELINE.default]
+[SEQUENCE.default]
 tasks = []
 
 [SCENARIO.default]
@@ -261,10 +261,10 @@ sequence1 = [ "test_task:SECTION",]
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[PipelineConfig.name] is not None
-    assert len(Config.sections[PipelineConfig.name]) == 1
-    assert Config.sections[PipelineConfig.name]["default"] is not None
-    assert Config.sections[PipelineConfig.name]["default"].tasks == []
+    assert Config.sections[SequenceConfig.name] is not None
+    assert len(Config.sections[SequenceConfig.name]) == 1
+    assert Config.sections[SequenceConfig.name]["default"] is not None
+    assert Config.sections[SequenceConfig.name]["default"].tasks == []
 
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
@@ -361,7 +361,7 @@ def test_read_write_json_configuration_file():
 "skippable": "False:bool"
 }
 },
-"PIPELINE": {
+"SEQUENCE": {
 "default": {
 "tasks": []
 }
@@ -460,10 +460,10 @@ def test_read_write_json_configuration_file():
     ]
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[PipelineConfig.name] is not None
-    assert len(Config.sections[PipelineConfig.name]) == 1
-    assert Config.sections[PipelineConfig.name]["default"] is not None
-    assert Config.sections[PipelineConfig.name]["default"].tasks == []
+    assert Config.sections[SequenceConfig.name] is not None
+    assert len(Config.sections[SequenceConfig.name]) == 1
+    assert Config.sections[SequenceConfig.name]["default"] is not None
+    assert Config.sections[SequenceConfig.name]["default"].tasks == []
 
     assert Config.sections[ScenarioConfig.name] is not None
     assert len(Config.sections[ScenarioConfig.name]) == 2
@@ -489,7 +489,7 @@ def test_read_write_json_configuration_file():
     }
 
 
-def test_read_write_toml_configuration_file_migrate_pipeline_in_scenario():
+def test_read_write_toml_configuration_file_migrate_sequence_in_scenario():
     old_toml_config = """
 [TAIPY]
 
@@ -535,17 +535,17 @@ inputs = [ "test_csv_dn:SECTION",]
 outputs = [ "test_json_dn:SECTION",]
 skippable = "False:bool"
 
-[PIPELINE.default]
+[SEQUENCE.default]
 tasks = []
 
-[PIPELINE.test_pipeline]
+[SEQUENCE.test_sequence]
 tasks = [ "test_task:SECTION",]
 
 [SCENARIO.default]
-pipelines = []
+sequences = []
 
 [SCENARIO.test_scenario]
-pipelines = [ "test_pipeline:SECTION",]
+sequences = [ "test_sequence:SECTION",]
 frequency = "DAILY:FREQUENCY"
 
 [VERSION_MIGRATION.migration_fcts."1.0"]
@@ -616,11 +616,11 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[PipelineConfig.name] is not None
-    assert len(Config.sections[PipelineConfig.name]) == 2
-    assert Config.sections[PipelineConfig.name]["default"] is not None
-    assert Config.sections[PipelineConfig.name]["default"].tasks == []
-    assert [task.id for task in Config.sections[PipelineConfig.name]["test_pipeline"].tasks] == [
+    assert Config.sections[SequenceConfig.name] is not None
+    assert len(Config.sections[SequenceConfig.name]) == 2
+    assert Config.sections[SequenceConfig.name]["default"] is not None
+    assert Config.sections[SequenceConfig.name]["default"].tasks == []
+    assert [task.id for task in Config.sections[SequenceConfig.name]["test_sequence"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
     ]
 
@@ -648,7 +648,7 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     }
 
 
-def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
+def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
     old_json_config = """
 {
 "TAIPY": {},
@@ -711,11 +711,11 @@ def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
 "skippable": "False:bool"
 }
 },
-"PIPELINE": {
+"SEQUENCE": {
 "default": {
 "tasks": []
 },
-"test_pipeline": {
+"test_sequence": {
 "tasks": [
 "test_task:SECTION"
 ]
@@ -724,7 +724,7 @@ def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
 "SCENARIO": {
 "default": {
 "comparators": {},
-"pipelines": [],
+"sequences": [],
 "frequency": null
 },
 "test_scenario": {
@@ -733,8 +733,8 @@ def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
 "tests.core.config.test_config_serialization.compare_function:function"
 ]
 },
-"pipelines": [
-"test_pipeline:SECTION"
+"sequences": [
+"test_sequence:SECTION"
 ],
 "frequency": "DAILY:FREQUENCY"
 }
@@ -800,11 +800,11 @@ def test_read_write_json_configuration_file_migrate_pipeline_in_scenario():
     ]
     assert Config.sections[TaskConfig.name]["test_task"].function == multiply
 
-    assert Config.sections[PipelineConfig.name] is not None
-    assert len(Config.sections[PipelineConfig.name]) == 2
-    assert Config.sections[PipelineConfig.name]["default"] is not None
-    assert Config.sections[PipelineConfig.name]["default"].tasks == []
-    assert [task.id for task in Config.sections[PipelineConfig.name]["test_pipeline"].tasks] == [
+    assert Config.sections[SequenceConfig.name] is not None
+    assert len(Config.sections[SequenceConfig.name]) == 2
+    assert Config.sections[SequenceConfig.name]["default"] is not None
+    assert Config.sections[SequenceConfig.name]["default"].tasks == []
+    assert [task.id for task in Config.sections[SequenceConfig.name]["test_sequence"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
     ]
 

@@ -1,9 +1,10 @@
 # Taipy Core
+
 [![Python](https://img.shields.io/pypi/pyversions/taipy-core)](https://pypi.org/project/taipy-core)
 [![PyPI](https://img.shields.io/pypi/v/taipy-core.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy-core)
 
-
 ## License
+
 Copyright 2023 Avaiga Private Limited
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
@@ -15,14 +16,15 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 
 ## Usage
-  - [Taipy Core](#taipy-core)
-  - [License](#license)
-  - [Usage](#usage)
-  - [What is Taipy Core](#what-is-taipy-core)
-  - [Installation](#installation)
-  - [Contributing](#contributing)
-  - [Code of conduct](#code-of-conduct)
-  - [Directory Structure](#directory-structure)
+
+- [Taipy Core](#taipy-core)
+- [License](#license)
+- [Usage](#usage)
+- [What is Taipy Core](#what-is-taipy-core)
+- [Installation](#installation)
+- [Contributing](#contributing)
+- [Code of conduct](#code-of-conduct)
+- [Directory Structure](#directory-structure)
 
 ## What is Taipy Core
 
@@ -62,7 +64,7 @@ Want to be part of the _Taipy Core_ community? Check out our [`CODE_OF_CONDUCT.m
     - `data`: Data Node definition, management and implementation.
     - `exceptions`: _taipy-core_ exceptions.
     - `job`: Job definition, management and implementation.
-    - `pipeline`: Pipeline definition, management and implementation.
+    - `sequence`: Sequence definition, management and implementation.
     - `scenario`: Scenario definition, management and implementation.
     - `task`: Task definition, management and implementation.
     - `taipy`: Main entrypoint for _taipy-core_ runtime features.

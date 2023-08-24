@@ -135,50 +135,51 @@ class InvalidSubscriber(RuntimeError):
     """Raised if the loaded function is not valid."""
 
 
-class InvalidPipelineId(Exception):
-    """Raised if a Pipeline id can not be broken down."""
+class InvalidSequenceId(Exception):
+    """Raised if a Sequence id can not be broken down."""
 
-    def __init__(self, pipeline_id: str):
-        self.message = f"Pipeline: {pipeline_id} is invalid."
-
-
-class NonExistingPipeline(Exception):
-    """Raised if a requested Pipeline is not known by the Pipeline Manager."""
-
-    def __init__(self, pipeline_id: str):
-        self.message = f"Pipeline: {pipeline_id} does not exist."
+    def __init__(self, sequence_id: str):
+        self.message = f"Sequence: {sequence_id} is invalid."
 
 
-class PipelineBelongsToNonExistingScenario(Exception):
-    """Raised if a Pipeline does not belong to an existing Scenario."""
+class NonExistingSequence(Exception):
+    """Raised if a requested Sequence is not known by the Sequence Manager."""
 
-    def __init__(self, pipeline_id: str, scenario_id: str):
-        self.message = f"Pipeline: {pipeline_id} belongs to a non-existing Scenario: {scenario_id}."
-
-
-class PipelineTaskDoesNotExistInScenario(Exception):
-    """Raised if Tasks of a Pipeline do not exist in the same Scenario that the Pipeline belongs to."""
-
-    def __init__(self, task_ids: List[Optional[str]], pipeline_name: str, scenario_id: str):
-        self.message = f"Tasks {task_ids} of Pipeline {pipeline_name} does not exist in Scenario {scenario_id}."
+    def __init__(self, sequence_id: str):
+        self.message = f"Sequence: {sequence_id} does not exist."
 
 
-class PipelineTaskConfigDoesNotExistInSameScenarioConfig(Exception):
-    """Raised if TaskConfigs of a Pipeline do not exist in the same ScenarioConfig that the Pipeline belongs to."""
+class SequenceBelongsToNonExistingScenario(Exception):
+    """Raised if a Sequence does not belong to an existing Scenario."""
 
-    def __init__(self, task_config_ids: List[Optional[str]], pipeline_name: str, scenario_config_id: str):
-        self.message = f"TaskConfig {task_config_ids} of Pipeline name {pipeline_name} does not exist in ScenarioConfig {scenario_config_id}."
-
-
-class NonExistingPipelineConfig(Exception):
-    """Raised if a requested Pipeline configuration is not known by the Pipeline Manager."""
-
-    def __init__(self, pipeline_config_id: str):
-        self.message = f"Pipeline config: {pipeline_config_id} does not exist."
+    def __init__(self, sequence_id: str, scenario_id: str):
+        self.message = f"Sequence: {sequence_id} belongs to a non-existing Scenario: {scenario_id}."
 
 
-class MultiplePipelineFromSameConfigWithSameOwner(Exception):
-    """Raised if it exists multiple pipelines from the same pipeline config and with the same _owner_id_."""
+class SequenceTaskDoesNotExistInScenario(Exception):
+    """Raised if Tasks of a Sequence do not exist in the same Scenario that the Sequence belongs to."""
+
+    def __init__(self, task_ids: List[Optional[str]], sequence_name: str, scenario_id: str):
+        self.message = f"Tasks {task_ids} of Sequence {sequence_name} does not exist in Scenario {scenario_id}."
+
+
+class SequenceTaskConfigDoesNotExistInSameScenarioConfig(Exception):
+    """Raised if TaskConfigs of a Sequence do not exist in the same ScenarioConfig that the Sequence belongs to."""
+
+    def __init__(self, task_config_ids: List[Optional[str]], sequence_name: str, scenario_config_id: str):
+        self.message = f"TaskConfig {task_config_ids} of Sequence name {sequence_name} "
+        self.message += f"does not exist in ScenarioConfig {scenario_config_id}."
+
+
+class NonExistingSequenceConfig(Exception):
+    """Raised if a requested Sequence configuration is not known by the Sequence Manager."""
+
+    def __init__(self, sequence_config_id: str):
+        self.message = f"Sequence config: {sequence_config_id} does not exist."
+
+
+class MultipleSequenceFromSameConfigWithSameOwner(Exception):
+    """Raised if it exists multiple sequences from the same sequence config and with the same _owner_id_."""
 
 
 class ModelNotFound(Exception):

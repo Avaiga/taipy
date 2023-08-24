@@ -32,7 +32,7 @@ from ..exceptions.exceptions import (
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
-    PipelineTaskConfigDoesNotExistInSameScenarioConfig,
+    SequenceTaskConfigDoesNotExistInSameScenarioConfig,
     UnauthorizedTagError,
 )
 from ..job._job_manager_factory import _JobManagerFactory
@@ -124,21 +124,21 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             else {}
         )
 
-        pipelines = {}
+        sequences = {}
         tasks_and_config_id_maps = {task.config_id: task for task in tasks}
         for sequence_name, sequence_task_configs in config.sequences.items():
             sequence_tasks = []
-            non_existing_pipeline_task_config_in_scenario_config = set()
+            non_existing_sequence_task_config_in_scenario_config = set()
             for sequence_task_config in sequence_task_configs:
                 if task := tasks_and_config_id_maps.get(sequence_task_config.id):
                     sequence_tasks.append(task)
                 else:
-                    non_existing_pipeline_task_config_in_scenario_config.add(sequence_task_config.id)
-            if len(non_existing_pipeline_task_config_in_scenario_config) > 0:
-                raise PipelineTaskConfigDoesNotExistInSameScenarioConfig(
-                    list(non_existing_pipeline_task_config_in_scenario_config), sequence_name, str(config.id)
+                    non_existing_sequence_task_config_in_scenario_config.add(sequence_task_config.id)
+            if len(non_existing_sequence_task_config_in_scenario_config) > 0:
+                raise SequenceTaskConfigDoesNotExistInSameScenarioConfig(
+                    list(non_existing_sequence_task_config_in_scenario_config), sequence_name, str(config.id)
                 )
-            pipelines[sequence_name] = {Scenario._PIPELINE_TASKS_KEY: sequence_tasks}
+            sequences[sequence_name] = {Scenario._SEQUENCE_TASKS_KEY: sequence_tasks}
 
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config._properties.copy()
@@ -156,7 +156,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             is_primary=is_primary_scenario,
             cycle=cycle,
             version=version,
-            pipelines=pipelines,
+            sequences=sequences,
         )
 
         for task in tasks:
@@ -377,9 +377,9 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:
         entity_ids = _EntityIds()
-        for pipeline in scenario.pipelines.values():
-            if pipeline.owner_id == scenario.id:
-                entity_ids.pipeline_ids.add(pipeline.id)
+        for sequence in scenario.sequences.values():
+            if sequence.owner_id == scenario.id:
+                entity_ids.sequence_ids.add(sequence.id)
         for task in scenario.tasks.values():
             if task.owner_id == scenario.id:
                 entity_ids.task_ids.add(task.id)

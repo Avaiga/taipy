@@ -402,10 +402,10 @@ class TestDataManager:
         dm._delete_all()
 
         dn_config_1 = Config.configure_data_node(
-            id="data_node_1", storage_type="in_memory", data="In memory pipeline 2"
+            id="data_node_1", storage_type="in_memory", data="In memory sequence 2"
         )
         dn_config_2 = Config.configure_data_node(
-            id="data_node_2", storage_type="in_memory", data="In memory pipeline 2"
+            id="data_node_2", storage_type="in_memory", data="In memory sequence 2"
         )
 
         dm._bulk_get_or_create([dn_config_1, dn_config_2])
@@ -490,11 +490,11 @@ class TestDataManager:
             outputs = [ "b:SECTION",]
             skippable = "False:bool"
 
-            [PIPELINE.s_pipeline]
+            [SEQUENCE.s_sequence]
             tasks = [ "t:SECTION",]
 
             [SCENARIO.s]
-            pipelines = [ "s_pipeline:SECTION",]
+            sequences = [ "s_sequence:SECTION",]
 
             [SCENARIO.s.comparators]
             """
@@ -526,11 +526,11 @@ class TestDataManager:
             outputs = [ "output:SECTION",]
             skippable = "False:bool"
 
-            [PIPELINE.my_pipeline]
+            [SEQUENCE.my_sequence]
             tasks = [ "double:SECTION",]
 
             [SCENARIO.my_scenario]
-            pipelines = [ "my_pipeline:SECTION",]
+            sequences = [ "my_sequence:SECTION",]
 
             [SCENARIO.my_scenario.comparators]
             """
@@ -562,11 +562,11 @@ class TestDataManager:
             outputs = [ "output:SECTION",]
             skippable = "False:bool"
 
-            [PIPELINE.my_pipeline]
+            [SEQUENCE.my_sequence]
             tasks = [ "double:SECTION",]
 
             [SCENARIO.my_scenario]
-            pipelines = [ "my_pipeline:SECTION",]
+            sequences = [ "my_sequence:SECTION",]
 
             [SCENARIO.my_scenario.comparators]
             """
@@ -599,15 +599,15 @@ class TestDataManager:
 
         dn_1_datanodes = _DataManager._get_by_config_id(dn_config_1.id)
         assert len(dn_1_datanodes) == 3
-        assert sorted([dn_1_1.id, dn_1_2.id, dn_1_3.id]) == sorted([pipeline.id for pipeline in dn_1_datanodes])
+        assert sorted([dn_1_1.id, dn_1_2.id, dn_1_3.id]) == sorted([sequence.id for sequence in dn_1_datanodes])
 
         dn_2_datanodes = _DataManager._get_by_config_id(dn_config_2.id)
         assert len(dn_2_datanodes) == 2
-        assert sorted([dn_2_1.id, dn_2_2.id]) == sorted([pipeline.id for pipeline in dn_2_datanodes])
+        assert sorted([dn_2_1.id, dn_2_2.id]) == sorted([sequence.id for sequence in dn_2_datanodes])
 
         dn_3_datanodes = _DataManager._get_by_config_id(dn_config_3.id)
         assert len(dn_3_datanodes) == 1
-        assert sorted([dn_3_1.id]) == sorted([pipeline.id for pipeline in dn_3_datanodes])
+        assert sorted([dn_3_1.id]) == sorted([sequence.id for sequence in dn_3_datanodes])
 
     def test_get_data_nodes_by_config_id_in_multiple_versions_environment(self):
         dn_config_1 = Config.configure_data_node("dn_1", scope=Scope.SCENARIO)

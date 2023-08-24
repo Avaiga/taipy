@@ -13,24 +13,24 @@ from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 
-from ..pipeline_config import PipelineConfig
+from ..sequence_config import SequenceConfig
 from ..task_config import TaskConfig
 
 
-class _PipelineConfigChecker(_ConfigChecker):
+class _SequenceConfigChecker(_ConfigChecker):
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        pipeline_configs = self._config._sections[PipelineConfig.name]
-        for pipeline_config_id, pipeline_config in pipeline_configs.items():
-            if pipeline_config_id != _Config.DEFAULT_KEY:
-                self._check_if_entity_property_key_used_is_predefined(pipeline_config)
-                self._check_existing_config_id(pipeline_config)
-                self._check_tasks(pipeline_config_id, pipeline_config)
+        sequence_configs = self._config._sections[SequenceConfig.name]
+        for sequence_config_id, sequence_config in sequence_configs.items():
+            if sequence_config_id != _Config.DEFAULT_KEY:
+                self._check_if_entity_property_key_used_is_predefined(sequence_config)
+                self._check_existing_config_id(sequence_config)
+                self._check_tasks(sequence_config_id, sequence_config)
         return self._collector
 
-    def _check_tasks(self, pipeline_config_id: str, pipeline_config: PipelineConfig):
+    def _check_tasks(self, sequence_config_id: str, sequence_config: SequenceConfig):
         self._check_children(
-            PipelineConfig, pipeline_config_id, pipeline_config._TASK_KEY, pipeline_config.tasks, TaskConfig
+            SequenceConfig, sequence_config_id, sequence_config._TASK_KEY, sequence_config.tasks, TaskConfig
         )

@@ -28,7 +28,7 @@ class _AbstractOrchestrator:
     @abstractmethod
     def submit(
         cls,
-        pipeline,
+        sequence,
         callbacks: Optional[Iterable[Callable]],
         force: bool = False,
         wait: bool = False,

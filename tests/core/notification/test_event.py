@@ -89,43 +89,43 @@ def test_event_creation_scenario():
         _ = Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION, "is_primary")
 
 
-def test_event_creation_pipeline():
-    event_1 = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.CREATION)
+def test_event_creation_sequence():
+    event_1 = Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.CREATION)
     assert event_1.creation_date is not None
-    assert event_1.entity_type == EventEntityType.PIPELINE
-    assert event_1.entity_id == "pipeline_id"
+    assert event_1.entity_type == EventEntityType.SEQUENCE
+    assert event_1.entity_id == "sequence_id"
     assert event_1.operation == EventOperation.CREATION
     assert event_1.attribute_name is None
 
-    event_2 = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.UPDATE, "subscribers")
+    event_2 = Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "subscribers")
     assert event_2.creation_date is not None
-    assert event_2.entity_type == EventEntityType.PIPELINE
-    assert event_2.entity_id == "pipeline_id"
+    assert event_2.entity_type == EventEntityType.SEQUENCE
+    assert event_2.entity_id == "sequence_id"
     assert event_2.operation == EventOperation.UPDATE
     assert event_2.attribute_name == "subscribers"
 
-    event_3 = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.DELETION)
+    event_3 = Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.DELETION)
     assert event_3.creation_date is not None
-    assert event_3.entity_type == EventEntityType.PIPELINE
-    assert event_3.entity_id == "pipeline_id"
+    assert event_3.entity_type == EventEntityType.SEQUENCE
+    assert event_3.entity_id == "sequence_id"
     assert event_3.operation == EventOperation.DELETION
     assert event_3.attribute_name is None
 
-    event_4 = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.SUBMISSION)
+    event_4 = Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.SUBMISSION)
     assert event_4.creation_date is not None
-    assert event_4.entity_type == EventEntityType.PIPELINE
-    assert event_4.entity_id == "pipeline_id"
+    assert event_4.entity_type == EventEntityType.SEQUENCE
+    assert event_4.entity_id == "sequence_id"
     assert event_4.operation == EventOperation.SUBMISSION
     assert event_4.attribute_name is None
 
     with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.CREATION, "subscribers")
+        _ = Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.CREATION, "subscribers")
 
     with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.DELETION, "subscribers")
+        _ = Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.DELETION, "subscribers")
 
     with pytest.raises(InvalidEventAttributeName):
-        _ = Event(EventEntityType.PIPELINE, "pipeline_id", EventOperation.SUBMISSION, "subscribers")
+        _ = Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.SUBMISSION, "subscribers")
 
 
 def test_event_creation_task():

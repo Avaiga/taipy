@@ -9,11 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from src.taipy.core.pipeline._pipeline_model import _PipelineModel
+from src.taipy.core.sequence._sequence_model import _SequenceModel
 
 
 def test_deprecated_parent_id():
-    model = _PipelineModel.from_dict(
+    model = _SequenceModel.from_dict(
         {
             "id": "id",
             "parent_id": "owner_id",
@@ -28,7 +28,7 @@ def test_deprecated_parent_id():
 
 
 def test_override_deprecated_parent_id():
-    model = _PipelineModel.from_dict(
+    model = _SequenceModel.from_dict(
         {
             "id": "id",
             "parent_id": "parent_id",

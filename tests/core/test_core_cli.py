@@ -19,8 +19,8 @@ from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.exceptions.exceptions import NonExistingVersion
 from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -102,7 +102,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Initial assertion
     assert len(_DataManager._get_all(version_number="all")) == 2
     assert len(_TaskManager._get_all(version_number="all")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 1
+    assert len(_SequenceManager._get_all(version_number="all")) == 1
     assert len(_ScenarioManager._get_all(version_number="all")) == 1
     assert len(_CycleManager._get_all(version_number="all")) == 1
     assert len(_JobManager._get_all(version_number="all")) == 1
@@ -116,7 +116,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Assert number of entities in 2nd version
     assert len(_DataManager._get_all(version_number="all")) == 4
     assert len(_TaskManager._get_all(version_number="all")) == 2
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
+    assert len(_SequenceManager._get_all(version_number="all")) == 2
     assert len(_ScenarioManager._get_all(version_number="all")) == 2
     assert (
         len(_CycleManager._get_all(version_number="all")) == 1
@@ -130,7 +130,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # The 1st dev version should be deleted run with development mode
     assert len(_DataManager._get_all(version_number="all")) == 2
     assert len(_TaskManager._get_all(version_number="all")) == 1
-    assert len(_PipelineManager._get_all(version_number="all")) == 1
+    assert len(_SequenceManager._get_all(version_number="all")) == 1
     assert len(_ScenarioManager._get_all(version_number="all")) == 1
     assert len(_CycleManager._get_all(version_number="all")) == 1
     assert len(_JobManager._get_all(version_number="all")) == 1
@@ -142,7 +142,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Assert number of entities with 1 dev version and 1 exp version
     assert len(_DataManager._get_all(version_number="all")) == 4
     assert len(_TaskManager._get_all(version_number="all")) == 2
-    assert len(_PipelineManager._get_all(version_number="all")) == 2
+    assert len(_SequenceManager._get_all(version_number="all")) == 2
     assert len(_ScenarioManager._get_all(version_number="all")) == 2
     assert len(_CycleManager._get_all(version_number="all")) == 1
     assert len(_JobManager._get_all(version_number="all")) == 2
@@ -150,14 +150,14 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     # Assert number of entities of the latest version only
     assert len(_DataManager._get_all(version_number="latest")) == 2
     assert len(_TaskManager._get_all(version_number="latest")) == 1
-    assert len(_PipelineManager._get_all(version_number="latest")) == 1
+    assert len(_SequenceManager._get_all(version_number="latest")) == 1
     assert len(_ScenarioManager._get_all(version_number="latest")) == 1
     assert len(_JobManager._get_all(version_number="latest")) == 1
 
     # Assert number of entities of the development version only
     assert len(_DataManager._get_all(version_number="development")) == 2
     assert len(_TaskManager._get_all(version_number="development")) == 1
-    assert len(_PipelineManager._get_all(version_number="development")) == 1
+    assert len(_SequenceManager._get_all(version_number="development")) == 1
     assert len(_ScenarioManager._get_all(version_number="development")) == 1
     assert len(_JobManager._get_all(version_number="development")) == 1
 
@@ -167,7 +167,7 @@ def test_dev_mode_clean_all_entities_of_the_latest_version():
     with pytest.raises(NonExistingVersion):
         assert _TaskManager._get_all(version_number="foo")
     with pytest.raises(NonExistingVersion):
-        assert _PipelineManager._get_all(version_number="foo")
+        assert _SequenceManager._get_all(version_number="foo")
     with pytest.raises(NonExistingVersion):
         assert _ScenarioManager._get_all(version_number="foo")
     with pytest.raises(NonExistingVersion):
@@ -288,7 +288,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
+    assert len(_SequenceManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -305,7 +305,7 @@ def test_production_mode_load_all_entities_from_previous_production_version():
 
     assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 2
+    assert len(_SequenceManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
@@ -326,7 +326,7 @@ def test_force_override_experiment_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
+    assert len(_SequenceManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -353,7 +353,7 @@ def test_force_override_experiment_version():
 
     assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 2
+    assert len(_SequenceManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
@@ -376,7 +376,7 @@ def test_force_override_production_version():
 
     assert len(_DataManager._get_all()) == 2
     assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
+    assert len(_SequenceManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 1
@@ -403,7 +403,7 @@ def test_force_override_production_version():
 
     assert len(_DataManager._get_all()) == 4
     assert len(_TaskManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 2
+    assert len(_SequenceManager._get_all()) == 2
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_CycleManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 2
@@ -485,7 +485,7 @@ def config_scenario():
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice, data_node_1_config, data_node_2_config)
     scenario_config = Config.configure_scenario("my_scenario", [task_config], frequency=Frequency.DAILY)
-    scenario_config.add_sequences({"my_pipeline": [task_config]})
+    scenario_config.add_sequences({"my_sequence": [task_config]})
 
     return scenario_config
 
@@ -519,6 +519,6 @@ def config_scenario_2():
     task_config_1 = Config.configure_task("my_task_1", double_twice, data_node_3_config, [data_node_2_config])
     # Modify properties of "my_scenario", where tasks is now my_task_1
     scenario_config = Config.configure_scenario("my_scenario", [task_config_1], frequency=Frequency.MONTHLY)
-    scenario_config.add_sequences({"my_pipeline": [task_config_1]})
+    scenario_config.add_sequences({"my_sequence": [task_config_1]})
 
     return scenario_config

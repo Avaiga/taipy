@@ -79,16 +79,16 @@ def test_get_label_complex_case():
     scenario_cfg = Config.configure_scenario("scenario_cfg", [tA_cfg, tB_cfg], [], Frequency.DAILY)
     scenario_cfg.add_sequences(
         {
-            "pipeline_C": [tA_cfg],
-            "pipeline_S": [tA_cfg, tB_cfg],
+            "sequence_C": [tA_cfg],
+            "sequence_S": [tA_cfg, tB_cfg],
         }
     )
 
     scenario = taipy.create_scenario(scenario_cfg, name="My Name")
     cycle = scenario.cycle
     cycle.name = "Today"
-    pipeline_C = scenario.pipeline_C
-    pipeline_S = scenario.pipeline_S
+    sequence_C = scenario.sequence_C
+    sequence_S = scenario.sequence_S
     tA = scenario.t_A_C
     tB = scenario.t_B_S
     dn1 = scenario.dn1
@@ -101,10 +101,10 @@ def test_get_label_complex_case():
     assert cycle.get_simple_label() == scenario.cycle.name
     assert scenario.get_label() == "Today > My Name"
     assert scenario.get_simple_label() == "My Name"
-    assert pipeline_C.get_label() == "Today > My Name > pipeline_C"
-    assert pipeline_C.get_simple_label() == "pipeline_C"
-    assert pipeline_S.get_label() == "Today > My Name > pipeline_S"
-    assert pipeline_S.get_simple_label() == "pipeline_S"
+    assert sequence_C.get_label() == "Today > My Name > sequence_C"
+    assert sequence_C.get_simple_label() == "sequence_C"
+    assert sequence_S.get_label() == "Today > My Name > sequence_S"
+    assert sequence_S.get_simple_label() == "sequence_S"
     assert tA.get_label() == "Today > t_A_C"
     assert tA.get_simple_label() == "t_A_C"
     assert tB.get_label() == "Today > My Name > t_B_S"
