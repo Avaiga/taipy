@@ -16,8 +16,8 @@ import styled from "@emotion/styled";
 import { DefaultPortModel, PortWidget } from "@projectstorm/react-diagrams";
 import { DiagramEngine } from "@projectstorm/react-diagrams-core";
 
-import { DataNode, Task, Pipeline } from "../utils/names";
-import { Datanode as DIcon, Task as TIcon, Pipeline as PIcon, Scenario as SIcon } from "../icons";
+import { DataNode, Task, Sequence } from "../utils/names";
+import { Datanode as DIcon, Task as TIcon, Sequence as PIcon, Scenario as SIcon } from "../icons";
 import { TaipyNodeModel } from "./models";
 import { IN_PORT_NAME } from "../utils/diagram";
 import { Input, Output } from "../icons";
@@ -118,7 +118,7 @@ const NodeWidget = ({ node, engine }: NodeProps) => {
                         <DIcon />
                     ) : node.getType() == Task ? (
                         <TIcon />
-                    ) : node.getType() == Pipeline ? (
+                    ) : node.getType() == Sequence ? (
                         <PIcon />
                     ) : (
                         <SIcon />

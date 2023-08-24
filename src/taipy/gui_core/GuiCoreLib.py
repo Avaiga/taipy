@@ -25,7 +25,7 @@ except ImportError:
 from dateutil import parser
 
 from taipy.config import Config
-from taipy.core import Cycle, DataNode, Job, Pipeline, Scenario, cancel_job, create_scenario
+from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, cancel_job, create_scenario
 from taipy.core import delete as core_delete
 from taipy.core import delete_job
 from taipy.core import get as core_get
@@ -59,7 +59,7 @@ class _GCDoNotUpdate(_DoNotUpdate):
 
 
 Scenario.__bases__ += (_GCDoNotUpdate,)
-Pipeline.__bases__ += (_GCDoNotUpdate,)
+Sequence.__bases__ += (_GCDoNotUpdate,)
 DataNode.__bases__ += (_GCDoNotUpdate,)
 Job.__bases__ += (_GCDoNotUpdate,)
 
@@ -67,7 +67,7 @@ Job.__bases__ += (_GCDoNotUpdate,)
 class _EntityType(Enum):
     CYCLE = 0
     SCENARIO = 1
-    PIPELINE = 2
+    SEQUENCE = 2
     DATANODE = 3
 
 
@@ -89,8 +89,8 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                     [(k, v) for k, v in scenario.properties.items() if k not in _GuiCoreScenarioAdapter.__INNER_PROPS]
                     if scenario.properties
                     else [],
-                    [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.pipelines.values()]
-                    if scenario.pipelines
+                    [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.sequences.values()]
+                    if scenario.sequences
                     else [],
                     list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                     is_deletable(scenario),  # deletable
@@ -226,12 +226,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"scenario": event.entity_id if scenario else True},
             )
-        elif event.entity_type == EventEntityType.PIPELINE and event.entity_id:  # TODO import EventOperation
-            pipeline = core_get(event.entity_id) if event.operation.value != 3 else None
-            if pipeline:
-                if hasattr(pipeline, "parent_ids") and pipeline.parent_ids:
+        elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:  # TODO import EventOperation
+            sequence = core_get(event.entity_id) if event.operation.value != 3 else None
+            if sequence:
+                if hasattr(sequence, "parent_ids") and sequence.parent_ids:
                     self.gui.broadcast(
-                        _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in pipeline.parent_ids]}
+                        _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
                     )
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
@@ -391,7 +391,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        entity: t.Union[Scenario, Pipeline] = core_get(entity_id)
+        entity: t.Union[Scenario, Sequence] = core_get(entity_id)
         if entity:
             try:
                 if isinstance(entity, Scenario):
@@ -448,13 +448,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             return (
                                 data.id,
                                 data.get_simple_label(),
-                                self.data_nodes_by_owner[data.id] + list(data.pipelines.values()),
+                                self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
                                 _EntityType.SCENARIO.value,
                                 data.is_primary,
                             )
-                        elif isinstance(data, Pipeline):
+                        elif isinstance(data, Sequence):
                             if datanodes := self.data_nodes_by_owner.get(data.id):
-                                return (data.id, data.get_simple_label(), datanodes, _EntityType.PIPELINE.value, False)
+                                return (data.id, data.get_simple_label(), datanodes, _EntityType.SEQUENCE.value, False)
         return None
 
     def get_jobs_list(self):
@@ -515,7 +515,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode. {e}")
 
-    def __edit_properties(self, entity: t.Union[Scenario, Pipeline, DataNode], data: t.Dict[str, str]):
+    def __edit_properties(self, entity: t.Union[Scenario, Sequence, DataNode], data: t.Dict[str, str]):
         with entity as ent:
             if isinstance(ent, Scenario):
                 tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
@@ -752,8 +752,8 @@ class _GuiCore(ElementLibrary):
                 "show_cycle": ElementProperty(PropertyType.boolean, False),
                 "show_tags": ElementProperty(PropertyType.boolean, True),
                 "show_properties": ElementProperty(PropertyType.boolean, True),
-                "show_pipelines": ElementProperty(PropertyType.boolean, True),
-                "show_submit_pipelines": ElementProperty(PropertyType.boolean, True),
+                "show_sequences": ElementProperty(PropertyType.boolean, True),
+                "show_submit_sequences": ElementProperty(PropertyType.boolean, True),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
             },
             inner_properties={

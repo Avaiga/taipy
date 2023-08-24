@@ -139,16 +139,16 @@
                         "doc": "If False, the scenario properties are not visible."
                     },
                     {
-                        "name": "show_pipelines",
+                        "name": "show_sequences",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the scenario pipelines are not visible."
+                        "doc": "If False, the scenario sequences are not visible."
                     },
                     {
-                        "name": "show_submit_pipelines",
+                        "name": "show_submit_sequences",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the buttons to submit scenario pipelines are not visible."
+                        "doc": "If False, the buttons to submit scenario sequences are not visible."
                     }
                 ]
             }

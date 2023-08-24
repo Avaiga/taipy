@@ -32,11 +32,11 @@ import {
     createRequestUpdateAction,
 } from "taipy-gui";
 
-import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Pipeline } from "./utils/types";
+import { Cycles, Cycle, DataNodes, NodeType, Scenarios, Scenario, DataNode, Sequence } from "./utils/types";
 import {
     Cycle as CycleIcon,
     Datanode as DatanodeIcon,
-    Pipeline as PipelineIcon,
+    Sequence as SequenceIcon,
     Scenario as ScenarioIcon,
 } from "./icons";
 import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, ParentItemSx, iconLabelSx, tinyIconButtonSx, tinySelPinIconButtonSx } from "./utils";
@@ -46,7 +46,7 @@ export interface EditProps {
 }
 
 type Entities = Cycles | Scenarios | DataNodes;
-type Entity = Cycle | Scenario | Pipeline | DataNode;
+type Entity = Cycle | Scenario | Sequence | DataNode;
 type Pinned = Record<string, boolean>;
 
 interface CoreSelectorProps {
@@ -139,8 +139,8 @@ const CoreItem = (props: {
                             ) : (
                                 <ScenarioIcon fontSize="small" color="primary" />
                             )
-                        ) : nodeType === NodeType.PIPELINE ? (
-                            <PipelineIcon fontSize="small" color="primary" />
+                        ) : nodeType === NodeType.SEQUENCE ? (
+                            <SequenceIcon fontSize="small" color="primary" />
                         ) : (
                             <DatanodeIcon fontSize="small" color="primary" />
                         )}

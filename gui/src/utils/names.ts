@@ -15,5 +15,5 @@ export const Taipy = "TAIPY";
 export const Job = "JOB";
 export const DataNode = "DataNode";
 export const Task = "Task";
-export const Pipeline = "Pipeline";
+export const Sequence = "Sequence";
 export const Scenario = "Scenario";
