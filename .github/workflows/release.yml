@@ -46,11 +46,42 @@ jobs:
               raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
           """ > /tmp/check2.py
           python /tmp/check2.py "${{ steps.extract_branch.outputs.branch }}"
+      
+      - name: Modify README image file path
+        run: |
+          echo """
+          import os, sys
+          branch_name = sys.argv[1]
+          img_list = os.listdir('readme_img')
+          with open(f'README.md') as readme_file:
+              readme_str = readme_file.read()
+              for img in img_list:
+                  readme_str = readme_str.replace(f'readme_img/{img}', f'https://raw.githubusercontent.com/Avaiga/taipy/{branch_name}/readme_img/{img}')
+          with open(f'README.md', 'w') as readme_file:
+              readme_file.write(readme_str)
+          """ > /tmp/modify_readme.py
+          python /tmp/modify_readme.py "${{ steps.extract_branch.outputs.branch }}"
+
+      - name: Get taipy-gui version from setup.py
+        id: taipy_gui_version
+        run: |
+          echo """
+          with open('setup.py') as f:
+              for line in f:
+                  if 'taipy-gui' in line:
+                      start = line.find('taipy-gui')
+                      end = line.rstrip().find('\",')
+                      print(f'VERSION={line[start:end]}')
+                      break
+          """ > /tmp/get_gui_version.py
+          python /tmp/get_gui_version.py >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build
+          # install taipy-gui from based on setup.py version
+          pip install "{{ steps.taipy_gui_version.outputs.VERSION }}"
 
       - name: Build and test the package
         run: |
