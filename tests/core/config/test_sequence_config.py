@@ -164,11 +164,3 @@ def test_clean_config():
     assert sequence2_config.id == "id2"
     assert sequence1_config.tasks == sequence2_config.tasks == []
     assert sequence1_config.properties == sequence2_config.properties == {}
-
-
-def test_sequence_config_configure_deprecated():
-    with pytest.warns(DeprecationWarning):
-        Config.configure_sequence("sequence_id", [])
-
-    with pytest.warns(DeprecationWarning):
-        Config.set_default_sequence_configuration([])
