@@ -13,7 +13,7 @@ import os
 from datetime import timedelta
 from unittest import mock
 
-from src.taipy.core.config import DataNodeConfig, ScenarioConfig, SequenceConfig, TaskConfig
+from src.taipy.core.config import DataNodeConfig, ScenarioConfig, TaskConfig
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -82,9 +82,6 @@ outputs = [ "dn2:SECTION",]
 skippable = "False:bool"
 description = "t1 description"
 
-[SEQUENCE.default]
-tasks = []
-
 [SCENARIO.default]
 tasks = []
 additional_data_nodes = []
@@ -104,6 +101,7 @@ owner = "Raymond Kopa"
 [SCENARIO.s1.comparators]
 
 [SCENARIO.s1.sequences]
+sequence = [ "t1:SECTION",]
     """.strip()
     tf = NamedTemporaryFile()
     with mock.patch.dict(
@@ -144,6 +142,7 @@ owner = "Raymond Kopa"
             additional_data_node_configs=[dn3_cfg_v2],
             frequency=Frequency.QUARTERLY,
             owner="Raymond Kopa",
+            sequences={"sequence": [t1_cfg_v2]},
         )
         Config.backup(tf.filename)
         actual_config = tf.read().strip()  # problem here
@@ -182,6 +181,9 @@ def test_read_configuration_file():
         tasks = [ "my_task:SECTION"]
         additional_data_nodes = ["my_datanode3:SECTION"]
         owner = "John Doe"
+
+        [SCENARIO.my_scenario.sequences]
+        sequence = [ "my_task:SECTION",]
         """
     )
     Config.configure_task("my_task", print)
@@ -214,8 +216,6 @@ def test_read_configuration_file():
     assert Config.tasks["my_task"].outputs[0].path == "/data2/csv"
     assert Config.tasks["my_task"].outputs[0].id == "my_datanode2"
 
-    assert len(Config.sequences) == 1
-
     assert len(Config.scenarios) == 2
     assert type(Config.scenarios["my_scenario"]) == ScenarioConfig
     assert Config.scenarios["my_scenario"].id == "my_scenario"
@@ -228,3 +228,6 @@ def test_read_configuration_file():
     assert Config.scenarios["my_scenario"].tasks[0].description == "task description"
     assert Config.scenarios["my_scenario"].additional_data_nodes[0].id == "my_datanode3"
     assert Config.scenarios["my_scenario"].additional_data_nodes[0].source == "local"
+    assert [task.id for task in Config.scenarios["my_scenario"].sequences["sequence"]] == [
+        Config.scenarios["my_scenario"].tasks[0].id
+    ]

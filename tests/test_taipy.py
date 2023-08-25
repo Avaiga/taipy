@@ -36,7 +36,6 @@ from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.config.scenario_config import ScenarioConfig
-from src.taipy.core.config.sequence_config import SequenceConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.pickle import PickleDataNode

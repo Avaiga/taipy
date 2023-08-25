@@ -30,14 +30,12 @@ from src.taipy.core.config import (
     JobConfig,
     MigrationConfig,
     ScenarioConfig,
-    SequenceConfig,
     TaskConfig,
     _ConfigIdChecker,
     _CoreSectionChecker,
     _DataNodeConfigChecker,
     _JobConfigChecker,
     _ScenarioConfigChecker,
-    _SequenceConfigChecker,
     _TaskConfigChecker,
 )
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
@@ -57,7 +55,6 @@ from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
-from src.taipy.core.sequence._sequence_model import _SequenceModel
 from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
@@ -319,19 +316,6 @@ def cycle_model():
     )
 
 
-@pytest.fixture(scope="class")
-def sequence_model():
-    return _SequenceModel(
-        SequenceId("sequence_id"),
-        "owner_id",
-        list({"parent_id_1", "parent_id_2"}),
-        {},
-        [],
-        [],
-        "random_version_number",
-    )
-
-
 @pytest.fixture(scope="function")
 def tmp_sqlite(tmpdir_factory):
     fn = tmpdir_factory.mktemp("db")
@@ -402,15 +386,6 @@ def init_config():
         ],
     )
     _inject_section(
-        SequenceConfig,
-        "sequences",
-        SequenceConfig.default_config(),
-        [
-            ("configure_sequence", SequenceConfig._configure),
-            ("set_default_sequence_configuration", SequenceConfig._set_default_configuration),
-        ],
-    )
-    _inject_section(
         ScenarioConfig,
         "scenarios",
         ScenarioConfig.default_config(),
@@ -431,7 +406,6 @@ def init_config():
     _Checker.add_checker(_CoreSectionChecker)
     _Checker.add_checker(_DataNodeConfigChecker)
     _Checker.add_checker(_TaskConfigChecker)
-    _Checker.add_checker(_SequenceConfigChecker)
     _Checker.add_checker(_ScenarioConfigChecker)
 
     Config.configure_core(read_entity_retry=0)
@@ -475,7 +449,6 @@ def clean_sql_db():
     _CycleModel.__table__.drop(engine, checkfirst=True)
     _DataNodeModel.__table__.drop(bind=engine, checkfirst=True)
     _JobModel.__table__.drop(bind=engine, checkfirst=True)
-    _SequenceModel.__table__.drop(bind=engine, checkfirst=True)
     _ScenarioModel.__table__.drop(bind=engine, checkfirst=True)
     _TaskModel.__table__.drop(bind=engine, checkfirst=True)
     _VersionModel.__table__.drop(bind=engine, checkfirst=True)
@@ -483,7 +456,6 @@ def clean_sql_db():
     _CycleModel.__table__.create(engine, checkfirst=True)
     _DataNodeModel.__table__.create(bind=engine, checkfirst=True)
     _JobModel.__table__.create(bind=engine, checkfirst=True)
-    _SequenceModel.__table__.create(bind=engine, checkfirst=True)
     _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
     _TaskModel.__table__.create(bind=engine, checkfirst=True)
     _VersionModel.__table__.create(bind=engine, checkfirst=True)
