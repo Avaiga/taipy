@@ -12,7 +12,7 @@
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from taipy.core.config import DataNodeConfig, JobConfig, ScenarioConfig, SequenceConfig, TaskConfig
+from taipy.core.config import DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
 
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
@@ -248,38 +248,6 @@ class Config:
 
         Returns:
             The new default scenario configuration.
-        """
-
-    @staticmethod
-    def configure_sequence(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "SequenceConfig":
-        """Configure a new sequence configuration.
-
-        Parameters:
-            id (str): The unique identifier of the new sequence configuration.
-            task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
-                configurations that make this new sequence. This can be a single task
-                configuration object if this sequence holds a single task.
-            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
-
-        Returns:
-            The new sequence configuration.
-        """
-
-    @staticmethod
-    def set_default_sequence_configuration(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> "SequenceConfig":
-        """Set the default values for sequence configurations.
-
-        This function creates the *default sequence configuration* object,
-        where all sequence configuration objects will find their default
-        values when needed.
-
-        Parameters:
-            task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
-                configurations that make the default sequence configuration. This can be
-                a single task configuration object if this sequence holds a single task.
-            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
-        Returns:
-            The default sequence configuration.
         """
 
     @staticmethod
