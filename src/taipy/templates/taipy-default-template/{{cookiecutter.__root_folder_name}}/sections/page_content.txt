@@ -1,6 +1,0 @@
-value = 0
-logo = "images/taipy_logo.jpg"
-
-
-def image_action(state):
-    webbrowser.open("https://taipy.io")

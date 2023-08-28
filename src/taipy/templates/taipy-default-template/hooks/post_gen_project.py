@@ -81,16 +81,8 @@ def handle_single_page_app():
             '''
 \npage = """
 <center>
-<|navbar|lov={[("home", "Homepage"), ("https://docs.taipy.io/en/latest/manuals/about/", "Taipy Docs"), ("https://docs.taipy.io/en/latest/getting_started/", "Getting Started")]}|>
+<|navbar|lov={[("home", "Homepage")]}|>
 </center>
-
-<|
-<center>
-    <|{logo}|image|height=200px|width=200px|on_action=image_action|>
-</center>
-|>
-
-# Taipy Application
 
 """
 '''
@@ -133,8 +125,6 @@ def handle_multi_page_app(pages):
     page_dict = """
 \npages = {
     "/": root_page,
-    "Taipy-Docs": "https://docs.taipy.io/en/latest/manuals/about/",
-    "Getting-Started": "https://docs.taipy.io/en/latest/getting_started/",
     {pages}
 }
 """
