@@ -49,18 +49,8 @@ jobs:
       
       - name: Modify README image file path
         run: |
-          echo """
-          import os, sys
-          branch_name = sys.argv[1]
-          img_list = os.listdir('readme_img')
-          with open(f'README.md') as readme_file:
-              readme_str = readme_file.read()
-              for img in img_list:
-                  readme_str = readme_str.replace(f'readme_img/{img}', f'https://raw.githubusercontent.com/Avaiga/taipy/{branch_name}/readme_img/{img}')
-          with open(f'README.md', 'w') as readme_file:
-              readme_file.write(readme_str)
-          """ > /tmp/modify_readme.py
-          python /tmp/modify_readme.py "${{ steps.extract_branch.outputs.branch }}"
+          cp tools/modify_readme.py /tmp
+          python /tmp/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
 
       - name: Get taipy-gui version from setup.py
         id: taipy_gui_version
