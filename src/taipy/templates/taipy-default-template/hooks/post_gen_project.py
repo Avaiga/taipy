@@ -16,32 +16,36 @@ import taipy
 
 
 def handle_services(use_rest, use_core):
-    if use_core in ["YES", "Y"] or use_rest in ["YES", "Y"]:
+    if use_core or use_rest:
         # Write "import taipy as tp" at the third line of the import.txt file
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "r") as import_file:
             import_lines = import_file.readlines()
-            import_lines[1] += "import taipy as tp\n"
+            import_lines[0] = "import taipy as tp\n" + import_lines[0] + "\n"
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "w") as import_file:
             import_file.writelines(import_lines)
 
-    if use_rest in ["YES", "Y"]:
+    # Import the necessary services
+    if use_core and use_rest:
+        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
+            import_file.write("from taipy import Core, Rest\n")
+    elif use_core:
+        with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
+            import_file.write("from taipy import Core\n")
+    elif use_rest:
         with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
             import_file.write("from taipy import Rest\n")
+
+    # Start the Rest service
+    if use_rest:
         with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
             main_file.write("    rest = Rest()\n")
 
-    if use_core in ["YES", "Y"]:
-        # Import and run Core service if Rest service is not run yet
-        if use_rest not in ["YES", "Y"]:
-            with open(os.path.join(os.getcwd(), "sections", "import.txt"), "a") as import_file:
-                import_file.write("from taipy import Core\n")
-            with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
-                main_file.write("    core = Core()\n")
-
+    if use_core:
         # Create and submit the placeholder scenario
         with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
+            main_file.write("    core = Core()\n")
             main_file.write("    # #############################################################################\n")
-            main_file.write("    # PLACEHOLDER: Initialize your data application here                          #\n")
+            main_file.write("    # PLACEHOLDER: Create and submit your scenario here                           #\n")
             main_file.write("    #                                                                             #\n")
             main_file.write("    # Example:                                                                    #\n")
             main_file.write("    # from configuration import scenario_config                                   #\n")
@@ -49,6 +53,7 @@ def handle_services(use_rest, use_core):
             main_file.write("    # scenario.submit()                                                           #\n")
             main_file.write("    # Comment, remove or replace the previous lines with your own use case        #\n")
             main_file.write("    # #############################################################################\n")
+            main_file.write("    core.run()\n")
     else:
         shutil.rmtree(os.path.join(os.getcwd(), "algorithms"))
         shutil.rmtree(os.path.join(os.getcwd(), "configuration"))
@@ -58,11 +63,9 @@ def handle_run_service():
     with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a+") as main_file:
         main_file.seek(0)
         main_content = main_file.read()
-
+        # Run Rest service along with the GUI service
         if "rest = Rest()" in main_content:
             main_file.write('    tp.run(gui, rest, title="{{cookiecutter.__application_title}}")\n')
-        elif "core = Core()" in main_content:
-            main_file.write('    tp.run(gui, core, title="{{cookiecutter.__application_title}}")\n')
         else:
             main_file.write('    gui.run(title="{{cookiecutter.__application_title}}")\n')
 
@@ -79,7 +82,7 @@ def handle_single_page_app():
     with open(os.path.join(os.getcwd(), "sections", "page_content.txt"), "a") as page_content_file:
         page_content_file.write(
             '''
-\npage = """
+page = """
 <center>
 <|navbar|lov={[("home", "Homepage")]}|>
 </center>
@@ -90,16 +93,6 @@ def handle_single_page_app():
 
 
 def handle_multi_page_app(pages):
-    number_of_pages = int(pages[0])
-
-    for page_i in range(1, number_of_pages + 1):
-        try:
-            pages[page_i] = pages[page_i] or "page_" + str(page_i)
-        except IndexError:
-            page_name = "page_" + str(page_i)
-            pages.append(page_name)
-    pages = pages[1 : number_of_pages + 1]
-
     for page_name in pages:
         os.mkdir(os.path.join(os.getcwd(), "pages", page_name))
         with open(os.path.join(os.getcwd(), "pages", "page_example", "page_example.md"), "r") as page_md_file:
@@ -123,7 +116,7 @@ def handle_multi_page_app(pages):
     newline = ",\n\t"
     user_page_dict = newline.join(f'"{page_name}": {page_name}' for page_name in pages)
     page_dict = """
-\npages = {
+pages = {
     "/": root_page,
     {pages}
 }
@@ -150,9 +143,8 @@ def generate_main_file():
         main_lines = main_file.read()
 
     with open(os.path.join(os.getcwd(), "{{cookiecutter.__main_file}}.py"), "a") as app_main_file:
-        app_main_file.write("\n")
         app_main_file.write(import_lines)
-        app_main_file.write("\n\n")
+        app_main_file.write("\n")
         app_main_file.write(page_content)
         app_main_file.write("\n\n")
         app_main_file.write(main_lines)
@@ -163,10 +155,12 @@ with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_fil
 
 use_core = "{{ cookiecutter.__core }}".upper()
 use_rest = "{{ cookiecutter.__rest }}".upper()
-handle_services(use_rest, use_core)
+handle_services(use_rest in ["YES", "Y"], use_core in ["YES", "Y"])
 
 pages = "{{ cookiecutter.__pages }}".split(" ")
-if pages[0] == "1":
+# Remove empty string from pages list
+pages = [page for page in pages if page != ""]
+if len(pages) == 0:
     handle_single_page_app()
 else:
     handle_multi_page_app(pages)

@@ -11,6 +11,8 @@
 
 import os
 
+import pytest
+from cookiecutter.exceptions import FailedHookException
 from cookiecutter.main import cookiecutter
 
 from .utils import _run_template
@@ -156,36 +158,7 @@ def test_multipage_gui_template(tmpdir):
         no_input=True,
         extra_context={
             "Application root folder name": "foo_app",
-            "How many pages and their names?": "3",
-        },
-    )
-
-    assert (
-        os.listdir(os.path.join(tmpdir, "foo_app")).sort() == ["requirements.txt", "main.py", "pages", "images"].sort()
-    )
-    assert (
-        os.listdir(os.path.join(tmpdir, "foo_app", "pages")).sort()
-        == ["page_1", "page_2", "page_3", "root.md", "root.py", "__init__.py"].sort()
-    )
-
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "foo_app"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
-
-    # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-
-
-def test_multipage_gui_template_with_page_names(tmpdir):
-    # Test with enough page names
-    cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
-        output_dir=str(tmpdir),
-        no_input=True,
-        extra_context={
-            "Application root folder name": "foo_app",
-            "How many pages and their names?": "3 name_1 name_2 name_3",
+            "Page names in multi-page application?": "name_1 name_2 name_3",
         },
     )
 
@@ -203,52 +176,20 @@ def test_multipage_gui_template_with_page_names(tmpdir):
     os.chdir(oldpwd)
     assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
 
-    # Test with missing page names
-    cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
-        output_dir=str(tmpdir),
-        no_input=True,
-        extra_context={
-            "Application root folder name": "bar_app",
-            "How many pages and their names?": "3 name_1 ",
-        },
-    )
 
-    assert (
-        os.listdir(os.path.join(tmpdir, "bar_app")).sort() == ["requirements.txt", "main.py", "pages", "images"].sort()
-    )
-    assert (
-        os.listdir(os.path.join(tmpdir, "bar_app", "pages")).sort()
-        == ["name_1", "page_2", "page_3", "root.md", "root.py", "__init__.py"].sort()
-    )
+def test_multipage_gui_template_with_invalid_page_name(tmpdir, capfd):
+    with pytest.raises(FailedHookException):
+        cookiecutter(
+            template="src/taipy/templates/taipy-default-template",
+            output_dir=str(tmpdir),
+            no_input=True,
+            extra_context={
+                "Application root folder name": "foo_app",
+                "Page names in multi-page application?": "valid_var_name 1_invalid_var_name",
+            },
+        )
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "bar_app"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    _, stderr = capfd.readouterr()
+    assert 'Page name "1_invalid_var_name" is not a valid Python identifier' in stderr
 
-    # Test with reduntant page names
-    cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
-        output_dir=str(tmpdir),
-        no_input=True,
-        extra_context={
-            "Application root folder name": "baz_app",
-            "How many pages and their names?": "3 name_1 name_2 name_3 name_4 name_5",
-        },
-    )
-
-    assert (
-        os.listdir(os.path.join(tmpdir, "baz_app")).sort() == ["requirements.txt", "main.py", "pages", "images"].sort()
-    )
-    assert (
-        os.listdir(os.path.join(tmpdir, "baz_app", "pages")).sort()
-        == ["name_1", "name_2", "name_3", "root.md", "root.py", "__init__.py"].sort()
-    )
-
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "baz_app"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    assert not os.path.exists(os.path.join(tmpdir, "foo_app"))
