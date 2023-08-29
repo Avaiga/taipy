@@ -27,3 +27,11 @@ if use_toml_config == "YES" or use_toml_config == "Y":
 else:
     os.remove(os.path.join(os.getcwd(), "config", "config_with_toml.py"))
     os.remove(os.path.join(os.getcwd(), "config", "config.toml"))
+
+main_file_name = "{{cookiecutter.__main_file}}.py"
+print(
+    f"New Taipy application has been created at {os.path.join(os.getcwd())}"
+    f"\n\nTo start the application, replace `{main_file_name}` with your"
+    f" application main Python file and run the following command:"
+    f"\n\tcd {os.path.join(os.getcwd())} && python {main_file_name}"
+)
