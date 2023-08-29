@@ -38,11 +38,5 @@ class _ScaffoldCLI:
         args = _CLI._parse()
 
         if getattr(args, "which", None) == "create":
-            application_path = cookiecutter(cls._TEMPLATE_MAP[args.template])
-            print(
-                f"New Taipy application has been created at {application_path}"
-                f"\n\nTo start the application, replace `main.py` with your"
-                f" application main Python file and run the following command:"
-                f"\n\tcd {application_path} && python main.py"
-            )
+            cookiecutter(cls._TEMPLATE_MAP[args.template])
             sys.exit(0)
