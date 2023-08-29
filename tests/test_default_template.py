@@ -20,7 +20,7 @@ from .utils import _run_template
 
 def test_default_answer(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
+        template="src/taipy/templates/default",
         output_dir=str(tmpdir),
         no_input=True,
     )
@@ -44,7 +44,7 @@ def test_default_answer(tmpdir):
 
 def test_main_file_with_and_without_extension(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
+        template="src/taipy/templates/default",
         output_dir=str(tmpdir),
         no_input=True,
         extra_context={
@@ -56,7 +56,7 @@ def test_main_file_with_and_without_extension(tmpdir):
     )
 
     cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
+        template="src/taipy/templates/default",
         output_dir=str(tmpdir),
         no_input=True,
         extra_context={
@@ -69,7 +69,7 @@ def test_main_file_with_and_without_extension(tmpdir):
 
 def test_with_core_service(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
+        template="src/taipy/templates/default",
         output_dir=str(tmpdir),
         no_input=True,
         extra_context={
@@ -97,7 +97,7 @@ def test_with_core_service(tmpdir):
 
 def test_with_rest_service(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
+        template="src/taipy/templates/default",
         output_dir=str(tmpdir),
         no_input=True,
         extra_context={
@@ -124,7 +124,7 @@ def test_with_rest_service(tmpdir):
 
 def test_with_both_core_rest_services(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
+        template="src/taipy/templates/default",
         output_dir=str(tmpdir),
         no_input=True,
         extra_context={
@@ -153,7 +153,7 @@ def test_with_both_core_rest_services(tmpdir):
 
 def test_multipage_gui_template(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/taipy-default-template",
+        template="src/taipy/templates/default",
         output_dir=str(tmpdir),
         no_input=True,
         extra_context={
@@ -180,7 +180,7 @@ def test_multipage_gui_template(tmpdir):
 def test_multipage_gui_template_with_invalid_page_name(tmpdir, capfd):
     with pytest.raises(FailedHookException):
         cookiecutter(
-            template="src/taipy/templates/taipy-default-template",
+            template="src/taipy/templates/default",
             output_dir=str(tmpdir),
             no_input=True,
             extra_context={
