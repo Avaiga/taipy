@@ -44,6 +44,7 @@ def handle_services(use_rest, use_core):
         # Create and submit the placeholder scenario
         with open(os.path.join(os.getcwd(), "sections", "main.txt"), "a") as main_file:
             main_file.write("    core = Core()\n")
+            main_file.write("    core.run()\n")
             main_file.write("    # #############################################################################\n")
             main_file.write("    # PLACEHOLDER: Create and submit your scenario here                           #\n")
             main_file.write("    #                                                                             #\n")
@@ -53,7 +54,6 @@ def handle_services(use_rest, use_core):
             main_file.write("    # scenario.submit()                                                           #\n")
             main_file.write("    # Comment, remove or replace the previous lines with your own use case        #\n")
             main_file.write("    # #############################################################################\n")
-            main_file.write("    core.run()\n")
     else:
         shutil.rmtree(os.path.join(os.getcwd(), "algorithms"))
         shutil.rmtree(os.path.join(os.getcwd(), "configuration"))
