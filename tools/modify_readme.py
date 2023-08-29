@@ -3,6 +3,7 @@ import re
 
 repo_name = sys.argv[1]
 branch_name = sys.argv[2]
+# Regex pattern <img\s+([^>]*?)(?<!['"])(?<!\/)src\s*=\s*(['"])(?!http|\/)(.*?)\2([^>]*?)>
 pattern = re.compile("<img\\s+([^>]*?)(?<![\'\"])(?<!\\/)src\\s*=\\s*([\'\"])(?!http|\\/)(.*?)\\2([^>]*?)>")
 replacement = r'<img \1src="https://raw.githubusercontent.com/Avaiga/{repo_name}/{branch_name}/\3"\4>'
 
