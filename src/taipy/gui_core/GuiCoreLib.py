@@ -30,8 +30,15 @@ from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, cancel_job, cre
 from taipy.core import delete as core_delete
 from taipy.core import delete_job
 from taipy.core import get as core_get
-from taipy.core import (get_cycles_scenarios, get_data_nodes, get_jobs, is_deletable, is_promotable, is_submittable,
-                        set_primary)
+from taipy.core import (
+    get_cycles_scenarios,
+    get_data_nodes,
+    get_jobs,
+    is_deletable,
+    is_promotable,
+    is_submittable,
+    set_primary,
+)
 from taipy.core import submit as core_submit
 from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
