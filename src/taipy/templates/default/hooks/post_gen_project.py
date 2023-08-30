@@ -169,3 +169,12 @@ generate_main_file()
 
 # Remove the sections folder
 shutil.rmtree(os.path.join(os.getcwd(), "sections"))
+
+main_file_name = "{{cookiecutter.__main_file}}.py"
+print(
+    f"New Taipy application has been created at {os.path.join(os.getcwd())}"
+    f"\n\nTo start the application, change directory to the newly created folder:"
+    f"\n\tcd {os.path.join(os.getcwd())}"
+    f"\nand run the application as follows:"
+    f"\n\tpython {main_file_name}"
+)
