@@ -58,7 +58,7 @@ def build_dn_partial(dn, dn_label, dn_content):
 
 def manage_inputs_partial(state):
     # Update inputs variables and partial
-    state.inputs = {d.id: (d.id, d.get_simple_label(), d) for d in state.selected_sceanrio.get_inputs()}
+    state.inputs = {d.id: (d.id, d.get_simple_label(), d) for d in state.selected_scenario.get_inputs()}
     state.contents = {k: (v[2].read() if v[2].is_ready_for_reading else None) for k, v in state.inputs.items()}
     input_partial_content = build_dn_list_partial(state.inputs, state.contents)
     state.inputs_partial.update_content(state, input_partial_content)
@@ -66,7 +66,7 @@ def manage_inputs_partial(state):
 
 def manage_outputs_partial(state):
     # Update outputs variables and partial
-    state.outputs = {d.id: (d.id, d.get_simple_label(), d) for d in state.selected_sceanrio.get_outputs()}
+    state.outputs = {d.id: (d.id, d.get_simple_label(), d) for d in state.selected_scenario.get_outputs()}
     state.contents.update({k: (v[2].read() if v[2].is_ready_for_reading else None) for k, v in state.outputs.items()})
     output_partial_content = build_dn_list_partial(state.outputs, state.contents)
     state.outputs_partial.update_content(state, output_partial_content)
