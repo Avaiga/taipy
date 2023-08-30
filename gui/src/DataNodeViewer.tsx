@@ -16,17 +16,31 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
+import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
+import InputLabel from "@mui/material/InputLabel";
+import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import OutlinedInput from "@mui/material/OutlinedInput";
 import Popover from "@mui/material/Popover";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Switch from "@mui/material/Switch";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { CheckCircle, Cancel, ArrowForwardIosSharp, Launch } from "@mui/icons-material";
+import {
+    CheckCircle,
+    Cancel,
+    ArrowForwardIosSharp,
+    Launch,
+    TableChartOutlined,
+    BarChartOutlined,
+} from "@mui/icons-material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -34,6 +48,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
 
 import {
+    ColumnDesc,
     RowValue,
     Table,
     TableValueType,
@@ -62,6 +77,8 @@ import PropertiesEditor from "./PropertiesEditor";
 import { NodeType, Scenarios } from "./utils/types";
 import CoreSelector from "./CoreSelector";
 import { useUniqueId } from "./utils/hooks";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import DataNodeChart from "./DataNodeChart";
 
 const editTimestampFormat = "YYY/MM/dd HH:mm";
 
@@ -75,6 +92,18 @@ const editSx = {
     "& > div": { writingMode: "vertical-rl", transform: "rotate(180deg)", paddingBottom: "1em" },
 };
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
+    },
+};
+const colsSelectSx = { m: 1, width: 300 };
 
 type DataNodeFull = [string, string, string, string, string, string, string, string, number, Array<[string, string]>];
 
@@ -327,6 +356,60 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         },
         [dnId, dispatch, id, isDataNode, module, props.onIdSelect]
     );
+
+    // Tabular viewType
+    const [viewType, setViewType] = useState("table");
+    const onViewTypeChange = useCallback((e: MouseEvent, value?: string) => value && setViewType(value), []);
+
+    // base tabular columns
+    const tabularColumns = useMemo(() => {
+        if (dtTabular && props.tabularColumns) {
+            try {
+                return JSON.parse(props.tabularColumns) as Record<string, ColumnDesc>;
+            } catch {
+                // ignore error
+            }
+        }
+        return undefined;
+    }, [dtTabular, props.tabularColumns]);
+
+    // tabular selected columns
+    const [selectedCols, setSelectedCols] = useState<string[]>([]);
+    const onColsChange = useCallback(
+        (e: SelectChangeEvent<typeof selectedCols>) => {
+            const sc = typeof e.target.value == "string" ? e.target.value.split(",") : e.target.value;
+            localStorage && localStorage.setItem(`${dnConfig}-selected-cols`, JSON.stringify(sc));
+            setSelectedCols(sc);
+        },
+        [dnConfig]
+    );
+    useEffect(() => {
+        if (tabularColumns) {
+            let tc = Object.keys(tabularColumns);
+            const storedSel = localStorage && localStorage.getItem(`${dnConfig}-selected-cols`);
+            if (storedSel) {
+                try {
+                    const storedCols = JSON.parse(storedSel);
+                    if (Array.isArray(storedCols)) {
+                        tc = tc.filter((c) => storedCols.includes(c));
+                    }
+                } catch {
+                    // do nothing
+                }
+            }
+            setSelectedCols(tc);
+        }
+    }, [tabularColumns, dnConfig]);
+
+    // tabular columns
+    const [tabCols, setTabCols] = useState<Record<string, ColumnDesc>>({});
+    useEffect(() => {
+        if (tabularColumns) {
+            const res = {} as Record<string, ColumnDesc>;
+            selectedCols.forEach((c) => (res[c] = tabularColumns[c]));
+            setTabCols(res);
+        }
+    }, [tabularColumns, selectedCols]);
 
     return (
         <>
@@ -679,14 +762,53 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                 ) : dtError ? (
                                     <Typography>{dtError}</Typography>
                                 ) : dtTabular ? (
-                                    <Table
-                                        defaultColumns={props.tabularColumns || ""}
-                                        updateVarName={getUpdateVar(props.updateVars, "tabularData")}
-                                        data={props.tabularData}
-                                        userData={dnId}
-                                        onEdit={props.onTabularDataEdit}
-                                        filter={true}
-                                    ></Table>
+                                    <>
+                                        <ToggleButtonGroup onChange={onViewTypeChange} exclusive value={viewType} color="primary">
+                                            <ToggleButton value="table">
+                                                <TableChartOutlined />
+                                            </ToggleButton>
+                                            <ToggleButton value="chart">
+                                                <BarChartOutlined />
+                                            </ToggleButton>
+                                        </ToggleButtonGroup>
+                                        {viewType === "table" ? (
+                                            <>
+                                                <FormControl sx={colsSelectSx}>
+                                                    <InputLabel id={uniqid + "-cols-label"}>Columns</InputLabel>
+                                                    <Select
+                                                        labelId={uniqid + "-cols-label"}
+                                                        multiple
+                                                        value={selectedCols}
+                                                        onChange={onColsChange}
+                                                        input={<OutlinedInput label="Columns" />}
+                                                        renderValue={(selected) => selected.join(", ")}
+                                                        MenuProps={MenuProps}
+                                                    >
+                                                        {Object.keys(tabularColumns || {}).map((col) => (
+                                                            <MenuItem key={col} value={col}>
+                                                                <Checkbox checked={selectedCols.indexOf(col) > -1} />
+                                                                <ListItemText primary={col} />
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                                <Table
+                                                    defaultColumns={JSON.stringify(tabCols)}
+                                                    updateVarName={getUpdateVar(props.updateVars, "tabularData")}
+                                                    data={props.tabularData}
+                                                    userData={dnId}
+                                                    onEdit={props.onTabularDataEdit}
+                                                    filter={true}
+                                                />
+                                            </>
+                                        ) : (
+                                            <DataNodeChart
+                                                columns={props.tabularColumns || ""}
+                                                tabularData={props.tabularData}
+                                                configId={dnConfig}
+                                            />
+                                        )}
+                                    </>
                                 ) : (
                                     "type: unknown"
                                 )

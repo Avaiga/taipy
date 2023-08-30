@@ -24,6 +24,8 @@ except ImportError:
 
 from dateutil import parser
 
+import pandas as pd
+
 from taipy.config import Config
 from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, cancel_job, create_scenario
 from taipy.core import delete as core_delete
@@ -591,6 +593,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     return (None, None, True, None)
                 try:
                     value = dn.read()
+                    if isinstance(value, (pd.DataFrame, pd.Series)):
+                        return (None, None, True, None)
                     return (
                         value,
                         "date"
@@ -663,7 +667,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
             and dn.is_ready_for_reading
-            and isinstance(dn, _AbstractTabularDataNode)
         ):
             try:
                 return self.__read_tabular_data(dn)
@@ -679,7 +682,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
             and dn.is_ready_for_reading
-            and isinstance(dn, _AbstractTabularDataNode)
         ):
             try:
                 return self.gui._tbl_cols(
@@ -687,7 +689,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
             except Exception:
                 return None
-        return _DoNotUpdate()
+        return None
 
     def select_id(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
@@ -844,7 +846,7 @@ class _GuiCore(ElementLibrary):
                     + f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
                 ),
                 "tabular_columns": ElementProperty(
-                    PropertyType.string,
+                    PropertyType.dynamic_string,
                     f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns("
                     + f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "
                     + f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
