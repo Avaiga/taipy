@@ -31,7 +31,8 @@ else:
 main_file_name = "{{cookiecutter.__main_file}}.py"
 print(
     f"New Taipy application has been created at {os.path.join(os.getcwd())}"
-    f"\n\nTo start the application, replace `{main_file_name}` with your"
-    f" application main Python file and run the following command:"
-    f"\n\tcd {os.path.join(os.getcwd())} && python {main_file_name}"
+    f"\n\nTo start the application, change directory to the newly created folder:"
+    f"\n\tcd {os.path.join(os.getcwd())}"
+    f"\nand run the application as follows:"
+    f"\n\tpython {main_file_name}"
 )
