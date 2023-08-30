@@ -8,7 +8,7 @@ on:
         required: true
 
 jobs:
-  test-package:
+  release-package:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
@@ -44,13 +44,34 @@ jobs:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
               raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
-          """ > /tmp/check.py
-          python /tmp/check.py "${{ steps.extract_branch.outputs.branch }}"
+          """ > /tmp/check2.py
+          python /tmp/check2.py "${{ steps.extract_branch.outputs.branch }}"
+      
+      - name: Modify README image file path
+        run: |
+          cp tools/modify_readme.py /tmp
+          python /tmp/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
+
+      - name: Get taipy-gui version from setup.py
+        id: taipy_gui_version
+        run: |
+          echo """
+          with open('setup.py') as f:
+              for line in f:
+                  if 'taipy-gui' in line:
+                      start = line.find('taipy-gui')
+                      end = line.rstrip().find('\",')
+                      print(f'VERSION={line[start:end]}')
+                      break
+          """ > /tmp/get_gui_version.py
+          python /tmp/get_gui_version.py >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build
+          # install taipy-gui from based on setup.py version
+          pip install "{{ steps.taipy_gui_version.outputs.VERSION }}"
 
       - name: Build and test the package
         run: |
@@ -61,15 +82,6 @@ jobs:
           python -c "import taipy as tp; tp.gui"
           python -c "import taipy as tp; tp.rest"
 
-  release:
-    needs: [test-package]
-    timeout-minutes: 20
-    name: Release Package
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
       - name: Extract commit hash
         shell: bash
         run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -77,6 +89,6 @@ jobs:
 
       - name: Create/update release and tag
         run: |
-            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ github.event.inputs.version }}
+            gh release create ${{ github.event.inputs.version }} ./dist/${{ github.event.repository.name }}-${{ github.event.inputs.version }}.tar.gz --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
