@@ -1,0 +1,3 @@
+<center>
+<|navbar|>
+</center>
