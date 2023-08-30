@@ -22,24 +22,16 @@ try:
 except ImportError:
     from backports import zoneinfo  # type: ignore[no-redef]
 
-from dateutil import parser
-
 import pandas as pd
+from dateutil import parser
 
 from taipy.config import Config
 from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, cancel_job, create_scenario
 from taipy.core import delete as core_delete
 from taipy.core import delete_job
 from taipy.core import get as core_get
-from taipy.core import (
-    get_cycles_scenarios,
-    get_data_nodes,
-    get_jobs,
-    is_deletable,
-    is_promotable,
-    is_submittable,
-    set_primary,
-)
+from taipy.core import (get_cycles_scenarios, get_data_nodes, get_jobs, is_deletable, is_promotable, is_submittable,
+                        set_primary)
 from taipy.core import submit as core_submit
 from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
