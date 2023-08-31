@@ -135,8 +135,15 @@ def test_check_consistency():
     output_5 = DataNode("foo", Scope.SCENARIO, "output_id_5")
     task_5_1 = Task("foo", {}, print, [input_5], [output_5], TaskId("task_id_5_1"))
     task_5_2 = Task("bar", {}, print, [output_5], [FakeDataNode()], TaskId("task_id_5_2"))
-    sequence_2 = Sequence({}, [task_5_1, task_5_2], "name_2")
-    assert not sequence_2._is_consistent()
+    sequence_5 = Sequence({}, [task_5_1, task_5_2], "name_5")
+    assert not sequence_5._is_consistent()
+
+    intermediate_6 = DataNode("foo", Scope.SCENARIO, "intermediate_id_6")
+    output_6 = DataNode("foo", Scope.SCENARIO, "output_id_6")
+    task_6_1 = Task("foo", {}, print, [], [intermediate_6], TaskId("task_id_6_1"))
+    task_6_2 = Task("foo", {}, print, [intermediate_6], [output_6], TaskId("task_id_6_2"))
+    sequence_6 = Sequence({}, [task_6_1, task_6_2], "name_6")
+    assert sequence_6._is_consistent()
 
 
 def test_get_sorted_tasks():
@@ -485,7 +492,7 @@ def test_get_set_of_tasks():
 
 
 def test_auto_set_and_reload(task):
-    tmp_task = Task("tmp_task_config_id", {}, print, [], [], TaskId("tmp_task_id"))
+    tmp_task = Task("tmp_task_config_id", {}, print, list(task.output.values()), [], TaskId("tmp_task_id"))
     scenario = Scenario("scenario", [task, tmp_task], {}, sequences={"foo": {}})
 
     _TaskManager._set(task)

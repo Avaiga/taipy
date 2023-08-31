@@ -142,6 +142,13 @@ class InvalidSequenceId(Exception):
         self.message = f"Sequence: {sequence_id} is invalid."
 
 
+class InvalidSequence(Exception):
+    """Raised if a Sequence is not a connected Directed Acyclic Graph."""
+
+    def __init__(self, sequence_id: str):
+        self.message = f"Sequence: {sequence_id} is not a connected Directed Acyclic Graph."
+
+
 class NonExistingSequence(Exception):
     """Raised if a requested Sequence is not known by the Sequence Manager."""
 

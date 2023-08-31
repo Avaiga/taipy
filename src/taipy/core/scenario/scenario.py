@@ -16,6 +16,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+import networkx as nx
+
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
@@ -166,6 +168,12 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._sequences = sequences
 
     def add_sequences(self, sequences: Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
+        """Add sequences to the scenario.
+
+        Parameters:
+            sequences (Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
+                The description of the sequences.
+        """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
         _sequences = _scenario._sequences
         _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
@@ -182,6 +190,11 @@ class Scenario(_Entity, Submittable, _Labeled):
         self.sequences = _sequences  # type: ignore
 
     def remove_sequences(self, sequence_names: List[str]):
+        """Remove sequences from the scenario.
+
+        Parameters:
+            sequence_names (List[str]): The names of the sequences.
+        """
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         for sequence_name in sequence_names:
             _sequences.pop(sequence_name)
@@ -499,3 +512,12 @@ class Scenario(_Entity, Submittable, _Labeled):
             The simple label of the scenario as a string.
         """
         return self._get_simple_label()
+
+    def _is_consistent(self) -> bool:
+        dag = self._build_dag()
+
+        if dag.number_of_nodes() == 0:
+            return True
+        if not nx.is_directed_acyclic_graph(dag):
+            return False
+        return True

@@ -488,7 +488,7 @@ def test_sequence_notification_subscribe(mocker):
     notify_2.__module__ = "notify_2"
     # Mocking this because NotifyMock is a class that does not loads correctly when getting the sequence
     # from the storage.
-    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2, notify_2])
+    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2, notify_2, notify_2, notify_2])
 
     # test subscription
     callback = mock.MagicMock()
