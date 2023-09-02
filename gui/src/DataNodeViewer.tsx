@@ -150,7 +150,7 @@ interface DataNodeViewerProps {
     showProperties?: boolean;
     showHistory?: boolean;
     showData?: boolean;
-    chartConfig?: string;
+    chartConfigs?: string;
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
@@ -161,6 +161,7 @@ interface DataNodeViewerProps {
     tabularColumns?: string;
     onDataValue?: string;
     onTabularDataEdit?: string;
+    chartConfig?: string;
 }
 
 const getDataValue = (value?: RowValue, dType?: string | null) => (dType == "date" ? new Date(value as string) : value);
@@ -171,6 +172,8 @@ const getValidDataNode = (datanode: DataNodeFull | DataNodeFull[]) =>
         : datanode.length == 1
         ? (datanode[0] as DataNodeFull)
         : undefined;
+
+const TableViewType = "table";
 
 const DataNodeViewer = (props: DataNodeViewerProps) => {
     const {
@@ -284,6 +287,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         setTabValue(0);
         setHistoryRequested(false);
         setDataRequested(false);
+        setViewType(TableViewType);
     }, [dnLabel, isDataNode, expanded]);
 
     // Datanode data
@@ -358,8 +362,16 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     );
 
     // Tabular viewType
-    const [viewType, setViewType] = useState("table");
-    const onViewTypeChange = useCallback((e: MouseEvent, value?: string) => value && setViewType(value), []);
+    const [viewType, setViewType] = useState(TableViewType);
+    const onViewTypeChange = useCallback(
+        (e: MouseEvent, value?: string) => {
+            if (value) {
+                dispatch(createSendActionNameAction(id, module, props.onIdSelect, { chart_id: dnId }));
+                setViewType(value);
+            }
+        },
+        [dnId, dispatch, id, module, props.onIdSelect]
+    );
 
     // base tabular columns
     const tabularColumns = useMemo(() => {
@@ -385,7 +397,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     );
     useEffect(() => {
         if (tabularColumns) {
-            let tc = Object.keys(tabularColumns);
+            let tc = Object.entries(tabularColumns).map((e) => e[1].dfid);
             const storedSel = localStorage && localStorage.getItem(`${dnConfig}-selected-cols`);
             if (storedSel) {
                 try {
@@ -406,7 +418,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     useEffect(() => {
         if (tabularColumns) {
             const res = {} as Record<string, ColumnDesc>;
-            selectedCols.forEach((c) => (res[c] = tabularColumns[c]));
+            const dfids = {} as Record<string, string>;
+            Object.entries(tabularColumns).forEach(([k, v]) => (dfids[v.dfid] = k));
+            selectedCols.forEach((c) => dfids[c] && (res[dfids[c]] = tabularColumns[dfids[c]]));
             setTabCols(res);
         }
     }, [tabularColumns, selectedCols]);
@@ -763,15 +777,20 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     <Typography>{dtError}</Typography>
                                 ) : dtTabular ? (
                                     <>
-                                        <ToggleButtonGroup onChange={onViewTypeChange} exclusive value={viewType} color="primary">
-                                            <ToggleButton value="table">
+                                        <ToggleButtonGroup
+                                            onChange={onViewTypeChange}
+                                            exclusive
+                                            value={viewType}
+                                            color="primary"
+                                        >
+                                            <ToggleButton value={TableViewType}>
                                                 <TableChartOutlined />
                                             </ToggleButton>
                                             <ToggleButton value="chart">
                                                 <BarChartOutlined />
                                             </ToggleButton>
                                         </ToggleButtonGroup>
-                                        {viewType === "table" ? (
+                                        {viewType === TableViewType ? (
                                             <>
                                                 <FormControl sx={colsSelectSx}>
                                                     <InputLabel id={uniqid + "-cols-label"}>Columns</InputLabel>
@@ -784,10 +803,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         renderValue={(selected) => selected.join(", ")}
                                                         MenuProps={MenuProps}
                                                     >
-                                                        {Object.keys(tabularColumns || {}).map((col) => (
-                                                            <MenuItem key={col} value={col}>
-                                                                <Checkbox checked={selectedCols.indexOf(col) > -1} />
-                                                                <ListItemText primary={col} />
+                                                        {Object.values(tabularColumns || {}).map((colDesc) => (
+                                                            <MenuItem key={colDesc.dfid} value={colDesc.dfid}>
+                                                                <Checkbox
+                                                                    checked={selectedCols.includes(colDesc.dfid)}
+                                                                />
+                                                                <ListItemText primary={colDesc.dfid} />
                                                             </MenuItem>
                                                         ))}
                                                     </Select>
@@ -803,9 +824,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             </>
                                         ) : (
                                             <DataNodeChart
-                                                columns={props.tabularColumns || ""}
+                                                uniqid={uniqid}
+                                                columns={tabularColumns}
                                                 tabularData={props.tabularData}
                                                 configId={dnConfig}
+                                                defaultConfig={props.chartConfig}
+                                                updateVarName={getUpdateVar(props.updateVars, "tabularData")}
                                             />
                                         )}
                                     </>
