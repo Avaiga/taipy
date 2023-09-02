@@ -172,11 +172,9 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                     else -1,
                     [
                         (k, f"{v}")
-                        for k, v in datanode.properties.items()
+                        for k, v in datanode._get_user_properties().items()
                         if k not in _GuiCoreDatanodeAdapter.__INNER_PROPS
-                    ]
-                    if datanode.properties
-                    else [],
+                    ],
                 ]
         return None
 
@@ -203,6 +201,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     _DATANODE_VIZ_OWNER_ID_VAR = "gui_core_dv_owner_id"
     _DATANODE_VIZ_HISTORY_ID_VAR = "gui_core_dv_history_id"
     _DATANODE_VIZ_DATA_ID_VAR = "gui_core_dv_data_id"
+    _DATANODE_VIZ_DATA_CHART_ID_VAR = "gui_core_dv_data_chart_id"
     _DATANODE_VIZ_DATA_NODE_PROP = "data_node"
 
     def __init__(self, gui: Gui) -> None:
@@ -690,6 +689,23 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return None
         return None
 
+    def get_data_node_chart_config(self, datanode: DataNode, id: str):
+        if (
+            id
+            and isinstance(datanode, DataNode)
+            and id == datanode.id
+            and (dn := core_get(id))
+            and isinstance(dn, DataNode)
+            and dn.is_ready_for_reading
+        ):
+            try:
+                return self.gui._chart_conf(
+                    True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=self.__read_tabular_data(dn)
+                )
+            except Exception:
+                return None
+        return None
+
     def select_id(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) == 0 and isinstance(args[0], dict):
@@ -701,6 +717,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR, history_id)
         elif data_id := data.get("data_id"):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
+        elif chart_id := data.get("chart_id"):
+            state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
 
 
 class _GuiCore(ElementLibrary):
@@ -813,7 +831,7 @@ class _GuiCore(ElementLibrary):
                 "show_properties": ElementProperty(PropertyType.boolean, True),
                 "show_history": ElementProperty(PropertyType.boolean, True),
                 "show_data": ElementProperty(PropertyType.boolean, True),
-                "chart_config": ElementProperty(PropertyType.dict),
+                "chart_configs": ElementProperty(PropertyType.dict),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "scenario": ElementProperty(PropertyType.lov_value),
             },
@@ -849,6 +867,12 @@ class _GuiCore(ElementLibrary):
                     f"{{{__CTX_VAR_NAME}.get_data_node_tabular_columns("
                     + f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "
                     + f"{_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR})}}",
+                ),
+                "chart_config": ElementProperty(
+                    PropertyType.dynamic_string,
+                    f"{{{__CTX_VAR_NAME}.get_data_node_chart_config("
+                    + f"<tp:prop:{_GuiCoreContext._DATANODE_VIZ_DATA_NODE_PROP}>, "
+                    + f"{_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR})}}",
                 ),
                 "on_data_value": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.update_data}}"),
                 "on_tabular_data_edit": ElementProperty(
@@ -902,6 +926,7 @@ class _GuiCore(ElementLibrary):
                 _GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR: "",
                 _GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR: "",
                 _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR: "",
+                _GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR: "",
             }
         )
         ctx = _GuiCoreContext(gui)
@@ -920,6 +945,7 @@ class _GuiCore(ElementLibrary):
             _GuiCoreContext._DATANODE_VIZ_OWNER_ID_VAR,
             _GuiCoreContext._DATANODE_VIZ_HISTORY_ID_VAR,
             _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR,
+            _GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR,
         ]:
             state._add_attribute(var, "")
 
