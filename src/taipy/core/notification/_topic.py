@@ -15,7 +15,7 @@ from ..exceptions.exceptions import InvalidEventOperation
 from .event import _UNSUBMITTABLE_ENTITY_TYPES, EventEntityType, EventOperation
 
 
-class Topic:
+class _Topic:
     def __init__(
         self,
         entity_type: Optional[EventEntityType] = None,

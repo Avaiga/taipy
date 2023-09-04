@@ -13,46 +13,46 @@
 from queue import SimpleQueue
 
 from src.taipy.core.notification import EventEntityType, EventOperation
-from src.taipy.core.notification.registration import Registration
-from src.taipy.core.notification.topic import Topic
+from src.taipy.core.notification._registration import _Registration
+from src.taipy.core.notification._topic import _Topic
 
 
 def test_create_registration():
-    registration_0 = Registration()
+    registration_0 = _Registration()
     assert isinstance(registration_0.registration_id, str)
-    assert registration_0.registration_id.startswith(Registration._ID_PREFIX)
+    assert registration_0.registration_id.startswith(_Registration._ID_PREFIX)
     assert isinstance(registration_0.queue, SimpleQueue)
     assert registration_0.queue.qsize() == 0
-    assert isinstance(registration_0.topic, Topic)
+    assert isinstance(registration_0.topic, _Topic)
     assert registration_0.topic.entity_type is None
     assert registration_0.topic.entity_id is None
     assert registration_0.topic.operation is None
     assert registration_0.topic.attribute_name is None
 
-    registration_1 = Registration(
+    registration_1 = _Registration(
         entity_type=EventEntityType.SCENARIO, entity_id="SCENARIO_scenario_id", operation=EventOperation.CREATION
     )
     assert isinstance(registration_1.registration_id, str)
-    assert registration_1.registration_id.startswith(Registration._ID_PREFIX)
+    assert registration_1.registration_id.startswith(_Registration._ID_PREFIX)
     assert isinstance(registration_1.queue, SimpleQueue)
     assert registration_1.queue.qsize() == 0
-    assert isinstance(registration_1.topic, Topic)
+    assert isinstance(registration_1.topic, _Topic)
     assert registration_1.topic.entity_type == EventEntityType.SCENARIO
     assert registration_1.topic.entity_id == "SCENARIO_scenario_id"
     assert registration_1.topic.operation == EventOperation.CREATION
     assert registration_1.topic.attribute_name is None
 
-    registration_2 = Registration(
+    registration_2 = _Registration(
         entity_type=EventEntityType.SEQUENCE,
         entity_id="SEQUENCE_scenario_id",
         operation=EventOperation.UPDATE,
         attribute_name="tasks",
     )
     assert isinstance(registration_2.registration_id, str)
-    assert registration_2.registration_id.startswith(Registration._ID_PREFIX)
+    assert registration_2.registration_id.startswith(_Registration._ID_PREFIX)
     assert isinstance(registration_2.queue, SimpleQueue)
     assert registration_2.queue.qsize() == 0
-    assert isinstance(registration_2.topic, Topic)
+    assert isinstance(registration_2.topic, _Topic)
     assert registration_2.topic.entity_type == EventEntityType.SEQUENCE
     assert registration_2.topic.entity_id == "SEQUENCE_scenario_id"
     assert registration_2.topic.operation == EventOperation.UPDATE

@@ -13,9 +13,9 @@ from queue import SimpleQueue
 
 from src.taipy.core import taipy as tp
 from src.taipy.core.notification import EventEntityType, EventOperation
+from src.taipy.core.notification._topic import _Topic
 from src.taipy.core.notification.event import Event
 from src.taipy.core.notification.notifier import Notifier
-from src.taipy.core.notification.topic import Topic
 from taipy.config import Config, Frequency
 
 
@@ -119,122 +119,122 @@ def test_register():
 
 
 def test_matching():
-    assert Notifier._is_matching(Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), Topic())
+    assert Notifier._is_matching(Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), _Topic())
     assert Notifier._is_matching(
-        Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), Topic(EventEntityType.CYCLE)
+        Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), _Topic(EventEntityType.CYCLE)
     )
     assert Notifier._is_matching(
-        Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), Topic(EventEntityType.CYCLE, "cycle_id")
+        Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), _Topic(EventEntityType.CYCLE, "cycle_id")
     )
     assert Notifier._is_matching(
-        Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), Topic(operation=EventOperation.CREATION)
+        Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION), _Topic(operation=EventOperation.CREATION)
     )
     assert Notifier._is_matching(
         Event(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION),
-        Topic(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION),
+        _Topic(EventEntityType.CYCLE, "cycle_id", EventOperation.CREATION),
     )
 
-    assert Notifier._is_matching(Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION), Topic())
+    assert Notifier._is_matching(Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION), _Topic())
     assert Notifier._is_matching(
-        Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION), Topic(EventEntityType.SCENARIO)
+        Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION), _Topic(EventEntityType.SCENARIO)
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION),
-        Topic(
+        _Topic(
             EventEntityType.SCENARIO,
             "scenario_id",
         ),
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION),
-        Topic(operation=EventOperation.SUBMISSION),
+        _Topic(operation=EventOperation.SUBMISSION),
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION),
-        Topic(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION),
+        _Topic(EventEntityType.SCENARIO, "scenario_id", EventOperation.SUBMISSION),
     )
 
     assert Notifier._is_matching(
-        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), Topic()
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), _Topic()
     )
     assert Notifier._is_matching(
-        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), Topic(EventEntityType.SEQUENCE)
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), _Topic(EventEntityType.SEQUENCE)
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
-        Topic(
+        _Topic(
             EventEntityType.SEQUENCE,
             "sequence_id",
         ),
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
-        Topic(operation=EventOperation.UPDATE),
+        _Topic(operation=EventOperation.UPDATE),
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
-        Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE),
+        _Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE),
     )
     assert Notifier._is_matching(
-        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), Topic(attribute_name="tasks")
-    )
-    assert Notifier._is_matching(
-        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
-        Topic(EventEntityType.SEQUENCE, attribute_name="tasks"),
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"), _Topic(attribute_name="tasks")
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
-        Topic(operation=EventOperation.UPDATE, attribute_name="tasks"),
+        _Topic(EventEntityType.SEQUENCE, attribute_name="tasks"),
     )
     assert Notifier._is_matching(
         Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
-        Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
+        _Topic(operation=EventOperation.UPDATE, attribute_name="tasks"),
     )
-    assert Notifier._is_matching(Event(EventEntityType.TASK, "task_id", EventOperation.DELETION), Topic())
     assert Notifier._is_matching(
-        Event(EventEntityType.TASK, "task_id", EventOperation.DELETION), Topic(EventEntityType.TASK)
+        Event(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
+        _Topic(EventEntityType.SEQUENCE, "sequence_id", EventOperation.UPDATE, "tasks"),
+    )
+    assert Notifier._is_matching(Event(EventEntityType.TASK, "task_id", EventOperation.DELETION), _Topic())
+    assert Notifier._is_matching(
+        Event(EventEntityType.TASK, "task_id", EventOperation.DELETION), _Topic(EventEntityType.TASK)
     )
     assert Notifier._is_matching(
         Event(EventEntityType.TASK, "task_id", EventOperation.DELETION),
-        Topic(
+        _Topic(
             EventEntityType.TASK,
             "task_id",
         ),
     )
     assert Notifier._is_matching(
-        Event(EventEntityType.TASK, "task_id", EventOperation.DELETION), Topic(operation=EventOperation.DELETION)
+        Event(EventEntityType.TASK, "task_id", EventOperation.DELETION), _Topic(operation=EventOperation.DELETION)
     )
     assert Notifier._is_matching(
         Event(EventEntityType.TASK, "task_id", EventOperation.DELETION),
-        Topic(EventEntityType.TASK, "task_id", EventOperation.DELETION),
+        _Topic(EventEntityType.TASK, "task_id", EventOperation.DELETION),
     )
 
     assert not Notifier._is_matching(
-        Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.CREATION), Topic(EventEntityType.CYCLE)
+        Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.CREATION), _Topic(EventEntityType.CYCLE)
     )
     assert not Notifier._is_matching(
         Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.CREATION),
-        Topic(EventEntityType.SCENARIO, "scenario_id"),
+        _Topic(EventEntityType.SCENARIO, "scenario_id"),
     )
     assert not Notifier._is_matching(
         Event(EventEntityType.DATA_NODE, "dn_id", EventOperation.CREATION),
-        Topic(EventEntityType.TASK, "task_id", EventOperation.CREATION),
+        _Topic(EventEntityType.TASK, "task_id", EventOperation.CREATION),
     )
     assert not Notifier._is_matching(
         Event(EventEntityType.JOB, "job_id", EventOperation.DELETION),
-        Topic(EventEntityType.JOB, "job_id", EventOperation.CREATION),
+        _Topic(EventEntityType.JOB, "job_id", EventOperation.CREATION),
     )
     assert not Notifier._is_matching(
         Event(EventEntityType.JOB, "job_id", EventOperation.DELETION),
-        Topic(EventEntityType.JOB, "job_id_1", EventOperation.DELETION),
+        _Topic(EventEntityType.JOB, "job_id_1", EventOperation.DELETION),
     )
     assert not Notifier._is_matching(
         Event(EventEntityType.JOB, "job_id", EventOperation.UPDATE, "status"),
-        Topic(EventEntityType.JOB, "job_id", EventOperation.UPDATE, "submit_id"),
+        _Topic(EventEntityType.JOB, "job_id", EventOperation.UPDATE, "submit_id"),
     )
     assert not Notifier._is_matching(
         Event(EventEntityType.JOB, "job_id", EventOperation.UPDATE, "status"),
-        Topic(operation=EventOperation.UPDATE, attribute_name="submit_id"),
+        _Topic(operation=EventOperation.UPDATE, attribute_name="submit_id"),
     )
 
 

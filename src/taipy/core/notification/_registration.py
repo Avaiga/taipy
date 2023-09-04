@@ -13,12 +13,12 @@ from queue import SimpleQueue
 from typing import Optional
 from uuid import uuid4
 
+from ._topic import _Topic
 from .event import EventEntityType, EventOperation
 from .registration_id import RegistrationId
-from .topic import Topic
 
 
-class Registration:
+class _Registration:
 
     _ID_PREFIX = "REGISTRATION"
     __SEPARATOR = "_"
@@ -32,13 +32,13 @@ class Registration:
     ):
 
         self.registration_id: str = self._new_id()
-        self.topic: Topic = Topic(entity_type, entity_id, operation, attribute_name)
+        self.topic: _Topic = _Topic(entity_type, entity_id, operation, attribute_name)
         self.queue: SimpleQueue = SimpleQueue()
 
     @staticmethod
     def _new_id() -> RegistrationId:
-        """Generate a unique scenario identifier."""
-        return RegistrationId(Registration.__SEPARATOR.join([Registration._ID_PREFIX, str(uuid4())]))
+        """Generate a unique registration identifier."""
+        return RegistrationId(_Registration.__SEPARATOR.join([_Registration._ID_PREFIX, str(uuid4())]))
 
     def __hash__(self) -> int:
         return hash(self.registration_id)

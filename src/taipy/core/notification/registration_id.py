@@ -12,4 +12,5 @@
 from typing import NewType
 
 RegistrationId = NewType("RegistrationId", str)
-RegistrationId.__doc__ = """Type that holds a `Registration^` identifier."""
+RegistrationId.__doc__ = """Type that holds a `Registration^` identifier. It can be used to instantiate a
+`CoreEventConsumerBase^`."""

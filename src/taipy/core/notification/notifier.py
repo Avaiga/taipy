@@ -12,9 +12,9 @@
 from queue import SimpleQueue
 from typing import Dict, Optional, Set, Tuple
 
+from ._registration import _Registration
+from ._topic import _Topic
 from .event import Event, EventEntityType, EventOperation
-from .registration import Registration
-from .topic import Topic
 
 
 def _publish_event(
@@ -29,7 +29,7 @@ def _publish_event(
 class Notifier:
     """A class for managing event registrations and publishing `Core^` service events."""
 
-    _topics_registrations_list: Dict[Topic, Set[Registration]] = {}
+    _topics_registrations_list: Dict[_Topic, Set[_Registration]] = {}
 
     @classmethod
     def register(
@@ -81,7 +81,7 @@ class Notifier:
         Returns:
             A tuple containing the registration id and the event queue.
         """
-        registration = Registration(entity_type, entity_id, operation, attribute_name)
+        registration = _Registration(entity_type, entity_id, operation, attribute_name)
 
         if registrations := cls._topics_registrations_list.get(registration.topic, None):
             registrations.add(registration)
@@ -93,7 +93,7 @@ class Notifier:
     @classmethod
     def unregister(cls, registration_id: str):
         """Unregister a listener."""
-        to_remove_registration: Optional[Registration] = None
+        to_remove_registration: Optional[_Registration] = None
 
         for _, registrations in cls._topics_registrations_list.items():
             for registration in registrations:
@@ -116,7 +116,7 @@ class Notifier:
                     registration.queue.put(event)
 
     @staticmethod
-    def _is_matching(event: Event, topic: Topic) -> bool:
+    def _is_matching(event: Event, topic: _Topic) -> bool:
         """Check if an event matches a topic."""
         if topic.entity_type is not None and event.entity_type != topic.entity_type:
             return False

@@ -15,7 +15,7 @@ Package for notifications about changes on `Core^` service entities.
 
 The Core service generates 'Event^' objects to track changes on entities.
 These events are then relayed to a 'Notifier^', which handles the dispatch
-to consumers interested in specific event 'Topics^'.
+to consumers interested in specific event topics.
 
 To subscribe, a consumer needs to invoke the `Notifier.register()^` method.
 This call will yield a `RegistrationId^` and a dedicated event queue for
@@ -25,9 +25,9 @@ To handle notifications, an event consumer (e.g., the `CoreEventConsumerBase^`
 object) must be instantiated with an associated event queue.
 """
 
+from ._registration import _Registration
+from ._topic import _Topic
 from .core_event_consumer import CoreEventConsumerBase
 from .event import _ENTITY_TO_EVENT_ENTITY_TYPE, Event, EventEntityType, EventOperation
 from .notifier import Notifier, _publish_event
-from .registration import Registration
 from .registration_id import RegistrationId
-from .topic import Topic
