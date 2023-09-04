@@ -45,6 +45,21 @@ _ENTITY_TO_EVENT_ENTITY_TYPE = {
 
 
 class Event:
+    """Event object used to notify any change in the Core service.
+
+    An event holds the necessary attributes to identify the change.
+
+    Attributes:
+        entity_type (EventEntityType^): Type of the entity that was changed (`DataNode^`,
+            `Scenario^`, `Cycle^`, etc. ).
+        entity_id (Optional[str]): Unique identifier of the entity that was changed.
+        operation (EventOperation^): Enum describing the operation (among `CREATION`, `UPDATE`, `DELETION`,
+            and SUBMISSION) that was performed on the entity.
+        attribute_name (Optional[str]): Name of the entity's attribute changed. Only relevant for `UPDATE`
+            operations
+        creation_date (datetime): Date and time of the event creation.
+    """
+
     def __init__(
         self,
         entity_type: EventEntityType,
