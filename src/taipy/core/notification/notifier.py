@@ -27,6 +27,8 @@ def _publish_event(
 
 
 class Notifier:
+    """A class for managing event registrations and publishing `Core^` service events."""
+
     _topics_registrations_list: Dict[Topic, Set[Registration]] = {}
 
     @classmethod
@@ -37,6 +39,48 @@ class Notifier:
         operation: Optional[EventOperation] = None,
         attribute_name: Optional[str] = None,
     ) -> Tuple[str, SimpleQueue]:
+        """Register a listener for a specific event topic.
+
+        The topic is defined by the combination of the entity type, the entity id,
+        the operation and the attribute name.
+
+        Parameters:
+            entity_type (Optional[EventEntityType^]): If provided, the listener will
+                be notified for all events related to this entity type. Otherwise,
+                the listener will be notified for events related to all entity types.
+                <br>
+                The possible entity type values are defined in the `EventEntityType^`
+                enum. The possible values are:
+                <ul>
+                    <li>CYCLE</li>
+                    <li>SCENARIO</li>
+                    <li>SEQUENCE</li>
+                    <li>TASK</li>
+                    <li>DATA_NODE</li>
+                    <li>JOB</li>
+                </ul>
+            entity_id (Optional[str]): If provided, the listener will be notified
+                for all events related to this entity. Otherwise, the listener
+                will be notified for events related to all entities.
+            operation (Optional[EventOperation^]): If provided, the listener will
+                be notified for all events related to this operation. Otherwise,
+                the listener will be notified for events related to all operations.
+                <br>
+                The possible operation values are defined in the `EventOperation^`
+                enum. The possible values are:
+                <ul>
+                    <li>CREATION</li>
+                    <li>UPDATE</li>
+                    <li>DELETION</li>
+                    <li>SUBMISSION</li>
+                </ul>
+            attribute_name (Optional[str]): If provided, the listener will be notified
+                for all events related to this entity's attribute. Otherwise, the listener
+                will be notified for events related to all attributes.
+
+        Returns:
+            A tuple containing the registration id and the event queue.
+        """
         registration = Registration(entity_type, entity_id, operation, attribute_name)
 
         if registrations := cls._topics_registrations_list.get(registration.topic, None):
@@ -48,6 +92,7 @@ class Notifier:
 
     @classmethod
     def unregister(cls, registration_id: str):
+        """Unregister a listener."""
         to_remove_registration: Optional[Registration] = None
 
         for _, registrations in cls._topics_registrations_list.items():
@@ -64,13 +109,15 @@ class Notifier:
 
     @classmethod
     def publish(cls, event):
+        """Publish a `Core^` service event to all registered listeners whose topic matches the event."""
         for topic, registrations in cls._topics_registrations_list.items():
-            if Notifier.is_matching(event, topic):
+            if Notifier._is_matching(event, topic):
                 for registration in registrations:
                     registration.queue.put(event)
 
     @staticmethod
-    def is_matching(event: Event, topic: Topic) -> bool:
+    def _is_matching(event: Event, topic: Topic) -> bool:
+        """Check if an event matches a topic."""
         if topic.entity_type is not None and event.entity_type != topic.entity_type:
             return False
         if topic.entity_id is not None and event.entity_id != topic.entity_id:
