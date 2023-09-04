@@ -26,7 +26,7 @@ from ._dag import _DAG
 class Submittable:
     """Instance of an entity that can be submitted for execution.
 
-    A submittable holds functions that can be used to build the executional directed acyclic graph.
+    A submittable holds functions that can be used to build the execution directed acyclic graph.
 
     Attributes:
         subscribers (List[Callable]): The list of callbacks to be called on `Job^`'s status change.
