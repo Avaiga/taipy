@@ -23,17 +23,6 @@ class CoreEventConsumerBase(threading.Thread):
     It should be subclassed, and the `process_event` method should be implemented to define
     the custom logic for handling incoming events.
 
-    Attributes:
-        queue (SimpleQueue): The queue from which events will be consumed.
-
-    Methods:
-        start(): Start the event consumer thread.
-        stop(): Stop the event consumer thread.
-        run(): The main thread execution logic that continuously consumes events from the queue
-              and delegates their processing to the `process_event` method.
-        process_event(event: Event): This method should be overridden in subclasses to define
-                                     how events are processed.
-
     Example usage:
 
     ```python
@@ -50,6 +39,10 @@ class CoreEventConsumerBase(threading.Thread):
     ```
 
     Subclasses should implement the `process_event` method to define their specific event handling behavior.
+
+    Attributes:
+        queue (SimpleQueue): The queue from which events will be consumed.
+
 
     """
 

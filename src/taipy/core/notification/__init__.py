@@ -13,8 +13,8 @@
 Package for notifications about changes on `Core^` service entities.
 
 
-The Core service generates 'Event^' objects to track changes on entities.
-These events are then relayed to a 'Notifier^', which handles the dispatch
+The Core service generates `Event^` objects to track changes on entities.
+These events are then relayed to a `Notifier^`, which handles the dispatch
 to consumers interested in specific event topics.
 
 To subscribe, a consumer needs to invoke the `Notifier.register()^` method.

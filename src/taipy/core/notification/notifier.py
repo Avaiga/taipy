@@ -92,7 +92,11 @@ class Notifier:
 
     @classmethod
     def unregister(cls, registration_id: str):
-        """Unregister a listener."""
+        """Unregister a listener.
+
+        Parameters:
+            registration_id (RegistrationId^): The registration id returned by the `register` method.
+        """
         to_remove_registration: Optional[_Registration] = None
 
         for _, registrations in cls._topics_registrations_list.items():
@@ -109,7 +113,11 @@ class Notifier:
 
     @classmethod
     def publish(cls, event):
-        """Publish a `Core^` service event to all registered listeners whose topic matches the event."""
+        """Publish a `Core^` service event to all registered listeners whose topic matches the event.
+
+        Parameters:
+            event (Event^): The event to publish.
+        """
         for topic, registrations in cls._topics_registrations_list.items():
             if Notifier._is_matching(event, topic):
                 for registration in registrations:
