@@ -834,6 +834,7 @@ class _GuiCore(ElementLibrary):
                 "chart_configs": ElementProperty(PropertyType.dict),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "scenario": ElementProperty(PropertyType.lov_value),
+                "width": ElementProperty(PropertyType.string),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),
