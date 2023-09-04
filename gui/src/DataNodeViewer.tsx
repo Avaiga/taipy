@@ -162,6 +162,7 @@ interface DataNodeViewerProps {
     onDataValue?: string;
     onTabularDataEdit?: string;
     chartConfig?: string;
+    width?: string;
 }
 
 const getDataValue = (value?: RowValue, dType?: string | null) => (dType == "date" ? new Date(value as string) : value);
@@ -425,9 +426,14 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         }
     }, [tabularColumns, selectedCols]);
 
+    const dnMainBoxSx = useMemo(
+        () => (props.width ? { ...MainBoxSx, maxWidth: props.width } : MainBoxSx),
+        [props.width]
+    );
+
     return (
         <>
-            <Box sx={MainBoxSx} id={id} onClick={onFocus} className={className}>
+            <Box sx={dnMainBoxSx} id={id} onClick={onFocus} className={className}>
                 <Accordion
                     defaultExpanded={expanded}
                     expanded={userExpanded}
@@ -777,22 +783,24 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     <Typography>{dtError}</Typography>
                                 ) : dtTabular ? (
                                     <>
-                                        <ToggleButtonGroup
-                                            onChange={onViewTypeChange}
-                                            exclusive
-                                            value={viewType}
-                                            color="primary"
-                                        >
-                                            <ToggleButton value={TableViewType}>
-                                                <TableChartOutlined />
-                                            </ToggleButton>
-                                            <ToggleButton value="chart">
-                                                <BarChartOutlined />
-                                            </ToggleButton>
-                                        </ToggleButtonGroup>
+                                        <Box className="taipy-toggle">
+                                            <ToggleButtonGroup
+                                                onChange={onViewTypeChange}
+                                                exclusive
+                                                value={viewType}
+                                                color="primary"
+                                            >
+                                                <ToggleButton value={TableViewType}>
+                                                    <TableChartOutlined />
+                                                </ToggleButton>
+                                                <ToggleButton value="chart">
+                                                    <BarChartOutlined />
+                                                </ToggleButton>
+                                            </ToggleButtonGroup>
+                                        </Box>
                                         {viewType === TableViewType ? (
                                             <>
-                                                <FormControl sx={colsSelectSx}>
+                                                <FormControl sx={colsSelectSx} fullWidth>
                                                     <InputLabel id={uniqid + "-cols-label"}>Columns</InputLabel>
                                                     <Select
                                                         labelId={uniqid + "-cols-label"}
@@ -802,6 +810,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         input={<OutlinedInput label="Columns" />}
                                                         renderValue={(selected) => selected.join(", ")}
                                                         MenuProps={MenuProps}
+                                                        fullWidth
                                                     >
                                                         {Object.values(tabularColumns || {}).map((colDesc) => (
                                                             <MenuItem key={colDesc.dfid} value={colDesc.dfid}>
@@ -820,6 +829,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     userData={dnId}
                                                     onEdit={props.onTabularDataEdit}
                                                     filter={true}
+                                                    libClassName="taipy-table"
                                                 />
                                             </>
                                         ) : (

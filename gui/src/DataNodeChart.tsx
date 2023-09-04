@@ -199,6 +199,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 defaultConfig={config ? JSON.stringify(config) : defaultConfig}
                 updateVarName={props.updateVarName}
                 data={props.tabularData}
+                libClassName="taipy-chart"
             />
         </>
     );
