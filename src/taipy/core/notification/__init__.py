@@ -9,7 +9,25 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+"""
+Package for notifications about changes on `Core^` service entities.
+
+
+The Core service generates 'Event^' objects to track changes on entities.
+These events are then relayed to a 'Notifier^', which handles the dispatch
+to consumers interested in specific event 'Topics^'.
+
+To subscribe, a consumer needs to invoke the `Notifier.register()^` method.
+This call will yield a `RegistrationId^` and a dedicated event queue for
+receiving notifications.
+
+To handle notifications, an event consumer (e.g., the `CoreEventConsumerBase^`
+object) must be instantiated with an associated event queue.
+"""
 
 from .core_event_consumer import CoreEventConsumerBase
-from .event import _ENTITY_TO_EVENT_ENTITY_TYPE, EventEntityType, EventOperation
-from .notifier import _publish_event
+from .event import _ENTITY_TO_EVENT_ENTITY_TYPE, Event, EventEntityType, EventOperation
+from .notifier import Notifier, _publish_event
+from .registration import Registration
+from .registration_id import RegistrationId
+from .topic import Topic
