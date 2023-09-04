@@ -17,6 +17,13 @@ from ..exceptions.exceptions import InvalidEventAttributeName, InvalidEventOpera
 
 
 class EventOperation(_ReprEnum):
+    """Enum representing a type of operation performed on a Core entity.
+
+    `EventOperation` is used as an attribute of the `Event^` object to describe the
+    operation performed on an entity.<br>
+    The possible operations are `CREATION`, `UPDATE`, `DELETION`, or `SUBMISSION`.
+    """
+
     CREATION = 1
     UPDATE = 2
     DELETION = 3
@@ -24,6 +31,13 @@ class EventOperation(_ReprEnum):
 
 
 class EventEntityType(_ReprEnum):
+    """Enum representing an entity type.
+
+    `EventEntityType` is used as an attribute of the `Event^` object to describe
+    an entity that was changed.<br>
+    The possible operations are `CYCLE`, `SCENARIO`, `SEQUENCE`, `TASK`, `DATA_NODE`, or `JOB`.
+    """
+
     CYCLE = 1
     SCENARIO = 2
     SEQUENCE = 3
