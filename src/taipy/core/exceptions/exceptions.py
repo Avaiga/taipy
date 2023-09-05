@@ -216,6 +216,13 @@ class NonExistingScenarioConfig(Exception):
         self.message = f"Scenario config: {scenario_config_id} does not exist."
 
 
+class InvalidSscenario(Exception):
+    """Raised if a Scenario is not a Directed Acyclic Graph."""
+
+    def __init__(self, scenario_id: str):
+        self.message = f"Scenario: {scenario_id} is not a Directed Acyclic Graph."
+
+
 class DoesNotBelongToACycle(Exception):
     """Raised if a scenario without any cycle is promoted as primary scenario."""
 

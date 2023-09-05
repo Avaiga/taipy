@@ -175,9 +175,6 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
                 task._parent_ids.update([sequence_id])
                 task_manager._set(task)
 
-        if not sequence._is_consistent():
-            # TODO: add test check raise this exception
-            raise InvalidSequence(sequence_id)
         _publish_event(cls._EVENT_ENTITY_TYPE, sequence.id, EventOperation.CREATION, None)
         return sequence
 

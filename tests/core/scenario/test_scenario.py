@@ -97,20 +97,18 @@ def test_create_scenario(cycle, current_datetime):
         Scenario("foo bar", [], {})
 
     input_1 = PickleDataNode("input_1", Scope.SCENARIO)
-    input_2 = PickleDataNode("input_2", Scope.SCENARIO)
     output_1 = PickleDataNode("output_1", Scope.SCENARIO)
     output_2 = PickleDataNode("output_2", Scope.SCENARIO)
     additional_dn_1 = PickleDataNode("additional_1", Scope.SCENARIO)
     additional_dn_2 = PickleDataNode("additional_2", Scope.SCENARIO)
     task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
-    task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
+    task_2 = Task("task_2", {}, print, [output_1], [output_2], TaskId("task_id_2"))
 
     data_manager = _DataManagerFactory._build_manager()
     task_manager = _TaskManagerFactory._build_manager()
 
     data_manager._set(input_1)
     data_manager._set(output_1)
-    data_manager._set(input_2)
     data_manager._set(output_2)
     data_manager._set(additional_dn_1)
     data_manager._set(additional_dn_2)
@@ -147,13 +145,12 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_5.config_id == "scenario_5"
     assert len(scenario_5.tasks) == 2
     assert len(scenario_5.additional_data_nodes) == 0
-    assert len(scenario_5.data_nodes) == 4
+    assert len(scenario_5.data_nodes) == 3
     assert scenario_5.tasks.keys() == {task_1.config_id, task_2.config_id}
     assert scenario_5.additional_data_nodes == {}
     assert scenario_5.data_nodes == {
         input_1.config_id: input_1,
         output_1.config_id: output_1,
-        input_2.config_id: input_2,
         output_2.config_id: output_2,
     }
     assert scenario_5.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
@@ -209,7 +206,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_9.config_id == "scenario_9"
     assert len(scenario_9.tasks) == 2
     assert len(scenario_9.additional_data_nodes) == 2
-    assert len(scenario_9.data_nodes) == 6
+    assert len(scenario_9.data_nodes) == 5
     assert scenario_9.tasks.keys() == {task_1.config_id, task_2.config_id}
     assert scenario_9.additional_data_nodes == {
         additional_dn_1.config_id: additional_dn_1,
@@ -218,16 +215,15 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_9.data_nodes == {
         input_1.config_id: input_1,
         output_1.config_id: output_1,
-        input_2.config_id: input_2,
         output_2.config_id: output_2,
         additional_dn_1.config_id: additional_dn_1,
         additional_dn_2.config_id: additional_dn_2,
     }
 
 
-def test_raise_sequence_tasks_not_in_scenario():
-    task_1 = Task("task_1", {}, print)
-    task_2 = Task("task_2", {}, print)
+def test_raise_sequence_tasks_not_in_scenario(data_node):
+    task_1 = Task("task_1", {}, print, output=[data_node])
+    task_2 = Task("task_2", {}, print, input=[data_node])
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
         Scenario("scenario", [], {}, sequences={"sequence": {"tasks": [task_1]}}, scenario_id="SCENARIO_scenario")
@@ -1158,7 +1154,7 @@ def test_add_and_remove_sequences():
         [data_node_3],
         TaskId("t1"),
     )
-    task_2 = Task("garply", {}, print, output=[data_node_3], id=TaskId("t2"))
+    task_2 = Task("garply", {}, print, [data_node_3], id=TaskId("t2"))
     task_3 = Task("waldo", {}, print, [data_node_3], None, id=TaskId("t3"))
     task_4 = Task("fred", {}, print, [data_node_3], [data_node_4], TaskId("t4"))
     task_5 = Task("bob", {}, print, [data_node_5], [data_node_3], TaskId("t5"))
@@ -1201,3 +1197,135 @@ def test_add_and_remove_sequences():
 
     scenario_1.remove_sequences(["sequence_2", "sequence_3"])
     assert scenario_1.sequences == {"sequence_1": sequence_1}
+
+
+def test_check_consistency():
+    data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
+    data_node_3 = InMemoryDataNode("bar", Scope.SCENARIO, "s3")
+    data_node_4 = InMemoryDataNode("qux", Scope.SCENARIO, "s4")
+    data_node_5 = InMemoryDataNode("quux", Scope.SCENARIO, "s5")
+    data_node_6 = InMemoryDataNode("quuz", Scope.SCENARIO, "s6")
+    data_node_7 = InMemoryDataNode("corge", Scope.SCENARIO, "s7")
+    data_node_8 = InMemoryDataNode("d8", Scope.SCENARIO, "s8")
+    data_node_9 = InMemoryDataNode("d9", Scope.SCENARIO, "s9")
+
+    scenario_0 = Scenario("scenario_0", [], {})
+    assert scenario_0._is_consistent()
+
+    task_1 = Task("foo", {}, print, [data_node_1], [data_node_2], TaskId("t1"))
+    scenario_1 = Scenario("scenario_1", [task_1], {})
+    assert scenario_1._is_consistent()
+
+    # s1 ---             ---> s3 ---> t2 ---> s5 ----
+    #       |           |                           |
+    #       |---> t1 ---|      -------------------------> t3 ---> s6
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_3, data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    scenario_2 = Scenario("scenario_2", {task_1, task_2, task_3, task_4}, {}, [], ScenarioId("s1"))
+    assert scenario_2._is_consistent()
+
+    # s1 ---              t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3 ---> s6
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, None, [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    scenario_3 = Scenario("scenario_3", {task_1, task_2, task_3, task_4}, {}, [], ScenarioId("s2"))
+    assert scenario_3._is_consistent()
+
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    scenario_4 = Scenario("scenario_4", [task_4, task_2, task_1, task_3], {}, [], scenario_id=ScenarioId("s3"))
+    assert scenario_4._is_consistent()
+
+    # s1 ---      s6 ---> t2 ---> s5
+    #       |                     |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7 ---> t6
+    #                                              |
+    # s8 -------> t5 -------> s9 ------------------
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, [data_node_6], [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
+    task_5 = Task("t5", {}, print, [data_node_8], [data_node_9], TaskId("t5"))
+    task_6 = Task("t6", {}, print, [data_node_7, data_node_9], id=TaskId("t6"))
+    scenario_5 = Scenario("scenario_5", [task_1, task_2, task_3, task_4, task_5, task_6], {}, [], ScenarioId("s4"))
+    assert scenario_5._is_consistent()
+
+    # s1 ---
+    #       |
+    #       |---> t1 ---|      -----> t3
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
+    # t2 ---> s5                      |
+    # s8 ---> t5                 s6 --|
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, output=[data_node_5], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4, data_node_6], [data_node_7], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_8], None, TaskId("t5"))
+    scenario_6 = Scenario("scenario_6", [task_1, task_2, task_3, task_4, task_5], {}, [], ScenarioId("s5"))
+    assert scenario_6._is_consistent()
+
+    #  p1  s1 ---
+    #            |
+    #            |---> t1 ---|      -----> t3
+    #            |           |      |
+    #      s2 ---             ---> s4 ---> t4 ---> s5
+    #  p2  t2 ---> s4 ---> t3
+    #  p3  s6 ---> t5
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, output=[data_node_4], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_5], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_6], None, TaskId("t5"))
+    scenario_7 = Scenario("scenario_7", [task_1, task_2, task_3, task_4, task_5], {}, [], ScenarioId("s6"))
+    assert scenario_7._is_consistent()
+
+    #  p1  s1 ---
+    #            |
+    #            |---> t1 ---|      -----> t3
+    #            |           |      |
+    #      s2 ---             ---> s4 ---> t4 ---> s5
+    #  p2  t2 ---> s4 ---> t3
+    #  p3  s6 ---> t5 ---> s4 ---> t4 ---> s5
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_4], TaskId("t1"))
+    task_2 = Task("garply", {}, print, output=[data_node_4], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_4], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_4], [data_node_5], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_6], [data_node_4], None, TaskId("t5"))
+    scenario_8 = Scenario("scenario_8", [task_4, task_1, task_2, task_3, task_5], {}, [], scenario_id=ScenarioId("s7"))
+    assert scenario_8._is_consistent()
+
+    #  p1  s1 ---
+    #            |
+    #            |---> t1 ---|      -----> t3
+    #            |           |      |
+    #      s2 ---             ---> s3 ---> t4 ---> s4
+    #  p2  t2 ---> s3 ---> t3
+    #  p3  s5 ---> t5 ---> s3 ---> t4 ---> s4
+    #  p4  s3 ---> t4 ---> s4
+    task_1 = Task("grault", {}, print, [data_node_1, data_node_2], [data_node_3], TaskId("t1"))
+    task_2 = Task("garply", {}, print, output=[data_node_3], id=TaskId("t2"))
+    task_3 = Task("waldo", {}, print, [data_node_3], None, id=TaskId("t3"))
+    task_4 = Task("fred", {}, print, [data_node_3], [data_node_4], TaskId("t4"))
+    task_5 = Task("bob", {}, print, [data_node_5], [data_node_3], TaskId("t5"))
+    scenario_9 = Scenario("scenario_9", [task_1, task_2, task_3, task_4, task_5], {}, [], scenario_id=ScenarioId("s8"))
+    assert scenario_9._is_consistent()

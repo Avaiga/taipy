@@ -145,6 +145,22 @@ def test_check_consistency():
     sequence_6 = Sequence({}, [task_6_1, task_6_2], "name_6")
     assert sequence_6._is_consistent()
 
+    input_7 = DataNode("foo", Scope.SCENARIO, "output_id_7")
+    intermediate_7 = DataNode("foo", Scope.SCENARIO, "intermediate_id_7")
+    task_7_1 = Task("foo", {}, print, [input_7], [intermediate_7], TaskId("task_id_7_1"))
+    task_7_2 = Task("foo", {}, print, [intermediate_7], [], TaskId("task_id_7_2"))
+    sequence_7 = Sequence({}, [task_7_1, task_7_2], "name_7")
+    assert sequence_7._is_consistent()
+
+    input_8 = DataNode("foo", Scope.SCENARIO, "input_id_8")
+    output_8 = DataNode("foo", Scope.SCENARIO, "output_id_8")
+    input_9 = DataNode("foo", Scope.SCENARIO, "input_id_9")
+    output_9 = DataNode("foo", Scope.SCENARIO, "output_id_9")
+    task_8_1 = Task("foo", {}, print, [input_8], [output_8], TaskId("task_id_8_1"))
+    task_8_2 = Task("foo", {}, print, [input_9], [output_9], TaskId("task_id_8_2"))
+    sequence_7 = Sequence({}, [task_8_1, task_8_2], "name_7")
+    assert not sequence_7._is_consistent()
+
 
 def test_get_sorted_tasks():
     def assert_equal(tasks_a, tasks_b) -> bool:

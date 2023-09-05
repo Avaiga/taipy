@@ -130,7 +130,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         dag = self._build_dag()
         if not nx.is_directed_acyclic_graph(dag):
             return False
-        if dag.number_of_nodes() != 0 and not nx.is_connected(dag.to_undirected(as_view=True)):
+        if dag.number_of_nodes() != 0 and not nx.is_weakly_connected(dag):
             return False
 
         current_node_type: Any = None

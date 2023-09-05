@@ -255,7 +255,7 @@ def test_publish_event():
     # NOTE: sequence is created only when accessed via scenario.sequences
     sequence = scenario.sequences["sequence_config"]
 
-    assert registration_queue.qsize() == 5
+    assert registration_queue.qsize() == 6
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -265,10 +265,11 @@ def test_publish_event():
         EventEntityType.CYCLE,
         EventEntityType.DATA_NODE,
         EventEntityType.TASK,
+        EventEntityType.SEQUENCE,
         EventEntityType.SCENARIO,
         EventEntityType.SEQUENCE,
     ]
-    expected_event_entity_id = [cycle.id, dn.id, task.id, scenario.id, sequence.id]
+    expected_event_entity_id = [cycle.id, dn.id, task.id, sequence.id, scenario.id, sequence.id]
 
     assert all(
         [
@@ -649,7 +650,7 @@ def test_publish_event():
 
     scenario = tp.create_scenario(scenario_config)
     cycle = scenario.cycle
-    assert registration_queue.qsize() == 4
+    assert registration_queue.qsize() == 5
 
     # only to clear the queue
     while registration_queue.qsize() != 0:

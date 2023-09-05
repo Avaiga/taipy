@@ -261,10 +261,6 @@ def test_submit():
         _ScenarioManager._set(scenario)
         scenario.add_sequences({sequence_name: {"tasks": [task_4, task_2, task_1, task_3]}})
 
-        # sequence does exist, but tasks does not exist. We expect an exception to be raised
-        with pytest.raises(NonExistingTask):
-            sequence = scenario.sequences[sequence_name]
-
         # sequence, and tasks does exist. We expect the tasks to be submitted
         # in a specific order
         _TaskManager._set(task_1)
