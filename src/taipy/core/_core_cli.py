@@ -56,7 +56,9 @@ class _CoreCLI:
         "--force": {
             "dest": "taipy_force",
             "action": "store_true",
-            "help": "Force override the configuration of the version if existed and run the application. Default to False.",
+            "help": """
+                Force override the configuration of the version if existed and run the application. Default to False.
+            """,
         },
         "--no-force": {
             "dest": "no_taipy_force",
