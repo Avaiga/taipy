@@ -11,9 +11,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo, MouseEvent } from "react";
+import React, { useEffect, useState, useCallback, useMemo, MouseEvent, Fragment } from "react";
 
-import { DeleteOutline, Add } from "@mui/icons-material";
+import { DeleteOutline, Add, RefreshOutlined } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
@@ -22,6 +22,7 @@ import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import { Chart, ColumnDesc, TraceValueType } from "taipy-gui";
@@ -33,6 +34,7 @@ interface DataNodeChartProps {
     defaultConfig?: string;
     updateVarName?: string;
     uniqid: string;
+    chartConfigs?: string;
 }
 
 const chartTypes: Record<string, { name: string; [prop: string]: unknown }> = {
@@ -159,20 +161,58 @@ const getTraceCol = (traceConf: Array<[string, string]>, trace: number, axis: nu
     return trace < traceConf.length ? traceConf[trace][axis] : "";
 };
 
-const DataNodeChart = (props: DataNodeChartProps) => {
-    const { defaultConfig = "", uniqid } = props;
+const storeConf = (configId?: string, config?: ChartConfig) => {
+    localStorage && localStorage.setItem(`${configId}-chart-config`, JSON.stringify(config));
+    return config;
+};
 
-    const baseConfig = useMemo(() => {
+const getBaseConfig = (defaultConfig?: string, chartConfigs?: string, configId?: string) => {
+    if (defaultConfig) {
         try {
-            return JSON.parse(defaultConfig) as ChartConfig;
+            const baseConfig = JSON.parse(defaultConfig) as ChartConfig;
+            if (baseConfig) {
+                if (configId && chartConfigs) {
+                    try {
+                        const conf: Record<string, ChartConfig> = JSON.parse(chartConfigs);
+                        if (conf[configId]) {
+                            return { ...baseConfig, ...getChartTypeConfig(...(conf[configId].types || [])), ...conf[configId] };
+                        }
+                    } catch (e) {
+                        console.warn(`chart_configs property is not a valid config.\n${e}`);
+                    }
+                }
+                return baseConfig;
+            }
         } catch {
             // Do nothing
         }
-        return undefined;
-    }, [defaultConfig]);
+    }
+    return undefined;
+};
+
+const DataNodeChart = (props: DataNodeChartProps) => {
+    const { defaultConfig = "", uniqid, configId, chartConfigs = "" } = props;
 
     const [config, setConfig] = useState<ChartConfig | undefined>(undefined);
-    useEffect(() => baseConfig && setConfig(baseConfig), [baseConfig]);
+    useEffect(() => {
+        const localItem = localStorage && localStorage.getItem(`${configId}-chart-config`);
+        if (localItem) {
+            try {
+                setConfig(JSON.parse(localItem));
+                return;
+            } catch {
+                // do nothing
+            }
+        }
+        const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
+        conf && setConfig(conf);
+    }, [defaultConfig, configId, chartConfigs]);
+
+    const resetConfig = useCallback(() => {
+        localStorage && localStorage.removeItem(`${configId}-chart-config`);
+        const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
+        conf && setConfig(conf);
+    }, [defaultConfig, chartConfigs, configId]);
 
     const columns = useMemo(() => Object.values(props.columns || {}).map((c) => c.dfid), [props.columns]);
 
@@ -183,24 +223,24 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                     return cfg;
                 }
                 const nts = (cfg.types || []).map((ct, i) => (i == trace ? cType : ct));
-                return { ...cfg, types: nts, ...getChartTypeConfig(...nts) };
+                return storeConf(configId, { ...cfg, types: nts, ...getChartTypeConfig(...nts) });
             }),
-        []
+        [configId]
     );
 
     const setColConf = useCallback(
         (trace: number, axis: number, col: string) =>
             setConfig((cfg) =>
                 cfg
-                    ? {
+                    ? storeConf(configId, {
                           ...cfg,
                           traces: (cfg.traces || []).map((axises, idx) =>
                               idx == trace ? (axises.map((a, j) => (j == axis ? col : a)) as [string, string]) : axises
                           ),
-                      }
+                      })
                     : cfg
             ),
-        []
+        [configId]
     );
 
     const onAddTrace = useCallback(
@@ -211,40 +251,48 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 }
                 const nt = cfg.types?.length ? cfg.types[0] : "scatter";
                 const nts = [...(cfg.types || []), nt];
-                return {
+                return storeConf(configId, {
                     ...cfg,
                     types: nts,
                     traces: [...(cfg.traces || []), [columns[0], columns[columns.length > 1 ? 1 : 0]]],
-                    ...getChartTypeConfig(...nts)
-                };
+                    ...getChartTypeConfig(...nts),
+                });
             }),
-        [columns]
+        [columns, configId]
     );
-    const onRemoveTrace = useCallback((e: MouseEvent<HTMLElement>) => {
-        const { idx } = e.currentTarget.dataset;
-        const i = Number(idx);
-        setConfig((cfg) => {
-            if (!cfg || !cfg.traces || isNaN(i) || i >= cfg.traces.length) {
-                return cfg;
-            }
-            const nts = (cfg.types || []).filter((c, j) => j != i);
-            return {
-                ...cfg,
-                types: nts,
-                traces: (cfg.traces || []).filter((t, j) => j != i),
-                ...getChartTypeConfig(...nts),
-            };
-        });
-    }, []);
+    const onRemoveTrace = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            const { idx } = e.currentTarget.dataset;
+            const i = Number(idx);
+            setConfig((cfg) => {
+                if (!cfg || !cfg.traces || isNaN(i) || i >= cfg.traces.length) {
+                    return cfg;
+                }
+                const nts = (cfg.types || []).filter((c, j) => j != i);
+                return storeConf(configId, {
+                    ...cfg,
+                    types: nts,
+                    traces: (cfg.traces || []).filter((t, j) => j != i),
+                    ...getChartTypeConfig(...nts),
+                });
+            });
+        },
+        [configId]
+    );
 
     return (
         <>
-            <Grid container>
+            {" "}
+            <Button onClick={resetConfig} variant="outlined" color="inherit">
+                <RefreshOutlined /> Reset
+            </Button>
+            <Paper>
+            <Grid container alignItems={"center"}>
                 {config?.traces && config?.types
                     ? config?.traces.map((tc, idx) => {
                           const baseLabelId = `${uniqid}-trace${idx}-"`;
                           return (
-                              <>
+                              <Fragment key={idx}>
                                   <Grid item xs={2}>
                                       Trace {idx + 1}
                                   </Grid>
@@ -256,7 +304,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               label="Category"
                                               labelId={baseLabelId + "config"}
                                               setTypeConf={setTypeChange}
-                                              value={config.types ? config.types[idx]: ""}
+                                              value={config.types ? config.types[idx] : ""}
                                           />
                                       </FormControl>
                                   </Grid>
@@ -295,7 +343,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                           </IconButton>
                                       ) : null}
                                   </Grid>
-                              </>
+                              </Fragment>
                           );
                       })
                     : null}
@@ -306,6 +354,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                     </Button>
                 </Grid>
             </Grid>
+            </Paper>
             <Chart
                 defaultConfig={config ? JSON.stringify(config) : defaultConfig}
                 updateVarName={props.updateVarName}

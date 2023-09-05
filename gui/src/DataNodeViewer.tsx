@@ -16,6 +16,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
@@ -42,6 +43,7 @@ import {
     BarChartOutlined,
     Edit,
     EditOff,
+    RefreshOutlined,
 } from "@mui/icons-material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
@@ -410,6 +412,11 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         },
         [dnConfig]
     );
+    const resetCols = useCallback(() => {
+        localStorage && localStorage.removeItem(`${dnConfig}-selected-cols`);
+        tabularColumns && setSelectedCols(Object.entries(tabularColumns).map((e) => e[1].dfid));
+    }, [dnConfig, tabularColumns]);
+
     useEffect(() => {
         if (tabularColumns) {
             let tc = Object.entries(tabularColumns).map((e) => e[1].dfid);
@@ -850,6 +857,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         ))}
                                                     </Select>
                                                 </FormControl>
+                                                <Button onClick={resetCols} variant="outlined" color="inherit">
+                                                    <RefreshOutlined /> Reset
+                                                </Button>
+
                                                 <IconButton onClick={toggleTableEdit} color="primary">
                                                     {tableEdit ? <EditOff /> : <Edit />}
                                                 </IconButton>
@@ -878,6 +889,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 configId={dnConfig}
                                                 defaultConfig={props.chartConfig}
                                                 updateVarName={getUpdateVar(props.updateVars, "tabularData")}
+                                                chartConfigs={props.chartConfigs}
                                             />
                                         )}
                                     </>
