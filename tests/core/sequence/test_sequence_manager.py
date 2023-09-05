@@ -261,10 +261,6 @@ def test_submit():
         _ScenarioManager._set(scenario)
         scenario.add_sequences({sequence_name: {"tasks": [task_4, task_2, task_1, task_3]}})
 
-        # sequence does exist, but tasks does not exist. We expect an exception to be raised
-        with pytest.raises(NonExistingTask):
-            sequence = scenario.sequences[sequence_name]
-
         # sequence, and tasks does exist. We expect the tasks to be submitted
         # in a specific order
         _TaskManager._set(task_1)
@@ -488,7 +484,7 @@ def test_sequence_notification_subscribe(mocker):
     notify_2.__module__ = "notify_2"
     # Mocking this because NotifyMock is a class that does not loads correctly when getting the sequence
     # from the storage.
-    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2, notify_2])
+    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2, notify_2, notify_2, notify_2])
 
     # test subscription
     callback = mock.MagicMock()

@@ -35,9 +35,10 @@ class ScenarioConfig(Section):
         additional_data_nodes (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): <br/>
             List of additional data node configs. The default value is None.
         frequency (Optional[Frequency]): The frequency of the scenario's cycle. The default value is None.
-        sequences (Dict[str, List[TaskConfig]]): List of sequences. The default value is [].
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]]: Dictionary of the data node <br/>
             config id as key and a list of Callable used to compare the data nodes as value.
+        sequences (Optional[Dict[str, List[TaskConfig]]]): Dictionary of sequence descriptions.
+            The default value is None.
         **properties (dict[str, any]): A dictionary of additional properties.
     """
 
@@ -268,6 +269,8 @@ class ScenarioConfig(Section):
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `(taipy.)compare_scenarios()^` more more details.
+            sequences (Optional[Dict[str, List[TaskConfig]]]): Dictionary of sequence descriptions.
+                The default value is None.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
@@ -316,6 +319,7 @@ class ScenarioConfig(Section):
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `taipy.compare_scenarios()^` more more details.
+            sequences (Optional[Dict[str, List[TaskConfig]]]): Dictionary of sequences. The default value is None.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:

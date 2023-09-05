@@ -20,6 +20,7 @@ from .._version._version_mixin import _VersionMixin
 from ..common._utils import _Subscriber
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..exceptions.exceptions import (
+    InvalidSequence,
     InvalidSequenceId,
     ModelNotFound,
     NonExistingSequence,
@@ -173,6 +174,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             if sequence_id not in task._parent_ids:
                 task._parent_ids.update([sequence_id])
                 task_manager._set(task)
+
         _publish_event(cls._EVENT_ENTITY_TYPE, sequence.id, EventOperation.CREATION, None)
         return sequence
 

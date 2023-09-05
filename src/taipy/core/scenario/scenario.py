@@ -16,6 +16,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+import networkx as nx
+
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
@@ -32,6 +34,7 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import (
+    InvalidSequence,
     NonExistingDataNode,
     NonExistingSequence,
     NonExistingTask,
@@ -142,7 +145,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         if protected_attribute_name in self._properties:
             return _tpl._replace_templates(self._properties[protected_attribute_name])
 
-        sequences = self.__get_sequences()
+        sequences = self._get_sequences()
         if protected_attribute_name in sequences:
             return sequences[protected_attribute_name]
         tasks = self.tasks
@@ -156,7 +159,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def sequences(self) -> Dict[str, Sequence]:
-        return self.__get_sequences()
+        return self._get_sequences()
 
     @sequences.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
@@ -164,8 +167,18 @@ class Scenario(_Entity, Submittable, _Labeled):
         self, sequences: Dict[str, Dict[str, Union[List[Task], List[TaskId], _ListAttributes, List[_Subscriber], Dict]]]
     ):
         self._sequences = sequences
+        actual_sequences = self._get_sequences()
+        for sequence_name in sequences.keys():
+            if not actual_sequences[sequence_name]._is_consistent():
+                raise InvalidSequence(actual_sequences[sequence_name].id)
 
     def add_sequences(self, sequences: Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
+        """Add sequences to the scenario.
+
+        Parameters:
+            sequences (Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
+                The description of the sequences.
+        """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
         _sequences = _scenario._sequences
         _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
@@ -181,7 +194,17 @@ class Scenario(_Entity, Submittable, _Labeled):
         _sequences.update(sequences)
         self.sequences = _sequences  # type: ignore
 
+        actual_sequences = self._get_sequences()
+        for sequence_name in sequences.keys():
+            if not actual_sequences[sequence_name]._is_consistent():
+                raise InvalidSequence(actual_sequences[sequence_name].id)
+
     def remove_sequences(self, sequence_names: List[str]):
+        """Remove sequences from the scenario.
+
+        Parameters:
+            sequence_names (List[str]): The names of the sequences.
+        """
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         for sequence_name in sequence_names:
             _sequences.pop(sequence_name)
@@ -200,7 +223,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 list(non_existing_sequence_task_ids_in_scenario), sequence_name, scenario_id
             )
 
-    def __get_sequences(self) -> Dict[str, Sequence]:
+    def _get_sequences(self) -> Dict[str, Sequence]:
         _sequences = {}
 
         from ..sequence._sequence_manager_factory import _SequenceManagerFactory
@@ -499,3 +522,18 @@ class Scenario(_Entity, Submittable, _Labeled):
             The simple label of the scenario as a string.
         """
         return self._get_simple_label()
+
+    def _is_consistent(self) -> bool:
+        dag = self._build_dag()
+
+        if dag.number_of_nodes() == 0:
+            return True
+        if not nx.is_directed_acyclic_graph(dag):
+            return False
+        for left_node, right_node in dag.edges:
+            if (isinstance(left_node, DataNode) and isinstance(right_node, Task)) or (
+                isinstance(left_node, Task) and isinstance(right_node, DataNode)
+            ):
+                continue
+            return False
+        return True

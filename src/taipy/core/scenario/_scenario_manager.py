@@ -29,6 +29,8 @@ from ..exceptions.exceptions import (
     DifferentScenarioConfigs,
     DoesNotBelongToACycle,
     InsufficientScenarioToCompare,
+    InvalidSequence,
+    InvalidSscenario,
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
@@ -170,6 +172,15 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                 _data_manager._set(dn)
 
         cls._set(scenario)
+
+        if not scenario._is_consistent():
+            raise InvalidSscenario(scenario.id)
+
+        actual_sequences = scenario._get_sequences()
+        for sequence_name in sequences.keys():
+            if not actual_sequences[sequence_name]._is_consistent():
+                raise InvalidSequence(actual_sequences[sequence_name].id)
+
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)
         return scenario
 

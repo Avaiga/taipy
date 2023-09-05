@@ -142,6 +142,13 @@ class InvalidSequenceId(Exception):
         self.message = f"Sequence: {sequence_id} is invalid."
 
 
+class InvalidSequence(Exception):
+    """Raised if a Sequence is not a connected Directed Acyclic Graph."""
+
+    def __init__(self, sequence_id: str):
+        self.message = f"Sequence: {sequence_id} is not a connected Directed Acyclic Graph."
+
+
 class NonExistingSequence(Exception):
     """Raised if a requested Sequence is not known by the Sequence Manager."""
 
@@ -207,6 +214,13 @@ class NonExistingScenarioConfig(Exception):
 
     def __init__(self, scenario_config_id: str):
         self.message = f"Scenario config: {scenario_config_id} does not exist."
+
+
+class InvalidSscenario(Exception):
+    """Raised if a Scenario is not a Directed Acyclic Graph."""
+
+    def __init__(self, scenario_id: str):
+        self.message = f"Scenario: {scenario_id} is not a Directed Acyclic Graph."
 
 
 class DoesNotBelongToACycle(Exception):

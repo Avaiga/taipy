@@ -221,8 +221,9 @@ def test_set_and_get_scenario(cycle):
 
 
 def test_raise_sequence_task_configs_not_in_scenario_config():
-    task_config_1 = Config.configure_task("task_1", print)
-    task_config_2 = Config.configure_task("task_2", print)
+    data_node = Config.configure_pickle_data_node("temp")
+    task_config_1 = Config.configure_task("task_1", print, output=[data_node])
+    task_config_2 = Config.configure_task("task_2", print, input=[data_node])
     scenario_config_1 = Config.configure_scenario("scenario_1")
     scenario_config_1.add_sequences({"sequence_0": []})
 

@@ -130,14 +130,28 @@ class Sequence(_Entity, Submittable, _Labeled):
         dag = self._build_dag()
         if not nx.is_directed_acyclic_graph(dag):
             return False
-        is_data_node = True
+        if dag.number_of_nodes() != 0 and not nx.is_weakly_connected(dag):
+            return False
+
+        current_node_type: Any = None
         for nodes in nx.topological_generations(dag):
             for node in nodes:
-                if is_data_node and not isinstance(node, DataNode):
+                if not current_node_type:
+                    if isinstance(node, Task):
+                        current_node_type = Task
+                    elif isinstance(node, DataNode):
+                        current_node_type = DataNode
+                    else:
+                        return False
+                if not isinstance(node, current_node_type):
                     return False
-                if not is_data_node and not isinstance(node, Task):
-                    return False
-            is_data_node = not is_data_node
+
+            if issubclass(current_node_type, Task):
+                current_node_type = DataNode
+            elif issubclass(current_node_type, DataNode):
+                current_node_type = Task
+            else:
+                return False
         return True
 
     def _get_tasks(self) -> Dict[str, Task]:
