@@ -176,78 +176,72 @@ const DataNodeChart = (props: DataNodeChartProps) => {
 
     const columns = useMemo(() => Object.values(props.columns || {}).map((c) => c.dfid), [props.columns]);
 
-    const [traceConf, setTraceConf] = useState<Array<[string, string]>>([]);
+    const setTypeChange = useCallback(
+        (trace: number, cType: string) =>
+            setConfig((cfg) => {
+                if (!cfg) {
+                    return cfg;
+                }
+                const nts = (cfg.types || []).map((ct, i) => (i == trace ? cType : ct));
+                return { ...cfg, types: nts, ...getChartTypeConfig(...nts) };
+            }),
+        []
+    );
 
-    const [chartTypes, setChartTypes] = useState(["scatter"]);
-    const setTypeChange = useCallback((trace: number, cType: string) => {
-        setChartTypes((cts) => {
-            const nct = cts.map((ct, i) => (i == trace ? cType : ct));
-            setConfig((cfg) => (cfg ? { ...cfg, types: nct, ...getChartTypeConfig(...nct) } : cfg));
-            return nct;
-        });
-    }, []);
-
-    const setColConf = useCallback((trace: number, axis: number, col: string) => {
-        setTraceConf((tc) => {
-            const ntc = tc.map((axises, idx) =>
-                idx == trace ? (axises.map((a, j) => (j == axis ? col : a)) as [string, string]) : axises
-            );
-            setConfig((cfg) => (cfg ? { ...cfg, traces: ntc } : cfg));
-            return ntc;
-        });
-    }, []);
-
-    useEffect(() => {
-        if (baseConfig && baseConfig.traces && baseConfig.traces.length) {
-            setTraceConf(baseConfig.traces);
-        } else {
-            setTraceConf(columns && columns.length > 0 ? [[columns[0], columns[columns.length > 1 ? 1 : 0]]] : []);
-        }
-        if (baseConfig && baseConfig.types && baseConfig.types.length) {
-            setChartTypes(baseConfig.types);
-        } else {
-            setChartTypes(["scatter"]);
-        }
-    }, [columns, baseConfig]);
+    const setColConf = useCallback(
+        (trace: number, axis: number, col: string) =>
+            setConfig((cfg) =>
+                cfg
+                    ? {
+                          ...cfg,
+                          traces: (cfg.traces || []).map((axises, idx) =>
+                              idx == trace ? (axises.map((a, j) => (j == axis ? col : a)) as [string, string]) : axises
+                          ),
+                      }
+                    : cfg
+            ),
+        []
+    );
 
     const onAddTrace = useCallback(
         () =>
-            setTraceConf((tc) => {
-                if (columns && columns.length > 0) {
-                    const ntc: Array<[string, string]> = [...tc, [columns[0], columns[columns.length > 1 ? 1 : 0]]];
-                    setChartTypes((cts) => {
-                        const ncts = [...cts, cts[0]];
-                        setConfig((cfg) => (cfg ? { ...cfg, types: ncts, traces: ntc } : cfg));
-                        return ncts;
-                    });
-                    return ntc;
+            setConfig((cfg) => {
+                if (!cfg || !columns || !columns.length) {
+                    return cfg;
                 }
-                return tc;
+                const nt = cfg.types?.length ? cfg.types[0] : "scatter";
+                const nts = [...(cfg.types || []), nt];
+                return {
+                    ...cfg,
+                    types: nts,
+                    traces: [...(cfg.traces || []), [columns[0], columns[columns.length > 1 ? 1 : 0]]],
+                    ...getChartTypeConfig(...nts)
+                };
             }),
         [columns]
     );
     const onRemoveTrace = useCallback((e: MouseEvent<HTMLElement>) => {
         const { idx } = e.currentTarget.dataset;
         const i = Number(idx);
-        setTraceConf((tc) => {
-            if (isNaN(i) || i >= tc.length) {
-                return tc;
+        setConfig((cfg) => {
+            if (!cfg || !cfg.traces || isNaN(i) || i >= cfg.traces.length) {
+                return cfg;
             }
-            const ntc = tc.filter((c, j) => j != i);
-            setChartTypes((cts) => {
-                const ncts = cts.filter((ct, j) => j != i);
-                setConfig((cfg) => (cfg ? { ...cfg, types: ncts, traces: ntc, ...getChartTypeConfig(...ncts) } : cfg));
-                return ncts;
-            });
-            return ntc;
+            const nts = (cfg.types || []).filter((c, j) => j != i);
+            return {
+                ...cfg,
+                types: nts,
+                traces: (cfg.traces || []).filter((t, j) => j != i),
+                ...getChartTypeConfig(...nts),
+            };
         });
     }, []);
 
     return (
         <>
             <Grid container>
-                {traceConf
-                    ? traceConf.map((tc, idx) => {
+                {config?.traces && config?.types
+                    ? config?.traces.map((tc, idx) => {
                           const baseLabelId = `${uniqid}-trace${idx}-"`;
                           return (
                               <>
@@ -262,7 +256,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               label="Category"
                                               labelId={baseLabelId + "config"}
                                               setTypeConf={setTypeChange}
-                                              value={chartTypes[idx]}
+                                              value={config.types ? config.types[idx]: ""}
                                           />
                                       </FormControl>
                                   </Grid>
@@ -272,7 +266,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                           <ColSelect
                                               trace={idx}
                                               axis={0}
-                                              traceConf={traceConf}
+                                              traceConf={config.traces || []}
                                               label="X-axis"
                                               labelId={baseLabelId + "x"}
                                               columns={columns}
@@ -286,7 +280,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                           <ColSelect
                                               trace={idx}
                                               axis={1}
-                                              traceConf={traceConf}
+                                              traceConf={config.traces || []}
                                               label="Y-axis"
                                               labelId={baseLabelId + "y"}
                                               columns={columns}
@@ -295,7 +289,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                       </FormControl>
                                   </Grid>
                                   <Grid item xs={1}>
-                                      {traceConf.length > 1 ? (
+                                      {config.traces && config.traces.length > 1 ? (
                                           <IconButton onClick={onRemoveTrace} data-idx={idx}>
                                               <DeleteOutline color="primary" />
                                           </IconButton>

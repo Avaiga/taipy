@@ -40,6 +40,8 @@ import {
     Launch,
     TableChartOutlined,
     BarChartOutlined,
+    Edit,
+    EditOff
 } from "@mui/icons-material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
@@ -291,6 +293,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         setViewType(TableViewType);
     }, [dnLabel, isDataNode, expanded]);
 
+    const [comment, setComment] = useState("");
+    const changeComment = useCallback((e: ChangeEvent<HTMLInputElement>) => setComment(e.currentTarget.value), []);
+
     // Datanode data
     const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? undefined;
     const dtType = props.data && props.data[DatanodeDataProps.type];
@@ -306,12 +311,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         id: dnId,
                         value: dataValue,
                         type: dtType,
+                        comment: comment,
                     })
                 );
                 setFocusName("");
             }
         },
-        [isDataNode, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module]
+        [isDataNode, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module, comment]
     );
     const cancelDataValue = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -425,6 +431,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             setTabCols(res);
         }
     }, [tabularColumns, selectedCols]);
+
+    const [tableEdit, setTableEdit] = useState(false);
+    const toggleTableEdit = useCallback(() => setTableEdit((e) => !e), []);
 
     const dnMainBoxSx = useMemo(
         () => (props.width ? { ...MainBoxSx, maxWidth: props.width } : MainBoxSx),
@@ -639,12 +648,16 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 : "no date"}
                                                         </Typography>
                                                     </Grid>
-                                                    <Grid item xs={12}>
-                                                        {edit[2]}
-                                                    </Grid>
-                                                    <Grid item xs={12}>
-                                                        <Typography fontSize="smaller">{edit[1]}</Typography>
-                                                    </Grid>
+                                                    {edit[2] ? (
+                                                        <Grid item xs={12}>
+                                                            {edit[2]}
+                                                        </Grid>
+                                                    ) : null}
+                                                    {edit[1] ? (
+                                                        <Grid item xs={12}>
+                                                            <Typography fontSize="smaller">{edit[1]}</Typography>
+                                                        </Grid>
+                                                    ) : null}
                                                 </Grid>
                                             </Grid>
                                         </>
@@ -673,87 +686,94 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             sx={hoverSx}
                                         >
                                             {active && focusName === "data-value" ? (
-                                                typeof dtValue == "boolean" ? (
-                                                    <>
-                                                        <Grid item xs={10}>
-                                                            <Switch
-                                                                value={dataValue as boolean}
-                                                                onChange={onDataValueChange}
-                                                            />
-                                                        </Grid>
-                                                        <Grid item xs={2}>
-                                                            <IconButton
-                                                                onClick={editDataValue}
-                                                                size="small"
-                                                                sx={IconPaddingSx}
-                                                            >
-                                                                <CheckCircle color="primary" />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                onClick={cancelDataValue}
-                                                                size="small"
-                                                                sx={IconPaddingSx}
-                                                            >
-                                                                <Cancel color="inherit" />
-                                                            </IconButton>
-                                                        </Grid>
-                                                    </>
-                                                ) : dtType == "date" ? (
-                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                        <Grid item xs={10}>
-                                                            <DateTimePicker
-                                                                value={dataValue as Date}
-                                                                onChange={onDataValueDateChange}
-                                                                slotProps={textFieldProps}
-                                                            />
-                                                        </Grid>
-                                                        <Grid item xs={2}>
-                                                            <IconButton
-                                                                onClick={editDataValue}
-                                                                size="small"
-                                                                sx={IconPaddingSx}
-                                                            >
-                                                                <CheckCircle color="primary" />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                onClick={cancelDataValue}
-                                                                size="small"
-                                                                sx={IconPaddingSx}
-                                                            >
-                                                                <Cancel color="inherit" />
-                                                            </IconButton>
-                                                        </Grid>
-                                                    </LocalizationProvider>
-                                                ) : (
+                                                <>
+                                                    {typeof dtValue == "boolean" ? (
+                                                        <>
+                                                            <Grid item xs={10}>
+                                                                <Switch
+                                                                    value={dataValue as boolean}
+                                                                    onChange={onDataValueChange}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2}>
+                                                                <IconButton
+                                                                    onClick={editDataValue}
+                                                                    size="small"
+                                                                    sx={IconPaddingSx}
+                                                                >
+                                                                    <CheckCircle color="primary" />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    onClick={cancelDataValue}
+                                                                    size="small"
+                                                                    sx={IconPaddingSx}
+                                                                >
+                                                                    <Cancel color="inherit" />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </>
+                                                    ) : dtType == "date" ? (
+                                                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                            <Grid item xs={10}>
+                                                                <DateTimePicker
+                                                                    value={dataValue as Date}
+                                                                    onChange={onDataValueDateChange}
+                                                                    slotProps={textFieldProps}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2}>
+                                                                <IconButton
+                                                                    onClick={editDataValue}
+                                                                    size="small"
+                                                                    sx={IconPaddingSx}
+                                                                >
+                                                                    <CheckCircle color="primary" />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    onClick={cancelDataValue}
+                                                                    size="small"
+                                                                    sx={IconPaddingSx}
+                                                                >
+                                                                    <Cancel color="inherit" />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </LocalizationProvider>
+                                                    ) : (
+                                                        <TextField
+                                                            label="Value"
+                                                            variant="outlined"
+                                                            fullWidth
+                                                            sx={FieldNoMaxWidth}
+                                                            value={dataValue || ""}
+                                                            onChange={onDataValueChange}
+                                                            type={typeof dtValue == "number" ? "number" : undefined}
+                                                            InputProps={{
+                                                                endAdornment: (
+                                                                    <InputAdornment position="end">
+                                                                        <IconButton
+                                                                            sx={IconPaddingSx}
+                                                                            onClick={editDataValue}
+                                                                        >
+                                                                            <CheckCircle color="primary" />
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            sx={IconPaddingSx}
+                                                                            onClick={cancelDataValue}
+                                                                        >
+                                                                            <Cancel color="inherit" />
+                                                                        </IconButton>
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            disabled={!isDataNode}
+                                                        />
+                                                    )}
                                                     <TextField
-                                                        label="Value"
-                                                        variant="outlined"
-                                                        fullWidth
-                                                        sx={FieldNoMaxWidth}
-                                                        value={dataValue || ""}
-                                                        onChange={onDataValueChange}
-                                                        type={typeof dtValue == "number" ? "number" : undefined}
-                                                        InputProps={{
-                                                            endAdornment: (
-                                                                <InputAdornment position="end">
-                                                                    <IconButton
-                                                                        sx={IconPaddingSx}
-                                                                        onClick={editDataValue}
-                                                                    >
-                                                                        <CheckCircle color="primary" />
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        sx={IconPaddingSx}
-                                                                        onClick={cancelDataValue}
-                                                                    >
-                                                                        <Cancel color="inherit" />
-                                                                    </IconButton>
-                                                                </InputAdornment>
-                                                            ),
-                                                        }}
-                                                        disabled={!isDataNode}
-                                                    />
-                                                )
+                                                        value={comment}
+                                                        onChange={changeComment}
+                                                        label="Comment"
+                                                    ></TextField>
+                                                </>
                                             ) : (
                                                 <>
                                                     <Grid item xs={4}>
@@ -822,12 +842,22 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         ))}
                                                     </Select>
                                                 </FormControl>
+                                                <IconButton onClick={toggleTableEdit} color="primary">
+                                                   {tableEdit ? <EditOff/>: <Edit />}
+                                                </IconButton>
+                                                {tableEdit ? (
+                                                    <TextField
+                                                        value={comment}
+                                                        onChange={changeComment}
+                                                        label="Comment"
+                                                    ></TextField>
+                                                ) : null}
                                                 <Table
                                                     defaultColumns={JSON.stringify(tabCols)}
                                                     updateVarName={getUpdateVar(props.updateVars, "tabularData")}
                                                     data={props.tabularData}
                                                     userData={dnId}
-                                                    onEdit={props.onTabularDataEdit}
+                                                    onEdit={tableEdit ? props.onTabularDataEdit : undefined}
                                                     filter={true}
                                                     libClassName="taipy-table"
                                                 />
