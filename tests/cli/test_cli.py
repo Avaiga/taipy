@@ -48,28 +48,26 @@ def clean_argparser():
     yield
 
 
-def test_taipy_help(capsys):
-    expected_help = """{manage-versions,create,help} ...
+expected_help = """{run,manage-versions,create,help} ...
 
 positional arguments:
-  {manage-versions,create,help}
-    manage-versions         Taipy version control system.
-    create          Create a new Taipy application.
+  {run,manage-versions,create,help}
+    run                 Run a Taipy application.
+    manage-versions     Taipy version control system.
+    create              Create a new Taipy application.
     help                Show the Taipy help message.
 """
 
+
+def test_taipy_command_alone_print_help(capsys):
     with patch("sys.argv", ["prog"]):
         _entrypoint()
         out, _ = capsys.readouterr()
         assert preprocess_stdout(expected_help) in preprocess_stdout(out)
 
-    with patch("sys.argv", ["prog", "help"]):
-        with pytest.raises(SystemExit):
-            _entrypoint()
-        out, _ = capsys.readouterr()
-        assert preprocess_stdout(expected_help) in preprocess_stdout(out)
 
-    with patch("sys.argv", ["prog", "--help"]):
+def test_taipy_help_command(capsys):
+    with patch("sys.argv", ["prog", "help"]):
         with pytest.raises(SystemExit):
             _entrypoint()
         out, _ = capsys.readouterr()
@@ -87,12 +85,6 @@ def test_taipy_create_help(capsys):
     expected_help = "create [-h] [--template"
 
     with patch("sys.argv", ["prog", "help", "create"]):
-        with pytest.raises(SystemExit):
-            _entrypoint()
-        out, _ = capsys.readouterr()
-        assert preprocess_stdout(expected_help) in preprocess_stdout(out)
-
-    with patch("sys.argv", ["prog", "create", "--help"]):
         with pytest.raises(SystemExit):
             _entrypoint()
         out, _ = capsys.readouterr()
