@@ -636,8 +636,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, entity_id)  # this will update the data value
 
     def tabular_data_edit(self, state: State, var_name: str, action: str, payload: dict):
-        dn_id = payload.get("user_data")
-        datanode = core_get(dn_id)
+        user_data = payload.get("user_data", {})
+        dn_id = user_data.get("dn_id")
+        datanode = core_get(dn_id) if dn_id else None
         if isinstance(datanode, DataNode):
             try:
                 idx = payload.get("index")
@@ -651,7 +652,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 # user_value = payload.get("user_value")
                 data = self.__read_tabular_data(datanode)
                 data.at[idx, col] = val
-                datanode.write(data, comment=payload.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")

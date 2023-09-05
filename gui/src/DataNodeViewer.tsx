@@ -41,7 +41,7 @@ import {
     TableChartOutlined,
     BarChartOutlined,
     Edit,
-    EditOff
+    EditOff,
 } from "@mui/icons-material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
@@ -283,6 +283,16 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [props.updateVars]
     );
 
+    const userData = useMemo(() => ({ dn_id: dnId, comment: "" }), [dnId]);
+    const [comment, setComment] = useState("");
+    const changeComment = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => {
+            setComment(e.currentTarget.value);
+            userData.comment = e.currentTarget.value;
+        },
+        [userData]
+    );
+
     // on datanode change
     useEffect(() => {
         setLabel(dnLabel);
@@ -291,10 +301,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         setHistoryRequested(false);
         setDataRequested(false);
         setViewType(TableViewType);
+        setComment("");
     }, [dnLabel, isDataNode, expanded]);
-
-    const [comment, setComment] = useState("");
-    const changeComment = useCallback((e: ChangeEvent<HTMLInputElement>) => setComment(e.currentTarget.value), []);
 
     // Datanode data
     const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? undefined;
@@ -843,7 +851,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     </Select>
                                                 </FormControl>
                                                 <IconButton onClick={toggleTableEdit} color="primary">
-                                                   {tableEdit ? <EditOff/>: <Edit />}
+                                                    {tableEdit ? <EditOff /> : <Edit />}
                                                 </IconButton>
                                                 {tableEdit ? (
                                                     <TextField
@@ -856,7 +864,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     defaultColumns={JSON.stringify(tabCols)}
                                                     updateVarName={getUpdateVar(props.updateVars, "tabularData")}
                                                     data={props.tabularData}
-                                                    userData={dnId}
+                                                    userData={userData as unknown as string}
                                                     onEdit={tableEdit ? props.onTabularDataEdit : undefined}
                                                     filter={true}
                                                     libClassName="taipy-table"
