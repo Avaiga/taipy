@@ -172,38 +172,85 @@ class Scenario(_Entity, Submittable, _Labeled):
             if not actual_sequences[sequence_name]._is_consistent():
                 raise InvalidSequence(actual_sequences[sequence_name].id)
 
-    def add_sequences(self, sequences: Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
-        """Add sequences to the scenario.
+    def add_sequence(
+        self,
+        name: str,
+        tasks: Union[List[Task], List[TaskId]],
+        properties: Optional[Dict] = None,
+        subscribers: Optional[List[_Subscriber]] = None,
+    ):
+        """Add a sequence to the scenario.
 
         Parameters:
-            sequences (Dict[str, Dict[str, Union[List[Task], List[TaskId], List[_Subscriber], Dict]]]):
-                The description of the sequences.
+            name (str): The name of the sequence.
+            tasks (Union[List[Task], List[TaskId]]): The list of scenario's tasks to add to the sequence.
+            properties (Optional[Dict]): The optional properties of the sequence.
+            subscribers (Optional[List[_Subscriber]]): The optional list of callbacks to be called on
+                `Job^`'s status change.
+
+        Raises:
+            SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _sequences = _scenario._sequences
         _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
+        _sequence_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+        self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
 
-        for sequence_name, sequence_data in sequences.items():
-            sequence_task_ids: Set[TaskId] = set(
-                [task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])]  # type: ignore
-            )
-            self.__check_sequence_tasks_exist_in_scenario_tasks(
-                sequence_name, sequence_task_ids, self.id, _scenario_task_ids
-            )
-
-        _sequences.update(sequences)
+        _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
+        _sequences.update(
+            {
+                name: {
+                    self._SEQUENCE_TASKS_KEY: tasks,
+                    self._SEQUENCE_PROPERTIES_KEY: properties or {},
+                    self._SEQUENCE_SUBSCRIBERS_KEY: subscribers or [],
+                }
+            }
+        )
         self.sequences = _sequences  # type: ignore
+        if not self.sequences[name]._is_consistent():
+            raise InvalidSequence(name)
 
-        actual_sequences = self._get_sequences()
-        for sequence_name in sequences.keys():
-            if not actual_sequences[sequence_name]._is_consistent():
-                raise InvalidSequence(actual_sequences[sequence_name].id)
+    def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
+        """Add multiple sequences to the scenario.
 
-    def remove_sequences(self, sequence_names: List[str]):
-        """Remove sequences from the scenario.
+        Note:
+            To provide properties and subscribers for the sequences, use `Scenario.add_sequence^` instead.
 
         Parameters:
-            sequence_names (List[str]): The names of the sequences.
+            sequences (Dict[str, Union[List[Task], List[TaskId]]]):
+                A dictionary containing sequences to add. Each key is a sequence name, and the value must
+                be a list of the scenario tasks.
+
+        Raises:
+            SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
+        """
+        _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
+        _sc_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
+        
+        for name, tasks in sequences.items():
+            _seq_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+            self.__check_sequence_tasks_exist_in_scenario_tasks(name, _seq_task_ids, self.id, _sc_task_ids)
+        
+        # Need to parse twice the sequences to avoid adding some sequences and not others in case of exception
+        for name, tasks in sequences.items():
+            self.add_sequence(name, tasks)
+
+    def remove_sequence(self, name: str):
+        """Remove a sequence from the scenario.
+
+        Parameters:
+            name (str): The name of the sequence to remove.
+        """
+        _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
+        _sequences.pop(name)
+        self.sequences = _sequences  # type: ignore
+
+    def remove_sequences(self, sequence_names: List[str]):
+        """
+        Remove multiple sequences from the scenario.
+
+        Parameters:
+            sequence_names (List[str]): A list of sequence names to remove.
         """
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         for sequence_name in sequence_names:

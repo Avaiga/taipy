@@ -66,35 +66,44 @@ def test_breakdown_sequence_id():
     assert sequence_name == "sequence" and scenario_id == "SCENARIO_scenario"
 
 
-def test_set_and_get_sequence():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
+def test_raise_sequence_does_not_belong_to_scenario():
     with pytest.raises(SequenceBelongsToNonExistingScenario):
         sequence = Sequence({"name": "sequence_name"}, [], "SEQUENCE_sequence_name_SCENARIO_scenario_id")
         _SequenceManager._set(sequence)
 
+
+def __init():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _OrchestratorFactory._build_dispatcher()
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
-
     scenario = Scenario("scenario", set([task]), {}, set())
     _ScenarioManager._set(scenario)
+    return scenario, task
 
+
+def test_set_and_get_sequence_no_existing_sequence():
+    scenario, task = __init()
     sequence_name_1 = "p1"
     sequence_id_1 = SequenceId(f"SEQUENCE_{sequence_name_1}_{scenario.id}")
     sequence_name_2 = "p2"
     sequence_id_2 = SequenceId(f"SEQUENCE_{sequence_name_2}_{scenario.id}")
 
-    # No existing Sequence
     assert _SequenceManager._get(sequence_id_1) is None
     assert _SequenceManager._get(sequence_id_2) is None
     assert _SequenceManager._get("sequence") is None
 
-    scenario.add_sequences({sequence_name_1: {"tasks": []}})
-    sequence_1 = scenario.sequences[sequence_name_1]
 
-    # Save one sequence. We expect to have only one sequence stored
+def test_set_and_get():
+    scenario, task = __init()
+    sequence_name_1 = "p1"
+    sequence_id_1 = SequenceId(f"SEQUENCE_{sequence_name_1}_{scenario.id}")
+    sequence_name_2 = "p2"
+    sequence_id_2 = SequenceId(f"SEQUENCE_{sequence_name_2}_{scenario.id}")
+
+    scenario.add_sequences({sequence_name_1: []})
+    sequence_1 = scenario.sequences[sequence_name_1]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_id_1).tasks) == 0
     assert _SequenceManager._get(sequence_1).id == sequence_1.id
@@ -103,7 +112,7 @@ def test_set_and_get_sequence():
 
     # Save a second sequence. Now, we expect to have a total of two sequences stored
     _TaskManager._set(task)
-    scenario.add_sequences({sequence_name_2: {"tasks": [task]}})
+    scenario.add_sequences({sequence_name_2: [task]})
     sequence_2 = scenario.sequences[sequence_name_2]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_id_1).tasks) == 0
@@ -116,7 +125,7 @@ def test_set_and_get_sequence():
     assert _TaskManager._get(task.id).id == task.id
 
     # We save the first sequence again. We expect nothing to change
-    scenario.add_sequences({sequence_name_1: {}})
+    scenario.add_sequence(sequence_name_1, [])
     sequence_1 = scenario.sequences[sequence_name_1]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_id_1).tasks) == 0
@@ -130,7 +139,7 @@ def test_set_and_get_sequence():
 
     # We save a third sequence with same name as the first one.
     # We expect the first sequence to be updated
-    scenario.add_sequences({sequence_name_1: {"tasks": [task]}})
+    scenario.add_sequences({sequence_name_1: [task]})
     sequence_3 = scenario.sequences[sequence_name_1]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert _SequenceManager._get(sequence_id_1).id == sequence_3.id
@@ -233,7 +242,7 @@ def test_submit():
     task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
     task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
     task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
-    scenario = Scenario("sce", [task_1, task_2, task_3, task_4], {})
+    scenario = Scenario("sce", {task_1, task_2, task_3, task_4}, {})
 
     sequence_name = "sequence"
     sequence_id = Sequence._new_id(sequence_name, scenario.id)
@@ -259,7 +268,7 @@ def test_submit():
             _SequenceManager._submit(sequence_id)
 
         _ScenarioManager._set(scenario)
-        scenario.add_sequences({sequence_name: {"tasks": [task_4, task_2, task_1, task_3]}})
+        scenario.add_sequences({sequence_name: [task_4, task_2, task_1, task_3]})
 
         # sequence, and tasks does exist. We expect the tasks to be submitted
         # in a specific order
@@ -328,12 +337,12 @@ def test_submit_sequence_from_tasks_with_one_or_no_input_output():
 
     # test no input and no output Task
     task_no_input_no_output = Task("task_no_input_no_output", {}, mock_function_no_input_no_output)
-    scenario_1 = Scenario("scenario_1", [task_no_input_no_output], {})
+    scenario_1 = Scenario("scenario_1", {task_no_input_no_output}, {})
 
     _TaskManager._set(task_no_input_no_output)
     _ScenarioManager._set(scenario_1)
 
-    scenario_1.add_sequences({"my_sequence_1": {"tasks": [task_no_input_no_output]}})
+    scenario_1.add_sequences({"my_sequence_1": [task_no_input_no_output]})
     sequence_1 = scenario_1.sequences["my_sequence_1"]
 
     assert len(sequence_1._get_sorted_tasks()) == 1
@@ -346,7 +355,7 @@ def test_submit_sequence_from_tasks_with_one_or_no_input_output():
     task_one_input_no_output = Task(
         "task_one_input_no_output", {}, mock_function_one_input_no_output, input=[data_node_input]
     )
-    scenario_2 = Scenario("scenario_2", [task_one_input_no_output], {})
+    scenario_2 = Scenario("scenario_2", {task_one_input_no_output}, {})
 
     _DataManager._set(data_node_input)
     data_node_input.unlock_edit()
@@ -354,7 +363,7 @@ def test_submit_sequence_from_tasks_with_one_or_no_input_output():
     _TaskManager._set(task_one_input_no_output)
     _ScenarioManager._set(scenario_2)
 
-    scenario_2.add_sequences({"my_sequence_2": {"tasks": [task_one_input_no_output]}})
+    scenario_2.add_sequences({"my_sequence_2": [task_one_input_no_output]})
     sequence_2 = scenario_2.sequences["my_sequence_2"]
     assert len(sequence_2._get_sorted_tasks()) == 1
 
@@ -366,14 +375,14 @@ def test_submit_sequence_from_tasks_with_one_or_no_input_output():
     task_no_input_one_output = Task(
         "task_no_input_one_output", {}, mock_function_no_input_one_output, output=[data_node_output]
     )
-    scenario_3 = Scenario("scenario_3", [task_no_input_one_output], {})
+    scenario_3 = Scenario("scenario_3", {task_no_input_one_output}, {})
 
     _DataManager._set(data_node_output)
     assert data_node_output.read() is None
     _TaskManager._set(task_no_input_one_output)
     _ScenarioManager._set(scenario_3)
 
-    scenario_3.add_sequences({"my_sequence_3": {"tasks": [task_no_input_one_output]}})
+    scenario_3.add_sequences({"my_sequence_3": [task_no_input_one_output]})
     sequence_3 = scenario_3.sequences["my_sequence_3"]
 
     assert len(sequence_2._get_sorted_tasks()) == 1
@@ -409,7 +418,7 @@ def test_get_or_create_data():
     assert len(_TaskManager._get_all()) == 0
 
     scenario = _ScenarioManager._create(scenario_config)
-    scenario.add_sequences({"by_6": {"tasks": list(scenario.tasks.values())}})
+    scenario.add_sequences({"by_6": list(scenario.tasks.values())})
     sequence = scenario.sequences["by_6"]
 
     assert sequence.name == "by_6"
@@ -471,7 +480,7 @@ def test_sequence_notification_subscribe(mocker):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs=task_configs)
-    scenario = Scenario("scenario", tasks, {}, sequences={"by_1": {"tasks": tasks}})
+    scenario = Scenario("scenario", set(tasks), {}, sequences={"by_1": {"tasks": tasks}})
     _ScenarioManager._set(scenario)
 
     sequence = scenario.sequences["by_1"]
@@ -525,7 +534,7 @@ def test_sequence_notification_subscribe_multi_param(mocker):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
-    scenario = Scenario("scenario", tasks, {}, sequences={"by_6": {"tasks": tasks}})
+    scenario = Scenario("scenario", set(tasks), {}, sequences={"by_6": {"tasks": tasks}})
     _ScenarioManager._set(scenario)
 
     sequence = scenario.sequences["by_6"]
@@ -560,7 +569,7 @@ def test_sequence_notification_unsubscribe(mocker):
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create(task_configs)
-    scenario = Scenario("scenario", tasks, {}, sequences={"by_6": {"tasks": tasks}})
+    scenario = Scenario("scenario", set(tasks), {}, sequences={"by_6": {"tasks": tasks}})
     _ScenarioManager._set(scenario)
 
     sequence = scenario.sequences["by_6"]

@@ -33,21 +33,22 @@ from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
-def test_create_scenario(cycle, current_datetime):
-    scenario_1 = Scenario("foo", set(), {"key": "value"}, is_primary=True, cycle=cycle)
-    assert scenario_1.id is not None
-    assert scenario_1.config_id == "foo"
-    assert scenario_1.tasks == {}
-    assert scenario_1.additional_data_nodes == {}
-    assert scenario_1.data_nodes == {}
-    assert scenario_1.sequences == {}
-    assert scenario_1.properties == {"key": "value"}
-    assert scenario_1.key == "value"
-    assert scenario_1.creation_date is not None
-    assert scenario_1.is_primary
-    assert scenario_1.cycle == cycle
-    assert scenario_1.tags == set()
-    assert scenario_1.get_simple_label() == scenario_1.config_id
+def test_create_primary_scenario(cycle):
+    scenario = Scenario("foo", set(), {"key": "value"}, is_primary=True, cycle=cycle)
+    assert scenario.id is not None
+    assert scenario.config_id == "foo"
+    assert scenario.tasks == {}
+    assert scenario.additional_data_nodes == {}
+    assert scenario.data_nodes == {}
+    assert scenario.sequences == {}
+    assert scenario.properties == {"key": "value"}
+    assert scenario.key == "value"
+    assert scenario.creation_date is not None
+    assert scenario.is_primary
+    assert scenario.cycle == cycle
+    assert scenario.tags == set()
+    assert scenario.get_simple_label() == scenario.config_id
+
     with mock.patch("src.taipy.core.get") as get_mck:
 
         class MockOwner:
@@ -57,45 +58,53 @@ def test_create_scenario(cycle, current_datetime):
                 return self.label
 
         get_mck.return_value = MockOwner()
-        assert scenario_1.get_label() == "owner_label > " + scenario_1.config_id
+        assert scenario.get_label() == "owner_label > " + scenario.config_id
 
-    scenario_2 = Scenario("bar", set(), {}, set(), ScenarioId("baz"), creation_date=current_datetime)
-    assert scenario_2.id == "baz"
-    assert scenario_2.config_id == "bar"
-    assert scenario_2.tasks == {}
-    assert scenario_2.additional_data_nodes == {}
-    assert scenario_2.data_nodes == {}
-    assert scenario_2.sequences == {}
-    assert scenario_2.properties == {}
-    assert scenario_2.creation_date == current_datetime
-    assert not scenario_2.is_primary
-    assert scenario_2.cycle is None
-    assert scenario_2.tags == set()
-    assert scenario_2.get_simple_label() == scenario_2.config_id
-    assert scenario_2.get_label() == scenario_2.config_id
 
+def test_create_scenario_at_time(current_datetime):
+    scenario = Scenario("bar", set(), {}, set(), ScenarioId("baz"), creation_date=current_datetime)
+    assert scenario.id == "baz"
+    assert scenario.config_id == "bar"
+    assert scenario.tasks == {}
+    assert scenario.additional_data_nodes == {}
+    assert scenario.data_nodes == {}
+    assert scenario.sequences == {}
+    assert scenario.properties == {}
+    assert scenario.creation_date == current_datetime
+    assert not scenario.is_primary
+    assert scenario.cycle is None
+    assert scenario.tags == set()
+    assert scenario.get_simple_label() == scenario.config_id
+    assert scenario.get_label() == scenario.config_id
+
+
+def test_create_scenario_with_task_and_additional_dn_and_sequence():
     dn_1 = PickleDataNode("xyz", Scope.SCENARIO)
     dn_2 = PickleDataNode("abc", Scope.SCENARIO)
     task = Task("qux", {}, print, [dn_1])
 
-    scenario_3 = Scenario("quux", set([task]), {}, set([dn_2]), sequences={"acb": {"tasks": [task]}})
-    sequence = scenario_3.sequences["acb"]
-    assert scenario_3.id is not None
-    assert scenario_3.config_id == "quux"
-    assert len(scenario_3.tasks) == 1
-    assert len(scenario_3.additional_data_nodes) == 1
-    assert len(scenario_3.data_nodes) == 2
-    assert len(scenario_3.sequences) == 1
-    assert scenario_3.qux == task
-    assert scenario_3.xyz == dn_1
-    assert scenario_3.abc == dn_2
-    assert scenario_3.acb == sequence
-    assert scenario_3.properties == {}
-    assert scenario_3.tags == set()
+    scenario = Scenario("quux", set([task]), {}, set([dn_2]), sequences={"acb": {"tasks": [task]}})
+    sequence = scenario.sequences["acb"]
+    assert scenario.id is not None
+    assert scenario.config_id == "quux"
+    assert len(scenario.tasks) == 1
+    assert len(scenario.additional_data_nodes) == 1
+    assert len(scenario.data_nodes) == 2
+    assert len(scenario.sequences) == 1
+    assert scenario.qux == task
+    assert scenario.xyz == dn_1
+    assert scenario.abc == dn_2
+    assert scenario.acb == sequence
+    assert scenario.properties == {}
+    assert scenario.tags == set()
 
+
+def test_create_scenario_invalid_config_id():
     with pytest.raises(InvalidConfigurationId):
         Scenario("foo bar", [], {})
 
+
+def test_create_scenario_and_add_sequences():
     input_1 = PickleDataNode("input_1", Scope.SCENARIO)
     output_1 = PickleDataNode("output_1", Scope.SCENARIO)
     output_2 = PickleDataNode("output_2", Scope.SCENARIO)
@@ -106,7 +115,6 @@ def test_create_scenario(cycle, current_datetime):
 
     data_manager = _DataManagerFactory._build_manager()
     task_manager = _TaskManagerFactory._build_manager()
-
     data_manager._set(input_1)
     data_manager._set(output_1)
     data_manager._set(output_2)
@@ -115,109 +123,168 @@ def test_create_scenario(cycle, current_datetime):
     task_manager._set(task_1)
     task_manager._set(task_2)
 
-    scenario_4 = Scenario(
-        "scenario_4",
-        set([task_1]),
-        {},
-    )
-    scenario_4.sequences = {"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": []}}
-
-    sequence_1 = scenario_4.sequences["sequence_1"]
-    sequence_2 = scenario_4.sequences["sequence_2"]
-    assert scenario_4.id is not None
-    assert scenario_4.config_id == "scenario_4"
-    assert len(scenario_4.tasks) == 1
-    assert len(scenario_4.additional_data_nodes) == 0
-    assert len(scenario_4.data_nodes) == 2
-    assert scenario_4.tasks.keys() == {task_1.config_id}
-    assert scenario_4.additional_data_nodes == {}
-    assert scenario_4.data_nodes == {
+    scenario = Scenario("scenario", set([task_1]), {})
+    scenario.sequences = {"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": []}}
+    assert scenario.id is not None
+    assert scenario.config_id == "scenario"
+    assert len(scenario.tasks) == 1
+    assert scenario.tasks.keys() == {task_1.config_id}
+    assert len(scenario.additional_data_nodes) == 0
+    assert scenario.additional_data_nodes == {}
+    assert len(scenario.data_nodes) == 2
+    assert scenario.data_nodes == {
         input_1.config_id: input_1,
         output_1.config_id: output_1,
     }
-    assert scenario_4.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
+    assert len(scenario.sequences) == 2
+    assert scenario.sequence_1 == scenario.sequences["sequence_1"]
+    assert scenario.sequence_2 == scenario.sequences["sequence_2"]
+    assert scenario.sequences == {"sequence_1": scenario.sequence_1, "sequence_2": scenario.sequence_2}
 
-    scenario_5 = Scenario("scenario_5", set([task_1, task_2]), {})
-    scenario_5.add_sequences({"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": [task_1, task_2]}})
-    sequence_1 = scenario_5.sequences["sequence_1"]
-    sequence_2 = scenario_5.sequences["sequence_2"]
-    assert scenario_5.id is not None
-    assert scenario_5.config_id == "scenario_5"
-    assert len(scenario_5.tasks) == 2
-    assert len(scenario_5.additional_data_nodes) == 0
-    assert len(scenario_5.data_nodes) == 3
-    assert scenario_5.tasks.keys() == {task_1.config_id, task_2.config_id}
-    assert scenario_5.additional_data_nodes == {}
-    assert scenario_5.data_nodes == {
-        input_1.config_id: input_1,
-        output_1.config_id: output_1,
-        output_2.config_id: output_2,
-    }
-    assert scenario_5.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
-    scenario_5.remove_sequences(["sequence_2"])
-    assert scenario_5.sequences == {"sequence_1": sequence_1}
-    scenario_5.remove_sequences(["sequence_1"])
-    assert scenario_5.sequences == {}
 
-    scenario_6 = Scenario("scenario_6", set(), {}, set([additional_dn_1]))
-    assert scenario_6.id is not None
-    assert scenario_6.config_id == "scenario_6"
-    assert len(scenario_6.tasks) == 0
-    assert len(scenario_6.additional_data_nodes) == 1
-    assert len(scenario_6.data_nodes) == 1
-    assert scenario_6.tasks == {}
-    assert scenario_6.additional_data_nodes == {additional_dn_1.config_id: additional_dn_1}
-    assert scenario_6.data_nodes == {additional_dn_1.config_id: additional_dn_1}
+def test_create_scenario_overlapping_sequences():
+    input_1 = PickleDataNode("input_1", Scope.SCENARIO)
+    output_1 = PickleDataNode("output_1", Scope.SCENARIO)
+    output_2 = PickleDataNode("output_2", Scope.SCENARIO)
+    additional_dn_1 = PickleDataNode("additional_1", Scope.SCENARIO)
+    additional_dn_2 = PickleDataNode("additional_2", Scope.SCENARIO)
+    task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
+    task_2 = Task("task_2", {}, print, [output_1], [output_2], TaskId("task_id_2"))
+    data_manager = _DataManagerFactory._build_manager()
+    task_manager = _TaskManagerFactory._build_manager()
+    data_manager._set(input_1)
+    data_manager._set(output_1)
+    data_manager._set(output_2)
+    data_manager._set(additional_dn_1)
+    data_manager._set(additional_dn_2)
+    task_manager._set(task_1)
+    task_manager._set(task_2)
 
-    scenario_7 = Scenario("scenario_7", set(), {}, set([additional_dn_1, additional_dn_2]))
-    assert scenario_7.id is not None
-    assert scenario_7.config_id == "scenario_7"
-    assert len(scenario_7.tasks) == 0
-    assert len(scenario_7.additional_data_nodes) == 2
-    assert len(scenario_7.data_nodes) == 2
-    assert scenario_7.tasks == {}
-    assert scenario_7.additional_data_nodes == {
-        additional_dn_1.config_id: additional_dn_1,
-        additional_dn_2.config_id: additional_dn_2,
-    }
-    assert scenario_7.data_nodes == {
-        additional_dn_1.config_id: additional_dn_1,
-        additional_dn_2.config_id: additional_dn_2,
-    }
-
-    scenario_8 = Scenario("scenario_8", set([task_1]), {}, set([additional_dn_1]))
-    assert scenario_8.id is not None
-    assert scenario_8.config_id == "scenario_8"
-    assert len(scenario_8.tasks) == 1
-    assert len(scenario_8.additional_data_nodes) == 1
-    assert len(scenario_8.data_nodes) == 3
-    assert scenario_8.tasks.keys() == {task_1.config_id}
-    assert scenario_8.additional_data_nodes == {
-        additional_dn_1.config_id: additional_dn_1,
-    }
-    assert scenario_8.data_nodes == {
-        input_1.config_id: input_1,
-        output_1.config_id: output_1,
-        additional_dn_1.config_id: additional_dn_1,
-    }
-
-    scenario_9 = Scenario("scenario_9", set([task_1, task_2]), {}, set([additional_dn_1, additional_dn_2]))
-    assert scenario_9.id is not None
-    assert scenario_9.config_id == "scenario_9"
-    assert len(scenario_9.tasks) == 2
-    assert len(scenario_9.additional_data_nodes) == 2
-    assert len(scenario_9.data_nodes) == 5
-    assert scenario_9.tasks.keys() == {task_1.config_id, task_2.config_id}
-    assert scenario_9.additional_data_nodes == {
-        additional_dn_1.config_id: additional_dn_1,
-        additional_dn_2.config_id: additional_dn_2,
-    }
-    assert scenario_9.data_nodes == {
+    scenario = Scenario("scenario", set([task_1, task_2]), {})
+    scenario.add_sequence("sequence_1", [task_1])
+    scenario.add_sequence("sequence_2", [task_1, task_2])
+    assert scenario.id is not None
+    assert scenario.config_id == "scenario"
+    assert len(scenario.tasks) == 2
+    assert scenario.tasks.keys() == {task_1.config_id, task_2.config_id}
+    assert len(scenario.additional_data_nodes) == 0
+    assert scenario.additional_data_nodes == {}
+    assert len(scenario.data_nodes) == 3
+    assert scenario.data_nodes == {
         input_1.config_id: input_1,
         output_1.config_id: output_1,
         output_2.config_id: output_2,
+    }
+    sequence_1 = scenario.sequences["sequence_1"]
+    sequence_2 = scenario.sequences["sequence_2"]
+    assert scenario.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
+    scenario.remove_sequences(["sequence_2"])
+    assert scenario.sequences == {"sequence_1": sequence_1}
+    scenario.remove_sequences(["sequence_1"])
+    assert scenario.sequences == {}
+
+
+def test_create_scenario_one_additional_dn():
+    input_1 = PickleDataNode("input_1", Scope.SCENARIO)
+    input_2 = PickleDataNode("input_2", Scope.SCENARIO)
+    output_1 = PickleDataNode("output_1", Scope.SCENARIO)
+    output_2 = PickleDataNode("output_2", Scope.SCENARIO)
+    additional_dn_1 = PickleDataNode("additional_1", Scope.SCENARIO)
+    additional_dn_2 = PickleDataNode("additional_2", Scope.SCENARIO)
+    task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
+    task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
+    data_manager = _DataManagerFactory._build_manager()
+    task_manager = _TaskManagerFactory._build_manager()
+    data_manager._set(input_1)
+    data_manager._set(output_1)
+    data_manager._set(input_2)
+    data_manager._set(output_2)
+    data_manager._set(additional_dn_1)
+    data_manager._set(additional_dn_2)
+    task_manager._set(task_1)
+    task_manager._set(task_2)
+
+    scenario = Scenario("scenario", set(), {}, set([additional_dn_1]))
+    assert scenario.id is not None
+    assert scenario.config_id == "scenario"
+    assert len(scenario.tasks) == 0
+    assert len(scenario.additional_data_nodes) == 1
+    assert len(scenario.data_nodes) == 1
+    assert scenario.tasks == {}
+    assert scenario.additional_data_nodes == {additional_dn_1.config_id: additional_dn_1}
+    assert scenario.data_nodes == {additional_dn_1.config_id: additional_dn_1}
+
+
+def test_create_scenario_wth_additional_dns():
+    input_1 = PickleDataNode("input_1", Scope.SCENARIO)
+    input_2 = PickleDataNode("input_2", Scope.SCENARIO)
+    output_1 = PickleDataNode("output_1", Scope.SCENARIO)
+    output_2 = PickleDataNode("output_2", Scope.SCENARIO)
+    additional_dn_1 = PickleDataNode("additional_1", Scope.SCENARIO)
+    additional_dn_2 = PickleDataNode("additional_2", Scope.SCENARIO)
+    task_1 = Task("task_1", {}, print, [input_1], [output_1], TaskId("task_id_1"))
+    task_2 = Task("task_2", {}, print, [input_2], [output_2], TaskId("task_id_2"))
+    data_manager = _DataManagerFactory._build_manager()
+    task_manager = _TaskManagerFactory._build_manager()
+    data_manager._set(input_1)
+    data_manager._set(output_1)
+    data_manager._set(input_2)
+    data_manager._set(output_2)
+    data_manager._set(additional_dn_1)
+    data_manager._set(additional_dn_2)
+    task_manager._set(task_1)
+    task_manager._set(task_2)
+
+    scenario = Scenario("scenario", set(), {}, set([additional_dn_1, additional_dn_2]))
+    assert scenario.id is not None
+    assert scenario.config_id == "scenario"
+    assert len(scenario.tasks) == 0
+    assert len(scenario.additional_data_nodes) == 2
+    assert len(scenario.data_nodes) == 2
+    assert scenario.tasks == {}
+    assert scenario.additional_data_nodes == {
         additional_dn_1.config_id: additional_dn_1,
         additional_dn_2.config_id: additional_dn_2,
+    }
+    assert scenario.data_nodes == {
+        additional_dn_1.config_id: additional_dn_1,
+        additional_dn_2.config_id: additional_dn_2,
+    }
+
+    scenario_1 = Scenario("scenario_1", set([task_1]), {}, set([additional_dn_1]))
+    assert scenario_1.id is not None
+    assert scenario_1.config_id == "scenario_1"
+    assert len(scenario_1.tasks) == 1
+    assert len(scenario_1.additional_data_nodes) == 1
+    assert len(scenario_1.data_nodes) == 3
+    assert scenario_1.tasks.keys() == {task_1.config_id}
+    assert scenario_1.additional_data_nodes == {
+        additional_dn_1.config_id: additional_dn_1,
+    }
+    assert scenario_1.data_nodes == {
+        input_1.config_id: input_1,
+        output_1.config_id: output_1,
+        additional_dn_1.config_id: additional_dn_1,
+    }
+
+    scenario_2 = Scenario("scenario_2", set([task_1, task_2]), {}, set([additional_dn_1, additional_dn_2]))
+    assert scenario_2.id is not None
+    assert scenario_2.config_id == "scenario_2"
+    assert len(scenario_2.tasks) == 2
+    assert len(scenario_2.additional_data_nodes) == 2
+    assert len(scenario_2.data_nodes) == 6
+    assert scenario_2.tasks.keys() == {task_1.config_id, task_2.config_id}
+    assert scenario_2.additional_data_nodes == {
+        additional_dn_1.config_id: additional_dn_1,
+        additional_dn_2.config_id: additional_dn_2,
+    }
+    assert {dn_config_id: dn.id for dn_config_id, dn in scenario_2.data_nodes.items()} == {
+        input_1.config_id: input_1.id,
+        output_1.config_id: output_1.id,
+        input_2.config_id: input_2.id,
+        output_2.config_id: output_2.id,
+        additional_dn_1.config_id: additional_dn_1.id,
+        additional_dn_2.config_id: additional_dn_2.id,
     }
 
 
@@ -247,11 +314,13 @@ def test_raise_sequence_tasks_not_in_scenario(data_node):
         sequences={"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": [task_1, task_2]}},
     )
 
-    scenario = Scenario("scenario", [], {})
 
+def test_raise_tasks_not_in_scenario_with_add_sequence_api(data_node):
+    task_1 = Task("task_1", {}, print, output=[data_node])
+    task_2 = Task("task_2", {}, print, input=[data_node])
+    scenario = Scenario("scenario", [task_1], {})
     scenario_manager = _ScenarioManagerFactory._build_manager()
     task_manager = _TaskManagerFactory._build_manager()
-
     scenario_manager._set(scenario)
     task_manager._set(task_1)
     task_manager._set(task_2)
@@ -259,23 +328,21 @@ def test_raise_sequence_tasks_not_in_scenario(data_node):
     scenario.add_sequences({"sequence_1": {}})
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
-        scenario.add_sequences({"sequence_2": {"tasks": [task_1]}})
-    assert err.value.args == ([task_1.id], "sequence_2", scenario.id)
+        scenario.add_sequence("sequence_2", [task_2])
+    assert err.value.args == ([task_2.id], "sequence_2", scenario.id)
 
-    scenario.tasks = [task_1]
-
-    scenario.add_sequences({"sequence_2": {"tasks": [task_1]}})
+    scenario.add_sequence("sequence_3", [task_1])
 
     with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
-        scenario.add_sequences({"sequence_3": {"tasks": [task_2]}})
-    assert err.value.args == ([task_2.id], "sequence_3", scenario.id)
-
-    with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
-        scenario.add_sequences({"sequence_4": {"tasks": [task_1, task_2]}})
+        scenario.add_sequences({"sequence_4": [task_2]})
     assert err.value.args == ([task_2.id], "sequence_4", scenario.id)
 
+    with pytest.raises(SequenceTaskDoesNotExistInScenario) as err:
+        scenario.add_sequences({"sequence_5": [task_1, task_2]})
+    assert err.value.args == ([task_2.id], "sequence_5", scenario.id)
+
     scenario.tasks = [task_1, task_2]
-    scenario.add_sequences({"sequence_5": {"tasks": [task_1, task_2]}})
+    scenario.add_sequence("sequence_6", [task_1, task_2])
 
 
 def test_add_property_to_scenario():
@@ -384,7 +451,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert scenario_1.sequences[tmp_sequence_name] == tmp_sequence
     assert len(scenario_2.sequences) == 1
     assert scenario_2.sequences[tmp_sequence_name] == tmp_sequence
-    scenario_2.add_sequences({sequence_1_name: {}})
+    scenario_2.add_sequences({sequence_1_name: []})
     assert len(scenario_1.sequences) == 2
     assert scenario_1.sequences == {sequence_1_name: sequence_1, tmp_sequence_name: tmp_sequence}
     assert len(scenario_2.sequences) == 2
@@ -1182,13 +1249,13 @@ def test_add_and_remove_sequences():
     scenario_1.sequences = {"sequence_1": {"tasks": [task_1]}}
     assert scenario_1.sequences == {"sequence_1": sequence_1}
 
-    scenario_1.add_sequences({"sequence_2": {"tasks": [task_1, task_2]}})
+    scenario_1.add_sequences({"sequence_2": [task_1, task_2]})
     assert scenario_1.sequences == {"sequence_1": sequence_1, "sequence_2": sequence_2}
 
     scenario_1.remove_sequences(["sequence_1"])
     assert scenario_1.sequences == {"sequence_2": sequence_2}
 
-    scenario_1.add_sequences({"sequence_1": {"tasks": [task_1]}, "sequence_3": {"tasks": [task_1, task_5, task_3]}})
+    scenario_1.add_sequences({"sequence_1": [task_1], "sequence_3": [task_1, task_5, task_3]})
     assert scenario_1.sequences == {
         "sequence_2": sequence_2,
         "sequence_1": sequence_1,
