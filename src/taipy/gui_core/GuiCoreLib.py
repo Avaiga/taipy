@@ -573,7 +573,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     (
                         e.get("timestamp"),
                         job.id if job else e.get("writer_identifier", ""),
-                        f"Execution of task {job.task.get_simple_label()}." if job and job.task else e.get("comment", ""),
+                        f"Execution of task {job.task.get_simple_label()}."
+                        if job and job.task
+                        else e.get("comment", ""),
                     )
                 )
             return list(reversed(sorted(res, key=lambda r: r[0])))
