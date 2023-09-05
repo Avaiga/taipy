@@ -51,7 +51,7 @@ class _RunCLI:
             taipy_args = [f"--taipy-{arg[2:]}" if arg.startswith("--") else arg for arg in all_args]
 
             subprocess.run(
-                [sys.executable, args.application_main_file, *(taipy_args + external_args)],
+                [sys.executable, args.application_main_file, *(external_args + taipy_args)],
                 stdout=sys.stdout,
                 stderr=sys.stdout,
             )
