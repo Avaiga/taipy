@@ -16,11 +16,9 @@ inputs = [ "initial_dataset:SECTION", "replacement_type:SECTION",]
 outputs = [ "cleaned_dataset:SECTION",]
 skippable = "False:bool"
 
-[PIPELINE.scenario_configuration_pipeline]
-tasks = [ "clean_data:SECTION",]
-
 [SCENARIO.scenario_configuration]
-pipelines = [ "scenario_configuration_pipeline:SECTION",]
+tasks = [ "clean_data:SECTION",]
 frequency = "DAILY:FREQUENCY"
+sequences.scenario_configuration_sequence = [ "clean_data:SECTION",]
 
 [SCENARIO.scenario_configuration.comparators]
