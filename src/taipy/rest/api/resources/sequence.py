@@ -229,7 +229,7 @@ class SequenceList(Resource):
         if not scenario:
             raise NonExistingScenario(scenario_id=scenario_id)
 
-        scenario.add_sequences({sequence_name: {"tasks": sequence_task_ids}})
+        scenario.add_sequence(sequence_name, sequence_task_ids)
         sequence = scenario.sequences[sequence_name]
 
         return {
