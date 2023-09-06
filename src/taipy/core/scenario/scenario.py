@@ -226,11 +226,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
         _sc_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
-        
         for name, tasks in sequences.items():
             _seq_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
             self.__check_sequence_tasks_exist_in_scenario_tasks(name, _seq_task_ids, self.id, _sc_task_ids)
-        
         # Need to parse twice the sequences to avoid adding some sequences and not others in case of exception
         for name, tasks in sequences.items():
             self.add_sequence(name, tasks)
