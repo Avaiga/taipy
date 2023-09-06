@@ -68,8 +68,8 @@ class CoreSection(UniqueSection):
     _VERSION_NUMBER_KEY = "version_number"
     _DEFAULT_VERSION_NUMBER = ""
 
-    _TAIPY_FORCE_KEY = "force"
-    _DEFAULT_TAIPY_FORCE = False
+    _FORCE_KEY = "force"
+    _DEFAULT_FORCE = False
 
     def __init__(
         self,
@@ -92,7 +92,7 @@ class CoreSection(UniqueSection):
         )
         self.mode = mode or self._DEFAULT_MODE
         self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
-        self.force = force or self._DEFAULT_TAIPY_FORCE
+        self.force = force or self._DEFAULT_FORCE
         super().__init__(**properties)
 
     def __copy__(self):
@@ -167,7 +167,7 @@ class CoreSection(UniqueSection):
             cls._DEFAULT_READ_ENTITY_RETRY,
             cls._DEFAULT_MODE,
             cls._DEFAULT_VERSION_NUMBER,
-            cls._DEFAULT_TAIPY_FORCE,
+            cls._DEFAULT_FORCE,
         )
 
     def _clean(self):
@@ -178,7 +178,7 @@ class CoreSection(UniqueSection):
         self._read_entity_retry = self._DEFAULT_READ_ENTITY_RETRY
         self.mode = self._DEFAULT_MODE
         self.version_number = self._DEFAULT_VERSION_NUMBER
-        self.force = self._DEFAULT_TAIPY_FORCE
+        self.force = self._DEFAULT_FORCE
         self._properties.clear()
 
     def _to_dict(self):
@@ -198,7 +198,7 @@ class CoreSection(UniqueSection):
         if self.version_number is not None:
             as_dict[self._VERSION_NUMBER_KEY] = self.version_number
         if self.force is not None:
-            as_dict[self._TAIPY_FORCE_KEY] = self.force
+            as_dict[self._FORCE_KEY] = self.force
         as_dict.update(self._properties)
         return as_dict
 
@@ -211,7 +211,7 @@ class CoreSection(UniqueSection):
         read_entity_retry = as_dict.pop(cls._READ_ENTITY_RETRY_KEY, None)
         mode = as_dict.pop(cls._MODE_KEY, None)
         version_nb = as_dict.pop(cls._VERSION_NUMBER_KEY, None)
-        force = as_dict.pop(cls._TAIPY_FORCE_KEY, None)
+        force = as_dict.pop(cls._FORCE_KEY, None)
         return CoreSection(
             root_folder,
             storage_folder,
@@ -254,7 +254,7 @@ class CoreSection(UniqueSection):
         if self.version_number != version_number:
             self.version_number = version_number
 
-        force = _tpl._replace_templates(as_dict.pop(self._TAIPY_FORCE_KEY, self.force))
+        force = _tpl._replace_templates(as_dict.pop(self._FORCE_KEY, self.force))
         if self.force != force:
             self.force = force
 
