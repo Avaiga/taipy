@@ -363,25 +363,6 @@
         }
       }
     },
-    "SEQUENCE": {
-      "description": "Sequences",
-      "type": "object",
-      "properties": {},
-      "required": [],
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "tasks": {
-            "description": "The list of tasks configurations.",
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "uniqueItems": true
-          }
-        }
-      }
-    },
     "SCENARIO": {
       "description": "Scenarios",
       "type": "object",
@@ -390,8 +371,16 @@
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "sequences": {
-            "description": "The list of sequence configs.",
+          "tasks": {
+            "description": "The list of task configs.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "additional_data_nodes": {
+            "description": "The list of additional data node configs.",
             "type": "array",
             "items": {
               "type": "string"
@@ -417,6 +406,14 @@
               "type": "string",
               "taipy_function": true
             }
+          },
+          "sequences": {
+            "description": "The dictionary of sequence sequence descriptions.",
+            "type": "object",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
           }
         }
       }
