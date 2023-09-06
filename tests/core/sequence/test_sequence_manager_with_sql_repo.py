@@ -15,19 +15,13 @@ from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFact
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
-from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
@@ -45,7 +39,7 @@ def test_set_and_get_sequence(init_sql_repo):
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
 
-    scenario = Scenario("scenario", set([task]), {}, set())
+    scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
 
     sequence_name_1 = "p1"
@@ -57,7 +51,7 @@ def test_set_and_get_sequence(init_sql_repo):
     assert _SequenceManager._get(sequence_id_1) is None
     assert _SequenceManager._get(sequence_id_2) is None
 
-    scenario.add_sequences({sequence_name_1: {"tasks": []}})
+    scenario.add_sequences({sequence_name_1: []})
     sequence_1 = scenario.sequences[sequence_name_1]
 
     # Save one sequence. We expect to have only one sequence stored
@@ -70,7 +64,7 @@ def test_set_and_get_sequence(init_sql_repo):
 
     # Save a second sequence. Now, we expect to have a total of two sequences stored
     _TaskManager._set(task)
-    scenario.add_sequences({sequence_name_2: {"tasks": [task]}})
+    scenario.add_sequences({sequence_name_2: [task]})
     sequence_2 = scenario.sequences[sequence_name_2]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert len(_SequenceManager._get(sequence_id_1).tasks) == 0
@@ -95,7 +89,7 @@ def test_set_and_get_sequence(init_sql_repo):
 
     # We save a third sequence with same id as the first one.
     # We expect the first sequence to be updated
-    scenario.add_sequences({sequence_name_1: {"tasks": [task]}})
+    scenario.add_sequences({sequence_name_1: [task]})
     sequence_3 = scenario.sequences[sequence_name_1]
     assert _SequenceManager._get(sequence_id_1).id == sequence_1.id
     assert _SequenceManager._get(sequence_id_1).id == sequence_3.id
@@ -193,7 +187,7 @@ def test_get_or_create_data(init_sql_repo):
     assert len(_TaskManager._get_all()) == 0
 
     scenario = _ScenarioManager._create(scenario_config)
-    scenario.add_sequences({"by_6": {"tasks": list(scenario.tasks.values())}})
+    scenario.add_sequences({"by_6": list(scenario.tasks.values())})
     sequence = scenario.sequences["by_6"]
 
     assert sequence.name == "by_6"
@@ -238,7 +232,7 @@ def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo)
     _OrchestratorFactory._build_dispatcher()
 
     tasks = _TaskManager._bulk_get_or_create([task_config])
-    scenario = Scenario("scenario", tasks, {}, sequences={"sequence": {"tasks": tasks}})
+    scenario = Scenario("scenario", set(tasks), {}, sequences={"sequence": {"tasks": tasks}})
     _ScenarioManager._set(scenario)
 
     sequence = scenario.sequences["sequence"]
