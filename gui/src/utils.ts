@@ -186,3 +186,28 @@ export const iconLabelSx = {
     alignItems: "center",
     gap: 1,
 };
+
+export const tabularHeaderSx = {
+    display: "inline-flex",
+    gap: 1,
+    alignItems: "center",
+    width: "unset",
+    ml: 1,
+    pt: 1,
+};
+
+export const TableViewType = "table";
+export const ChartViewType = "chart";
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+export const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
+    },
+};
+export const colsSelectSx = { m: 1, width: 300 };
+

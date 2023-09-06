@@ -13,7 +13,8 @@
 
 import React, { useEffect, useState, useCallback, useMemo, MouseEvent, Fragment } from "react";
 
-import { DeleteOutline, Add, RefreshOutlined } from "@mui/icons-material";
+import { DeleteOutline, Add, RefreshOutlined, TableChartOutlined, BarChartOutlined } from "@mui/icons-material";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
@@ -24,10 +25,15 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 import { Chart, ColumnDesc, TraceValueType } from "taipy-gui";
 
+import { ChartViewType, TableViewType, tabularHeaderSx } from "./utils";
+
 interface DataNodeChartProps {
+    active: boolean;
     configId?: string;
     tabularData?: Record<string, TraceValueType>;
     columns?: Record<string, ColumnDesc>;
@@ -35,6 +41,7 @@ interface DataNodeChartProps {
     updateVarName?: string;
     uniqid: string;
     chartConfigs?: string;
+    onViewTypeChange: (e: MouseEvent, value?: string) => void;
 }
 
 const chartTypes: Record<string, { name: string; [prop: string]: unknown }> = {
@@ -101,19 +108,22 @@ const ColSelect = (props: ColSelectProps) => {
     useEffect(() => setCol(getTraceCol(traceConf, trace, axis)), [traceConf, trace, axis]);
 
     return (
-        <Select
-            labelId={labelId}
-            value={col}
-            onChange={onColChange}
-            input={<OutlinedInput label={label} />}
-            MenuProps={MenuProps}
-        >
-            {columns.map((c) => (
-                <MenuItem key={c} value={c}>
-                    <ListItemText primary={c} />
-                </MenuItem>
-            ))}
-        </Select>
+        <FormControl sx={selectSx}>
+            <InputLabel id={labelId}>{label}</InputLabel>
+            <Select
+                labelId={labelId}
+                value={col}
+                onChange={onColChange}
+                input={<OutlinedInput label={label} />}
+                MenuProps={MenuProps}
+            >
+                {columns.map((c) => (
+                    <MenuItem key={c} value={c}>
+                        <ListItemText primary={c} />
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
     );
 };
 
@@ -141,19 +151,22 @@ const TypeSelect = (props: TypeSelectProps) => {
     useEffect(() => setType(value), [value]);
 
     return (
-        <Select
-            labelId={labelId}
-            value={cType}
-            onChange={onTypeChange}
-            input={<OutlinedInput label={label} />}
-            MenuProps={MenuProps}
-        >
-            {Object.entries(chartTypes).map(([k, v]) => (
-                <MenuItem key={k} value={k}>
-                    <ListItemText primary={v.name} />
-                </MenuItem>
-            ))}
-        </Select>
+        <FormControl sx={selectSx}>
+            <InputLabel id={labelId}>{label}</InputLabel>
+            <Select
+                labelId={labelId}
+                value={cType}
+                onChange={onTypeChange}
+                input={<OutlinedInput label={label} />}
+                MenuProps={MenuProps}
+            >
+                {Object.entries(chartTypes).map(([k, v]) => (
+                    <MenuItem key={k} value={k}>
+                        <ListItemText primary={v.name} />
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
     );
 };
 
@@ -175,7 +188,11 @@ const getBaseConfig = (defaultConfig?: string, chartConfigs?: string, configId?:
                     try {
                         const conf: Record<string, ChartConfig> = JSON.parse(chartConfigs);
                         if (conf[configId]) {
-                            return { ...baseConfig, ...getChartTypeConfig(...(conf[configId].types || [])), ...conf[configId] };
+                            return {
+                                ...baseConfig,
+                                ...getChartTypeConfig(...(conf[configId].types || [])),
+                                ...conf[configId],
+                            };
                         }
                     } catch (e) {
                         console.warn(`chart_configs property is not a valid config.\n${e}`);
@@ -191,7 +208,7 @@ const getBaseConfig = (defaultConfig?: string, chartConfigs?: string, configId?:
 };
 
 const DataNodeChart = (props: DataNodeChartProps) => {
-    const { defaultConfig = "", uniqid, configId, chartConfigs = "" } = props;
+    const { defaultConfig = "", uniqid, configId, chartConfigs = "", onViewTypeChange } = props;
 
     const [config, setConfig] = useState<ChartConfig | undefined>(undefined);
     useEffect(() => {
@@ -282,23 +299,36 @@ const DataNodeChart = (props: DataNodeChartProps) => {
 
     return (
         <>
-            {" "}
-            <Button onClick={resetConfig} variant="outlined" color="inherit">
-                <RefreshOutlined /> Reset
-            </Button>
+            <Grid container sx={tabularHeaderSx}>
+                <Grid item>
+                    <Box className="taipy-toggle">
+                        <ToggleButtonGroup onChange={onViewTypeChange} exclusive value={ChartViewType} color="primary">
+                            <ToggleButton value={TableViewType}>
+                                <TableChartOutlined />
+                            </ToggleButton>
+                            <ToggleButton value={ChartViewType}>
+                                <BarChartOutlined />
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </Box>
+                </Grid>
+                <Grid item>
+                    <Button onClick={resetConfig} variant="outlined" color="inherit" className="taipy-button">
+                        <RefreshOutlined /> Reset
+                    </Button>
+                </Grid>
+            </Grid>
             <Paper>
-            <Grid container alignItems={"center"}>
-                {config?.traces && config?.types
-                    ? config?.traces.map((tc, idx) => {
-                          const baseLabelId = `${uniqid}-trace${idx}-"`;
-                          return (
-                              <Fragment key={idx}>
-                                  <Grid item xs={2}>
-                                      Trace {idx + 1}
-                                  </Grid>
-                                  <Grid item xs={3}>
-                                      <FormControl sx={selectSx}>
-                                          <InputLabel id={baseLabelId + "config"}>Category</InputLabel>
+                <Grid container alignItems="center">
+                    {config?.traces && config?.types
+                        ? config?.traces.map((tc, idx) => {
+                              const baseLabelId = `${uniqid}-trace${idx}-"`;
+                              return (
+                                  <Fragment key={idx}>
+                                      <Grid item xs={2}>
+                                          Trace {idx + 1}
+                                      </Grid>
+                                      <Grid item xs={3}>
                                           <TypeSelect
                                               trace={idx}
                                               label="Category"
@@ -306,11 +336,8 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               setTypeConf={setTypeChange}
                                               value={config.types ? config.types[idx] : ""}
                                           />
-                                      </FormControl>
-                                  </Grid>
-                                  <Grid item xs={3}>
-                                      <FormControl sx={selectSx}>
-                                          <InputLabel id={baseLabelId + "x"}>X-axis</InputLabel>
+                                      </Grid>
+                                      <Grid item xs={3}>
                                           <ColSelect
                                               trace={idx}
                                               axis={0}
@@ -319,12 +346,9 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               labelId={baseLabelId + "x"}
                                               columns={columns}
                                               setColConf={setColConf}
-                                          />
-                                      </FormControl>
-                                  </Grid>
-                                  <Grid item xs={3}>
-                                      <FormControl sx={selectSx}>
-                                          <InputLabel id={baseLabelId + "y"}>Y-axis</InputLabel>
+                                          />{" "}
+                                      </Grid>
+                                      <Grid item xs={3}>
                                           <ColSelect
                                               trace={idx}
                                               axis={1}
@@ -334,28 +358,28 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               columns={columns}
                                               setColConf={setColConf}
                                           />
-                                      </FormControl>
-                                  </Grid>
-                                  <Grid item xs={1}>
-                                      {config.traces && config.traces.length > 1 ? (
-                                          <IconButton onClick={onRemoveTrace} data-idx={idx}>
-                                              <DeleteOutline color="primary" />
-                                          </IconButton>
-                                      ) : null}
-                                  </Grid>
-                              </Fragment>
-                          );
-                      })
-                    : null}
-                <Grid item xs={12}>
-                    <Button onClick={onAddTrace}>
-                        <Add color="primary" />
-                        Add trace
-                    </Button>
+                                      </Grid>
+                                      <Grid item xs={1}>
+                                          {config.traces && config.traces.length > 1 ? (
+                                              <IconButton onClick={onRemoveTrace} data-idx={idx}>
+                                                  <DeleteOutline color="primary" />
+                                              </IconButton>
+                                          ) : null}
+                                      </Grid>
+                                  </Fragment>
+                              );
+                          })
+                        : null}
+                    <Grid item xs={12}>
+                        <Button onClick={onAddTrace}>
+                            <Add color="primary" />
+                            Add trace
+                        </Button>
+                    </Grid>
                 </Grid>
-            </Grid>
             </Paper>
             <Chart
+                active={props.active}
                 defaultConfig={config ? JSON.stringify(config) : defaultConfig}
                 updateVarName={props.updateVarName}
                 data={props.tabularData}
