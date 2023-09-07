@@ -11,12 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo, MouseEvent, Fragment } from "react";
+import React, { useEffect, useState, useCallback, useMemo, MouseEvent, Fragment, ChangeEvent } from "react";
 
 import { DeleteOutline, Add, RefreshOutlined, TableChartOutlined, BarChartOutlined } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
@@ -25,6 +26,7 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Switch from "@mui/material/Switch";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
@@ -80,6 +82,7 @@ interface ChartConfig {
     traces?: Array<[string, string]>;
     types?: string[];
     columns?: Record<string, ColumnDesc>;
+    options?: Array<Record<string, unknown>>;
 }
 
 interface ColSelectProps {
@@ -297,6 +300,34 @@ const DataNodeChart = (props: DataNodeChartProps) => {
         [configId]
     );
 
+    const [cumulative, setCumulative] = useState(false);
+    const onCumulativeChange = useCallback(
+        (e: ChangeEvent<HTMLInputElement>, check: boolean) => {
+            setCumulative(check);
+            setConfig((cfg) => {
+                if (!cfg || !cfg.types) {
+                    return cfg;
+                }
+                if (check) {
+                    const options: Array<Record<string, unknown>> = cfg.options || Array(cfg.types.length);
+                    cfg.types.forEach(
+                        (_, i) =>
+                            (options[i] = {
+                                ...(i < options.length ? options[i] || {} : {}),
+                                fill: i == 0 ? "tozeroy" : "tonexty",
+                            })
+                    );
+                    cfg.options = options;
+                } else {
+                    const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
+                    cfg.options = conf?.options || [];
+                }
+                return storeConf(configId, { ...cfg });
+            });
+        },
+        [defaultConfig, chartConfigs, configId]
+    );
+
     return (
         <>
             <Grid container sx={tabularHeaderSx}>
@@ -311,6 +342,12 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                             </ToggleButton>
                         </ToggleButtonGroup>
                     </Box>
+                </Grid>
+                <Grid item>
+                    <FormControlLabel
+                        control={<Switch value={cumulative} onChange={onCumulativeChange} color="primary" />}
+                        label="Cumulative"
+                    />
                 </Grid>
                 <Grid item>
                     <Button onClick={resetConfig} variant="outlined" color="inherit" className="taipy-button">
