@@ -293,6 +293,19 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.warnings) == 0
         assert len(Config._collector.infos) == 0
 
+        config._sections[ScenarioConfig.name]["new"].add_sequences({"sequence_2": ["task_config"]})
+        Config._collector = IssueCollector()
+        with pytest.raises(SystemExit):
+            Config.check()
+        assert len(Config._collector.errors) == 1
+        expected_error_messgae = (
+            "sequences field of ScenarioConfig `new` must be populated with a list of"
+            " TaskConfig objects. Current value of property `sequences` is ['task_config']."
+        )
+        assert expected_error_messgae in caplog.text
+        assert len(Config._collector.warnings) == 0
+        assert len(Config._collector.infos) == 0
+
         config._sections[ScenarioConfig.name]["new"].add_sequences({"sequence_2": [task_config_2]})
         Config._collector = IssueCollector()
         with pytest.raises(SystemExit):
