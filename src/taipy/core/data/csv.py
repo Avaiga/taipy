@@ -238,4 +238,4 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         else:
             df = pd.DataFrame(data, columns=columns)
         df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
-        self._track_edit(timestamp=datetime.now(), job_id=job_id)
+        self.track_edit(timestamp=datetime.now(), job_id=job_id)

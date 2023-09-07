@@ -320,12 +320,12 @@ class DataNode(_Entity, _Labeled):
         from ._data_manager_factory import _DataManagerFactory
 
         self._write(data)
-        self._track_edit(job_id=job_id, **kwargs)
+        self.track_edit(job_id=job_id, **kwargs)
         self.unlock_edit()
         _DataManagerFactory._build_manager()._set(self)
 
-    def _track_edit(self, **options):
-        """Add Edit tracking information to this data node."""
+    def track_edit(self, **options):
+        """Add edit tracking information to this data node."""
         edit = {}
         for k, v in options.items():
             if v is not None:
@@ -359,7 +359,7 @@ class DataNode(_Entity, _Labeled):
         join operator (_AND_ or _OR_).
 
         Parameters:
-            operators (Union[List[Tuple], Tuple]): TODO
+            operators (Union[List[Tuple], Tuple]): 3-tuples or list of 3-tuples (key, value, `Operator^`).
             join_operator (JoinOperator^): The operator used to join the multiple filter
                 3-tuples.
         """
