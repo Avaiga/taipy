@@ -31,7 +31,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 import { ColumnDesc, Table, TraceValueType } from "taipy-gui";
 
-import { ChartViewType, MenuProps, TableViewType, colsSelectSx, tabularHeaderSx } from "./utils";
+import { ChartViewType, MenuProps, TableViewType, selectSx, tabularHeaderSx } from "./utils";
 
 interface DataNodeTableProps {
     active: boolean;
@@ -122,7 +122,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                     </Box>
                 </Grid>
                 <Grid item>
-                    <FormControl sx={colsSelectSx} fullWidth className="taipy-selector">
+                    <FormControl sx={selectSx} fullWidth className="taipy-selector">
                         <InputLabel id={uniqid + "-cols-label"}>Columns</InputLabel>
                         <Select
                             labelId={uniqid + "-cols-label"}
