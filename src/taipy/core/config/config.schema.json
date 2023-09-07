@@ -408,7 +408,7 @@
             }
           },
           "sequences": {
-            "description": "The dictionary of sequence sequence descriptions.",
+            "description": "The dictionary of sequence descriptions.",
             "type": "object",
             "items": {
               "type": "string"
