@@ -345,8 +345,8 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 </Grid>
                 <Grid item>
                     <FormControlLabel
-                        control={<Switch value={cumulative} onChange={onCumulativeChange} />}
-                        label="Cumulative traces"
+                        control={<Switch value={cumulative} onChange={onCumulativeChange} color="primary" />}
+                        label="Cumulative"
                     />
                 </Grid>
                 <Grid item>

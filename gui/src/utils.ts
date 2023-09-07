@@ -188,10 +188,8 @@ export const iconLabelSx = {
 };
 
 export const tabularHeaderSx = {
-    display: "inline-flex",
     gap: 1,
     alignItems: "center",
-    width: "unset",
     ml: 1,
     pt: 1,
 };
