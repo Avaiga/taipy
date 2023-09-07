@@ -325,7 +325,12 @@ class DataNode(_Entity, _Labeled):
         _DataManagerFactory._build_manager()._set(self)
 
     def track_edit(self, **options):
-        """Add edit tracking information to this data node."""
+        """Add edit tracking information to this data node.
+
+        Parameters:
+            options: track `timestamp`, `comments`, `job_id`. The others are user-custom, users can use options
+                to attach any information to an external edit of a data node.
+        """
         edit = {}
         for k, v in options.items():
             if v is not None:
