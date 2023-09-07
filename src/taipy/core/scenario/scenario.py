@@ -570,7 +570,6 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     def _is_consistent(self) -> bool:
         dag = self._build_dag()
-
         if dag.number_of_nodes() == 0:
             return True
         if not nx.is_directed_acyclic_graph(dag):

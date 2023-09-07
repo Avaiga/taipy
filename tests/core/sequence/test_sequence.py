@@ -111,55 +111,68 @@ def test_check_consistency():
     assert sequence_1._is_consistent()
 
     input_2 = InMemoryDataNode("foo", Scope.SCENARIO)
-    output_2 = InMemoryDataNode("foo", Scope.SCENARIO)
-    task_2 = Task("foo", {}, print, [input_2], [output_2], TaskId("task_id_2"))
+    output_2 = InMemoryDataNode("bar", Scope.SCENARIO)
+    task_2 = Task("tfoo", {}, print, [input_2], [output_2], TaskId("task_id_2"))
     sequence_2 = Sequence({}, [task_2], "name_2")
     assert sequence_2._is_consistent()
 
     data_node_3 = InMemoryDataNode("foo", Scope.SCENARIO)
-    task_3 = Task("foo", {}, print, [data_node_3], [data_node_3], TaskId("task_id_3"))
+    task_3 = Task("tfoo", {}, print, [data_node_3], [data_node_3], TaskId("task_id_3"))
     sequence_3 = Sequence({}, [task_3], "name_3")
     assert not sequence_3._is_consistent()  # Not a dag
 
     input_4 = InMemoryDataNode("foo", Scope.SCENARIO)
-    output_4 = InMemoryDataNode("foo", Scope.SCENARIO)
-    task_4_1 = Task("foo", {}, print, [input_4], [output_4], TaskId("task_id_4_1"))
-    task_4_2 = Task("bar", {}, print, [output_4], [input_4], TaskId("task_id_4_2"))
+    output_4 = InMemoryDataNode("bar", Scope.SCENARIO)
+    task_4_1 = Task("tfoo", {}, print, [input_4], [output_4], TaskId("task_id_4_1"))
+    task_4_2 = Task("tbar", {}, print, [output_4], [input_4], TaskId("task_id_4_2"))
     sequence_4 = Sequence({}, [task_4_1, task_4_2], "name_4")
     assert not sequence_4._is_consistent()  # Not a Dag
 
     class FakeDataNode:
         config_id = "config_id_of_a_fake_dn"
 
-    input_5 = DataNode("foo", Scope.SCENARIO, "input_id_5")
-    output_5 = DataNode("foo", Scope.SCENARIO, "output_id_5")
-    task_5_1 = Task("foo", {}, print, [input_5], [output_5], TaskId("task_id_5_1"))
-    task_5_2 = Task("bar", {}, print, [output_5], [FakeDataNode()], TaskId("task_id_5_2"))
-    sequence_5 = Sequence({}, [task_5_1, task_5_2], "name_5")
-    assert not sequence_5._is_consistent()
+    input_6 = DataNode("foo", Scope.SCENARIO, "input_id_5")
+    output_6 = DataNode("bar", Scope.SCENARIO, "output_id_5")
+    task_6_1 = Task("tfoo", {}, print, [input_6], [output_6], TaskId("task_id_5_1"))
+    task_6_2 = Task("tbar", {}, print, [output_6], [FakeDataNode()], TaskId("task_id_5_2"))
+    sequence_6 = Sequence({}, [task_6_1, task_6_2], "name_5")
+    assert not sequence_6._is_consistent()  # Not a DataNode
 
-    intermediate_6 = DataNode("foo", Scope.SCENARIO, "intermediate_id_6")
-    output_6 = DataNode("foo", Scope.SCENARIO, "output_id_6")
-    task_6_1 = Task("foo", {}, print, [], [intermediate_6], TaskId("task_id_6_1"))
-    task_6_2 = Task("foo", {}, print, [intermediate_6], [output_6], TaskId("task_id_6_2"))
-    sequence_6 = Sequence({}, [task_6_1, task_6_2], "name_6")
-    assert sequence_6._is_consistent()
-
-    input_7 = DataNode("foo", Scope.SCENARIO, "output_id_7")
     intermediate_7 = DataNode("foo", Scope.SCENARIO, "intermediate_id_7")
-    task_7_1 = Task("foo", {}, print, [input_7], [intermediate_7], TaskId("task_id_7_1"))
-    task_7_2 = Task("foo", {}, print, [intermediate_7], [], TaskId("task_id_7_2"))
+    output_7 = DataNode("bar", Scope.SCENARIO, "output_id_7")
+    task_7_1 = Task("tfoo", {}, print, [], [intermediate_7], TaskId("task_id_7_1"))
+    task_7_2 = Task("tbar", {}, print, [intermediate_7], [output_7], TaskId("task_id_7_2"))
     sequence_7 = Sequence({}, [task_7_1, task_7_2], "name_7")
     assert sequence_7._is_consistent()
 
-    input_8 = DataNode("foo", Scope.SCENARIO, "input_id_8")
-    output_8 = DataNode("foo", Scope.SCENARIO, "output_id_8")
-    input_9 = DataNode("foo", Scope.SCENARIO, "input_id_9")
-    output_9 = DataNode("foo", Scope.SCENARIO, "output_id_9")
-    task_8_1 = Task("foo", {}, print, [input_8], [output_8], TaskId("task_id_8_1"))
-    task_8_2 = Task("foo", {}, print, [input_9], [output_9], TaskId("task_id_8_2"))
-    sequence_7 = Sequence({}, [task_8_1, task_8_2], "name_7")
-    assert not sequence_7._is_consistent()
+    input_8 = DataNode("foo", Scope.SCENARIO, "output_id_8")
+    intermediate_8 = DataNode("bar", Scope.SCENARIO, "intermediate_id_8")
+    task_8_1 = Task("tfoo", {}, print, [input_8], [intermediate_8], TaskId("task_id_8_1"))
+    task_8_2 = Task("tbar", {}, print, [intermediate_8], [], TaskId("task_id_8_2"))
+    sequence_8 = Sequence({}, [task_8_1, task_8_2], "name_8")
+    assert sequence_8._is_consistent()
+
+    input_9_1 = DataNode("foo", Scope.SCENARIO, "input_id_9_1")
+    output_9_1 = DataNode("bar", Scope.SCENARIO, "output_id_9_1")
+    input_9_2 = DataNode("baz", Scope.SCENARIO, "input_id_9_2")
+    output_9_2 = DataNode("qux", Scope.SCENARIO, "output_id_9_2")
+    task_9_1 = Task("tfoo", {}, print, [input_9_1], [output_9_1], TaskId("task_id_9_1"))
+    task_9_2 = Task("tbar", {}, print, [input_9_2], [output_9_2], TaskId("task_id_9_2"))
+    sequence_9 = Sequence({}, [task_9_1, task_9_2], "name_9")
+    assert not sequence_9._is_consistent()  # Not connected
+
+    input_10_1 = DataNode("foo", Scope.SCENARIO, "output_id_10_1")
+    intermediate_10_1 = DataNode("bar", Scope.SCENARIO, "intermediate_id_10_1")
+    intermediate_10_2 = DataNode("baz", Scope.SCENARIO, "intermediate_id_10_2")
+    output_10 = DataNode("qux", Scope.SCENARIO, "output_id_10")
+    post_10 = DataNode("quux", Scope.SCENARIO, "post_id_10")
+    task_10_1 = Task("tfoo", {}, print, [input_10_1], [intermediate_10_1], TaskId("task_id_10_1"))
+    task_10_2 = Task("tbar", {}, print, [], [intermediate_10_2], TaskId("task_id_10_2"))
+    task_10_3 = Task("tbaz", {}, print, [intermediate_10_1, intermediate_10_2], [output_10], TaskId("task_id_10_3"))
+    task_10_4 = Task("tqux", {}, print, [output_10], [post_10], TaskId("task_id_10_4"))
+    task_10_5 = Task("tquux", {}, print, [output_10], [], TaskId("task_id_10_5"))
+    sequence_10 = Sequence({}, [task_10_1, task_10_2, task_10_3, task_10_4, task_10_5], "name_10")
+    assert sequence_10._is_consistent()
 
 
 def test_get_sorted_tasks():
