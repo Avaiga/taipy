@@ -32,7 +32,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 import { Chart, ColumnDesc, TraceValueType } from "taipy-gui";
 
-import { ChartViewType, TableViewType, tabularHeaderSx } from "./utils";
+import { ChartViewType, MenuProps, TableViewType, selectSx, tabularHeaderSx } from "./utils";
 
 interface DataNodeChartProps {
     active: boolean;
@@ -49,6 +49,7 @@ interface DataNodeChartProps {
 const chartTypes: Record<string, { name: string; [prop: string]: unknown }> = {
     scatter: { name: "Cartesian", addIndex: true, axisNames: [] },
     pie: { name: "Pie", addIndex: false, axisNames: ["values", "labels"] },
+    scatterpolargl: {name: "Polar", addIndex: true, axisNames:["r", "theta"]}
 };
 
 const getChartTypeConfig = (...types: string[]) => {
@@ -65,18 +66,6 @@ const getChartTypeConfig = (...types: string[]) => {
     });
     return ret;
 };
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-        },
-    },
-};
-const selectSx = { m: 1, width: 300 };
 
 interface ChartConfig {
     traces?: Array<[string, string]>;

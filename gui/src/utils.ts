@@ -207,5 +207,5 @@ export const MenuProps = {
         },
     },
 };
-export const colsSelectSx = { m: 1, width: 300 };
+export const selectSx = { m: 1, width: 300 };
 
