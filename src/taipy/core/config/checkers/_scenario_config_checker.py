@@ -119,8 +119,6 @@ class _ScenarioConfigChecker(_ConfigChecker):
         for task_config in scenario_config.tasks:
             if isinstance(task_config, TaskConfig):
                 scenario_task_ids.add(task_config.id)
-            else:
-                return
         for sequence_tasks in scenario_config.sequences.values():
             self._check_children(
                 ScenarioConfig,
