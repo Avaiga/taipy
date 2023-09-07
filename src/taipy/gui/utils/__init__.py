@@ -44,6 +44,7 @@ from .types import (
     _TaipyData,
     _TaipyDate,
     _TaipyDict,
+    _TaipyLoNumbers,
     _TaipyLov,
     _TaipyLovValue,
     _TaipyNumber,

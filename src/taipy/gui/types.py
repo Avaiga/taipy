@@ -22,6 +22,7 @@ from .utils import (
     _TaipyData,
     _TaipyDate,
     _TaipyDict,
+    _TaipyLoNumbers,
     _TaipyLov,
     _TaipyLovValue,
     _TaipyNumber,
@@ -79,6 +80,10 @@ class PropertyType(Enum):
     """
     The property holds a dynamic number.
     """
+    dynamic_lo_numbers = _TaipyLoNumbers
+    """
+    The property holds a dynamic list of numbers.
+    """
     dynamic_boolean = _TaipyBool
     """
     The property holds a dynamic Boolean value.
@@ -119,7 +124,7 @@ class PropertyType(Enum):
     This is typically used to handle CSS dimension values, where a unit can be used.
     """
     boolean_or_list = "boolean|list"
-    number_or_lov_value = "number|lovValue"
+    slider_value = "number|number[]|lovValue"
     string_list = "stringlist"
     decimator = Decimator
     """

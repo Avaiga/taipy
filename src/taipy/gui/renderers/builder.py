@@ -717,9 +717,17 @@ class _Builder:
             default_val (optional(Any)): the default value.
         """
         var_name = self.__default_property_name if var_name is None else var_name
-        if var_type == PropertyType.number_or_lov_value:
-            var_type = PropertyType.lov_value if self.__attributes.get("lov") else PropertyType.dynamic_number
-            native_type = native_type if var_type == PropertyType.dynamic_number else False
+        if var_type == PropertyType.slider_value:
+            if self.__attributes.get("lov"):
+                var_type = PropertyType.lov_value
+                native_type = False
+            else:
+                var_type = (
+                    PropertyType.dynamic_lo_numbers
+                    if isinstance(self.__attributes.get("value"), list)
+                    else PropertyType.dynamic_number
+                )
+                native_type = True
         if var_type == PropertyType.dynamic_boolean:
             return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
         if hash_name := self.__hashes.get(var_name):

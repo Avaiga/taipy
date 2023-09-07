@@ -6,12 +6,12 @@ name = "pypi"
 [packages]
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
 flask = "==2.2.5"
-flask-cors = "==3.0.10"
-flask-socketio = "==5.3.0"
-gevent = "==22.10.2"
+flask-cors = "==4.0.0"
+flask-socketio = "==5.3.6"
+gevent = "==23.7.0"
 gevent-websocket = "==0.10.1"
 kthread = "==0.2.3"
-markdown = "==3.4.1"
+markdown = "==3.4.4"
 pandas = "==2.0.0"
 pyarrow = "==10.0.1"
 pyngrok = "==5.1"
@@ -19,11 +19,11 @@ python-dotenv = "==0.19"
 python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
 python-magic-bin = {version = "==0.4.14", markers="sys_platform == 'win32'"}
 pytz = "==2021.3"
-simple-websocket = "==0.9"
+simple-websocket = "==0.10.1"
 taipy-config = {ref = "develop", git = "https://github.com/avaiga/taipy-config.git"}
 tzlocal = "==3.0"
 gitignore-parser = "==0.1.1"
-twisted = "==22.10.0"
+twisted = "==23.8.0"
 
 [dev-packages]
 black = "*"
