@@ -15,13 +15,13 @@ from unittest.mock import patch
 
 import pytest
 
-from src.taipy.gui._gui_cli import _GuiCLI
 from taipy.config import Config
 from taipy.config._config import _Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.checker._checker import _Checker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.gui import Gui
+from taipy.gui._gui_cli import _GuiCLI
 
 
 class NamedTemporaryFile:
