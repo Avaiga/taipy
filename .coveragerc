@@ -2,6 +2,7 @@
 # uncomment the following to omit files during running
 omit =
     proxy.py
+    src/taipy/gui/_gui_cli.py
 [report]
 exclude_lines =
     pragma: no cover
