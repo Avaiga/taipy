@@ -15,12 +15,13 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy.gui import Gui
+from src.taipy.gui._gui_cli import _GuiCLI
 from taipy.config import Config
 from taipy.config._config import _Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.checker._checker import _Checker
 from taipy.config.checker.issue_collector import IssueCollector
+from taipy.gui import Gui
 
 
 class NamedTemporaryFile:
@@ -155,6 +156,21 @@ use_reloader = "true:bool"
         service_config = gui._config.config
         assert service_config["host"] == "my_4th_host"
         assert service_config["port"] == 5004
+        assert not service_config["use_reloader"]
+        assert service_config["debug"]
+        gui.stop()
+
+
+def test_run_parser():
+    _GuiCLI.create_run_parser()
+
+    # Override default configuration by providing arguments in run command
+    with patch("sys.argv", ["prog", "run", "--host", "my_host", "--port", "5001", "--no-reloader", "--debug"]):
+        gui = Gui()
+        gui.run(run_server=False)
+        service_config = gui._config.config
+        assert service_config["host"] == "my_host"
+        assert service_config["port"] == 5001
         assert not service_config["use_reloader"]
         assert service_config["debug"]
         gui.stop()
