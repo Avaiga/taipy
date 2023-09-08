@@ -97,6 +97,21 @@ class _TaipyNumber(_TaipyBase):
         return _TaipyBase._HOLDER_PREFIX + "N"
 
 
+class _TaipyLoNumbers(_TaipyBase):
+    def cast_value(self, value: t.Any):
+        if isinstance(value, str):
+            try:
+                return list(map(lambda f: float(f), value[1:-1].split(",")))
+            except Exception as e:
+                _warn(f"{self._get_readable_name()}: Parsing {value} as an array of numbers:\n{e}")
+                return []
+        return super().cast_value(value)
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Ln"
+
+
 class _TaipyDate(_TaipyBase):
     def get(self):
         val = super().get()

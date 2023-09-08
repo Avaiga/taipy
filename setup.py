@@ -30,21 +30,21 @@ with open(f"src{os.sep}taipy{os.sep}gui{os.sep}version.json") as version_file:
 
 requirements = [
     "flask>=2.2,<2.3",
-    "flask-cors>=3.0.10,<4.0",
-    "flask-socketio>=5.3.0,<6.0",
-    "markdown>=3.4.1,<4.0",
+    "flask-cors>=4.0.0,<5.0",
+    "flask-socketio>=5.3.6,<6.0",
+    "markdown>=3.4.4,<4.0",
     "pandas>=2.0.0,<3.0",
     "python-dotenv>=0.19,<0.21",
     "pytz>=2021.3,<2022.2",
     "tzlocal>=3.0,<5.0",
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "gevent>=22.10.2,<23.0",
+    "gevent>=23.7.0,<24.0",
     "gevent-websocket>=0.10.1,<0.11",
     "kthread>=0.2.3,<0.3",
     "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
     "gitignore-parser>=0.1,<0.2",
-    "simple-websocket>=0.9,<1.0",
-    "twisted>=22.10",
+    "simple-websocket>=0.10.1,<1.0",
+    "twisted>=23.8.0,<24.0",
 ]
 
 test_requirements = ["pytest>=3.8"]

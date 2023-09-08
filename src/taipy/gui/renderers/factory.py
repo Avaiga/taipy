@@ -391,7 +391,7 @@ class _Factory:
             attributes=attrs,
             default_value=0,
         )
-        .set_value_and_default(native_type=True, var_type=PropertyType.number_or_lov_value)
+        .set_value_and_default(native_type=True, var_type=PropertyType.slider_value)
         .set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),

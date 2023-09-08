@@ -82,6 +82,13 @@ describe("Slider Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
+    it("holds a numeric range", async () => {
+        const { getByDisplayValue } = render(<Slider defaultValue={"[10,90]"} value={undefined as unknown as number[]} />);
+        const elt1 = getByDisplayValue("10");
+        expect(elt1.tagName).toBe("INPUT");
+        const elt2 = getByDisplayValue("90");
+        expect(elt2.tagName).toBe("INPUT");
+    });
     it("shows discrete value when lov", async () => {
         const { getAllByText } = render(
             <Slider
@@ -106,6 +113,13 @@ describe("Slider Component", () => {
         const elts = getAllByText("Item 1");
         expect(elts).toHaveLength(1);
         expect(elts[0].tagName).toBe("P");
+    });
+    it("holds a lov range", async () => {
+        const { getByDisplayValue } = render(<Slider value={["B", "C"]} defaultLov={'[["A", "A"], ["B", "B"], ["C", "C"], ["D", "D"]]'} />);
+        const elt1 = getByDisplayValue("1");
+        expect(elt1.tagName).toBe("INPUT");
+        const elt2 = getByDisplayValue("2");
+        expect(elt2.tagName).toBe("INPUT");
     });
     it("shows marks", async () => {
         const { getAllByText } = render(

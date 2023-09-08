@@ -91,6 +91,17 @@ def test_slider_text_anchor_default_md(gui: Gui, test_client, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_slider_array_md(gui: Gui, test_client, helpers):
+    gui._bind_var_val("x", [10, 20])
+    md_string = "<|{x}|slider|>"
+    expected_list = [
+        "<Slider",
+        'updateVarName="_TpLn_tpec_TpExPr_x_TPMDL_0"',
+        "value={_TpLn_tpec_TpExPr_x_TPMDL_0}",
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_slider_html_1(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 10)
     html_string = '<taipy:slider value="{x}" />'
