@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Dict
+from typing import Dict, Tuple
 
 from taipy._cli._base_cli import _CLI
 
@@ -17,7 +17,7 @@ from taipy._cli._base_cli import _CLI
 class _GuiCLI:
     """Command-line interface of GUI."""
 
-    __GUI_ARGS: Dict[str, Dict] = {
+    __GUI_ARGS: Dict[Tuple, Dict] = {
         ("--port", "-P"): {
             "dest": "taipy_port",
             "metavar": "PORT",
