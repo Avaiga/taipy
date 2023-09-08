@@ -56,7 +56,7 @@ class _VersionManager(_Manager[_Version]):
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
                 if force:
                     cls.__logger.warning(
-                        f"Option --taipy-force is detected, overriding the configuration of version {id} ..."
+                        f"Option --force is detected, overriding the configuration of version {id} ..."
                     )
                     version.config = Config._applied_config
                 else:
@@ -110,7 +110,7 @@ class _VersionManager(_Manager[_Version]):
             cls._get_or_create(version_number, force)
         except ConflictedConfigurationError:
             raise SystemExit(
-                f"Please add a new experiment version or run your application with --taipy-force option to"
+                f"Please add a new experiment version or run your application with --force option to"
                 f" override the Config of experiment {version_number}."
             )
         cls._repository._set_latest_version(version_number)
@@ -136,7 +136,7 @@ class _VersionManager(_Manager[_Version]):
             raise SystemExit(
                 f"Please add a new production version with migration functions.\n"
                 f"If old entities remain compatible with the new configuration, you can also run your application with"
-                f" --taipy-force option to override the production configuration of version {version_number}."
+                f" --force option to override the production configuration of version {version_number}."
             )
         cls._repository._set_production_version(version_number)
         return version_number
