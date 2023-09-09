@@ -16,9 +16,13 @@ import sys
 import types
 import typing as t
 
-from ..extension.library import ElementLibrary
-from ..renderers._class_api import BlockElementApi, ControlElementApi
-from .singleton import _Singleton
+from taipy.logger._taipy_logger import _TaipyLogger
+
+from ...utils.singleton import _Singleton
+from .element_api import BlockElementApi, ControlElementApi
+
+if t.TYPE_CHECKING:
+    from ...extension.library import ElementLibrary
 
 
 class _ElementApiGenerator(object, metaclass=_Singleton):
@@ -33,7 +37,9 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             raise RuntimeError("Cannot generate Element API for the current module: taipy-gui module not found.")
         module_name = current_frame.f_back.f_globals["__name__"]
         self.__module = module = sys.modules[module_name]
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viselements.json"))) as viselements:
+        with open(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "viselements.json"))
+        ) as viselements:
             data = json.load(viselements)
             if "blocks" not in data or "controls" not in data:
                 raise RuntimeError("Cannot generate Element API for the current module: Invalid viselements.json file.")
@@ -48,10 +54,13 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
                     _ElementApiGenerator.createControlElement(controlElement[0], controlElement[0]),
                 )
 
-    def add_library(self, library: ElementLibrary):
+    def add_library(self, library: "ElementLibrary"):
         library_name = library.get_name()
         if self.__module is None:
-            raise RuntimeError(f"Cannot add Element API for extension library: '{library_name}'")
+            _TaipyLogger._get_logger().info(
+                "Python API for extension library '{library_name}' will not be available. To fix this, import 'taipy.gui.builder' before importing the extension library."
+            )
+            return
         library_module = getattr(self.__module, library_name, None)
         if library_module is None:
             library_module = types.ModuleType(library_name)

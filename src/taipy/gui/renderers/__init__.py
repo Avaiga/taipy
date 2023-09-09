@@ -15,7 +15,14 @@ from os import path
 
 from ..page import Page
 from ..utils import _is_in_notebook, _varname_from_content
-from ._class_api import BlockElementApi, ControlElementApi, ElementApi
+from ._class_api import (
+    BlockElementApi,
+    ControlElementApi,
+    DefaultBlockElement,
+    ElementApi,
+    _ElementApiContextManager,
+    _ElementApiGenerator,
+)
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
@@ -174,12 +181,33 @@ class ClassApi(_Renderer):
     Page generator for Element Api.
     """
 
-    def __init__(self, content: ElementApi, **kwargs) -> None:
+    def __init__(self, content: t.Optional[ElementApi] = None, **kwargs) -> None:
+        if content is None:
+            content = DefaultBlockElement()
         kwargs["content"] = content
         super().__init__(**kwargs)
 
     # Generate JSX from Element Object
     def render(self, gui) -> str:
         if self._base_element is None:
-            return "<h1>No Base Element found for ClassApi</h1>"
+            return "<h1>No Base Element found for Page</h1>"
         return self._base_element._render(gui)
+
+    def add(self, *elements: ElementApi):
+        if not isinstance(self._base_element, BlockElementApi):
+            raise RuntimeError("Can't add child element to non-block element")
+        for element in elements:
+            if element not in self._base_element._children:
+                self._base_element._children.append(element)
+        return self
+
+    def __enter__(self):
+        if self._base_element is None:
+            raise RuntimeError("Can't use context manager with missing block element for Page")
+        if not isinstance(self._base_element, BlockElementApi):
+            raise RuntimeError("Can't add child element to non-block element")
+        _ElementApiContextManager().push(self._base_element)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        _ElementApiContextManager().pop()

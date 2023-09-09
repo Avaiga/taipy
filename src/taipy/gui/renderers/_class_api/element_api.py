@@ -13,8 +13,9 @@ from __future__ import annotations
 
 import typing as t
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 
-from ...utils import _ElementApiContextManager
+from .element_api_context_manager import _ElementApiContextManager
 from .factory import _ClassApiFactory
 
 if t.TYPE_CHECKING:
@@ -33,9 +34,23 @@ class ElementApi(ABC):
 
     def __init__(self, **kwargs):
         self._properties = kwargs
+        self.parse_properties()
 
     def update(self, **kwargs):
         self._properties.update(kwargs)
+        self.parse_properties()
+
+    # Convert property value to string
+    def parse_properties(self):
+        self._properties = {k: ElementApi._parse_property(v) for k, v in self._properties.items()}
+
+    @staticmethod
+    def _parse_property(value: t.Any) -> t.Any:
+        if isinstance(value, (str, dict, Iterable)):
+            return value
+        if hasattr(value, "__name__"):
+            return str(getattr(value, "__name__"))
+        return str(value)
 
     @abstractmethod
     def _render(self, gui: "Gui") -> str:
@@ -66,6 +81,13 @@ class BlockElementApi(ElementApi):
 
     def _render_children(self, gui: "Gui") -> str:
         return "\n".join([child._render(gui) for child in self._children])
+
+
+class DefaultBlockElement(BlockElementApi):
+    _ELEMENT_NAME = "part"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class ControlElementApi(ElementApi):

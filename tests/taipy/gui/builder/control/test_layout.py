@@ -9,15 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import typing as t
+import taipy.gui.builder as tgb
+from taipy.gui import Gui
 
-from ..factory import _Factory
 
-
-class _ClassApiFactory(_Factory):
-    @staticmethod
-    def create_element(gui, control_type: str, all_properties: t.Dict[str, t.Any]) -> t.Tuple[str, str]:
-        builder_html = _Factory.call_builder(gui, control_type, all_properties, True)
-        if builder_html is None:
-            return f"<div>INVALID SYNTAX - Control is '{control_type}'", "div"
-        return builder_html  # type: ignore
+def test_layout_builder_1(gui: Gui, helpers):
+    with tgb.Page(frame=None) as page:
+        with tgb.layout(columns="1 1", gap="1rem"):
+            tgb.text(value="This is a layout section")
+    expected_list = ["<Layout", 'columns="1 1', 'gap="1rem"', "This is a layout section"]
+    helpers.test_control_builder(gui, page, expected_list)

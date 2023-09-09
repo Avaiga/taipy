@@ -43,6 +43,11 @@ class Helpers:
         Helpers._test_control(gui, expected_values)
 
     @staticmethod
+    def test_control_builder(gui: Gui, builder_page, expected_values: t.Union[str, t.List]):
+        gui.add_page("test", builder_page)
+        Helpers._test_control(gui, expected_values)
+
+    @staticmethod
     def _test_control(gui: Gui, expected_values: t.Union[str, t.List]):
         gui.run(run_server=False, single_client=True, stylekit=False)
         client = gui._server.test_client()

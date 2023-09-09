@@ -33,7 +33,7 @@ with open("./tools/class_api_templates/block.txt", "r") as file:
 with open("./tools/class_api_templates/control.txt", "r") as file:
     control_template = file.read()
 
-os.system("pipenv run stubgen ./src/taipy/gui/__init__.py --no-import --parse-only --export-less -o ./")
+os.system("pipenv run stubgen ./src/taipy/gui/builder/__init__.py --no-import --parse-only --export-less -o ./")
 
 
 def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
@@ -70,7 +70,7 @@ for control_element in viselements["controls"]:
     properties = ", ".join([f"{p} = ..." for p in property_names])
     doc_arguments = f"\n{12*' '}".join([build_doc(p) for p in property_list])
     # append properties to __init__.pyi
-    with open("./src/taipy/gui/__init__.pyi", "a") as file:
+    with open("./src/taipy/gui/builder/__init__.pyi", "a") as file:
         file.write(
             control_template.replace("{{name}}", name)
             .replace("{{properties}}", properties)
@@ -88,7 +88,7 @@ for block_element in viselements["blocks"]:
     properties = ", ".join([f"{p} = ..." for p in property_names])
     doc_arguments = f"{8*' '}".join([build_doc(p) for p in property_list])
     # append properties to __init__.pyi
-    with open("./src/taipy/gui/__init__.pyi", "a") as file:
+    with open("./src/taipy/gui/builder/__init__.pyi", "a") as file:
         file.write(
             block_template.replace("{{name}}", name)
             .replace("{{properties}}", properties)
@@ -97,3 +97,5 @@ for block_element in viselements["blocks"]:
 
 os.system("pipenv run isort src/taipy/gui/*.pyi")
 os.system("pipenv run black src/taipy/gui/*.pyi")
+os.system("pipenv run isort src/taipy/gui/builder/*.pyi")
+os.system("pipenv run black src/taipy/gui/builder/*.pyi")
