@@ -176,5 +176,5 @@ print(
     f"\n\nTo start the application, change directory to the newly created folder:"
     f"\n\tcd {os.path.join(os.getcwd())}"
     f"\nand run the application as follows:"
-    f"\n\tpython {main_file_name}"
+    f"\n\ttaipy run {main_file_name}"
 )
