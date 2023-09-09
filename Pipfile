@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
-flask = "==2.2.5"
+flask = "==2.3.3"
 flask-cors = "==4.0.0"
 flask-socketio = "==5.3.6"
 gevent = "==23.7.0"
@@ -15,7 +15,7 @@ markdown = "==3.4.4"
 pandas = "==2.0.0"
 pyarrow = "==10.0.1"
 pyngrok = "==5.1"
-python-dotenv = "==0.19"
+python-dotenv = "==1.0.0"
 python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
 python-magic-bin = {version = "==0.4.14", markers="sys_platform == 'win32'"}
 pytz = "==2021.3"

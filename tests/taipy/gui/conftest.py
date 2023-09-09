@@ -23,11 +23,12 @@ def pytest_configure(config):
     if (find_spec("src") and find_spec("src.taipy")) and (not find_spec("taipy") or not find_spec("taipy.gui")):
         import src.taipy.gui
         import src.taipy.gui._warnings
-        import src.taipy.gui.data.utils
+        import src.taipy.gui.builder
         import src.taipy.gui.data.decimator.lttb
         import src.taipy.gui.data.decimator.minmax
         import src.taipy.gui.data.decimator.rdp
         import src.taipy.gui.data.decimator.scatter_decimator
+        import src.taipy.gui.data.utils
         import src.taipy.gui.extension
         import src.taipy.gui.renderers.builder
         import src.taipy.gui.utils._map_dict
@@ -48,6 +49,7 @@ def pytest_configure(config):
             "src.taipy.gui.data.decimator.scatter_decimator"
         ]
         sys.modules["taipy.gui"] = sys.modules["src.taipy.gui"]
+        sys.modules["taipy.gui.builder"] = sys.modules["src.taipy.gui.builder"]
 
 
 csv = pd.read_csv(

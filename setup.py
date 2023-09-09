@@ -29,12 +29,12 @@ with open(f"src{os.sep}taipy{os.sep}gui{os.sep}version.json") as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
-    "flask>=2.2,<2.3",
+    "flask>=2.3.3,<2.4",
     "flask-cors>=4.0.0,<5.0",
     "flask-socketio>=5.3.6,<6.0",
     "markdown>=3.4.4,<4.0",
     "pandas>=2.0.0,<3.0",
-    "python-dotenv>=0.19,<0.21",
+    "python-dotenv>=1.0.0,<1.1",
     "pytz>=2021.3,<2022.2",
     "tzlocal>=3.0,<5.0",
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",

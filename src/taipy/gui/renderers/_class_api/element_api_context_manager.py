@@ -11,10 +11,10 @@
 
 import typing as t
 
-from .singleton import _Singleton
+from ...utils.singleton import _Singleton
 
 if t.TYPE_CHECKING:
-    from ..renderers import BlockElementApi
+    from .element_api import BlockElementApi
 
 
 class _ElementApiContextManager(object, metaclass=_Singleton):

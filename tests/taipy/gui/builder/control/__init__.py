@@ -8,16 +8,3 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
-import typing as t
-
-from ..factory import _Factory
-
-
-class _ClassApiFactory(_Factory):
-    @staticmethod
-    def create_element(gui, control_type: str, all_properties: t.Dict[str, t.Any]) -> t.Tuple[str, str]:
-        builder_html = _Factory.call_builder(gui, control_type, all_properties, True)
-        if builder_html is None:
-            return f"<div>INVALID SYNTAX - Control is '{control_type}'", "div"
-        return builder_html  # type: ignore

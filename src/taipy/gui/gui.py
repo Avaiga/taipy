@@ -52,6 +52,7 @@ from .extension.library import Element, ElementLibrary
 from .page import Page
 from .partial import Partial
 from .renderers import _EmptyPage
+from .renderers._class_api.element_api_generator import _ElementApiGenerator
 from .renderers._markdown import _TaipyMarkdownExtension
 from .renderers.factory import _Factory
 from .renderers.json import _TaipyJsonEncoder
@@ -88,7 +89,6 @@ from .utils import (
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
-from .utils._element_api_generator import _ElementApiGenerator
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _MODULE_ID, _VariableDirectory
 from .utils.chart_config_builder import _build_chart_config
@@ -992,7 +992,7 @@ class Gui:
         ]
         if self._is_broadcasting():
             self.__broadcast_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
-            self._del_broadcast()
+            self._set_broadcast(False)
         else:
             self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
@@ -1585,15 +1585,11 @@ class Gui:
     def _broadcast_all_clients(self, name: str, value: t.Any):
         self._set_broadcast()
         self._update_var(name, value)
-        self._del_broadcast()
+        self._set_broadcast(False)
 
     def _set_broadcast(self, broadcast: bool = True):
         with contextlib.suppress(RuntimeError):
             setattr(g, "is_broadcasting", broadcast)
-
-    def _del_broadcast(self):
-        with contextlib.suppress(RuntimeError):
-            delattr(g, "is_broadcasting")
 
     def _is_broadcasting(self) -> bool:
         try:
