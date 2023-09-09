@@ -188,25 +188,25 @@ class _Config(object):
         args = _GuiCLI.parse_arguments()
 
         config = self.config
-        if args.port:
-            if not _Config.__RE_PORT_NUMBER.match(args.port):
+        if args.taipy_port:
+            if not _Config.__RE_PORT_NUMBER.match(args.taipy_port):
                 _warn("Port value for --port option is not valid.")
             else:
-                config["port"] = int(args.port)
-        if args.host:
-            config["host"] = args.host
-        if args.debug:
+                config["port"] = int(args.taipy_port)
+        if args.taipy_host:
+            config["host"] = args.taipy_host
+        if args.taipy_debug:
             config["debug"] = True
-        if args.no_debug:
+        if args.taipy_no_debug:
             config["debug"] = False
-        if args.use_reloader:
+        if args.taipy_use_reloader:
             config["use_reloader"] = True
-        if args.no_reloader:
+        if args.taipy_no_reloader:
             config["use_reloader"] = False
-        if args.ngrok_token:
-            config["ngrok_token"] = args.ngrok_token
-        if args.webapp_path:
-            config["webapp_path"] = args.webapp_path
+        if args.taipy_ngrok_token:
+            config["ngrok_token"] = args.taipy_ngrok_token
+        if args.taipy_webapp_path:
+            config["webapp_path"] = args.taipy_webapp_path
         elif os.environ.get("TAIPY_GUI_WEBAPP_PATH"):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_WEBAPP_PATH")
 
