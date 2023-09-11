@@ -13,9 +13,12 @@ import os
 import sys
 
 from taipy._cli._base_cli import _CLI
+from taipy.core._core_cli import _CoreCLI
 from taipy.core._version._cli._version_cli import _VersionCLI
+from taipy.gui._gui_cli import _GuiCLI
 
 from ._cli._help_cli import _HelpCLI
+from ._cli._run_cli import _RunCLI
 from ._cli._scaffold_cli import _ScaffoldCLI
 from .version import _get_version
 
@@ -26,6 +29,10 @@ def _entrypoint():
 
     _CLI._parser.add_argument("-v", "--version", action="store_true", help="Print the current Taipy version and exit.")
 
+    _RunCLI.create_parser()
+    _GuiCLI.create_run_parser()
+    _CoreCLI.create_run_parser()
+
     _VersionCLI.create_parser()
     _ScaffoldCLI.create_parser()
     _HelpCLI.create_parser()
@@ -35,6 +42,7 @@ def _entrypoint():
         print(f"Taipy {_get_version()}")
         sys.exit(0)
 
+    _RunCLI.parse_arguments()
     _HelpCLI.parse_arguments()
     _VersionCLI.parse_arguments()
     _ScaffoldCLI.parse_arguments()

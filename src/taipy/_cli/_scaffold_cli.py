@@ -29,7 +29,7 @@ class _ScaffoldCLI:
         create_parser.add_argument(
             "--template",
             choices=list(cls._TEMPLATE_MAP.keys()),
-            default="taipy-default-template",
+            default="default",
             help="The Taipy template to create new application.",
         )
 
