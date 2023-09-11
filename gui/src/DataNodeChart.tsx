@@ -46,10 +46,12 @@ interface DataNodeChartProps {
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
 }
 
-const chartTypes: Record<string, { name: string; [prop: string]: unknown }> = {
-    scatter: { name: "Cartesian", addIndex: true, axisNames: [] },
+const DefaultAxis = ["x", "y"];
+
+const chartTypes: Record<string, { name: string; addIndex: boolean; axisNames: string[]; [prop: string]: unknown }> = {
+    scatter: { name: "Cartesian", addIndex: true, axisNames: DefaultAxis },
     pie: { name: "Pie", addIndex: false, axisNames: ["values", "labels"] },
-    scatterpolargl: {name: "Polar", addIndex: true, axisNames:["r", "theta"]}
+    scatterpolargl: { name: "Polar", addIndex: true, axisNames: ["r", "theta"] },
 };
 
 const getChartTypeConfig = (...types: string[]) => {
@@ -59,7 +61,7 @@ const getChartTypeConfig = (...types: string[]) => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { name, ...cfg } = chartTypes[t];
             Object.entries(cfg).forEach(([k, v]) => {
-                ret[k] = ret[k] || [];
+                ret[k] = ret[k] || Array(types.length);
                 ret[k][i] = v;
             });
         }
@@ -72,7 +74,29 @@ interface ChartConfig {
     types?: string[];
     columns?: Record<string, ColumnDesc>;
     options?: Array<Record<string, unknown>>;
+    axisNames?: Array<string[]>;
+    cumulative?: boolean;
 }
+
+const addCumulative = (config: ChartConfig) => {
+    const types = config.types || [];
+    const options: Array<Record<string, unknown>> = config.options || Array(types.length);
+    types.forEach(
+        (_, i) =>
+            (options[i] = {
+                ...(i < options.length ? options[i] || {} : {}),
+                fill: i == 0 ? "tozeroy" : "tonexty",
+            })
+    );
+    config.options = options;
+};
+
+const getAxisNames = (conf: ChartConfig, trace: number) =>
+    conf?.axisNames && trace < conf?.axisNames.length
+        ? conf.axisNames[trace] && conf.axisNames[trace].length
+            ? conf.axisNames[trace]
+            : DefaultAxis
+        : DefaultAxis;
 
 interface ColSelectProps {
     labelId: string;
@@ -82,10 +106,11 @@ interface ColSelectProps {
     traceConf: Array<[string, string]>;
     setColConf: (trace: number, axis: number, col: string) => void;
     columns: string[];
+    withNone?: boolean;
 }
 
 const ColSelect = (props: ColSelectProps) => {
-    const { labelId, trace, axis, columns, label, setColConf, traceConf } = props;
+    const { labelId, trace, axis, columns, label, setColConf, traceConf, withNone = false } = props;
 
     const [col, setCol] = useState("");
 
@@ -109,6 +134,11 @@ const ColSelect = (props: ColSelectProps) => {
                 input={<OutlinedInput label={label} />}
                 MenuProps={MenuProps}
             >
+                {withNone ? (
+                    <MenuItem value="">
+                        <ListItemText primary="- None -" />
+                    </MenuItem>
+                ) : null}
                 {columns.map((c) => (
                     <MenuItem key={c} value={c}>
                         <ListItemText primary={c} />
@@ -180,11 +210,13 @@ const getBaseConfig = (defaultConfig?: string, chartConfigs?: string, configId?:
                     try {
                         const conf: Record<string, ChartConfig> = JSON.parse(chartConfigs);
                         if (conf[configId]) {
-                            return {
+                            const config = {
                                 ...baseConfig,
                                 ...getChartTypeConfig(...(conf[configId].types || [])),
                                 ...conf[configId],
                             };
+                            config.cumulative && addCumulative(config);
+                            return config;
                         }
                     } catch (e) {
                         console.warn(`chart_configs property is not a valid config.\n${e}`);
@@ -207,20 +239,26 @@ const DataNodeChart = (props: DataNodeChartProps) => {
         const localItem = localStorage && localStorage.getItem(`${configId}-chart-config`);
         if (localItem) {
             try {
-                setConfig(JSON.parse(localItem));
+                const conf = JSON.parse(localItem);
+                conf.cumulative && addCumulative(conf);
+                setConfig(conf);
                 return;
             } catch {
                 // do nothing
             }
         }
         const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
-        conf && setConfig(conf);
+        if (conf) {
+            setConfig(conf);
+        }
     }, [defaultConfig, configId, chartConfigs]);
 
     const resetConfig = useCallback(() => {
         localStorage && localStorage.removeItem(`${configId}-chart-config`);
         const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
-        conf && setConfig(conf);
+        if (conf) {
+            setConfig(conf);
+        }
     }, [defaultConfig, chartConfigs, configId]);
 
     const columns = useMemo(() => Object.values(props.columns || {}).map((c) => c.dfid), [props.columns]);
@@ -260,12 +298,14 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 }
                 const nt = cfg.types?.length ? cfg.types[0] : "scatter";
                 const nts = [...(cfg.types || []), nt];
-                return storeConf(configId, {
+                const conf: ChartConfig = {
                     ...cfg,
                     types: nts,
                     traces: [...(cfg.traces || []), [columns[0], columns[columns.length > 1 ? 1 : 0]]],
                     ...getChartTypeConfig(...nts),
-                });
+                };
+                cfg.cumulative && addCumulative(conf);
+                return storeConf(configId, conf);
             }),
         [columns, configId]
     );
@@ -289,32 +329,22 @@ const DataNodeChart = (props: DataNodeChartProps) => {
         [configId]
     );
 
-    const [cumulative, setCumulative] = useState(false);
     const onCumulativeChange = useCallback(
         (e: ChangeEvent<HTMLInputElement>, check: boolean) => {
-            setCumulative(check);
             setConfig((cfg) => {
                 if (!cfg || !cfg.types) {
                     return cfg;
                 }
+                cfg.cumulative = check;
                 if (check) {
-                    const options: Array<Record<string, unknown>> = cfg.options || Array(cfg.types.length);
-                    cfg.types.forEach(
-                        (_, i) =>
-                            (options[i] = {
-                                ...(i < options.length ? options[i] || {} : {}),
-                                fill: i == 0 ? "tozeroy" : "tonexty",
-                            })
-                    );
-                    cfg.options = options;
+                    addCumulative(cfg);
                 } else {
-                    const conf = getBaseConfig(defaultConfig, chartConfigs, configId);
-                    cfg.options = conf?.options || [];
+                    cfg.options?.forEach(o => delete o.fill);
                 }
-                return storeConf(configId, { ...cfg });
+                return storeConf(configId, { ...cfg});
             });
         },
-        [defaultConfig, chartConfigs, configId]
+        [configId]
     );
 
     return (
@@ -334,7 +364,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 </Grid>
                 <Grid item>
                     <FormControlLabel
-                        control={<Switch value={cumulative} onChange={onCumulativeChange} color="primary" />}
+                        control={<Switch checked={!!config?.cumulative} onChange={onCumulativeChange} color="primary" />}
                         label="Cumulative"
                     />
                 </Grid>
@@ -368,7 +398,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               trace={idx}
                                               axis={0}
                                               traceConf={config.traces || []}
-                                              label="X-axis"
+                                              label={getAxisNames(config, idx)[0]}
                                               labelId={baseLabelId + "x"}
                                               columns={columns}
                                               setColConf={setColConf}
@@ -379,10 +409,11 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                               trace={idx}
                                               axis={1}
                                               traceConf={config.traces || []}
-                                              label="Y-axis"
+                                              label={getAxisNames(config, idx)[1]}
                                               labelId={baseLabelId + "y"}
                                               columns={columns}
                                               setColConf={setColConf}
+                                              withNone
                                           />
                                       </Grid>
                                       <Grid item xs={1}>
