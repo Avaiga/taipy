@@ -170,20 +170,23 @@ export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: strin
     cols[key1].index < cols[key2].index ? -1 : cols[key1].index > cols[key2].index ? 1 : 0;
 
 const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
-    if (val === null || val === undefined) {
+    if (val === undefined) {
         return "";
     }
     switch (col.type) {
         case "datetime":
-            return getDateTimeString(val as string, col.format || defaultDateFormat, formatConf, col.tz);
+            if (val === "NaT") {
+                return nanValue || "";
+            }
+            return val ? getDateTimeString(val as string, col.format || defaultDateFormat, formatConf, col.tz) : "";
         case "int":
         case "float":
-            if (val === "NaN") {
+            if (val === null) {
                 return nanValue || "";
             }
             return getNumberString(val as number, col.format, formatConf);
         default:
-            return val as string;
+            return val ? (val as string) : "";
     }
 };
 
@@ -285,21 +288,32 @@ export const EditableCell = (props: EditableCellProps) => {
                 }
                 break;
             case "datetime":
-                if (val !== null && isValid(val)) {
+                if (val === null) {
+                    castedVal = val;
+                } else if (isValid(val)) {
                     castedVal = getTimeZonedDate(val as Date, formatConfig.timeZone, withTime).toISOString();
                 } else {
                     return;
                 }
                 break;
         }
-        onValidation && onValidation(castedVal as RowValue, rowIndex, colDesc.dfid, val as string, colDesc.type == "datetime" ? formatConfig.timeZone: undefined);
+        onValidation &&
+            onValidation(
+                castedVal as RowValue,
+                rowIndex,
+                colDesc.dfid,
+                val as string,
+                colDesc.type == "datetime" ? formatConfig.timeZone : undefined
+            );
         setEdit((e) => !e);
     }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type, formatConfig.timeZone, withTime]);
 
     const onEditClick = useCallback(
         (evt?: MouseEvent) => {
             evt && evt.stopPropagation();
-            colDesc.type?.startsWith("date") ? setVal(getDateTime(value as string, formatConfig.timeZone)) : setVal(value);
+            colDesc.type?.startsWith("date")
+                ? setVal(getDateTime(value as string, formatConfig.timeZone))
+                : setVal(value);
             onValidation && setEdit((e) => !e);
         },
         [onValidation, value, formatConfig.timeZone, colDesc.type]

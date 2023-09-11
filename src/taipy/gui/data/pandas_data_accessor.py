@@ -70,6 +70,7 @@ class _PandasDataAccessor(_DataAccessor):
         tooltips: t.Optional[t.Dict[str, str]] = None,
         is_copied: t.Optional[bool] = False,
         new_indexes: t.Optional[np.ndarray] = None,
+        handle_nan: t.Optional[bool] = False,
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
             col_types = dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(payload_cols)]
@@ -114,7 +115,11 @@ class _PandasDataAccessor(_DataAccessor):
                 grps = re_type.groups() if re_type else ()
                 if len(grps) > 4 and grps[4]:
                     dataframe[newcol] = (
-                        dataframe[col].dt.tz_convert("UTC").dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
+                        dataframe[col]
+                        .dt.tz_convert("UTC")
+                        .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
+                        .astype(str)
+                        .replace("nan", "NaT" if handle_nan else None)
                     )
                 else:
                     dataframe[newcol] = (
@@ -123,6 +128,7 @@ class _PandasDataAccessor(_DataAccessor):
                         .dt.tz_convert("UTC")
                         .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
                         .astype(str)
+                        .replace("nan", "NaT" if handle_nan else None)
                     )
 
             # remove the date columns from the list of columns
@@ -190,16 +196,16 @@ class _PandasDataAccessor(_DataAccessor):
             ret["orient"] = orient
         else:
             # Workaround for Python built in JSON encoder that does not yet support ignore_nan
-            ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)  # type: ignore
+            ret["data"] = data.replace([np.nan, pd.NA], [None, None]).to_dict(orient=orient)  # type: ignore
         return ret
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
         if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
-            return {str(k): v for k, v in value.dtypes.apply(lambda x: x.name).items()}
+            return {str(k): v for k, v in value.dtypes.apply(lambda x: x.name.lower()).items()}
         elif isinstance(value, list):
             ret_dict: t.Dict[str, str] = {}
             for i, v in enumerate(value):
-                ret_dict.update({f"{i}/{k}": v for k, v in v.dtypes.apply(lambda x: x.name).items()})
+                ret_dict.update({f"{i}/{k}": v for k, v in v.dtypes.apply(lambda x: x.name.lower()).items()})
             return ret_dict
         return None
 
@@ -317,6 +323,7 @@ class _PandasDataAccessor(_DataAccessor):
                 tooltips=payload.get("tooltips"),
                 is_copied=is_copied,
                 new_indexes=new_indexes,
+                handle_nan=payload.get("handlenan", False),
             )
             dictret = self.__format_data(
                 value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
