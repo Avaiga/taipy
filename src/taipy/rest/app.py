@@ -14,8 +14,8 @@ import os
 from flask import Flask
 
 from . import api
-from .extensions import apispec
 from .commons.encoder import _CustomEncoder
+from .extensions import apispec
 
 
 def create_app(testing=False, flask_env=None, secret_key=None):
@@ -27,10 +27,12 @@ def create_app(testing=False, flask_env=None, secret_key=None):
         SECRET_KEY=os.getenv("SECRET_KEY", secret_key),
     )
 
-    app.config["RESTFUL_JSON"] = {'cls': _CustomEncoder} 
+    app.config["RESTFUL_JSON"] = {"cls": _CustomEncoder}
 
     configure_apispec(app)
     register_blueprints(app)
+    with app.app_context():
+        api.views.register_views()
 
     return app
 

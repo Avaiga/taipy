@@ -168,7 +168,6 @@ def load_enterprise_resources(api: Api):
 load_enterprise_resources(api)
 
 
-@blueprint.before_app_first_request
 def register_views():
     apispec.spec.components.schema("DataNodeSchema", schema=DataNodeSchema)
     apispec.spec.path(view=DataNodeResource, app=current_app)
