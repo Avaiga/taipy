@@ -427,7 +427,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_datanodes_tree(self):
         with self.lock:
             self.__do_datanodes_tree()
-        return self.get_scenarios()
+        return self.data_nodes_by_owner.get(None, []) + self.get_scenarios()
 
     def data_node_adapter(self, data):
         if data and hasattr(data, "id") and core_get(data.id) is not None:
