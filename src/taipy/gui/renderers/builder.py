@@ -455,7 +455,7 @@ class _Builder:
                 self.__gui._set_building(True)
                 return self.__gui._evaluate_expr(
                     "{"
-                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{v}={self.__gui._get_real_var_name(v)[0]}" for v in hashes.values()])})'
+                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{k}={v2}" for k, v2 in {v: self.__gui._get_real_var_name(v)[0] for v in hashes.values()}.items()])})'
                     + "}"
                 )
             finally:
