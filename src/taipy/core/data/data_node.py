@@ -63,7 +63,7 @@ class DataNode(_Entity, _Labeled):
         edits (List[Edit^]): The list of Edits (an alias for dict) containing metadata about each
             data edition including but not limited to timestamp, comments, job_id:
             timestamp: The time instant of the writing
-            comments: Representation of a free text to explain or comment on a change of a data node
+            comments: Representation of a free text to explain or comment on a data change
             job_id: Only populated when the data node is written by a task execution and corresponds to the job's id.
             Additional metadata related to the edition made to the data node can also be provided in Edits.
         version (str): The string indicates the application version of the data node to
