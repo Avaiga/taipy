@@ -61,7 +61,7 @@ class DataNode(_Entity, _Labeled):
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The list of Edits (an alias for dict) containing metadata about each
-            edition of that node including but not limited to timestamp, comments, job_id:
+            data edition including but not limited to timestamp, comments, job_id:
             timestamp: The time instant of the writing
             comments: Representation of a free text to explain or comment on a change of a data node
             job_id: Only populated when the data node is written by a task execution and corresponds to the job's id.
