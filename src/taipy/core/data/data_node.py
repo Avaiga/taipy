@@ -30,7 +30,7 @@ from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
-from ..exceptions.exceptions import NoData
+from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
@@ -84,6 +84,7 @@ class DataNode(_Entity, _Labeled):
     _REQUIRED_PROPERTIES: List[str] = []
     _MANAGER_NAME = "data"
     __PATH_KEY = "path"
+    _EDIT_TIMEOUT = 30
 
     _TAIPY_PROPERTIES: Set[str] = set()
 
@@ -112,6 +113,8 @@ class DataNode(_Entity, _Labeled):
         self._edit_in_progress = edit_in_progress
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._validity_period = validity_period
+        self._editor_id: Optional[str] = None
+        self.__editor_expiration_date: datetime = datetime.now()
 
         # Track edits
         self._edits = edits or list()
@@ -344,20 +347,47 @@ class DataNode(_Entity, _Labeled):
         self.last_edit_date = edit.get("timestamp")
         self._edits.append(edit)
 
-    def lock_edit(self):
+    def lock_edit(self, editor_id: Optional[str] = None):
         """Lock the data node modification.
 
         Note:
             The data node can be unlocked with the method `(DataNode.)unlock_edit()^`.
-        """
-        self.edit_in_progress = True
 
-    def unlock_edit(self):
+        Parameters:
+            editor_id (Optional[str]): The editor's identifier.
+        """
+        if editor_id:
+            if (
+                self.edit_in_progress
+                and self._editor_id != editor_id
+                and self.__editor_expiration_date > datetime.now()
+            ):
+                raise DataNodeIsBeingEdited(self.id, self._editor_id)
+            self._editor_id = editor_id
+            self.__editor_expiration_date = datetime.now() + timedelta(minutes=self._EDIT_TIMEOUT)
+            self.edit_in_progress = True  # type: ignore
+        else:
+            self.edit_in_progress = True  # type: ignore
+
+    def unlock_edit(self, editor_id: Optional[str] = None):
         """Unlocks the data node modification.
+
         Note:
             The data node can be locked with the method `(DataNode.)lock_edit()^`.
+
+        Parameters:
+            editor_id (Optional[str]): The editor's identifier.
         """
-        self.edit_in_progress = False
+        if self._editor_id and editor_id:
+            if self._editor_id != editor_id and self.__editor_expiration_date > datetime.now():
+                raise DataNodeIsBeingEdited(self.id, self._editor_id)
+            self._editor_id = None
+            self.__editor_expiration_date = datetime.now()
+            self.edit_in_progress = False  # type: ignore
+        else:
+            self.editor_id = None
+            self.__editor_expiration_date = datetime.now()
+            self.edit_in_progress = False  # type: ignore
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """Read and filter the data referenced by this data node.
