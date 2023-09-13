@@ -8,14 +8,14 @@ name = "pypi"
 [dev-packages]
 autopep8 = "*"
 black = "*"
-cookiecutter = "*"
+cookiecutter = "==2.1.1"
 flake8 = "*"
 flake8-docstrings = "*"
 isort = "*"
 mypy = "*"
 pre-commit = "*"
 pytest = "*"
-taipy = "*"
+taipy = {ref = "develop", git = "https://github.com/avaiga/taipy.git"}
 tox = "*"
 types-python-dateutil = "*"
 
