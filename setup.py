@@ -13,6 +13,7 @@
 
 import json
 import os
+import sysconfig
 from pathlib import Path
 
 from setuptools import find_namespace_packages, find_packages, setup
@@ -35,6 +36,8 @@ requirements = [
     "taipy-templates@git+https://git@github.com/Avaiga/taipy-templates.git@develop",
 ]
 
+setup_requirements = [(requirement for requirement in requirements if requirement.startswith("taipy-gui"))]
+
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
@@ -52,6 +55,11 @@ extras_require = {
 def _build_webapp():
     already_exists = Path("./src/taipy/gui_core/lib/taipy-gui-core.js").exists()
     if not already_exists:
+        site_packages_path = sysconfig.get_path('purelib')
+        env_file_path = Path(__file__).absolute().parent / "gui" /".env"
+        if not os.path.exists(env_file_path):
+            with open(env_file_path, "w") as env_file:
+                env_file.write(f"TAIPY_GUI_DIR={site_packages_path}\n")
         os.system("cd gui && npm ci && npm run build")
 
 
@@ -76,6 +84,7 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     description="A 360° open-source platform from Python pilots to production-ready web apps.",
+    setup_requires=setup_requirements,
     install_requires=requirements,
     entry_points={
         "console_scripts": [
