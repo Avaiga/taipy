@@ -12,6 +12,10 @@
       "required": [],
       "additionalProperties": {
         "properties": {
+          "core_version": {
+            "description": "Version of Taipy Core",
+            "type": "string"
+          },
           "root_folder": {
             "description": "Path of the base folder for the taipy application. The default value is ./taipy/",
             "type": "string"
@@ -408,8 +412,8 @@
             }
           },
           "sequences": {
-            "description": "The dictionary of sequence descriptions.",
-            "type": "object",
+            "description": "The list of task configs.",
+            "type": "array",
             "items": {
               "type": "string"
             },

@@ -124,6 +124,7 @@ read_entity_retry = "0:int"
 mode = "development"
 version_number = ""
 force = "False:bool"
+core_version="3.0.0"
 
 [DATA_NODE.default]
 storage_type = "pickle"

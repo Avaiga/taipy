@@ -17,6 +17,8 @@ from taipy.config._config import _Config
 from taipy.config.common._config_blocker import _ConfigBlocker
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 
+from ..exceptions.exceptions import ConfigCoreVersionMismatched
+
 
 class CoreSection(UniqueSection):
     """
@@ -71,6 +73,9 @@ class CoreSection(UniqueSection):
     _FORCE_KEY = "force"
     _DEFAULT_FORCE = False
 
+    _CORE_VERSION_KEY = "core_version"
+    _DEFAULT_LATEST_CORE_VERSION = "3.0.0"
+
     def __init__(
         self,
         root_folder: Optional[str] = None,
@@ -81,6 +86,7 @@ class CoreSection(UniqueSection):
         mode: Optional[str] = None,
         version_number: Optional[str] = None,
         force: Optional[bool] = None,
+        core_version: Optional[str] = None,
         **properties,
     ):
         self._root_folder = root_folder
@@ -93,6 +99,11 @@ class CoreSection(UniqueSection):
         self.mode = mode or self._DEFAULT_MODE
         self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
         self.force = force or self._DEFAULT_FORCE
+
+        self._core_version = core_version or self._DEFAULT_LATEST_CORE_VERSION
+        if self._core_version != self._DEFAULT_LATEST_CORE_VERSION:
+            raise ConfigCoreVersionMismatched(self._core_version, self._DEFAULT_LATEST_CORE_VERSION)
+
         super().__init__(**properties)
 
     def __copy__(self):
@@ -199,6 +210,8 @@ class CoreSection(UniqueSection):
             as_dict[self._VERSION_NUMBER_KEY] = self.version_number
         if self.force is not None:
             as_dict[self._FORCE_KEY] = self.force
+        if self._core_version is not None:
+            as_dict[self._CORE_VERSION_KEY] = self._core_version
         as_dict.update(self._properties)
         return as_dict
 
@@ -212,6 +225,7 @@ class CoreSection(UniqueSection):
         mode = as_dict.pop(cls._MODE_KEY, None)
         version_nb = as_dict.pop(cls._VERSION_NUMBER_KEY, None)
         force = as_dict.pop(cls._FORCE_KEY, None)
+        core_version = as_dict.pop(cls._CORE_VERSION_KEY, None)
         return CoreSection(
             root_folder,
             storage_folder,
@@ -221,6 +235,7 @@ class CoreSection(UniqueSection):
             mode,
             version_nb,
             force,
+            core_version,
             **as_dict,
         )
 
@@ -257,6 +272,10 @@ class CoreSection(UniqueSection):
         force = _tpl._replace_templates(as_dict.pop(self._FORCE_KEY, self.force))
         if self.force != force:
             self.force = force
+
+        core_version = _tpl._replace_templates(as_dict.pop(self._CORE_VERSION_KEY, self._core_version))
+        if self._core_version != core_version:
+            self._core_version = core_version
 
         self._properties.update(as_dict)
 
