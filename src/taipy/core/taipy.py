@@ -95,7 +95,7 @@ def submit(
     wait: bool = False,
     timeout: Optional[Union[float, int]] = None,
 ) -> Union[Job, List[Job]]:
-    """Submit an entity for execution.
+    """Submit a scenario, sequence or task entity for execution.
 
     This function submits the given entity for execution and returns the created job(s).
 
@@ -103,7 +103,7 @@ def submit(
     submitted for execution.
 
     Parameters:
-        entity (Union[Scenario^, Sequence^, Task^]): The entity to submit.
+        entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to submit.
         force (bool): If True, the execution is forced even if for skippable tasks.
         wait (bool): Wait for the orchestrated jobs created from the submission to be finished
             in asynchronous mode.
@@ -643,7 +643,7 @@ def create_scenario(
     and the configuration frequency attribute) is created if it does not exist yet.
 
     Parameters:
-        config (ScenarioConfig^): The scenario configuration.
+        config (ScenarioConfig^): The scenario configuration used to create a new scenario.
         creation_date (Optional[datetime.datetime]): The creation date of the scenario.
             If None, the current date time is used.
         name (Optional[str]): The displayable name of the scenario.
