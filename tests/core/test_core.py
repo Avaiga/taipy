@@ -36,16 +36,16 @@ class TestCore:
         _OrchestratorFactory._dispatcher = None
 
         core = Core()
-        assert core._orchestrator is not None
-        assert core._orchestrator == _Orchestrator
-        assert _OrchestratorFactory._orchestrator is not None
-        assert _OrchestratorFactory._orchestrator == _Orchestrator
-
+        assert core._orchestrator is None
         assert core._dispatcher is None
         assert _OrchestratorFactory._dispatcher is None
 
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
         core.run()
+        assert core._orchestrator is not None
+        assert core._orchestrator == _Orchestrator
+        assert _OrchestratorFactory._orchestrator is not None
+        assert _OrchestratorFactory._orchestrator == _Orchestrator
         assert core._dispatcher is not None
         assert isinstance(core._dispatcher, _DevelopmentJobDispatcher)
         assert isinstance(_OrchestratorFactory._dispatcher, _DevelopmentJobDispatcher)
@@ -54,16 +54,17 @@ class TestCore:
         _OrchestratorFactory._dispatcher = None
 
         core = Core()
-        assert core._orchestrator is not None
-        assert core._orchestrator == _Orchestrator
-        assert _OrchestratorFactory._orchestrator is not None
-        assert _OrchestratorFactory._orchestrator == _Orchestrator
+        assert core._orchestrator is None
 
         assert core._dispatcher is None
         assert _OrchestratorFactory._dispatcher is None
 
         Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
         core.run()
+        assert core._orchestrator is not None
+        assert core._orchestrator == _Orchestrator
+        assert _OrchestratorFactory._orchestrator is not None
+        assert _OrchestratorFactory._orchestrator == _Orchestrator
         assert core._dispatcher is not None
         assert isinstance(core._dispatcher, _StandaloneJobDispatcher)
         assert isinstance(_OrchestratorFactory._dispatcher, _StandaloneJobDispatcher)
