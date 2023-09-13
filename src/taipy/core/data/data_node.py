@@ -60,8 +60,12 @@ class DataNode(_Entity, _Labeled):
             None.
         parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
-        edits (List[Edit^]): The list of Edits (an alias for dict) containing medata about each
-            edition of that node.
+        edits (List[Edit^]): The list of Edits (an alias for dict) containing metadata about each
+            data edition including but not limited to timestamp, comments, job_id:
+            timestamp: The time instant of the writing
+            comments: Representation of a free text to explain or comment on a data change
+            job_id: Only populated when the data node is written by a task execution and corresponds to the job's id.
+            Additional metadata related to the edition made to the data node can also be provided in Edits.
         version (str): The string indicates the application version of the data node to
             instantiate. If not provided, the current version is used.
         validity_period (Optional[timedelta]): The duration implemented as a timedelta since the last edit date for
@@ -320,12 +324,17 @@ class DataNode(_Entity, _Labeled):
         from ._data_manager_factory import _DataManagerFactory
 
         self._write(data)
-        self._track_edit(job_id=job_id, **kwargs)
+        self.track_edit(job_id=job_id, **kwargs)
         self.unlock_edit()
         _DataManagerFactory._build_manager()._set(self)
 
-    def _track_edit(self, **options):
-        """Add Edit tracking information to this data node."""
+    def track_edit(self, **options):
+        """Creates and adds a new entry in the edits attribute without writing the data.
+
+        Parameters:
+            options: track `timestamp`, `comments`, `job_id`. The others are user-custom, users can use options
+                to attach any information to an external edit of a data node.
+        """
         edit = {}
         for k, v in options.items():
             if v is not None:
@@ -359,7 +368,8 @@ class DataNode(_Entity, _Labeled):
         join operator (_AND_ or _OR_).
 
         Parameters:
-            operators (Union[List[Tuple], Tuple]): TODO
+            operators (Union[List[Tuple], Tuple]): A 3-element tuple or a list of 3-element tuples,
+                each is in the form of (key, value, `Operator^`).
             join_operator (JoinOperator^): The operator used to join the multiple filter
                 3-tuples.
         """

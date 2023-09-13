@@ -237,7 +237,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             data.to_parquet(self._path, **kwargs)
         else:
             pd.DataFrame(data).to_parquet(self._path, **kwargs)
-        self._track_edit(timestamp=datetime.now(), job_id=job_id)
+        self.track_edit(timestamp=datetime.now(), job_id=job_id)
 
     def read_with_kwargs(self, **read_kwargs):
         """Read data from this data node.

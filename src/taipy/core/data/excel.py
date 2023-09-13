@@ -351,4 +351,4 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             if columns:
                 df.columns = columns
             self.__write_excel_with_single_sheet(df.to_excel, self.path, index=False)
-        self._track_edit(timestamp=datetime.now(), job_id=job_id)
+        self.track_edit(timestamp=datetime.now(), job_id=job_id)
