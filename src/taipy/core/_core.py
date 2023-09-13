@@ -37,7 +37,7 @@ class Core:
         """
         Initialize a Core service.
         """
-        self._orchestrator = _OrchestratorFactory._build_orchestrator()
+        pass
 
     def run(self, force_restart=False):
         """
@@ -48,6 +48,8 @@ class Core:
         """
         self.__update_and_check_config()
         self.__manage_version()
+        if self._orchestrator is None:
+            self._orchestrator = _OrchestratorFactory._build_orchestrator()
         self.__start_dispatcher(force_restart)
 
     def stop(self):
