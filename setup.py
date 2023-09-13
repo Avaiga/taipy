@@ -11,11 +11,13 @@
 
 """The setup script."""
 
+
 import json
 import os
 import sysconfig
-from pathlib import Path
 
+from pathlib import Path
+from importlib.util import find_spec
 from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
 
@@ -55,8 +57,13 @@ extras_require = {
 def _build_webapp():
     already_exists = Path("./src/taipy/gui_core/lib/taipy-gui-core.js").exists()
     if not already_exists:
-        site_packages_path = sysconfig.get_path('purelib')
-        env_file_path = Path(__file__).absolute().parent / "gui" /".env"
+        site_packages_path = sysconfig.get_path("purelib")
+        if find_spec("taipy") and find_spec("taipy.gui"):
+            import taipy
+
+            site_packages_path = Path(taipy.__file__).parent.parent
+
+        env_file_path = Path(__file__).absolute().parent / "gui" / ".env"
         if not os.path.exists(env_file_path):
             with open(env_file_path, "w") as env_file:
                 env_file.write(f"TAIPY_GUI_DIR={site_packages_path}\n")
