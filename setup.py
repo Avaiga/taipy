@@ -15,9 +15,9 @@
 import json
 import os
 import sysconfig
-
-from pathlib import Path
 from importlib.util import find_spec
+from pathlib import Path
+
 from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
 
@@ -64,7 +64,7 @@ def _build_webapp():
         if find_spec("taipy") and find_spec("taipy.gui"):
             import taipy
 
-            site_packages_path = Path(taipy.__file__).parent.parent
+            site_packages_path = Path(taipy.__file__).absolute().parent.parent
 
         # Specify the correct path to taipy-gui in gui/.env file
         env_file_path = Path(__file__).absolute().parent / "gui" / ".env"
