@@ -86,8 +86,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             self._delete(entity_id)
 
     def _delete_by(self, attribute: str, value: str):
-        for entity in self._search(attribute, value):
-            self._delete(entity.id)  # type: ignore
+        self.db.query(self.model_type).filter_by(**{attribute: value}).delete()
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         query = self.db.query(self.model_type).filter_by(**{attribute: value})

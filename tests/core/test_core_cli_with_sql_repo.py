@@ -15,6 +15,7 @@ import pytest
 
 from src.taipy.core import Core
 from src.taipy.core._version._version_manager import _VersionManager
+from src.taipy.core.common._utils import _load_fct
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.exceptions.exceptions import NonExistingVersion
@@ -193,8 +194,10 @@ def test_dev_mode_clean_all_entities_when_config_is_alternated(init_sql_repo):
     _ScenarioManager._submit(scenario)
     core.stop()
 
-    # Delete the doppelganger function
+    # Delete the twice_doppelganger function
+    # and clear cache of _load_fct() to simulate a new run
     del globals()["twice_doppelganger"]
+    _load_fct.cache_clear()
 
     # Create a scenario in development mode with another function
     scenario_config = config_scenario()

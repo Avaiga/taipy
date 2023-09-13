@@ -102,8 +102,16 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
             self._delete(model_id)
 
     def _delete_by(self, attribute: str, value: str):
-        for entity in self.__search(attribute, value):
-            self._delete(entity.id)  # type: ignore
+        filters: List[Dict] = [{}]
+        for fil in filters:
+            fil.update({attribute: value})
+
+        try:
+            for f in self.dir_path.iterdir():
+                if self.__filter_by(f, filters):
+                    f.unlink()
+        except FileNotFoundError:
+            pass
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         return list(self.__search(attribute, value, filters))
