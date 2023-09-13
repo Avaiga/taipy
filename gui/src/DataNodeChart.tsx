@@ -105,7 +105,7 @@ interface ColSelectProps {
     axis: number;
     traceConf: Array<[string, string]>;
     setColConf: (trace: number, axis: number, col: string) => void;
-    columns: string[];
+    columns: Array<[string, string]>;
     withNone?: boolean;
 }
 
@@ -139,9 +139,9 @@ const ColSelect = (props: ColSelectProps) => {
                         <ListItemText primary="- None -" />
                     </MenuItem>
                 ) : null}
-                {columns.map((c) => (
-                    <MenuItem key={c} value={c}>
-                        <ListItemText primary={c} />
+                {columns.map(([dfid, k]) => (
+                    <MenuItem key={dfid} value={k}>
+                        <ListItemText primary={dfid} />
                     </MenuItem>
                 ))}
             </Select>
@@ -261,7 +261,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
         }
     }, [defaultConfig, chartConfigs, configId]);
 
-    const columns = useMemo(() => Object.values(props.columns || {}).map((c) => c.dfid), [props.columns]);
+    const columns: Array<[string, string]> = useMemo(() => Object.entries(props.columns || {}).map(([k, c]) => [c.dfid, k]), [props.columns]);
 
     const setTypeChange = useCallback(
         (trace: number, cType: string) =>
@@ -301,7 +301,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 const conf: ChartConfig = {
                     ...cfg,
                     types: nts,
-                    traces: [...(cfg.traces || []), [columns[0], columns[columns.length > 1 ? 1 : 0]]],
+                    traces: [...(cfg.traces || []), [columns[0][1], columns[columns.length > 1 ? 1 : 0][1]]],
                     ...getChartTypeConfig(...nts),
                 };
                 cfg.cumulative && addCumulative(conf);
