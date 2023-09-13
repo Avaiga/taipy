@@ -105,7 +105,6 @@ export const stylekitTheme = {
           display: "flex",
           alignItems: "center",
           minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
-          lineHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
           boxSizing: "border-box",
           paddingTop: 8,
           paddingBottom: 8,
