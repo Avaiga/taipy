@@ -57,12 +57,16 @@ extras_require = {
 def _build_webapp():
     already_exists = Path("./src/taipy/gui_core/lib/taipy-gui-core.js").exists()
     if not already_exists:
+        # default site-packages path is from the current python interpreter
         site_packages_path = sysconfig.get_path("purelib")
+        # taipy-gui should be available through setup_requires option
+        # taipy-gui at this step is installed in a backend site-packages separated from the one being used by pip
         if find_spec("taipy") and find_spec("taipy.gui"):
             import taipy
 
             site_packages_path = Path(taipy.__file__).parent.parent
 
+        # Specify the correct path to taipy-gui in gui/.env file
         env_file_path = Path(__file__).absolute().parent / "gui" / ".env"
         if not os.path.exists(env_file_path):
             with open(env_file_path, "w") as env_file:
