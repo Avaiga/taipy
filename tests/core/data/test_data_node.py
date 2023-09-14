@@ -186,12 +186,14 @@ class TestDataNode:
         assert dn.is_ready_for_reading
         assert dn.job_ids == [job_id]
 
-    def test_lock_unlock_dn(self):
+    def test_lock_initialization(self):
         dn = InMemoryDataNode("dn", Scope.SCENARIO)
         assert not dn.edit_in_progress
         assert dn._editor_id is None
-        assert dn._editor_expiration_date is not None
+        assert dn._editor_expiration_date is None
 
+    def test_locked_dn_unlockable_only_by_same_editor(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
         dn.lock_edit("user_1")
         assert dn.edit_in_progress
         assert dn._editor_id == "user_1"
@@ -203,35 +205,38 @@ class TestDataNode:
         dn.unlock_edit("user_1")
         assert not dn.edit_in_progress
         assert dn._editor_id is None
-        assert dn._editor_expiration_date is not None
+        assert dn._editor_expiration_date is None
 
-        dn.lock_edit("user_2")
+    def test_none_editor_can_lock_a_locked_dn(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("user")
         assert dn.edit_in_progress
-        assert dn._editor_id == "user_2"
+        assert dn._editor_id == "user"
         assert dn._editor_expiration_date is not None
         dn.lock_edit()
         assert dn.edit_in_progress
         assert dn._editor_id is None
-        assert dn._editor_expiration_date is not None
-        dn.unlock_edit()
+        assert dn._editor_expiration_date is None
 
-        dn.lock_edit("user_3")
+    def test_none_editor_can_unlock_a_locked_dn(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("user")
         assert dn.edit_in_progress
-        assert dn._editor_id == "user_3"
+        assert dn._editor_id == "user"
         assert dn._editor_expiration_date is not None
         dn.unlock_edit()
         assert not dn.edit_in_progress
         assert dn._editor_id is None
-        assert dn._editor_expiration_date is not None
+        assert dn._editor_expiration_date is None
 
-        dn.lock_edit("user_4")
-        assert dn.edit_in_progress
-        assert dn._editor_id == "user_4"
-        assert dn._editor_expiration_date is not None
         dn.lock_edit()
         assert dn.edit_in_progress
         assert dn._editor_id is None
-        assert dn._editor_expiration_date is not None
+        assert dn._editor_expiration_date is None
+        dn.unlock_edit()
+        assert not dn.edit_in_progress
+        assert dn._editor_id is None
+        assert dn._editor_expiration_date is None
 
     def test_ready_for_reading(self):
         dn = InMemoryDataNode("foo_bar", Scope.CYCLE)

@@ -114,7 +114,7 @@ class DataNode(_Entity, _Labeled):
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._validity_period = validity_period
         self._editor_id: Optional[str] = None
-        self._editor_expiration_date: datetime = datetime.now()
+        self._editor_expiration_date: Optional[datetime] = None
 
         # Track edits
         self._edits = edits or list()
@@ -357,12 +357,18 @@ class DataNode(_Entity, _Labeled):
             editor_id (Optional[str]): The editor's identifier.
         """
         if editor_id:
-            if self.edit_in_progress and self._editor_id != editor_id and self._editor_expiration_date > datetime.now():
+            if (
+                self.edit_in_progress
+                and self._editor_id != editor_id
+                and self._editor_expiration_date
+                and self._editor_expiration_date > datetime.now()
+            ):
                 raise DataNodeIsBeingEdited(self.id, self._editor_id)
             self._editor_id = editor_id
+            self._editor_expiration_date = datetime.now() + timedelta(minutes=self.__EDIT_TIMEOUT)
         else:
             self._editor_id = None
-        self._editor_expiration_date = datetime.now() + timedelta(minutes=self.__EDIT_TIMEOUT)
+            self._editor_expiration_date = None
         self.edit_in_progress = True  # type: ignore
 
     def unlock_edit(self, editor_id: Optional[str] = None):
@@ -374,11 +380,16 @@ class DataNode(_Entity, _Labeled):
         Parameters:
             editor_id (Optional[str]): The editor's identifier.
         """
-        if editor_id and self._editor_id != editor_id and self._editor_expiration_date > datetime.now():
+        if (
+            editor_id
+            and self._editor_id != editor_id
+            and self._editor_expiration_date
+            and self._editor_expiration_date > datetime.now()
+        ):
             raise DataNodeIsBeingEdited(self.id, self._editor_id)
         else:
             self._editor_id = None
-            self._editor_expiration_date = datetime.now()
+            self._editor_expiration_date = None
             self.edit_in_progress = False  # type: ignore
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
