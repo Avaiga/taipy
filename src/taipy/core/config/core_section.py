@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import re
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
@@ -16,6 +17,9 @@ from taipy.config import Config, UniqueSection
 from taipy.config._config import _Config
 from taipy.config.common._config_blocker import _ConfigBlocker
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
+
+from .._init_version import _read_version
+from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 
 class CoreSection(UniqueSection):
@@ -71,6 +75,9 @@ class CoreSection(UniqueSection):
     _FORCE_KEY = "force"
     _DEFAULT_FORCE = False
 
+    _CORE_VERSION_KEY = "core_version"
+    _CURRENT_CORE_VERSION = _read_version()
+
     def __init__(
         self,
         root_folder: Optional[str] = None,
@@ -81,6 +88,7 @@ class CoreSection(UniqueSection):
         mode: Optional[str] = None,
         version_number: Optional[str] = None,
         force: Optional[bool] = None,
+        core_version: Optional[str] = None,
         **properties,
     ):
         self._root_folder = root_folder
@@ -93,6 +101,10 @@ class CoreSection(UniqueSection):
         self.mode = mode or self._DEFAULT_MODE
         self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
         self.force = force or self._DEFAULT_FORCE
+
+        self._check_compatibility(core_version)
+        self._core_version = core_version
+
         super().__init__(**properties)
 
     def __copy__(self):
@@ -105,6 +117,7 @@ class CoreSection(UniqueSection):
             self.mode,
             self.version_number,
             self.force,
+            self._core_version,
             **copy(self._properties),
         )
 
@@ -168,6 +181,7 @@ class CoreSection(UniqueSection):
             cls._DEFAULT_MODE,
             cls._DEFAULT_VERSION_NUMBER,
             cls._DEFAULT_FORCE,
+            cls._CURRENT_CORE_VERSION,
         )
 
     def _clean(self):
@@ -179,6 +193,7 @@ class CoreSection(UniqueSection):
         self.mode = self._DEFAULT_MODE
         self.version_number = self._DEFAULT_VERSION_NUMBER
         self.force = self._DEFAULT_FORCE
+        self._core_version = self._CURRENT_CORE_VERSION
         self._properties.clear()
 
     def _to_dict(self):
@@ -199,6 +214,8 @@ class CoreSection(UniqueSection):
             as_dict[self._VERSION_NUMBER_KEY] = self.version_number
         if self.force is not None:
             as_dict[self._FORCE_KEY] = self.force
+        if self._core_version is not None:
+            as_dict[self._CORE_VERSION_KEY] = self._core_version
         as_dict.update(self._properties)
         return as_dict
 
@@ -212,6 +229,7 @@ class CoreSection(UniqueSection):
         mode = as_dict.pop(cls._MODE_KEY, None)
         version_nb = as_dict.pop(cls._VERSION_NUMBER_KEY, None)
         force = as_dict.pop(cls._FORCE_KEY, None)
+        core_version = as_dict.pop(cls._CORE_VERSION_KEY, None)
         return CoreSection(
             root_folder,
             storage_folder,
@@ -221,6 +239,7 @@ class CoreSection(UniqueSection):
             mode,
             version_nb,
             force,
+            core_version,
             **as_dict,
         )
 
@@ -258,7 +277,31 @@ class CoreSection(UniqueSection):
         if self.force != force:
             self.force = force
 
+        core_version = as_dict.pop(self._CORE_VERSION_KEY, None)
+        self._check_compatibility(core_version)
+
         self._properties.update(as_dict)
+
+    @classmethod
+    def _check_compatibility(cls, core_version):
+        if not core_version:
+            return
+
+        version_pattern = r"^(\d+)\.(\d+)\.(\d+)$"
+        dev_version_pattern = r"^(\d+)\.(\d+)\.(\d+).(\w*)$"
+
+        installed_match = re.match(version_pattern, cls._CURRENT_CORE_VERSION) or re.match(
+            dev_version_pattern, cls._CURRENT_CORE_VERSION
+        )
+        required_match = re.match(version_pattern, core_version) or re.match(dev_version_pattern, core_version)
+        if required_match and installed_match:
+            installed_group = installed_match.groups()
+            required_group = required_match.groups()
+            installed_major, installed_minor = installed_group[0], installed_group[1]
+            required_major, required_minor = required_group[0], required_group[1]
+
+            if required_major != installed_major or required_minor != installed_minor:
+                raise ConfigCoreVersionMismatched(core_version, cls._CURRENT_CORE_VERSION)
 
     @staticmethod
     def _configure(
@@ -306,6 +349,7 @@ class CoreSection(UniqueSection):
             mode=mode,
             version_number=version_number,
             force=force,
+            core_version=_read_version(),
             **properties,
         )
         Config._register(section)

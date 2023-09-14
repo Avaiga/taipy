@@ -13,6 +13,15 @@
 from typing import List, Optional
 
 
+class ConfigCoreVersionMismatched(Exception):
+    """Raised if core version in Config does not match with the version of Taipy Core."""
+
+    def __init__(self, config_core_version: str, core_version: str) -> None:
+        self.message = (
+            f"Core version {config_core_version} in Config does not match with version of Taipy Core {core_version}."
+        )
+
+
 class CycleAlreadyExists(Exception):
     """Raised if it is trying to create a Cycle that has already exists."""
 

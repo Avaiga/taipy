@@ -8,63 +8,64 @@
     "CORE": {
       "description": "Data nodes",
       "type": "object",
-      "properties": {},
-      "required": [],
-      "additionalProperties": {
-        "properties": {
-          "root_folder": {
-            "description": "Path of the base folder for the taipy application. The default value is ./taipy/",
-            "type": "string"
-          },
-          "storage_folder": {
-            "description": "Folder name used to store Taipy data. The default value is .data/. It is used in conjunction with the root_folder field",
-            "type": "string"
-          },
-          "read_entity_retry": {
-            "description": "Number of times to retry before return failure to read an entity.",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "default": "3:int"
-          },
-          "repository_type": {
-            "description": "The repository type that is used to store the entities.",
-            "type": "string",
-            "enum": [
-              "sql",
-              "filesystem"
-            ],
-            "default": "filesystem"
-          },
-          "repository_properties": {
-            "type": "object"
-          },
-          "mode": {
-            "description": "The Taipy operating mode.",
-            "type": "string",
-            "enum": [
-              "development",
-              "experiment",
-              "production"
-            ],
-            "default": "development"
-          },
-          "version_number": {
-            "description": "The identifier of the user application version.",
-            "type": "string"
-          },
-          "force": {
-            "description": "If True, force the application run even if there are some conflicts in the configuration.",
-            "type": "string",
-            "enum": [
-              "False:bool",
-              "True:bool"
-            ],
-            "default": "False:bool"
-          }
+      "properties": {
+        "core_version": {
+          "description": "Version of Taipy Core",
+          "type": "string"
+        },
+        "root_folder": {
+          "description": "Path of the base folder for the taipy application. The default value is ./taipy/",
+          "type": "string"
+        },
+        "storage_folder": {
+          "description": "Folder name used to store Taipy data. The default value is .data/. It is used in conjunction with the root_folder field",
+          "type": "string"
+        },
+        "read_entity_retry": {
+          "description": "Number of times to retry before return failure to read an entity.",
+          "type": [
+            "integer",
+            "string"
+          ],
+          "default": "3:int"
+        },
+        "repository_type": {
+          "description": "The repository type that is used to store the entities.",
+          "type": "string",
+          "enum": [
+            "sql",
+            "filesystem"
+          ],
+          "default": "filesystem"
+        },
+        "repository_properties": {
+          "type": "object"
+        },
+        "mode": {
+          "description": "The Taipy operating mode.",
+          "type": "string",
+          "enum": [
+            "development",
+            "experiment",
+            "production"
+          ],
+          "default": "development"
+        },
+        "version_number": {
+          "description": "The identifier of the user application version.",
+          "type": "string"
+        },
+        "force": {
+          "description": "If True, force the application run even if there are some conflicts in the configuration.",
+          "type": "string",
+          "enum": [
+            "False:bool",
+            "True:bool"
+          ],
+          "default": "False:bool"
         }
-      }
+      },
+      "required": []
     },
     "DATA_NODE": {
       "description": "Data nodes",
@@ -408,10 +409,14 @@
             }
           },
           "sequences": {
-            "description": "The dictionary of sequence descriptions.",
+            "description": "The dictionary of sequence descriptions",
             "type": "object",
-            "items": {
-              "type": "string"
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "uniqueItems": true
+              }
             },
             "uniqueItems": true
           }

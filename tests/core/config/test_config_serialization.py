@@ -109,7 +109,7 @@ def config_test_scenario():
 
 
 def test_read_write_toml_configuration_file():
-    expected_toml_config = """
+    expected_toml_config = f"""
 [TAIPY]
 
 [JOB]
@@ -124,6 +124,7 @@ read_entity_retry = "0:int"
 mode = "development"
 version_number = ""
 force = "False:bool"
+core_version = "{CoreSection._CURRENT_CORE_VERSION}"
 
 [DATA_NODE.default]
 storage_type = "pickle"
@@ -280,8 +281,8 @@ sequence1 = [ "test_task:SECTION",]
 
 
 def test_read_write_json_configuration_file():
-    expected_json_config = """
-{
+    expected_json_config = (
+        """{
 "TAIPY": {},
 "JOB": {
 "mode": "development",
@@ -294,7 +295,11 @@ def test_read_write_json_configuration_file():
 "read_entity_retry": "0:int",
 "mode": "development",
 "version_number": "",
-"force": "False:bool"
+"force": "False:bool","""
+        + f"""
+"core_version": "{CoreSection._CURRENT_CORE_VERSION}"
+"""
+        + """
 },
 "VERSION_MIGRATION": {
 "migration_fcts": {
@@ -380,6 +385,7 @@ def test_read_write_json_configuration_file():
 }
 }
     """.strip()
+    )
 
     Config._serializer = _JsonSerializer()
     config_test_scenario()
