@@ -285,11 +285,18 @@ class CoreSection(UniqueSection):
     @classmethod
     def _check_compatibility(cls, core_version):
         version_pattern = r"^(\d+)\.(\d+)\.(\d+)$"
-        installed_match = re.match(version_pattern, cls._CURRENT_CORE_VERSION)
-        required_match = re.match(version_pattern, core_version)
+        dev_version_pattern = r"^(\d+)\.(\d+)\.(\d+).(\w*)$"
+
+        installed_match = re.match(version_pattern, cls._CURRENT_CORE_VERSION) or re.match(
+            dev_version_pattern, cls._CURRENT_CORE_VERSION
+        )
+        required_match = re.match(version_pattern, core_version) or re.match(dev_version_pattern, core_version)
         if required_match and installed_match:
-            installed_major, installed_minor, _ = map(int, installed_match.groups())
-            required_major, required_minor, _ = map(int, required_match.groups())
+            installed_group = installed_match.groups()
+            required_group = required_match.groups()
+            installed_major, installed_minor = installed_group[0], installed_group[1]
+            required_major, required_minor = required_group[0], required_group[1]
+
             if required_major != installed_major or required_minor != installed_minor:
                 raise ConfigCoreVersionMismatched(core_version, cls._CURRENT_CORE_VERSION)
 
