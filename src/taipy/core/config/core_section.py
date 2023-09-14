@@ -102,8 +102,8 @@ class CoreSection(UniqueSection):
         self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
         self.force = force or self._DEFAULT_FORCE
 
-        self._core_version = core_version or self._CURRENT_CORE_VERSION
-        self._check_compatibility(self._core_version)
+        self._check_compatibility(core_version)
+        self._core_version = core_version
 
         super().__init__(**properties)
 
@@ -277,13 +277,16 @@ class CoreSection(UniqueSection):
         if self.force != force:
             self.force = force
 
-        core_version = _tpl._replace_templates(as_dict.pop(self._CORE_VERSION_KEY, self._CURRENT_CORE_VERSION))
+        core_version = as_dict.pop(self._CORE_VERSION_KEY, None)
         self._check_compatibility(core_version)
 
         self._properties.update(as_dict)
 
     @classmethod
     def _check_compatibility(cls, core_version):
+        if not core_version:
+            return
+
         version_pattern = r"^(\d+)\.(\d+)\.(\d+)$"
         dev_version_pattern = r"^(\d+)\.(\d+)\.(\d+).(\w*)$"
 
@@ -346,6 +349,7 @@ class CoreSection(UniqueSection):
             mode=mode,
             version_number=version_number,
             force=force,
+            core_version=_init_version(),
             **properties,
         )
         Config._register(section)

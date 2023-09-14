@@ -35,10 +35,51 @@ class TestCoreVersionInCoreSectionConfig:
             ("2.1.0.dev0", False),  # dev past but incompatible
         ],
     )
-    # def test_load_configuration_file(content, columns):
     def test_load_configuration_file(self, core_version, is_compatible):
+        file_config = NamedTemporaryFile(
+            f"""
+            [TAIPY]
 
-        # breakpoint()
+            [JOB]
+            mode = "standalone"
+            max_nb_of_workers = "2:int"
+
+            [CORE]
+            root_folder = "./taipy/"
+            storage_folder = ".data/"
+            repository_type = "filesystem"
+            read_entity_retry = "0:int"
+            mode = "development"
+            version_number = ""
+            force = "False:bool"
+            core_version = "{core_version}"
+
+            [VERSION_MIGRATION.migration_fcts]
+            """
+        )
+        if is_compatible:
+            Config.load(file_config.filename)
+            assert Config.unique_sections[CoreSection.name]._core_version == "3.0.1"
+        else:
+            with pytest.raises(ConfigCoreVersionMismatched):
+                Config.load(file_config.filename)
+
+    @pytest.mark.parametrize(
+        "core_version,is_compatible",
+        [
+            ("3.0.1", True),  # current version
+            ("3.0.1.dev0", True),  # current dev version
+            ("3.0.2", True),  # future but compatible
+            ("3.0.2.dev0", True),  # dev future but compatible
+            ("3.0.0", True),  # past but compatible
+            ("3.0.0.dev0", True),  # dev past but compatible
+            ("3.1.0", False),  # future but incompatible
+            ("3.1.0.dev0", False),  # dev future but incompatible
+            ("2.1.0", False),  # past but incompatible
+            ("2.1.0.dev0", False),  # dev past but incompatible
+        ],
+    )
+    def test_override_configuration_file(self, core_version, is_compatible):
         file_config = NamedTemporaryFile(
             f"""
             [TAIPY]
@@ -62,6 +103,28 @@ class TestCoreVersionInCoreSectionConfig:
         )
         if is_compatible:
             Config.override(file_config.filename)
+            assert Config.unique_sections[CoreSection.name]._core_version == "3.0.1"
         else:
             with pytest.raises(ConfigCoreVersionMismatched):
                 Config.override(file_config.filename)
+
+    def test_load_configuration_file_without_core_section(self):
+        file_config = NamedTemporaryFile(
+            """
+            [TAIPY]
+            [JOB]
+            mode = "standalone"
+            max_nb_of_workers = "2:int"
+            [CORE]
+            root_folder = "./taipy/"
+            storage_folder = ".data/"
+            repository_type = "filesystem"
+            read_entity_retry = "0:int"
+            mode = "development"
+            version_number = ""
+            force = "False:bool"
+            [VERSION_MIGRATION.migration_fcts]
+            """
+        )
+        Config.load(file_config.filename)
+        assert Config.unique_sections[CoreSection.name]._core_version == "3.0.1"
