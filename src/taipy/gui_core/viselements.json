@@ -274,19 +274,19 @@
                         "name": "show_entity_label",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the <code>Entity^</code> label is not shown in the selector."
+                        "doc": "If False, the <code>Scenario^</code> or <code>Sequence^</code> label is not shown in the selector."
                     },
                     {
                         "name": "show_entity_id",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "If True, the <code>Entity^</code> id is shown in the selector."
+                        "doc": "If True, the <code>Scenario^</code> or <code>Sequence^</code> id is shown in the selector."
                     },
                     {
                         "name": "show_submit_id",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "If True, the <code>Submit^</code> id is shown in the selector."
+                        "doc": "If True, the submission id is shown in the selector."
                     },
                     {
                         "name": "show_date",
