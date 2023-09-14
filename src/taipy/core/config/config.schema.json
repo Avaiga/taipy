@@ -412,22 +412,14 @@
             }
           },
           "sequences": {
-            "description": "Sequences",
+            "description": "The dictionary of sequence descriptions",
             "type": "object",
-            "properties": {},
-            "required": [],
             "additionalProperties": {
-              "type": "object",
-              "properties": {
-                "tasks": {
-                  "description": "The list of task configs",
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+              "type": "array",
+              "items": {
+                "type": "string",
+                "uniqueItems": true
               }
-
             },
             "uniqueItems": true
           }

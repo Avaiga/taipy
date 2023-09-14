@@ -45,16 +45,4 @@ from .common.mongo_default_document import MongoDefaultDocument
 from .data.data_node_id import Edit
 from .exceptions import exceptions
 
-# def __init_version():
-#     import json
-#     import os
-
-#     with open(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}version.json") as version_file:
-#         version = json.load(version_file)
-#         version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
-#         if vext := version.get("ext"):
-#             version_string = f"{version_string}.{vext}"
-#     return version_string
-
-
 __version__ = _init_version()
