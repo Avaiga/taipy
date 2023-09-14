@@ -412,10 +412,22 @@
             }
           },
           "sequences": {
-            "description": "The list of task configs.",
-            "type": "array",
-            "items": {
-              "type": "string"
+            "description": "Sequences",
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "tasks": {
+                  "description": "The list of task configs",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+
             },
             "uniqueItems": true
           }

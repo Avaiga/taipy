@@ -10,6 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import functools
+import json
+import os
 import time
 from collections import namedtuple
 from importlib import import_module
@@ -78,6 +80,15 @@ def _fct_to_dict(obj):
 
 def _fcts_to_dict(objs):
     return [d for obj in objs if (d := _fct_to_dict(obj)) is not None]
+
+
+def _init_version():
+    with open(f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}{os.sep}version.json") as version_file:
+        version = json.load(version_file)
+        version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+        if vext := version.get("ext"):
+            version_string = f"{version_string}.{vext}"
+    return version_string
 
 
 _Subscriber = namedtuple("_Subscriber", "callback params")

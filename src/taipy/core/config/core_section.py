@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import re
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
@@ -17,6 +18,7 @@ from taipy.config._config import _Config
 from taipy.config.common._config_blocker import _ConfigBlocker
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 
+from ..common._utils import _init_version
 from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 
@@ -74,7 +76,7 @@ class CoreSection(UniqueSection):
     _DEFAULT_FORCE = False
 
     _CORE_VERSION_KEY = "core_version"
-    _DEFAULT_LATEST_CORE_VERSION = "3.0.0"
+    _CURRENT_CORE_VERSION = _init_version()
 
     def __init__(
         self,
@@ -100,9 +102,8 @@ class CoreSection(UniqueSection):
         self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
         self.force = force or self._DEFAULT_FORCE
 
-        self._core_version = core_version or self._DEFAULT_LATEST_CORE_VERSION
-        if self._core_version != self._DEFAULT_LATEST_CORE_VERSION:
-            raise ConfigCoreVersionMismatched(self._core_version, self._DEFAULT_LATEST_CORE_VERSION)
+        self._core_version = core_version or self._CURRENT_CORE_VERSION
+        self._check_compatibility(self._core_version)
 
         super().__init__(**properties)
 
@@ -116,6 +117,7 @@ class CoreSection(UniqueSection):
             self.mode,
             self.version_number,
             self.force,
+            self._core_version,
             **copy(self._properties),
         )
 
@@ -179,6 +181,7 @@ class CoreSection(UniqueSection):
             cls._DEFAULT_MODE,
             cls._DEFAULT_VERSION_NUMBER,
             cls._DEFAULT_FORCE,
+            cls._CURRENT_CORE_VERSION,
         )
 
     def _clean(self):
@@ -190,6 +193,7 @@ class CoreSection(UniqueSection):
         self.mode = self._DEFAULT_MODE
         self.version_number = self._DEFAULT_VERSION_NUMBER
         self.force = self._DEFAULT_FORCE
+        self._core_version = self._CURRENT_CORE_VERSION
         self._properties.clear()
 
     def _to_dict(self):
@@ -273,11 +277,21 @@ class CoreSection(UniqueSection):
         if self.force != force:
             self.force = force
 
-        core_version = _tpl._replace_templates(as_dict.pop(self._CORE_VERSION_KEY, self._core_version))
-        if self._core_version != core_version:
-            self._core_version = core_version
+        core_version = _tpl._replace_templates(as_dict.pop(self._CORE_VERSION_KEY, self._CURRENT_CORE_VERSION))
+        self._check_compatibility(core_version)
 
         self._properties.update(as_dict)
+
+    @classmethod
+    def _check_compatibility(cls, core_version):
+        version_pattern = r"^(\d+)\.(\d+)\.(\d+)$"
+        installed_match = re.match(version_pattern, cls._CURRENT_CORE_VERSION)
+        required_match = re.match(version_pattern, core_version)
+        if required_match and installed_match:
+            installed_major, installed_minor, _ = map(int, installed_match.groups())
+            required_major, required_minor, _ = map(int, required_match.groups())
+            if required_major != installed_major or required_minor != installed_minor:
+                raise ConfigCoreVersionMismatched(core_version, cls._CURRENT_CORE_VERSION)
 
     @staticmethod
     def _configure(
