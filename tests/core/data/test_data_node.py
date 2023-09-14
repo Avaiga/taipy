@@ -25,7 +25,7 @@ from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.data.operator import JoinOperator, Operator
-from src.taipy.core.exceptions.exceptions import NoData
+from src.taipy.core.exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from src.taipy.core.job.job_id import JobId
 from taipy.config import Config
 from taipy.config.common.scope import Scope
@@ -185,6 +185,58 @@ class TestDataNode:
         assert first_edition < second_edition
         assert dn.is_ready_for_reading
         assert dn.job_ids == [job_id]
+
+    def test_lock_initialization(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        assert not dn.edit_in_progress
+        assert dn._editor_id is None
+        assert dn._editor_expiration_date is None
+
+    def test_locked_dn_unlockable_only_by_same_editor(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("user_1")
+        assert dn.edit_in_progress
+        assert dn._editor_id == "user_1"
+        assert dn._editor_expiration_date is not None
+        with pytest.raises(DataNodeIsBeingEdited):
+            dn.lock_edit("user_2")
+        with pytest.raises(DataNodeIsBeingEdited):
+            dn.unlock_edit("user_2")
+        dn.unlock_edit("user_1")
+        assert not dn.edit_in_progress
+        assert dn._editor_id is None
+        assert dn._editor_expiration_date is None
+
+    def test_none_editor_can_lock_a_locked_dn(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("user")
+        assert dn.edit_in_progress
+        assert dn._editor_id == "user"
+        assert dn._editor_expiration_date is not None
+        dn.lock_edit()
+        assert dn.edit_in_progress
+        assert dn._editor_id is None
+        assert dn._editor_expiration_date is None
+
+    def test_none_editor_can_unlock_a_locked_dn(self):
+        dn = InMemoryDataNode("dn", Scope.SCENARIO)
+        dn.lock_edit("user")
+        assert dn.edit_in_progress
+        assert dn._editor_id == "user"
+        assert dn._editor_expiration_date is not None
+        dn.unlock_edit()
+        assert not dn.edit_in_progress
+        assert dn._editor_id is None
+        assert dn._editor_expiration_date is None
+
+        dn.lock_edit()
+        assert dn.edit_in_progress
+        assert dn._editor_id is None
+        assert dn._editor_expiration_date is None
+        dn.unlock_edit()
+        assert not dn.edit_in_progress
+        assert dn._editor_id is None
+        assert dn._editor_expiration_date is None
 
     def test_ready_for_reading(self):
         dn = InMemoryDataNode("foo_bar", Scope.CYCLE)
