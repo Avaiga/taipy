@@ -18,7 +18,7 @@ from taipy.config._config import _Config
 from taipy.config.common._config_blocker import _ConfigBlocker
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 
-from ..common._utils import _init_version
+from .._init_version import _read_version
 from ..exceptions.exceptions import ConfigCoreVersionMismatched
 
 
@@ -76,7 +76,7 @@ class CoreSection(UniqueSection):
     _DEFAULT_FORCE = False
 
     _CORE_VERSION_KEY = "core_version"
-    _CURRENT_CORE_VERSION = _init_version()
+    _CURRENT_CORE_VERSION = _read_version()
 
     def __init__(
         self,

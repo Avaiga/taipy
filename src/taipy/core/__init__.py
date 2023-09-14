@@ -40,9 +40,9 @@ in the following [function](./#functions) section. In particular, the most used 
 """
 
 from ._init import *
-from .common._utils import _init_version
+from ._init_version import _read_version
 from .common.mongo_default_document import MongoDefaultDocument
 from .data.data_node_id import Edit
 from .exceptions import exceptions
 
-__version__ = _init_version()
+__version__ = _read_version()
