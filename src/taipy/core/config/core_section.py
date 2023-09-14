@@ -349,7 +349,7 @@ class CoreSection(UniqueSection):
             mode=mode,
             version_number=version_number,
             force=force,
-            core_version=_init_version(),
+            core_version=_read_version(),
             **properties,
         )
         Config._register(section)
