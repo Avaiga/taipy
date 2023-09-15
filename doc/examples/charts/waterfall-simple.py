@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Data set
 data = {
@@ -25,7 +25,7 @@ data = {
 page = """
 # Waterfall - Simple
 
-<|{data}|type=waterfall|chart|x=Day|y=Values|measure=Measure|>
+<|{data}|chart|type=waterfall|x=Day|y=Values|measure=Measure|>
 """
 
 Gui(page).run()

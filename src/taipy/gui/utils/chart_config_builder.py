@@ -56,14 +56,11 @@ class _Chart_iprops(Enum):
     labels = 29
     decimator = 30
     measure = 31
+    parents = 32
 
 
 __CHART_AXIS: t.Dict[str, t.Tuple[_Chart_iprops, ...]] = {
-    "scattermapbox": (_Chart_iprops.lon, _Chart_iprops.lat),
-    "scattergeo": (_Chart_iprops.lon, _Chart_iprops.lat),
-    "densitymapbox": (_Chart_iprops.lon, _Chart_iprops.lat, _Chart_iprops.z),
-    "scatterpolar": (_Chart_iprops.r, _Chart_iprops.theta),
-    "scatterpolargl": (_Chart_iprops.r, _Chart_iprops.theta),
+    "bar": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.base),
     "candlestick": (
         _Chart_iprops.x,
         _Chart_iprops.close,
@@ -71,10 +68,15 @@ __CHART_AXIS: t.Dict[str, t.Tuple[_Chart_iprops, ...]] = {
         _Chart_iprops.high,
         _Chart_iprops.low,
     ),
-    "bar": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.base),
-    "pie": (_Chart_iprops.values, _Chart_iprops.labels),
     "choropleth": (_Chart_iprops.locations, _Chart_iprops.z),
+    "densitymapbox": (_Chart_iprops.lon, _Chart_iprops.lat, _Chart_iprops.z),
     "funnelarea": (_Chart_iprops.values,),
+    "pie": (_Chart_iprops.values, _Chart_iprops.labels),
+    "scattergeo": (_Chart_iprops.lon, _Chart_iprops.lat),
+    "scattermapbox": (_Chart_iprops.lon, _Chart_iprops.lat),
+    "scatterpolar": (_Chart_iprops.r, _Chart_iprops.theta),
+    "scatterpolargl": (_Chart_iprops.r, _Chart_iprops.theta),
+    "treemap": (_Chart_iprops.labels, _Chart_iprops.parents, _Chart_iprops.values),
     "waterfall": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.measure),
 }
 __CHART_DEFAULT_AXIS: t.Tuple[_Chart_iprops, ...] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)

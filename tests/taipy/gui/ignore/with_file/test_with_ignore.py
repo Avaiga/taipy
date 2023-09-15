@@ -22,7 +22,7 @@ def test_ignore_file_found(gui: Gui):
         gui._set_frame(inspect.currentframe())
         gui.run(run_server=False)
         client = gui._server.test_client()
-        response = client.get(f"/resource.txt")
+        response = client.get("/resource.txt")
         assert (
             response.status_code == 404
         ), f"file resource.txt request status should be 404 but is {response.status_code}"
@@ -33,7 +33,7 @@ def test_ignore_file_not_found(gui: Gui):
         gui._set_frame(inspect.currentframe())
         gui.run(run_server=False)
         client = gui._server.test_client()
-        response = client.get(f"/resource2.txt")
+        response = client.get("/resource2.txt")
         assert (
             response.status_code == 200
         ), f"file resource2.txt request status should be 200 but is {response.status_code}"

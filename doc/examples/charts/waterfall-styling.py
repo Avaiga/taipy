@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # 9-hole course
 n_holes = 9
@@ -47,7 +47,7 @@ options = {
 page = """
 # Waterfall - Styling
 
-<|{data}|type=waterfall|chart|x=Hole|y=Diff|measure=M|options={options}|>
+<|{data}|chart|type=waterfall|x=Hole|y=Diff|measure=M|options={options}|>
 """
 
 Gui(page).run()

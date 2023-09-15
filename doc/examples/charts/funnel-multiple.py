@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
     "Types": ["Website visit", "Downloads", "Prospects", "Invoice sent", "Closed"],
@@ -31,7 +31,7 @@ names = ["US", "EU", "AP"]
 page = """
 # Funnel - Multiple traces
 
-<|{data}|type=funnel|chart|x={x}|y=Types|name={names}|>
+<|{data}|chart|type=funnel|x={x}|y=Types|name={names}|>
 """
 
 Gui(page).run()

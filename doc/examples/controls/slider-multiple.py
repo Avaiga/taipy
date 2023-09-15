@@ -15,25 +15,15 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Data set
-data = [
-    {
-        # The quarterly periods are grouped by year
-        "Period": [
-            ["Carry", "Q1", "Q2", "Q3", "Q4", "Current"],
-            ["N-1",   "N",  "N",  "N",  "N",  "N+1"]
-        ]
-    },
-    {
-        "Cash Flow": [25, -17, 12, 18, -8, None],
-        "Measure": ["absolute", "relative", "relative", "relative", "relative", "total"]
-    }
-]
+# Initial values
+values = [20, 40, 80]
 
 page = """
-# Waterfall - Period levels
+# Slider - Range
 
-<|{data}|chart|type=waterfall|x=0/Period|y=1/Cash Flow|measure=1/Measure|>
+<|{values}|slider|>
+
+Selection: <|{values}|>
 """
 
 Gui(page).run()

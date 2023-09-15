@@ -351,6 +351,11 @@
             "doc": "Column name for the <i>labels</i> value. See <a href=\"https://plotly.com/javascript/reference/pie/#pie-labels\">Plotly Pie charts</a>."
           },
           {
+            "name": "parents",
+            "type": "indexed(str)",
+            "doc": "Column name for the <i>parents</i> value. See <a href=\"https://plotly.com/javascript/reference/treemap/#treemap-parents\">Plotly Treemap charts</a>."
+          },
+          {
             "name": "text",
             "type": "indexed(str)",
             "doc": "Column name for the text associated to the point for the indicated trace.<br/>This is meaningful only when <i>mode</i> has the <i>text</i> option."

@@ -385,6 +385,13 @@ const Chart = (props: ChartProp) => {
                           ret.z = baseZ;
                       }
                   }
+                  // Hack for treemap charts: create a fallback 'parents' column if needed
+                  // This works ONLY because 'parents' is the third named axis
+                  // (see __CHART_AXIS in gui/utils/chart_config_builder.py)
+                  else if (config.types[idx] === "treemap" && Array.isArray(ret.labels)) {
+                      ret.parents = Array(ret.labels.length).fill("")
+                  }
+                  // Other axis
                   for (let i = 3; i < axisNames.length; i++) {
                       ret[axisNames[i]] = getValue(datum, trace, i, true);
                   }

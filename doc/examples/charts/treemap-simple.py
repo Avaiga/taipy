@@ -15,25 +15,22 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-# Data set
-data = [
-    {
-        # The quarterly periods are grouped by year
-        "Period": [
-            ["Carry", "Q1", "Q2", "Q3", "Q4", "Current"],
-            ["N-1",   "N",  "N",  "N",  "N",  "N+1"]
-        ]
-    },
-    {
-        "Cash Flow": [25, -17, 12, 18, -8, None],
-        "Measure": ["absolute", "relative", "relative", "relative", "relative", "total"]
-    }
-]
+# Data set: the first 10 elements of the Fibonacci sequence
+n_numbers = 10
+fibonacci = [0, 1]
+for i in range(2, n_numbers):
+    fibonacci.append(fibonacci[i-1]+fibonacci[i-2])
+
+data = {
+    "index": [i for i in range(1, n_numbers+1)],
+    "fibonacci": fibonacci
+}
 
 page = """
-# Waterfall - Period levels
+# TreeMap - Simple
+<|toggle|theme|>
 
-<|{data}|chart|type=waterfall|x=0/Period|y=1/Cash Flow|measure=1/Measure|>
+<|{data}|chart|type=treemap|labels=index|values=fibonacci|>
 """
 
 Gui(page).run()

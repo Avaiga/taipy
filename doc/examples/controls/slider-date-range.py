@@ -14,26 +14,39 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
+from datetime import date, timedelta
 
-# Data set
-data = [
-    {
-        # The quarterly periods are grouped by year
-        "Period": [
-            ["Carry", "Q1", "Q2", "Q3", "Q4", "Current"],
-            ["N-1",   "N",  "N",  "N",  "N",  "N+1"]
-        ]
-    },
-    {
-        "Cash Flow": [25, -17, 12, 18, -8, None],
-        "Measure": ["absolute", "relative", "relative", "relative", "relative", "total"]
-    }
-]
+# Create the list of dates (all year 2000)
+all_dates = {}
+all_dates_str = []
+start_date = date(2000, 1, 1)
+end_date = date(2001, 1, 1)
+a_date = start_date
+while a_date < end_date:
+    date_str = a_date.strftime("%Y/%m/%d")
+    all_dates_str.append(date_str)
+    all_dates[date_str] = a_date
+    a_date += timedelta(days=1)
+
+# Initial selection: first and last day
+dates=[all_dates_str[1], all_dates_str[-1]]
+# These two variables are used in text controls
+start_sel = all_dates[dates[0]]
+end_sel = all_dates[dates[1]]
+
+def on_change(state, _, var_value):
+    # Update the text controls
+    state.start_sel = all_dates[var_value[0]]
+    state.end_sel = all_dates[var_value[1]]
 
 page = """
-# Waterfall - Period levels
+# Slider - Date range
 
-<|{data}|chart|type=waterfall|x=0/Period|y=1/Cash Flow|measure=1/Measure|>
+<|{dates}|slider|lov={all_dates_str}|>
+
+Start: <|{start_sel}|text|format=d MMM|>
+
+End: <|{end_sel}|text|format=d MMM|>
 """
 
 Gui(page).run()
