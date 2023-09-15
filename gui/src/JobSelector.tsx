@@ -62,10 +62,10 @@ interface JobSelectorProps {
     className?: string;
     dynamicClassName?: string;
     height: string;
-    showJobId?: boolean;
-    showEntityLabel?: boolean;
-    showEntityId?: boolean;
-    showSubmitId?: boolean;
+    showId?: boolean;
+    showSubmittedLabel?: boolean;
+    showSubmittedId?: boolean;
+    showSubmissionId?: boolean;
     showDate?: boolean;
     showCancel?: boolean;
     showDelete?: boolean;
@@ -84,9 +84,9 @@ enum JobProps {
     id,
     name,
     _,
-    entity_id,
-    entity_name,
-    submit_id,
+    submitted_id,
+    submitted_label,
+    submission_id,
     creation_date,
     status,
 }
@@ -150,7 +150,12 @@ interface FilterProps {
     columns: JobSelectorColumns[];
 }
 const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns }: FilterProps) => {
-    const form = useFormik<{filters: FilterData[], newData: "" | number, newOperator: "is" | "isnot", newValue: string}>({
+    const form = useFormik<{
+        filters: FilterData[];
+        newData: "" | number;
+        newOperator: "is" | "isnot";
+        newValue: string;
+    }>({
         initialValues: {
             filters: [],
             newData: "",
@@ -284,10 +289,10 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                                 (item.showPrimaryLabel || item.showSecondayLabel)
                                         )
                                         .map((item) => (
-                                                <MenuItem key={item.id} value={item.columnIndex}>
-                                                    {item.primaryLabel}
-                                                </MenuItem>
-                                            ))}
+                                            <MenuItem key={item.id} value={item.columnIndex}>
+                                                {item.primaryLabel}
+                                            </MenuItem>
+                                        ))}
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -315,11 +320,16 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                         </Grid>
                     </Grid>
                     <Grid item xs={12} container justifyContent="space-between" mt={2}>
-                        <Button variant="outlined" color="inherit" onClick={removeAllFilter} disabled={!form.values.filters.length}>
+                        <Button
+                            variant="outlined"
+                            color="inherit"
+                            onClick={removeAllFilter}
+                            disabled={!form.values.filters.length}
+                        >
                             Remove all filters
                         </Button>
                         <Button variant="contained" type="submit">
-                            Apply {form.values.filters.length} filter{form.values.filters.length > 1 ? "s": ""}
+                            Apply {form.values.filters.length} filter{form.values.filters.length > 1 ? "s" : ""}
                         </Button>
                     </Grid>
                 </Grid>
@@ -334,33 +344,31 @@ interface JobSelectedTableHeadProps {
     handleSelectAllClick?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     columns: JobSelectorColumns[];
 }
-function JobSelectedTableHead({ jobs, selected, handleSelectAllClick, columns }: JobSelectedTableHeadProps) {
-    return (
-        <TableHead>
-            <TableRow>
-                <TableCell padding="checkbox">
-                    <Checkbox
-                        color="primary"
-                        checked={!!jobs && jobs == selected}
-                        indeterminate={!!jobs && !!selected && jobs != selected}
-                        onChange={handleSelectAllClick}
-                    />
-                </TableCell>
-                {columns
-                    .filter((i) => i.showPrimaryLabel || i.showSecondayLabel)
-                    .map((item) => (
-                        <TableCell key={item.id}>
-                            {item.secondaryLabel ? (
-                                <ListItemText primary={item.primaryLabel} secondary={item.secondaryLabel} />
-                            ) : (
-                                item.primaryLabel
-                            )}
-                        </TableCell>
-                    ))}
-            </TableRow>
-        </TableHead>
-    );
-}
+const JobSelectedTableHead = ({ jobs, selected, handleSelectAllClick, columns }: JobSelectedTableHeadProps) => (
+    <TableHead>
+        <TableRow>
+            <TableCell padding="checkbox">
+                <Checkbox
+                    color="primary"
+                    checked={!!jobs && jobs == selected}
+                    indeterminate={!!jobs && !!selected && jobs != selected}
+                    onChange={handleSelectAllClick}
+                />
+            </TableCell>
+            {columns
+                .filter((c) => c.showPrimaryLabel || c.showSecondayLabel)
+                .map((col) => (
+                    <TableCell key={col.id}>
+                        {col.secondaryLabel ? (
+                            <ListItemText primary={col.primaryLabel} secondary={col.secondaryLabel} />
+                        ) : (
+                            col.primaryLabel
+                        )}
+                    </TableCell>
+                ))}
+        </TableRow>
+    </TableHead>
+);
 
 interface JobSelectedTableRowProps {
     row: Job;
@@ -370,10 +378,10 @@ interface JobSelectedTableRowProps {
     handleCheckboxClick: (event: React.MouseEvent<HTMLElement>) => void;
     handleCancelJobs: (event: React.MouseEvent<HTMLElement>) => void;
     handleDeleteJobs: (event: React.MouseEvent<HTMLElement>) => void;
-    showJobId?: boolean;
-    showEntityLabel?: boolean;
-    showEntityId?: boolean;
-    showSubmitId?: boolean;
+    showId?: boolean;
+    showSubmittedLabel?: boolean;
+    showSubmittedId?: boolean;
+    showSubmissionId?: boolean;
     showDate?: boolean;
     showCancel?: boolean;
     showDelete?: boolean;
@@ -386,10 +394,10 @@ const JobSelectedTableRow = ({
     handleCheckboxClick,
     handleCancelJobs,
     handleDeleteJobs,
-    showJobId,
-    showEntityLabel,
-    showEntityId,
-    showSubmitId,
+    showId,
+    showSubmittedLabel,
+    showSubmittedId,
+    showSubmissionId,
     showDate,
     showCancel,
     showDelete,
@@ -398,21 +406,29 @@ const JobSelectedTableRow = ({
     const [id, jobName, _, entityId, entityName, submitId, creationDate, status] = row;
 
     return (
-        <TableRow hover role="checkbox" tabIndex={-1} key={id} data-id={id} onClick={handleSelection} selected={isSelected}>
+        <TableRow
+            hover
+            role="checkbox"
+            tabIndex={-1}
+            key={id}
+            data-id={id}
+            onClick={handleSelection}
+            selected={isSelected}
+        >
             <TableCell padding="checkbox">
                 <Checkbox color="primary" checked={isItemSelected} data-id={id} onClick={handleCheckboxClick} />
             </TableCell>
-            {showJobId ? (
+            {showId ? (
                 <TableCell component="th" scope="row" padding="none">
                     <ListItemText primary={jobName} secondary={id} />
                 </TableCell>
             ) : null}
-            {showSubmitId ? <TableCell>{submitId}</TableCell> : null}
-            {showEntityLabel || showEntityId ? (
+            {showSubmissionId ? <TableCell>{submitId}</TableCell> : null}
+            {showSubmittedLabel || showSubmittedId ? (
                 <TableCell>
-                    {!showEntityLabel && showEntityId ? (
+                    {!showSubmittedLabel && showSubmittedId ? (
                         entityId
-                    ) : !showEntityId && showEntityLabel ? (
+                    ) : !showSubmittedId && showSubmittedLabel ? (
                         entityName
                     ) : (
                         <ListItemText primary={entityName} secondary={entityId} />
@@ -451,10 +467,10 @@ const JobSelectedTableRow = ({
 const JobSelector = (props: JobSelectorProps) => {
     const {
         id = "",
-        showJobId = true,
-        showEntityLabel = true,
-        showEntityId = true,
-        showSubmitId = true,
+        showId = true,
+        showSubmittedLabel = true,
+        showSubmittedId = true,
+        showSubmissionId = true,
         showDate = true,
         showCancel = true,
         showDelete = true,
@@ -491,25 +507,25 @@ const JobSelector = (props: JobSelectorProps) => {
             {
                 id: "jobId",
                 primaryLabel: "Job",
-                showPrimaryLabel: showJobId,
+                showPrimaryLabel: showId,
                 secondaryLabel: "ID",
-                showSecondayLabel: showJobId,
+                showSecondayLabel: showId,
                 columnIndex: JobProps.id,
             },
             {
                 id: "submitID",
-                primaryLabel: "Submit ID",
-                columnIndex: JobProps.submit_id,
-                showPrimaryLabel: showSubmitId,
-                showSecondayLabel: showSubmitId,
+                primaryLabel: "Submission ID",
+                columnIndex: JobProps.submission_id,
+                showPrimaryLabel: showSubmissionId,
+                showSecondayLabel: showSubmissionId,
             },
             {
                 id: "submitEntity",
                 primaryLabel: "Submitted entity",
                 secondaryLabel: "ID",
-                columnIndex: JobProps.entity_id,
-                showPrimaryLabel: showEntityLabel,
-                showSecondayLabel: showEntityId,
+                columnIndex: JobProps.submitted_id,
+                showPrimaryLabel: showSubmittedLabel,
+                showSecondayLabel: showSubmittedId,
             },
             {
                 id: "createdDt",
@@ -533,7 +549,7 @@ const JobSelector = (props: JobSelectorProps) => {
                 showSecondayLabel: showDelete,
             },
         ],
-        [showDate, showEntityId, showEntityLabel, showJobId, showSubmitId, showCancel, showDelete]
+        [showDate, showSubmittedId, showSubmittedLabel, showId, showSubmissionId, showCancel, showDelete]
     );
 
     const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -552,31 +568,27 @@ const JobSelector = (props: JobSelectorProps) => {
         });
     }, []);
 
-    const handleSelection = useCallback((event: React.MouseEvent<HTMLElement>) => {
-        const { id = "" } = event.currentTarget?.dataset || {};
-        setSelected((oldSelected) => {
-            const newSelected = [...oldSelected];
-            const selectedIndex = newSelected.indexOf(id);
+    const handleSelection = useCallback(
+        (event: React.MouseEvent<HTMLElement>) => {
+            const { id = "" } = event.currentTarget?.dataset || {};
+            setSelected((oldSelected) => {
+                const newSelected = [...oldSelected];
+                const selectedIndex = newSelected.indexOf(id);
 
-            if (selectedIndex === -1) {
-                newSelected.push(id);
-            } else {
-                newSelected.splice(selectedIndex, 1);
-            }
-            const jobsVar = getUpdateVar(props.updateVars, "jobs");
-            dispatch(
-                createSendUpdateAction(
-                    props.updateVarName,
-                    newSelected,
-                    module,
-                    props.onChange,
-                    propagate,
-                    jobsVar
-                )
-            );
-            return newSelected;
-        });
-    }, [dispatch, module, props.onChange, props.updateVars, props.updateVarName, propagate]);
+                if (selectedIndex === -1) {
+                    newSelected.push(id);
+                } else {
+                    newSelected.splice(selectedIndex, 1);
+                }
+                const jobsVar = getUpdateVar(props.updateVars, "jobs");
+                dispatch(
+                    createSendUpdateAction(props.updateVarName, newSelected, module, props.onChange, propagate, jobsVar)
+                );
+                return newSelected;
+            });
+        },
+        [dispatch, module, props.onChange, props.updateVars, props.updateVarName, propagate]
+    );
 
     const handleCheckAllClick = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -589,7 +601,12 @@ const JobSelector = (props: JobSelectorProps) => {
             event.stopPropagation();
             const { id = "", multiple = false } = event.currentTarget?.dataset || {};
             try {
-                dispatch(createSendActionNameAction(props.id, module, props.onJobAction, {id: multiple === false ? [id] : JSON.parse(id), action: "cancel"}));
+                dispatch(
+                    createSendActionNameAction(props.id, module, props.onJobAction, {
+                        id: multiple === false ? [id] : JSON.parse(id),
+                        action: "cancel",
+                    })
+                );
             } catch (e) {
                 console.warn("Error parsing ids for cancel.", e);
             }
@@ -602,7 +619,12 @@ const JobSelector = (props: JobSelectorProps) => {
             event.stopPropagation();
             const { id = "", multiple = false } = event.currentTarget?.dataset || {};
             try {
-                dispatch(createSendActionNameAction(props.id, module, props.onJobAction, {id: multiple === false ? [id] : JSON.parse(id), action: "delete"}));
+                dispatch(
+                    createSendActionNameAction(props.id, module, props.onJobAction, {
+                        id: multiple === false ? [id] : JSON.parse(id),
+                        action: "delete",
+                    })
+                );
             } catch (e) {
                 console.warn("Error parsing ids for delete.", e);
             }
@@ -616,7 +638,11 @@ const JobSelector = (props: JobSelectorProps) => {
             !jobRows.some(
                 (job) =>
                     checked.includes(job[JobProps.id]) &&
-                    !(job[JobProps.status] === JobStatus.SUBMITTED || job[JobProps.status] === JobStatus.BLOCKED || job[JobProps.status] === JobStatus.PENDING)
+                    !(
+                        job[JobProps.status] === JobStatus.SUBMITTED ||
+                        job[JobProps.status] === JobStatus.BLOCKED ||
+                        job[JobProps.status] === JobStatus.PENDING
+                    )
             ),
         [jobRows, checked]
     );
@@ -658,9 +684,13 @@ const JobSelector = (props: JobSelectorProps) => {
                                 if (filter.data === JobProps.status) {
                                     rowColumnValue = JobStatus[job[JobProps.status]].toLowerCase();
                                 } else if (filter.data === JobProps.id) {
-                                    rowColumnValue = `${job[JobProps.id].toLowerCase()}${job[JobProps.name].toLowerCase()}`;
-                                } else if (filter.data === JobProps.entity_id) {
-                                    rowColumnValue = `${job[JobProps.entity_id].toLowerCase()}${job[JobProps.entity_name].toLowerCase()}`;
+                                    rowColumnValue = `${job[JobProps.id].toLowerCase()}${job[
+                                        JobProps.name
+                                    ].toLowerCase()}`;
+                                } else if (filter.data === JobProps.submitted_id) {
+                                    rowColumnValue = `${job[JobProps.submitted_id].toLowerCase()}${job[
+                                        JobProps.submitted_label
+                                    ].toLowerCase()}`;
                                 } else if (filter.data === JobProps.creation_date) {
                                     rowColumnValue = new Date(job[JobProps.creation_date]).toLocaleString();
                                 } else if (filter.data < JobLength) {
@@ -679,11 +709,11 @@ const JobSelector = (props: JobSelectorProps) => {
 
     useEffect(() => {
         if (props.value) {
-            setSelected(Array.isArray(props.value) ? props.value: [props.value]);
+            setSelected(Array.isArray(props.value) ? props.value : [props.value]);
         } else if (props.defaultValue) {
             try {
                 const val = JSON.parse(props.defaultValue);
-                setSelected(Array.isArray(val) ? val: [val]);
+                setSelected(Array.isArray(val) ? val : [val]);
             } catch (e) {
                 console.warn("Error parsing jobs default value", e);
             }
@@ -785,10 +815,10 @@ const JobSelector = (props: JobSelectorProps) => {
                                     key={row[JobProps.id]}
                                     handleDeleteJobs={handleDeleteJobs}
                                     handleCancelJobs={handleCancelJobs}
-                                    showSubmitId={showSubmitId}
-                                    showJobId={showJobId}
-                                    showEntityLabel={showEntityLabel}
-                                    showEntityId={showEntityId}
+                                    showSubmissionId={showSubmissionId}
+                                    showId={showId}
+                                    showSubmittedLabel={showSubmittedLabel}
+                                    showSubmittedId={showSubmittedId}
                                     showDate={showDate}
                                     showCancel={showCancel}
                                     showDelete={showDelete}

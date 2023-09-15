@@ -265,25 +265,25 @@
                         "doc": "Bound to the selected <code>Job^</code>(s), or None if there is none."
                     },
                     {
-                        "name": "show_job_id",
+                        "name": "show_id",
                         "type": "bool",
                         "default_value": "True",
                         "doc": "If False, the <code>Job^</code> id is not shown in the selector."
                     },
                     {
-                        "name": "show_entity_label",
+                        "name": "show_submitted_label",
                         "type": "bool",
                         "default_value": "True",
                         "doc": "If False, the <code>Scenario^</code> or <code>Sequence^</code> label is not shown in the selector."
                     },
                     {
-                        "name": "show_entity_id",
+                        "name": "show_submitted_id",
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If True, the <code>Scenario^</code> or <code>Sequence^</code> id is shown in the selector."
                     },
                     {
-                        "name": "show_submit_id",
+                        "name": "show_submission_id",
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If True, the submission id is shown in the selector."
