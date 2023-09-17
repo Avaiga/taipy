@@ -69,6 +69,170 @@ class TestTaipy:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
 
+    def test_is_editable_is_called(self, cycle, job, data_node):
+        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
+            cycle_id = CycleId("CYCLE_id")
+            tp.is_editable(cycle_id)
+            mck.assert_called_once_with(cycle_id)
+
+        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
+            tp.is_editable(cycle)
+            mck.assert_called_once_with(cycle)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_editable") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.is_editable(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_editable") as mck:
+            scenario = Scenario("scenario_config_id", [], {})
+            tp.is_editable(scenario)
+            mck.assert_called_once_with(scenario)
+
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_editable") as mck:
+            sequence_id = SequenceId("SEQUENCE_id")
+            tp.is_editable(sequence_id)
+            mck.assert_called_once_with(sequence_id)
+
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_editable") as mck:
+            sequence = Sequence({}, [], "sequence_id")
+            tp.is_editable(sequence)
+            mck.assert_called_once_with(sequence)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_editable") as mck:
+            task_id = TaskId("TASK_id")
+            tp.is_editable(task_id)
+            mck.assert_called_once_with(task_id)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_editable") as mck:
+            task = Task("task_config_id", {}, print)
+            tp.is_editable(task)
+            mck.assert_called_once_with(task)
+
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_editable") as mck:
+            job_id = JobId("JOB_id")
+            tp.is_editable(job_id)
+            mck.assert_called_once_with(job_id)
+
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_editable") as mck:
+            tp.is_editable(job)
+            mck.assert_called_once_with(job)
+
+        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_editable") as mck:
+            dn_id = DataNodeId("DATANODE_id")
+            tp.is_editable(dn_id)
+            mck.assert_called_once_with(dn_id)
+
+        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_editable") as mck:
+            tp.is_editable(data_node)
+            mck.assert_called_once_with(data_node)
+
+    def test_is_editable(self):
+        current_date = datetime.datetime.now()
+
+        cycle = Cycle(Frequency.DAILY, {}, current_date, current_date, current_date)
+        scenario = Scenario("scenario_config_id", [], {}, sequences={"sequence": {}})
+
+        task = Task("task_config_id", {}, print)
+        job = Job("job_id", task, "submit_id", scenario.id)
+        dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
+
+        _CycleManager._set(cycle)
+        _ScenarioManager._set(scenario)
+        _TaskManager._set(task)
+        _JobManager._set(job)
+        _DataManager._set(dn)
+        sequence = scenario.sequences["sequence"]
+
+        assert tp.is_editable(scenario)
+        assert tp.is_editable(sequence)
+        assert tp.is_editable(task)
+        assert tp.is_editable(cycle)
+        assert tp.is_editable(job)
+        assert tp.is_editable(dn)
+
+    def test_is_readable_is_called(self, cycle, job, data_node):
+        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_readable") as mck:
+            cycle_id = CycleId("CYCLE_id")
+            tp.is_readable(cycle_id)
+            mck.assert_called_once_with(cycle_id)
+
+        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_readable") as mck:
+            tp.is_readable(cycle)
+            mck.assert_called_once_with(cycle)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_readable") as mck:
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.is_readable(scenario_id)
+            mck.assert_called_once_with(scenario_id)
+
+        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_readable") as mck:
+            scenario = Scenario("scenario_config_id", [], {})
+            tp.is_readable(scenario)
+            mck.assert_called_once_with(scenario)
+
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_readable") as mck:
+            sequence_id = SequenceId("SEQUENCE_id")
+            tp.is_readable(sequence_id)
+            mck.assert_called_once_with(sequence_id)
+
+        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_readable") as mck:
+            sequence = Sequence({}, [], "sequence_id")
+            tp.is_readable(sequence)
+            mck.assert_called_once_with(sequence)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_readable") as mck:
+            task_id = TaskId("TASK_id")
+            tp.is_readable(task_id)
+            mck.assert_called_once_with(task_id)
+
+        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_readable") as mck:
+            task = Task("task_config_id", {}, print)
+            tp.is_readable(task)
+            mck.assert_called_once_with(task)
+
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_readable") as mck:
+            job_id = JobId("JOB_id")
+            tp.is_readable(job_id)
+            mck.assert_called_once_with(job_id)
+
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_readable") as mck:
+            tp.is_readable(job)
+            mck.assert_called_once_with(job)
+
+        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_readable") as mck:
+            dn_id = DataNodeId("DATANODE_id")
+            tp.is_readable(dn_id)
+            mck.assert_called_once_with(dn_id)
+
+        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_readable") as mck:
+            tp.is_readable(data_node)
+            mck.assert_called_once_with(data_node)
+
+    def test_is_readable(self):
+        current_date = datetime.datetime.now()
+
+        cycle = Cycle(Frequency.DAILY, {}, current_date, current_date, current_date)
+        scenario = Scenario("scenario_config_id", [], {}, sequences={"sequence": {}})
+
+        task = Task("task_config_id", {}, print)
+        job = Job("job_id", task, "submit_id", scenario.id)
+        dn = PickleDataNode("data_node_config_id", Scope.SCENARIO)
+
+        _CycleManager._set(cycle)
+        _ScenarioManager._set(scenario)
+        _TaskManager._set(task)
+        _JobManager._set(job)
+        _DataManager._set(dn)
+        sequence = scenario.sequences["sequence"]
+
+        assert tp.is_readable(scenario)
+        assert tp.is_readable(sequence)
+        assert tp.is_readable(task)
+        assert tp.is_readable(cycle)
+        assert tp.is_readable(job)
+        assert tp.is_readable(dn)
+
     def test_is_submittable_is_called(self):
         with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
             scenario_id = ScenarioId("SCENARIO_id")

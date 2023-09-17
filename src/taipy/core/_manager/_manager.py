@@ -132,3 +132,11 @@ class _Manager(Generic[EntityType]):
         Export an entity.
         """
         return cls._repository._export(id, folder_path)
+
+    @classmethod
+    def _is_editable(cls, entity: Union[EntityType, _EntityIds]) -> bool:
+        return True
+
+    @classmethod
+    def _is_readable(cls, entity: Union[EntityType, _EntityIds]) -> bool:
+        return True

@@ -160,3 +160,13 @@ class TestManager:
             MockManager._set(m)
         MockManager._delete_many(["uuid-0", "uuid-1"])
         assert len(MockManager._get_all()) == 3
+
+    def test_is_editable(self):
+        m = MockEntity("uuid", "Foo")
+        MockManager._set(m)
+        assert MockManager._is_editable(m)
+
+    def test_is_readable(self):
+        m = MockEntity("uuid", "Foo")
+        MockManager._set(m)
+        assert MockManager._is_readable(m)

@@ -88,6 +88,62 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
     return False
 
 
+def is_editable(
+    entity: Union[
+        DataNode, Task, Job, Sequence, Scenario, Cycle, DataNodeId, TaskId, JobId, SequenceId, ScenarioId, CycleId
+    ]
+) -> bool:
+
+    """Indicate if an entity can be edited.
+
+    This function checks if the given entity can be edited.
+
+    Returns:
+        True if the given entity can be edited. False otherwise.
+    """
+    if isinstance(entity, Cycle) or (isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX)):
+        return _CycleManagerFactory._build_manager()._is_editable(entity)  # type: ignore
+    if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
+        return _ScenarioManagerFactory._build_manager()._is_editable(entity)  # type: ignore
+    if isinstance(entity, Sequence) or (isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX)):
+        return _SequenceManagerFactory._build_manager()._is_editable(entity)  # type: ignore
+    if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
+        return _TaskManagerFactory._build_manager()._is_editable(entity)  # type: ignore
+    if isinstance(entity, Job) or (isinstance(entity, str) and entity.startswith(Job._ID_PREFIX)):
+        return _JobManagerFactory._build_manager()._is_editable(entity)  # type: ignore
+    if isinstance(entity, DataNode) or (isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX)):
+        return _DataManagerFactory._build_manager()._is_editable(entity)  # type: ignore
+    return False
+
+
+def is_readable(
+    entity: Union[
+        DataNode, Task, Job, Sequence, Scenario, Cycle, DataNodeId, TaskId, JobId, SequenceId, ScenarioId, CycleId
+    ]
+) -> bool:
+
+    """Indicate if an entity can be read.
+
+    This function checks if the given entity can be read.
+
+    Returns:
+        True if the given entity can be read. False otherwise.
+    """
+    if isinstance(entity, Cycle) or (isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX)):
+        return _CycleManagerFactory._build_manager()._is_readable(entity)  # type: ignore
+    if isinstance(entity, Scenario) or (isinstance(entity, str) and entity.startswith(Scenario._ID_PREFIX)):
+        return _ScenarioManagerFactory._build_manager()._is_readable(entity)  # type: ignore
+    if isinstance(entity, Sequence) or (isinstance(entity, str) and entity.startswith(Sequence._ID_PREFIX)):
+        return _SequenceManagerFactory._build_manager()._is_readable(entity)  # type: ignore
+    if isinstance(entity, Task) or (isinstance(entity, str) and entity.startswith(Task._ID_PREFIX)):
+        return _TaskManagerFactory._build_manager()._is_readable(entity)  # type: ignore
+    if isinstance(entity, Job) or (isinstance(entity, str) and entity.startswith(Job._ID_PREFIX)):
+        return _JobManagerFactory._build_manager()._is_readable(entity)  # type: ignore
+    if isinstance(entity, DataNode) or (isinstance(entity, str) and entity.startswith(DataNode._ID_PREFIX)):
+        return _DataManagerFactory._build_manager()._is_readable(entity)  # type: ignore
+    return False
+
+
 @_warn_no_core_service()
 def submit(
     entity: Union[Scenario, Sequence, Task],
