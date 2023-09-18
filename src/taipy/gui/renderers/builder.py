@@ -106,7 +106,7 @@ class _Builder:
                 prop_hash = self.__gui._bind_var(prop_hash)
                 if hasattr(self.__gui._bindings(), prop_hash):
                     prop_dict = _getscopeattr(self.__gui, prop_hash)
-            if isinstance(prop_dict, _MapDict):
+            if isinstance(prop_dict, (dict, _MapDict)):
                 # Iterate through prop_dict and append to self.attributes
                 for k, v in prop_dict.items():
                     (val, key_hash) = _Builder.__parse_attribute_value(gui, v)

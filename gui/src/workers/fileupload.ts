@@ -11,10 +11,9 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { URL as NodeURL } from "url";
 import { FileUploadData, FileUploadReturn } from "./fileupload.utils";
 
-const worker = new Worker(new URL("./fileupload.worker.ts", import.meta.url) as NodeURL);
+const worker = new Worker(new URL("./fileupload.worker.ts", import.meta.url));
 
 const UPLOAD_URL = "/taipy-uploads";
 
