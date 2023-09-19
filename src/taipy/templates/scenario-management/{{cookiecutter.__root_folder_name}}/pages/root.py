@@ -1,10 +1,7 @@
-from typing import Dict
-
 from taipy.gui import Markdown
 
 selected_scenario = None
-inputs: Dict = {}
-outputs: Dict = {}
-contents: Dict = {}
+selected_data_node = None
+content = ""
 
 root = Markdown("pages/root.md")

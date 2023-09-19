@@ -1,21 +1,9 @@
 from taipy.gui import Markdown
 
-from .data_node_management import (
-    custom_write_data_nodes,
-    manage_inputs_partial,
-    manage_outputs_partial,
-    write_data_nodes,
-)
+from .data_node_management import manage_partial
 
 
-def manage_data_node_partials(state):
-    manage_inputs_partial(state)
-    manage_outputs_partial(state)
-
-
-def on_change(state, var, val):
-    write_data_nodes(state, var, val)
-    custom_write_data_nodes(state, var, val)
-
+def manage_data_node_partial(state):
+    manage_partial(state)
 
 scenario_page = Markdown("pages/scenario_page/scenario_page.md")
