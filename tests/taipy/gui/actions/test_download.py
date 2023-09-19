@@ -40,5 +40,5 @@ def test_download(gui: Gui, helpers):
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(
-        received_messages[0], "DF", {"name": "filename.txt", "on_action": "on_download_action"}
+        received_messages[0], "DF", {"name": "filename.txt", "onAction": "on_download_action"}
     )

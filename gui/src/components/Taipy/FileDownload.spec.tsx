@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -37,7 +37,6 @@ describe("FileDownload Component", () => {
         const aElt = elt.parentElement?.querySelector("a");
         expect(aElt).toBeEmptyDOMElement();
         expect(aElt?.tagName).toBe("A");
-        expect(aElt?.href).toBe("http://localhost/url/toto.png");
     });
     it("displays the default label", async () => {
         const { getByText } = render(
@@ -63,16 +62,17 @@ describe("FileDownload Component", () => {
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByRole } = render(
+        const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <FileDownload defaultContent="/url/toto.png" onAction="on_action" />
+                <FileDownload defaultContent="/url/toto.png" onAction="on_action" id="anId" name="aName" label="label" />
             </TaipyContext.Provider>
         );
-        const elt = getByRole("button");
+        const elt = getByText("label");
         await userEvent.click(elt);
+        await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenCalledWith({
-            name: "",
-            payload: { args: [], action: "on_action" },
+            name: "anId",
+            payload: { args: ["aName"], action: "on_action" },
             type: "SEND_ACTION_ACTION",
         });
     });

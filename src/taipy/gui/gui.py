@@ -939,7 +939,7 @@ class Gui:
         )
 
     def __send_ws_download(self, content: str, name: str, on_action: str) -> None:
-        self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "on_action": on_action})
+        self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "onAction": on_action})
 
     def __send_ws_alert(self, type: str, message: str, system_notification: bool, duration: int) -> None:
         self.__send_ws(
