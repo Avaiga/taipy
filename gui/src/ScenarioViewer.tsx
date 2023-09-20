@@ -77,6 +77,7 @@ interface ScenarioViewerProps {
     libClassName?: string;
     className?: string;
     dynamicClassName?: string;
+    onSubmissionChange?: string;
 }
 
 interface SequencesRowProps {
@@ -278,19 +279,19 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // submits
     const submitSequence = useCallback(
         (sequenceId: string) => {
-            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: sequenceId }));
+            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: sequenceId, on_submission_change: props.onSubmissionChange }));
         },
-        [props.onSubmit, id, dispatch, module]
+        [props.onSubmit, props.onSubmissionChange, id, dispatch, module]
     );
 
     const submitScenario = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (isScenario) {
-                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scId }));
+                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scId, on_submission_change: props.onSubmissionChange }));
             }
         },
-        [isScenario, props.onSubmit, id, scId, dispatch, module]
+        [isScenario, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module]
     );
 
     // focus

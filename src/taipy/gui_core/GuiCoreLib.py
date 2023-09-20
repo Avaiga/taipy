@@ -73,6 +73,7 @@ class _GuiCore(ElementLibrary):
                 "show_sequences": ElementProperty(PropertyType.boolean, True),
                 "show_submit_sequences": ElementProperty(PropertyType.boolean, True),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
+                "on_submission_change": ElementProperty(PropertyType.function),
             },
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_entity}}"),
