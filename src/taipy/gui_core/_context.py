@@ -12,6 +12,7 @@
 import json
 import typing as t
 from collections import defaultdict
+from enum import Enum
 from numbers import Number
 from threading import Lock
 
@@ -39,6 +40,39 @@ from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
 from ._adapters import _EntityType
+
+
+class _SubmissionStatus(Enum):
+    SUBMITTED = 0
+    COMPLETED = 1
+    CANCELED = 2
+    FAILED = 3
+    BLOCKED = 4
+    WAITING = 5
+    RUNNING = 6
+    UNDEFINED = 7
+
+
+class _SubmissionDetails:
+    def __init__(
+        self,
+        client_id: str,
+        module_context: str,
+        callback: str,
+        entity_id: str,
+        status: _SubmissionStatus,
+        jobs: t.List[Job],
+    ) -> None:
+        self.client_id = client_id
+        self.module_context = module_context
+        self.callback = callback
+        self.entity_id = entity_id
+        self.status = status
+        self.jobs = jobs
+
+    def set_status(self, status: _SubmissionStatus):
+        self.status = status
+        return self
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
@@ -69,9 +103,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
+        self.client_jobs_by_submission: t.Dict[str, _SubmissionDetails] = dict()
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
+        # locks
         self.lock = Lock()
+        self.submissions_lock = Lock()
         super().__init__(reg_id, reg_queue)
         self.start()
 
@@ -95,6 +132,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
+            if event.entity_id:
+                self.scenario_status_callback(event.entity_id)
             self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
@@ -262,7 +301,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
 
-    def submit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def submit_entity(self, state: State, id: str, submission_cb: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -271,10 +310,121 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity = core_get(entity_id)
         if entity:
             try:
-                core_submit(entity)
+                jobs = core_submit(entity)
+                if submission_cb := data.get("on_submission_change"):
+                    if callable(self.gui._get_user_function(submission_cb)):
+                        job_ids = [j.id for j in (jobs if isinstance(jobs, list) else [jobs])]
+                        client_id = self.gui._get_client_id()
+                        module_context = self.gui._get_locals_context()
+                        sub_id = jobs[0].submit_id if isinstance(jobs, list) else jobs.submit_id
+                        with self.submissions_lock:
+                            self.client_jobs_by_submission[sub_id] = _SubmissionDetails(
+                                client_id,
+                                module_context,
+                                submission_cb,
+                                entity_id,
+                                _SubmissionStatus.SUBMITTED,
+                                job_ids,
+                            )
+                        self.scenario_status_callback(jobs[0].id if isinstance(jobs, list) else jobs.id)
+                    else:
+                        _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
+
+    def _get_submittable_status(self, jobs_ids: t.List[str]) -> _SubmissionStatus:
+        abandoned = False
+        canceled = False
+        blocked = False
+        waiting = False
+        running = False
+        completed = False
+        for id in jobs_ids:
+            job = core_get(id)
+            if not job:
+                continue
+            if job.is_failed():
+                return _SubmissionStatus.FAILED
+            if job.is_canceled():
+                canceled = True
+            if job.is_blocked():
+                blocked = True
+                continue
+            if job.is_pending() or job.is_submitted():
+                waiting = True
+                continue
+            if job.is_running():
+                running = True
+                continue
+            if job.is_completed() or job.is_skipped():
+                completed = True
+                continue
+            if job.is_abandoned():
+                abandoned = True
+        if canceled:
+            return _SubmissionStatus.CANCELED
+        if abandoned:
+            return _SubmissionStatus.UNDEFINED
+        if running:
+            return _SubmissionStatus.RUNNING
+        if waiting:
+            return _SubmissionStatus.WAITING
+        if blocked:
+            return _SubmissionStatus.BLOCKED
+        if completed:
+            return _SubmissionStatus.COMPLETED
+        return _SubmissionStatus.UNDEFINED
+
+    def scenario_status_callback(self, job_id: str):
+        if not job_id:
+            return
+        try:
+            job = core_get(job_id)
+            if not job:
+                return
+            sub_id = job.submit_id
+            sub_details = self.client_jobs_by_submission.get(sub_id)
+            if not sub_details:
+                return
+
+            if (
+                not sub_details.callback
+                or not sub_details.client_id
+                or not sub_details.entity_id
+                or not sub_details.jobs
+            ):
+                return
+
+            entity = core_get(sub_details.entity_id)
+            if not entity:
+                return
+
+            submission_function = self.gui._get_user_function(sub_details.callback)
+            if not callable(submission_function):
+                return
+
+            new_status = self._get_submittable_status(sub_details.jobs)
+            if sub_details.status is not new_status:
+                # callback
+                self.gui._call_user_callback(
+                    sub_details.client_id,
+                    submission_function,
+                    [entity, {"submission_status": new_status.name, "job": job}],
+                    sub_details.module_context,
+                )
+            with self.submissions_lock:
+                if new_status in (
+                    _SubmissionStatus.COMPLETED,
+                    _SubmissionStatus.FAILED,
+                    _SubmissionStatus.CANCELED,
+                ):
+                    self.client_jobs_by_submission.pop(sub_id, None)
+                else:
+                    self.client_jobs_by_submission[sub_id] = sub_details.set_status(new_status)
+
+        except Exception as e:
+            _warn(f"Job is not available {e}")
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
