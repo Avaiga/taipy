@@ -236,3 +236,10 @@ class TestGuiCoreContext_SubmissionStatus:
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
+
+    def test_no_job(self):
+        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+            gui_core_context = _GuiCoreContext(Mock())
+            status = gui_core_context._get_submittable_status([])
+            assert status == _SubmissionStatus.UNDEFINED
+
