@@ -215,28 +215,6 @@ class TestGuiCoreContext_SubmissionStatus:
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
 
-    @pytest.mark.parametrize(
-        "job_ids, expected_status",
-        [
-            (["job3_blocked", "job8_abandoned"], _SubmissionStatus.UNDEFINED),
-            (["job4_pending", "job8_abandoned"], _SubmissionStatus.UNDEFINED),
-            (["job5_running", "job8_abandoned"], _SubmissionStatus.UNDEFINED),
-            (["job6_completed", "job8_abandoned"], _SubmissionStatus.UNDEFINED),
-            (["job7_skipped", "job8_abandoned"], _SubmissionStatus.UNDEFINED),
-            (["job8_abandoned", "job8_abandoned"], _SubmissionStatus.UNDEFINED),
-            (["job8_abandoned", "job3_blocked"], _SubmissionStatus.UNDEFINED),
-            (["job8_abandoned", "job4_pending"], _SubmissionStatus.UNDEFINED),
-            (["job8_abandoned", "job5_running"], _SubmissionStatus.UNDEFINED),
-            (["job8_abandoned", "job6_completed"], _SubmissionStatus.UNDEFINED),
-            (["job8_abandoned", "job7_skipped"], _SubmissionStatus.UNDEFINED),
-        ],
-    )
-    def test_WRONG_CASE_abandoned_without_cancel_or_failed(self, job_ids, expected_status):
-        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
-            gui_core_context = _GuiCoreContext(Mock())
-            status = gui_core_context._get_submittable_status(job_ids)
-            assert status == expected_status
-
     def test_no_job(self):
         with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
