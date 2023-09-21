@@ -53,6 +53,28 @@ class _SubmissionStatus(Enum):
     UNDEFINED = 7
 
 
+class _SubmissionDetails:
+    def __init__(
+        self,
+        client_id: str,
+        module_context: str,
+        callback: str,
+        entity_id: str,
+        status: _SubmissionStatus,
+        jobs: t.List[Job],
+    ) -> None:
+        self.client_id = client_id
+        self.module_context = module_context
+        self.callback = callback
+        self.entity_id = entity_id
+        self.status = status
+        self.jobs = jobs
+
+    def set_status(self, status: _SubmissionStatus):
+        self.status = status
+        return self
+
+
 class _GuiCoreContext(CoreEventConsumerBase):
     __PROP_ENTITY_ID = "id"
     __PROP_ENTITY_COMMENT = "comment"
@@ -81,17 +103,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
-        self.client_jobs_by_submission: t.Dict[
-            str,
-            t.Tuple[
-                str,  # client_id
-                str,  # module_context
-                str,  # action
-                str,  # entity_id
-                _SubmissionStatus,  # submission status
-                t.List[str],  # jobs
-            ],
-        ] = dict()
+        self.client_jobs_by_submission: t.Dict[str, _SubmissionDetails] = dict()
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
         # locks
@@ -289,7 +301,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
 
-    def submit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def submit_entity(self, state: State, id: str, submission_cb: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -299,24 +311,24 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if entity:
             try:
                 jobs = core_submit(entity)
-                if action := data.get("on_submission_change"):
-                    if callable(self.gui._get_user_function(action)):
+                if submission_cb := data.get("on_submission_change"):
+                    if callable(self.gui._get_user_function(submission_cb)):
                         job_ids = [j.id for j in (jobs if isinstance(jobs, list) else [jobs])]
                         client_id = self.gui._get_client_id()
                         module_context = self.gui._get_locals_context()
                         sub_id = jobs[0].submit_id if isinstance(jobs, list) else jobs.submit_id
                         with self.submissions_lock:
-                            self.client_jobs_by_submission[sub_id] = (
+                            self.client_jobs_by_submission[sub_id] = _SubmissionDetails(
                                 client_id,
                                 module_context,
-                                action,
+                                submission_cb,
                                 entity_id,
                                 _SubmissionStatus.SUBMITTED,
                                 job_ids,
                             )
                         self.scenario_status_callback(jobs[0].id if isinstance(jobs, list) else jobs.id)
                     else:
-                        _warn(f"on_submission_change(): '{action}' is not a valid function.")
+                        _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
@@ -364,30 +376,29 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not job:
                 return
             sub_id = job.submit_id
-            res = self.client_jobs_by_submission.get(sub_id)
-            if not res:
+            sub_details = self.client_jobs_by_submission.get(sub_id)
+            if not sub_details:
                 return
 
-            client_id, module_context, action, entity_id, current_status, jobs = res
-            if not action or not client_id or not entity_id or not jobs:
+            if not sub_details.callback or not sub_details.client_id or not sub_details.entity_id or not sub_details.jobs:
                 return
 
-            entity = core_get(entity_id)
+            entity = core_get(sub_details.entity_id)
             if not entity:
                 return
 
-            on_action_function = self.gui._get_user_function(action)
-            if not callable(on_action_function):
+            submission_function = self.gui._get_user_function(sub_details.callback)
+            if not callable(submission_function):
                 return
 
-            new_status = self._get_submittable_status(jobs)
-            if current_status is not new_status:
+            new_status = self._get_submittable_status(sub_details.jobs)
+            if sub_details.status is not new_status:
                 # callback
                 self.gui._call_user_callback(
-                    client_id,
-                    on_action_function,
+                    sub_details.client_id,
+                    submission_function,
                     [entity, {"submission_status": new_status.name, "job": job}],
-                    module_context,
+                    sub_details.module_context,
                 )
             with self.submissions_lock:
                 if new_status in (
@@ -397,7 +408,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 ):
                     self.client_jobs_by_submission.pop(sub_id, None)
                 else:
-                    self.client_jobs_by_submission[sub_id] = (res[0], res[1], res[2], res[3], new_status, res[5])
+                    self.client_jobs_by_submission[sub_id] = sub_details.set_status(new_status)
 
         except Exception as e:
             _warn(f"Job is not available {e}")
