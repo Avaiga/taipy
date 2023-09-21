@@ -333,7 +333,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
-    def _get_submittable_status(self, jobs_ids: t.List[str]):
+    def _get_submittable_status(self, jobs_ids: t.List[str]) -> _SubmissionStatus:
         status = _SubmissionStatus.UNDEFINED
         blocked = False
         waiting = False
