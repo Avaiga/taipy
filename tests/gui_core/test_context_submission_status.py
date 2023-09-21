@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from src.taipy.gui_core._context import _GuiCoreContext, _SubmissionStatus
-from taipy import Status
+from taipy.core import Status
 
 
 class MockJob:
