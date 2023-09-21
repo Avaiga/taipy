@@ -380,7 +380,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not sub_details:
                 return
 
-            if not sub_details.callback or not sub_details.client_id or not sub_details.entity_id or not sub_details.jobs:
+            if (
+                not sub_details.callback
+                or not sub_details.client_id
+                or not sub_details.entity_id
+                or not sub_details.jobs
+            ):
                 return
 
             entity = core_get(sub_details.entity_id)
