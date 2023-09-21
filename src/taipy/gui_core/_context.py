@@ -357,7 +357,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if job.is_running():
                 running = True
                 continue
-            if (job.is_completed() or job.is_skipped()):
+            if job.is_completed() or job.is_skipped():
                 completed = True
                 continue
             if job.is_abandoned():

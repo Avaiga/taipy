@@ -1,8 +1,9 @@
-import pytest
 from unittest.mock import Mock, patch
-from taipy import Status
+
+import pytest
 
 from src.taipy.gui_core._context import _GuiCoreContext, _SubmissionStatus
+from taipy import Status
 
 
 class MockJob:
@@ -54,7 +55,6 @@ def mock_core_get(entity_id):
 
 
 class TestGuiCoreContext_SubmissionStatus:
-
     @pytest.mark.parametrize(
         "job_ids, expected_status",
         [
@@ -69,7 +69,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_single_job(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -95,7 +95,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_one_failed_job(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -119,7 +119,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_no_failed_one_cancel(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -137,7 +137,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_no_failed_or_cancel_one_pending(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -157,7 +157,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_no_failed_cancel_nor_pending_one_running(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -173,7 +173,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_no_failed_cancel_pending_nor_running_one_blocked(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -188,7 +188,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_only_completed_or_skipped(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -210,7 +210,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_WRONG_CASE_abandoned_without_cancel_or_failed(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
@@ -232,7 +232,7 @@ class TestGuiCoreContext_SubmissionStatus:
         ],
     )
     def test_WRONG_CASE_abandoned_without_cancel_or_failed(self, job_ids, expected_status):
-        with patch('src.taipy.gui_core._context.core_get', side_effect=mock_core_get):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get):
             gui_core_context = _GuiCoreContext(Mock())
             status = gui_core_context._get_submittable_status(job_ids)
             assert status == expected_status
