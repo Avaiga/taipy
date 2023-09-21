@@ -334,7 +334,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
 
     def _get_submittable_status(self, jobs_ids: t.List[str]) -> _SubmissionStatus:
-        status = _SubmissionStatus.UNDEFINED
+        abandoned = False
+        canceled = False
         blocked = False
         waiting = False
         running = False
@@ -344,29 +345,36 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not job:
                 continue
             if job.is_failed():
-                status = _SubmissionStatus.FAILED
-                break
+                return _SubmissionStatus.FAILED
             if job.is_canceled():
-                status = _SubmissionStatus.CANCELED
-                break
-            if not blocked and job.is_blocked():
+                canceled = True
+            if job.is_blocked():
                 blocked = True
-            if not waiting and job.is_pending():
+                continue
+            if job.is_pending() or job.is_submitted():
                 waiting = True
-            if not running and job.is_running():
+                continue
+            if job.is_running():
                 running = True
-            if not completed and (job.is_completed() or job.is_skipped()):
+                continue
+            if (job.is_completed() or job.is_skipped()):
                 completed = True
-        if status is _SubmissionStatus.UNDEFINED:
-            if waiting:
-                status = _SubmissionStatus.WAITING
-            elif blocked:
-                status = _SubmissionStatus.BLOCKED
-            elif running:
-                status = _SubmissionStatus.RUNNING
-            elif completed:
-                status = _SubmissionStatus.COMPLETED
-        return status
+                continue
+            if job.is_abandoned():
+                abandoned = True
+        if canceled:
+            return _SubmissionStatus.CANCELED
+        if abandoned:
+            return _SubmissionStatus.UNDEFINED
+        if running:
+            return _SubmissionStatus.RUNNING
+        if waiting:
+            return _SubmissionStatus.WAITING
+        if blocked:
+            return _SubmissionStatus.BLOCKED
+        if completed:
+            return _SubmissionStatus.COMPLETED
+        return _SubmissionStatus.UNDEFINED
 
     def scenario_status_callback(self, job_id: str):
         if not job_id:
