@@ -13,10 +13,10 @@
 
 import React, { useState, useCallback, useEffect, useMemo, SyntheticEvent, HTMLAttributes, forwardRef, Ref, CSSProperties } from "react";
 import Box from "@mui/material/Box";
-import MuiTreeView from "@mui/lab/TreeView";
+import {TreeView as MuiTreeView} from "@mui/x-tree-view/TreeView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import TreeItem, { TreeItemContentProps, useTreeItem, TreeItemProps } from "@mui/lab/TreeItem";
+import { TreeItem, TreeItemContentProps, useTreeItem, TreeItemProps } from "@mui/x-tree-view/TreeItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";

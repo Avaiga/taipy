@@ -526,8 +526,8 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "The name of a function that is triggered when the download is initiated.<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n</ul>",
-            "signature": [["state", "State"], ["id", "str"], ["action", "str"]]
+            "doc": "The name of a function that is triggered when the download is terminated (or on user action if content is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
+            "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
             "name": "auto",

@@ -46,7 +46,7 @@ module.exports = (env, options) => {
             name: reactBundleName,
             entry: ["react", "react-dom",
             "@emotion/react","@emotion/styled",
-            "@mui/icons-material","@mui/lab","@mui/material","@mui/x-date-pickers"],
+            "@mui/icons-material","@mui/material","@mui/x-date-pickers", "@mui/x-tree-view"],
             output: {
                 filename: reactBundle + ".dll.js",
                 path: webAppPath,

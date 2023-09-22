@@ -14,6 +14,7 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { newServer } from 'mock-xmlhttprequest';
 
 import GuiDownload from "./GuiDownload";
 import { TaipyContext } from "../../context/taipyContext";
@@ -21,6 +22,14 @@ import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 
 describe("GuiDownload Component", () => {
     it("emits a well formed message", async () => {
+        const server = newServer({
+            get: ['/some/link/to.png', {
+              // status: 200 is the default
+              //headers: { 'Content-Type': 'application/json' },
+              body: '{ "message": "Success!" }',
+            }],
+          });
+        server.install();
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         render(
@@ -31,9 +40,11 @@ describe("GuiDownload Component", () => {
         await waitFor(() =>
             expect(dispatch).toHaveBeenCalledWith({
                 name: "Gui.download",
-                payload: { args: ["from.png"], action: "onActionMsg" },
+                context: undefined,
+                payload: { args: ["from.png", "/some/link/to.png"], action: "onActionMsg" },
                 type: "SEND_ACTION_ACTION",
             })
         );
+        server.remove();
     });
 });

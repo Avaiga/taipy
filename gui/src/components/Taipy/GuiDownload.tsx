@@ -22,13 +22,13 @@ interface GuiDownloadProps {
 }
 
 const GuiDownload = ({ download }: GuiDownloadProps) => {
-    const { name, onAction, content } = download || {};
+    const { name = "", onAction, content } = download || {};
     const dispatch = useDispatch();
     const module = useModule();
 
     useEffect(() => {
         if (content) {
-            runXHR(undefined, content, name, onAction ? (() => dispatch(createSendActionNameAction("Gui.download", module, onAction, name))) : undefined);
+            runXHR(undefined, content, name, onAction ? (() => dispatch(createSendActionNameAction("Gui.download", module, onAction, name, content))) : undefined);
             dispatch(createDownloadAction());
         }
     }, [content, name, dispatch, onAction, module]);
