@@ -246,7 +246,7 @@ const Selector = (props: SelTreeProps) => {
                     {props.label}
                 </InputLabel>
             ) : null}
-            <Tooltip title={hover || ""}>
+            <Tooltip title={hover || ""} placement={dropdown ? "top": undefined} >
                 {dropdown ? (
                     <Select
                         id={id}
