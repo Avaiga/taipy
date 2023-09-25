@@ -380,21 +380,20 @@ class DataNode(_Entity, _Labeled):
         Parameters:
             editor_id (Optional[str]): The editor's identifier.
         """
-        with self:
-            if editor_id:
-                if (
-                    self.edit_in_progress
-                    and self.editor_id != editor_id
-                    and self.editor_expiration_date
-                    and self.editor_expiration_date > datetime.now()
-                ):
-                    raise DataNodeIsBeingEdited(self.id, self._editor_id)
-                self.editor_id = editor_id  # type: ignore
-                self.editor_expiration_date = datetime.now() + timedelta(minutes=self.__EDIT_TIMEOUT)  # type: ignore
-            else:
-                self.editor_id = None  # type: ignore
-                self.editor_expiration_date = None  # type: ignore
-            self.edit_in_progress = True  # type: ignore
+        if editor_id:
+            if (
+                self.edit_in_progress
+                and self.editor_id != editor_id
+                and self.editor_expiration_date
+                and self.editor_expiration_date > datetime.now()
+            ):
+                raise DataNodeIsBeingEdited(self.id, self._editor_id)
+            self.editor_id = editor_id  # type: ignore
+            self.editor_expiration_date = datetime.now() + timedelta(minutes=self.__EDIT_TIMEOUT)  # type: ignore
+        else:
+            self.editor_id = None  # type: ignore
+            self.editor_expiration_date = None  # type: ignore
+        self.edit_in_progress = True  # type: ignore
 
     def unlock_edit(self, editor_id: Optional[str] = None):
         """Unlocks the data node modification.
@@ -405,18 +404,17 @@ class DataNode(_Entity, _Labeled):
         Parameters:
             editor_id (Optional[str]): The editor's identifier.
         """
-        with self:
-            if (
-                editor_id
-                and self.editor_id != editor_id
-                and self.editor_expiration_date
-                and self.editor_expiration_date > datetime.now()
-            ):
-                raise DataNodeIsBeingEdited(self.id, self._editor_id)
-            else:
-                self.editor_id = None  # type: ignore
-                self.editor_expiration_date = None  # type: ignore
-                self.edit_in_progress = False  # type: ignore
+        if (
+            editor_id
+            and self.editor_id != editor_id
+            and self.editor_expiration_date
+            and self.editor_expiration_date > datetime.now()
+        ):
+            raise DataNodeIsBeingEdited(self.id, self._editor_id)
+        else:
+            self.editor_id = None  # type: ignore
+            self.editor_expiration_date = None  # type: ignore
+            self.edit_in_progress = False  # type: ignore
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """Read and filter the data referenced by this data node.
