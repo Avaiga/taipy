@@ -49,6 +49,8 @@ class InMemoryDataNode(DataNode):
             If _validity_period_ is set to `None`, the data node is always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
+        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
+        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
         properties (dict[str, Any]): A dictionary of additional properties. When creating an
             _In Memory_ data node, if the _properties_ dictionary contains a _"default_data"_
             entry, the data node is automatically written with the corresponding _"default_data"_
@@ -72,6 +74,8 @@ class InMemoryDataNode(DataNode):
         version: str = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
+        editor_id: Optional[str] = None,
+        editor_expiration_date: Optional[datetime] = None,
         properties=None,
     ):
         if properties is None:
@@ -89,6 +93,8 @@ class InMemoryDataNode(DataNode):
             version or _VersionManagerFactory._build_manager()._get_latest_version(),
             validity_period,
             edit_in_progress,
+            editor_id,
+            editor_expiration_date,
             **properties
         )
         if default_value is not None and self.id not in in_memory_storage:

@@ -58,6 +58,8 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             If _validity_period_ is set to `None`, the data node is always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
+        editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
+        editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
         path (str): The path to the Excel file.
         properties (dict[str, Any]): A dictionary of additional properties. The _properties_
             must have a _"default_path"_ or _"path"_ entry with the path of the Excel file:
@@ -95,6 +97,8 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         version: str = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
+        editor_id: Optional[str] = None,
+        editor_expiration_date: Optional[datetime] = None,
         properties: Dict = None,
     ):
         if properties is None:
@@ -124,6 +128,8 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             version or _VersionManagerFactory._build_manager()._get_latest_version(),
             validity_period,
             edit_in_progress,
+            editor_id,
+            editor_expiration_date,
             **properties,
         )
         if not self._path:

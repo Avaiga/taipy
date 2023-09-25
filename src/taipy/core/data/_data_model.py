@@ -54,6 +54,8 @@ class _DataNodeModel(_BaseModel):
         Column("validity_days", Float),
         Column("validity_seconds", Float),
         Column("edit_in_progress", Boolean),
+        Column("editor_id", String),
+        Column("editor_expiration_date", String),
         Column("data_node_properties", JSON),
     )
     __table_args__ = (UniqueConstraint("config_id", "owner_id", name="_config_owner_uc"),)
@@ -71,6 +73,8 @@ class _DataNodeModel(_BaseModel):
     validity_days: Optional[float]
     validity_seconds: Optional[float]
     edit_in_progress: bool
+    editor_id: Optional[str]
+    editor_expiration_date: Optional[str]
     data_node_properties: Dict[str, Any]
 
     @staticmethod
@@ -96,5 +100,7 @@ class _DataNodeModel(_BaseModel):
             validity_seconds=data["validity_seconds"],
             # Migrate edition_in_progress attribute for compatibility between <2.0 to >=2.0 versions.
             edit_in_progress=bool(data.get("edit_in_progress", data.get("edition_in_progress", False))),
+            editor_id=data.get("editor_id", None),
+            editor_expiration_date=data.get("editor_expiration_date"),
             data_node_properties=dn_properties,
         )

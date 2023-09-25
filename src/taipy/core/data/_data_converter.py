@@ -169,6 +169,8 @@ class _DataNodeConverter(_AbstractConverter):
             data_node._validity_period.days if data_node._validity_period else None,
             data_node._validity_period.seconds if data_node._validity_period else None,
             data_node._edit_in_progress,
+            data_node._editor_id,
+            data_node._editor_expiration_date.isoformat() if data_node._editor_expiration_date else None,
             properties,
         )
 
@@ -300,6 +302,7 @@ class _DataNodeConverter(_AbstractConverter):
         if model.validity_seconds is not None and model.validity_days is not None:
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
 
+        exp_date = datetime.fromisoformat(model.editor_expiration_date) if model.editor_expiration_date else None
         datanode = DataNode._class_map()[model.storage_type](
             config_id=model.config_id,
             scope=model.scope,
@@ -312,6 +315,8 @@ class _DataNodeConverter(_AbstractConverter):
             version=model.version,
             validity_period=validity_period,
             edit_in_progress=model.edit_in_progress,
+            editor_id=model.editor_id,
+            editor_expiration_date=exp_date,
             properties=data_node_properties,
         )
         return _migrate_entity(datanode)
