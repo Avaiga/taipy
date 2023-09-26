@@ -11,7 +11,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, ChangeEvent, SyntheticEvent, MouseEvent } from "react";
+import React, {
+    useState,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    ChangeEvent,
+    SyntheticEvent,
+    MouseEvent,
+} from "react";
+import { CheckCircle, Cancel, ArrowForwardIosSharp, Launch, LockOutlined } from "@mui/icons-material";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -25,8 +35,8 @@ import Switch from "@mui/material/Switch";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { CheckCircle, Cancel, ArrowForwardIosSharp, Launch } from "@mui/icons-material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/DateTimePicker/shared";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -35,14 +45,15 @@ import { format } from "date-fns";
 
 import {
     ColumnDesc,
+    Context,
     RowValue,
     TableValueType,
     createRequestUpdateAction,
     createSendActionNameAction,
     getUpdateVar,
-    useDispatch,
     useDynamicProperty,
     useModule,
+    Store,
 } from "taipy-gui";
 
 import { Cycle as CycleIcon, Scenario as ScenarioIcon } from "./icons";
@@ -79,7 +90,20 @@ const editSx = {
 };
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
 
-type DataNodeFull = [string, string, string, string, string, string, string, string, number, Array<[string, string]>];
+type DataNodeFull = [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    number,
+    Array<[string, string]>,
+    boolean,
+    string
+];
 
 enum DataNodeFullProps {
     id,
@@ -92,6 +116,8 @@ enum DataNodeFullProps {
     ownerLabel,
     ownerType,
     properties,
+    editInProgress,
+    editorId,
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -137,6 +163,7 @@ interface DataNodeViewerProps {
     onTabularDataEdit?: string;
     chartConfig?: string;
     width?: string;
+    onLock?: string;
 }
 
 const getDataValue = (value?: RowValue, dType?: string | null) => (dType == "date" ? new Date(value as string) : value);
@@ -162,9 +189,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         showData = true,
     } = props;
 
-    const dispatch = useDispatch();
+    const { state, dispatch } = useContext<Store>(Context);
     const module = useModule();
     const uniqid = useUniqueId(id);
+    const editorId = (state as { id: string }).id;
 
     const [
         dnId,
@@ -177,6 +205,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnOwnerLabel,
         dnOwnerType,
         dnProperties,
+        dnEditInProgress,
+        dnEditorId,
         isDataNode,
     ] = useMemo(() => {
         let dn: DataNodeFull | undefined = undefined;
@@ -189,7 +219,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 // DO nothing
             }
         }
-        return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false];
+        return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false, "", false];
     }, [props.dataNode, props.defaultDataNode]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -267,7 +297,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         setDataRequested(false);
         setViewType(TableViewType);
         setComment("");
-    }, [dnLabel, isDataNode, expanded]);
+    }, [dnId, dnLabel, isDataNode, expanded]);
 
     // Datanode data
     const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? undefined;
@@ -388,6 +418,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             <Grid item>
                                 <Typography fontSize="smaller">{dnType}</Typography>
                             </Grid>
+                            <Grid item>{}</Grid>
                         </Grid>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -405,7 +436,23 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     style={showHistory ? undefined : noDisplay}
                                 />
                                 <Tab
-                                    label="Data"
+                                    label={
+                                        <Grid container alignItems="center">
+                                            <Grid item>Data</Grid>
+                                            {dnEditInProgress ? (
+                                                <Grid item>
+                                                    <Tooltip
+                                                        title={"locked " + (dnEditorId === editorId ? "by you" : "")}
+                                                    >
+                                                        <LockOutlined
+                                                            fontSize="small"
+                                                            color={dnEditorId === editorId ? "disabled" : "primary"}
+                                                        />
+                                                    </Tooltip>
+                                                </Grid>
+                                            ) : null}
+                                        </Grid>
+                                    }
                                     id={`${uniqid}-data`}
                                     aria-controls={`${uniqid}-dn-tabpanel-data`}
                                     style={showData ? undefined : noDisplay}
@@ -615,7 +662,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             onClick={onFocus}
                                             sx={hoverSx}
                                         >
-                                            {active && focusName === "data-value" ? (
+                                            {active &&
+                                            dnEditInProgress &&
+                                            dnEditorId === editorId &&
+                                            focusName === "data-value" ? (
                                                 <>
                                                     {typeof dtValue == "boolean" ? (
                                                         <>
@@ -744,6 +794,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 onViewTypeChange={onViewTypeChange}
                                                 updateVarName={getUpdateVar(props.updateVars, "tabularData")}
                                                 onEdit={props.onTabularDataEdit}
+                                                onLock={props.onLock}
+                                                editInProgress={dnEditInProgress && dnEditorId !== editorId}
                                             />
                                         ) : (
                                             <DataNodeChart

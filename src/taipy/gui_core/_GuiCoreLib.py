@@ -179,6 +179,7 @@ class _GuiCore(ElementLibrary):
                 "on_tabular_data_edit": ElementProperty(
                     PropertyType.function, f"{{{__CTX_VAR_NAME}.tabular_data_edit}}"
                 ),
+                "on_lock": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.lock_datanode_for_edit}}"),
             },
         ),
         "job_selector": Element(
