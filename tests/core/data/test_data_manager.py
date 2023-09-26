@@ -8,7 +8,6 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 import os
 import pathlib
 
@@ -79,6 +78,9 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).properties.get("has_header") is True
         assert _DataManager._get(csv_dn.id).properties.get("exposed_type") == "pandas"
         assert _DataManager._get(csv_dn.id).properties == csv_dn.properties
+        assert _DataManager._get(csv_dn.id).edit_in_progress is False
+        assert _DataManager._get(csv_dn.id)._editor_id is None
+        assert _DataManager._get(csv_dn.id)._editor_expiration_date is None
 
         assert _DataManager._get(csv_dn) is not None
         assert _DataManager._get(csv_dn).id == csv_dn.id
@@ -102,6 +104,38 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).properties.get("has_header") is True
         assert _DataManager._get(csv_dn.id).properties.get("exposed_type") == "pandas"
         assert _DataManager._get(csv_dn).properties == csv_dn.properties
+        assert _DataManager._get(csv_dn.id).edit_in_progress is False
+        assert _DataManager._get(csv_dn.id)._editor_id is None
+        assert _DataManager._get(csv_dn.id)._editor_expiration_date is None
+
+    def test_edit_and_get_data_node(self):
+        config = Config.configure_pickle_data_node(id="foo")
+        dn = _DataManager._create_and_set(config, None, None)
+
+        assert _DataManager._get(dn.id).last_edit_date is None
+        assert len(_DataManager._get(dn.id).properties) == 1
+        assert _DataManager._get(dn.id).properties.get("is_generated")
+        assert not _DataManager._get(dn.id).edit_in_progress
+        assert _DataManager._get(dn.id)._editor_id is None
+        assert _DataManager._get(dn.id)._editor_expiration_date is None
+
+        dn.lock_edit("foo")
+
+        assert _DataManager._get(dn.id).last_edit_date is None
+        assert len(_DataManager._get(dn.id).properties) == 1
+        assert _DataManager._get(dn.id).properties.get("is_generated")
+        assert _DataManager._get(dn.id).edit_in_progress
+        assert _DataManager._get(dn.id).editor_id == "foo"
+        assert _DataManager._get(dn.id).editor_expiration_date is not None
+
+        dn.unlock_edit("foo")
+
+        assert _DataManager._get(dn.id).last_edit_date is None
+        assert len(_DataManager._get(dn.id).properties) == 1
+        assert _DataManager._get(dn.id).properties.get("is_generated")
+        assert not _DataManager._get(dn.id).edit_in_progress
+        assert _DataManager._get(dn.id).editor_id is None
+        assert _DataManager._get(dn.id).editor_expiration_date is None
 
     def test_create_and_get_in_memory_data_node(self):
         # Test we can instantiate an InMemoryDataNode from DataNodeConfig with :
@@ -261,7 +295,7 @@ class TestDataManager:
             for i in range(5):
                 _DataManager._set(
                     InMemoryDataNode(
-                        f"config_id_{i+version}",
+                        f"config_id_{i + version}",
                         Scope.SCENARIO,
                         id=DataNodeId(f"id{i}_v{version}"),
                         version=f"{version}.0",

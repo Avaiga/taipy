@@ -94,6 +94,8 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
+        editor_id: Optional[str] = None,
+        editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
     ):
         if properties is None:
@@ -116,6 +118,8 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             version or _VersionManagerFactory._build_manager()._get_latest_version(),
             validity_period,
             edit_in_progress,
+            editor_id,
+            editor_expiration_date,
             **properties,
         )
         self._engine = None
