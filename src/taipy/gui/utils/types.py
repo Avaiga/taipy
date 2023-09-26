@@ -88,7 +88,7 @@ class _TaipyNumber(_TaipyBase):
             try:
                 return float(value) if value else 0.0
             except Exception as e:
-                _warn(f"{self._get_readable_name()}: Parsing {value} as float:\n{e}")
+                _warn(f"{self._get_readable_name()}: Parsing {value} as float", e)
                 return 0.0
         return super().cast_value(value)
 
@@ -103,7 +103,7 @@ class _TaipyLoNumbers(_TaipyBase):
             try:
                 return list(map(lambda f: float(f), value[1:-1].split(",")))
             except Exception as e:
-                _warn(f"{self._get_readable_name()}: Parsing {value} as an array of numbers:\n{e}")
+                _warn(f"{self._get_readable_name()}: Parsing {value} as an array of numbers", e)
                 return []
         return super().cast_value(value)
 

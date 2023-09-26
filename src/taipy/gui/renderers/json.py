@@ -35,7 +35,7 @@ def _default(o):
     try:
         raise TypeError(f"Object of type {o.__class__.__name__} is not JSON serializable")
     except Exception as e:
-        _warn(f"Exception in JSONEncoder:\n{e}")
+        _warn("Exception in JSONEncoder", e)
         return None
 
 

@@ -66,7 +66,7 @@ class _Adapter:
                     if children is not None:
                         dict_res.update(self._get_elt_per_ids(var_name, children))
             except Exception as e:
-                _warn(f"Cannot run adapter for {var_name}:\n{e}")
+                _warn(f"Cannot run adapter for {var_name}", e)
         return dict_res
 
     def _run(
@@ -96,7 +96,7 @@ class _Adapter:
                     else tpl_res
                 )
         except Exception as e:
-            _warn(f"Cannot run adapter for {var_name}:\n{e}")
+            _warn(f"Cannot run adapter for {var_name}", e)
         return None
 
     def __on_tree(self, adapter: t.Optional[t.Callable], tree: t.List[t.Any]):

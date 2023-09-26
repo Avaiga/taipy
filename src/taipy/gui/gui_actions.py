@@ -308,7 +308,7 @@ def invoke_long_callback(
 
     def callback_on_exception(state: State, function_name: str, e: Exception):
         if not this_gui._call_on_exception(function_name, e):
-            _warn(f"invoke_long_callback(): Exception raised in function {function_name}().\n{e}")
+            _warn(f"invoke_long_callback(): Exception raised in function {function_name}()", e)
 
     def callback_on_status(
         status: t.Union[int, bool],

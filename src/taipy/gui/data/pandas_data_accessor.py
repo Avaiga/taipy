@@ -54,7 +54,7 @@ class _PandasDataAccessor(_DataAccessor):
         try:
             return str(gui._call_function_with_state(user_function, args))
         except Exception as e:
-            _warn(f"Exception raised when calling user function {function_name}():\n{e}")
+            _warn(f"Exception raised when calling user function {function_name}()", e)
         return ""
 
     def __is_date_column(self, data: pd.DataFrame, col_name: str) -> bool:
@@ -155,7 +155,7 @@ class _PandasDataAccessor(_DataAccessor):
             )
             return new_col_name
         except Exception as e:
-            _warn(f"Exception raised when invoking user function {function_name}():\n{e}")
+            _warn(f"Exception raised when invoking user function {function_name}()", e)
         return False
 
     def __format_data(
@@ -256,7 +256,7 @@ class _PandasDataAccessor(_DataAccessor):
                 value = value.query(query)
                 is_copied = True
             except Exception as e:
-                _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}:\n{e}")
+                _warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}", e)
 
         if paged:
             aggregates = payload.get("aggregates")
@@ -369,7 +369,7 @@ class _PandasDataAccessor(_DataAccessor):
                             )
                             gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(value))
                         except Exception as e:
-                            _warn(f"Limit rows error with {decimator} for Dataframe:\n{e}")
+                            _warn(f"Limit rows error with {decimator} for Dataframe", e)
             value = self.__build_transferred_cols(gui, columns, value, is_copied=is_copied)
             dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret

@@ -55,7 +55,7 @@ class _ContentAccessor:
             try:
                 return magic.from_file(str(path), mime=True)
             except Exception as e:
-                _warn(f"Exception reading mime type in '{path}':\n{e}")
+                _warn(f"Exception reading mime type in '{path}'", e)
         return None
 
     def __get_display_name(self, var_name: str) -> str:
@@ -82,15 +82,13 @@ class _ContentAccessor:
                     mime = magic.from_buffer(value, mime=True)
                     file_name = "TaiPyContent." + mime.split("/")[-1]
                 except Exception as e:
-                    _warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be typed:\n{e}")
+                    _warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be typed", e)
             file_path = _get_non_existent_file_path(self.__temp_dir_path, file_name)
             try:
                 with open(file_path, "wb") as temp_file:
                     temp_file.write(value)
             except Exception as e:
-                _warn(
-                    f"{self.__get_display_name(var_name)} ({type(value)}) cannot be written to file {file_path}:\n{e}"
-                )
+                _warn(f"{self.__get_display_name(var_name)} ({type(value)}) cannot be written to file {file_path}", e)
             newvalue = file_path
         if isinstance(newvalue, (str, pathlib.Path)):
             path = pathlib.Path(newvalue) if isinstance(newvalue, str) else newvalue
@@ -123,7 +121,7 @@ class _ContentAccessor:
                 _warn(f"{self.__get_display_name(var_name)}: ({type(value)}) does not have an image mime type: {mime}.")
                 return f"Invalid content: {mime}"
             except Exception as e:
-                _warn(f"{self.__get_display_name(var_name)}: ({type(value)}) cannot be base64 encoded:\n{e}")
+                _warn(f"{self.__get_display_name(var_name)}: ({type(value)}) cannot be base64 encoded", e)
                 return "Cannot be base64 encoded"
         else:
             _warn(

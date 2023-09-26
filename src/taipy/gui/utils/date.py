@@ -26,7 +26,7 @@ def _date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
         except Exception as e:
             # astimezone() fails on Windows for pre-epoch times
             # See https://bugs.python.org/issue36759
-            _warn(f"Exception raised converting date to ISO 8601:\n{e}")
+            _warn("Exception raised converting date to ISO 8601", e)
     return date_val.isoformat()
 
 

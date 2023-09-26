@@ -653,7 +653,7 @@ class _Builder:
             try:
                 numVal = float(numVal)
             except Exception as e:
-                _warn(f"{self.__element_name}: {var_name} cannot be transformed into a number:\n{e}")
+                _warn(f"{self.__element_name}: {var_name} cannot be transformed into a number", e)
                 numVal = 0
         if isinstance(numVal, numbers.Number):
             self.__set_react_attribute(_to_camel_case(f"default_{var_name}"), numVal)
@@ -794,7 +794,7 @@ class _Builder:
             try:
                 page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
             except Exception as e:
-                _warn(f"{self.__element_name}: page_size_options value is invalid ({page_size_options}):\n{e}")
+                _warn(f"{self.__element_name}: page_size_options value is invalid ({page_size_options})", e)
         if isinstance(page_size_options, list):
             self.__set_json_attribute("pageSizeOptions", page_size_options)
         else:

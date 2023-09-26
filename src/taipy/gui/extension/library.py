@@ -177,7 +177,7 @@ class Element:
                     return xml_root
 
             except Exception as e:
-                _warn(f"{name}.render_xhtml() did not return a valid XHTML string:\n{e}")
+                _warn(f"{name}.render_xhtml() did not return a valid XHTML string", e)
                 return f"{name}.render_xhtml() did not return a valid XHTML string. {e}"
         else:
             default_attr: t.Optional[ElementProperty] = None
