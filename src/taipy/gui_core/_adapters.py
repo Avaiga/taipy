@@ -142,7 +142,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         if k not in _GuiCoreDatanodeAdapter.__INNER_PROPS
                     ],
                     datanode._edit_in_progress,
-                    datanode._editor_id
+                    datanode._editor_id,
                 ]
         return None
 
