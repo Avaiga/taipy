@@ -11,9 +11,19 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, SyntheticEvent, HTMLAttributes, forwardRef, Ref, CSSProperties } from "react";
+import React, {
+    useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    SyntheticEvent,
+    HTMLAttributes,
+    forwardRef,
+    Ref,
+    CSSProperties,
+} from "react";
 import Box from "@mui/material/Box";
-import {TreeView as MuiTreeView} from "@mui/x-tree-view/TreeView";
+import { TreeView as MuiTreeView } from "@mui/x-tree-view/TreeView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { TreeItem, TreeItemContentProps, useTreeItem, TreeItemProps } from "@mui/x-tree-view/TreeItem";
@@ -23,20 +33,20 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
 import { createSendUpdateAction } from "../../context/taipyReducers";
+import { isLovParent, LovImage, paperBaseSx, SelTreeProps, showItem, useLovListMemo } from "./lovUtils";
 import {
-    isLovParent,
-    LovImage,
-    paperBaseSx,
-    SelTreeProps,
-    showItem,
-    useLovListMemo,
-} from "./lovUtils";
-import { useClassNames, useDispatch, useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useModule } from "../../utils/hooks";
+    useClassNames,
+    useDispatch,
+    useDispatchRequestUpdateOnFirstRender,
+    useDynamicProperty,
+    useModule,
+} from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
 
-const CustomContent = forwardRef(function CustomContent(props: TreeItemContentProps, ref) { // need a display name
+const CustomContent = forwardRef(function CustomContent(props: TreeItemContentProps, ref) {
+    // need a display name
     const { classes, className, label, nodeId, icon: iconProp, expansionIcon, displayIcon } = props;
     const { allowSelection, lovIcon, height } = props as unknown as CustomTreeProps;
 
@@ -58,11 +68,11 @@ const CustomContent = forwardRef(function CustomContent(props: TreeItemContentPr
     if (disabled) {
         classNames.push(classes.disabled);
     }
-    const divStyle = useMemo(() => (height ? {height: height}: undefined), [height]);
+    const divStyle = useMemo(() => (height ? { height: height } : undefined), [height]);
 
     return (
         <div
-            className={classNames. join(" ")}
+            className={classNames.join(" ")}
             onMouseDown={preventSelection}
             ref={ref as Ref<HTMLDivElement>}
             style={divStyle}
@@ -70,26 +80,36 @@ const CustomContent = forwardRef(function CustomContent(props: TreeItemContentPr
             <div onClick={handleExpansion} className={classes.iconContainer}>
                 {icon}
             </div>
-            <Typography onClick={allowSelection ? handleSelection : handleExpansion} component="div" className={classes.label}>
+            <Typography
+                onClick={allowSelection ? handleSelection : handleExpansion}
+                component="div"
+                className={classes.label}
+            >
                 {lovIcon ? <LovImage item={lovIcon} disableTypo={true} height={height} /> : label}
             </Typography>
         </div>
     );
 });
 
-interface CustomTreeProps extends HTMLAttributes<HTMLElement>{
+interface CustomTreeProps extends HTMLAttributes<HTMLElement> {
     allowSelection: boolean;
     lovIcon?: Icon;
     height?: string;
 }
 
-const CustomTreeItem = (props: TreeItemProps & CustomTreeProps ) => {
-    const {allowSelection, lovIcon, height, ...tiProps} = props;
-    const ctProps = {allowSelection, lovIcon, height} as CustomTreeProps;
-    return <TreeItem ContentComponent={CustomContent} ContentProps={ctProps} {...tiProps} />
-}
+const CustomTreeItem = (props: TreeItemProps & CustomTreeProps) => {
+    const { allowSelection, lovIcon, height, ...tiProps } = props;
+    const ctProps = { allowSelection, lovIcon, height } as CustomTreeProps;
+    return <TreeItem ContentComponent={CustomContent} ContentProps={ctProps} {...tiProps} />;
+};
 
-const renderTree = (lov: LovItem[], active: boolean, searchValue: string, selectLeafsOnly: boolean, rowHeight?: string) => {
+const renderTree = (
+    lov: LovItem[],
+    active: boolean,
+    searchValue: string,
+    selectLeafsOnly: boolean,
+    rowHeight?: string
+) => {
     return lov.map((li) => {
         const children = li.children ? renderTree(li.children, active, searchValue, selectLeafsOnly, rowHeight) : [];
         if (!children.filter((c) => c).length && !showItem(li, searchValue)) {
@@ -101,8 +121,8 @@ const renderTree = (lov: LovItem[], active: boolean, searchValue: string, select
                 nodeId={li.id}
                 label={typeof li.item === "string" ? li.item : "undefined item"}
                 disabled={!active}
-                allowSelection={selectLeafsOnly ? (!children || children.length == 0) : true}
-                lovIcon={typeof li.item !== "string" ? li.item as Icon : undefined}
+                allowSelection={selectLeafsOnly ? !children || children.length == 0 : true}
+                lovIcon={typeof li.item !== "string" ? (li.item as Icon) : undefined}
                 height={rowHeight}
             >
                 {children}
@@ -112,7 +132,7 @@ const renderTree = (lov: LovItem[], active: boolean, searchValue: string, select
 };
 
 const boxSx = { width: "100%" } as CSSProperties;
-const textFieldSx = {mb: 1, px: 1, display: "flex"};
+const textFieldSx = { mb: 1, px: 1, display: "flex" };
 
 interface TreeViewProps extends SelTreeProps {
     defaultExpanded?: string | boolean;
@@ -137,10 +157,10 @@ const TreeView = (props: TreeViewProps) => {
         height,
         valueById,
         selectLeafsOnly = false,
-        rowHeight
+        rowHeight,
     } = props;
     const [searchValue, setSearchValue] = useState("");
-    const [selectedValue, setSelectedValue] = useState<string[] | string>(multiple ? [] : "");
+    const [selectedValue, setSelectedValue] = useState<string[]>([]);
     const [oneExpanded, setOneExpanded] = useState(false);
     const [refreshExpanded, setRefreshExpanded] = useState(false);
     const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
@@ -154,14 +174,14 @@ const TreeView = (props: TreeViewProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, updateVarName);
 
     const lovList = useLovListMemo(lov, defaultLov, true);
-    const treeSx = useMemo(() => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }), [width]);
-    const paperSx = useMemo(
-        () => {
-            const sx = height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height }
-            return {...sx, overflow: "hidden", py: 1};
-        },
-        [height]
+    const treeSx = useMemo(
+        () => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }),
+        [width]
     );
+    const paperSx = useMemo(() => {
+        const sx = height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height };
+        return { ...sx, overflow: "hidden", py: 1 };
+    }, [height]);
 
     useEffect(() => {
         let refExp = false;
@@ -202,9 +222,7 @@ const TreeView = (props: TreeViewProps) => {
 
     useEffect(() => {
         if (value !== undefined) {
-            setSelectedValue(
-                multiple ? (Array.isArray(value) ? value : [value]) : Array.isArray(value) ? value[0] : value
-            );
+            setSelectedValue(Array.isArray(value) ? value : [value]);
         } else if (defaultValue) {
             let parsedValue;
             try {
@@ -212,26 +230,19 @@ const TreeView = (props: TreeViewProps) => {
             } catch (e) {
                 parsedValue = defaultValue;
             }
-            setSelectedValue(
-                multiple
-                    ? Array.isArray(parsedValue)
-                        ? parsedValue
-                        : [parsedValue]
-                    : Array.isArray(parsedValue)
-                    ? parsedValue[0]
-                    : parsedValue
-            );
+            setSelectedValue(Array.isArray(parsedValue) ? parsedValue : [parsedValue]);
         }
     }, [defaultValue, value, multiple]);
 
     const clickHandler = useCallback(
         (event: SyntheticEvent, nodeIds: string[] | string) => {
-            setSelectedValue(nodeIds);
+            const ids = Array.isArray(nodeIds) ? nodeIds : [nodeIds];
+            setSelectedValue(ids);
             updateVarName &&
                 dispatch(
                     createSendUpdateAction(
                         updateVarName,
-                        Array.isArray(nodeIds) ? nodeIds : [nodeIds],
+                        ids,
                         module,
                         props.onChange,
                         propagate,
@@ -268,13 +279,7 @@ const TreeView = (props: TreeViewProps) => {
         [oneExpanded, refreshExpanded, lovList, propagate, updateVars, dispatch, props.onChange, module]
     );
 
-    const treeProps = useMemo(
-        () =>
-            multiple
-                ? { multiSelect: true as true | undefined, selected: selectedValue as string[] }
-                : { selected: selectedValue as string },
-        [multiple, selectedValue]
-    );
+    const treeProps = useMemo(() => ({ multiSelect: multiple, selected: selectedValue }), [multiple, selectedValue]);
 
     return (
         <Box id={id} sx={boxSx} className={className}>
