@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo, MouseEvent, ChangeEvent } from "react";
+import React, { useEffect, useState, useCallback, useMemo, MouseEvent, ChangeEvent, MutableRefObject } from "react";
 
 import { TableChartOutlined, BarChartOutlined, RefreshOutlined } from "@mui/icons-material";
 import Box from "@mui/material/Box";
@@ -46,6 +46,7 @@ interface DataNodeTableProps {
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
     onLock?: string;
     editInProgress?: boolean;
+    editLock: MutableRefObject<boolean>
 }
 
 const DataNodeTable = (props: DataNodeTableProps) => {
@@ -103,15 +104,11 @@ const DataNodeTable = (props: DataNodeTableProps) => {
     const toggleTableEdit = useCallback(
         () =>
             setTableEdit((e) => {
+                props.editLock.current = !e;
                 dispatch(createSendActionNameAction("", module, props.onLock, { id: nodeId, lock: !e }));
                 return !e;
             }),
-        [nodeId, dispatch, module, props.onLock]
-    );
-
-    useEffect(
-        () => () => dispatch(createSendActionNameAction("", module, props.onLock, { id: nodeId, lock: false })),
-        [nodeId, dispatch, module, props.onLock]
+        [nodeId, dispatch, module, props.onLock, props.editLock]
     );
 
     const userData = useMemo(() => ({ dn_id: nodeId, comment: "" }), [nodeId]);

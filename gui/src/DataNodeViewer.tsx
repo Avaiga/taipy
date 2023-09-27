@@ -20,6 +20,7 @@ import React, {
     ChangeEvent,
     SyntheticEvent,
     MouseEvent,
+    useRef,
 } from "react";
 import { CheckCircle, Cancel, ArrowForwardIosSharp, Launch, LockOutlined } from "@mui/icons-material";
 import Accordion from "@mui/material/Accordion";
@@ -193,6 +194,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const module = useModule();
     const uniqid = useUniqueId(id);
     const editorId = (state as { id: string }).id;
+    const editLock = useRef(false);
+    const oldId = useRef<string|undefined>(undefined);
 
     const [
         dnId,
@@ -219,8 +222,19 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 // DO nothing
             }
         }
+        // clean lock on change
+        if (dn && dn[DataNodeFullProps.id] !== oldId.current) {
+            oldId.current && editLock.current && dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
+            editLock.current = false;
+            oldId.current = dn[DataNodeFullProps.id];
+        }
         return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false, "", false];
-    }, [props.dataNode, props.defaultDataNode]);
+    }, [props.dataNode, props.defaultDataNode, oldId, id, dispatch, module, props.onLock]);
+
+    // clean lock on unmount
+    useEffect(() => () => {
+        oldId.current && editLock.current && dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
+    }, [id, dispatch, module, props.onLock]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -796,6 +810,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 onEdit={props.onTabularDataEdit}
                                                 onLock={props.onLock}
                                                 editInProgress={dnEditInProgress && dnEditorId !== editorId}
+                                                editLock={editLock}
                                             />
                                         ) : (
                                             <DataNodeChart

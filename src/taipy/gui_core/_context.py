@@ -534,9 +534,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity: DataNode = core_get(entity_id)
         if isinstance(entity, DataNode):
             try:
-                if lock and not entity._edit_in_progress:
+                if lock:
                     entity.lock_edit(self.gui._get_client_id())
-                elif entity._edit_in_progress:
+                else:
                     entity.unlock_edit(self.gui._get_client_id())
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
             except Exception as e:
