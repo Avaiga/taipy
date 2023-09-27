@@ -11,25 +11,26 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo, MouseEvent, ChangeEvent } from "react";
+import React, { useEffect, useState, useCallback, useMemo, MouseEvent, ChangeEvent, MutableRefObject } from "react";
 
-import { TableChartOutlined, BarChartOutlined, Edit, EditOff, RefreshOutlined } from "@mui/icons-material";
+import { TableChartOutlined, BarChartOutlined, RefreshOutlined } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
-import { ColumnDesc, Table, TraceValueType } from "taipy-gui";
+import { ColumnDesc, Table, TraceValueType, createSendActionNameAction, useDispatch, useModule } from "taipy-gui";
 
 import { ChartViewType, MenuProps, TableViewType, selectSx, tabularHeaderSx } from "./utils";
 
@@ -43,10 +44,16 @@ interface DataNodeTableProps {
     uniqid: string;
     onEdit?: string;
     onViewTypeChange: (e: MouseEvent, value?: string) => void;
+    onLock?: string;
+    editInProgress?: boolean;
+    editLock: MutableRefObject<boolean>
 }
 
 const DataNodeTable = (props: DataNodeTableProps) => {
     const { uniqid, configId, nodeId, columns = "", onViewTypeChange } = props;
+
+    const dispatch = useDispatch();
+    const module = useModule();
 
     // tabular selected columns
     const [selectedCols, setSelectedCols] = useState<string[]>([]);
@@ -94,7 +101,15 @@ const DataNodeTable = (props: DataNodeTableProps) => {
     }, [columns, selectedCols]);
 
     const [tableEdit, setTableEdit] = useState(false);
-    const toggleTableEdit = useCallback(() => setTableEdit((e) => !e), []);
+    const toggleTableEdit = useCallback(
+        () =>
+            setTableEdit((e) => {
+                props.editLock.current = !e;
+                dispatch(createSendActionNameAction("", module, props.onLock, { id: nodeId, lock: !e }));
+                return !e;
+            }),
+        [nodeId, dispatch, module, props.onLock, props.editLock]
+    );
 
     const userData = useMemo(() => ({ dn_id: nodeId, comment: "" }), [nodeId]);
     const [comment, setComment] = useState("");
@@ -144,22 +159,23 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                     </FormControl>
                 </Grid>
                 <Grid item>
-                    <Button onClick={resetCols} variant="outlined" color="inherit" className="taipy-button">
-                        <RefreshOutlined /> Reset
+                    <Button onClick={resetCols} variant="text" color="primary" className="taipy-button">
+                        <RefreshOutlined /> Reset View
                     </Button>
                 </Grid>
-                <Grid item>
-                    {props.active ? (
-                        <IconButton onClick={toggleTableEdit} color="primary">
-                            {tableEdit ? <EditOff /> : <Edit />}
-                        </IconButton>
-                    ) : null}
-                </Grid>
                 {tableEdit ? (
-                    <Grid item>
+                    <Grid item sx={{ ml: "auto" }}>
                         <TextField value={comment} onChange={changeComment} label="Comment"></TextField>
                     </Grid>
                 ) : null}
+                <Grid item sx={tableEdit ? undefined : { ml: "auto" }}>
+                    <FormControlLabel
+                        disabled={!props.active || !!props.editInProgress}
+                        control={<Switch color="primary" checked={tableEdit} onChange={toggleTableEdit} />}
+                        label="Edit data"
+                        labelPlacement="start"
+                    />
+                </Grid>
             </Grid>
             <Table
                 active={props.active}

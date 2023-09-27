@@ -60,7 +60,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                     if scenario.sequences
                     else [],
                     list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
-                    is_deletable(scenario),  # deletable
+                    is_deletable(scenario),
                     is_promotable(scenario),
                     is_submittable(scenario),
                 ]
@@ -141,6 +141,8 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         for k, v in datanode._get_user_properties().items()
                         if k not in _GuiCoreDatanodeAdapter.__INNER_PROPS
                     ],
+                    datanode._edit_in_progress,
+                    datanode._editor_id,
                 ]
         return None
 

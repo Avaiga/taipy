@@ -260,7 +260,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             return
                     except Exception as e:  # pragma: no cover
                         if not gui._call_on_exception(on_creation, e):
-                            _warn(f"on_creation(): Exception raised in '{on_creation}()':\n{e}")
+                            _warn(f"on_creation(): Exception raised in '{on_creation}()'", e)
                 else:
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
                 scenario = create_scenario(scenario_config, date, name)
@@ -424,7 +424,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     self.client_jobs_by_submission[sub_id] = sub_details.set_status(new_status)
 
         except Exception as e:
-            _warn(f"Job is not available {e}")
+            _warn("Job is not available", e)
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
@@ -524,6 +524,24 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode. {e}")
 
+    def lock_datanode_for_edit(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+            return
+        data = args[0]
+        entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
+        lock = data.get("lock", True)
+        entity: DataNode = core_get(entity_id)
+        if isinstance(entity, DataNode):
+            try:
+                if lock:
+                    entity.lock_edit(self.gui._get_client_id())
+                else:
+                    entity.unlock_edit(self.gui._get_client_id())
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+            except Exception as e:
+                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error locking Datanode. {e}")
+
     def __edit_properties(self, entity: t.Union[Scenario, Sequence, DataNode], data: t.Dict[str, str]):
         with entity as ent:
             if isinstance(ent, Scenario):
@@ -597,7 +615,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
         ):
-            if dn.is_ready_for_reading:
+            if dn._last_edit_date:
                 if isinstance(dn, _AbstractTabularDataNode):
                     return (None, None, True, None)
                 try:

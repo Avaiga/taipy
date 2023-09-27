@@ -369,8 +369,8 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                     />
                 </Grid>
                 <Grid item>
-                    <Button onClick={resetConfig} variant="outlined" color="inherit" className="taipy-button">
-                        <RefreshOutlined /> Reset
+                    <Button onClick={resetConfig} variant="text" color="primary" className="taipy-button">
+                        <RefreshOutlined /> Reset View
                     </Button>
                 </Grid>
             </Grid>
