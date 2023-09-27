@@ -167,6 +167,8 @@ interface DataNodeViewerProps {
     onLock?: string;
 }
 
+const dataValueFocus = "data-value";
+
 const getDataValue = (value?: RowValue, dType?: string | null) => (dType == "date" ? new Date(value as string) : value);
 
 const getValidDataNode = (datanode: DataNodeFull | DataNodeFull[]) =>
@@ -228,6 +230,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             editLock.current = false;
             oldId.current = dn[DataNodeFullProps.id];
         }
+        editLock.current = dn ? dn[DataNodeFullProps.editInProgress]: false;
         return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false, "", false];
     }, [props.dataNode, props.defaultDataNode, oldId, id, dispatch, module, props.onLock]);
 
@@ -255,7 +258,11 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const onFocus = useCallback((e: MouseEvent<HTMLElement>) => {
         e.stopPropagation();
         setFocusName(e.currentTarget.dataset.focus || "");
-    }, []);
+        if (e.currentTarget.dataset.focus === dataValueFocus && !editLock.current) {
+            dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: true }));
+            editLock.current = true;
+        }
+    }, [dnId, props.onLock, id, dispatch, module]);
 
     // Label
     const [label, setLabel] = useState<string>();
@@ -341,8 +348,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             e.stopPropagation();
             setDataValue(getDataValue(dtValue, dtType));
             setFocusName("");
+            dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: false }));
         },
-        [dtValue, dtType, setDataValue, setFocusName]
+        [dtValue, dtType, dnId, id, dispatch, module, props.onLock, setDataValue, setFocusName]
     );
     const onDataValueChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.value), []);
     const onDataValueDateChange = useCallback((d: Date | null) => d && setDataValue(d), []);
@@ -672,14 +680,14 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             container
                                             xs={12}
                                             justifyContent="space-between"
-                                            data-focus="data-value"
+                                            data-focus={dataValueFocus}
                                             onClick={onFocus}
                                             sx={hoverSx}
                                         >
                                             {active &&
                                             dnEditInProgress &&
                                             dnEditorId === editorId &&
-                                            focusName === "data-value" ? (
+                                            focusName === dataValueFocus ? (
                                                 <>
                                                     {typeof dtValue == "boolean" ? (
                                                         <>

@@ -656,6 +656,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else data.get("value"),
                     comment=data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT),
                 )
+                entity.unlock_edit(self.gui._get_client_id())
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode value. {e}")
