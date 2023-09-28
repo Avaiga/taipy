@@ -799,6 +799,8 @@ class Gui:
                 setattr(self._bindings(), var_name, newvalue)
         return ("", 200)
 
+    _data_request_counter = 1
+
     def __send_var_list_update(
         self,
         modified_vars: t.List[str],
@@ -814,7 +816,9 @@ class Gui:
         for _var in modified_vars:
             newvalue = values.get(_var)
             if isinstance(newvalue, _TaipyData):
-                newvalue = None
+                # A changing integer that triggers a data request
+                newvalue = Gui._data_request_counter
+                Gui._data_request_counter = (Gui._data_request_counter % 100) + 1
             else:
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(

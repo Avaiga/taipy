@@ -117,7 +117,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const formatConfig = useFormatConfig();
     const module = useModule();
 
-    const refresh = props.data === null;
+    const refresh = typeof props.data === "number";
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
@@ -186,11 +186,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [selected, startIndex, rowsPerPage]);
 
     useEffect(() => {
-        if (props.data && props.data[pageKey.current] !== undefined) {
+        if (!refresh && props.data && props.data[pageKey.current] !== undefined) {
             setValue(props.data[pageKey.current]);
             setLoading(false);
         }
-    }, [props.data]);
+    }, [refresh, props.data]);
 
     useEffect(() => {
         const endIndex = showAll ? -1 : startIndex + rowsPerPage - 1;

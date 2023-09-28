@@ -198,8 +198,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
 
+    const refresh = typeof props.data === "number";
+
     useEffect(() => {
-        if (props.data && page.current.key && props.data[page.current.key] !== undefined) {
+        if (!refresh && props.data && page.current.key && props.data[page.current.key] !== undefined) {
             const newValue = props.data[page.current.key];
             const promise = page.current.promises[newValue.start];
             setRowCount(newValue.rowcount);
@@ -212,7 +214,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             }
             delete page.current.promises[newValue.start];
         }
-    }, [props.data]);
+    }, [refresh, props.data]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
 
@@ -231,11 +233,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     useEffect(() => {
-        if (props.data === null) {
+        if (refresh) {
             setRows([]);
             setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
         }
-    }, [props.data]);
+    }, [refresh]);
 
     const onAggregate = useCallback((e: MouseEvent<HTMLElement>) => {
         const groupBy = e.currentTarget.getAttribute("data-dfid");
