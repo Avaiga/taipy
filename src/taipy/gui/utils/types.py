@@ -15,7 +15,7 @@ from abc import ABC
 from datetime import datetime
 
 from .._warnings import _warn
-from . import _date_to_ISO, _ISO_to_date, _MapDict, _variable_decode
+from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
 
 
 class _TaipyBase(ABC):
@@ -116,14 +116,14 @@ class _TaipyDate(_TaipyBase):
     def get(self):
         val = super().get()
         if isinstance(val, datetime):
-            val = _date_to_ISO(val)
+            val = _date_to_string(val)
         elif val is not None:
             val = str(val)
         return val
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
-            return _ISO_to_date(value)
+            return _string_to_date(value)
         return super().cast_value(value)
 
     @staticmethod

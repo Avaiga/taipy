@@ -18,7 +18,7 @@ from flask.json.provider import DefaultJSONProvider
 
 from .._warnings import _warn
 from ..icon import Icon
-from ..utils import _date_to_ISO, _MapDict, _TaipyBase
+from ..utils import _date_to_string, _MapDict, _TaipyBase
 
 
 def _default(o):
@@ -29,7 +29,7 @@ def _default(o):
     if isinstance(o, _TaipyBase):
         return o.get()
     if isinstance(o, (datetime, date, time)):
-        return _date_to_ISO(o)
+        return _date_to_string(o)
     if isinstance(o, Path):
         return str(o)
     try:

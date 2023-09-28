@@ -143,7 +143,7 @@ describe("DateSelector Component", () => {
             await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}01012001", { delay: 1 });
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "",
-                payload: { value: "2001-01-01T00:00:00.000Z" },
+                payload: { value: "Mon Jan 01 2001" },
                 propagate: true,
                 type: "SEND_UPDATE_ACTION",
             });

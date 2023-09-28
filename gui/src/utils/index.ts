@@ -12,6 +12,7 @@
  */
 
 import { utcToZonedTime, getTimezoneOffset, formatInTimeZone } from "date-fns-tz";
+import { format } from "date-fns";
 import { sprintf } from "sprintf-js";
 import { FormatConfig } from "../context/taipyReducers";
 
@@ -59,7 +60,7 @@ interface StyleKit {
 }
 
 // return date with right time and tz
-export const getTimeZonedDate = (d: Date, tz: string, withTime: boolean) => {
+export const getTimeZonedDate = (d: Date, tz: string, withTime: boolean): Date => {
     const newDate = d;
     // dispatch new date which offset by the timeZone differences between client and server
     const hours = getClientServerTimeZoneOffset(tz) / 60;
@@ -78,16 +79,20 @@ export const getTimeZonedDate = (d: Date, tz: string, withTime: boolean) => {
     return newDate;
 };
 
+export const dateToString = (d: Date, withTime: boolean = true): string => {
+    return withTime ? d.toISOString() : d.toDateString();
+};
+
 // return client server timeZone offset in minutes
 export const getClientServerTimeZoneOffset = (tz: string): number =>
     (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(tz)) / 60000;
 
-export const getDateTime = (value: string | null | undefined, tz?: string): Date | null => {
+export const getDateTime = (value: string | null | undefined, tz?: string, withTime = true): Date | null => {
     if (value === null || value === undefined) {
         return null;
     }
     try {
-        return tz && tz !== "Etc/Unknown" ? utcToZonedTime(value, tz) : new Date(value);
+        return tz && tz !== "Etc/Unknown" && withTime ? utcToZonedTime(value, tz) : new Date(value);
     } catch (e) {
         return null;
     }
@@ -97,13 +102,18 @@ export const getDateTimeString = (
     value: string,
     datetimeformat: string | undefined,
     formatConf: FormatConfig,
-    tz?: string
-): string =>
-    formatInTimeZone(
-        getDateTime(value) || "",
-        formatConf.forceTZ || !tz ? formatConf.timeZone : tz,
-        datetimeformat || formatConf.dateTime
-    );
+    tz?: string,
+    withTime: boolean = true
+): string => {
+    if (withTime) {
+        return formatInTimeZone(
+            getDateTime(value) || "",
+            formatConf.forceTZ || !tz ? formatConf.timeZone : tz,
+            datetimeformat || formatConf.dateTime
+        );
+    }
+    return format(getDateTime(value) || 0, datetimeformat || formatConf.date);
+};
 
 export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string => {
     try {
@@ -147,10 +157,8 @@ export const formatWSValue = (
     dataType = dataType || typeof value;
     switch (dataType) {
         case "datetime.datetime":
-        case "datetime.date":
         case "datetime.time":
         case "datetime":
-        case "date":
         case "time":
             try {
                 return getDateTimeString(value.toString(), dataFormat, formatConf);
@@ -158,6 +166,14 @@ export const formatWSValue = (
                 console.error(`wrong dateformat "${dataFormat || formatConf.dateTime}"`, e);
             }
             return getDateTimeString(value.toString(), undefined, formatConf);
+        case "datetime.date":
+        case "date":
+            try {
+                return getDateTimeString(value.toString(), dataFormat, formatConf, undefined, false);
+            } catch (e) {
+                console.error(`wrong dateformat "${dataFormat || formatConf.date}"`, e);
+            }
+            return getDateTimeString(value.toString(), undefined, formatConf, undefined, false);
         case "int":
         case "float":
         case "number":

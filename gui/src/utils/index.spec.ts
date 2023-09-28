@@ -23,7 +23,7 @@ beforeEach(() => {
     console.warn = myWarn;
 })
 
-const getFormatConfig = (numberFormat?: string): FormatConfig => ({timeZone: "", dateTime: "", number: numberFormat || "", forceTZ: false})
+const getFormatConfig = (numberFormat?: string): FormatConfig => ({timeZone: "", date: "", dateTime: "", number: numberFormat || "", forceTZ: false})
 
 describe("getNumberString", () => {
     it("returns straight", async () => {

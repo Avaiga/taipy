@@ -57,6 +57,7 @@ export interface TaipyState {
     theme: Theme;
     locations: Record<string, string>;
     timeZone?: string;
+    dateFormat?: string;
     dateTimeFormat?: string;
     numberFormat?: string;
     alerts: AlertMessage[];
@@ -151,6 +152,7 @@ interface TaipyPartialAction extends TaipyBaseAction {
 export interface FormatConfig {
     timeZone: string;
     forceTZ: boolean;
+    date: string;
     dateTime: string;
     number: string;
 }

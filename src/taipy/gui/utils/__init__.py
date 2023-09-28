@@ -24,7 +24,7 @@ from ._variable_directory import _variable_decode, _variable_encode, _VariableDi
 from .boolean import _is_boolean, _is_boolean_true
 from .clientvarname import _get_broadcast_var_name, _get_client_var_name, _to_camel_case
 from .datatype import _get_data_type
-from .date import _date_to_ISO, _ISO_to_date
+from .date import _date_to_string, _string_to_date
 from .expr_var_name import _get_expr_var_name
 from .filename import _get_non_existent_file_path
 from .filter_locals import _filter_locals

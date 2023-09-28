@@ -22,7 +22,7 @@ from .._warnings import _warn
 from ..partial import Partial
 from ..types import PropertyType, _get_taipy_type
 from ..utils import (
-    _date_to_ISO,
+    _date_to_string,
     _get_broadcast_var_name,
     _get_client_var_name,
     _get_data_type,
@@ -676,7 +676,7 @@ class _Builder:
             value = self.__attributes.get(var_name)
         default_var_name = _to_camel_case(f"default_{var_name}")
         if isinstance(value, (datetime, date, time)):
-            return self.set_attribute(default_var_name, _date_to_ISO(value))
+            return self.set_attribute(default_var_name, _date_to_string(value))
         elif isinstance(value, str):
             return self.set_attribute(default_var_name, value)
         elif native_type and isinstance(value, numbers.Number):

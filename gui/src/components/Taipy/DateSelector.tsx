@@ -22,7 +22,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
-import { getDateTime, getTimeZonedDate } from "../../utils";
+import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
 import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
@@ -37,14 +37,14 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 }
 
 const boxSx = { display: "inline-block" };
-const textFieldProps = {textField: {margin:"dense"}} as BaseDateTimePickerSlotsComponentsProps<Date>;
+const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
 
 const DateSelector = (props: DateSelectorProps) => {
     const { updateVarName, withTime = false, id, propagate = true } = props;
     const dispatch = useDispatch();
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
-    const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz));
+    const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz, withTime));
     const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -57,7 +57,15 @@ const DateSelector = (props: DateSelectorProps) => {
             setValue(v);
             if (v !== null && isValid(v)) {
                 const newDate = getTimeZonedDate(v, tz, withTime);
-                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), module, props.onChange, propagate));
+                dispatch(
+                    createSendUpdateAction(
+                        updateVarName,
+                        dateToString(newDate, withTime),
+                        module,
+                        props.onChange,
+                        propagate
+                    )
+                );
             }
         },
         [updateVarName, dispatch, withTime, propagate, tz, props.onChange, module]
@@ -66,9 +74,9 @@ const DateSelector = (props: DateSelectorProps) => {
     // Run every time props.value get updated
     useEffect(() => {
         if (props.date !== undefined) {
-            setValue(getDateTime(props.date, tz));
+            setValue(getDateTime(props.date, tz, withTime));
         }
-    }, [props.date, tz]);
+    }, [props.date, tz, withTime]);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>

@@ -105,9 +105,10 @@ export const useFormatConfig = (): FormatConfig => {
                 timeZone: state.timeZone || TIMEZONE_CLIENT,
                 forceTZ: !!state.timeZone,
                 dateTime: state.dateTimeFormat || "yyyy-MM-dd HH:mm:ss zzz",
+                date: state.dateFormat || "yyyy-MM-dd",
                 number: state.numberFormat || "%f",
             } as FormatConfig),
-        [state.timeZone, state.dateTimeFormat, state.numberFormat]
+        [state.timeZone, state.dateFormat, state.dateTimeFormat, state.numberFormat]
     );
 };
 

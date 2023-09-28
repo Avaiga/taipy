@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import re
 import typing as t
 from datetime import date, datetime, time
 
@@ -18,7 +19,7 @@ from pytz import utc
 from .._warnings import _warn
 
 
-def _date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
+def _date_to_string(date_val: t.Union[datetime, date, time]) -> str:
     if isinstance(date_val, datetime):
         # return date.isoformat() + 'Z', if possible
         try:
@@ -30,7 +31,9 @@ def _date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
     return date_val.isoformat()
 
 
-def _ISO_to_date(date_str: str) -> datetime:
+def _string_to_date(date_str: str) -> t.Union[datetime, date]:
     # return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
     # return datetime.fromisoformat(date_str)
-    return parser.parse(date_str)
+    date = parser.parse(date_str)
+    date_regex = r"^[A-Z][a-z]{2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{2} \d{4}$"
+    return date.date() if re.match(date_regex, date_str) else date
