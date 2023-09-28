@@ -19,15 +19,12 @@ from taipy.gui import Gui
 data = [
     {
         # The quarterly periods are grouped by year
-        "Period": [
-            ["Carry", "Q1", "Q2", "Q3", "Q4", "Current"],
-            ["N-1",   "N",  "N",  "N",  "N",  "N+1"]
-        ]
+        "Period": [["Carry", "Q1", "Q2", "Q3", "Q4", "Current"], ["N-1", "N", "N", "N", "N", "N+1"]]
     },
     {
         "Cash Flow": [25, -17, 12, 18, -8, None],
-        "Measure": ["absolute", "relative", "relative", "relative", "relative", "total"]
-    }
+        "Measure": ["absolute", "relative", "relative", "relative", "relative", "total"],
+    },
 ]
 
 page = """

@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import datetime
 
 # Tasks definitions
@@ -22,12 +22,12 @@ tasks = ["Plan", "Research", "Design", "Implement", "Test", "Deliver"]
 durations = [50, 30, 30, 40, 15, 10]
 # Planned start dates of tasks
 start_dates = [
-    datetime.date(2022, 10, 15), # Plan
-    datetime.date(2022, 11,  7), # Research
-    datetime.date(2022, 12,  1), # Design
-    datetime.date(2022, 12, 20), # Implement
-    datetime.date(2023,  1, 15), # Test
-    datetime.date(2023,  2,  1)  # Deliver
+    datetime.date(2022, 10, 15),  # Plan
+    datetime.date(2022, 11, 7),  # Research
+    datetime.date(2022, 12, 1),  # Design
+    datetime.date(2022, 12, 20),  # Implement
+    datetime.date(2023, 1, 15),  # Test
+    datetime.date(2023, 2, 1),  # Deliver
 ]
 
 epoch = datetime.date(1970, 1, 1)
@@ -36,7 +36,7 @@ data = {
     "start": start_dates,
     "Task": tasks,
     # Compute the time span as adatetime (relative to January 1st, 1970)
-    "Date": [epoch+datetime.timedelta(days=duration) for duration in durations]
+    "Date": [epoch + datetime.timedelta(days=duration) for duration in durations],
 }
 
 layout = {
@@ -44,7 +44,7 @@ layout = {
         # Sort tasks from top to bottom
         "autorange": "reversed",
         # Remove title
-        "title": {"text": ""}
+        "title": {"text": ""},
     },
 }
 

@@ -14,7 +14,7 @@
 #     python <script>
 # You may need to install the yfinance package as well.
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import yfinance
 
 # Extraction of a few days of stock historical data for AAPL using
@@ -27,25 +27,15 @@ stock["Date"] = stock.index
 
 options = {
     # Candlesticks that show decreasing values are orange
-    "decreasing": {
-        "line": {
-            "color": "orange"
-        }
-    },
+    "decreasing": {"line": {"color": "orange"}},
     # Candlesticks that show decreasing values are blue
-    "increasing": {
-        "line": {
-            "color": "blue"
-        }
-    }
+    "increasing": {"line": {"color": "blue"}},
 }
 
 layout = {
     "xaxis": {
         # Hide the range slider
-        "rangeslider": {
-            "visible": False
-        }
+        "rangeslider": {"visible": False}
     }
 }
 

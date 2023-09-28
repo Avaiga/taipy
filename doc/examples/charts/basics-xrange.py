@@ -13,16 +13,13 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # x values are [-10..10]
 x_range = range(-10, 11)
 
 # The data set that holds both the x and the y values
-data = {
-    "X": x_range,
-    "Y": [x*x for x in x_range]
-}
+data = {"X": x_range, "Y": [x * x for x in x_range]}
 
 page = """
 # Basics - X range

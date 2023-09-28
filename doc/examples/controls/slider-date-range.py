@@ -29,15 +29,17 @@ while a_date < end_date:
     a_date += timedelta(days=1)
 
 # Initial selection: first and last day
-dates=[all_dates_str[1], all_dates_str[-1]]
+dates = [all_dates_str[1], all_dates_str[-1]]
 # These two variables are used in text controls
 start_sel = all_dates[dates[0]]
 end_sel = all_dates[dates[1]]
+
 
 def on_change(state, _, var_value):
     # Update the text controls
     state.start_sel = all_dates[var_value[0]]
     state.end_sel = all_dates[var_value[1]]
+
 
 page = """
 # Slider - Date range

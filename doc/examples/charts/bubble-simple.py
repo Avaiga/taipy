@@ -14,21 +14,17 @@
 #     python <script>
 # You may need to install the yfinance package as well.
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
     "x": [1, 2, 3],
     "y": [1, 2, 3],
     "Colors": ["blue", "green", "red"],
     "Sizes": [20, 40, 30],
-    "Opacities": [1, .4, 1]
+    "Opacities": [1, 0.4, 1],
 }
 
-marker = {
-    "color": "Colors",
-    "size": "Sizes",
-    "opacity": "Opacities"
-}
+marker = {"color": "Colors", "size": "Sizes", "opacity": "Opacities"}
 
 page = """
 # Bubble - Simple

@@ -13,12 +13,12 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
-    "Day":   [ "Mon", "Tue", "Wed", "Thu", "Fri" ],
-    "Items": [ 32, 25, 86, 60, 70],
-    "Price": [ 80, 50, 140, 10, 70],
+    "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "Items": [32, 25, 86, 60, 70],
+    "Price": [80, 50, 140, 10, 70],
 }
 
 options = [
@@ -26,14 +26,13 @@ options = [
     {"fill": "tozeroy"},
     # For price
     # Using "tonexty" not to cover the first trace
-    {"fill": "tonexty"}
+    {"fill": "tonexty"},
 ]
 
 page = """
 # Filled Area - Overlay
 
 <|{data}|chart|mode=none|x=Day|y[1]=Items|y[2]=Price|options={options}|>
-""" 
+"""
 
 Gui(page).run()
-

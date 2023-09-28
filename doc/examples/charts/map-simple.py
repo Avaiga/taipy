@@ -13,11 +13,11 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Flight start and end locations
 data = {
-    # Hartsfield-Jackson Atlanta International Airport 
+    # Hartsfield-Jackson Atlanta International Airport
     # to
     # Aéroport de Paris-Charles de Gaulle
     "lat": [33.64, 49.01],
@@ -36,20 +36,13 @@ layout = {
         "showocean": True,
         "landcolor": "4a4",
         "oceancolor": "77d",
-        "lataxis": {
-            "range": [20, 60]
-        },
-        "lonaxis": {
-            "range": [-100, 20]
-        }
-    }
+        "lataxis": {"range": [20, 60]},
+        "lonaxis": {"range": [-100, 20]},
+    },
 }
 
 # Flight displayed as a thick, red plot
-line = {
-    "width": 5,
-    "color": "red"
-}
+line = {"width": 5, "color": "red"}
 
 page = """
 # Maps - Simple

@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
     "John_us": [500, 450, 340, 230, 220, 110],
@@ -35,7 +35,7 @@ options = [
             "text": "John in the U.S."
         },
         # Lower-left corner
-        "domain": {"x": [0, 0.5], "y": [0, 0.5]}
+        "domain": {"x": [0, 0.5], "y": [0, 0.5]},
     },
     # For John/EU
     {
@@ -46,18 +46,18 @@ options = [
             "text": "John in the E.U."
         },
         # Upper-left corner
-        "domain": {"x": [0, 0.5], "y": [0.55, 1]}
+        "domain": {"x": [0, 0.5], "y": [0.55, 1]},
     },
     # For Robert/US
     {
         "scalegroup": "second",
         "textinfo": "value",
         "title": {
-            #"position": "top",
+            # "position": "top",
             "text": "Robert in the U.S."
         },
         # Lower-right corner
-        "domain": {"x": [0.51, 1], "y": [0, 0.5]}
+        "domain": {"x": [0.51, 1], "y": [0, 0.5]},
     },
     # For Robert/EU
     {
@@ -68,8 +68,8 @@ options = [
             "text": "Robert in the E.U."
         },
         # Upper-right corner
-        "domain": {"x": [0.51, 1], "y": [0.51, 1]}
-    }
+        "domain": {"x": [0.51, 1], "y": [0.51, 1]},
+    },
 ]
 
 layout = {
@@ -77,11 +77,11 @@ layout = {
     "showlegend": False,
     # Draw frames around each trace
     "shapes": [
-        { "x0": 0,    "x1": 0.5, "y0": 0,    "y1": 0.5 },
-        { "x0": 0,    "x1": 0.5, "y0": 0.52, "y1": 1 },
-        { "x0": 0.52, "x1": 1,   "y0": 0,    "y1": 0.5 },
-        { "x0": 0.52, "x1": 1,   "y0": 0.52, "y1": 1 }
-    ]
+        {"x0": 0, "x1": 0.5, "y0": 0, "y1": 0.5},
+        {"x0": 0, "x1": 0.5, "y0": 0.52, "y1": 1},
+        {"x0": 0.52, "x1": 1, "y0": 0, "y1": 0.5},
+        {"x0": 0.52, "x1": 1, "y0": 0.52, "y1": 1},
+    ],
 }
 
 page = """

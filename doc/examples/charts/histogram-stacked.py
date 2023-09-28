@@ -13,20 +13,14 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import random
 
 # Data set made of two series of random numbers
-data = {
-    "A": [random.random() for i in range(200)],
-    "B": [random.random() for i in range(200)]
-}
+data = {"A": [random.random() for i in range(200)], "B": [random.random() for i in range(200)]}
 
 # Names of the two traces
-names  = [
-    "A samples",
-    "B samples"
-]
+names = ["A samples", "B samples"]
 
 layout = {
     # Make the histogram stack the data sets

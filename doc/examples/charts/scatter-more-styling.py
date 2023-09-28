@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = [
     {
@@ -27,80 +27,44 @@ data = [
     {
         "x": [1, 2, 3, 4],
         "y": [12, 13, 14, 15],
-    }
+    },
 ]
 
 options = [
     # First data set is represented by increasingly large
     # disks, getting more and more opaque
-    {
-        "marker": {
-            "color": "red",
-            "size": [12, 22, 32, 42],
-            "opacity": [0.2, 0.5, 0.7, 1]
-        }
-    },
+    {"marker": {"color": "red", "size": [12, 22, 32, 42], "opacity": [0.2, 0.5, 0.7, 1]}},
     # Second data set is represented with a different symbol
     # for each data point
     {
-        "marker": {
-            "color": "blue",
-            "size": 18,
-            "symbol": ["circle", "square", "diamond", "cross"]
-        },
+        "marker": {"color": "blue", "size": 18, "symbol": ["circle", "square", "diamond", "cross"]},
     },
     # Third data set is represented with green disks surrounded
     # by a red circle that becomes thicker and thicker
     {
-        "marker": {
-            "color": "green",
-            "size": 20,
-            "line": {
-                "color": "red",
-                "width": [2, 4, 6, 8]
-            }
-        },
-    }
+        "marker": {"color": "green", "size": 20, "line": {"color": "red", "width": [2, 4, 6, 8]}},
+    },
 ]
 
 markers = [
     # First data set is represented by increasingly large
     # disks, getting more and more opaque
-    {
-        "color": "red",
-        "size": [12, 22, 32, 42],
-        "opacity": [0.2, 0.5, 0.7, 1]
-    },
+    {"color": "red", "size": [12, 22, 32, 42], "opacity": [0.2, 0.5, 0.7, 1]},
     # Second data set is represented with a different symbol
     # for each data point
-    {
-        "color": "blue",
-        "size": 18,
-        "symbol": ["circle", "square", "diamond", "cross"]
-    },
+    {"color": "blue", "size": 18, "symbol": ["circle", "square", "diamond", "cross"]},
     # Third data set is represented with green disks surrounded
     # by a red circle that becomes thicker and thicker
-    {
-        "color": "green",
-        "size": 20,
-        "line": {
-            "color": "red",
-            "width": [2, 4, 6, 8]
-        }
-    }
+    {"color": "green", "size": 20, "line": {"color": "red", "width": [2, 4, 6, 8]}},
 ]
 
 layout = {
     # Hide the chart legend
     "showlegend": False,
     # Remove all ticks from the x axis
-    "xaxis": {
-        "showticklabels": False
-    },
+    "xaxis": {"showticklabels": False},
     # Remove all ticks from the y axis
-    "yaxis": {
-        "showticklabels": False
-    }
+    "yaxis": {"showticklabels": False},
 }
 
 page = """

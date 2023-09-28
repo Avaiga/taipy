@@ -13,27 +13,21 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
     "x": [1, 2, 3],
     "y": [1, 2, 3],
-    "Texts": [
-        "Blue<br>Small",
-        "Green<br>Medium",
-        "Red<br>Large"],
-    "Sizes":  [60, 80, 100],
+    "Texts": ["Blue<br>Small", "Green<br>Medium", "Red<br>Large"],
+    "Sizes": [60, 80, 100],
     "Colors": [
         "rgb(93, 164, 214)",
         "rgb(44, 160, 101)",
         "rgb(255, 65, 54)",
-    ]
+    ],
 }
 
-marker = {
-    "size": "Sizes",
-    "color": "Colors"
-}
+marker = {"size": "Sizes", "color": "Colors"}
 
 page = """
 # Bubble - Hover text

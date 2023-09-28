@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import numpy
 import pandas
 
@@ -128,9 +128,8 @@ data = pandas.DataFrame(cities)
 # Add a column holding the bubble size:
 #   Min(population) -> size =  5
 #   Max(population) -> size = 60
-solve = numpy.linalg.solve([[data["population"].min(), 1], [data["population"].max(), 1]],
-                           [5, 60])
-data["size"] = data["population"].apply(lambda p: p*solve[0]+solve[1])
+solve = numpy.linalg.solve([[data["population"].min(), 1], [data["population"].max(), 1]], [5, 60])
+data["size"] = data["population"].apply(lambda p: p * solve[0] + solve[1])
 
 # Add a column holding the bubble hover texts
 # Format is "<city name> [<population>]"
@@ -141,18 +140,12 @@ marker = {
     "size": "size"
 }
 
-layout = {
-    "geo": {
-        "showland": True,
-        "landcolor": "4A4"
-    }
-}
+layout = {"geo": {"showland": True, "landcolor": "4A4"}}
 
 page = """
 # Maps - Bubbles
 
 <|{data}|chart|type=scattergeo|lat=lat|lon=lon|mode=markers|marker={marker}|text=text|layout={layout}|>
-
 """
 
 Gui(page).run()

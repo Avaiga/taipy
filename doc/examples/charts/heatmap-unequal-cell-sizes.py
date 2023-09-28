@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import numpy as np
 from itertools import accumulate
 
@@ -24,14 +24,17 @@ data = [
         # - 0 if row+col is a multiple of 4
         # - 1 if row+col is a multiple of 2
         # - 0.5 otherwise
-        "z": [[0. if (row+col) % 4 == 0 else 1 if (row+col) % 2 == 0 else 0.5 for col in range(grid_size)] for row in range(grid_size)]
+        "z": [
+            [0.0 if (row + col) % 4 == 0 else 1 if (row + col) % 2 == 0 else 0.5 for col in range(grid_size)]
+            for row in range(grid_size)
+        ]
     },
     {
         # A series of coordinates, growing exponentially
         "x": [0] + list(accumulate(np.logspace(0, 1, grid_size))),
         # A series of coordinates, shrinking exponentially
-        "y": [0] + list(accumulate(np.logspace(1, 0, grid_size)))
-    }
+        "y": [0] + list(accumulate(np.logspace(1, 0, grid_size))),
+    },
 ]
 
 # Axis template used in the layout object
@@ -41,13 +44,10 @@ axis_template = {
     "zeroline": False,
     "ticks": "",
     "showticklabels": False,
-    "visible": False
+    "visible": False,
 }
 
-layout = {
-    "xaxis": axis_template,
-    "yaxis": axis_template
-}
+layout = {"xaxis": axis_template, "yaxis": axis_template}
 
 options = {
     # Remove the color scale display

@@ -13,27 +13,16 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Create a star shape
-data = {
-        "r": [3, 1] * 5 + [3],
-        "theta": list(range(0, 360, 36)) + [0]
-    }
+data = {"r": [3, 1] * 5 + [3], "theta": list(range(0, 360, 36)) + [0]}
 
-options=[
+options = [
     # First plot is filled with a yellow-ish color
-    {
-        "subplot": "polar",
-        "fill": "toself",
-        "fillcolor": "#E4FF87"
-    },
+    {"subplot": "polar", "fill": "toself", "fillcolor": "#E4FF87"},
     # Second plot is filled with a blue-ish color
-    {
-        "fill": "toself",
-        "subplot": "polar2",
-        "fillcolor": "#709BFF"
-    }
+    {"fill": "toself", "subplot": "polar2", "fillcolor": "#709BFF"},
 ]
 
 layout = {
@@ -50,7 +39,7 @@ layout = {
             # Orient the axis clockwise
             "direction": "clockwise",
             # Show the angles as radians
-            "thetaunit": "radians"
+            "thetaunit": "radians",
         },
     },
     # Hide the legend

@@ -18,8 +18,8 @@ from taipy.gui import Gui
 data = {
     "Types": ["Website visit", "Downloads", "Prospects", "Invoice sent", "Closed"],
     "Visits_us": [13873, 10533, 5443, 2703, 908],
-    "Visits_eu": [ 7063, 4533, 3443, 1003, 1208 ],
-    "Visits_ap": [ 6873, 2533, 3443, 1703, 508 ]
+    "Visits_eu": [7063, 4533, 3443, 1003, 1208],
+    "Visits_ap": [6873, 2533, 3443, 1703, 508],
 }
 
 # Columns for each trace

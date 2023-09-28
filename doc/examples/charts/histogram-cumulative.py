@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import random
 
 # Random data set
@@ -21,9 +21,7 @@ data = [random.random() for i in range(500)]
 
 options = {
     # Enable the cumulative histogram
-    "cumulative": {
-        "enabled": True
-    }
+    "cumulative": {"enabled": True}
 }
 
 page = """

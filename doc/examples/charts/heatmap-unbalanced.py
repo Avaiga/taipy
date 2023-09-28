@@ -13,20 +13,20 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = [
     {
-        "Temperatures": [[17.2, 27.4, 28.6, 21.5],
-                         [5.6, 15.1, 20.2, 8.1],
-                         [26.6, 22.8, 21.8, 24.0],
-                         [22.3, 15.5, 13.4, 19.6],
-                         [3.9, 18.9, 25.7, 9.8]],
-        "Cities": ["Hanoi", "Paris", "Rio", "Sydney", "Washington"]
+        "Temperatures": [
+            [17.2, 27.4, 28.6, 21.5],
+            [5.6, 15.1, 20.2, 8.1],
+            [26.6, 22.8, 21.8, 24.0],
+            [22.3, 15.5, 13.4, 19.6],
+            [3.9, 18.9, 25.7, 9.8],
+        ],
+        "Cities": ["Hanoi", "Paris", "Rio", "Sydney", "Washington"],
     },
-    {
-        "Seasons": ["Winter", "Spring", "Summer", "Autumn"]
-    }
+    {"Seasons": ["Winter", "Spring", "Summer", "Autumn"]},
 ]
 
 page = """

@@ -13,18 +13,15 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
-data = {
-    "Types":  ["Visits", "Downloads", "Prospects", "Invoiced", "Closed"],
-    "Visits": [13873, 10533, 5443, 2703, 908]
-}
+data = {"Types": ["Visits", "Downloads", "Prospects", "Invoiced", "Closed"], "Visits": [13873, 10533, 5443, 2703, 908]}
 
 layout = {
     # Stack the areas
     "funnelmode": "stack",
     # Hide the legend
-    "showlegend": False
+    "showlegend": False,
 }
 
 page = """

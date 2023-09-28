@@ -14,7 +14,7 @@
 #     python <script>
 # You may need to install the scikit-learn package as well.
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 from os.path import exists
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
@@ -29,11 +29,7 @@ x_data = X.flatten()
 y_data = y.flatten()
 predict = model.predict(X)
 
-data = {
-  "x": x_data,
-  "y": y_data,
-  "Regression": predict
-}
+data = {"x": x_data, "y": y_data, "Regression": predict}
 
 page = """
 # Scatter - Regression

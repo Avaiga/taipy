@@ -13,9 +13,10 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 from datetime import datetime
 import numpy
+
 
 def generate_hand_shapes():
     # Retrieve and store the current, local time
@@ -27,32 +28,20 @@ def generate_hand_shapes():
     # Compute the angle that represents the hours
     hours_angle = 360 * ((hours % 12) / 12 + (minutes % 60) / 60 / 60 + (seconds % 60) / 60 / 60 / 60)
     # Short and thick hand for the hours
-    hours_hand = {
-        "r": [0, 4, 5, 4, 0],
-        "a": [0, hours_angle-7, hours_angle, hours_angle+7, 0]
-    }
+    hours_hand = {"r": [0, 4, 5, 4, 0], "a": [0, hours_angle - 7, hours_angle, hours_angle + 7, 0]}
 
     # Compute the angle that represents the minutes
     minutes_angle = 360 * ((minutes % 60) / 60 + (seconds % 60) / 60 / 60)
     # Longer and slighly thinner hand for the minutes
-    minutes_hand = {
-        "r": [0, 6, 8, 6, 0],
-        "a": [0, minutes_angle-4, minutes_angle, minutes_angle+4, 0]
-    }
+    minutes_hand = {"r": [0, 6, 8, 6, 0], "a": [0, minutes_angle - 4, minutes_angle, minutes_angle + 4, 0]}
 
     # Compute the angle that represents the seconds
     seconds_angle = 360 * (seconds % 60) / 60
     # Even longer and thinner hand for the seconds
-    seconds_hand = {
-        "r": [0, 8, 10, 8, 0],
-        "a": [0, seconds_angle-2, seconds_angle, seconds_angle+2, 0]
-    }
+    seconds_hand = {"r": [0, 8, 10, 8, 0], "a": [0, seconds_angle - 2, seconds_angle, seconds_angle + 2, 0]}
     # Build and return the whole data set
-    return [
-        hours_hand,
-        minutes_hand,
-        seconds_hand
-    ]
+    return [hours_hand, minutes_hand, seconds_hand]
+
 
 # Initialize the data set with the current time
 data = generate_hand_shapes()
@@ -63,20 +52,13 @@ layout = {
             "rotation": 90,
             "direction": "clockwise",
             # One tick every 30 degrees
-            "tickvals": list(numpy.arange(0., 360., 30)),
+            "tickvals": list(numpy.arange(0.0, 360.0, 30)),
             # Text value for every tick
-            "ticktext": [
-                "XII", "I", "II", "III", "IV", "V",
-                "VI", "VII", "VIII", "IX", "X", "XI"
-            ]
+            "ticktext": ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"],
         },
-        "radialaxis": {
-            "angle": 90,
-            "visible": False,
-            "range": [0, 12]
-        }
+        "radialaxis": {"angle": 90, "visible": False, "range": [0, 12]},
     },
-    "showlegend": False
+    "showlegend": False,
 }
 
 # Options to be used for all three traces
@@ -109,16 +91,18 @@ properties = {
     "options[2]": minutes_opts,
     "options[3]": seconds_opts,
     "line": {"color": "black"},
-    "layout": layout
+    "layout": layout,
 }
+
 
 # Update time on every refresh
 def on_navigate(state, page):
     state.data = generate_hand_shapes()
     return page
 
+
 page = """
-# Polar - Areas
+# Polar - Tick texts
 
 <|{data}|chart|type=scatterpolar|properties={properties}|>
 """

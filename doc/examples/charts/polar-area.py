@@ -13,41 +13,37 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import math
 
 # One data point for each degree
 theta = range(0, 360)
 
+
 # Parametric equation that draws a shape (source Wolfram Mathworld)
 def draw_heart(angle):
     a = math.radians(angle)
     sa = math.sin(a)
-    return 2-2*sa+sa*(math.sqrt(math.fabs(math.cos(a)))/(sa+1.4))
+    return 2 - 2 * sa + sa * (math.sqrt(math.fabs(math.cos(a))) / (sa + 1.4))
+
 
 data = {
     # Create the heart shape
     "r": [draw_heart(angle) for angle in theta],
-    "theta": theta
+    "theta": theta,
 }
 
-options = {
-    "fill": "toself"
-}
+options = {"fill": "toself"}
 
 layout = {
     # Hide the legend
     "showlegend": False,
     "polar": {
         # Hide the angular axis
-        "angularaxis": {
-            "visible": False
-        },
+        "angularaxis": {"visible": False},
         # Hide the radial axis
-        "radialaxis": {
-            "visible": False
-        }
-    }
+        "radialaxis": {"visible": False},
+    },
 }
 
 page = """

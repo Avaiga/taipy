@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import datetime
 
 # Retrieved history:
@@ -34,14 +34,14 @@ stock_history = [
     (299.35, 299.20, 299.19, 299.68),
     (299.42, 300.50, 299.42, 300.50),
     (300.70, 300.65, 300.32, 300.75),
-    (300.65, 299.91, 299.91, 300.76)
+    (300.65, 299.91, 299.91, 300.76),
 ]
 start_date = datetime.datetime(year=2022, month=10, day=21)
 period = datetime.timedelta(seconds=4 * 60 * 60)  # 4 hours
 
 data = {
     # Compute date series
-    "Date": [start_date+n*period for n in range(0, len(stock_history))],
+    "Date": [start_date + n * period for n in range(0, len(stock_history))],
     # Extract open values
     "Open": [v[0] for v in stock_history],
     # Extract close values
@@ -49,7 +49,7 @@ data = {
     # Extract low values
     "Low": [v[2] for v in stock_history],
     # Extract high values
-    "High": [v[3] for v in stock_history]
+    "High": [v[3] for v in stock_history],
 }
 
 md = """

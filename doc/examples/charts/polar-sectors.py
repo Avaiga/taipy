@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Sample small plot definition
 trace = {
@@ -30,18 +30,14 @@ options = [
     {
         "subplot": "polar",
     },
-    {
-        "subplot": "polar2"
-    }
+    {"subplot": "polar2"},
 ]
 
 layout = {
     # Hide the legend
     "showlegend": False,
     # Restrict the angular values for second trace
-    "polar2": {
-        "sector": [30, 130]
-    },
+    "polar2": {"sector": [30, 130]},
 }
 
 md = """

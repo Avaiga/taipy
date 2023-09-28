@@ -13,21 +13,15 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Skill categories
-skills=["HTML", "CSS", "Java", "Python", "PHP", "JavaScript", "Photoshop"]
+skills = ["HTML", "CSS", "Java", "Python", "PHP", "JavaScript", "Photoshop"]
 data = [
     # Proportion of skills used for Backend development
-    {
-        "Backend": [10, 10, 80, 70, 90, 30, 0],
-        "Skills": skills
-    },
+    {"Backend": [10, 10, 80, 70, 90, 30, 0], "Skills": skills},
     # Proportion of skills used for Frontend development
-    {
-        "Frontend": [90, 90, 0, 10, 20, 80, 60],
-        "Skills": skills
-    }
+    {"Frontend": [90, 90, 0, 10, 20, 80, 60], "Skills": skills},
 ]
 
 # Append first elements to all arrays for a nice stroke
@@ -37,7 +31,7 @@ data[1]["Frontend"].append(data[1]["Frontend"][0])
 
 layout = {
     # Force the radial axis displayed range
-    "polar": { "radialaxis": { "range": [0, 100] } }
+    "polar": {"radialaxis": {"range": [0, 100]}}
 }
 
 # Fill the trace
@@ -47,8 +41,8 @@ options = {"fill": "toself"}
 names = ["Backend", "Frontend"]
 
 # To shorten the chart control definition
-r     = ["0/Backend", "1/Frontend"]
-theta = ["0/Skills",  "1/Skills"]
+r = ["0/Backend", "1/Frontend"]
+theta = ["0/Skills", "1/Skills"]
 
 page = """
 # Radar - Multiple

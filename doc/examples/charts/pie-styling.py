@@ -13,12 +13,12 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 n_slices = 20
 # List: [1..n_slices]
 # Slices are bigger and bigger
-values = list(range(1, n_slices+1))
+values = list(range(1, n_slices + 1))
 
 marker = {
     # Colors move around the Hue color disk
@@ -36,7 +36,7 @@ options = {
 }
 
 page = """
-# Pie - Simple
+# Pie - Style
 
 <|{values}|chart|type=pie|marker={marker}|options={options}|layout={layout}|>
 """

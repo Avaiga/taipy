@@ -13,12 +13,23 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Source https://www.fao.org/faostat/en/#data/SDGB
 data = {
-    "Country": ["Rest of the world", "Russian Federation", "Brazil", "Canada", "United States of America", "China", "Australia", "Democratic Republic of the Congo", "Indonesia", "Peru"],
-    "Area": [1445674.66, 815312, 496620, 346928, 309795, 219978, 134005, 126155, 92133.2, 72330.4]
+    "Country": [
+        "Rest of the world",
+        "Russian Federation",
+        "Brazil",
+        "Canada",
+        "United States of America",
+        "China",
+        "Australia",
+        "Democratic Republic of the Congo",
+        "Indonesia",
+        "Peru",
+    ],
+    "Area": [1445674.66, 815312, 496620, 346928, 309795, 219978, 134005, 126155, 92133.2, 72330.4],
 }
 
 page = """

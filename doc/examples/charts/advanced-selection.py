@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import numpy
 import random
 
@@ -23,14 +23,14 @@ x = list(range(0, 21))
 data = {
     "x": x,
     # A list of random values within [1, 10]
-    "y": [random.uniform(1, 10) for _ in x]
+    "y": [random.uniform(1, 10) for _ in x],
 }
 
 layout = {
     # Force the Box select tool
     "dragmode": "select",
     # Remove all margins around the plot
-    "margin": {"l":0,"r":0,"b":0,"t":0}
+    "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
 }
 
 config = {
@@ -40,11 +40,13 @@ config = {
 
 selected_indices = []
 
-mean_value = 0.
+mean_value = 0.0
+
 
 def on_change(state, var, val):
     if var == "selected_indices":
         state.mean_value = numpy.mean([data["y"][idx] for idx in val]) if len(val) else 0
+
 
 page = """
 # Advanced - Selection

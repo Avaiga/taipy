@@ -17,9 +17,9 @@ from taipy.gui import Gui
 
 # Data set
 data = {
-    "Day":   ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
     "Values": [10, -5, 20, -10, 30],
-    "Measure": ["absolute", "relative", "relative", "relative", "relative"]
+    "Measure": ["absolute", "relative", "relative", "relative", "relative"],
 }
 
 page = """

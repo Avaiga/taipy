@@ -13,13 +13,10 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Data set
-data = {
-    "Opps":  ["Hot leads", "Doc sent", "Quote", "Closed Won"],
-    "Visits": [316, 238, 125, 83]
-}
+data = {"Opps": ["Hot leads", "Doc sent", "Quote", "Closed Won"], "Visits": [316, 238, 125, 83]}
 
 page = """
 # Funnel Chart - Simple

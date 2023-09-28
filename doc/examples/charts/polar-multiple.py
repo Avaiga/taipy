@@ -13,22 +13,19 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import math
 
 # One data point for each degree
 theta = range(0, 360)
 
+
 # Create a rose-like shaped radius-array
 def create_rose(n_petals):
-    return [math.cos(math.radians(n_petals*angle)) for angle in theta]
+    return [math.cos(math.radians(n_petals * angle)) for angle in theta]
 
-data = {
-    "theta": theta,
-    "r1": create_rose(2),
-    "r2": create_rose(3),
-    "r3": create_rose(4)
-}
+
+data = {"theta": theta, "r1": create_rose(2), "r2": create_rose(3), "r3": create_rose(4)}
 
 # We want three traces in the same chart
 r = ["r1", "r2", "r3"]
@@ -38,14 +35,10 @@ layout = {
     "showlegend": False,
     "polar": {
         # Hide the angular axis
-        "angularaxis": {
-            "visible": False
-        },
+        "angularaxis": {"visible": False},
         # Hide the radial axis
-        "radialaxis": {
-            "visible": False
-        }
-    }
+        "radialaxis": {"visible": False},
+    },
 }
 
 page = """

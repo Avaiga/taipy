@@ -13,37 +13,24 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import random
 
 # Data set made of two series of random numbers
-data = [
-    {
-        "x": [random.random() + 1 for i in range(100)]
-    },
-    {
-        "x": [random.random() + 1.1 for i in range(100)]
-    }
-]
+data = [{"x": [random.random() + 1 for i in range(100)]}, {"x": [random.random() + 1.1 for i in range(100)]}]
 
 options = [
     # First data set displayed as semi-transparent, green bars
-    {
-        "opacity": 0.5,
-        "marker": { "color": "green" }
-    },
+    {"opacity": 0.5, "marker": {"color": "green"}},
     # Second data set displayed as semi-transparent, gray bars
-    {
-        "opacity": 0.5,
-        "marker": { "color": "#888" }
-    }
+    {"opacity": 0.5, "marker": {"color": "#888"}},
 ]
 
 layout = {
     # Overlay the two histograms
     "barmode": "overlay",
     # Hide the legend
-    "showlegend": False
+    "showlegend": False,
 }
 
 page = """

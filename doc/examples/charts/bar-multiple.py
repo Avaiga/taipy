@@ -14,14 +14,35 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 # Two data sets as a bar chart
-from taipy import Gui
+from taipy.gui import Gui
 import pandas
 
 # Source https://en.wikipedia.org/wiki/List_of_United_States_presidential_elections_by_popular_vote_margin
-percentages=[(1852,50.83), (1856,45.29), (1860,39.65), (1864,55.03), (1868,52.66), (1872,55.58), (1876,47.92), (1880,48.31), (1884,48.85), (1888,47.80), (1892,46.02), (1896.,51.02), (1900,51.64), (1904,56.42), (1908,51.57), (1912,41.84), (1916,49.24), (1920,60.32), (1924,54.04), (1928,58.21)]
-data = pandas.DataFrame(percentages, columns=['Year', 'Won'])
-lost=[100-t[1] for t in percentages]
-data['Lost'] = lost
+percentages = [
+    (1852, 50.83),
+    (1856, 45.29),
+    (1860, 39.65),
+    (1864, 55.03),
+    (1868, 52.66),
+    (1872, 55.58),
+    (1876, 47.92),
+    (1880, 48.31),
+    (1884, 48.85),
+    (1888, 47.80),
+    (1892, 46.02),
+    (1896.0, 51.02),
+    (1900, 51.64),
+    (1904, 56.42),
+    (1908, 51.57),
+    (1912, 41.84),
+    (1916, 49.24),
+    (1920, 60.32),
+    (1924, 54.04),
+    (1928, 58.21),
+]
+data = pandas.DataFrame(percentages, columns=["Year", "Won"])
+lost = [100 - t[1] for t in percentages]
+data["Lost"] = lost
 
 page = """
 # Bar - Multiple

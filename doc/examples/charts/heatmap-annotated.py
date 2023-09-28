@@ -13,15 +13,17 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
-    "Temperatures": [[17.2, 27.4, 28.6, 21.5],
-                     [5.6, 15.1, 20.2, 8.1],
-                     [26.6, 22.8, 21.8, 24.0],
-                     [22.3, 15.5, 13.4, 19.6]],
+    "Temperatures": [
+        [17.2, 27.4, 28.6, 21.5],
+        [5.6, 15.1, 20.2, 8.1],
+        [26.6, 22.8, 21.8, 24.0],
+        [22.3, 15.5, 13.4, 19.6],
+    ],
     "Cities": ["Hanoi", "Paris", "Rio", "Sydney"],
-    "Seasons": ["Winter", "Spring", "Summer", "Autumn"]
+    "Seasons": ["Winter", "Spring", "Summer", "Autumn"],
 }
 
 layout = {
@@ -29,16 +31,10 @@ layout = {
     # These are filled later
     "annotations": [],
     # No ticks on the x axis, show labels on top the of the chart
-    "xaxis": {
-        "ticks": "",
-        "side": "top"
-    },
+    "xaxis": {"ticks": "", "side": "top"},
     # No ticks on the y axis
     # Add a space character for a small margin with the text
-    "yaxis": {
-        "ticks": "",
-        "ticksuffix": " "
-    }
+    "yaxis": {"ticks": "", "ticksuffix": " "},
 }
 
 seasons = data["Seasons"]
@@ -58,11 +54,9 @@ for city in range(len(cities)):
             "text": f"{temperature}\N{DEGREE SIGN}C",
             # Change the text color depending on the temperature
             # so it results in a better contrast
-            "font": {
-                "color": "white" if temperature < 14 else "black"
-            },
+            "font": {"color": "white" if temperature < 14 else "black"},
             # Remove the annotation arrow
-            "showarrow": False
+            "showarrow": False,
         }
         # Add the annotation to the layout's annotations array
         layout["annotations"].append(annotation)

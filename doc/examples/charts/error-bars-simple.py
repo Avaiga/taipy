@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import math
 import random
 
@@ -24,10 +24,10 @@ x = range(0, max_x)
 # Generate random sampling error margins
 error_ranges = [random.uniform(0, 5) for _ in x]
 # Compute a perfect sine wave
-perfect_y = [10*math.sin(4*math.pi*i/max_x) for i in x]
+perfect_y = [10 * math.sin(4 * math.pi * i / max_x) for i in x]
 # Compute a sine wave impacted by the sampling error
 # The error is between ±error_ranges[x]/2
-y = [perfect_y[i]+random.uniform(-error_ranges[i]/2, error_ranges[i]/2) for i in x]
+y = [perfect_y[i] + random.uniform(-error_ranges[i] / 2, error_ranges[i] / 2) for i in x]
 
 # The chart data is made of the three series
 data = {
@@ -38,10 +38,7 @@ data = {
 
 options = {
     # Create the error bar information:
-    "error_y": {
-        "type": "data",
-        "array": error_ranges
-    }
+    "error_y": {"type": "data", "array": error_ranges}
 }
 
 page = """

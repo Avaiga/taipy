@@ -13,33 +13,27 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import random
 
 # Random set of 100 samples
-samples = { "x": [random.gauss() for i in range(100)] }
+samples = {"x": [random.gauss() for i in range(100)]}
 
 # Use the same data for both traces
-data = [ samples, samples ]
+data = [samples, samples]
 
 options = [
     # First data set displayed as green-ish, and 5 bins
-    {
-        "marker": {"color": "#4A4"},
-        "nbinsx": 5
-    },
+    {"marker": {"color": "#4A4"}, "nbinsx": 5},
     # Second data set displayed as red-ish, and 25 bins
-    {
-        "marker": {"color": "#A33"},
-        "nbinsx": 25
-    }
+    {"marker": {"color": "#A33"}, "nbinsx": 25},
 ]
 
 layout = {
     # Overlay the two histograms
     "barmode": "overlay",
     # Hide the legend
-    "showlegend": False
+    "showlegend": False,
 }
 
 page = """

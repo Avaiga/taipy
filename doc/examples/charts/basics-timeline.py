@@ -13,15 +13,12 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import numpy
 import pandas
 
 # Generate a random value for every hour on a given day
-data = {
-    "Date": pandas.date_range("2023-01-04", periods=24, freq="H"),
-    "Value": pandas.Series(numpy.random.randn(24))
-}
+data = {"Date": pandas.date_range("2023-01-04", periods=24, freq="H"), "Value": pandas.Series(numpy.random.randn(24))}
 
 page = """
 # Basics - Timeline

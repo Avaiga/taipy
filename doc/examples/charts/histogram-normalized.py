@@ -13,16 +13,14 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import random
 
 # Random data set
 data = [random.random() for i in range(100)]
 
 # Normalize to show bin probabilities
-options = {
-    "histnorm": "probability"
-}
+options = {"histnorm": "probability"}
 
 page = """
 # Histogram - Normalized

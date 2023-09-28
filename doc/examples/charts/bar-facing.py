@@ -14,7 +14,7 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 # Face-to-face bar charts example
-from taipy import Gui
+from taipy.gui import Gui
 import numpy
 
 n_years = 10
@@ -26,33 +26,44 @@ proportions_male = numpy.zeros(n_years)
 proportions_female[0] = 0.4
 proportions_male[0] = proportions_female[0] * (1 + numpy.random.normal(0, 0.1))
 
-for i in range(1,n_years):
-    mean_i = (0.5-proportions_female[i-1])/5
-    new_value = proportions_female[i-1] + numpy.random.normal(mean_i, 0.1)
-    
-    new_value = min(max(0,new_value),1)
+for i in range(1, n_years):
+    mean_i = (0.5 - proportions_female[i - 1]) / 5
+    new_value = proportions_female[i - 1] + numpy.random.normal(mean_i, 0.1)
+
+    new_value = min(max(0, new_value), 1)
     proportions_female[i] = new_value
     proportions_male[i] = proportions_female[i] * (1 + numpy.random.normal(0, 0.1))
-     
+
 
 data = {
-  "Hobbies" : ["Archery", "Tennis", "Football", "Basket", "Volley", "Golf", "Video-Games", "Reading", "Singing", "Music"],
-  "Female" : proportions_female,
-  # Negate these values so they appear to the left side
-  "Male" : -proportions_male
+    "Hobbies": [
+        "Archery",
+        "Tennis",
+        "Football",
+        "Basket",
+        "Volley",
+        "Golf",
+        "Video-Games",
+        "Reading",
+        "Singing",
+        "Music",
+    ],
+    "Female": proportions_female,
+    # Negate these values so they appear to the left side
+    "Male": -proportions_male,
 }
 
 properties = {
     # Shared y values
-    "y":              "Hobbies",
+    "y": "Hobbies",
     # Bars for the female data set
-    "x[1]":           "Female",
-    "color[1]":       "#c26391",
+    "x[1]": "Female",
+    "color[1]": "#c26391",
     # Bars for the male data set
-    "x[2]":           "Male",
-    "color[2]":       "#5c91de",
+    "x[2]": "Male",
+    "color[2]": "#5c91de",
     # Both data sets are represented with an horizontal orientation
-    "orientation":    "h",
+    "orientation": "h",
     #
     "layout": {
         # This makes left and right bars aligned on the same y value
@@ -61,8 +72,8 @@ properties = {
         "xaxis": {"title": "Gender"},
         # Hide the legend
         "showlegend": False,
-        "margin" : { "l": 100 }
-    }
+        "margin": {"l": 100},
+    },
 }
 
 page = """

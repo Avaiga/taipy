@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import random
 
 # Common axis for all data: [1..10]
@@ -23,28 +23,25 @@ samples = [5, 7, 8, 4, 5, 9, 8, 8, 6, 5]
 
 # Generate error data
 # Error that adds to the input data
-error_plus  = [3*random.random()+.5 for _ in x]
+error_plus = [3 * random.random() + 0.5 for _ in x]
 # Error substracted from to the input data
-error_minus = [3*random.random()+.5 for _ in x]
+error_minus = [3 * random.random() + 0.5 for _ in x]
 
 # Upper bound (y + error_plus)
-error_upper = [y+e for (y, e) in zip(samples, error_plus)]
+error_upper = [y + e for (y, e) in zip(samples, error_plus)]
 # Lower bound (y - error_minus)
-error_lower = [y-e for (y, e) in zip(samples, error_minus)]
+error_lower = [y - e for (y, e) in zip(samples, error_minus)]
 
 data = [
     # Trace for samples
-    {
-        "x": x,
-        "y": samples
-    },
+    {"x": x, "y": samples},
     # Trace for error range
     {
         # Roundtrip around the error bounds: onward then return
         "x": x + list(reversed(x)),
         # The two error bounds, with lower bound reversed
-        "y": error_upper + list(reversed(error_lower))
-    }
+        "y": error_upper + list(reversed(error_lower)),
+    },
 ]
 
 properties = {
@@ -55,17 +52,16 @@ properties = {
         # Shows as filled area
         "fill": "toself",
         "fillcolor": "rgba(70,70,240,0.6)",
-        "showlegend": False
+        "showlegend": False,
     },
     # Don't show surrounding stroke
     "color[1]": "transparent",
-
     # Raw data (displayed on top of the error band)
     "x[2]": "0/x",
     "y[2]": "0/y",
     "color[2]": "rgb(140,50,50)",
     # Shown in the legend
-    "name[2]": "Input"
+    "name[2]": "Input",
 }
 
 page = """

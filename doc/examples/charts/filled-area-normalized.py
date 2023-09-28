@@ -13,31 +13,38 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
     "Products": [
-        "Nail polish", "Eyebrow pencil", "Rouge", "Lipstick",
-        "Eyeshadows", "Eyeliner", "Foundation", "Lip gloss", "Mascara"
+        "Nail polish",
+        "Eyebrow pencil",
+        "Rouge",
+        "Lipstick",
+        "Eyeshadows",
+        "Eyeliner",
+        "Foundation",
+        "Lip gloss",
+        "Mascara",
     ],
-    "USA": [ 12814, 13012, 11624, 8814, 12998, 12321, 10342, 22998, 11261 ],
-    "China": [ 3054, 5067, 7004, 9054, 12043, 15067, 10119, 12043, 10419 ],
-    "EU": [ 4376, 3987, 3574, 4376, 4572, 3417, 5231, 4572, 6134 ],
-    "Africa": [ 4229, 3932, 5221, 9256, 3308, 5432, 13701, 4008, 18712 ]
+    "USA": [12814, 13012, 11624, 8814, 12998, 12321, 10342, 22998, 11261],
+    "China": [3054, 5067, 7004, 9054, 12043, 15067, 10119, 12043, 10419],
+    "EU": [4376, 3987, 3574, 4376, 4572, 3417, 5231, 4572, 6134],
+    "Africa": [4229, 3932, 5221, 9256, 3308, 5432, 13701, 4008, 18712],
 }
 
 # Order the different traces
-ys = [ "USA", "China", "EU", "Africa" ]
+ys = ["USA", "China", "EU", "Africa"]
 
 options = [
     # For the USA
-    { "stackgroup": "one", "groupnorm": "percent" },
+    {"stackgroup": "one", "groupnorm": "percent"},
     # For China
-    { "stackgroup": "one" },
+    {"stackgroup": "one"},
     # For the EU
-    { "stackgroup": "one" },
+    {"stackgroup": "one"},
     # For Africa
-    { "stackgroup": "one" }
+    {"stackgroup": "one"},
 ]
 
 layout = {

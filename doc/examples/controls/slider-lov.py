@@ -15,7 +15,7 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
-value="XS"
+value = "XS"
 
 page = """
 # Slider - List of values

@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import datetime
 import dateutil.relativedelta
 
@@ -33,27 +33,22 @@ prices = {
     "bananas_high": [3.32, 2.70, 3.12, 3.25, 3.00, 2.63, 2.54, 2.37, 2.97, 3.69, 4.36, 2.95],
     "cherries": [6.18, None, None, None, 3.69, 2.46, 2.31, 2.57, None, None, 6.50, 4.38],
     "cherries_high": [7.00, None, None, None, 8.50, 6.27, 5.61, 4.36, None, None, 8.00, 7.23],
-    "cherries_low": [3.55, None, None, None, 1.20, 0.87, 1.08, 1.50, None, None, 5.00, 4.20]
+    "cherries_low": [3.55, None, None, None, 1.20, 0.87, 1.08, 1.50, None, None, 5.00, 4.20],
 }
 
 # Create monthly time series
-months = [start_date+n*period for n in range(0, len(prices["apples"]))]
+months = [start_date + n * period for n in range(0, len(prices["apples"]))]
 
 data = [
     # Raw data
-    {
-        "Months":  months,
-        "apples": prices["apples"],
-        "bananas": prices["bananas"],
-        "cherries": prices["cherries"]
-    },
+    {"Months": months, "apples": prices["apples"], "bananas": prices["bananas"], "cherries": prices["cherries"]},
     # Range data (twice as many values)
     {
-        "Months2":  months + list(reversed(months)),
+        "Months2": months + list(reversed(months)),
         "apples": prices["apples_high"] + list(reversed(prices["apples_low"])),
         "bananas": prices["bananas_high"] + list(reversed(prices["bananas_low"])),
-        "cherries": prices["cherries_high"] + list(reversed(prices["cherries_low"]))
-    }
+        "cherries": prices["cherries_high"] + list(reversed(prices["cherries_low"])),
+    },
 ]
 
 properties = {
@@ -94,11 +89,7 @@ properties = {
     # Fifth trace: range for Bananas
     "x[5]": "1/Months2",
     "y[5]": "1/bananas",
-    "options[5]": {
-        "fill": "tozerox",
-        "showlegend": False,
-        "fillcolor": "rgba(0,180,250,0.4)"
-    },
+    "options[5]": {"fill": "tozerox", "showlegend": False, "fillcolor": "rgba(0,180,250,0.4)"},
     #      No surrounding stroke
     "color[5]": "transparent",
     # Sixth trace: range for Cherries
@@ -110,7 +101,7 @@ properties = {
         "fillcolor": "rgba(230,100,120,0.4)",
     },
     #      No surrounding stroke
-    "color[6]": "transparent"
+    "color[6]": "transparent",
 }
 
 page = """

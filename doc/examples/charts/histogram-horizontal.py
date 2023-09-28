@@ -13,13 +13,11 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import random
 
 # Random data set
-data = {
-    "Count": [random.random() for i in range(100)]
-}
+data = {"Count": [random.random() for i in range(100)]}
 
 page = """
 # Histograms - Horizontal

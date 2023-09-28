@@ -13,16 +13,13 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Initial data set. y = count_of(x)
-samples = {
-    "x": ["Apples", "Apples", "Apples", "Oranges", "Bananas", "Oranges"],
-    "y": [5, 10, 3, 8, 5, 2]
-}
+samples = {"x": ["Apples", "Apples", "Apples", "Oranges", "Bananas", "Oranges"], "y": [5, 10, 3, 8, 5, 2]}
 
 # Create a data set array to allow for two traces
-data = [ samples, samples ]
+data = [samples, samples]
 
 # Gather those settings in a single dictionary
 properties = {
@@ -43,10 +40,10 @@ properties = {
         # First trace: count the bins
         {"histfunc": "count"},
         # Second trace: sum the bin occurences
-        {"histfunc": "sum"}
+        {"histfunc": "sum"},
     ],
     # Set x axis name
-    "layout": {"xaxis": {"title": "Fruit"}}
+    "layout": {"xaxis": {"title": "Fruit"}},
 }
 
 page = """

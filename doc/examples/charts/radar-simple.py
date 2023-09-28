@@ -13,17 +13,14 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Source: www.statista.com (Most used programming languages in 2022)
 data = {
     # List of programming languages
-    "Language": [
-        "JavaScript", "HTML/CSS", "SQL", "Python",
-        "Typescript", "Java", "Bash/Shell"
-    ],
+    "Language": ["JavaScript", "HTML/CSS", "SQL", "Python", "Typescript", "Java", "Bash/Shell"],
     # Percentage of usage, per language
-    "%": [65.36, 55.08, 49.43, 48.07, 34.83, 33.27, 29.07]
+    "%": [65.36, 55.08, 49.43, 48.07, 34.83, 33.27, 29.07],
 }
 
 # Close the shape for a nice-looking stroke
@@ -40,7 +37,7 @@ layout = {
         }
     },
     # Hide legend
-    "showlegend": False
+    "showlegend": False,
 }
 
 options = {

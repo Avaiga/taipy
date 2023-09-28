@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # x values are [-10..10]
 x_range = range(-10, 11)
@@ -22,24 +22,24 @@ x_range = range(-10, 11)
 data = {
     "x": x_range,
     # y1 = x*x
-    "y1": [x*x for x in x_range],
+    "y1": [x * x for x in x_range],
     # y2 = 2-x*x/50
-    "y2": [(100-x*x)/50 for x in x_range]
+    "y2": [(100 - x * x) / 50 for x in x_range],
 }
 
 layout = {
     "yaxis2": {
-      # Second axis overlays with the first y axis
-      "overlaying": "y",
-      # Place the second axis on the right
-      "side": "right",
-      # and give it a title
-      "title": "Second y axis"
+        # Second axis overlays with the first y axis
+        "overlaying": "y",
+        # Place the second axis on the right
+        "side": "right",
+        # and give it a title
+        "title": "Second y axis",
     },
     "legend": {
-      # Place the legend above chart
-      "yanchor": "bottom"
-    }
+        # Place the legend above chart
+        "yanchor": "bottom"
+    },
 }
 
 page = """

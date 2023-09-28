@@ -13,13 +13,13 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 layout = {
-  "xaxis": {
-    # Force the title of the x axis
-    "title": "Values for x"
-  }
+    "xaxis": {
+        # Force the title of the x axis
+        "title": "Values for x"
+    }
 }
 
 page = """

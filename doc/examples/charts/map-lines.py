@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 # Busiest US airports
 # Source: https://en.wikipedia.org/wiki/List_of_busiest_airports_by_passenger_traffic
@@ -67,7 +67,7 @@ airports = {
     "SVO": {"lat": 55.97381026156798, "lon": 37.412288430689664},
     "SZX": {"lat": 22.636827890877626, "lon": 113.81454162446936},
     "WUH": {"lat": 30.776589409566686, "lon": 114.21244949898504},
-    "XIY": {"lat": 34.437119809208546, "lon": 108.7573508575816}
+    "XIY": {"lat": 34.437119809208546, "lon": 108.7573508575816},
 }
 
 # Inter US airports flights
@@ -128,7 +128,7 @@ flights = [
     {"from": "SFO", "to": "DFW", "traffic": 526},
     {"from": "SFO", "to": "JFK", "traffic": 278},
     {"from": "SFO", "to": "MIA", "traffic": 168},
-    {"from": "SLC", "to": "DFW", "traffic": 280}
+    {"from": "SLC", "to": "DFW", "traffic": 280},
 ]
 
 data = []
@@ -137,10 +137,7 @@ for flight in flights:
     airport_from = airports[flight["from"]]
     airport_to = airports[flight["to"]]
     # Define data source to plot this flight
-    data.append({
-        "lat": [airport_from["lat"], airport_to["lat"]],
-        "lon": [airport_from["lon"], airport_to["lon"]]
-    })
+    data.append({"lat": [airport_from["lat"], airport_to["lat"]], "lon": [airport_from["lon"], airport_to["lon"]]})
     # Store the maximum traffic
     if flight["traffic"] > max_traffic:
         max_traffic = flight["traffic"]
@@ -153,16 +150,11 @@ properties = {
     # Keep lines only
     "mode": "lines",
     # Flights display as redish lines
-    "line": {
-        "width": 2,
-        "color": "E22"
-    },
+    "line": {"width": 2, "color": "E22"},
     "layout": {
         # Focus on the USA region
-        "geo": {
-            "scope": "usa"
-        }
-    }
+        "geo": {"scope": "usa"}
+    },
 }
 
 # Set the proper data source and opacity for each trace
@@ -173,10 +165,7 @@ for i, flight in enumerate(flights):
     properties[f"lon[{i+1}]"] = f"{i}/lon"
     # Set flight opacity (max traffic -> max opacity)
     # Hide legend for all flights
-    properties[f"options[{i+1}]"] = {
-        "opacity": flight["traffic"]/max_traffic,
-        "showlegend": False
-    }
+    properties[f"options[{i+1}]"] = {"opacity": flight["traffic"] / max_traffic, "showlegend": False}
 
 page = """
 # Maps - Multiple Lines

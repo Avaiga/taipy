@@ -19,65 +19,59 @@ from taipy.gui import Gui
 # Source: https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area
 continents = {
     "Africa": [
-        { "name": "Algeria", "surface": 2381741},
-        { "name": "Dem. Rep. Congo", "surface": 2344858},
-        { "name": "Sudan", "surface": 1886068},
-        { "name": "Libya", "surface": 1759540},
-        { "name": "Chad", "surface": 1284000}
+        {"name": "Algeria", "surface": 2381741},
+        {"name": "Dem. Rep. Congo", "surface": 2344858},
+        {"name": "Sudan", "surface": 1886068},
+        {"name": "Libya", "surface": 1759540},
+        {"name": "Chad", "surface": 1284000},
     ],
     "Asia": [
-        { "name": "Russia-Asia", "surface": 17098246},
-        { "name": "China", "surface": 9596961},
-        { "name": "India", "surface": 3287263},
-        { "name": "Kazakhstan", "surface": 2724900},
-        { "name": "Saudi Arabia", "surface": 2149690}
+        {"name": "Russia-Asia", "surface": 17098246},
+        {"name": "China", "surface": 9596961},
+        {"name": "India", "surface": 3287263},
+        {"name": "Kazakhstan", "surface": 2724900},
+        {"name": "Saudi Arabia", "surface": 2149690},
     ],
     "Europe": [
-        { "name": "Russia-Eur", "surface": 3972400},
-        { "name": "Ukraine", "surface": 603628},
-        { "name": "France", "surface": 551695},
-        { "name": "Spain", "surface": 498980},
-        { "name": "Sweden", "surface": 450295}
+        {"name": "Russia-Eur", "surface": 3972400},
+        {"name": "Ukraine", "surface": 603628},
+        {"name": "France", "surface": 551695},
+        {"name": "Spain", "surface": 498980},
+        {"name": "Sweden", "surface": 450295},
     ],
     "Americas": [
-        { "name": "Canada", "surface": 9984670},
-        { "name": "U.S.A.", "surface": 9833517},
-        { "name": "Brazil", "surface": 8515767},
-        { "name": "Argentina", "surface": 2780400},
-        { "name": "Mexico", "surface": 1964375}
+        {"name": "Canada", "surface": 9984670},
+        {"name": "U.S.A.", "surface": 9833517},
+        {"name": "Brazil", "surface": 8515767},
+        {"name": "Argentina", "surface": 2780400},
+        {"name": "Mexico", "surface": 1964375},
     ],
     "Oceania": [
-        { "name": "Australia", "surface": 7692024},
-        { "name": "Papua New Guinea", "surface": 462840},
-        { "name": "New Zealand", "surface":270467 },
-        { "name": "Solomon Islands", "surface": 28896},
-        { "name": "Fiji", "surface": 18274}
+        {"name": "Australia", "surface": 7692024},
+        {"name": "Papua New Guinea", "surface": 462840},
+        {"name": "New Zealand", "surface": 270467},
+        {"name": "Solomon Islands", "surface": 28896},
+        {"name": "Fiji", "surface": 18274},
     ],
-    "Antarctica": [
-        { "name": "Whole", "surface": 14200000}
-    ]
+    "Antarctica": [{"name": "Whole", "surface": 14200000}],
 }
 
-name=[]
-surface=[]
-continent=[]
+name = []
+surface = []
+continent = []
 
 for continent_name, countries in continents.items():
-  # Create continent in root rectangle
-  name.append(continent_name)
-  surface.append(0)
-  continent.append("")
-  # Create countries in that continent rectangle
-  for country in countries:
-    name.append(country["name"])
-    surface.append(country["surface"])
-    continent.append(continent_name)
+    # Create continent in root rectangle
+    name.append(continent_name)
+    surface.append(0)
+    continent.append("")
+    # Create countries in that continent rectangle
+    for country in countries:
+        name.append(country["name"])
+        surface.append(country["surface"])
+        continent.append(continent_name)
 
-data = {
-  "names": name,
-  "surfaces": surface,
-  "continent": continent
-}
+data = {"names": name, "surfaces": surface, "continent": continent}
 
 page = """
 # TreeMap - Hierarchical values

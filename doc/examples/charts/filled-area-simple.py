@@ -13,10 +13,10 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
-    "Day":   ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    "Day": ["Mon", "Tue", "Wed", "Thu", "Fri"],
     "Items": [32, 25, 86, 60, 70],
 }
 
@@ -32,4 +32,3 @@ page = """
 """
 
 Gui(page).run()
-

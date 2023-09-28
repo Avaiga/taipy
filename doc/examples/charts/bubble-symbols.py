@@ -14,16 +14,13 @@
 #     python <script>
 # You may need to install the yfinance package as well.
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 
 data = {
     "x": [1, 2, 3, 4, 5],
     "y": [10, 7, 4, 1, 5],
     "Sizes": [20, 30, 40, 50, 30],
-    "Symbols": [
-        "circle-open", "triangle-up", "hexagram",
-        "star-diamond", "circle-cross"
-    ]
+    "Symbols": ["circle-open", "triangle-up", "hexagram", "star-diamond", "circle-cross"],
 }
 
 marker = {

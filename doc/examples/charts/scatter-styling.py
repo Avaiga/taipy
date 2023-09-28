@@ -14,7 +14,7 @@
 #     python <script>
 # You may need to install the scikit-learn package as well.
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
+from taipy.gui import Gui
 import pandas as pd
 
 import pandas as pd
@@ -22,33 +22,18 @@ import numpy as np
 from sklearn.datasets import make_classification
 
 # Let scikit-learn generate a random 2-class classification problem
-n_samples=100
+n_samples = 100
 features, label = make_classification(n_samples=n_samples, n_features=2, n_informative=2, n_redundant=0)
 
-random_data = pd.DataFrame({
-  "x": features[:,0],
-  "y": features[:,1],
-  "label": label
-})
+random_data = pd.DataFrame({"x": features[:, 0], "y": features[:, 1], "label": label})
 
 data_x = random_data["x"]
-class_A = [random_data.loc[i, "y"] if random_data.loc[i, "label"]==0 else np.nan for i in range(n_samples)]
-class_B = [random_data.loc[i, "y"] if random_data.loc[i, "label"]==1 else np.nan for i in range(n_samples)]
+class_A = [random_data.loc[i, "y"] if random_data.loc[i, "label"] == 0 else np.nan for i in range(n_samples)]
+class_B = [random_data.loc[i, "y"] if random_data.loc[i, "label"] == 1 else np.nan for i in range(n_samples)]
 
-data = {
-  "x" : random_data["x"],
-  "Class A" : class_A,
-  "Class B" : class_B
-}
-marker_A = {
-    "symbol": "circle-open",
-    "size": 16
-}
-marker_B = {
-  "symbol": "triangle-up-dot",
-  "size": 20,
-  "opacity": 0.7
-}
+data = {"x": random_data["x"], "Class A": class_A, "Class B": class_B}
+marker_A = {"symbol": "circle-open", "size": 16}
+marker_B = {"symbol": "triangle-up-dot", "size": 20, "opacity": 0.7}
 page = """
 # Scatter - Styling
 
@@ -56,4 +41,3 @@ page = """
 """
 
 Gui(page).run()
-

@@ -19,10 +19,7 @@ from taipy.gui import Gui
 
 # x values: [-10..10]
 x_range = range(-10, 11)
-data = {
-    "X": x_range,
-    "Y": [x*x for x in x_range]
-}
+data = {"X": x_range, "Y": [x * x for x in x_range]}
 
 types = [("bar", "Bar"), ("line", "Line")]
 selected_type = types[0]

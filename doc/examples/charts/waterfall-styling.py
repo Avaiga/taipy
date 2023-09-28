@@ -22,27 +22,20 @@ n_holes = 9
 # Each entry holds an array of values. One for each hole, plus one for th
 data = {
     # ["Hole1", "Hole2", ..., "Hole9"]
-    "Hole": [f"Hole{h}" for h in range(1,n_holes+1)] + ["Score"],
+    "Hole": [f"Hole{h}" for h in range(1, n_holes + 1)] + ["Score"],
     # Par for each hole
-    "Par": [ 3, 4, 4, 5, 3, 5, 4, 5, 3 ] + [None],
+    "Par": [3, 4, 4, 5, 3, 5, 4, 5, 3] + [None],
     # Score for each hole
-    "Score": [ 4, 4, 5, 4, 4, 5, 4, 5, 4 ] + [None],
+    "Score": [4, 4, 5, 4, 4, 5, 4, 5, 4] + [None],
     # Represented as relative values except for the last one
-    "M": n_holes * [ "relative" ] + ["total"],
+    "M": n_holes * ["relative"] + ["total"],
 }
 
 # Compute difference (Score-Par)
-data["Diff"] = [data["Score"][i]-data["Par"][i] for i in range(0,n_holes)] + [None]
+data["Diff"] = [data["Score"][i] - data["Par"][i] for i in range(0, n_holes)] + [None]
 
 # Show positive values in red, and negative values in green
-options = {
-    "decreasing": {
-        "marker" : { "color": "green" }
-    },
-    "increasing": {
-        "marker" : { "color": "red" }
-    }
-}
+options = {"decreasing": {"marker": {"color": "green"}}, "increasing": {"marker": {"color": "red"}}}
 
 page = """
 # Waterfall - Styling
