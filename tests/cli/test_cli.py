@@ -48,13 +48,14 @@ def clean_argparser():
     yield
 
 
-expected_help = """{run,manage-versions,create,help} ...
+expected_help = """{run,manage-versions,create,migrate,help} ...
 
 positional arguments:
-  {run,manage-versions,create,help}
+  {run,manage-versions,create,migrate,help}
     run                 Run a Taipy application.
     manage-versions     Taipy version control system.
     create              Create a new Taipy application.
+    migrate             Migrate entities from old taipy versions to current taipy version.
     help                Show the Taipy help message.
 """
 
