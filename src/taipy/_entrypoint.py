@@ -13,6 +13,7 @@ import os
 import sys
 
 from taipy._cli._base_cli import _CLI
+from taipy._cli._migrate_cli import _MigrateCLI
 from taipy.core._core_cli import _CoreCLI
 from taipy.core._version._cli._version_cli import _VersionCLI
 from taipy.gui._gui_cli import _GuiCLI
@@ -35,6 +36,7 @@ def _entrypoint():
 
     _VersionCLI.create_parser()
     _ScaffoldCLI.create_parser()
+    _MigrateCLI.create_parser()
     _HelpCLI.create_parser()
 
     args = _CLI._parse()
@@ -45,6 +47,7 @@ def _entrypoint():
     _RunCLI.parse_arguments()
     _HelpCLI.parse_arguments()
     _VersionCLI.parse_arguments()
+    _MigrateCLI.parse_arguments()
     _ScaffoldCLI.parse_arguments()
 
     _CLI._remove_argument("help")
