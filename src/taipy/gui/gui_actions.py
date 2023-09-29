@@ -17,14 +17,16 @@ from .gui import Gui
 from .state import State
 
 
-def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
+def download(
+    state: State, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[t.Union[str, t.Callable]] = ""
+):
     """Download content to the client.
 
     Arguments:
         state (State^): The current user state as received in any callback.
         content: File path or file content.
         name: File name for the content on the client browser (defaults to content name).
-        on_action: Name of the callback function to call when the download starts.
+        on_action: Callback function to call when the download ends.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._download(content, name, on_action)
