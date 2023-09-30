@@ -264,45 +264,45 @@ class TestDataNode:
         assert dn.is_ready_for_reading
         assert dn.job_ids == [job_id]
 
-    def test_is_up_to_date_no_validity_period(self):
+    def test_is_valid_no_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode("foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id")
-        assert not dn.is_up_to_date
+        assert not dn.is_valid
 
         # test has been writen
         dn.write("My data")
-        assert dn.is_up_to_date
+        assert dn.is_valid
 
-    def test_is_up_to_date_with_30_min_validity_period(self):
+    def test_is_valid_with_30_min_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode(
             "foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id", validity_period=timedelta(minutes=30)
         )
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
         # Has been writen less than 30 minutes ago
         dn.write("My data")
-        assert dn.is_up_to_date is True
+        assert dn.is_valid is True
 
         # Has been writen more than 30 minutes ago
         dn.last_edit_date = datetime.now() + timedelta(days=-1)
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
-    def test_is_up_to_date_with_5_days_validity_period(self):
+    def test_is_valid_with_5_days_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode("foo", Scope.SCENARIO, validity_period=timedelta(days=5))
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
         # Has been writen less than 30 minutes ago
         dn.write("My data")
-        assert dn.is_up_to_date is True
+        assert dn.is_valid is True
 
         # Has been writen more than 30 minutes ago
         dn._last_edit_date = datetime.now() - timedelta(days=6)
         _DataManager()._set(dn)
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
-    def test_do_not_recompute_data_node_up_to_date_but_continue_sequence_execution(self):
+    def test_do_not_recompute_data_node_valid_but_continue_sequence_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
         a = Config.configure_data_node("A", "pickle", default_data="A")

@@ -101,7 +101,7 @@ class _JobDispatcher(threading.Thread, _TaskFunctionWrapper):
         data_manager = _DataManagerFactory._build_manager()
         if len(task.output) == 0:
             return True
-        are_outputs_in_cache = all(data_manager._get(dn.id).is_up_to_date for dn in task.output.values())
+        are_outputs_in_cache = all(data_manager._get(dn.id).is_valid for dn in task.output.values())
         if not are_outputs_in_cache:
             return True
         if len(task.input) == 0:
