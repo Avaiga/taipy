@@ -579,9 +579,13 @@ class DataNode(_Entity, _Labeled):
         parent_scenarios: Set[Scenario] = get_parents(self)["scenario"]  # type: ignore
         for parent_scenario in parent_scenarios:
             for ancestor_node in nx.ancestors(parent_scenario._build_dag(), self):
-                if isinstance(ancestor_node, DataNode) and ancestor_node.last_edit_date > self.last_edit_date:
+                if (
+                    isinstance(ancestor_node, DataNode)
+                    and ancestor_node.last_edit_date
+                    and ancestor_node.last_edit_date > self.last_edit_date
+                ):
                     return False
-        return self.is_valid()
+        return self.is_valid
 
     @staticmethod
     def _class_map():
