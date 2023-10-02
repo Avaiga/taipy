@@ -333,8 +333,11 @@ def _load_all_entities_from_sql(db_file: str = "test.db") -> Tuple[Dict, Dict]:
 
 def __insert_scenario(scenario: dict, conn):
     query = f"""
-        INSERT INTO scenario (id, config_id, tasks, additional_data_nodes, creation_date, primary_scenario, subscribers, tags, version, pipelines, cycle)
-        VALUES ({scenario['id']}, {scenario['config_id']}, {scenario['tasks']}, {scenario['additional_data_nodes']}, {scenario['creation_date']}, {scenario['primary_scenario']}, {scenario['subscribers']}, {scenario['tags']}, {scenario['version']}, {scenario['pipelines']}, {scenario['cycle']})
+        INSERT INTO scenario (id, config_id, tasks, additional_data_nodes, creation_date, primary_scenario, subscribers,
+         tags, version, pipelines, cycle)
+        VALUES ({scenario['id']}, {scenario['config_id']}, {scenario['tasks']}, {scenario['additional_data_nodes']},
+        {scenario['creation_date']}, {scenario['primary_scenario']}, {scenario['subscribers']}, {scenario['tags']},
+        {scenario['version']}, {scenario['pipelines']}, {scenario['cycle']})
         """
     conn.execute(query)
     conn.commit()
@@ -342,8 +345,11 @@ def __insert_scenario(scenario: dict, conn):
 
 def __insert_task(task: dict, conn):
     query = f"""
-        INSERT INTO task (id, owner_id, parent_ids, config_id, input_ids, function_name, function_module, output_ids, version, skippable, properties)
-        VALUES ({task['id']}, {task['owner_id']}, {task['parent_ids']}, {task['config_id']}, {task['input_ids']}, {task['function_name']}, {task['function_module']}, {task['output_ids']}, {task['version']}, {task['skippable']}, {task['properties']})
+        INSERT INTO task (id, owner_id, parent_ids, config_id, input_ids, function_name, function_module, output_ids,
+        version, skippable, properties)
+        VALUES ({task['id']}, {task['owner_id']}, {task['parent_ids']}, {task['config_id']}, {task['input_ids']},
+         {task['function_name']}, {task['function_module']}, {task['output_ids']}, {task['version']},
+         {task['skippable']}, {task['properties']})
     """
     conn.execute(query)
     conn.commit()
@@ -351,8 +357,12 @@ def __insert_task(task: dict, conn):
 
 def __insert_datanode(datanode: dict, conn):
     query = f"""
-        INSERT INTO data_node (id, config_id, scope, storage_type, name, owner_id, parent_ids, last_edit_date, edits, version, validity_days, validity_seconds, edit_in_progress, data_node_properties)
-        VALUES ({datanode['id']}, {datanode['config_id']}, {datanode['scope']}, {datanode['storage_type']}, {datanode['name']}, {datanode['owner_id']}, {datanode['parent_ids']}, {datanode['last_edit_date']}, {datanode['edits']}, {datanode['version']}, {datanode['validity_days']}, {datanode['validity_seconds']}, {datanode['edit_in_progress']}, {datanode['data_node_properties']})
+        INSERT INTO data_node (id, config_id, scope, storage_type, name, owner_id, parent_ids, last_edit_date, edits,
+        version, validity_days, validity_seconds, edit_in_progress, data_node_properties)
+        VALUES ({datanode['id']}, {datanode['config_id']}, {datanode['scope']}, {datanode['storage_type']},
+        {datanode['name']}, {datanode['owner_id']}, {datanode['parent_ids']}, {datanode['last_edit_date']},
+        {datanode['edits']}, {datanode['version']}, {datanode['validity_days']}, {datanode['validity_seconds']},
+        {datanode['edit_in_progress']}, {datanode['data_node_properties']})
     """
     conn.execute(query)
     conn.commit()
@@ -360,8 +370,10 @@ def __insert_datanode(datanode: dict, conn):
 
 def __insert_job(job: dict, conn):
     query = f"""
-        INSERT INTO job (id, task_id, status, force, submit_id, submit_entity_id, creation_date, subscribers, stacktrace, version)
-        VALUES ({job['id']}, {job['task_id']}, {job['status']}, {job['force']}, {job['submit_id']}, {job['submit_entity_id']}, {job['creation_date']}, {job['subscribers']}, {job['stacktrace']}, {job['version']})
+        INSERT INTO job (id, task_id, status, force, submit_id, submit_entity_id, creation_date, subscribers,
+        stacktrace, version)
+        VALUES ({job['id']}, {job['task_id']}, {job['status']}, {job['force']}, {job['submit_id']},
+        {job['submit_entity_id']}, {job['creation_date']}, {job['subscribers']}, {job['stacktrace']}, {job['version']})
     """
     conn.execute(query)
     conn.commit()
@@ -370,7 +382,8 @@ def __insert_job(job: dict, conn):
 def __insert_cycle(cycle: dict, conn):
     query = f"""
         INSERT INTO scenario (id, name, frequency, properties, creation_date, start_date, end_date)
-        VALUES ({cycle['id']}, {cycle['name']}, {cycle['frequency']}, {cycle['properties']}, {cycle['creation_date']}, {cycle['start_date']}, {cycle['end_date']})
+        VALUES ({cycle['id']}, {cycle['name']}, {cycle['frequency']}, {cycle['properties']}, {cycle['creation_date']},
+        {cycle['start_date']}, {cycle['end_date']})
     """
     conn.execute(query)
     conn.commit()
@@ -379,7 +392,8 @@ def __insert_cycle(cycle: dict, conn):
 def __insert_version(version: dict, conn):
     query = f"""
         INSERT INTO version (id, config_id, creation_date, is_production, is_development, is_latest)
-        VALUES ({version['id']}, {version['config_id']}, {version['creation_date']}, {version['is_production']}, {version['is_development']}, {version['is_latest']})
+        VALUES ({version['id']}, {version['config_id']}, {version['creation_date']}, {version['is_production']},
+        {version['is_development']}, {version['is_latest']})
     """
     conn.execute(query)
     conn.commit()
