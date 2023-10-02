@@ -543,7 +543,10 @@ class DataNode(_Entity, _Labeled):
     def __filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
         filtered_list = []
         for row in list_data:
-            row_value = getattr(row, key)
+            row_value = getattr(row, key, None)
+            if row_value is None:
+                continue
+
             if operator == Operator.EQUAL and row_value == value:
                 filtered_list.append(row)
             if operator == Operator.NOT_EQUAL and row_value != value:

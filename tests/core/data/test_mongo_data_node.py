@@ -23,6 +23,7 @@ from src.taipy.core import MongoDefaultDocument
 from src.taipy.core.common._mongo_connector import _connect_mongodb
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.mongo import MongoCollectionDataNode
+from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
@@ -170,6 +171,32 @@ class TestMongoCollectionDataNode:
         assert isinstance(data[4]._id, ObjectId)
         assert data[4].KWARGS_KEY == "KWARGS_VALUE"
         assert isinstance(data[5]._id, ObjectId)
+
+    @mongomock.patch(servers=(("localhost", 27017),))
+    @pytest.mark.parametrize("properties", __properties)
+    def test_filter(self, properties):
+        mock_client = pymongo.MongoClient("localhost")
+        mock_client[properties["db_name"]][properties["collection_name"]].insert_many(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+                {"KWARGS_KEY": "KWARGS_VALUE"},
+            ]
+        )
+
+        mongo_dn = MongoCollectionDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties=properties,
+        )
+
+        assert len(mongo_dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(mongo_dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 1
+        assert len(mongo_dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(mongo_dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
