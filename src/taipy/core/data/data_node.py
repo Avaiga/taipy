@@ -570,9 +570,6 @@ class DataNode(_Entity, _Labeled):
 
     @property
     def is_up_to_date(self) -> bool:
-        # NOTE:
-        # What about prev_1.last_edit_date > prev_2.last_edit_date but < current/prev_3.last_edit_date
-
         from ..scenario.scenario import Scenario
         from ..taipy import get_parents
 
