@@ -13,7 +13,7 @@ import json
 import os
 import sqlite3
 from functools import lru_cache
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pymongo
 
@@ -413,10 +413,7 @@ FCT_MIGRATION_MAP = {
 }
 
 
-def _migrate_fs_entities(path: str) -> None:
-    __logger.info("Starting entity migration")
-    entities = _load_all_entities_from_fs(path)
-
+def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Optional[Dict]]:
     __logger.info("Migrating SCENARIOS")
     entities = _migrate_entity("SCENARIO", entities)
 
@@ -430,7 +427,18 @@ def _migrate_fs_entities(path: str) -> None:
     entities = _migrate_entity("JOB", entities)
 
     __logger.info("Migrating VERSION")
-    entities = _migrate_entity("VERSION", entities)
+    if versions:
+        versions = _migrate_entity("VERSION", versions)
+    else:
+        entities = _migrate_entity("VERSION", entities)
+    return entities, versions
+
+
+def _migrate_fs_entities(path: str) -> None:
+    __logger.info("Starting entity migration")
+    entities = _load_all_entities_from_fs(path)
+
+    entities, _ = __migrate(entities)
 
     __write_entities_to_fs(entities)
 
@@ -441,20 +449,7 @@ def _migrate_sql_entities(path: str) -> None:
     __logger.info("Starting entity migration")
     entities, versions = _load_all_entities_from_sql(path)
 
-    __logger.info("Migrating SCENARIOS")
-    entities = _migrate_entity("SCENARIO", entities)
-
-    __logger.info("Migrating TASKS")
-    entities = _migrate_entity("TASKS", entities)
-
-    __logger.info("Migrating DATANODES")
-    entities = _migrate_entity("DATANODE", entities)
-
-    __logger.info("Migrating JOBS")
-    entities = _migrate_entity("JOB", entities)
-
-    __logger.info("Migrating VERSION")
-    entities = _migrate_entity("VERSION", entities)
+    entities, versions = __migrate(entities, versions)  # type: ignore
 
     __write_entities_to_sql(entities, versions, path)
 
@@ -467,20 +462,7 @@ def _migrate_mongo_entities(
     __logger.info("Starting entity migration")
     entities = _load_all_entities_from_mongo(hostname, port, user, password)
 
-    __logger.info("Migrating SCENARIOS")
-    entities = _migrate_entity("SCENARIO", entities)
-
-    __logger.info("Migrating TASKS")
-    entities = _migrate_entity("TASKS", entities)
-
-    __logger.info("Migrating DATANODES")
-    entities = _migrate_entity("DATANODE", entities)
-
-    __logger.info("Migrating JOBS")
-    entities = _migrate_entity("JOB", entities)
-
-    __logger.info("Migrating VERSION")
-    entities = _migrate_entity("VERSION", entities)
+    entities, _ = __migrate(entities)
 
     __write_entities_to_mongo(entities)
 
