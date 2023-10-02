@@ -14,6 +14,7 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
+from operator import and_, or_
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
@@ -437,11 +438,16 @@ class DataNode(_Entity, _Labeled):
         if not ((type(operators[0]) == list) or (type(operators[0]) == tuple)):
             if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
                 return DataNode.__filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
+            if isinstance(data, np.ndarray):
+                list_operators = [operators]
+                return DataNode.__filter_numpy_array(data, list_operators)
             if isinstance(data, List):
                 return DataNode.__filter_list_per_key_value(data, operators[0], operators[1], operators[2])
         else:
             if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
                 return DataNode.__filter_dataframe(data, operators, join_operator=join_operator)
+            if isinstance(data, np.ndarray):
+                return DataNode.__filter_numpy_array(data, operators, join_operator=join_operator)
             if isinstance(data, List):
                 return DataNode.__filter_list(data, operators, join_operator=join_operator)
         raise NotImplementedError
@@ -483,6 +489,41 @@ class DataNode(_Entity, _Labeled):
     @staticmethod
     def __dataframe_merge(df_list: List, how="inner"):
         return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
+
+    @staticmethod
+    def __filter_numpy_array(data: np.ndarray, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+        conditions = []
+        for key, value, operator in operators:
+            conditions.append(DataNode.__get_filter_condition_per_key_value(data, key, value, operator))
+
+        if join_operator == JoinOperator.AND:
+            join_conditions = reduce(and_, conditions)
+        elif join_operator == JoinOperator.OR:
+            join_conditions = reduce(or_, conditions)
+        else:
+            return NotImplementedError
+
+        return data[join_conditions]
+
+    @staticmethod
+    def __get_filter_condition_per_key_value(array_data: np.ndarray, key, value, operator: Operator):
+        if not isinstance(key, int):
+            key = int(key)
+
+        if operator == Operator.EQUAL:
+            return array_data[:, key] == value
+        if operator == Operator.NOT_EQUAL:
+            return array_data[:, key] != value
+        if operator == Operator.LESS_THAN:
+            return array_data[:, key] < value
+        if operator == Operator.LESS_OR_EQUAL:
+            return array_data[:, key] <= value
+        if operator == Operator.GREATER_THAN:
+            return array_data[:, key] > value
+        if operator == Operator.GREATER_OR_EQUAL:
+            return array_data[:, key] >= value
+
+        return NotImplementedError
 
     @staticmethod
     def __filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):

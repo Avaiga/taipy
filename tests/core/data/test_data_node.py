@@ -69,6 +69,19 @@ class FakeDataframeDataNode(DataNode):
         return "fake_df_dn"
 
 
+class FakeNumpyarrayDataNode(DataNode):
+    def __init__(self, config_id, default_array, **kwargs):
+        super().__init__(config_id, **kwargs)
+        self.data = default_array
+
+    def _read(self):
+        return self.data
+
+    @classmethod
+    def storage_type(cls) -> str:
+        return "fake_np_dn"
+
+
 class FakeListDataNode(DataNode):
     class Row:
         def __init__(self, value):
@@ -446,7 +459,7 @@ class TestDataNode:
         assert isinstance(df_dn[COLUMN_NAME_1], _FilterDataNode)
         assert isinstance(df_dn[[COLUMN_NAME_1, COLUMN_NAME_2]], _FilterDataNode)
 
-    def test_filter(self, default_data_frame):
+    def test_filter_pandas_exposed_type(self, default_data_frame):
         dn = FakeDataNode("fake_dn")
         dn.write("Any data")
 
@@ -527,6 +540,8 @@ class TestDataNode:
         ) == len(
             default_data_frame[(default_data_frame[COLUMN_NAME_1] > 10) | (default_data_frame[COLUMN_NAME_1] < -10)]
         )
+
+    def test_filter_list(self):
         list_dn = FakeListDataNode("fake_list_dn")
 
         KEY_NAME = "value"
@@ -593,6 +608,40 @@ class TestDataNode:
             )
             == 6
         )
+
+    def test_filter_numpy_exposed_type(self, default_data_frame):
+        default_array = default_data_frame.to_numpy()
+
+        df_dn = FakeNumpyarrayDataNode("fake_dataframe_dn", default_array)
+
+        assert len(df_dn.filter((0, 1, Operator.EQUAL))) == len(default_array[default_array[:, 0] == 1])
+        assert len(df_dn.filter((0, 1, Operator.NOT_EQUAL))) == len(default_array[default_array[:, 0] != 1])
+        assert len(df_dn.filter([(0, 1, Operator.EQUAL)])) == len(default_array[default_array[:, 0] == 1])
+        assert len(df_dn.filter([(0, 1, Operator.NOT_EQUAL)])) == len(default_array[default_array[:, 0] != 1])
+        assert len(df_dn.filter([(0, 1, Operator.LESS_THAN)])) == len(default_array[default_array[:, 0] < 1])
+        assert len(df_dn.filter([(0, 1, Operator.LESS_OR_EQUAL)])) == len(default_array[default_array[:, 0] <= 1])
+        assert len(df_dn.filter([(0, 1, Operator.GREATER_THAN)])) == len(default_array[default_array[:, 0] > 1])
+        assert len(df_dn.filter([(0, 1, Operator.GREATER_OR_EQUAL)])) == len(default_array[default_array[:, 0] >= 1])
+        assert len(df_dn.filter([(0, -1000, Operator.LESS_OR_EQUAL)])) == 0
+        assert len(df_dn.filter([(0, 1000, Operator.GREATER_OR_EQUAL)])) == 0
+        assert len(df_dn.filter([(0, 4, Operator.EQUAL), (0, 5, Operator.EQUAL)])) == len(
+            default_array[(default_array[:, 0] == 4) & (default_array[:, 0] == 5)]
+        )
+        assert len(df_dn.filter([(0, 4, Operator.EQUAL), (1, 5, Operator.EQUAL)], JoinOperator.OR)) == len(
+            default_array[(default_array[:, 0] == 4) | (default_array[:, 1] == 5)]
+        )
+        assert len(
+            df_dn.filter([(0, 1, Operator.GREATER_THAN), (1, 3, Operator.GREATER_THAN)], JoinOperator.AND)
+        ) == len(default_array[(default_array[:, 0] > 1) & (default_array[:, 1] > 3)])
+        assert len(
+            df_dn.filter([(0, 2, Operator.GREATER_THAN), (0, 3, Operator.GREATER_THAN)], JoinOperator.OR)
+        ) == len(default_array[(default_array[:, 0] > 2) | (default_array[:, 0] > 3)])
+        assert len(
+            df_dn.filter([(0, 10, Operator.GREATER_THAN), (0, -10, Operator.LESS_THAN)], JoinOperator.AND)
+        ) == len(default_array[(default_array[:, 0] > 10) | (default_array[:, 0] < -10)])
+        assert len(
+            df_dn.filter([(0, 10, Operator.GREATER_THAN), (0, -10, Operator.LESS_THAN)], JoinOperator.OR)
+        ) == len(default_array[(default_array[:, 0] > 10) | (default_array[:, 0] < -10)])
 
     def test_data_node_update_after_writing(self):
         dn = FakeDataNode("foo")
