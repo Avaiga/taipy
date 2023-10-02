@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
 import modin.pandas as modin_pd
+import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine, text
 
@@ -214,7 +215,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             query_result = connection.execute(text(self._get_read_query()))
         return list(map(lambda row: custom_class(**row), query_result))
 
-    def _read_as_numpy(self):
+    def _read_as_numpy(self) -> np.ndarray:
         return self._read_as_pandas_dataframe().to_numpy()
 
     def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
