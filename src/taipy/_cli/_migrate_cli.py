@@ -22,7 +22,12 @@ class _MigrateCLI:
             "migrate", help="Migrate entities from old taipy versions to current taipy version."
         )
         migrate_parser.add_argument(
-            "--repository-type", nargs="*", help="The path to the File System Repository folder"
+            "--repository-type",
+            nargs="+",
+            choices=["filesystem", "sql", "mongo"],
+            help="The type of repository to migrate. If filesystem or sql, a path to the database folder/.sqlite file"
+            "should be informed. In case of mongo host, port, user and password must be informed, if left empty it"
+            "is assumed default values",
         )
 
     @classmethod
@@ -31,13 +36,21 @@ class _MigrateCLI:
 
         if getattr(args, "which", None) == "migrate":
             repository_type = args.repository_type[0]
+            try:
+                path = args.repository_type[1]
+            except IndexError:
+                path = None
 
             if repository_type == "filesystem":
-                _migrate_fs_entities(args.repository_type[1])
+                path = path or ".data"
+                _migrate_fs_entities(path)
             elif repository_type == "sql":
-                _migrate_sql_entities(args.repository_type[1])
+                if not path:
+                    raise argparse.ArgumentError("Missing required path argument")
+                _migrate_sql_entities(path)
             elif repository_type == "mongo":
-                _migrate_mongo_entities(*args.repository_type[1:])
+                mongo_args = args.repository_type[1:] if path else []
+                _migrate_mongo_entities(*mongo_args)
             else:
                 raise argparse.ArgumentError(f"Unknown repository type {repository_type}")
             sys.exit(0)
