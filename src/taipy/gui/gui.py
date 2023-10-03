@@ -23,16 +23,14 @@ import tempfile
 import time
 import typing as t
 import warnings
-from importlib import util
+from importlib import metadata, util
 from types import FrameType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask
-from flask import __version__ as flask_version  # type: ignore
-from flask import g, jsonify, request, send_file, send_from_directory
+from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -737,7 +735,7 @@ class Gui:
         if self._get_config("extended_status", False):
             base_json.update(
                 {
-                    "flask_version": str(flask_version or ""),
+                    "flask_version": str(metadata.version("flask") or ""),
                     "backend_version": self.__get_version(),
                     "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
                     "python_version": sys.version,

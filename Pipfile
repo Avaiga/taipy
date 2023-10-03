@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
-flask = "==2.3.3"
+flask = "==3.0.0"
 flask-cors = "==4.0.0"
 flask-socketio = "==5.3.6"
 gevent = "==23.7.0"

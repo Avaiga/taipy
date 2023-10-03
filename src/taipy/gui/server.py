@@ -95,7 +95,7 @@ class _Server:
 
         # set json encoder (for Taipy specific types)
         self._flask.json_provider_class = _TaipyJsonProvider
-        self._flask.json = self._flask.json_provider_class(self._flask)
+        self._flask.json = self._flask.json_provider_class(self._flask)  # type: ignore
 
         self.__path_mapping = path_mapping or {}
         self.__ssl_context = server_config.get("ssl_context", None)
