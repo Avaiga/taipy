@@ -125,6 +125,7 @@ class _Factory:
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
                 ("on_change", PropertyType.function),
+                ("format",),
             ]
         )
         ._set_propagate(),
