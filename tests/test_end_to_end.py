@@ -92,3 +92,9 @@ def test_end_to_end(client, setup_end_to_end):
     get_assert_status(url_for("api.sequence_by_id", sequence_id=9999999), client, 404)
     get_assert_status(url_for("api.task_by_id", task_id=9999999), client, 404)
     get_assert_status(url_for("api.datanode_by_id", datanode_id=9999999), client, 404)
+
+    # Check URL with and without trailing slashes
+    url_with_slash = url_for("api.scenarios")
+    url_without_slash = url_for("api.scenarios")[:-1]
+    get_all(url_with_slash, 1, client)
+    get_all(url_without_slash, 1, client)
