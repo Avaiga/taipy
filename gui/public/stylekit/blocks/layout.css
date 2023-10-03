@@ -29,6 +29,10 @@
     min-width: 0;
 }
 
+.taipy-layout>.md-para {
+    min-width: 0;
+}
+
 .taipy-layout.align-columns-stretch>.taipy-part>.md-para,
 .taipy-layout>.taipy-part.align-item-stretch>.md-para {
     height: 100%;
