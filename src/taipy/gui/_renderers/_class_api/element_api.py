@@ -24,6 +24,7 @@ if t.TYPE_CHECKING:
 
 class ElementApi(ABC):
     _ELEMENT_NAME = ""
+    _DEFAULT_PROPERTY = ""
 
     def __new__(cls, *args, **kwargs):
         obj = super(ElementApi, cls).__new__(cls)
@@ -32,8 +33,11 @@ class ElementApi(ABC):
             parent.add(obj)
         return obj
 
-    def __init__(self, **kwargs):
-        self._properties = kwargs
+    def __init__(self, *args, **kwargs):
+        self._properties: t.Dict[str, t.Any] = {}
+        if args and self._DEFAULT_PROPERTY != "":
+            self._properties = {self._DEFAULT_PROPERTY: args[0]}
+        self._properties.update(kwargs)
         self.parse_properties()
 
     def update(self, **kwargs):
@@ -58,8 +62,8 @@ class ElementApi(ABC):
 
 
 class BlockElementApi(ElementApi):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._children: t.List[ElementApi] = []
 
     def add(self, *elements: ElementApi):
@@ -86,13 +90,27 @@ class BlockElementApi(ElementApi):
 class DefaultBlockElement(BlockElementApi):
     _ELEMENT_NAME = "part"
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class html(BlockElementApi):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not args:
+            raise RuntimeError("Can't render html element. Missing html tag name.")
+        self._ELEMENT_NAME = args[0]
+        self._content = args[1] if len(args) > 1 else ""
+
+    def _render(self, gui: "Gui") -> str:
+        open_tag_attributes = " ".join([f'{k}="{str(v)}"' for k, v in self._properties.items()])
+        open_tag = f"<{self._ELEMENT_NAME} {open_tag_attributes}>"
+        return f"{open_tag}{self._content}{self._render_children(gui)}</{self._ELEMENT_NAME}>"
 
 
 class ControlElementApi(ElementApi):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
         el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._properties)

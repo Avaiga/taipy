@@ -17,8 +17,8 @@ import typing as t
 import warnings
 
 if t.TYPE_CHECKING:
+    from ._renderers import Page
     from .gui import Gui
-    from .renderers import Page
 
 
 class _Page(object):

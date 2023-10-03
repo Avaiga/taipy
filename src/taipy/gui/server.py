@@ -34,8 +34,8 @@ from werkzeug.serving import is_running_from_reloader
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
-from .renderers.json import _TaipyJsonProvider
 from .utils import _is_in_notebook, _RuntimeManager
 from .utils.proxy import NotebookProxy
 

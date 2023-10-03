@@ -14,8 +14,8 @@ import re
 import typing as t
 from enum import Enum
 
+from .._renderers.utils import _get_columns_dict
 from .._warnings import _warn
-from ..renderers.utils import _get_columns_dict
 from ..types import PropertyType
 from ..utils import _MapDict
 

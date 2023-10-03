@@ -22,6 +22,7 @@ from flask import Flask, g
 def pytest_configure(config):
     if (find_spec("src") and find_spec("src.taipy")) and (not find_spec("taipy") or not find_spec("taipy.gui")):
         import src.taipy.gui
+        import src.taipy.gui._renderers.builder
         import src.taipy.gui._warnings
         import src.taipy.gui.builder
         import src.taipy.gui.data.decimator.lttb
@@ -30,13 +31,12 @@ def pytest_configure(config):
         import src.taipy.gui.data.decimator.scatter_decimator
         import src.taipy.gui.data.utils
         import src.taipy.gui.extension
-        import src.taipy.gui.renderers.builder
         import src.taipy.gui.utils._map_dict
         import src.taipy.gui.utils._variable_directory
         import src.taipy.gui.utils.expr_var_name
 
         sys.modules["taipy.gui._warnings"] = sys.modules["src.taipy.gui._warnings"]
-        sys.modules["taipy.gui.renderers.builder"] = sys.modules["src.taipy.gui.renderers.builder"]
+        sys.modules["taipy.gui._renderers.builder"] = sys.modules["src.taipy.gui._renderers.builder"]
         sys.modules["taipy.gui.utils._variable_directory"] = sys.modules["src.taipy.gui.utils._variable_directory"]
         sys.modules["taipy.gui.utils.expr_var_name"] = sys.modules["src.taipy.gui.utils.expr_var_name"]
         sys.modules["taipy.gui.utils._map_dict"] = sys.modules["src.taipy.gui.utils._map_dict"]

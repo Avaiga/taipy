@@ -29,6 +29,13 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
     def __init__(self):
         self.__module: types.ModuleType | None = None
 
+    @staticmethod
+    def find_default_property(property_list: t.List[t.Dict[str, t.Any]]) -> str:
+        for property in property_list:
+            if "default_property" in property and property["default_property"] is True:
+                return property["name"]
+        return ""
+
     def add_default(self):
         current_frame = inspect.currentframe()
         if current_frame is None:
@@ -44,14 +51,18 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             if "blocks" not in data or "controls" not in data:
                 raise RuntimeError("Cannot generate Element API for the current module: Invalid viselements.json file.")
             for blockElement in data["blocks"]:
+                default_property = _ElementApiGenerator.find_default_property(blockElement[1]["properties"])
                 setattr(
-                    module, blockElement[0], _ElementApiGenerator.createBlockElement(blockElement[0], blockElement[0])
+                    module,
+                    blockElement[0],
+                    _ElementApiGenerator.create_block_element(blockElement[0], blockElement[0], default_property),
                 )
             for controlElement in data["controls"]:
+                default_property = _ElementApiGenerator.find_default_property(controlElement[1]["properties"])
                 setattr(
                     module,
                     controlElement[0],
-                    _ElementApiGenerator.createControlElement(controlElement[0], controlElement[0]),
+                    _ElementApiGenerator.create_control_element(controlElement[0], controlElement[0], default_property),
                 )
 
     def add_library(self, library: "ElementLibrary"):
@@ -65,30 +76,44 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         if library_module is None:
             library_module = types.ModuleType(library_name)
             setattr(self.__module, library_name, library_module)
-        for element_name in library.get_elements().keys():
+        for element_name, element in library.get_elements().items():
             setattr(
                 library_module,
                 element_name,
-                _ElementApiGenerator().createControlElement(element_name, f"{library_name}.{element_name}"),
+                _ElementApiGenerator().create_control_element(
+                    element_name, f"{library_name}.{element_name}", element.default_attribute
+                ),
             )
 
     @staticmethod
-    def createBlockElement(classname: str, element_name: str):
-        return _ElementApiGenerator.createElementApi(classname, element_name, BlockElementApi)
+    def create_block_element(
+        classname: str,
+        element_name: str,
+        default_property: str,
+    ):
+        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, BlockElementApi)
 
     @staticmethod
-    def createControlElement(classname: str, element_name: str):
-        return _ElementApiGenerator.createElementApi(classname, element_name, ControlElementApi)
+    def create_control_element(
+        classname: str,
+        element_name: str,
+        default_property: str,
+    ):
+        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, ControlElementApi)
 
     @staticmethod
-    def createElementApi(
-        classname: str, element_name: str, ElementBaseClass: t.Union[t.Type[BlockElementApi], t.Type[ControlElementApi]]
+    def create_element_api(
+        classname: str,
+        element_name: str,
+        default_property: str,
+        ElementBaseClass: t.Union[t.Type[BlockElementApi], t.Type[ControlElementApi]],
     ):
         return type(
             classname,
             (ElementBaseClass,),
             {
-                "__init__": lambda self, **kwargs: ElementBaseClass.__init__(self, **kwargs),
+                "__init__": lambda self, *args, **kwargs: ElementBaseClass.__init__(self, *args, **kwargs),
                 "_ELEMENT_NAME": element_name,
+                "_DEFAULT_PROPERTY": default_property,
             },
         )

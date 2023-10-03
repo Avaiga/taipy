@@ -18,7 +18,7 @@ from types import FrameType
 from .utils import _filter_locals, _get_module_name_from_frame
 
 if t.TYPE_CHECKING:
-    from .renderers import ElementApi
+    from ._renderers import ElementApi
 
 
 class Page:

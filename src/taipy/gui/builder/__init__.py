@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from ..renderers import BlockElementApi, ControlElementApi, _ElementApiGenerator
+from .._renderers import BlockElementApi, ControlElementApi, _ElementApiGenerator, html
 
 # separate import for "Page" class so stubgen can properly generate pyi file
 from .page import Page

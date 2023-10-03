@@ -71,6 +71,7 @@ application.
 from importlib.util import find_spec
 
 from ._init import *
+from ._renderers import Html, Markdown
 from .gui_actions import (
     download,
     get_module_context,
@@ -87,7 +88,6 @@ from .gui_actions import (
 from .icon import Icon
 from .page import Page
 from .partial import Partial
-from .renderers import Html, Markdown
 from .state import State
 from .utils import is_debugging
 

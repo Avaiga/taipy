@@ -42,7 +42,13 @@ if util.find_spec("pyngrok"):
 
 from ._default_config import _default_stylekit, default_config
 from ._page import _Page
+from ._renderers import _EmptyPage
+from ._renderers._markdown import _TaipyMarkdownExtension
+from ._renderers.factory import _Factory
+from ._renderers.json import _TaipyJsonEncoder
+from ._renderers.utils import _get_columns_dict
 from ._warnings import TaipyGuiWarning, _warn
+from .builder import _ElementApiGenerator
 from .config import Config, ConfigParameter, ServerConfig, Stylekit, _Config
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
@@ -51,12 +57,6 @@ from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
 from .page import Page
 from .partial import Partial
-from .renderers import _EmptyPage
-from .renderers._class_api.element_api_generator import _ElementApiGenerator
-from .renderers._markdown import _TaipyMarkdownExtension
-from .renderers.factory import _Factory
-from .renderers.json import _TaipyJsonEncoder
-from .renderers.utils import _get_columns_dict
 from .server import _Server
 from .state import State
 from .types import _WsType
@@ -1245,19 +1245,19 @@ class Gui:
         return _taipy_on_cancel_block_ui
 
     def __add_pages_in_folder(self, folder_name: str, folder_path: str):
-        from .renderers import Html, Markdown
+        from ._renderers import Html, Markdown
 
         list_of_files = os.listdir(folder_path)
         for file_name in list_of_files:
             if file_name.startswith("__"):
                 continue
             if (re_match := Gui.__RE_HTML.match(file_name)) and f"{re_match.group(1)}.py" not in list_of_files:
-                renderers = Html(os.path.join(folder_path, file_name), frame=None)
-                renderers.modify_taipy_base_url(folder_name)
-                self.add_page(name=f"{folder_name}/{re_match.group(1)}", page=renderers)
+                _renderers = Html(os.path.join(folder_path, file_name), frame=None)
+                _renderers.modify_taipy_base_url(folder_name)
+                self.add_page(name=f"{folder_name}/{re_match.group(1)}", page=_renderers)
             elif (re_match := Gui.__RE_MD.match(file_name)) and f"{re_match.group(1)}.py" not in list_of_files:
-                renderers_md = Markdown(os.path.join(folder_path, file_name), frame=None)
-                self.add_page(name=f"{folder_name}/{re_match.group(1)}", page=renderers_md)
+                _renderers_md = Markdown(os.path.join(folder_path, file_name), frame=None)
+                self.add_page(name=f"{folder_name}/{re_match.group(1)}", page=_renderers_md)
             elif re_match := Gui.__RE_PY.match(file_name):
                 module_name = re_match.group(1)
                 module_path = os.path.join(folder_name, module_name).replace(os.path.sep, ".")
@@ -1365,7 +1365,7 @@ class Gui:
         if name in self._config.routes:  # pragma: no cover
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined.')
         if isinstance(page, str):
-            from .renderers import Markdown
+            from ._renderers import Markdown
 
             page = Markdown(page, frame=None)
         elif not isinstance(page, Page):  # pragma: no cover
@@ -1505,7 +1505,7 @@ class Gui:
         ):  # pragma: no cover
             _warn(f'Partial name "{new_partial._route}" is already defined.')
         if isinstance(page, str):
-            from .renderers import Markdown
+            from ._renderers import Markdown
 
             page = Markdown(page, frame=None)
         elif not isinstance(page, Page):  # pragma: no cover

@@ -22,6 +22,7 @@ from ._class_api import (
     ElementApi,
     _ElementApiContextManager,
     _ElementApiGenerator,
+    html,
 )
 from ._html import _TaipyHTMLParser
 

@@ -18,8 +18,8 @@ from inspect import isclass
 from pathlib import Path
 from urllib.parse import urlencode
 
+from .._renderers.builder import _Builder
 from .._warnings import _warn
-from ..renderers.builder import _Builder
 from ..types import PropertyType
 from ..utils import _get_broadcast_var_name, _TaipyBase, _to_camel_case
 
