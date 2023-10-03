@@ -551,17 +551,17 @@ class DataNode(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def is_valid(self) -> bool:
-        """Indicate if this data node is up-to-date.
+        """Indicate if this data node is valid.
 
         Returns:
             False if the data ever been written or the expiration date has passed.<br/>
             True otherwise.
         """
         if not self._last_edit_date:
-            # Never been written so it is not up-to-date
+            # Never been written so it is not valid
             return False
         if not self._validity_period:
-            # No validity period and has already been written, so it is up-to-date
+            # No validity period and has already been written, so it is valid
             return True
         if datetime.now() > self.expiration_date:
             # expiration_date has been passed
@@ -570,6 +570,14 @@ class DataNode(_Entity, _Labeled):
 
     @property
     def is_up_to_date(self) -> bool:
+        """Indicate if this data node is up-to-date.
+
+        Returns:
+            False if a preceding data node has been updated before the selected data node
+            or the selected data is invalid.<br/>
+            True otherwise.
+        """
+
         from ..scenario.scenario import Scenario
         from ..taipy import get_parents
 
