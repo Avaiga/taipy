@@ -64,11 +64,22 @@ def setup_end_to_end():
     scenario_config.add_sequences({"sequence": [forecast_task_cfg, evaluate_task_cfg]})
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def app():
     load_dotenv(".testenv")
     app = create_app(testing=True)
-    return app
+    app.config.update(
+        {
+            "TESTING": True,
+        }
+    )
+    with app.app_context(), app.test_request_context():
+        yield app
+
+
+@pytest.fixture()
+def client(app):
+    return app.test_client()
 
 
 @pytest.fixture

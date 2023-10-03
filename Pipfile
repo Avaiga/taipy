@@ -6,22 +6,20 @@ name = "pypi"
 [packages]
 apispec = {extras = ["yaml"], version = "==5.0"}
 apispec-webframeworks = "==0.5.2"
-flask = "==2.3.3"
-Flask-JWT-Extended = "==4.3"
-Flask-Migrate = "==3.0"
-Flask-RESTful = "==0.3.9"
-flask-marshmallow = "==0.14"
+Flask-Migrate = ">=3.0"
+Flask-RESTful = ">=0.3.9"
+flask-marshmallow = ">=0.14"
 markupsafe = "==2.1.1"
 marshmallow-sqlalchemy = "==0.25"
 passlib = "==1.7.4"
 taipy-core = {ref = "develop", git = "https://github.com/avaiga/taipy-core.git"}
+flask = "==3.0.0"
 
 [dev-packages]
 tox = ">=3.24.5"
 black = "*"
 pytest = "*"
 pytest-factoryboy = "*"
-pytest-flask = "*"
 pre-commit = "*"
 pytest-mock = "*"
 pytest-cov = "*"

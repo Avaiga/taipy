@@ -47,10 +47,9 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     install_requires=[
-        "flask>=2.3.3,<2.4",
+        "flask>=3.0.0,<3.1",
         "flask-restful>=0.3.9,<0.4",
         "flask-migrate>=3.1,<4.0",
-        "flask-jwt-extended>=4.3,<5.0",
         "flask-marshmallow>=0.14,<0.15",
         "marshmallow-sqlalchemy>=0.25,<0.29",
         "passlib>=1.7.4,<1.8",
