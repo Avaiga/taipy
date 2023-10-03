@@ -26,7 +26,7 @@ def create_app(testing=False, flask_env=None, secret_key=None):
         TESTING=os.getenv("TESTING", testing),
         SECRET_KEY=os.getenv("SECRET_KEY", secret_key),
     )
-
+    app.url_map.strict_slashes = False
     app.config["RESTFUL_JSON"] = {"cls": _CustomEncoder}
 
     configure_apispec(app)
