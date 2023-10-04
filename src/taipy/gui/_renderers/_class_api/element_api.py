@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import copy
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -48,6 +49,10 @@ class ElementApi(ABC):
     def parse_properties(self):
         self._properties = {k: ElementApi._parse_property(v) for k, v in self._properties.items()}
 
+    # Get a deepcopy version of the properties
+    def _get_deepcopy_properties(self):
+        return copy.deepcopy(self._properties)
+
     @staticmethod
     def _parse_property(value: t.Any) -> t.Any:
         if isinstance(value, (str, dict, Iterable)):
@@ -80,7 +85,7 @@ class BlockElementApi(ElementApi):
         _ElementApiContextManager().pop()
 
     def _render(self, gui: "Gui") -> str:
-        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._properties)
+        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._get_deepcopy_properties())
         return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
 
     def _render_children(self, gui: "Gui") -> str:
@@ -113,7 +118,7 @@ class ControlElementApi(ElementApi):
         super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
-        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._properties)
+        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._get_deepcopy_properties())
         return (
             f"<div>{el[0]}</{el[1]}></div>"
             if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]
