@@ -8,8 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger taipy-integration-testing
-        uses: peter-evans/repository-dispatch@v1
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
+          owner: Avaiga
+          repo: taipy-integration-testing
           token: ${{secrets.INTEGRATION_TESTS_ACCESS_TOKEN}}
-          repository: avaiga/taipy-integration-testing
-          event-type: tests
+          workflow_file_name: tests.yml
+          ref: main
+          wait_interval: 20
+          propagate_failure: true
+          trigger_workflow: true
+          wait_workflow: true
+          client_payload: '{"repo": "taipy-core", "commitSHA": "${{ GITHUB_REF##*/ }}"}'
