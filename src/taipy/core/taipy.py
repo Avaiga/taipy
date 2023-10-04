@@ -819,9 +819,9 @@ def get_parents(
             They are grouped by their type (Scenario^, Sequences^, or tasks^) so each key corresponds
             to a level of the parents and the value is a set of the parent entities.
             An empty dictionary is returned if the entity does not have parents.<br/>
-            Example: The following instruction returns all the sequences that include the
+            Example: The following instruction returns all the scenarios that include the
             datanode identified by "my_datanode_id".
-            `taipy.get_parents("id_of_my_datanode")["sequences"]`
+            `taipy.get_parents("id_of_my_datanode")["scenario"]`
 
     Raises:
         ModelNotFound^: If _entity_ does not match a correct entity pattern.

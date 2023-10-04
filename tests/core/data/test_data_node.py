@@ -264,45 +264,151 @@ class TestDataNode:
         assert dn.is_ready_for_reading
         assert dn.job_ids == [job_id]
 
-    def test_is_up_to_date_no_validity_period(self):
+    def test_is_valid_no_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode("foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id")
-        assert not dn.is_up_to_date
+        assert not dn.is_valid
 
         # test has been writen
         dn.write("My data")
-        assert dn.is_up_to_date
+        assert dn.is_valid
 
-    def test_is_up_to_date_with_30_min_validity_period(self):
+    def test_is_valid_with_30_min_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode(
             "foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id", validity_period=timedelta(minutes=30)
         )
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
         # Has been writen less than 30 minutes ago
         dn.write("My data")
-        assert dn.is_up_to_date is True
+        assert dn.is_valid is True
 
         # Has been writen more than 30 minutes ago
         dn.last_edit_date = datetime.now() + timedelta(days=-1)
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
-    def test_is_up_to_date_with_5_days_validity_period(self):
+    def test_is_valid_with_5_days_validity_period(self):
         # Test Never been writen
         dn = InMemoryDataNode("foo", Scope.SCENARIO, validity_period=timedelta(days=5))
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
         # Has been writen less than 30 minutes ago
         dn.write("My data")
-        assert dn.is_up_to_date is True
+        assert dn.is_valid is True
 
         # Has been writen more than 30 minutes ago
         dn._last_edit_date = datetime.now() - timedelta(days=6)
         _DataManager()._set(dn)
-        assert dn.is_up_to_date is False
+        assert dn.is_valid is False
 
-    def test_do_not_recompute_data_node_up_to_date_but_continue_sequence_execution(self):
+    def test_is_up_to_date(self, current_datetime):
+        dn_confg_1 = Config.configure_in_memory_data_node("dn_1")
+        dn_confg_2 = Config.configure_in_memory_data_node("dn_2")
+        dn_confg_3 = Config.configure_in_memory_data_node("dn_3", scope=Scope.GLOBAL)
+        task_config_1 = Config.configure_task("t1", print, [dn_confg_1], [dn_confg_2])
+        task_config_2 = Config.configure_task("t2", print, [dn_confg_2], [dn_confg_3])
+        scenario_config = Config.configure_scenario("sc", [task_config_1, task_config_2])
+
+        scenario_1 = tp.create_scenario(scenario_config)
+        assert len(_DataManager._get_all()) == 3
+
+        dn_1_1 = scenario_1.data_nodes["dn_1"]
+        dn_2_1 = scenario_1.data_nodes["dn_2"]
+        dn_3_1 = scenario_1.data_nodes["dn_3"]
+
+        assert dn_1_1.last_edit_date is None
+        assert dn_2_1.last_edit_date is None
+        assert dn_3_1.last_edit_date is None
+
+        dn_1_1.last_edit_date = current_datetime + timedelta(1)
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_3_1.last_edit_date = current_datetime + timedelta(3)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_3_1.is_up_to_date
+
+        dn_2_1.last_edit_date = current_datetime + timedelta(4)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert not dn_3_1.is_up_to_date
+
+        dn_1_1.last_edit_date = current_datetime + timedelta(5)
+        assert dn_1_1.is_up_to_date
+        assert not dn_2_1.is_up_to_date
+        assert not dn_3_1.is_up_to_date
+
+        dn_1_1.last_edit_date = current_datetime + timedelta(1)
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_3_1.last_edit_date = current_datetime + timedelta(3)
+
+    def test_is_up_to_date_across_scenarios(self, current_datetime):
+        dn_confg_1 = Config.configure_in_memory_data_node("dn_1", scope=Scope.SCENARIO)
+        dn_confg_2 = Config.configure_in_memory_data_node("dn_2", scope=Scope.SCENARIO)
+        dn_confg_3 = Config.configure_in_memory_data_node("dn_3", scope=Scope.GLOBAL)
+        task_config_1 = Config.configure_task("t1", print, [dn_confg_1], [dn_confg_2])
+        task_config_2 = Config.configure_task("t2", print, [dn_confg_2], [dn_confg_3])
+        scenario_config = Config.configure_scenario("sc", [task_config_1, task_config_2])
+
+        scenario_1 = tp.create_scenario(scenario_config)
+        scenario_2 = tp.create_scenario(scenario_config)
+        assert len(_DataManager._get_all()) == 5
+
+        dn_1_1 = scenario_1.data_nodes["dn_1"]
+        dn_2_1 = scenario_1.data_nodes["dn_2"]
+        dn_1_2 = scenario_2.data_nodes["dn_1"]
+        dn_2_2 = scenario_2.data_nodes["dn_2"]
+        dn_3 = scenario_1.data_nodes["dn_3"]
+        assert dn_3 == scenario_2.data_nodes["dn_3"]
+
+        assert dn_1_1.last_edit_date is None
+        assert dn_2_1.last_edit_date is None
+        assert dn_1_2.last_edit_date is None
+        assert dn_2_2.last_edit_date is None
+        assert dn_3.last_edit_date is None
+
+        dn_1_1.last_edit_date = current_datetime + timedelta(1)
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_1_2.last_edit_date = current_datetime + timedelta(3)
+        dn_2_2.last_edit_date = current_datetime + timedelta(4)
+        dn_3.last_edit_date = current_datetime + timedelta(5)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert dn_3.is_up_to_date
+
+        dn_2_1.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
+
+        dn_2_1.last_edit_date = current_datetime + timedelta(2)
+        dn_2_2.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
+
+        dn_2_2.last_edit_date = current_datetime + timedelta(4)
+        dn_1_1.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert not dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
+
+        dn_1_2.last_edit_date = current_datetime + timedelta(6)
+        assert dn_1_1.is_up_to_date
+        assert not dn_2_1.is_up_to_date
+        assert dn_1_2.is_up_to_date
+        assert not dn_2_2.is_up_to_date
+        assert not dn_3.is_up_to_date
+
+    def test_do_not_recompute_data_node_valid_but_continue_sequence_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
         a = Config.configure_data_node("A", "pickle", default_data="A")

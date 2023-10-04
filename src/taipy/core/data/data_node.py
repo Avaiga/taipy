@@ -17,6 +17,7 @@ from functools import reduce
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
+import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -549,23 +550,47 @@ class DataNode(_Entity, _Labeled):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def is_up_to_date(self) -> bool:
-        """Indicate if this data node is up-to-date.
+    def is_valid(self) -> bool:
+        """Indicate if this data node is valid.
 
         Returns:
             False if the data ever been written or the expiration date has passed.<br/>
             True otherwise.
         """
         if not self._last_edit_date:
-            # Never been written so it is not up-to-date
+            # Never been written so it is not valid
             return False
         if not self._validity_period:
-            # No validity period and has already been written, so it is up-to-date
+            # No validity period and has already been written, so it is valid
             return True
         if datetime.now() > self.expiration_date:
             # expiration_date has been passed
             return False
         return True
+
+    @property
+    def is_up_to_date(self) -> bool:
+        """Indicate if this data node is up-to-date.
+
+        Returns:
+            False if a preceding data node has been updated before the selected data node
+            or the selected data is invalid.<br/>
+            True otherwise.
+        """
+
+        from ..scenario.scenario import Scenario
+        from ..taipy import get_parents
+
+        parent_scenarios: Set[Scenario] = get_parents(self)["scenario"]  # type: ignore
+        for parent_scenario in parent_scenarios:
+            for ancestor_node in nx.ancestors(parent_scenario._build_dag(), self):
+                if (
+                    isinstance(ancestor_node, DataNode)
+                    and ancestor_node.last_edit_date
+                    and ancestor_node.last_edit_date > self.last_edit_date
+                ):
+                    return False
+        return self.is_valid
 
     @staticmethod
     def _class_map():

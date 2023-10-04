@@ -742,7 +742,7 @@ def test_blocked_task():
 
     assert len(_Orchestrator.blocked_jobs) == 0
     job_2 = _Orchestrator.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
-    assert job_2.is_blocked()  # since bar is not up_to_date the job 2 is blocked
+    assert job_2.is_blocked()  # since bar is not is_valid the job 2 is blocked
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
     assert len(_Orchestrator.blocked_jobs) == 1
     with lock_2:
@@ -1012,7 +1012,7 @@ def test_need_to_run_skippable_task_no_validity_period_on_output():
     assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
 
 
-def test_need_to_run_skippable_task_with_validity_period_up_to_date_on_output():
+def test_need_to_run_skippable_task_with_validity_period_is_valid_on_output():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
