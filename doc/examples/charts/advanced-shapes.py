@@ -13,7 +13,7 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy,gui import Gui
+from taipy.gui import Gui
 
 
 # Function to plot: x^3/3-x

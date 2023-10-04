@@ -66,7 +66,7 @@ properties = {
 
 page = """
 # Continuous Error - Simple
- 
+
 <|{data}|chart|properties={properties}|>
 """
 

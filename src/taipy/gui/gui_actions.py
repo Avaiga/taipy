@@ -24,9 +24,33 @@ def download(
 
     Arguments:
         state (State^): The current user state as received in any callback.
-        content: File path or file content.
+        content: File path or file content. See below.
         name: File name for the content on the client browser (defaults to content name).
-        on_action: Callback function to call when the download ends.
+        on_action: Callback function (or callback name) to call when the download ends. See below.
+
+    ## Notes:
+
+    - *content*: this parameter can hold several values depending on your use case:
+        - a string: the value must be an existing path name to the file that gets downloaded or
+          the URL to the resource you want to download.
+        - a buffer (such as a `bytes` object): if the size of the buffer is smaller than
+           the [*data_url_max_size*](../../gui/configuration/#p-data_url_max_size) configuration
+           setting, then the [`python-magic`](https://pypi.org/project/python-magic/) package is
+           used to determine the [MIME type](https://en.wikipedia.org/wiki/Media_type) of the
+           buffer content, and the download is performed using a generated "data:" URL with
+           the relevant type, and a base64-encoded version of the buffer content.<br/>
+           If the buffer is too large, its content is transferred after saving it in a temporary
+           server file.
+      - *on_action*: TODO CHECK<br/>
+           this callback is triggered when the transfer of the content is achieved.</br>
+           In this function, you can perform any clean up operation that could be required after
+           the download is performed.<br/>
+           This callback expects [] paramters:
+        - *state*: the `State^` instance of the caller.
+        - *id* (optional): a string representing the identifier of the caller. If this function is
+          called directly, this will always be "Gui.download". Some controls may also trigger
+          download actions, then *id* would reflect the identifier of those controls.
+        - *payload* (optional): an optional payload from the caller.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._download(content, name, on_action)

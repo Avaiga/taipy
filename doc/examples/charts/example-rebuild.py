@@ -30,4 +30,4 @@ page = """
 <|{selected_type}|toggle|lov={types}|>
 """
 
-Gui(page=page).run()
+Gui(page).run()

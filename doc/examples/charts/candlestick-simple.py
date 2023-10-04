@@ -27,7 +27,7 @@ stock["Date"] = stock.index
 
 page = """
 # Candlestick - Simple
- 
+
 <|{stock}|chart|type=candlestick|x=Date|open=Open|close=Close|low=Low|high=High|>
 """
 

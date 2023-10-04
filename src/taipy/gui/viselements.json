@@ -515,8 +515,8 @@
           {
             "name": "content",
             "default_property": true,
-            "type": "dynamic(url|path|file|ReadableBuffer)",
-            "doc": "The content of the file.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the data is transferred depends on the the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary file.</li>\n</ul>"
+            "type": "dynamic(path|file|URL|ReadableBuffer|None)",
+            "doc": "The content to transfer.<br/>If this is a string, a URL, or a file, then the content is read from this source.<br/>If a readable buffer is provided (such as an array of bytes...), and to prevent the bandwidth from being consumed too much, the way the data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the buffer size is smaller than this setting, then the raw content is generated as a data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the buffer size exceeds this setting, then it is transferred through a temporary file.</li>\n</ul>If this property is set to None, that indicates that dynamic content is generated. Please take a look at the examples below for details on dynamic generation."
           },
           {
             "name": "label",
@@ -526,7 +526,7 @@
           {
             "name": "on_action",
             "type": "Callback",
-            "doc": "The name of a function that is triggered when the download is terminated (or on user action if content is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
+            "doc": "The name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (optional[str]): the identifier of the button.</li>\n<li>action (optional[str]): the name of the action that provoked the change.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has a single key:\n<ul>\n<li>args: A list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li>\n</ul>\n</li>\n</ul>",
             "signature": [["state", "State"], ["id", "str"], ["action", "str"], ["payload", "dict"]]
           },
           {
@@ -612,8 +612,8 @@
           {
             "name": "content",
             "default_property": true,
-            "type": "dynamic(url|path|file|ReadableBuffer)",
-            "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
+            "type": "dynamic(path|URL|file|ReadableBuffer)",
+            "doc": "The image source.<br/>If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be consumed too much, the way the image data is transferred depends on the <i>data_url_max_size</i> parameter of the application configuration (which is set to 50kB by default):\n<ul>\n<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a\n  data URL, encoded using base64 (i.e. <code>\"data:&lt;mimetype&gt;;base64,&lt;data&gt;\"</code>).</li>\n<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary\n  file.</li>\n</ul>"
           },
           {
             "name": "label",
@@ -1127,7 +1127,7 @@
           {
             "name": "page",
             "type": "dynamic(str)",
-            "doc": "The page to show as the content of the block (page name if defined or an URL in an <i>iframe</i>).<br/>This should not be defined if <i>partial</i> is set."
+            "doc": "The page to show as the content of the block (page name if defined or a URL in an <i>iframe</i>).<br/>This should not be defined if <i>partial</i> is set."
           },
           {
             "name": "height",
