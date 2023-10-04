@@ -1,0 +1,15 @@
+name: Integration testings on taipy-integration-testing
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger taipy-integration-testing
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{secrets.INTEGRATION_TESTS_ACCESS_TOKEN}}
+          repository: avaiga/taipy-integration-testing
+          event-type: tests
