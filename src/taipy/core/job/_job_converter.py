@@ -18,7 +18,6 @@ from ..exceptions import InvalidSubscriber
 from ..job._job_model import _JobModel
 from ..job.job import Job
 from ..task._task_manager_factory import _TaskManagerFactory
-from ._utils import _migrate_subscriber
 
 
 class _JobConverter(_AbstractConverter):
@@ -55,9 +54,8 @@ class _JobConverter(_AbstractConverter):
         job._creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
         for it in model.subscribers:
             try:
-                # Migrate from taipy-core 2.2 to taipy-core 2.3
-                fct_module, fct_name = _migrate_subscriber(it.get("fct_module"), it.get("fct_name"))
-                job._subscribers.append(_load_fct(fct_module, fct_name))  # type:ignore
+                fct_module, fct_name = it.get("fct_module"), it.get("fct_name")
+                job._subscribers.append(_load_fct(fct_module, fct_name))  # type: ignore
             except AttributeError:
                 raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
         job._stacktrace = model.stacktrace

@@ -10,16 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import JSON, Boolean, Column, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
-from .._version._utils import _version_migration
 from ..cycle.cycle_id import CycleId
 from ..data.data_node_id import DataNodeId
-from ..sequence.sequence_id import SequenceId
 from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
 
@@ -68,7 +66,7 @@ class _ScenarioModel(_BaseModel):
             primary_scenario=data["primary_scenario"],
             subscribers=data["subscribers"],
             tags=data["tags"],
-            version=data["version"] if "version" in data.keys() else _version_migration(),
+            version=data["version"],
             sequences=data.get("sequences", None),
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )

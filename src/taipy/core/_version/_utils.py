@@ -13,22 +13,9 @@ from typing import Callable, List
 
 from taipy.config.config import Config
 
-from .._core_cli import _CoreCLI
 from .._entity._reload import _Reloader
-from ..config import CoreSection, MigrationConfig
+from ..config import MigrationConfig
 from ._version_manager_factory import _VersionManagerFactory
-
-
-def _version_migration() -> str:
-    """Add version attribute on old entities. Used to migrate from <=2.0 to >=2.1 version."""
-
-    args = _CoreCLI.parse_arguments()
-
-    if args[CoreSection._MODE_KEY] != CoreSection._DEVELOPMENT_MODE:
-        return _VersionManagerFactory._build_manager()._get_latest_version()
-    else:
-        _VersionManagerFactory._build_manager()._get_or_create("LEGACY-VERSION", True)
-        return "LEGACY-VERSION"
 
 
 def _migrate_entity(entity):
