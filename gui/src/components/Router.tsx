@@ -156,6 +156,7 @@ const Router = () => {
                                         <UIBlocker block={state.block} />
                                         <Navigate
                                             to={state.navigateTo}
+                                            params={state.navigateParams}
                                             tab={state.navigateTab}
                                             force={state.navigateForce}
                                         />

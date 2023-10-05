@@ -18,11 +18,12 @@ import { createNavigateAction } from "../../context/taipyReducers";
 
 interface NavigateProps {
     to?: string;
+    params?: Record<string, string>;
     tab?: string;
     force?: boolean;
 }
 
-const Navigate = ({ to, tab, force }: NavigateProps) => {
+const Navigate = ({ to, params, tab, force }: NavigateProps) => {
     const { dispatch, state } = useContext(TaipyContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -30,20 +31,22 @@ const Navigate = ({ to, tab, force }: NavigateProps) => {
     useEffect(() => {
         if (to) {
             const tos = to === "/" ? to : "/" + to;
+            const searchParams = new URLSearchParams(params);
             if (Object.keys(state.locations || {}).some((route) => tos === route)) {
-                if (force && location.pathname === tos) {
+                const searchParamsLocation = new URLSearchParams(location.search);
+                if (force && location.pathname === tos && searchParamsLocation.toString() === searchParams.toString()) {
                     navigate(0);
                 } else {
-                    navigate(to);
+                    navigate({ pathname: to, search: `?${searchParams.toString()}` });
                 }
             } else {
-                window.open(to, tab || "_blank")?.focus();
+                window.open(`${to}?${searchParams.toString()}`, tab || "_blank")?.focus();
             }
             dispatch(createNavigateAction());
         }
-        // we surely don't want to depend on location.pathname!
+        // we surely don't want to depend on location.pathname, and location.search!
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [to, tab, force, state.locations, dispatch, navigate]);
+    }, [to, tab, force, state.locations, dispatch, navigate, params]);
 
     return null;
 };

@@ -63,6 +63,7 @@ export interface TaipyState {
     alerts: AlertMessage[];
     block?: BlockMessage;
     navigateTo?: string;
+    navigateParams?: Record<string, string>;
     navigateTab?: string;
     navigateForce?: boolean;
     id: string;
@@ -118,6 +119,7 @@ interface TaipyBlockAction extends TaipyBaseAction, BlockMessage {}
 
 interface NavigateMessage {
     to?: string;
+    params?: Record<string, string>;
     tab?: string;
     force?: boolean;
 }
@@ -224,6 +226,7 @@ const messageToAction = (message: WsMessage) => {
         } else if (message.type === "NA") {
             return createNavigateAction(
                 (message as unknown as NavigateMessage).to,
+                (message as unknown as NavigateMessage).params,
                 (message as unknown as NavigateMessage).tab,
                 (message as unknown as NavigateMessage).force
             );
@@ -387,6 +390,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return {
                 ...state,
                 navigateTo: (action as unknown as TaipyNavigateAction).to,
+                navigateParams: (action as unknown as TaipyNavigateAction).params,
                 navigateTab: (action as unknown as TaipyNavigateAction).tab,
                 navigateForce: (action as unknown as TaipyNavigateAction).force,
             };
@@ -774,9 +778,10 @@ export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
     message: block.message,
 });
 
-export const createNavigateAction = (to?: string, tab?: string, force?: boolean): TaipyNavigateAction => ({
+export const createNavigateAction = (to?: string, params?: Record<string, string>, tab?: string, force?: boolean): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,
+    params,
     tab,
     force,
 });

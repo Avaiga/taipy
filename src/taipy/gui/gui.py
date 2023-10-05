@@ -140,6 +140,7 @@ class Gui:
 
             - *state*: the `State^` instance of the caller.
             - *page_name*: the name of the page the user is navigating to.
+            - *params* (Optional): the query parameters provided in the URL.
 
             The *on_navigate* callback function must return the name of the page the user should be
             directed to.
@@ -982,10 +983,11 @@ class Gui:
     def __send_ws_navigate(
         self,
         to: str,
+        params: t.Optional[t.Dict[str, str]],
         tab: t.Optional[str],
         force: bool,
     ):
-        self.__send_ws({"type": _WsType.NAVIGATE.value, "to": to, "tab": tab, "force": force})
+        self.__send_ws({"type": _WsType.NAVIGATE.value, "to": to, "params": params, "tab": tab, "force": force})
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
@@ -1651,12 +1653,18 @@ class Gui:
             _setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
         self.__send_ws_block(close=True)
 
-    def _navigate(self, to: t.Optional[str] = "", tab: t.Optional[str] = None, force: t.Optional[bool] = False):
+    def _navigate(
+        self,
+        to: t.Optional[str] = "",
+        params: t.Optional[t.Dict[str, str]] = None,
+        tab: t.Optional[str] = None,
+        force: t.Optional[bool] = False,
+    ):
         to = to or Gui.__root_page_name
         if not to.startswith("/") and to not in self._config.routes and not urlparse(to).netloc:
             _warn(f'Cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
             return False
-        self.__send_ws_navigate(to if to != Gui.__root_page_name else "/", tab, force or False)
+        self.__send_ws_navigate(to if to != Gui.__root_page_name else "/", params, tab, force or False)
         return True
 
     def __init_libs(self):
@@ -1708,7 +1716,13 @@ class Gui:
         nav_page = page_name
         if hasattr(self, "on_navigate") and callable(self.on_navigate):
             try:
-                nav_page = self.on_navigate(self.__get_state(), page_name)
+                if self.on_navigate.__code__.co_argcount == 2:
+                    nav_page = self.on_navigate(self.__get_state(), page_name)
+                else:
+                    params = request.args.to_dict() if hasattr(request, "args") else {}
+                    params.pop("client_id", None)
+                    params.pop("v", None)
+                    nav_page = self.on_navigate(self.__get_state(), page_name, params)
                 if nav_page != page_name:
                     if isinstance(nav_page, str):
                         if self._navigate(nav_page):

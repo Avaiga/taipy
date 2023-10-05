@@ -148,7 +148,13 @@ def resume_control(state: State):
         _warn("'resume_actions()' must be called in the context of a callback.")
 
 
-def navigate(state: State, to: t.Optional[str] = "", tab: t.Optional[str] = None, force: t.Optional[bool] = False):
+def navigate(
+    state: State,
+    to: t.Optional[str] = "",
+    params: t.Optional[t.Dict[str, str]] = None,
+    tab: t.Optional[str] = None,
+    force: t.Optional[bool] = False,
+):
     """Navigate to a page.
 
     Arguments:
@@ -156,13 +162,14 @@ def navigate(state: State, to: t.Optional[str] = "", tab: t.Optional[str] = None
         to: The name of the page to navigate to. This can be a page identifier (as created by
             `Gui.add_page()^` with no leading '/') or an URL.<br/>
             If omitted, the application navigates to the root page.
+        params: A dictionary of query parameters.
         tab: When navigating to a page that is not a known page, the page is opened in a tab identified by
             *tab* (as in [window.open](https://developer.mozilla.org/en-US/docs/Web/API/Window/open)).<br/>
             The default value creates a new tab for the page (which is equivalent to setting *tab* to "_blank").
         force: When navigating to a known page, the content is refreshed even it the page is already shown.
     """
     if state and isinstance(state._gui, Gui):
-        state._gui._navigate(to, tab, force)
+        state._gui._navigate(to, params, tab, force)
     else:
         _warn("'navigate()' must be called in the context of a callback.")
 
