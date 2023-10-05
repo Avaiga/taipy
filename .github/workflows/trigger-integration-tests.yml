@@ -1,7 +1,9 @@
 name: Integration testings on taipy-integration-testing
 on:
   push:
-    branches: [develop]
+    branches: [ develop, dev/* ]
+  pull_request:
+    branches: [ develop , dev/* ]
 
 jobs:
   build:
