@@ -10,7 +10,7 @@ jobs:
       - name: Trigger taipy-integration-testing
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{secrets.PERFORMANCE_BENCHMARK_ACCESS_TOKEN}}
+          token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
           repository: avaiga/taipy-integration-testing
           event-type: benchmark
           client-payload: '{"repo": "taipy-core", "commitSHA": "${{ github.sha }}"}'

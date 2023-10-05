@@ -14,7 +14,7 @@ jobs:
         with:
           owner: Avaiga
           repo: taipy-integration-testing
-          token: ${{secrets.INTEGRATION_TESTS_ACCESS_TOKEN}}
+          token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
           workflow_file_name: tests.yml
           ref: main
           wait_interval: 20
