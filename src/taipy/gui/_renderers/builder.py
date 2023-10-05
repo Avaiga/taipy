@@ -183,7 +183,7 @@ class _Builder:
 
     def get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
         """
-        TODO
+        TODO-undocumented
         Returns all properties defined as <property name>[<named index>] as a dict.
 
         Arguments:
@@ -198,7 +198,7 @@ class _Builder:
 
     def set_boolean_attribute(self, name: str, value: bool):
         """
-        TODO
+        TODO-undocumented
         Defines a React Boolean attribute (attr={true|false}).
 
         Arguments:
@@ -209,7 +209,7 @@ class _Builder:
 
     def set_dict_attribute(self, name: str, default_value: t.Optional[t.Dict[str, t.Any]] = None):
         """
-        TODO
+        TODO-undocumented
         Defines a React attribute as a stringified json dict.
         The original property can be a dict or a string formed as <key 1>:<value 1>;<key 2>:<value 2>.
 
@@ -232,7 +232,7 @@ class _Builder:
 
     def set_dynamic_dict_attribute(self, name: str, default_value: t.Optional[t.Dict[str, t.Any]] = None):
         """
-        TODO
+        TODO-undocumented
         Defines a React attribute as a stringified json dict.
         The original property can be a dict or a string formed as <key 1>:<value 1>;<key 2>:<value 2>.
 
@@ -271,7 +271,7 @@ class _Builder:
 
     def set_number_attribute(self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True):
         """
-        TODO
+        TODO-undocumented
         Defines a React number attribute (attr={<number>}).
 
         Arguments:
@@ -603,7 +603,7 @@ class _Builder:
         if hash_name := self.__hashes.get(var_name):
             self.__set_update_var_name(hash_name)
         else:
-            _warn("{self.element_name}: {var_name} should be bound.")
+            _warn(f"file_selector: {var_name} should be bound.")
         return self
 
     def _set_content(self, var_name: str = "content", image=True):
@@ -704,7 +704,7 @@ class _Builder:
         default_val: t.Any = None,
     ):
         """
-        TODO
+        TODO-undocumented
         Sets the value associated with the default property.
 
         Arguments:
@@ -844,7 +844,7 @@ class _Builder:
 
     def set_attributes(self, attributes: t.List[tuple]):  # noqa: C901
         """
-        TODO
+        TODO-undocumented
         Sets the attributes from the property with type and default value.
 
         Arguments:
@@ -927,7 +927,7 @@ class _Builder:
 
     def set_attribute(self, name: str, value: t.Any):
         """
-        TODO
+        TODO-undocumented
         Sets an attribute.
 
         Arguments:
@@ -940,7 +940,7 @@ class _Builder:
 
     def get_element(self):
         """
-        TODO
+        TODO-undocumented
         Returns the xml.etree.ElementTree.Element
         """
         return self.el

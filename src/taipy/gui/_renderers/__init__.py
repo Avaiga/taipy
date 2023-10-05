@@ -119,7 +119,7 @@ class Markdown(_Renderer):
     user interfaces.
 
     You can find details on the Taipy Markdown-specific syntax and how to add
-    Taipy Visual Elements in the [section on HTML](../../gui/pages/#using-markdown)
+    Taipy Visual Elements in the [section on HTML](../gui/pages.md#using-markdown)
     of the User Manual.
     """
 
@@ -141,14 +141,13 @@ class Markdown(_Renderer):
 
 
 class Html(_Renderer):
-    """
-    Page generator for _HTML_ text.
+    """Page generator for _HTML_ text.
 
     Taipy can use HTML code to create pages that are the base of
     user interfaces.
 
     You can find details on HTML-specific constructs and how to add
-    Taipy Visual Elements in the [section on HTML](../../gui/pages/#using-html)
+    Taipy Visual Elements in the [section on HTML](../gui/pages.md#using-html)
     of the User Manual.
     """
 

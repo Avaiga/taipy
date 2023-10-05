@@ -16,9 +16,9 @@ from taipy.gui import Gui, Markdown
 
 
 def test_a_button_pressed(gui: Gui, helpers):
-    def do_something(gui, id):
-        gui.x = gui.x + 10
-        gui.text = "a random text"
+    def do_something(state, id):
+        state.x = state.x + 10
+        state.text = "a random text"
 
     x = 10  # noqa: F841
     text = "hi"  # noqa: F841
