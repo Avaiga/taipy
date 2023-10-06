@@ -118,7 +118,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 self.scenario_by_cycle = None
                 self.data_nodes_by_owner = None
             scenario = core_get(event.entity_id) if event.operation.value != 3 else None
-            self.gui.broadcast(
+            self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"scenario": event.entity_id if scenario else True},
             )
@@ -126,7 +126,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             sequence = core_get(event.entity_id) if event.operation.value != 3 else None
             if sequence:
                 if hasattr(sequence, "parent_ids") and sequence.parent_ids:
-                    self.gui.broadcast(
+                    self.gui._broadcast(
                         _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
                     )
         elif event.entity_type == EventEntityType.JOB:
@@ -134,11 +134,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 self.jobs_list = None
             if event.entity_id:
                 self.scenario_status_callback(event.entity_id)
-            self.gui.broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
+            self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
-            self.gui.broadcast(
+            self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"datanode": event.entity_id if event.operation.value != 3 else True},
             )
@@ -169,7 +169,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     cycles_scenarios.append(cycle)
         return cycles_scenarios
 
-    def select_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def select_scenario(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) == 0:
             return
@@ -191,7 +191,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items() if id != "default"]
             return self.scenario_configs
 
-    def crud_scenario(self, state: State, id: str, user_action: str, payload: t.Dict[str, str]):  # noqa: C901
+    def crud_scenario(self, state: State, id: str, payload: t.Dict[str, str]):  # noqa: C901
         args = payload.get("args")
         if (
             args is None
@@ -283,7 +283,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     except Exception as e:
                         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
 
-    def edit_entity(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def edit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -487,7 +487,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     data.status.value,
                 )
 
-    def act_on_jobs(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def act_on_jobs(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -510,7 +510,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         errs.append(f"Error canceling job. {e}")
             state.assign(_GuiCoreContext._JOB_SELECTOR_ERROR_VAR, "<br/>".join(errs) if errs else "")
 
-    def edit_data_node(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def edit_data_node(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -524,7 +524,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode. {e}")
 
-    def lock_datanode_for_edit(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def lock_datanode_for_edit(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -637,7 +637,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
         return _DoNotUpdate()
 
-    def update_data(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def update_data(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
@@ -662,7 +662,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode value. {e}")
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, entity_id)  # this will update the data value
 
-    def tabular_data_edit(self, state: State, var_name: str, action: str, payload: dict):
+    def tabular_data_edit(self, state: State, var_name: str, payload: dict):
         user_data = payload.get("user_data", {})
         dn_id = user_data.get("dn_id")
         datanode = core_get(dn_id) if dn_id else None
@@ -737,7 +737,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return None
         return None
 
-    def select_id(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
+    def select_id(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) == 0 and isinstance(args[0], dict):
             return
