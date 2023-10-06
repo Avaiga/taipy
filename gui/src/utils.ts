@@ -149,7 +149,6 @@ export const FieldNoMaxWidth = {
 export const IconPaddingSx = { padding: 0 };
 
 export const MainBoxSx = {
-    overflowY: "auto",
 };
 
 export const AccordionIconSx = { fontSize: "0.9rem" };
