@@ -17,8 +17,8 @@ jobs:
           github_token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
           workflow_file_name: tests.yml
           ref: develop
-          wait_interval: 20
+          wait_interval: 40
           propagate_failure: true
           trigger_workflow: true
           wait_workflow: true
-          client_payload: '{"repo": "taipy-core", "branchName": "${{ github.ref_name }}"}'
+          client_payload: '{"repo": "taipy-core", "branchName": "${{ github.sha }}"}'
