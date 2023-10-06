@@ -35,7 +35,7 @@ def test_broadcast(gui: Gui, helpers):
     sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={sid}")
-    gui.broadcast("broadcast_name", "broadcast_value")
+    gui._broadcast("broadcast_name", "broadcast_value")
     received_messages = ws_client.get_received()
     assert len(received_messages)
     helpers.assert_outward_simple_ws_message(received_messages[0], "U", "_bc_broadcast_name", "broadcast_value")

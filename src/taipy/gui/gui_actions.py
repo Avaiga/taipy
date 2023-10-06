@@ -277,7 +277,7 @@ def invoke_callback(
     for details on when and how this function can be used.
 
     Arguments:
-        gui (Gui^): The current gui instance.
+        gui (Gui^): The current Gui instance.
         state_id: The identifier of the state to use, as returned by `get_state_id()^`.
         callback (Callable[[State^, ...], None]): The user-defined function that is invoked.<br/>
             The first parameter of this function **must** be a `State^`.
@@ -287,6 +287,31 @@ def invoke_callback(
     if isinstance(gui, Gui):
         return gui._call_user_callback(state_id, callback, list(args), module_context)
     _warn("'invoke_callback()' must be called with a valid Gui instance.")
+
+
+def broadcast_callback(
+    gui: Gui,
+    callback: t.Callable,
+    args: t.Optional[t.Union[t.Tuple, t.List]] = None,
+    module_context: t.Optional[str] = None,
+) -> t.Any:
+    """Invoke a callback for every client.
+
+    This callback gets invoked for every client connected to the application with the appropriate
+    `State^` instance. You can then perform client-specific tasks, such as updating the state
+    variable reflected in the user interface.
+
+    Arguments:
+        gui (Gui^): The current Gui instance.
+        callback: The user-defined function to be invoked.<br/>
+            The first parameter of this function must be a `State^` object representing the
+            client for which it is invoked.<br/>
+            The other parameters should reflect the ones provided in the *args* collection.
+        args: The parameters to send to *callback*, if any.
+    """
+    if isinstance(gui, Gui):
+        return gui._call_broadcast_callback(callback, list(args) if args else [], module_context)
+    _warn("'broadcast_callback()' must be called with a valid Gui instance.")
 
 
 def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:

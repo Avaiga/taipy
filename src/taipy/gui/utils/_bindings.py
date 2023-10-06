@@ -55,8 +55,8 @@ class _Bindings:
     def _set_single_client(self, value: bool) -> None:
         self.__scopes.set_single_client(value)
 
-    def _get_single_client(self) -> bool:
-        return self.__scopes.get_single_client()
+    def _is_single_client(self) -> bool:
+        return self.__scopes.is_single_client()
 
     def _get_or_create_scope(self, id: str):
         if not id:

@@ -27,7 +27,7 @@ class _DataScopes:
     def set_single_client(self, value: bool) -> None:
         self.__single_client = value
 
-    def get_single_client(self) -> bool:
+    def is_single_client(self) -> bool:
         return self.__single_client
 
     def get_scope(self, client_id: t.Optional[str]) -> SimpleNamespace:
