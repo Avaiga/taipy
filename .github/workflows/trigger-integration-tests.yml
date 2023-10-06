@@ -21,4 +21,4 @@ jobs:
           propagate_failure: true
           trigger_workflow: true
           wait_workflow: true
-          client_payload: '{"repo": "taipy-core", "branchName": "${{ github.sha }}"}'
+          client_payload: '{"repo": "taipy-core", "commitSHA": "${{ github.sha }}"}'
