@@ -239,8 +239,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             on_creation_function,
                             [
                                 id,
-                                on_creation,
                                 {
+                                    'action': on_creation,
                                     "config": scenario_config,
                                     "date": date,
                                     "label": name,
