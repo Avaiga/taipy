@@ -38,7 +38,23 @@ class _VariableDirectory:
             imported_var_list = _get_imported_var(frame)
             self._imported_var_dir[module_name] = imported_var_list
 
+    def pre_process_module_import_all(self) -> None:
+        for imported_dir in self._imported_var_dir.values():
+            additional_var_list: t.List[t.Tuple[str, str, str]] = []
+            for name, asname, module in imported_dir:
+                if name != "*" or asname != "*":
+                    continue
+                if module not in self._locals_context._locals_map.keys():
+                    continue
+                self._locals_context.set_locals_context(module)
+                additional_var_list.extend(
+                    (v, v, module) for v in self._locals_context.get_locals().keys() if not v.startswith("_")
+                )
+                self._locals_context.reset_locals_context()
+            imported_dir.extend(additional_var_list)
+
     def process_imported_var(self) -> None:
+        self.pre_process_module_import_all()
         default_imported_dir = self._imported_var_dir[self._default_module]
         self._locals_context.set_locals_context(self._default_module)
         for name, asname, module in default_imported_dir:
