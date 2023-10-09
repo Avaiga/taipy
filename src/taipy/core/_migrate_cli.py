@@ -21,15 +21,15 @@ class _MigrateCLI:
     def create_parser(cls):
         migrate_parser = _CLI._add_subparser(
             "migrate",
-            help="Migrate entities from old taipy versions to current taipy version. The entity migration"
+            help="Migrate entities from old taipy versions to current taipy version. The entity migration "
             "should be performed only after updating taipy code to the current version.",
         )
         migrate_parser.add_argument(
             "--repository-type",
             nargs="+",
             choices=["filesystem", "sql", "mongo"],
-            help="The type of repository to migrate. If filesystem or sql, a path to the database folder/.sqlite file"
-            "should be informed. In case of mongo host, port, user and password must be informed, if left empty it"
+            help="The type of repository to migrate. If filesystem or sql, a path to the database folder/.sqlite file "
+            "should be informed. In case of mongo host, port, user and password must be informed, if left empty it "
             "is assumed default values",
         )
 
