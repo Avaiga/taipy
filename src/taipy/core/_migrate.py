@@ -19,8 +19,6 @@ import pymongo
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .job._utils import _migrate_subscriber
-
 __logger = _TaipyLogger._get_logger()
 
 
@@ -90,6 +88,15 @@ def __fetch_tasks_from_pipelines(pipelines: List, data: Dict) -> List:
         pipeline_data = data[pipeline]["data"]
         tasks.extend(pipeline_data["tasks"])
     return tasks
+
+
+def __migrate_subscriber(fct_module, fct_name):
+    """Rename scheduler by orchestrator on old jobs. Used to migrate from <=2.2 to >=2.3 version."""
+
+    if fct_module == "taipy.core._scheduler._scheduler":
+        fct_module = fct_module.replace("_scheduler", "_orchestrator")
+        fct_name = fct_name.replace("_Scheduler", "_Orchestrator")
+    return fct_module, fct_name
 
 
 def _migrate_scenario(scenario: Dict, data: Dict) -> Dict:
@@ -203,7 +210,7 @@ def _migrate_job(job: Dict) -> Dict:
     job["submit_entity_id"] = job.get("submit_entity_id", None)
     if "subscribers" in job:
         for sub in job["subscribers"]:
-            sub["fct_module"], sub["fct_name"] = _migrate_subscriber(sub["fct_module"], sub["fct_name"])
+            sub["fct_module"], sub["fct_name"] = __migrate_subscriber(sub["fct_module"], sub["fct_name"])
     return job
 
 
