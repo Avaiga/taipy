@@ -239,8 +239,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             on_creation_function,
                             [
                                 id,
-                                on_creation,
                                 {
+                                    "action": on_creation,
                                     "config": scenario_config,
                                     "date": date,
                                     "label": name,
@@ -261,7 +261,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     except Exception as e:  # pragma: no cover
                         if not gui._call_on_exception(on_creation, e):
                             _warn(f"on_creation(): Exception raised in '{on_creation}()'", e)
-                else:
+                elif on_creation is not None:
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
                 scenario = create_scenario(scenario_config, date, name)
             except Exception as e:
@@ -301,7 +301,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error updating Scenario. {e}")
 
-    def submit_entity(self, state: State, id: str, submission_cb: str, payload: t.Dict[str, str]):
+    def submit_entity(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
