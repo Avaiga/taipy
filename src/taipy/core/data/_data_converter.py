@@ -12,12 +12,10 @@
 from copy import copy
 from datetime import datetime, timedelta
 from pydoc import locate
-from typing import List, Optional
 
 from .._repository._abstract_converter import _AbstractConverter
 from .._version._utils import _migrate_entity
 from ..common._utils import _load_fct
-from ..common._warnings import _warn_deprecated
 from ..data._data_model import _DataNodeModel
 from ..data.data_node import DataNode
 from . import GenericDataNode, JSONDataNode, MongoCollectionDataNode, SQLDataNode
@@ -40,17 +38,6 @@ class _DataNodeConverter(_AbstractConverter):
     # The previous implementation used tabular datanode but it's no longer suitable so
     # new proposal is needed.
     _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas", "modin"]
-
-    @staticmethod
-    def _to_edits_migration(job_ids: Optional[List[str]]) -> List:
-        """Migrate a list of job IDs to a list of Edits. Used to migrate data model from <=2.0 to >=2.1 version."""
-        _warn_deprecated("job_ids", suggest="edits")
-        if not job_ids:
-            return []
-        # We can't guess what is the timestamp corresponding to a modification from its job_id...
-        # So let's use the current time...
-        timestamp = datetime.now()
-        return [dict(timestamp=timestamp, job_id=job_id) for job_id in job_ids]
 
     @classmethod
     def __serialize_generic_dn_properties(cls, datanode_properties: dict):
@@ -109,9 +96,6 @@ class _DataNodeConverter(_AbstractConverter):
             if timestamp := new_edit.get("timestamp", None):
                 new_edit["timestamp"] = timestamp.isoformat()
             else:
-                # Migrate a list of job IDs to a list of Edits.
-                # Used to migrate data model from <=2.0 to >=2.1 version.
-                _warn_deprecated("job_ids", suggest="edits")
                 new_edit["timestamp"] = datetime.now().isoformat()
             new_edits.append(new_edit)
         return new_edits
@@ -251,14 +235,10 @@ class _DataNodeConverter(_AbstractConverter):
 
     @classmethod
     def __deserialize_edits(cls, edits):
-        # TODO: didn't process _to_edits_migration in the _data_model.py
         for edit in edits:
             if timestamp := edit.get("timestamp", None):
                 edit["timestamp"] = datetime.fromisoformat(timestamp)
             else:
-                # Migrate a list of job IDs to a list of Edits.
-                # Used to migrate data model from <=2.0 to >=2.1 version.
-                _warn_deprecated("job_ids", suggest="edits")
                 edit["timestamp"] = datetime.now()
         return edits
 

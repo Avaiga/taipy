@@ -15,7 +15,6 @@ from sqlalchemy import JSON, Boolean, Column, Enum, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
-from .._version._utils import _version_migration
 from .job_id import JobId
 from .status import Status
 
@@ -60,5 +59,5 @@ class _JobModel(_BaseModel):
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
             stacktrace=data["stacktrace"],
-            version=data["version"] if "version" in data.keys() else _version_migration(),
+            version=data["version"],
         )
