@@ -464,13 +464,13 @@ def clean_sql_db():
 
 @pytest.fixture
 def entities_for_migration():
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/entities.json")
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/entities_2.4.json")
     with open(path) as f:
         return json.load(f)
 
 
 @pytest.fixture
 def expected_entities_for_migration():
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/expected_entities.json")
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/entities_3.0.json")
     with open(path) as f:
         return json.load(f)
