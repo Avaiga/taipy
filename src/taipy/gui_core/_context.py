@@ -240,7 +240,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             [
                                 id,
                                 {
-                                    'action': on_creation,
+                                    "action": on_creation,
                                     "config": scenario_config,
                                     "date": date,
                                     "label": name,
