@@ -108,9 +108,12 @@ class _Builder:
                     prop_dict = _getscopeattr(self.__gui, prop_hash)
             if isinstance(prop_dict, (dict, _MapDict)):
                 # Iterate through prop_dict and append to self.attributes
+                var_name, _ = gui._get_real_var_name(prop_hash)
                 for k, v in prop_dict.items():
                     (val, key_hash) = _Builder.__parse_attribute_value(gui, v)
-                    self.__attributes[k] = f"{{{prop_hash}['{k}']}}" if key_hash is None else v
+                    self.__attributes[k] = (
+                        f"{{None if ({var_name}) is None else ({var_name}).get('{k}')}}" if key_hash is None else v
+                    )
             else:
                 _warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
