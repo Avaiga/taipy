@@ -8,8 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import json
 import os
+import pathlib
 import pickle
 import shutil
 from datetime import datetime
@@ -459,3 +460,17 @@ def clean_sql_db():
     _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
     _TaskModel.__table__.create(bind=engine, checkfirst=True)
     _VersionModel.__table__.create(bind=engine, checkfirst=True)
+
+
+@pytest.fixture
+def entities_for_migration():
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/entities.json")
+    with open(path) as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def expected_entities_for_migration():
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/expected_entities.json")
+    with open(path) as f:
+        return json.load(f)
