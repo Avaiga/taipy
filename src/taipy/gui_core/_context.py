@@ -261,7 +261,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     except Exception as e:  # pragma: no cover
                         if not gui._call_on_exception(on_creation, e):
                             _warn(f"on_creation(): Exception raised in '{on_creation}()'", e)
-                else:
+                elif on_creation is not None:
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
                 scenario = create_scenario(scenario_config, date, name)
             except Exception as e:
