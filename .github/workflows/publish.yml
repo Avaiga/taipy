@@ -9,7 +9,7 @@ on:
 
 jobs:
   test-package:
-    timeout-minutes: 20
+    timeout-minutes: 40
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

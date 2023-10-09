@@ -12,7 +12,7 @@ def build_dn_partial(dn, dn_label):
     # ##################################################################################################################
 
     # Automatic data node content
-    partial_content += "<|{selected_scenario.data_nodes['" + dn.config_id + "']}|data_node|scenario={selected_scenario}|width=41vw|>\n\n"
+    partial_content += "<|{selected_scenario.data_nodes['" + dn.config_id + "']}|data_node|scenario={selected_scenario}|>\n\n"
 
     # ##################################################################################################################
     # PLACEHOLDER: data node specific content after automatic content                                                  #
