@@ -168,6 +168,7 @@
                 "properties": [
                     {
                         "name": "scenario",
+                        "default_property": true,
                         "type": "dynamic(Scenario|list[Scenario])",
                         "doc": "The <code>Scenario^</code> whose diagram is displayed.<br/>If the value is a list, it must have a single element otherwise nothing is shown."
                     },
