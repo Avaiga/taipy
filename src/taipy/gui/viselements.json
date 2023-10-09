@@ -758,8 +758,9 @@
           "properties": [
             {
                 "name": "lov",
+                "default_property": true,
                 "type": "dict[str, any]",
-                "doc": "The list of pages. The keys should be page id and start with \"/\", the values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
+                "doc": "The list of pages. The keys should be:\n<ul>\n<li>page id (start with \"/\")</li>\n<li>or full URL</li>\n</ul>\nThe values are labels. See the <a href=\"../../binding/#list-of-values\">section on List of Values</a> for details."
             }
         ]
       }

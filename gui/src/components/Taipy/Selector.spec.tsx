@@ -188,8 +188,9 @@ describe("Selector Component", () => {
             getByTestId("CancelIcon");
         });
         it("opens a dropdown on click", async () => {
-            const { getByText, getByRole, getByTestId, queryAllByRole } = render(<Selector lov={lov} dropdown={true} />);
-            const butElt = getByRole("button");
+            const { getByText, getByRole, queryAllByRole } = render(<Selector lov={lov} dropdown={true} />);
+            const butElt = getByRole("combobox");
+            expect(butElt).toBeInTheDocument()
             await userEvent.click(butElt);
             getByRole("listbox");
             const elt = getByText("Item 2");
