@@ -197,7 +197,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const uniqid = useUniqueId(id);
     const editorId = (state as { id: string }).id;
     const editLock = useRef(false);
-    const oldId = useRef<string|undefined>(undefined);
+    const oldId = useRef<string | undefined>(undefined);
 
     const [
         dnId,
@@ -226,18 +226,25 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         }
         // clean lock on change
         if (dn && dn[DataNodeFullProps.id] !== oldId.current) {
-            oldId.current && editLock.current && dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
+            oldId.current &&
+                editLock.current &&
+                dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
             editLock.current = false;
             oldId.current = dn[DataNodeFullProps.id];
         }
-        editLock.current = dn ? dn[DataNodeFullProps.editInProgress]: false;
+        editLock.current = dn ? dn[DataNodeFullProps.editInProgress] : false;
         return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false, "", false];
     }, [props.dataNode, props.defaultDataNode, oldId, id, dispatch, module, props.onLock]);
 
     // clean lock on unmount
-    useEffect(() => () => {
-        oldId.current && editLock.current && dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
-    }, [id, dispatch, module, props.onLock]);
+    useEffect(
+        () => () => {
+            oldId.current &&
+                editLock.current &&
+                dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
+        },
+        [id, dispatch, module, props.onLock]
+    );
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -255,14 +262,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     // focus
     const [focusName, setFocusName] = useState("");
-    const onFocus = useCallback((e: MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        setFocusName(e.currentTarget.dataset.focus || "");
-        if (e.currentTarget.dataset.focus === dataValueFocus && !editLock.current) {
-            dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: true }));
-            editLock.current = true;
-        }
-    }, [dnId, props.onLock, id, dispatch, module]);
+    const onFocus = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            e.stopPropagation();
+            setFocusName(e.currentTarget.dataset.focus || "");
+            if (e.currentTarget.dataset.focus === dataValueFocus && !editLock.current) {
+                dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: true }));
+                editLock.current = true;
+            }
+        },
+        [dnId, props.onLock, id, dispatch, module]
+    );
 
     // Label
     const [label, setLabel] = useState<string>();
@@ -373,20 +383,22 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const handleTabChange = useCallback(
         (_: SyntheticEvent, newValue: number) => {
             if (isDataNode) {
-                newValue == 1 &&
+                if (newValue == 1) {
                     setHistoryRequested(
                         (req) =>
                             req ||
                             dispatch(createSendActionNameAction(id, module, props.onIdSelect, { history_id: dnId })) ||
                             true
                     );
-                newValue == 2 &&
+                } else if (newValue == 2) {
                     setDataRequested(
                         (req) =>
                             req ||
                             dispatch(createSendActionNameAction(id, module, props.onIdSelect, { data_id: dnId })) ||
                             true
                     );
+                    setHistoryRequested(false);
+                }
                 setTabValue(newValue);
             }
         },
