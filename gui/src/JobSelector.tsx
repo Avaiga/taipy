@@ -635,31 +635,30 @@ const JobSelector = (props: JobSelectorProps) => {
     const allowCancelJobs = useMemo(
         () =>
             !!checked.length &&
-            !jobRows.some(
-                (job) =>
-                    checked.includes(job[JobProps.id]) &&
-                    !(
+            jobRows
+                .filter((job) => checked.includes(job[JobProps.id]))
+                .every(
+                    (job) =>
                         job[JobProps.status] === JobStatus.SUBMITTED ||
                         job[JobProps.status] === JobStatus.BLOCKED ||
                         job[JobProps.status] === JobStatus.PENDING
-                    )
-            ),
+                ),
         [jobRows, checked]
     );
 
     const allowDeleteJobs = useMemo(
         () =>
             !!checked.length &&
-            !jobRows.some(
-                (job) =>
-                    checked.includes(job[JobProps.id]) &&
-                    !(
+            jobRows
+                .filter((job) => checked.includes(job[JobProps.id]))
+                .every(
+                    (job) =>
                         job[JobProps.status] === JobStatus.CANCELED ||
                         job[JobProps.status] === JobStatus.FAILED ||
+                        job[JobProps.status] === JobStatus.COMPLETED ||
                         job[JobProps.status] === JobStatus.SKIPPED ||
                         job[JobProps.status] === JobStatus.ABANDONED
-                    )
-            ),
+                ),
         [jobRows, checked]
     );
 
@@ -672,39 +671,35 @@ const JobSelector = (props: JobSelectorProps) => {
     }, []);
 
     useEffect(() => {
-        if (props.jobs) {
-            if (filters) {
-                let filteredJobRows = [...props.jobs];
-                filteredJobRows.length &&
-                    filters
-                        .filter((filter) => filter.data && filter.operator)
-                        .forEach((filter) => {
-                            filteredJobRows = filteredJobRows.filter((job) => {
-                                let rowColumnValue = "";
-                                if (filter.data === JobProps.status) {
-                                    rowColumnValue = JobStatus[job[JobProps.status]].toLowerCase();
-                                } else if (filter.data === JobProps.id) {
-                                    rowColumnValue = `${job[JobProps.id].toLowerCase()}${job[
-                                        JobProps.name
-                                    ].toLowerCase()}`;
-                                } else if (filter.data === JobProps.submitted_id) {
-                                    rowColumnValue = `${job[JobProps.submitted_id].toLowerCase()}${job[
-                                        JobProps.submitted_label
-                                    ].toLowerCase()}`;
-                                } else if (filter.data === JobProps.creation_date) {
-                                    rowColumnValue = new Date(job[JobProps.creation_date]).toLocaleString();
-                                } else if (filter.data < JobLength) {
-                                    rowColumnValue = job[filter.data].toString().toLowerCase();
-                                }
-                                const includes = rowColumnValue.includes(filter.value.toLowerCase());
-                                return filter.operator === "is" ? includes : !includes;
-                            });
-                        });
-                setJobRows(filteredJobRows);
-            } else {
-                setJobRows(props.jobs);
-            }
-        }
+        let filteredJobRows = [...(props.jobs || [])];
+        filteredJobRows.length && filters &&
+            filters
+                .filter((filter) => filter.data && filter.operator)
+                .forEach((filter) => {
+                    filteredJobRows = filteredJobRows.filter((job) => {
+                        let rowColumnValue = "";
+                        if (filter.data === JobProps.status) {
+                            rowColumnValue = JobStatus[job[JobProps.status]].toLowerCase();
+                        } else if (filter.data === JobProps.id) {
+                            rowColumnValue = `${job[JobProps.id].toLowerCase()}${job[
+                                JobProps.name
+                            ].toLowerCase()}`;
+                        } else if (filter.data === JobProps.submitted_id) {
+                            rowColumnValue = `${job[JobProps.submitted_id].toLowerCase()}${job[
+                                JobProps.submitted_label
+                            ].toLowerCase()}`;
+                        } else if (filter.data === JobProps.creation_date) {
+                            rowColumnValue = new Date(job[JobProps.creation_date]).toLocaleString();
+                        } else if (filter.data < JobLength) {
+                            rowColumnValue = job[filter.data].toString().toLowerCase();
+                        }
+                        const includes = rowColumnValue.includes(filter.value.toLowerCase());
+                        return filter.operator === "is" ? includes : !includes;
+                    });
+                });
+        setJobRows(filteredJobRows);
+        const jobIds = filteredJobRows.map(j => j[JobProps.id]);
+        setChecked(ids => ids.filter(id => jobIds.includes(id)));
     }, [filters, props.jobs]);
 
     useEffect(() => {
