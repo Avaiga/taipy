@@ -11,17 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    CSSProperties,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    lazy,
-    Suspense,
-} from "react";
-import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotSelectionEvent, ScatterLine } from "plotly.js";
+import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
+import { Data, Layout, PlotDatum, PlotMarker, PlotRelayoutEvent, PlotSelectionEvent, ScatterLine } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
@@ -167,6 +158,19 @@ const selectedPropRe = /selected(\d+)/;
 
 const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
 
+const isOnClick = (types: string[]) => (types?.length ? types.every(t => t === "pie") : false);
+
+interface WithpointNumbers {
+    pointNumbers: number[];
+}
+const getPlotIndex = (pt: PlotDatum) =>
+    pt.pointIndex === undefined
+        ? pt.pointNumber === undefined
+        ? (pt as unknown as WithpointNumbers).pointNumbers?.length
+            ? (pt as unknown as WithpointNumbers).pointNumbers[0]
+            : 0
+        : pt.pointNumber : pt.pointIndex;
+
 const defaultConfig = {
     columns: {} as Record<string, ColumnDesc>,
     labels: [],
@@ -207,12 +211,16 @@ const Chart = (props: ChartProp) => {
     const theme = useTheme();
     const module = useModule();
 
-    const refresh = typeof data === "number" ? data : 0
+    const refresh = typeof data === "number" ? data : 0;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", {} as Record<string, Record<string, unknown>>);
+    const baseLayout = useDynamicJsonProperty(
+        props.layout,
+        props.defaultLayout || "",
+        {} as Record<string, Record<string, unknown>>
+    );
 
     // get props.selected[i] values
     useEffect(() => {
@@ -393,7 +401,7 @@ const Chart = (props: ChartProp) => {
                   // This works ONLY because 'parents' is the third named axis
                   // (see __CHART_AXIS in gui/utils/chart_config_builder.py)
                   else if (config.types[idx] === "treemap" && Array.isArray(ret.labels)) {
-                      ret.parents = Array(ret.labels.length).fill("")
+                      ret.parents = Array(ret.labels.length).fill("");
                   }
                   // Other axis
                   for (let i = 3; i < axisNames.length; i++) {
@@ -412,12 +420,12 @@ const Chart = (props: ChartProp) => {
                   ret.textposition = getArrayValue(config.textAnchors, idx);
                   const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                   if (selectedMarker) {
-                      ret.selected = { marker: selectedMarker }
+                      ret.selected = { marker: selectedMarker };
                   }
                   return ret as Data;
               })
             : [];
-        return lastDataPl.current
+        return lastDataPl.current;
     }, [data, config, selected, dataKey]);
 
     const plotConfig = useMemo(() => {
@@ -495,7 +503,12 @@ const Chart = (props: ChartProp) => {
     }, []);
 
     const getRealIndex = useCallback(
-        (index: number) => (data[dataKey].tp_index ? (data[dataKey].tp_index[index] as number) : index),
+        (index?: number) =>
+            typeof index === "number"
+                ? data[dataKey].tp_index
+                    ? (data[dataKey].tp_index[index] as number)
+                    : index
+                : 0,
         [data, dataKey]
     );
 
@@ -504,7 +517,7 @@ const Chart = (props: ChartProp) => {
             if (updateVars) {
                 const traces = (evt?.points || []).reduce((tr, pt) => {
                     tr[pt.curveNumber] = tr[pt.curveNumber] || [];
-                    tr[pt.curveNumber].push(getRealIndex(pt.pointIndex));
+                    tr[pt.curveNumber].push(getRealIndex(getPlotIndex(pt)));
                     return tr;
                 }, [] as number[][]);
                 if (traces.length) {
@@ -535,8 +548,9 @@ const Chart = (props: ChartProp) => {
                         style={style}
                         onRelayout={onRelayout}
                         onAfterPlot={onAfterPlot}
-                        onSelected={onSelect}
-                        onDeselect={onSelect}
+                        onSelected={isOnClick(config.types) ? undefined : onSelect}
+                        onDeselect={isOnClick(config.types) ? undefined : onSelect}
+                        onClick={isOnClick(config.types) ? onSelect : undefined}
                         config={plotConfig}
                     />
                 </Suspense>
