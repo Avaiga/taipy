@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "CORE": {
-      "description": "Data nodes",
+      "description": "Core service",
       "type": "object",
       "properties": {
         "core_version": {

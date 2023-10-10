@@ -44,6 +44,7 @@ class CoreSection(UniqueSection):
             [Versioning management](../../core/versioning/) documentation page for more details.
         force (bool): If True, force the application run even if there are some conflicts in the
             configuration.
+        core_version (str): The Taipy Core package version.
         **properties (dict[str, any]): A dictionary of additional properties.
     """
 
