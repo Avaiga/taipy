@@ -182,7 +182,7 @@ const DataNodeTable = (props: DataNodeTableProps) => {
                 defaultColumns={JSON.stringify(tabCols)}
                 updateVarName={props.updateVarName}
                 data={props.data}
-                userData={userData as unknown as string}
+                userData={userData}
                 onEdit={tableEdit ? props.onEdit : undefined}
                 filter={true}
                 libClassName="taipy-table"
