@@ -40,7 +40,9 @@ class MockState:
 
 class TestGuiCoreContext_is_deletable:
     def test_crud_scenario(self):
-        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get), patch("src.taipy.gui_core._context.is_deletable", side_effect=mock_is_true):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
+            "src.taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+        ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
             gui_core_context.crud_scenario(
@@ -108,4 +110,3 @@ class TestGuiCoreContext_is_deletable:
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "gui_core_js_error"
                 assert str(assign.call_args.args[1]).endswith("is not readable.")
-

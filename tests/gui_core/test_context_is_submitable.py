@@ -40,7 +40,9 @@ class MockState:
 
 class TestGuiCoreContext_is_submittable:
     def test_submit_entity(self):
-        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get), patch("src.taipy.gui_core._context.is_submittable", side_effect=mock_is_true):
+        with patch("src.taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
+            "src.taipy.gui_core._context.is_submittable", side_effect=mock_is_true
+        ):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
             gui_core_context.submit_entity(
@@ -54,7 +56,7 @@ class TestGuiCoreContext_is_submittable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "gui_core_sv_error"
-            assert str(assign.call_args.args[1]).startswith('Error submitting entity.')
+            assert str(assign.call_args.args[1]).startswith("Error submitting entity.")
 
             with patch("src.taipy.gui_core._context.is_submittable", side_effect=mock_is_submittable_false):
                 assign.reset_mock()
@@ -70,4 +72,3 @@ class TestGuiCoreContext_is_submittable:
                 assign.assert_called_once()
                 assert assign.call_args.args[0] == "gui_core_sv_error"
                 assert str(assign.call_args.args[1]).endswith("is not submittable.")
-

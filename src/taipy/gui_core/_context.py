@@ -767,7 +767,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
                     state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
                 else:
-                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "Error updating Datanode tabular value: type does not support at[] indexer.")
+                    state.assign(
+                        _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                        "Error updating Datanode tabular value: type does not support at[] indexer.",
+                    )
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
