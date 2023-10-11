@@ -231,6 +231,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scDeletable,
         scPromotable,
         scSubmittable,
+        scReadable,
+        scEditable,
         isScenario,
     ] = useMemo(() => {
         let sc: ScenarioFull | undefined = undefined;
@@ -243,10 +245,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 // DO nothing
             }
         }
-        return sc ? [...sc, true] : ["", false, "", "", "", [], [], [], [], false, false, false, false];
+        return sc ? [...sc, true] : ["", false, "", "", "", [], [], [], [], false, false, false, false, false, false];
     }, [props.scenario, props.defaultScenario]);
 
-    const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const active = useDynamicProperty(props.active, props.defaultActive, true) && scEditable && scReadable;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const [deleteDialog, setDeleteDialogOpen] = useState(false);
@@ -279,7 +281,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // submits
     const submitSequence = useCallback(
         (sequenceId: string) => {
-            dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: sequenceId, on_submission_change: props.onSubmissionChange }));
+            dispatch(
+                createSendActionNameAction(id, module, props.onSubmit, {
+                    id: sequenceId,
+                    on_submission_change: props.onSubmissionChange,
+                    type: "Sequence"
+                })
+            );
         },
         [props.onSubmit, props.onSubmissionChange, id, dispatch, module]
     );
@@ -288,7 +296,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             if (isScenario) {
-                dispatch(createSendActionNameAction(id, module, props.onSubmit, { id: scId, on_submission_change: props.onSubmissionChange }));
+                dispatch(
+                    createSendActionNameAction(id, module, props.onSubmit, {
+                        id: scId,
+                        on_submission_change: props.onSubmissionChange,
+                    })
+                );
             }
         },
         [isScenario, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module]
@@ -349,7 +362,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const editSequence = useCallback(
         (id: string, label: string) => {
             if (isScenario) {
-                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: id, name: label }));
+                dispatch(createSendActionNameAction(id, module, props.onEdit, { id: id, name: label, type: "Sequence" }));
                 setFocusName("");
             }
         },

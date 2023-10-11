@@ -92,18 +92,20 @@ const editSx = {
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
 
 type DataNodeFull = [
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    number,
-    Array<[string, string]>,
-    boolean,
-    string
+    string,     // id
+    string,     // type
+    string,     // config_id
+    string,     // last_edit_date
+    string,     // expiration_date
+    string,     // label
+    string,     // ownerId
+    string,     // ownerLabel
+    number,     // ownerType
+    Array<[string, string]>,    // properties
+    boolean,    // editInProgress
+    string,     // editorId
+    boolean,    // readable
+    boolean,    // editable
 ];
 
 enum DataNodeFullProps {
@@ -119,6 +121,8 @@ enum DataNodeFullProps {
     properties,
     editInProgress,
     editorId,
+    readable,
+    editable
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -212,6 +216,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnProperties,
         dnEditInProgress,
         dnEditorId,
+        dnReadable,
+        dnEditable,
         isDataNode,
     ] = useMemo(() => {
         let dn: DataNodeFull | undefined = undefined;
@@ -233,7 +239,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             oldId.current = dn[DataNodeFullProps.id];
         }
         editLock.current = dn ? dn[DataNodeFullProps.editInProgress] : false;
-        return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false, "", false];
+        return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false, "", false, false, false];
     }, [props.dataNode, props.defaultDataNode, oldId, id, dispatch, module, props.onLock]);
 
     // clean lock on unmount
@@ -246,7 +252,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [id, dispatch, module, props.onLock]
     );
 
-    const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const active = useDynamicProperty(props.active, props.defaultActive, true) && dnEditable && dnReadable;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     // history & data

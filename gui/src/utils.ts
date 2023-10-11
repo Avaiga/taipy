@@ -15,20 +15,21 @@ import { PopoverOrigin } from "@mui/material/Popover";
 
 import { useDynamicProperty } from "taipy-gui";
 
-// id, is_primary, config_id, creation_date, label, tags, properties(key, value), sequences(id, label), authorized_tags, deletable
 export type ScenarioFull = [
-    string,
-    boolean,
-    string,
-    string,
-    string,
-    string[],
-    Array<[string, string]>,
-    Array<[string, string, boolean]>,
-    string[],
-    boolean,
-    boolean,
-    boolean
+    string,     // id
+    boolean,    // is_primary
+    string,     // config_id
+    string,     // creation_date
+    string,     // label
+    string[],   // tags
+    Array<[string, string]>,    // properties
+    Array<[string, string, boolean]>,   // sequences
+    string[],   // authorized_tags
+    boolean,    // deletable
+    boolean,    // promotable
+    boolean,    // submittable
+    boolean,    // readable
+    boolean     // editable
 ];
 
 export enum ScFProps {
@@ -44,6 +45,8 @@ export enum ScFProps {
     deletable,
     promotable,
     submittable,
+    readable,
+    editable,
 }
 export const ScenarioFullLength = Object.keys(ScFProps).length / 2;
 
@@ -148,8 +151,7 @@ export const FieldNoMaxWidth = {
 
 export const IconPaddingSx = { padding: 0 };
 
-export const MainBoxSx = {
-};
+export const MainBoxSx = {};
 
 export const AccordionIconSx = { fontSize: "0.9rem" };
 
@@ -207,4 +209,3 @@ export const MenuProps = {
     },
 };
 export const selectSx = { m: 1, width: 300 };
-
