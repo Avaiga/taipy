@@ -14,7 +14,9 @@ import typing as t
 from operator import attrgetter
 from types import FrameType
 
-from .utils import _get_module_name_from_frame
+from flask import has_app_context
+
+from .utils import _get_module_name_from_frame, _is_in_notebook
 from .utils._attributes import _attrsetter
 
 if t.TYPE_CHECKING:
@@ -125,6 +127,14 @@ class State:
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
+        if not has_app_context() and _is_in_notebook():
+            with gui.get_flask_app().app_context():
+                # Code duplication is ugly but necessary due to frame resolution
+                set_context = self._set_context(gui)
+                encoded_name = gui._bind_var(name)
+                attr = getattr(gui._bindings(), encoded_name)
+                self._reset_context(gui, set_context)
+                return attr
         set_context = self._set_context(gui)
         encoded_name = gui._bind_var(name)
         attr = getattr(gui._bindings(), encoded_name)
@@ -139,6 +149,14 @@ class State:
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not accessible.")
+        if not has_app_context() and _is_in_notebook():
+            with gui.get_flask_app().app_context():
+                # Code duplication is ugly but necessary due to frame resolution
+                set_context = self._set_context(gui)
+                encoded_name = gui._bind_var(name)
+                setattr(gui._bindings(), encoded_name, value)
+                self._reset_context(gui, set_context)
+                return
         set_context = self._set_context(gui)
         encoded_name = gui._bind_var(name)
         setattr(gui._bindings(), encoded_name, value)
