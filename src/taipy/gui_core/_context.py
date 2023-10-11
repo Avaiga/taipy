@@ -762,12 +762,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
                 # user_value = payload.get("user_value")
                 data = self.__read_tabular_data(datanode)
-                if hasattr(data, "at") and callable(data.at):
+                if hasattr(data, "at"):
                     data.at[idx, col] = val
                     datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
                     state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
                 else:
-                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "Error updating Datanode tabular value: type does not support at() method.")
+                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "Error updating Datanode tabular value: type does not support at[] indexer.")
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
