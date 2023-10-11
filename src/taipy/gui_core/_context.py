@@ -127,13 +127,21 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.lock:
                 self.scenario_by_cycle = None
                 self.data_nodes_by_owner = None
-            scenario = core_get(event.entity_id) if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id) else None
+            scenario = (
+                core_get(event.entity_id)
+                if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id)
+                else None
+            )
             self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"scenario": event.entity_id if scenario else True},
             )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
-            sequence = core_get(event.entity_id) if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id) else None
+            sequence = (
+                core_get(event.entity_id)
+                if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id)
+                else None
+            )
             if sequence:
                 if hasattr(sequence, "parent_ids") and sequence.parent_ids:
                     self.gui._broadcast(
@@ -312,7 +320,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not self.__check_readable_editable(state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR):
+        if not self.__check_readable_editable(
+            state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR
+        ):
             return
         entity: t.Union[Scenario, Sequence] = core_get(entity_id)
         if entity:
@@ -339,7 +349,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
         if not is_submittable(entity_id):
             state.assign(
-                _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"{data.get('type', 'Scenario')} {entity_id} is not submitable."
+                _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
+                f"{data.get('type', 'Scenario')} {entity_id} is not submitable.",
             )
             return
         entity = core_get(entity_id)
