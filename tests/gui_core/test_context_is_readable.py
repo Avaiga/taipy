@@ -1,11 +1,11 @@
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import Mock, patch
 
 import pytest
 
 from src.taipy.gui_core._context import _GuiCoreContext
-from taipy.core import Scenario, Job, Task
-from taipy.core.data.pickle import PickleDataNode
 from taipy.config.common.scope import Scope
+from taipy.core import Job, Scenario, Task
+from taipy.core.data.pickle import PickleDataNode
 from taipy.gui import Gui
 
 a_scenario = Scenario("scenario_config_id", [], {}, sequences={"sequence": {}})
@@ -356,7 +356,7 @@ class TestGuiCoreContext_is_readable:
             assert assign.call_args_list[0].args[0] == "gui_core_dv_error"
             assert (
                 assign.call_args_list[0].args[1]
-                == "Error updating Datanode tabular value: type does not support at() method."
+                == "Error updating Datanode tabular value: type does not support at[] indexer."
             )
             assign.reset_mock()
 
