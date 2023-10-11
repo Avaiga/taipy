@@ -14,7 +14,7 @@ from enum import Enum
 
 from taipy.core import Cycle, DataNode, Job, Scenario, Sequence
 from taipy.core import get as core_get
-from taipy.core import is_deletable, is_promotable, is_submittable
+from taipy.core import is_deletable, is_promotable, is_submittable, is_readable, is_editable
 from taipy.gui.gui import _DoNotUpdate
 from taipy.gui.utils import _TaipyBase
 
@@ -63,6 +63,8 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                     is_deletable(scenario),
                     is_promotable(scenario),
                     is_submittable(scenario),
+                    is_readable(scenario),
+                    is_editable(scenario),
                 ]
         return None
 
@@ -143,6 +145,8 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                     ],
                     datanode._edit_in_progress,
                     datanode._editor_id,
+                    is_readable(datanode),
+                    is_editable(datanode),
                 ]
         return None
 
