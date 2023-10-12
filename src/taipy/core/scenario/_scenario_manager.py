@@ -188,7 +188,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     def _is_submittable(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
-        return isinstance(scenario, Scenario)
+        return isinstance(scenario, Scenario) and scenario.is_ready_to_run()
 
     @classmethod
     def _submit(

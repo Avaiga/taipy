@@ -295,7 +295,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
     def _is_submittable(cls, sequence: Union[Sequence, SequenceId]) -> bool:
         if isinstance(sequence, str):
             sequence = cls._get(sequence)
-        return isinstance(sequence, Sequence)
+        return isinstance(sequence, Sequence) and sequence.is_ready_to_run()
 
     @classmethod
     def _submit(

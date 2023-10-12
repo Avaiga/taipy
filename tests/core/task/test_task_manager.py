@@ -304,13 +304,22 @@ def test_hard_delete():
 
 def test_is_submittable():
     assert len(_TaskManager._get_all()) == 0
-    task_config = Config.configure_task("task", print)
+    dn_config = Config.configure_in_memory_data_node("dn", 10)
+    task_config = Config.configure_task("task", print, [dn_config])
     task = _TaskManager._bulk_get_or_create([task_config])[0]
 
     assert len(_TaskManager._get_all()) == 1
     assert _TaskManager._is_submittable(task)
     assert _TaskManager._is_submittable(task.id)
     assert not _TaskManager._is_submittable("Task_temp")
+
+    task.input["dn"].edit_in_progress = True
+    assert not _TaskManager._is_submittable(task)
+    assert not _TaskManager._is_submittable(task.id)
+
+    task.input["dn"].edit_in_progress = False
+    assert _TaskManager._is_submittable(task)
+    assert _TaskManager._is_submittable(task.id)
 
 
 def test_submit_task():
