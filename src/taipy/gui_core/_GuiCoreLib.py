@@ -133,7 +133,7 @@ class _GuiCore(ElementLibrary):
                 "show_data": ElementProperty(PropertyType.boolean, True),
                 "chart_configs": ElementProperty(PropertyType.dict),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
-                "scenario": ElementProperty(PropertyType.lov_value),
+                "scenario": ElementProperty(PropertyType.lov_value, "optional"),
                 "width": ElementProperty(PropertyType.string),
             },
             inner_properties={
