@@ -1,0 +1,19 @@
+{
+"id": "TASK_clean_data_2b17fa43-6746-45d6-b22d-0f5b09b9048a",
+"owner_id": null,
+"parent_ids": [
+"PIPELINE_baseline_08c57938-83e8-4848-aca5-c98a4ca21e58"
+],
+"config_id": "clean_data",
+"input_ids": [
+"DATANODE_initial_dataset_7d571742-92a5-457f-aef2-5d2eff3a3e99"
+],
+"function_name": "clean_data",
+"function_module": "algos.algos",
+"output_ids": [
+"DATANODE_cleaned_dataset_0e715489-98ee-4a06-9b38-21409ed04d03"
+],
+"version": "b11ea9f9-b2d7-4b58-a1c2-c6b1700bed97",
+"skippable": true,
+"properties": {}
+}
