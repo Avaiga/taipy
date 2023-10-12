@@ -242,8 +242,8 @@ def get_context_id(state: State) -> t.Any:
 def get_module_name_from_state(state: State) -> t.Optional[str]:
     """Get the module name that triggered a callback.
 
-    Pages can be defined in different modules yet share callbacks declared elsewhere (typically, the
-    application's main module).
+    Pages can be defined in different modules yet refer to callback functions declared elsewhere
+    (typically, the application's main module).
 
     This function returns the name of the module where the page that holds the control that
     triggered the callback was declared.  This lets applications implement different behaviors

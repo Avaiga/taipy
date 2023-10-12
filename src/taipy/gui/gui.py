@@ -103,7 +103,6 @@ class Gui:
     """Entry point for the Graphical User Interface generation.
 
     Attributes:
-
         on_action (Callable): The function that is called when a control
             triggers an action, as the result of an interaction with the end-user.<br/>
             It defaults to the `on_action()` global function defined in the Python
@@ -393,7 +392,7 @@ class Gui:
         The variables will be synchronized between all clients when updated.
         Note that only variables from the main module will be registered.
 
-        This is a synonym for `Gui.add_shared_variables()^`.
+        This is a synonym for `(Gui.)add_shared_variables()^`.
 
         Arguments:
             names: The names of the variables that become shared, as a list argument.
@@ -409,7 +408,7 @@ class Gui:
         The variables will be synchronized between all clients when updated.
         Note that only variables from the main module will be registered.
 
-        This is a synonym for `Gui.add_shared_variable()^`.
+        This is a synonym for `(Gui.)add_shared_variable()^`.
 
         Arguments:
             names: The names of the variables that become shared, as a list argument.
@@ -1818,7 +1817,7 @@ class Gui:
     def get_flask_app(self) -> Flask:
         """Get the internal Flask application.
 
-        This method must be called **after** (Gui.)run^ method was invoked.
+        This method must be called **after** `(Gui.)run()^` was invoked.
 
         Returns:
             The Flask instance used.
@@ -2189,7 +2188,7 @@ class Gui:
 
         This function stops the underlying web server only in the situation where
         it was run in a separated thread: the *run_in_thread* parameter to the
-        `(Gui.)run^` method was set to True, or you are running in an IPython notebook
+        `(Gui.)run()^` method was set to True, or you are running in an IPython notebook
         context.
         """
         if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:

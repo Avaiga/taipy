@@ -1,25 +1,28 @@
-
 from taipy.gui.extension import ElementLibrary, Element, ElementProperty, PropertyType
 
-class ExampleLibrary(ElementLibrary):
 
+class ExampleLibrary(ElementLibrary):
     def __init__(self) -> None:
         # Initialize the set of visual elements for this extension library
         self.elements = {
             # A static element that displays its properties in a fraction
-            "fraction": Element("numerator", {
-                "numerator": ElementProperty(PropertyType.number),
-                "denominator": ElementProperty(PropertyType.number)
+            "fraction": Element(
+                "numerator",
+                {
+                    "numerator": ElementProperty(PropertyType.number),
+                    "denominator": ElementProperty(PropertyType.number),
                 },
-                render_xhtml=ExampleLibrary._fraction_render),
+                render_xhtml=ExampleLibrary._fraction_render,
+            ),
             # A dynamic element that decorates its value
-            "label": Element("value", {
-                "value": ElementProperty(PropertyType.dynamic_string)
-                },
+            "label": Element(
+                "value",
+                {"value": ElementProperty(PropertyType.dynamic_string)},
                 # The name of the React component (ColoredLabel) that implements this custom
                 # element, exported as ExampleLabel in front-end/src/index.ts
-                react_component="ExampleLabel")
-            }
+                react_component="ExampleLabel",
+            ),
+        }
 
     # The implementation of the rendering for the "fraction" static element
     @staticmethod
@@ -32,7 +35,7 @@ class ExampleLibrary(ElementLibrary):
             return f"<span>{numerator}</span>"
         # Denominator is zero: display infinity
         if int(denominator) == 0:
-            return "<span style=\"font-size: 1.6em\">&#8734;</span>"
+            return '<span style="font-size: 1.6em">&#8734;</span>'
         # 'Normal' case
         return f"<span><sup>{numerator}</sup>/<sub>{denominator}</sub></span>"
 

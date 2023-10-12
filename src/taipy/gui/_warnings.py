@@ -16,6 +16,11 @@ import warnings
 
 
 class TaipyGuiWarning(UserWarning):
+    """NOT DOCUMENTED
+
+    Warning category for Taipy warnings generated in user code.
+    """
+
     _tp_debug_mode = False
 
     @staticmethod
