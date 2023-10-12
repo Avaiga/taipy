@@ -157,7 +157,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
     def _is_submittable(cls, task: Union[Task, TaskId]) -> bool:
         if isinstance(task, str):
             task = cls._get(task)
-        return isinstance(task, Task)
+        return isinstance(task, Task) and all(input_dn.is_ready_for_reading for input_dn in task.input.values())
 
     @classmethod
     def _submit(
