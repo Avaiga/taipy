@@ -47,7 +47,7 @@ from ._renderers.json import _TaipyJsonEncoder
 from ._renderers.utils import _get_columns_dict
 from ._warnings import TaipyGuiWarning, _warn
 from .builder import _ElementApiGenerator
-from .config import Config, ConfigParameter, ServerConfig, Stylekit, _Config
+from .config import Config, ConfigParameter, _Config
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
@@ -1158,7 +1158,7 @@ class Gui:
                 callback_result = self._call_function_with_state(user_callback, args)
                 setattr(g, Gui.__BRDCST_CALLBACK_G_ID, False)
                 return callback_result
-        except Exception as e:  # pragma: no cover
+        except Exception as e:
             if not self._call_on_exception(user_callback.__name__, e):
                 _warn(f"invoke_callback(): Exception raised in '{user_callback.__name__}()':\n{e}")
         return None

@@ -3,6 +3,7 @@
 omit =
     proxy.py
     _gui_cli.py
+    *tests*
 [report]
 exclude_lines =
     pragma: no cover

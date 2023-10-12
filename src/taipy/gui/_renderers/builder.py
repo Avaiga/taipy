@@ -835,10 +835,13 @@ class _Builder:
                 else:
                     self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
 
-    def __set_dynamic_property_without_default(self, name: str, property_type: PropertyType):
+    def __set_dynamic_property_without_default(
+        self, name: str, property_type: PropertyType, optional: t.Optional[bool] = False
+    ):
         hash_name = self.__hashes.get(name)
         if hash_name is None:
-            _warn(f"{self.__element_name}.{name} should be bound.")
+            if not optional:
+                _warn(f"{self.__element_name}.{name} should be bound.")
         else:
             hash_name = self.__get_typed_hash_name(hash_name, property_type)
             self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
@@ -916,7 +919,9 @@ class _Builder:
                 self._get_adapter(attr[0])  # need to be called before set_lov
                 self._set_lov(attr[0])
             elif var_type == PropertyType.lov_value:
-                self.__set_dynamic_property_without_default(attr[0], var_type)
+                self.__set_dynamic_property_without_default(
+                    attr[0], var_type, _get_tuple_val(attr, 2, None) == "optional"
+                )
             elif isclass(var_type) and issubclass(var_type, _TaipyBase):
                 if hash_name := self.__hashes.get(attr[0]):
                     prop_name = _to_camel_case(attr[0])

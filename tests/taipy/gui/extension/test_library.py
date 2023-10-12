@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 import inspect
 import typing as t
+import pytest
 from pathlib import Path
 
 from taipy.gui import Gui
@@ -71,6 +72,22 @@ class MyLibrary(ElementLibrary):
 
     def get_resource(self, name: str) -> Path:
         return Path(name)
+
+
+class MyBadLibrary(ElementLibrary):
+    def get_name(self) -> str:
+        return "bad name"
+
+    def get_elements(self) -> t.Dict[str, Element]:
+        return {}
+
+
+class MyGoodLibrary(ElementLibrary):
+    def get_name(self) -> str:
+        return "test_lib"
+
+    def get_elements(self) -> t.Dict[str, Element]:
+        return {}
 
 
 Gui.add_library(MyLibrary())
@@ -152,3 +169,16 @@ def test_lib_inner_no_value_md(gui: Gui, test_client, helpers):
     md_string = "<|test_lib.inner|>"
     expected = ["<TestLib_Inner", "withProperty={tpec_TpExPr_None_TPMDL_0}"]
     helpers.test_control_md(gui, md_string, expected)
+
+
+def test_lib_bad_name():
+    with pytest.raises(NameError):
+        Gui.add_library(MyBadLibrary())
+
+
+def test_lib_good_name():
+    Gui.add_library(MyGoodLibrary())
+
+
+def test_add_lib():
+    Gui(libraries=[MyGoodLibrary()])
