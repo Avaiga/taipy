@@ -8,26 +8,29 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-import argparse
+
+import os
 import sys
 
 from taipy._cli._base_cli import _CLI
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._migrate import _migrate_fs_entities, _migrate_mongo_entities, _migrate_sql_entities
 
 
 class _MigrateCLI:
+    __logger = _TaipyLogger._get_logger()
+
     @classmethod
     def create_parser(cls):
         migrate_parser = _CLI._add_subparser(
             "migrate",
-            help="Migrate entities from old taipy versions to current taipy version. The entity migration "
-            "should be performed only after updating taipy code to the current version.",
+            help="Migrate entities created from old taipy versions to be compatible with the current taipy version. "
+            " The entity migration should be performed only after updating taipy code to the current version.",
         )
         migrate_parser.add_argument(
             "--repository-type",
             nargs="+",
-            choices=["filesystem", "sql", "mongo"],
             help="The type of repository to migrate. If filesystem or sql, a path to the database folder/.sqlite file "
             "should be informed. In case of mongo host, port, user and password must be informed, if left empty it "
             "is assumed default values",
@@ -46,14 +49,22 @@ class _MigrateCLI:
 
             if repository_type == "filesystem":
                 path = path or ".data"
+                if not os.path.isdir(path):
+                    cls.__logger.error(f"Folder '{path}' does not exist.")
+                    sys.exit(1)
                 _migrate_fs_entities(path)
             elif repository_type == "sql":
                 if not path:
-                    raise argparse.ArgumentError("Missing required path argument")
+                    cls.__logger.error("Missing the required sqlite path.")
+                    sys.exit(1)
+                if not os.path.exists(path):
+                    cls.__logger.error(f"File '{path}' does not exist.")
+                    sys.exit(1)
                 _migrate_sql_entities(path)
             elif repository_type == "mongo":
                 mongo_args = args.repository_type[1:] if path else []
                 _migrate_mongo_entities(*mongo_args)
             else:
-                raise argparse.ArgumentError(f"Unknown repository type {repository_type}")
+                cls.__logger.error(f"Unknown repository type {repository_type}")
+                sys.exit(1)
             sys.exit(0)

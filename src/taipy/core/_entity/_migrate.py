@@ -11,6 +11,7 @@
 
 import json
 import os
+import shutil
 import sqlite3
 from functools import lru_cache
 from typing import Dict, List, Optional, Tuple
@@ -257,7 +258,7 @@ def _migrate_entity(entity_type: str, data: Dict) -> Dict:
     return data
 
 
-def _load_all_entities_from_fs(root: str = ".data") -> Dict:
+def _load_all_entities_from_fs(root: str) -> Dict:
     # run through all files in the data folder and load them
     entities = {}
     for root, dirs, files in os.walk(root):
@@ -274,13 +275,21 @@ def _load_all_entities_from_fs(root: str = ".data") -> Dict:
     return entities
 
 
-def __write_entities_to_fs(_entities: Dict, root: str = ".data"):
+def __write_entities_to_fs(_entities: Dict, root: str):
     if not os.path.exists(root):
         os.makedirs(root, exist_ok=True)
 
     for _id, entity in _entities.items():
-        with open(os.path.join(root, entity["path"]), "w") as f:
-            json.dump(entity["data"], f, indent=2)
+        # Do not write pipeline entities
+        if "PIPELINE" in _id:
+            continue
+        with open(entity["path"], "w") as f:
+            json.dump(entity["data"], f, indent=0)
+
+    # Remove pipelines folder
+    pipelines_path = os.path.join(root, "pipelines")
+    if os.path.exists(pipelines_path):
+        shutil.rmtree(pipelines_path)
 
 
 @lru_cache
@@ -295,10 +304,10 @@ def __connect_mongodb(db_host: str, db_port: int, db_username: str, db_password:
 
 
 def _load_all_entities_from_mongo(
-    hostname: str = "localhost",
-    port: int = 27017,
-    user: str = "taipy",
-    password: str = "password",
+    hostname: str,
+    port: int,
+    user: str,
+    password: str,
 ):
     client = __connect_mongodb(hostname, port, user, password)
     collections = [
@@ -322,16 +331,15 @@ def _load_all_entities_from_mongo(
 
 def __write_entities_to_mongo(
     _entities: Dict,
-    hostname: str = "localhost",
-    port: int = 27017,
-    user: str = "taipy",
-    password: str = "password",
+    hostname: str,
+    port: int,
+    user: str,
+    password: str,
 ):
     client = __connect_mongodb(hostname, port, user, password)
     collections = [
         "cycle",
         "scenario",
-        "pipeline",
         "task",
         "data_node",
         "job",
@@ -344,7 +352,7 @@ def __write_entities_to_mongo(
         )
 
 
-def _load_all_entities_from_sql(db_file: str = "test.db") -> Tuple[Dict, Dict]:
+def _load_all_entities_from_sql(db_file: str) -> Tuple[Dict, Dict]:
     conn = sqlite3.connect(db_file)
     query = "SELECT model_id, document FROM taipy_model"
     query_version = "SELECT * FROM taipy_version"
@@ -443,7 +451,7 @@ def __insert_version(version: dict, conn):
     conn.commit()
 
 
-def __write_entities_to_sql(_entities: Dict, _versions: Dict, db_file: str = "test.db"):
+def __write_entities_to_sql(_entities: Dict, _versions: Dict, db_file: str):
     conn = sqlite3.connect(db_file)
 
     for k, entity in _entities.items():
@@ -492,19 +500,19 @@ def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Op
     return entities, versions
 
 
-def _migrate_fs_entities(path: str) -> None:
-    __logger.info("Starting entity migration")
+def _migrate_fs_entities(path: str):
+    __logger.info(f"Starting entity migration from {path} folder")
     entities = _load_all_entities_from_fs(path)
 
     entities, _ = __migrate(entities)
 
-    __write_entities_to_fs(entities)
+    __write_entities_to_fs(entities, path)
 
     __logger.info("Migration finished")
 
 
-def _migrate_sql_entities(path: str) -> None:
-    __logger.info("Starting entity migration")
+def _migrate_sql_entities(path: str):
+    __logger.info(f"Starting entity migration from sqlite database {path}")
     entities, versions = _load_all_entities_from_sql(path)
 
     entities, versions = __migrate(entities, versions)  # type: ignore
@@ -514,14 +522,12 @@ def _migrate_sql_entities(path: str) -> None:
     __logger.info("Migration finished")
 
 
-def _migrate_mongo_entities(
-    hostname: str = "localhost", port: int = 27017, user: str = "taipy", password: str = "password"
-) -> None:
-    __logger.info("Starting entity migration")
+def _migrate_mongo_entities(hostname: str = "localhost", port: int = 27017, user: str = "", password: str = ""):
+    __logger.info(f"Starting entity migration from MongoDB {hostname}:{port}")
     entities = _load_all_entities_from_mongo(hostname, port, user, password)
 
     entities, _ = __migrate(entities)
 
-    __write_entities_to_mongo(entities)
+    __write_entities_to_mongo(entities, hostname, port, user, password)
 
     __logger.info("Migration finished")
