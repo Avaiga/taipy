@@ -321,7 +321,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
         if not self.__check_readable_editable(
-            state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR
+            state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR
         ):
             return
         entity: t.Union[Scenario, Sequence] = core_get(entity_id)
@@ -332,7 +332,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if primary is True:
                         if not is_promotable(entity):
                             state.assign(
-                                _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Scenario {entity_id} is not promotable."
+                                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Scenario {entity_id} is not promotable."
                             )
                             return
                         set_primary(entity)
@@ -349,8 +349,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
         if not is_submittable(entity_id):
             state.assign(
-                _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR,
-                f"{data.get('type', 'Scenario')} {entity_id} is not submitable.",
+                _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR,
+                f"{data.get('type', 'Scenario')} {entity_id} is not submittable.",
             )
             return
         entity = core_get(entity_id)
@@ -484,7 +484,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return self.data_nodes_by_owner.get(None, []) + self.get_scenarios()
 
     def data_node_adapter(self, data):
-        if data and hasattr(data, "id") and core_get(data.id) is not None:
+        if data and hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
             if isinstance(data, DataNode):
                 return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
             else:
@@ -519,7 +519,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return self.jobs_list
 
     def job_adapter(self, data):
-        if hasattr(data, "id") and core_get(data.id) is not None:
+        if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
             if isinstance(data, Job):
                 entity = core_get(data.owner_id)
                 return (
@@ -547,6 +547,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
             errs = []
             if job_action == "delete":
                 for job_id in job_ids:
+                    if not is_readable(job_id):
+                        errs.append(f"Job {job_id} is not readable.")
+                        continue
                     if not is_deletable(job_id):
                         errs.append(f"Job {job_id} is not deletable.")
                         continue
@@ -556,6 +559,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         errs.append(f"Error deleting job. {e}")
             elif job_action == "cancel":
                 for job_id in job_ids:
+                    if not is_readable(job_id):
+                        errs.append(f"Job {job_id} is not readable.")
+                        continue
                     if not is_editable(job_id):
                         errs.append(f"Job {job_id} is not cancelable.")
                         continue
@@ -587,8 +593,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return
         data = args[0]
         entity_id = data.get(_GuiCoreContext.__PROP_ENTITY_ID)
-        if not is_editable(entity_id):
-            state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Datanode {entity_id} is not editable.")
+        if not self.__check_readable_editable(state, entity_id, "Datanode", _GuiCoreContext._DATANODE_VIZ_ERROR_VAR):
             return
         lock = data.get("lock", True)
         entity: DataNode = core_get(entity_id)
@@ -636,7 +641,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             cycles_scenarios.extend(scenarios)
                         else:
                             cycles_scenarios.append(cycle)
-                else:
+                elif is_readable(owner_id):
                     entity = core_get(owner_id)
                     if entity and (scenarios := self.scenario_by_cycle.get(entity)):
                         cycles_scenarios.extend(scenarios)
@@ -757,9 +762,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
                 # user_value = payload.get("user_value")
                 data = self.__read_tabular_data(datanode)
-                data.at[idx, col] = val
-                datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
-                state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                if hasattr(data, "at"):
+                    data.at[idx, col] = val
+                    datanode.write(data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                    state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, "")
+                else:
+                    state.assign(
+                        _GuiCoreContext._DATANODE_VIZ_ERROR_VAR,
+                        "Error updating Datanode tabular value: type does not support at[] indexer.",
+                    )
             except Exception as e:
                 state.assign(_GuiCoreContext._DATANODE_VIZ_ERROR_VAR, f"Error updating Datanode tabular value. {e}")
         setattr(state, _GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, dn_id)
