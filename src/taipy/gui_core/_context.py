@@ -187,7 +187,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     )
         except Exception as e:
             _warn(
-                f"{type(scenario_or_cycle)} ({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'}) access raised an issue",
+                f"{type(scenario_or_cycle)} ({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'})"
+                + " access raised an issue",
                 e,
             )
         return None
