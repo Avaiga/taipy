@@ -195,11 +195,14 @@ const VALID_BOOLEAN_STRINGS = ["true", "1", "t", "y", "yes", "yeah", "sure"];
 const isBooleanTrue = (val: RowValue) =>
     typeof val == "string" ? VALID_BOOLEAN_STRINGS.some((s) => s == val.trim().toLowerCase()) : !!val;
 
+const defaultCursor = { cursor: "default" };
+const defaultCursorIcon = { ...iconInRowSx, "& .MuiSwitch-input": defaultCursor };
+
 const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
-        return <Switch checked={val as boolean} size="small" title={val ? "True" : "False"} sx={iconInRowSx} />;
+        return <Switch checked={val as boolean} size="small" title={val ? "True" : "False"} sx={defaultCursorIcon} />;
     }
-    return <>{formatValue(val as RowValue, col, formatConf, nanValue)}</>;
+    return <span style={defaultCursor}>{formatValue(val as RowValue, col, formatConf, nanValue)}</span>;
 };
 
 const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {

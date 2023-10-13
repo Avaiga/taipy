@@ -213,7 +213,7 @@ describe("AutoLoadingTable Component", () => {
         );
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
-        expect(elts[0].tagName).toBe("DIV");
+        expect(elts[0].tagName).toBe("SPAN");
     });
     it("selects the rows", async () => {
         const dispatch = jest.fn();
@@ -238,8 +238,8 @@ describe("AutoLoadingTable Component", () => {
         const elts = getAllByText("Austria");
         elts.forEach((elt: HTMLElement, idx: number) =>
             selected.indexOf(idx) == -1
-                ? expect(elt.parentElement?.parentElement).not.toHaveClass("Mui-selected")
-                : expect(elt.parentElement?.parentElement).toHaveClass("Mui-selected")
+                ? expect(elt.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
+                : expect(elt.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")
         );
         expect(document.querySelectorAll(".Mui-selected")).toHaveLength(selected.length);
     });
