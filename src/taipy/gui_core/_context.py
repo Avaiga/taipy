@@ -127,26 +127,28 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.lock:
                 self.scenario_by_cycle = None
                 self.data_nodes_by_owner = None
-            scenario = (
-                core_get(event.entity_id)
+            scenario_id = (
+                event.entity_id
                 if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id)
                 else None
             )
             self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
-                {"scenario": event.entity_id if scenario else True},
+                {"scenario": scenario_id or True},
             )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
-            sequence = (
-                core_get(event.entity_id)
-                if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id)
-                else None
-            )
-            if sequence:
-                if hasattr(sequence, "parent_ids") and sequence.parent_ids:
+            try:
+                sequence = (
+                    core_get(event.entity_id)
+                    if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id)
+                    else None
+                )
+                if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
                     self.gui._broadcast(
                         _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
                     )
+            except Exception as e:
+                _warn(f"Sequence ({sequence.id if hasattr(sequence, 'id') else 'No_id'}) access raised an issue", e)
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
@@ -160,18 +162,34 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 {"datanode": event.entity_id if event.operation.value != EventOperation.DELETION else True},
             )
 
-    def scenario_adapter(self, data):
-        if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
-            if self.scenario_by_cycle and isinstance(data, Cycle):
-                return (
-                    data.id,
-                    data.get_simple_label(),
-                    self.scenario_by_cycle.get(data),
-                    _EntityType.CYCLE.value,
-                    False,
-                )
-            elif isinstance(data, Scenario):
-                return (data.id, data.get_simple_label(), None, _EntityType.SCENARIO.value, data.is_primary)
+    def scenario_adapter(self, scenario_or_cycle):
+        try:
+            if (
+                hasattr(scenario_or_cycle, "id")
+                and is_readable(scenario_or_cycle.id)
+                and core_get(scenario_or_cycle.id) is not None
+            ):
+                if self.scenario_by_cycle and isinstance(scenario_or_cycle, Cycle):
+                    return (
+                        scenario_or_cycle.id,
+                        scenario_or_cycle.get_simple_label(),
+                        self.scenario_by_cycle.get(scenario_or_cycle),
+                        _EntityType.CYCLE.value,
+                        False,
+                    )
+                elif isinstance(scenario_or_cycle, Scenario):
+                    return (
+                        scenario_or_cycle.id,
+                        scenario_or_cycle.get_simple_label(),
+                        None,
+                        _EntityType.SCENARIO.value,
+                        scenario_or_cycle.is_primary,
+                    )
+        except Exception as e:
+            _warn(
+                f"{type(scenario_or_cycle)} ({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'}) access raised an issue",
+                e,
+            )
         return None
 
     def get_scenarios(self):
@@ -470,7 +488,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     self.client_jobs_by_submission[sub_id] = sub_details.set_status(new_status)
 
         except Exception as e:
-            _warn("Job is not available", e)
+            _warn(f"Job ({job_id}) is not available", e)
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
@@ -484,32 +502,45 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return self.data_nodes_by_owner.get(None, []) + self.get_scenarios()
 
     def data_node_adapter(self, data):
-        if data and hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
-            if isinstance(data, DataNode):
-                return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
-            else:
-                with self.lock:
-                    self.__do_datanodes_tree()
-                    if self.data_nodes_by_owner:
-                        if isinstance(data, Cycle):
-                            return (
-                                data.id,
-                                data.get_simple_label(),
-                                self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
-                                _EntityType.CYCLE.value,
-                                False,
-                            )
-                        elif isinstance(data, Scenario):
-                            return (
-                                data.id,
-                                data.get_simple_label(),
-                                self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
-                                _EntityType.SCENARIO.value,
-                                data.is_primary,
-                            )
-                        elif isinstance(data, Sequence):
-                            if datanodes := self.data_nodes_by_owner.get(data.id):
-                                return (data.id, data.get_simple_label(), datanodes, _EntityType.SEQUENCE.value, False)
+        try:
+            if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
+                if isinstance(data, DataNode):
+                    return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
+                else:
+                    with self.lock:
+                        self.__do_datanodes_tree()
+                        if self.data_nodes_by_owner:
+                            if isinstance(data, Cycle):
+                                return (
+                                    data.id,
+                                    data.get_simple_label(),
+                                    self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
+                                    _EntityType.CYCLE.value,
+                                    False,
+                                )
+                            elif isinstance(data, Scenario):
+                                return (
+                                    data.id,
+                                    data.get_simple_label(),
+                                    self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
+                                    _EntityType.SCENARIO.value,
+                                    data.is_primary,
+                                )
+                            elif isinstance(data, Sequence):
+                                if datanodes := self.data_nodes_by_owner.get(data.id):
+                                    return (
+                                        data.id,
+                                        data.get_simple_label(),
+                                        datanodes,
+                                        _EntityType.SEQUENCE.value,
+                                        False,
+                                    )
+        except Exception as e:
+            _warn(
+                f"{type(data)} ({data.id if hasattr(data, 'id') else 'No_id'}) access raised an issue",
+                e,
+            )
+
         return None
 
     def get_jobs_list(self):
