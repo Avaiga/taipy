@@ -9,8 +9,13 @@
 |>
 |>
 
-<|part|class_name=main|render={selected_scenario}|
+<|part|class_name=main|
+
+<|navbar|>
+
+<|part|class_name=main|
 <|content|>
 |>
 
+|>
 |>

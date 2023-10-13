@@ -1,5 +1,5 @@
 from config.config import configure
-from pages import scenario_page
+from pages import scenario_page, job_page
 from pages.root import root, selected_scenario, selected_data_node, content
 
 import taipy as tp
@@ -22,6 +22,7 @@ def on_change(state, var, val):
 pages = {
     "/": root,
     "scenario": scenario_page,
+    "jobs": job_page,
 }
 
 
