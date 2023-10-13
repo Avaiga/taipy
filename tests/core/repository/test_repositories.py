@@ -30,7 +30,7 @@ class TestRepositoriesStorage:
             (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
-    def test_save_and_fetch_model(self, mock_repo, params):
+    def test_save_and_fetch_model(self, mock_repo, params, init_sql_repo):
         r = mock_repo(**params)
         m = MockObj("uuid", "foo")
         r._save(m)
@@ -45,7 +45,7 @@ class TestRepositoriesStorage:
             (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
-    def test_exists(self, mock_repo, params):
+    def test_exists(self, mock_repo, params, init_sql_repo):
         r = mock_repo(**params)
         m = MockObj("uuid", "foo")
         r._save(m)
@@ -60,7 +60,7 @@ class TestRepositoriesStorage:
             (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
-    def test_get_all(self, mock_repo, params):
+    def test_get_all(self, mock_repo, params, init_sql_repo):
         objs = []
         r = mock_repo(**params)
         r._delete_all()
@@ -84,7 +84,7 @@ class TestRepositoriesStorage:
             (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
-    def test_delete_all(self, mock_repo, params):
+    def test_delete_all(self, mock_repo, params, init_sql_repo):
         r = mock_repo(**params)
         r._delete_all()
 
@@ -106,7 +106,7 @@ class TestRepositoriesStorage:
             (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
-    def test_delete_many(self, mock_repo, params):
+    def test_delete_many(self, mock_repo, params, init_sql_repo):
         r = mock_repo(**params)
         r._delete_all()
 
@@ -127,7 +127,7 @@ class TestRepositoriesStorage:
             (MockSQLRepository, {"model_type": MockModel, "converter": MockConverter}),
         ],
     )
-    def test_search(self, mock_repo, params):
+    def test_search(self, mock_repo, params, init_sql_repo):
         r = mock_repo(**params)
         r._delete_all()
 
@@ -148,7 +148,7 @@ class TestRepositoriesStorage:
         ],
     )
     @pytest.mark.parametrize("export_path", ["tmp"])
-    def test_export(self, mock_repo, params, tmp_sqlite, export_path):
+    def test_export(self, mock_repo, params, export_path, init_sql_repo):
         r = mock_repo(**params)
 
         m = MockObj("uuid", "foo")

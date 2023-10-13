@@ -21,27 +21,24 @@ from src.taipy.core.exceptions import ModelNotFound
 
 class TestVersionFSRepository:
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_save_and_load(self, tmpdir, _version, repo):
+    def test_save_and_load(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
         repository._save(_version)
 
         obj = repository._load(_version.id)
         assert isinstance(obj, _Version)
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_exists(self, tmpdir, _version, repo):
+    def test_exists(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
         repository._save(_version)
 
         assert repository._exists(_version.id)
         assert not repository._exists("not-existed-version")
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_load_all(self, tmpdir, _version, repo):
+    def test_load_all(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
         for i in range(10):
             _version.id = f"_version_{i}"
             repository._save(_version)
@@ -50,9 +47,8 @@ class TestVersionFSRepository:
         assert len(data_nodes) == 10
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_load_all_with_filters(self, tmpdir, _version, repo):
+    def test_load_all_with_filters(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
 
         for i in range(10):
             _version.id = f"_version_{i}"
@@ -63,9 +59,8 @@ class TestVersionFSRepository:
         assert len(objs) == 1
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_delete(self, tmpdir, _version, repo):
+    def test_delete(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
         repository._save(_version)
 
         repository._delete(_version.id)
@@ -74,9 +69,8 @@ class TestVersionFSRepository:
             repository._load(_version.id)
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_delete_all(self, tmpdir, _version, repo):
+    def test_delete_all(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
 
         for i in range(10):
             _version.id = f"_version_{i}"
@@ -89,9 +83,8 @@ class TestVersionFSRepository:
         assert len(repository._load_all()) == 0
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_delete_many(self, tmpdir, _version, repo):
+    def test_delete_many(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
 
         for i in range(10):
             _version.id = f"_version_{i}"
@@ -105,9 +98,8 @@ class TestVersionFSRepository:
         assert len(repository._load_all()) == 7
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_search(self, tmpdir, _version, repo):
+    def test_search(self, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
 
         for i in range(10):
             _version.id = f"_version_{i}"
@@ -121,9 +113,8 @@ class TestVersionFSRepository:
         assert isinstance(objs[0], _Version)
 
     @pytest.mark.parametrize("repo", [_VersionFSRepository, _VersionSQLRepository])
-    def test_export(self, tmpdir, _version, repo):
+    def test_export(self, tmpdir, _version, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
         repository._save(_version)
 
         repository._export(_version.id, tmpdir.strpath)

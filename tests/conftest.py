@@ -21,7 +21,7 @@ import pytest
 from sqlalchemy import create_engine, text
 
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db import engine
+from src.taipy.core._repository.db._sql_session import _build_engine
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core._version._version_model import _VersionModel
@@ -188,9 +188,6 @@ def default_multi_sheet_data_frame():
 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_files():
-    if os.path.exists("None"):
-        os.remove("None")
-
     yield
 
     if os.path.exists(".data"):
@@ -439,27 +436,28 @@ def sql_engine():
     return create_engine("sqlite:///:memory:")
 
 
-@pytest.fixture()
+@pytest.fixture
 def init_sql_repo(tmp_sqlite):
     Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
-    return tmp_sqlite
 
+    # Clean SQLite database
+    engine = _build_engine()
 
-@pytest.fixture(autouse=True)
-def clean_sql_db():
-    _CycleModel.__table__.drop(engine, checkfirst=True)
+    _CycleModel.__table__.drop(bind=engine, checkfirst=True)
     _DataNodeModel.__table__.drop(bind=engine, checkfirst=True)
     _JobModel.__table__.drop(bind=engine, checkfirst=True)
     _ScenarioModel.__table__.drop(bind=engine, checkfirst=True)
     _TaskModel.__table__.drop(bind=engine, checkfirst=True)
     _VersionModel.__table__.drop(bind=engine, checkfirst=True)
 
-    _CycleModel.__table__.create(engine, checkfirst=True)
+    _CycleModel.__table__.create(bind=engine, checkfirst=True)
     _DataNodeModel.__table__.create(bind=engine, checkfirst=True)
     _JobModel.__table__.create(bind=engine, checkfirst=True)
     _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
     _TaskModel.__table__.create(bind=engine, checkfirst=True)
     _VersionModel.__table__.create(bind=engine, checkfirst=True)
+
+    return tmp_sqlite
 
 
 @pytest.fixture
