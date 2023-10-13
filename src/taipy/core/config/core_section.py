@@ -26,22 +26,22 @@ class CoreSection(UniqueSection):
     """
     Configuration parameters for running the `Core^` service.
 
-
     Attributes:
         root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
         storage_folder (str): Folder name used to store Taipy data. The default value is ".data/". It is used in
-            conjunction with the `root_folder` field. That means the storage path is <root_folder><storage_folder>
+            conjunction with the *root_folder* attribute. That means the storage path is <root_folder><storage_folder>
             (The default path is "./taipy/.data/").
-        repository_type (str): Type of the repository to be used to store Taipy data. The default value is "filesystem".
+        repository_type (str): Type of the repository to be used to store Taipy data. The default value is
+            "filesystem".
         repository_properties (Dict[str, Union[str, int]]): A dictionary of additional properties to be used by the
             repository.
         read_entity_retry (int): Number of retries to read an entity from the repository before return failure.
             The default value is 3.
         mode (str): The Taipy operating mode. By default, the `Core^` service runs in "development" mode.
             An "experiment" and a "production" mode are also available. Please refer to the
-            [Versioning management](../../core/versioning/) documentation page for more details.
+            [Versioning management](../core/versioning/index.md) documentation page for more details.
         version_number (str)): The identifier of the user application version. Please refer to the
-            [Versioning management](../../core/versioning/) documentation page for more details.
+            [Versioning management](../core/versioning/index.md) documentation page for more details.
         force (bool): If True, force the application run even if there are some conflicts in the
             configuration.
         core_version (str): The Taipy Core package version.

@@ -51,9 +51,9 @@ class CoreEventConsumerBase(threading.Thread):
 
         Parameters:
             registration_id (str): A unique identifier of the registration. You can get a
-            registration id invoking `Notifier.register()^` method.
+                registration id invoking `Notifier.register()^` method.
             queue (SimpleQueue): The queue from which events will be consumed. You can get a
-            queue invoking `Notifier.register()^` method.
+                queue invoking `Notifier.register()^` method.
         """
         threading.Thread.__init__(self, name=f"Thread-Taipy-Core-Consumer-{registration_id}")
         self.daemon = True

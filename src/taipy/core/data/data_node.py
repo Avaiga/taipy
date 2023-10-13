@@ -360,8 +360,8 @@ class DataNode(_Entity, _Labeled):
         """Creates and adds a new entry in the edits attribute without writing the data.
 
         Parameters:
-            options: track `timestamp`, `comments`, `job_id`. The others are user-custom, users can use options
-                to attach any information to an external edit of a data node.
+            options (dict[str, any)): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
+                use options to attach any information to an external edit of a data node.
         """
         edit = {}
         for k, v in options.items():
