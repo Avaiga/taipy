@@ -518,23 +518,27 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 self.jobs_list = get_jobs()
             return self.jobs_list
 
-    def job_adapter(self, data):
-        if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
-            if isinstance(data, Job):
-                entity = core_get(data.owner_id)
-                return (
-                    data.id,
-                    data.get_simple_label(),
-                    [],
-                    entity.get_simple_label() if entity else "",
-                    entity.id if entity else "",
-                    data.submit_id,
-                    data.creation_date,
-                    data.status.value,
-                    is_deletable(data),
-                    is_readable(data),
-                    is_editable(data),
-                )
+    def job_adapter(self, job):
+        try:
+            if hasattr(job, "id") and is_readable(job.id) and core_get(job.id) is not None:
+                if isinstance(job, Job):
+                    entity = core_get(job.owner_id)
+                    return (
+                        job.id,
+                        job.get_simple_label(),
+                        [],
+                        entity.get_simple_label() if entity else "",
+                        entity.id if entity else "",
+                        job.submit_id,
+                        job.creation_date,
+                        job.status.value,
+                        is_deletable(job),
+                        is_readable(job),
+                        is_editable(job),
+                    )
+        except Exception as e:
+            _warn(f"Job ({job.id if hasattr(job, 'id') else 'No_id'}) access raised an issue", e)
+        return None
 
     def act_on_jobs(self, state: State, id: str, payload: t.Dict[str, str]):
         args = payload.get("args")
