@@ -17,6 +17,24 @@
 
 <br>
 
+ # <div align="center"> 🎉Taipy is taking part in Hacktoberfest 2023!🎉 </div>
+
+*<div align="center">Don't miss out on the fun and register [here](https://hacktoberfest.com/) </div>* 
+
+<img align="right" src="readme_img/hackshirt.png" alt="Taipy Logo" width="50%" ></img>
+
+<div align="left">🔥 Win a limited edition t-shirt for a merged PR! </div>
+<div align="left">🏆 Only 10 are up for grabs so hurry! </div>
+<div align="left">🙌 Big or small, your contribution matters to us!
+ </div>
+
+<br>
+
+Where to find Taipy's Hacktoberfest issues :
++ If you're team [front-end](https://github.com/Avaiga/taipy-gui/labels/hacktoberfest)
++ If you're team [back-end](https://github.com/Avaiga/taipy-core/labels/hacktoberfest)
++ Or in this [repositery](https://github.com/Avaiga/taipy/labels/hacktoberfest)
+
 ###  <div align="left">Turns Data and AI algorithms into full web applications in no time.
 ###  How? Taipy GUI with Taipy Core pops out as a 360° platform to build production-ready web applications</div>
 
