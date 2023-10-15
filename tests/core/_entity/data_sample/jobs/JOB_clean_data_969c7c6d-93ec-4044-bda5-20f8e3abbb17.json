@@ -7,9 +7,9 @@
 "creation_date": "2023-10-08T21:12:32.990839",
 "subscribers": [
 {
-"fct_name": "_Orchestrator._on_status_change",
+"fct_name": "_Scheduler._on_status_change",
 "fct_params": [],
-"fct_module": "taipy.core._orchestrator._orchestrator"
+"fct_module": "taipy.core._scheduler._scheduler"
 }
 ],
 "stacktrace": [],
