@@ -17,16 +17,18 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_core_section():
-    core = Core()
-    core.run()
+    with patch("sys.argv", ["prog"]):
+        core = Core()
+        core.run()
     assert Config.core.mode == "development"
     assert Config.core.version_number == ""
     assert not Config.core.force
     core.stop()
 
-    Config.configure_core(mode="experiment", version_number="test_num", force=True)
-    core = Core()
-    core.run()
+    with patch("sys.argv", ["prog"]):
+        Config.configure_core(mode="experiment", version_number="test_num", force=True)
+        core = Core()
+        core.run()
     assert Config.core.mode == "experiment"
     assert Config.core.version_number == "test_num"
     assert Config.core.force
@@ -43,8 +45,9 @@ force = "true:bool"
         """
     )
     Config.load(toml_config.filename)
-    core = Core()
-    core.run()
+    with patch("sys.argv", ["prog"]):
+        core = Core()
+        core.run()
     assert Config.core.mode == "production"
     assert Config.core.version_number == "test_num_2"
     assert Config.core.force
