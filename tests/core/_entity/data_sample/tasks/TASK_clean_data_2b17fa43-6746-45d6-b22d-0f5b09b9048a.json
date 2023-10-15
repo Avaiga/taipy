@@ -1,9 +1,6 @@
 {
 "id": "TASK_clean_data_2b17fa43-6746-45d6-b22d-0f5b09b9048a",
-"owner_id": null,
-"parent_ids": [
-"PIPELINE_baseline_08c57938-83e8-4848-aca5-c98a4ca21e58"
-],
+"parent_id": null,
 "config_id": "clean_data",
 "input_ids": [
 "DATANODE_initial_dataset_7d571742-92a5-457f-aef2-5d2eff3a3e99"

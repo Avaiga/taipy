@@ -87,7 +87,6 @@ def __fetch_tasks_from_pipelines(pipelines: List, data: Dict) -> List:
 
 def __migrate_subscriber(fct_module, fct_name):
     """Rename scheduler by orchestrator on old jobs. Used to migrate from <=2.2 to >=2.3 version."""
-
     if fct_module == "taipy.core._scheduler._scheduler":
         fct_module = fct_module.replace("_scheduler", "_orchestrator")
         fct_name = fct_name.replace("_Scheduler", "_Orchestrator")
@@ -117,9 +116,11 @@ def __is_cacheable(task: Dict, data: Dict) -> bool:
 
 def _migrate_task(task: Dict, data: Dict) -> Dict:
     # parent_id has been renamed to owner_id
-    if task.get("parent_id"):
-        task["owner_id"] = task.get("parent_id")
+    try:
+        task["owner_id"] = task["parent_id"]
         del task["parent_id"]
+    except KeyError:
+        pass
 
     # properties was not present in 2.0
     task["properties"] = task.get("properties", {})
@@ -171,9 +172,11 @@ def _migrate_datanode(datanode: Dict) -> Dict:
         datanode["edits"] = edits
 
     # parent_id has been renamed to owner_id
-    if datanode.get("parent_id"):
-        datanode["owner_id"] = datanode.get("parent_id") # TODO: test this
+    try:
+        datanode["owner_id"] = datanode["parent_id"]
         del datanode["parent_id"]
+    except KeyError:
+        pass
 
     # Update Scope enum after Pipeline removal
     datanode["scope"] = __update_scope(datanode["scope"])
@@ -480,7 +483,7 @@ def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Op
     entities = _migrate_entity("SCENARIO", entities)
 
     __logger.info("Migrating TASKS")
-    entities = _migrate_entity("TASKS", entities)
+    entities = _migrate_entity("TASK", entities)
 
     __logger.info("Migrating DATANODES")
     entities = _migrate_entity("DATANODE", entities)
