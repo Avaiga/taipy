@@ -4,6 +4,7 @@
 "scope": "<Scope.GLOBAL: 4>",
 "storage_type": "parquet",
 "name": null,
+"cacheable": true,
 "owner_id": null,
 "parent_ids": [
 "TASK_predict_cf8b3c83-5ea7-40eb-b8af-d5240852ff5b",

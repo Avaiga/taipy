@@ -107,9 +107,16 @@ def _migrate_scenario(scenario: Dict, data: Dict) -> Dict:
 
 
 def __is_cacheable(task: Dict, data: Dict) -> bool:
-    for id in task["output_ids"]:
-        dn = data.get(id, {})
-        if "cacheable" not in dn or not dn["cacheable"]:
+    output_ids = task.get("output_ids", []) or task.get("outputs", [])  # output_ids is on entity, outputs is on config
+
+    for output_id in output_ids:
+        if output_id.endswith(":SECTION"):  # Get the config_id if the task is a Config
+            output_id = output_id.split(":")[0]
+        dn = data.get(output_id, {})
+        if "data" in dn:
+            dn = dn.get("data", {})
+
+        if "cacheable" not in dn or not dn["cacheable"] or dn["cacheable"] == "False:bool":
             return False
     return True
 
@@ -138,7 +145,12 @@ def _migrate_task_entity(task: Dict, data: Dict) -> Dict:
 
 def _migrate_task_config(id: str, task: Dict, config: Dict) -> Dict:
     task = __update_config_parent_ids(id, task, "TASK", config)
-    return _migrate_task(task, config["DATA_NODE"])
+    task = _migrate_task(task, config["DATA_NODE"])
+
+    # Convert the skippable boolean to a string if needed
+    if isinstance(task.get("skippable"), bool):
+        task["skippable"] = str(task["skippable"]) + ":bool"
+    return task
 
 
 def __update_scope(scope: str):
@@ -240,7 +252,7 @@ def _migrate_version(version: Dict) -> Dict:
 
     del config["PIPELINE"]
 
-    version["config"] = json.dumps(config)
+    version["config"] = json.dumps(config, ensure_ascii=False, indent=0)
     return version
 
 
