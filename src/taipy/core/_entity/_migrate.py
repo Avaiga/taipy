@@ -24,9 +24,6 @@ __logger = _TaipyLogger._get_logger()
 
 
 def __update_parent_ids(entity: Dict, data: Dict) -> Dict:
-    # parent_id was replaced by parent_ids
-    _ = entity.pop("parent_id", None)
-
     # parent_ids was not present in 2.0, need to be search for in tasks
     parent_ids = entity.get("parent_ids", [])
     if not parent_ids:
@@ -37,9 +34,6 @@ def __update_parent_ids(entity: Dict, data: Dict) -> Dict:
 
 
 def __update_config_parent_ids(id: str, entity: Dict, entity_type: str, config: Dict) -> Dict:
-    # parent_id was replaced by parent_ids
-    _ = entity.pop("parent_id", None)
-
     # parent_ids was not present in 2.0, need to be search for in tasks
     parent_ids = entity.get("parent_ids", [])
 
@@ -122,9 +116,9 @@ def __is_cacheable(task: Dict, data: Dict) -> bool:
 
 
 def _migrate_task(task: Dict, data: Dict) -> Dict:
-    # owner_id was not present in 2.0
+    # parent_id has been renamed to owner_id
     if task.get("parent_id"):
-        task["owner_id"] = task.get("owner_id")
+        task["owner_id"] = task.get("parent_id")
         del task["parent_id"]
 
     # properties was not present in 2.0
@@ -161,7 +155,7 @@ def _migrate_datanode(datanode: Dict) -> Dict:
     _ = datanode.pop("cacheable", False)
 
     # job_ids was replaced by edits
-    if "job_ids" in datanode:
+    if "job_ids" in datanode:   # TODO: test this
         datanode["edits"] = [{"job_id": job, "timestamp": datanode["last_edit_date"]} for job in datanode["job_ids"]]
     elif "edits" in datanode:
         # make sure timestamp inside edits is a string
@@ -176,8 +170,10 @@ def _migrate_datanode(datanode: Dict) -> Dict:
             edits.append(new_edit)
         datanode["edits"] = edits
 
-    # owner_id was not present in 2.0, need to be search for in tasks
-    datanode["owner_id"] = datanode["parent_ids"][0] if datanode["parent_ids"] else None
+    # parent_id has been renamed to owner_id
+    if datanode.get("parent_id"):
+        datanode["owner_id"] = datanode.get("parent_id") # TODO: test this
+        del datanode["parent_id"]
 
     # Update Scope enum after Pipeline removal
     datanode["scope"] = __update_scope(datanode["scope"])
