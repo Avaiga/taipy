@@ -168,7 +168,7 @@ def _migrate_datanode(datanode: Dict) -> Dict:
     _ = datanode.pop("cacheable", False)
 
     # job_ids was replaced by edits
-    if "job_ids" in datanode:   # TODO: test this
+    if "job_ids" in datanode:
         datanode["edits"] = [{"job_id": job, "timestamp": datanode["last_edit_date"]} for job in datanode["job_ids"]]
     elif "edits" in datanode:
         # make sure timestamp inside edits is a string
@@ -304,7 +304,7 @@ def __write_entities_to_fs(_entities: Dict, root: str):
 
 
 @lru_cache
-def __connect_mongodb(db_host: str, db_port: int, db_username: str, db_password: str) -> pymongo.MongoClient:
+def _connect_mongodb(db_host: str, db_port: int, db_username: str, db_password: str) -> pymongo.MongoClient:
     auth_str = ""
     if db_username and db_password:
         auth_str = f"{db_username}:{db_password}@"
@@ -320,7 +320,7 @@ def _load_all_entities_from_mongo(
     user: str,
     password: str,
 ):
-    client = __connect_mongodb(hostname, port, user, password)
+    client = _connect_mongodb(hostname, port, user, password)
     collections = [
         "cycle",
         "scenario",
@@ -347,7 +347,7 @@ def __write_entities_to_mongo(
     user: str,
     password: str,
 ):
-    client = __connect_mongodb(hostname, port, user, password)
+    client = _connect_mongodb(hostname, port, user, password)
     collections = [
         "cycle",
         "scenario",
