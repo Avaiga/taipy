@@ -25,8 +25,9 @@ class TestConfigComparator:
     section_1 = SectionForTest("section_1", attribute="attribute_1", prop="prop_1")
     section_2 = SectionForTest("section_2", attribute=2, prop="prop_2")
     section_2b = SectionForTest("section_2", attribute="attribute_2", prop="prop_2b")
-    section_3 = SectionForTest("section_5", attribute=[1, 2, 3, 4], prop=["prop_1"])
-    section_3b = SectionForTest("section_5", attribute=[1, 2], prop=["prop_1", "prop_2", "prop_3"])
+    section_3 = SectionForTest("section_3", attribute=[1, 2, 3, 4], prop=["prop_1"])
+    section_3b = SectionForTest("section_3", attribute=[1, 2], prop=["prop_1", "prop_2", "prop_3"])
+    section_3c = SectionForTest("section_3", attribute=[2, 1], prop=["prop_3", "prop_1", "prop_2"])
 
     def test_comparator_compare_method_call(self):
         _config_1 = _Config._default_config()
@@ -175,6 +176,19 @@ class TestConfigComparator:
         )
         assert conflicted_config_diff.get("removed_items") is None
         assert conflicted_config_diff.get("added_items") is None
+
+    def test_comparator_with_different_order_list_attributes(self):
+        _config_1 = _Config._default_config()
+        _config_1._unique_sections
+        _config_1._sections[SectionForTest.name] = {"section_3": self.section_3b}
+
+        # Create _config_2 with different order of list attributes
+        _config_2 = _Config._default_config()
+        _config_2._sections[SectionForTest.name] = {"section_3": self.section_3c}
+        config_diff = Config._comparator._find_conflict_config(_config_1, _config_2)
+
+        # There should be no difference since the order of list attributes is ignored
+        assert config_diff == {}
 
     def test_comparator_with_new_unique_section(self):
         _config_1 = _Config._default_config()

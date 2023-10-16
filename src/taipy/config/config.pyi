@@ -165,10 +165,6 @@ class Config:
         """"""
 
     @_Classproperty
-    def sequences(cls) -> Dict[str, SequenceConfig]:
-        """"""
-
-    @_Classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """"""
 
@@ -187,6 +183,7 @@ class Config:
         additional_data_node_configs: Optional[List[DataNodeConfig]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
+        sequences: Optional[Dict[str, List[TaskConfig]]] = None,
         **properties,
     ) -> "ScenarioConfig":
         """Configure a new scenario configuration.
@@ -208,6 +205,8 @@ class Config:
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `(taipy.)compare_scenarios()^` more more details.
+            sequences (Optional[Dict[str, List[TaskConfig]]]): Dictionary of sequence descriptions.
+                The default value is None.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:
@@ -220,6 +219,7 @@ class Config:
         additional_data_node_configs: List[DataNodeConfig] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
+        sequences: Optional[Dict[str, List[TaskConfig]]] = None,
         **properties,
     ) -> "ScenarioConfig":
         """Set the default values for scenario configurations.
@@ -244,6 +244,7 @@ class Config:
                 comparison, each comparator is applied to all the data nodes instantiated from
                 the data node configuration attached to the comparator. See
                 `taipy.compare_scenarios()^` more more details.
+            sequences (Optional[Dict[str, List[TaskConfig]]]): Dictionary of sequences. The default value is None.
             **properties (dict[str, any]): A keyworded variable length list of additional arguments.
 
         Returns:

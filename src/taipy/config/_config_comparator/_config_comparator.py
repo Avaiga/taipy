@@ -94,7 +94,7 @@ class _ConfigComparator:
         json_config_1 = json.loads(_JsonSerializer._serialize(config_1))
         json_config_2 = json.loads(_JsonSerializer._serialize(config_2))
 
-        config_deepdiff = DeepDiff(json_config_1, json_config_2)
+        config_deepdiff = DeepDiff(json_config_1, json_config_2, ignore_order=True)
 
         comparator_result = _ComparatorResult(copy(self._unconflicted_sections))
 
