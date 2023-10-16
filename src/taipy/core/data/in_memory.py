@@ -99,7 +99,17 @@ class InMemoryDataNode(DataNode):
         )
         if default_value is not None and self.id not in in_memory_storage:
             self._write(default_value)
-            self.track_edit(writer_identifier="TAIPY", comments="Default data written.")
+            self._last_edit_date = datetime.now()
+            self._edits.append(
+                Edit(
+                    {
+                        "timestamp": self._last_edit_date,
+                        "writer_identifier": "TAIPY",
+                        "comments": "Default data written.",
+                    }
+                )
+            )
+
         self._TAIPY_PROPERTIES.update({self.__DEFAULT_DATA_VALUE})
 
     @classmethod

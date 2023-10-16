@@ -123,7 +123,16 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
 
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)
-            self.track_edit(writer_identifier="TAIPY", comments="Default data written.")
+            self._last_edit_date = datetime.now()
+            self._edits.append(
+                Edit(
+                    {
+                        "timestamp": self._last_edit_date,
+                        "writer_identifier": "TAIPY",
+                        "comments": "Default data written.",
+                    }
+                )
+            )
 
         if not self._last_edit_date and isfile(self._path):  # type: ignore
             self._last_edit_date = datetime.now()
