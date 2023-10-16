@@ -20,6 +20,7 @@ import pytest
 from src.taipy.core import Task
 from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from src.taipy.core._repository.db._sql_session import _build_engine, _SQLSession
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data import InMemoryDataNode
 from src.taipy.core.data._data_manager import _DataManager
@@ -49,6 +50,12 @@ def init_managers():
     _TaskManagerFactory._build_manager()._delete_all()
     _DataManagerFactory._build_manager()._delete_all()
     _JobManagerFactory._build_manager()._delete_all()
+
+
+def clear_sql_session():
+    _build_engine.cache_clear()
+    _SQLSession._SessionLocal = None
+    _SQLSession._engine = None
 
 
 def test_create_jobs(init_sql_repo):
@@ -159,6 +166,8 @@ def test_delete_job(init_sql_repo):
 
 
 def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
+    clear_sql_session()
+
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     init_managers()
 
@@ -184,6 +193,8 @@ def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
 
 
 def test_force_deleting_unfinished_job(init_sql_repo):
+    clear_sql_session()
+
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     init_managers()
 

@@ -13,7 +13,7 @@ import os
 
 import pytest
 
-from src.taipy.core.data._data_fs_repository import _DataFSRepository
+from src.taipy.core.data._data_sql_repository import _DataSQLRepository
 from src.taipy.core.exceptions import ModelNotFound
 from src.taipy.core.task._task_fs_repository import _TaskFSRepository
 from src.taipy.core.task._task_sql_repository import _TaskSQLRepository
@@ -22,10 +22,9 @@ from src.taipy.core.task.task import Task, TaskId
 
 class TestTaskFSRepository:
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_save_and_load(self, tmpdir, data_node, repo):
+    def test_save_and_load(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
 
         repository._save(task)
@@ -34,10 +33,9 @@ class TestTaskFSRepository:
         assert isinstance(obj, Task)
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_exists(self, tmpdir, data_node, repo):
+    def test_exists(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
 
         repository._save(task)
@@ -46,10 +44,9 @@ class TestTaskFSRepository:
         assert not repository._exists("not-existed-task")
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_load_all(self, tmpdir, data_node, repo):
+    def test_load_all(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
 
         for i in range(10):
@@ -60,10 +57,9 @@ class TestTaskFSRepository:
         assert len(data_nodes) == 10
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_load_all_with_filters(self, tmpdir, data_node, repo):
+    def test_load_all_with_filters(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
 
         for i in range(10):
@@ -75,10 +71,9 @@ class TestTaskFSRepository:
         assert len(objs) == 1
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_delete(self, tmpdir, data_node, repo):
+    def test_delete(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
         repository._save(task)
 
@@ -88,10 +83,9 @@ class TestTaskFSRepository:
             repository._load(task.id)
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_delete_all(self, tmpdir, data_node, repo):
+    def test_delete_all(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
 
         for i in range(10):
@@ -105,10 +99,9 @@ class TestTaskFSRepository:
         assert len(repository._load_all()) == 0
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_delete_many(self, tmpdir, data_node, repo):
+    def test_delete_many(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
 
         for i in range(10):
@@ -123,10 +116,9 @@ class TestTaskFSRepository:
         assert len(repository._load_all()) == 7
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_delete_by(self, tmpdir, data_node, repo):
+    def test_delete_by(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
 
         # Create 5 entities with version 1.0 and 5 entities with version 2.0
@@ -142,10 +134,9 @@ class TestTaskFSRepository:
         assert len(repository._load_all()) == 5
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_search(self, tmpdir, data_node, repo):
+    def test_search(self, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node], version="random_version_number")
 
         for i in range(10):
@@ -166,10 +157,9 @@ class TestTaskFSRepository:
         assert repository._search("owner_id", "owner-2", filters=[{"version": "non_existed_version"}]) == []
 
     @pytest.mark.parametrize("repo", [_TaskFSRepository, _TaskSQLRepository])
-    def test_export(self, tmpdir, data_node, repo):
+    def test_export(self, tmpdir, data_node, repo, init_sql_repo):
         repository = repo()
-        repository.base_path = tmpdir
-        _DataFSRepository()._save(data_node)
+        _DataSQLRepository()._save(data_node)
         task = Task("task_config_id", {}, print, [data_node], [data_node])
         repository._save(task)
 

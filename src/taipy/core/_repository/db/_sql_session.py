@@ -12,6 +12,7 @@
 from functools import lru_cache
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -22,22 +23,48 @@ from .._decoder import loads
 from .._encoder import dumps
 
 
+class _SQLSession:
+    _engine = None
+    _SessionLocal = None
+
+    @classmethod
+    def init_db(cls):
+        if cls._SessionLocal:
+            return cls._SessionLocal
+
+        cls._engine = _build_engine()
+        cls._SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=cls._engine)
+
+        from ....core._version._version_model import _VersionModel
+        from ....core.cycle._cycle_model import _CycleModel
+        from ....core.data._data_model import _DataNodeModel
+        from ....core.job._job_model import _JobModel
+        from ....core.scenario._scenario_model import _ScenarioModel
+        from ....core.task._task_model import _TaskModel
+
+        _CycleModel.__table__.create(bind=cls._engine, checkfirst=True)
+        _DataNodeModel.__table__.create(bind=cls._engine, checkfirst=True)
+        _JobModel.__table__.create(bind=cls._engine, checkfirst=True)
+        _ScenarioModel.__table__.create(bind=cls._engine, checkfirst=True)
+        _TaskModel.__table__.create(bind=cls._engine, checkfirst=True)
+        _VersionModel.__table__.create(bind=cls._engine, checkfirst=True)
+
+        return cls._SessionLocal
+
+
 @lru_cache
-def _build_engine():
+def _build_engine() -> Engine:
     properties = Config.core.repository_properties
     try:
-        # More sql databases can be easily added in the future
-        engine = create_engine(
-            f"sqlite:///{properties.get('db_location')}?check_same_thread=False",
-            poolclass=StaticPool,
-            json_serializer=dumps,
-            json_deserializer=loads,
-        )
-        return engine
-
+        db_location = properties["db_location"]
     except KeyError:
         raise MissingRequiredProperty("Missing property db_location")
 
-
-engine = _build_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    # More sql databases can be easily added in the future
+    engine = create_engine(
+        f"sqlite:///{db_location}?check_same_thread=False",
+        poolclass=StaticPool,
+        json_serializer=dumps,
+        json_deserializer=loads,
+    )
+    return engine

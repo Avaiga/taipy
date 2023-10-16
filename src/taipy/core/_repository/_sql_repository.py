@@ -18,12 +18,11 @@ from sqlalchemy.exc import NoResultFound
 from ..common.typing import Converter, Entity, ModelType
 from ..exceptions import ModelNotFound
 from ._abstract_repository import _AbstractRepository
-from .db._init_db import init_db
-from .db._sql_session import SessionLocal
+from .db._sql_session import _SQLSession
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
-    def __init__(self, model_type: Type[ModelType], converter: Type[Converter], session=SessionLocal()):
+    def __init__(self, model_type: Type[ModelType], converter: Type[Converter], session=None):
         """
         Holds common methods to be used and extended when the need for saving
         dataclasses in a SqlLite database.
@@ -36,10 +35,10 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             converter: A class that handles conversion to and from a database backend
             db: An SQLAlchemy session object
         """
+        SessionLocal = _SQLSession.init_db()
+        self.db = session or SessionLocal()
         self.model_type = model_type
-        self.db = session
         self.converter = converter
-        init_db()
 
     ###############################
     # ##   Inherited methods   ## #
@@ -87,6 +86,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _delete_by(self, attribute: str, value: str):
         self.db.query(self.model_type).filter_by(**{attribute: value}).delete()
+        self.db.commit()
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
         query = self.db.query(self.model_type).filter_by(**{attribute: value})
