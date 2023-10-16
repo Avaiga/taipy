@@ -113,7 +113,6 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const zoomToFit = useCallback(() => engine.zoomToFit(), [engine]);
 
     useEffect(() => {
-        console.log("useEffect", displayModel);
         const model = new TaipyDiagramModel();
         initDiagram(engine);
 
