@@ -128,7 +128,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if event.operation == EventOperation.SUBMISSION:
                 self.scenario_status_callback(event.attribute_name, True)
                 return
-            self.scenario_refresh(event.entity_id if event.operation != EventOperation.DELETION and is_readable(event.entity_id) else None)
+            self.scenario_refresh(
+                event.entity_id if event.operation != EventOperation.DELETION and is_readable(event.entity_id) else None
+            )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
             try:
                 sequence = (
