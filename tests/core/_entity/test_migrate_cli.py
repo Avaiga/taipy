@@ -64,33 +64,19 @@ def test_migrate_fs_non_existing_folder(caplog):
     caplog.clear()
 
 
-# def test_migrate_sql_specified_path(caplog):
-#     _MigrateCLI.create_parser()
-
-#     # Copy the data_sample.sqlite to data.sqlite for testing
-#     data_sample_path = "tests/core/_entity/data_sample.sqlite"
-#     data_path = "tests/core/_entity/data.sqlite"
-#     shutil.copyfile(data_sample_path, data_path)
-
-#     with pytest.raises(SystemExit):
-#         with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", data_path]):
-#             _MigrateCLI.parse_arguments()
-#     assert f"Starting entity migration from {data_path} folder" in caplog.text
-
-#     # TODO: Compare migrated data.sqlite with data_sample_migrated.sqlite
-
-
-def test_migrate_sql_non_existing_folder(caplog):
+@patch("src.taipy.core._entity._migrate_cli._migrate_sql_entities")
+def test_migrate_sql_specified_path(_migrate_sql_entities_mock, tmp_sqlite):
     _MigrateCLI.create_parser()
 
-    # Test migrate with a non-existing-path.sqlite file
-    with pytest.raises(SystemExit) as err:
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", "non-existing-path.sqlite"]):
+    # Test the _migrate_sql_entities is called once with the correct path
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite]):
             _MigrateCLI.parse_arguments()
-    assert err.value.code == 1
-    assert "File 'non-existing-path.sqlite' does not exist." in caplog.text
+            assert _migrate_sql_entities_mock.assert_called_once_with(path=tmp_sqlite)
 
-    caplog.clear()
+
+def test_migrate_sql_non_existing_path(caplog):
+    _MigrateCLI.create_parser()
 
     # Test migrate without providing a path
     with pytest.raises(SystemExit) as err:
@@ -99,3 +85,27 @@ def test_migrate_sql_non_existing_folder(caplog):
 
     assert err.value.code == 1
     assert "Missing the required sqlite path." in caplog.text
+
+    caplog.clear()
+
+    # Test migrate with a non-existing-path.sqlite file
+    with pytest.raises(SystemExit) as err:
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", "non-existing-path.sqlite"]):
+            _MigrateCLI.parse_arguments()
+    assert err.value.code == 1
+    assert "File 'non-existing-path.sqlite' does not exist." in caplog.text
+
+
+@patch("src.taipy.core._entity._migrate_cli._migrate_mongo_entities")
+def test_call_to_migrate_mongo(_migrate_mongo_entities_mock):
+    _MigrateCLI.create_parser()
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo"]):
+            _MigrateCLI.parse_arguments()
+            assert _migrate_mongo_entities_mock.assert_called_once_with()
+
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo", "host", "port", "user", "password"]):
+            _MigrateCLI.parse_arguments()
+            assert _migrate_mongo_entities_mock.assert_called_once_with("host", "port", "user", "password")
