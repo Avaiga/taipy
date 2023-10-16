@@ -173,9 +173,13 @@ def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
 
     m = multiprocessing.Manager()
     lock = m.Lock()
+    dnm = _DataManagerFactory._build_manager()
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dnm._set(dn_1)
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dnm._set(dn_2)
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    dnm._set(dn_3)
     task = Task("task_cfg", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished")
     _OrchestratorFactory._build_dispatcher()
 
@@ -200,9 +204,13 @@ def test_force_deleting_unfinished_job(init_sql_repo):
 
     m = multiprocessing.Manager()
     lock = m.Lock()
+    dnm = _DataManagerFactory._build_manager()
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dnm._set(dn_1)
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dnm._set(dn_2)
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    dnm._set(dn_3)
     task_1 = Task(
         "task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="delete_force_unfinished_job"
     )

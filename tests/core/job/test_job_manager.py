@@ -22,6 +22,7 @@ from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatc
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import JobNotDeletedException
 from src.taipy.core.job._job_manager import _JobManager
@@ -155,9 +156,13 @@ def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     m = multiprocessing.Manager()
     lock = m.Lock()
+    dnm = _DataManagerFactory._build_manager()
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dnm._set(dn_1)
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dnm._set(dn_2)
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    dnm._set(dn_3)
     task = Task(
         "task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="raise_when_delete_unfinished"
     )
@@ -179,9 +184,13 @@ def test_force_deleting_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     m = multiprocessing.Manager()
     lock = m.Lock()
+    dnm = _DataManagerFactory._build_manager()
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dnm._set(dn_1)
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dnm._set(dn_2)
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    dnm._set(dn_3)
     task = Task(
         "task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="force_deleting_unfinished_job"
     )
@@ -295,9 +304,13 @@ def test_cancel_single_running_job():
 
     m = multiprocessing.Manager()
     lock = m.Lock()
+    dnm = _DataManagerFactory._build_manager()
     dn_1 = InMemoryDataNode("dn_config_1", Scope.SCENARIO, properties={"default_data": 1})
+    dnm._set(dn_1)
     dn_2 = InMemoryDataNode("dn_config_2", Scope.SCENARIO, properties={"default_data": 2})
+    dnm._set(dn_2)
     dn_3 = InMemoryDataNode("dn_config_3", Scope.SCENARIO)
+    dnm._set(dn_3)
     task = Task("task_config_1", {}, partial(lock_multiply, lock), [dn_1, dn_2], [dn_3], id="cancel_single_job")
 
     _OrchestratorFactory._build_dispatcher()
