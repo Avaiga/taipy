@@ -98,7 +98,8 @@ class InMemoryDataNode(DataNode):
             **properties
         )
         if default_value is not None and self.id not in in_memory_storage:
-            self.write(default_value)
+            self._write(default_value)
+            self.track_edit(writer_identifier="TAIPY", comments="Default data written.")
         self._TAIPY_PROPERTIES.update({self.__DEFAULT_DATA_VALUE})
 
     @classmethod

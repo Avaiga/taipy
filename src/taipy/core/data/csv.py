@@ -134,7 +134,8 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         if not self._last_edit_date and isfile(self._path):
             self._last_edit_date = datetime.now()
         if default_value is not None and not os.path.exists(self._path):
-            self.write(default_value)
+            self._write(default_value)
+            self.track_edit(writer_identifier="TAIPY", comments="Default data written.")
 
         self._TAIPY_PROPERTIES.update(
             {
