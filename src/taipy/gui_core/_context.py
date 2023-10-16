@@ -128,16 +128,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if event.operation == EventOperation.SUBMISSION:
                 self.scenario_status_callback(event.attribute_name, True)
                 return
-            with self.lock:
-                self.scenario_by_cycle = None
-                self.data_nodes_by_owner = None
-            scenario_id = (
-                event.entity_id if event.operation != EventOperation.DELETION and is_readable(event.entity_id) else None
-            )
-            self.gui._broadcast(
-                _GuiCoreContext._CORE_CHANGED_NAME,
-                {"scenario": scenario_id or True},
-            )
+            self.scenario_refresh(event.entity_id if event.operation != EventOperation.DELETION and is_readable(event.entity_id) else None)
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
             try:
                 sequence = (
@@ -162,6 +153,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 _GuiCoreContext._CORE_CHANGED_NAME,
                 {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True},
             )
+
+    def scenario_refresh(self, scenario_id: t.Optional[str]):
+        with self.lock:
+            self.scenario_by_cycle = None
+            self.data_nodes_by_owner = None
+        self.gui._broadcast(
+            _GuiCoreContext._CORE_CHANGED_NAME,
+            {"scenario": scenario_id or True},
+        )
 
     def scenario_adapter(self, scenario_or_cycle):
         try:
@@ -281,6 +281,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function):
                     try:
+                        scenario_id = None
                         res = gui._call_function_with_state(
                             on_creation_function,
                             [
@@ -298,6 +299,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         )
                         if isinstance(res, Scenario):
                             # everything's fine
+                            scenario_id = res.id
                             state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, "")
                             return
                         if res:
@@ -310,8 +312,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 elif on_creation is not None:
                     _warn(f"on_creation(): '{on_creation}' is not a function.")
                 scenario = create_scenario(scenario_config, date, name)
+                scenario_id = scenario.id
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error creating Scenario. {e}")
+            finally:
+                self.scenario_refresh(scenario_id)
         if scenario:
             if not is_editable(scenario):
                 state.assign(
