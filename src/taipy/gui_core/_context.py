@@ -119,18 +119,20 @@ class _GuiCoreContext(CoreEventConsumerBase):
         # locks
         self.lock = Lock()
         self.submissions_lock = Lock()
+        # super
         super().__init__(reg_id, reg_queue)
         self.start()
 
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
+            if event.operation == EventOperation.SUBMISSION:
+                self.scenario_status_callback(event.attribute_name, True)
+                return
             with self.lock:
                 self.scenario_by_cycle = None
                 self.data_nodes_by_owner = None
             scenario_id = (
-                event.entity_id
-                if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id)
-                else None
+                event.entity_id if event.operation != EventOperation.DELETION and is_readable(event.entity_id) else None
             )
             self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
@@ -140,7 +142,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             try:
                 sequence = (
                     core_get(event.entity_id)
-                    if event.operation.value != EventOperation.DELETION and is_readable(event.entity_id)
+                    if event.operation != EventOperation.DELETION and is_readable(event.entity_id)
                     else None
                 )
                 if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
@@ -153,13 +155,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             with self.lock:
                 self.jobs_list = None
             self.scenario_status_callback(event.entity_id)
-            self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
                 self.data_nodes_by_owner = None
             self.gui._broadcast(
                 _GuiCoreContext._CORE_CHANGED_NAME,
-                {"datanode": event.entity_id if event.operation.value != EventOperation.DELETION else True},
+                {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True},
             )
 
     def scenario_adapter(self, scenario_or_cycle):
@@ -391,9 +392,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                 _SubmissionStatus.SUBMITTED,
                                 job_ids,
                             )
-                        self.scenario_status_callback(jobs[0].id if isinstance(jobs, list) else jobs.id)
                     else:
                         _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")
+                self.scenario_status_callback(jobs[0].id if len(jobs) else "" if isinstance(jobs, list) else jobs.id)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
@@ -441,14 +442,18 @@ class _GuiCoreContext(CoreEventConsumerBase):
             return _SubmissionStatus.COMPLETED
         return _SubmissionStatus.UNDEFINED
 
-    def scenario_status_callback(self, job_id: str):
-        if not job_id or not is_readable(job_id):
+    def scenario_status_callback(self, job_id: str, is_submission: t.Optional[bool] = False):
+        if not job_id or not (is_submission or is_readable(job_id)):
             return
         try:
-            job = core_get(job_id)
-            if not job:
-                return
-            sub_id = job.submit_id
+            if is_submission:
+                sub_id = job_id
+                job = None
+            else:
+                job = core_get(job_id)
+                if not job:
+                    return
+                sub_id = job.submit_id
             sub_details = self.client_jobs_by_submission.get(sub_id)
             if not sub_details:
                 return
@@ -490,6 +495,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
         except Exception as e:
             _warn(f"Job ({job_id}) is not available", e)
+
+        finally:
+            self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
