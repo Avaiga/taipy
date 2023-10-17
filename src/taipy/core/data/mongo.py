@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from functools import lru_cache
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Set
 
@@ -18,6 +19,7 @@ import pymongo
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common._mongo_connector import _connect_mongodb
 from ..exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -231,32 +233,3 @@ class MongoCollectionDataNode(DataNode):
             The document dictionary.
         """
         return document_object.__dict__
-
-
-def _connect_mongodb(
-    db_host: str, db_port: int, db_username: str, db_password: str, db_extra_args: Dict[str, str]
-) -> pymongo.MongoClient:
-    """Create a connection to a Mongo database.
-
-    Args:
-        db_host (str): the database host.
-        db_port (int): the database port.
-        db_username (str): the database username.
-        db_password (str): the database password.
-        db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection
-            string.
-
-    Returns:
-        pymongo.MongoClient
-    """
-    auth_str = ""
-    if db_username and db_password:
-        auth_str = f"{db_username}:{db_password}@"
-
-    extra_args_str = "&".join(f"{k}={str(v)}" for k, v in db_extra_args.items())
-    if extra_args_str:
-        extra_args_str = "/?" + extra_args_str
-
-    connection_string = f"mongodb://{auth_str}{db_host}:{db_port}{extra_args_str}"
-
-    return pymongo.MongoClient(connection_string)
