@@ -71,3 +71,24 @@ class _MigrateCLI:
                 cls.__logger.error(f"Unknown repository type {repository_type}")
                 sys.exit(1)
             sys.exit(0)
+        elif getattr(args, "which", None) == "revert":
+            if repository_type == "filesystem":
+                path = path or ".data_backup"
+                if not os.path.isdir(path):
+                    cls.__logger.error(f"Folder '{path}' does not exist.")
+                    sys.exit(1)
+                _migrate_fs_entities(path)
+            elif repository_type == "sql":
+                if not path:
+                    cls.__logger.error("Missing the required sqlite path.")
+                    sys.exit(1)
+                if not os.path.exists(path):
+                    cls.__logger.error(f"File '{path}' does not exist.")
+                    sys.exit(1)
+                _migrate_sql_entities(path)
+            # elif repository_type == "mongo":
+            #     mongo_args = args.repository_type[1:] if path else []
+            #     _migrate_mongo_entities(*mongo_args)
+            # else:
+            #     cls.__logger.error(f"Unknown repository type {repository_type}")
+            #     sys.exit(1)
