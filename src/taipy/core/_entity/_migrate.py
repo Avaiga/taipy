@@ -512,8 +512,24 @@ def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Di
     return entities, versions
 
 
-def _migrate_fs_entities(path: str) -> None:
-    __logger.info(f"Starting entity migration from {path} folder")
+def _revert_migrate_fs_entities(backup_path: str):
+    __logger.info(f"Reverting entities from {backup_path} backup folder.")
+    shutil.move(backup_path, "".join(backup_path.rsplit("_backup", 1)))
+    __logger.info(f"Reverted entities from {backup_path} backup folder.")
+
+
+def _clean_backup_fs_entities(backup_path: str):
+    __logger.info(f"Cleaning backup entities from {backup_path} backup folder.")
+    shutil.rmtree(backup_path)
+    __logger.info(f"Cleaned backup entities from {backup_path} backup folder.")
+
+
+def _migrate_fs_entities(path: str):
+    __logger.info(f"Backing up entities from {path} folder before migration.")
+    shutil.copytree(path, f"{path}_backup")
+    __logger.info(f"Backed up entities from {path} folder before migration.")
+
+    __logger.info(f"Starting entity migration from {path} folder.")
     entities = _load_all_entities_from_fs(path)
 
     entities, _ = __migrate(entities)
