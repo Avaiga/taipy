@@ -40,7 +40,10 @@ class _MigrateCLI:
     def parse_arguments(cls):
         args = _CLI._parse()
 
-        if getattr(args, "which", None) == "migrate":
+        if getattr(args, "which", None) != "migrate":
+            return
+
+        if args.repository_type:
             repository_type = args.repository_type[0]
             try:
                 path = args.repository_type[1]
