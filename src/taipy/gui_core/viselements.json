@@ -129,7 +129,7 @@
                     {
                         "name": "show_tags",
                         "type": "bool",
-                        "default_value": "False",
+                        "default_value": "True",
                         "doc": "If False, the scenario tags are not visible."
                     },
                     {
@@ -259,89 +259,6 @@
             }
         ],
         [
-            "job_selector",
-            {
-                "inherits": [
-                    "core_gui_shared"
-                ],
-                "properties": [
-                    {
-                        "name": "value",
-                        "default_property": true,
-                        "type": "dynamic(Job|list[Job])",
-                        "doc": "Bound to the selected <code>Job^</code>(s), or None if there is none."
-                    },
-                    {
-                        "name": "show_id",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If False, the <code>Job^</code> id is not shown in the selector."
-                    },
-                    {
-                        "name": "show_submitted_label",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If False, the <code>Scenario^</code> or <code>Sequence^</code> label is not shown in the selector."
-                    },
-                    {
-                        "name": "show_submitted_id",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the <code>Scenario^</code> or <code>Sequence^</code> id is shown in the selector."
-                    },
-                    {
-                        "name": "show_submission_id",
-                        "type": "bool",
-                        "default_value": "False",
-                        "doc": "If True, the submission id is shown in the selector."
-                    },
-                    {
-                        "name": "show_date",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If False, the <code>Job^</code> date is not shown in the selector."
-                    },
-                    {
-                        "name": "show_cancel",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If False, the cancel buttons are not shown in the selector."
-                    },
-                    {
-                        "name": "show_delete",
-                        "type": "bool",
-                        "default_value": "True",
-                        "doc": "If False, the delete button are not shown in the selector."
-                    },
-                    {
-                        "name": "on_change",
-                        "type": "callback",
-                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Job^</code>): the selected job.</li>\n</ul>",
-                        "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "value",
-                                "optional[Job]"
-                            ]
-                        ]
-                    },
-                    {
-                        "name": "height",
-                        "type": "str",
-                        "default_value": "50vh",
-                        "doc": "The maximum height, in CSS units,of the tree."
-                    }
-                ]
-            }
-        ],
-        [
             "data_node",
             {
                 "inherits": [
@@ -423,6 +340,89 @@
                         "name": "scenario",
                         "type": "dynamic(Scenario)",
                         "doc": "Bound to the selected <code>Scenario^</code> from the owner list of Scenarios, or None if there is none."
+                    }
+                ]
+            }
+        ],
+        [
+            "job_selector",
+            {
+                "inherits": [
+                    "core_gui_shared"
+                ],
+                "properties": [
+                    {
+                        "name": "value",
+                        "default_property": true,
+                        "type": "dynamic(Job|list[Job])",
+                        "doc": "Bound to the selected <code>Job^</code>(s), or None if there is none."
+                    },
+                    {
+                        "name": "show_id",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the <code>Job^</code> id is not shown in the selector."
+                    },
+                    {
+                        "name": "show_submitted_label",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the <code>Scenario^</code> or <code>Sequence^</code> label is not shown in the selector."
+                    },
+                    {
+                        "name": "show_submitted_id",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the <code>Scenario^</code> or <code>Sequence^</code> id is shown in the selector."
+                    },
+                    {
+                        "name": "show_submission_id",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the submission id is shown in the selector."
+                    },
+                    {
+                        "name": "show_date",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the <code>Job^</code> date is not shown in the selector."
+                    },
+                    {
+                        "name": "show_cancel",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the Cancel buttons are not shown in the selector."
+                    },
+                    {
+                        "name": "show_delete",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "If False, the Delete button are not shown in the selector."
+                    },
+                    {
+                        "name": "on_change",
+                        "type": "callback",
+                        "doc": "The name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Job^</code>): the selected job.</li>\n</ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "var_name",
+                                "str"
+                            ],
+                            [
+                                "value",
+                                "optional[Job]"
+                            ]
+                        ]
+                    },
+                    {
+                        "name": "height",
+                        "type": "str",
+                        "default_value": "50vh",
+                        "doc": "The maximum height, in CSS units,of the tree."
                     }
                 ]
             }
