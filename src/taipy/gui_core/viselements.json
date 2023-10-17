@@ -391,13 +391,13 @@
                         "name": "show_cancel",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the cancel buttons are not shown in the selector."
+                        "doc": "If False, the Cancel buttons are not shown in the selector."
                     },
                     {
                         "name": "show_delete",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the delete button are not shown in the selector."
+                        "doc": "If False, the Delete button are not shown in the selector."
                     },
                     {
                         "name": "on_change",
