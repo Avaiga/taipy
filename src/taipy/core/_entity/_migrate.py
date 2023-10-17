@@ -490,7 +490,7 @@ FCT_MIGRATION_MAP = {
 }
 
 
-def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Optional[Dict]]:
+def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Dict]:
     __logger.info("Migrating SCENARIOS")
     entities = _migrate_entity("SCENARIO", entities)
 
@@ -508,10 +508,11 @@ def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Op
         versions = _migrate_entity("VERSION", versions)
     else:
         entities = _migrate_entity("VERSION", entities)
+        versions = {}
     return entities, versions
 
 
-def _migrate_fs_entities(path: str):
+def _migrate_fs_entities(path: str) -> None:
     __logger.info(f"Starting entity migration from {path} folder")
     entities = _load_all_entities_from_fs(path)
 
@@ -522,18 +523,18 @@ def _migrate_fs_entities(path: str):
     __logger.info("Migration finished")
 
 
-def _migrate_sql_entities(path: str):
+def _migrate_sql_entities(path: str) -> None:
     __logger.info(f"Starting entity migration from sqlite database {path}")
     entities, versions = _load_all_entities_from_sql(path)
 
-    entities, versions = __migrate(entities, versions)  # type: ignore
+    entities, versions = __migrate(entities, versions)
 
     __write_entities_to_sql(entities, versions, path)
 
     __logger.info("Migration finished")
 
 
-def _migrate_mongo_entities(hostname: str = "localhost", port: int = 27017, user: str = "", password: str = ""):
+def _migrate_mongo_entities(hostname: str = "localhost", port: int = 27017, user: str = "", password: str = "") -> None:
     __logger.info(f"Starting entity migration from MongoDB {hostname}:{port}")
     entities = _load_all_entities_from_mongo(hostname, port, user, password)
 
