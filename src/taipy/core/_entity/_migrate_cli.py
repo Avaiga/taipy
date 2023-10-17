@@ -9,13 +9,23 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
 import sys
+from typing import List
 
 from taipy._cli._base_cli import _CLI
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ._migrate import _migrate_fs_entities, _migrate_mongo_entities, _migrate_sql_entities
+from ._migrate import (
+    _clean_backup_file_entities,
+    _clean_backup_mongo_entities,
+    _clean_backup_sql_entities,
+    _migrate_fs_entities,
+    _migrate_mongo_entities,
+    _migrate_sql_entities,
+    _revert_migrate_file_entities,
+    _revert_migrate_mongo_entities,
+    _revert_migrate_sql_entities,
+)
 
 
 class _MigrateCLI:
@@ -30,10 +40,26 @@ class _MigrateCLI:
         )
         migrate_parser.add_argument(
             "--repository-type",
+            required=True,
             nargs="+",
             help="The type of repository to migrate. If filesystem or sql, a path to the database folder/.sqlite file "
             "should be informed. In case of mongo host, port, user and password must be informed, if left empty it "
             "is assumed default values",
+        )
+        migrate_parser.add_argument(
+            "--skip-backup",
+            action="store_true",
+            help="Skip the backup of entities before migration.",
+        )
+        migrate_parser.add_argument(
+            "--revert",
+            action="store_true",
+            help="Revert the migration of entities from backup folder.",
+        )
+        migrate_parser.add_argument(
+            "--clean-backup",
+            action="store_true",
+            help="Remove the backup of entities. Only use this option if the migration was successful.",
         )
 
     @classmethod
@@ -43,52 +69,72 @@ class _MigrateCLI:
         if getattr(args, "which", None) != "migrate":
             return
 
-        if args.repository_type:
-            repository_type = args.repository_type[0]
-            try:
-                path = args.repository_type[1]
-            except IndexError:
-                path = None
+        repository_type = args.repository_type[0]
+        repository_args = args.repository_type[1:] if len(args.repository_type) > 1 else [None]
 
-            if repository_type == "filesystem":
-                path = path or ".data"
-                if not os.path.isdir(path):
-                    cls.__logger.error(f"Folder '{path}' does not exist.")
-                    sys.exit(1)
-                _migrate_fs_entities(path)
-            elif repository_type == "sql":
-                if not path:
-                    cls.__logger.error("Missing the required sqlite path.")
-                    sys.exit(1)
-                if not os.path.exists(path):
-                    cls.__logger.error(f"File '{path}' does not exist.")
-                    sys.exit(1)
-                _migrate_sql_entities(path)
-            elif repository_type == "mongo":
-                mongo_args = args.repository_type[1:] if path else []
-                _migrate_mongo_entities(*mongo_args)
-            else:
-                cls.__logger.error(f"Unknown repository type {repository_type}")
+        if args.revert:
+            cls.__handle_revert_backup(repository_type, repository_args)
+        if args.clean_backup:
+            cls.__handle_clean_backup(repository_type, repository_args)
+
+        do_backup = False if args.skip_backup else True
+        cls.__migrate_entities(repository_type, repository_args, do_backup)
+        sys.exit(0)
+
+    @classmethod
+    def __handle_clean_backup(cls, repository_type: str, repository_args: List):
+        if repository_type == "filesystem":
+            path = repository_args[0] or ".data"
+            if not _clean_backup_file_entities(path):
                 sys.exit(1)
-            sys.exit(0)
-        elif getattr(args, "which", None) == "revert":
-            if repository_type == "filesystem":
-                path = path or ".data_backup"
-                if not os.path.isdir(path):
-                    cls.__logger.error(f"Folder '{path}' does not exist.")
-                    sys.exit(1)
-                _migrate_fs_entities(path)
-            elif repository_type == "sql":
-                if not path:
-                    cls.__logger.error("Missing the required sqlite path.")
-                    sys.exit(1)
-                if not os.path.exists(path):
-                    cls.__logger.error(f"File '{path}' does not exist.")
-                    sys.exit(1)
-                _migrate_sql_entities(path)
-            # elif repository_type == "mongo":
-            #     mongo_args = args.repository_type[1:] if path else []
-            #     _migrate_mongo_entities(*mongo_args)
-            # else:
-            #     cls.__logger.error(f"Unknown repository type {repository_type}")
-            #     sys.exit(1)
+        elif repository_type == "sql":
+            if not _clean_backup_sql_entities(repository_args[0]):
+                sys.exit(1)
+        # TODO
+        # elif repository_type == "mongo":
+        #     mongo_args = args.repository_type[1:] if path else []
+        #     if not _clean_backup_mongo_entities(*mongo_args):
+        #         sys.exit(1)
+        else:
+            cls.__logger.error(f"Unknown repository type {repository_type}")
+            sys.exit(1)
+
+        sys.exit(0)
+
+    @classmethod
+    def __handle_revert_backup(cls, repository_type: str, repository_args: List):
+        if repository_type == "filesystem":
+            path = repository_args[0] or ".data"
+            if not _revert_migrate_file_entities(path):
+                sys.exit(1)
+        elif repository_type == "sql":
+            if not _revert_migrate_sql_entities(repository_args[0]):
+                sys.exit(1)
+        # TODO
+        # elif repository_type == "mongo":
+        #     mongo_args = repository_args[1:5] if repository_args[0] else []
+        #     if not _revert_migrate_mongo_entities(*mongo_args):
+        #         sys.exit(1)
+        else:
+            cls.__logger.error(f"Unknown repository type {repository_type}")
+            sys.exit(1)
+        sys.exit(0)
+
+    @classmethod
+    def __migrate_entities(cls, repository_type: str, repository_args: List, do_backup: bool):
+        if repository_type == "filesystem":
+            path = repository_args[0] or ".data"
+            if not _migrate_fs_entities(path, do_backup):
+                sys.exit(1)
+
+        elif repository_type == "sql":
+            if not _migrate_sql_entities(repository_args[0], do_backup):
+                sys.exit(1)
+
+        elif repository_type == "mongo":
+            mongo_args = repository_args[1:5] if repository_args[0] else []
+            _migrate_mongo_entities(*mongo_args, backup=do_backup)  # type: ignore
+
+        else:
+            cls.__logger.error(f"Unknown repository type {repository_type}")
+            sys.exit(1)
