@@ -100,9 +100,9 @@ def excel_file_with_sheet_name(tmpdir_factory) -> str:
 
 @pytest.fixture(scope="function")
 def json_file(tmpdir_factory) -> str:
-    json = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    json_data = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
     fn = tmpdir_factory.mktemp("data").join("df.json")
-    json.to_json(str(fn))
+    json_data.to_json(str(fn))
     return fn.strpath
 
 
@@ -458,17 +458,3 @@ def init_sql_repo(tmp_sqlite):
     _VersionModel.__table__.create(bind=engine, checkfirst=True)
 
     return tmp_sqlite
-
-
-@pytest.fixture
-def entities_for_migration():
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/entities_2.4.json")
-    with open(path) as f:
-        return json.load(f)
-
-
-@pytest.fixture
-def expected_entities_for_migration():
-    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/entities_3.0.json")
-    with open(path) as f:
-        return json.load(f)

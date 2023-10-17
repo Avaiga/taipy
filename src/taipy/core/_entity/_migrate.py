@@ -11,6 +11,7 @@
 
 import json
 import os
+import shutil
 import sqlite3
 from functools import lru_cache
 from typing import Dict, List, Optional, Tuple
@@ -23,9 +24,6 @@ __logger = _TaipyLogger._get_logger()
 
 
 def __update_parent_ids(entity: Dict, data: Dict) -> Dict:
-    # parent_id was replaced by parent_ids
-    _ = entity.pop("parent_id", None)
-
     # parent_ids was not present in 2.0, need to be search for in tasks
     parent_ids = entity.get("parent_ids", [])
     if not parent_ids:
@@ -36,9 +34,6 @@ def __update_parent_ids(entity: Dict, data: Dict) -> Dict:
 
 
 def __update_config_parent_ids(id: str, entity: Dict, entity_type: str, config: Dict) -> Dict:
-    # parent_id was replaced by parent_ids
-    _ = entity.pop("parent_id", None)
-
     # parent_ids was not present in 2.0, need to be search for in tasks
     parent_ids = entity.get("parent_ids", [])
 
@@ -92,7 +87,6 @@ def __fetch_tasks_from_pipelines(pipelines: List, data: Dict) -> List:
 
 def __migrate_subscriber(fct_module, fct_name):
     """Rename scheduler by orchestrator on old jobs. Used to migrate from <=2.2 to >=2.3 version."""
-
     if fct_module == "taipy.core._scheduler._scheduler":
         fct_module = fct_module.replace("_scheduler", "_orchestrator")
         fct_name = fct_name.replace("_Scheduler", "_Orchestrator")
@@ -113,18 +107,27 @@ def _migrate_scenario(scenario: Dict, data: Dict) -> Dict:
 
 
 def __is_cacheable(task: Dict, data: Dict) -> bool:
-    for id in task["output_ids"]:
-        dn = data.get(id, {})
-        if "cacheable" not in dn or not dn["cacheable"]:
+    output_ids = task.get("output_ids", []) or task.get("outputs", [])  # output_ids is on entity, outputs is on config
+
+    for output_id in output_ids:
+        if output_id.endswith(":SECTION"):  # Get the config_id if the task is a Config
+            output_id = output_id.split(":")[0]
+        dn = data.get(output_id, {})
+        if "data" in dn:
+            dn = dn.get("data", {})
+
+        if "cacheable" not in dn or not dn["cacheable"] or dn["cacheable"] == "False:bool":
             return False
     return True
 
 
 def _migrate_task(task: Dict, data: Dict) -> Dict:
-    # owner_id was not present in 2.0
-    if task.get("parent_id"):
-        task["owner_id"] = task.get("owner_id")
+    # parent_id has been renamed to owner_id
+    try:
+        task["owner_id"] = task["parent_id"]
         del task["parent_id"]
+    except KeyError:
+        pass
 
     # properties was not present in 2.0
     task["properties"] = task.get("properties", {})
@@ -142,7 +145,12 @@ def _migrate_task_entity(task: Dict, data: Dict) -> Dict:
 
 def _migrate_task_config(id: str, task: Dict, config: Dict) -> Dict:
     task = __update_config_parent_ids(id, task, "TASK", config)
-    return _migrate_task(task, config["DATA_NODE"])
+    task = _migrate_task(task, config["DATA_NODE"])
+
+    # Convert the skippable boolean to a string if needed
+    if isinstance(task.get("skippable"), bool):
+        task["skippable"] = str(task["skippable"]) + ":bool"
+    return task
 
 
 def __update_scope(scope: str):
@@ -175,8 +183,12 @@ def _migrate_datanode(datanode: Dict) -> Dict:
             edits.append(new_edit)
         datanode["edits"] = edits
 
-    # owner_id was not present in 2.0, need to be search for in tasks
-    datanode["owner_id"] = datanode["parent_ids"][0] if datanode["parent_ids"] else None
+    # parent_id has been renamed to owner_id
+    try:
+        datanode["owner_id"] = datanode["parent_id"]
+        del datanode["parent_id"]
+    except KeyError:
+        pass
 
     # Update Scope enum after Pipeline removal
     datanode["scope"] = __update_scope(datanode["scope"])
@@ -240,7 +252,7 @@ def _migrate_version(version: Dict) -> Dict:
 
     del config["PIPELINE"]
 
-    version["config"] = json.dumps(config)
+    version["config"] = json.dumps(config, ensure_ascii=False, indent=0)
     return version
 
 
@@ -257,7 +269,7 @@ def _migrate_entity(entity_type: str, data: Dict) -> Dict:
     return data
 
 
-def _load_all_entities_from_fs(root: str = ".data") -> Dict:
+def _load_all_entities_from_fs(root: str) -> Dict:
     # run through all files in the data folder and load them
     entities = {}
     for root, dirs, files in os.walk(root):
@@ -274,17 +286,25 @@ def _load_all_entities_from_fs(root: str = ".data") -> Dict:
     return entities
 
 
-def __write_entities_to_fs(_entities: Dict, root: str = ".data"):
+def __write_entities_to_fs(_entities: Dict, root: str):
     if not os.path.exists(root):
         os.makedirs(root, exist_ok=True)
 
     for _id, entity in _entities.items():
-        with open(os.path.join(root, entity["path"]), "w") as f:
-            json.dump(entity["data"], f, indent=2)
+        # Do not write pipeline entities
+        if "PIPELINE" in _id:
+            continue
+        with open(entity["path"], "w") as f:
+            json.dump(entity["data"], f, indent=0)
+
+    # Remove pipelines folder
+    pipelines_path = os.path.join(root, "pipelines")
+    if os.path.exists(pipelines_path):
+        shutil.rmtree(pipelines_path)
 
 
 @lru_cache
-def __connect_mongodb(db_host: str, db_port: int, db_username: str, db_password: str) -> pymongo.MongoClient:
+def _connect_mongodb(db_host: str, db_port: int, db_username: str, db_password: str) -> pymongo.MongoClient:
     auth_str = ""
     if db_username and db_password:
         auth_str = f"{db_username}:{db_password}@"
@@ -295,12 +315,12 @@ def __connect_mongodb(db_host: str, db_port: int, db_username: str, db_password:
 
 
 def _load_all_entities_from_mongo(
-    hostname: str = "localhost",
-    port: int = 27017,
-    user: str = "taipy",
-    password: str = "password",
+    hostname: str,
+    port: int,
+    user: str,
+    password: str,
 ):
-    client = __connect_mongodb(hostname, port, user, password)
+    client = _connect_mongodb(hostname, port, user, password)
     collections = [
         "cycle",
         "scenario",
@@ -322,16 +342,15 @@ def _load_all_entities_from_mongo(
 
 def __write_entities_to_mongo(
     _entities: Dict,
-    hostname: str = "localhost",
-    port: int = 27017,
-    user: str = "taipy",
-    password: str = "password",
+    hostname: str,
+    port: int,
+    user: str,
+    password: str,
 ):
-    client = __connect_mongodb(hostname, port, user, password)
+    client = _connect_mongodb(hostname, port, user, password)
     collections = [
         "cycle",
         "scenario",
-        "pipeline",
         "task",
         "data_node",
         "job",
@@ -344,7 +363,7 @@ def __write_entities_to_mongo(
         )
 
 
-def _load_all_entities_from_sql(db_file: str = "test.db") -> Tuple[Dict, Dict]:
+def _load_all_entities_from_sql(db_file: str) -> Tuple[Dict, Dict]:
     conn = sqlite3.connect(db_file)
     query = "SELECT model_id, document FROM taipy_model"
     query_version = "SELECT * FROM taipy_version"
@@ -443,7 +462,7 @@ def __insert_version(version: dict, conn):
     conn.commit()
 
 
-def __write_entities_to_sql(_entities: Dict, _versions: Dict, db_file: str = "test.db"):
+def __write_entities_to_sql(_entities: Dict, _versions: Dict, db_file: str):
     conn = sqlite3.connect(db_file)
 
     for k, entity in _entities.items():
@@ -471,12 +490,12 @@ FCT_MIGRATION_MAP = {
 }
 
 
-def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Optional[Dict]]:
+def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Dict]:
     __logger.info("Migrating SCENARIOS")
     entities = _migrate_entity("SCENARIO", entities)
 
     __logger.info("Migrating TASKS")
-    entities = _migrate_entity("TASKS", entities)
+    entities = _migrate_entity("TASK", entities)
 
     __logger.info("Migrating DATANODES")
     entities = _migrate_entity("DATANODE", entities)
@@ -489,39 +508,38 @@ def __migrate(entities: Dict, versions: Optional[Dict] = None) -> Tuple[Dict, Op
         versions = _migrate_entity("VERSION", versions)
     else:
         entities = _migrate_entity("VERSION", entities)
+        versions = {}
     return entities, versions
 
 
 def _migrate_fs_entities(path: str) -> None:
-    __logger.info("Starting entity migration")
+    __logger.info(f"Starting entity migration from {path} folder")
     entities = _load_all_entities_from_fs(path)
 
     entities, _ = __migrate(entities)
 
-    __write_entities_to_fs(entities)
+    __write_entities_to_fs(entities, path)
 
     __logger.info("Migration finished")
 
 
 def _migrate_sql_entities(path: str) -> None:
-    __logger.info("Starting entity migration")
+    __logger.info(f"Starting entity migration from sqlite database {path}")
     entities, versions = _load_all_entities_from_sql(path)
 
-    entities, versions = __migrate(entities, versions)  # type: ignore
+    entities, versions = __migrate(entities, versions)
 
     __write_entities_to_sql(entities, versions, path)
 
     __logger.info("Migration finished")
 
 
-def _migrate_mongo_entities(
-    hostname: str = "localhost", port: int = 27017, user: str = "taipy", password: str = "password"
-) -> None:
-    __logger.info("Starting entity migration")
+def _migrate_mongo_entities(hostname: str = "localhost", port: int = 27017, user: str = "", password: str = "") -> None:
+    __logger.info(f"Starting entity migration from MongoDB {hostname}:{port}")
     entities = _load_all_entities_from_mongo(hostname, port, user, password)
 
     entities, _ = __migrate(entities)
 
-    __write_entities_to_mongo(entities)
+    __write_entities_to_mongo(entities, hostname, port, user, password)
 
     __logger.info("Migration finished")
