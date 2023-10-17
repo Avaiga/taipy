@@ -7,6 +7,7 @@ import Paper from "@mui/material/Paper";
 import Toolbar from "@mui/material/Toolbar";
 import { ZoomIn } from "@mui/icons-material";
 import createEngine from "@projectstorm/react-diagrams";
+import deepEqual from "fast-deep-equal/es6";
 
 import { DisplayModel } from "./utils/types";
 import { createDagreEngine, initDiagram, populateModel, relayoutDiagram } from "./utils/diagram";
@@ -67,6 +68,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const [scenarioId, setScenarioId] = useState("");
     const [engine] = useState(createEngine);
     const [dagreEngine] = useState(createDagreEngine);
+    const [displayModel, setDisplayModel] = useState<DisplayModel>();
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -74,7 +76,13 @@ const ScenarioDag = (props: ScenarioDagProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     const sizeSx = useMemo(
-        () => ({ width: props.width || "100%", height: props.height || "50vh", display: "grid", gridTemplateRows: showToolbar ? "auto 1fr" : "1fr", gridTemplateColumns: "1fr" }),
+        () => ({
+            width: props.width || "100%",
+            height: props.height || "50vh",
+            display: "grid",
+            gridTemplateRows: showToolbar ? "auto 1fr" : "1fr",
+            gridTemplateColumns: "1fr",
+        }),
         [props.width, props.height, showToolbar]
     );
 
@@ -86,7 +94,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         }
     }, [props.coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
 
-    const displayModel = useMemo(() => {
+    useEffect(() => {
         let dm: DisplayModel | undefined = undefined;
         if (Array.isArray(props.scenario)) {
             dm = getValidScenario(props.scenario);
@@ -97,7 +105,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
                 // Do nothing
             }
         }
-        return dm;
+        setDisplayModel((oldDm) => (deepEqual(oldDm, dm) ? oldDm : dm));
     }, [props.scenario, props.defaultScenario]);
 
     const relayout = useCallback(() => relayoutDiagram(engine, dagreEngine), [engine, dagreEngine]);
