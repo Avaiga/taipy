@@ -131,7 +131,7 @@ class _GuiCore(ElementLibrary):
                 "show_properties": ElementProperty(PropertyType.boolean, True),
                 "show_history": ElementProperty(PropertyType.boolean, True),
                 "show_data": ElementProperty(PropertyType.boolean, True),
-                "chart_configs": ElementProperty(PropertyType.dict),
+                "chart_config": ElementProperty(PropertyType.dict),
                 "class_name": ElementProperty(PropertyType.dynamic_string),
                 "scenario": ElementProperty(PropertyType.lov_value, "optional"),
                 "width": ElementProperty(PropertyType.string),
