@@ -250,7 +250,7 @@ class _GuiCore(ElementLibrary):
             _GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR,
         ]:
             state._add_attribute(var, "")
-        state.get_gui()._pre_render_page()
+        state.pre_render_pages()
 
     def get_version(self) -> str:
         if not hasattr(self, "version"):
