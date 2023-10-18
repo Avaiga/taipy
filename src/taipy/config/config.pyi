@@ -11,8 +11,9 @@
 
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
+from datetime import timedelta
 
-from taipy.core.config import DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig
+from taipy.core.config import DataNodeConfig, JobConfig, ScenarioConfig, TaskConfig, MigrationConfig, CoreSection
 
 from .checker.issue_collector import IssueCollector
 from .common._classproperty import _Classproperty
@@ -699,6 +700,7 @@ class Config:
         db_password: Optional[str] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
+        db_driver: Optional[str] = None,
         db_extra_args: Optional[Dict[str, Any]] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -721,6 +723,7 @@ class Config:
                 The default value is "localhost".
             db_port (Optional[int]): The database port.<br/>
                 The default value is 27017.
+            db_driver (Optional[str]): The database driver.
             db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             scope (Optional[Scope^]): The scope of the Mongo collection data node configuration.<br/>
@@ -815,5 +818,62 @@ class Config:
 
         Returns:
             The new job execution configuration.
+        """
+
+    @staticmethod
+    def add_migration_function(
+        target_version: str,
+        config: Union[Section, str],
+        migration_fct: Callable,
+        **properties,
+    ):
+        """Add a migration function for a Configuration to migrate entities to the target version.
+
+        Parameters:
+            target_version (str): The production version that entities are migrated to.
+            config (Union[Section, str]): The configuration or the `id` of the config that needs to migrate.
+            migration_fct (Callable): Migration function that takes an entity as input and returns a new entity
+                that is compatible with the target production version.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments.
+        Returns:
+            `MigrationConfig^`: The Migration configuration.
+        """
+
+    @staticmethod
+    def configure_core(
+        root_folder: Optional[str] = None,
+        storage_folder: Optional[str] = None,
+        repository_type: Optional[str] = None,
+        repository_properties: Optional[Dict[str, Union[str, int]]] = None,
+        read_entity_retry: Optional[int] = None,
+        mode: Optional[str] = None,
+        version_number: Optional[str] = None,
+        force: Optional[bool] = None,
+        **properties,
+    ) -> "CoreSection":
+        """Configure the Core service.
+
+        Parameters:
+            root_folder (Optional[str]): Path of the base folder for the taipy application.
+                The default value is "./taipy/"
+            storage_folder (Optional[str]): Folder name used to store Taipy data. The default value is ".data/".
+                It is used in conjunction with the `root_folder` field. That means the storage path is
+                <root_folder><storage_folder> (The default path is "./taipy/.data/").
+            repository_type (Optional[str]): The type of the repository to be used to store Taipy data.
+                The default value is "filesystem".
+            repository_properties (Optional[Dict[str, Union[str, int]]]): A dictionary of additional properties
+                to be used by the repository.
+            read_entity_retry (Optional[int]): Number of retries to read an entity from the repository
+                before return failure. The default value is 3.
+            mode (Optional[str]): Indicates the mode of the version management system.
+                Possible values are *"development"*, *"experiment"*, or *"production"*.
+            version_number (Optional[str]): The string identifier of the version.
+                 In development mode, the version number is ignored.
+            force (Optional[bool]): If True, Taipy will override a version even if the configuration
+                has changed and run the application.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional arguments configure the
+                behavior of the `Core^` service.
+        Returns:
+            The Core configuration.
         """
 
