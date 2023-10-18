@@ -9,6 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from ._migrate_fs import _clean_backup_file_entities, _migrate_fs_entities, _revert_migrate_file_entities
-from ._migrate_mongo import _clean_backup_mongo_entities, _migrate_mongo_entities, _revert_migrate_mongo_entities
-from ._migrate_sql import _clean_backup_sql_entities, _migrate_sql_entities, _revert_migrate_sql_entities
+from ._migrate_fs import _migrate_fs_entities, _remove_backup_file_entities, _restore_migrate_file_entities
+from ._migrate_mongo import _migrate_mongo_entities, _remove_backup_mongo_entities, _restore_migrate_mongo_entities
+from ._migrate_sql import _migrate_sql_entities, _remove_backup_sql_entities, _restore_migrate_sql_entities

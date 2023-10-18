@@ -55,7 +55,7 @@ def __write_entities_to_fs(_entities: Dict, root: str):
         shutil.rmtree(pipelines_path)
 
 
-def _revert_migrate_file_entities(path: str) -> bool:
+def _restore_migrate_file_entities(path: str) -> bool:
     backup_path = f"{path}_backup"
 
     if not os.path.exists(backup_path):
@@ -68,18 +68,18 @@ def _revert_migrate_file_entities(path: str) -> bool:
         __logger.warning(f"The original entities folder '{path}' does not exist.")
 
     os.rename(backup_path, path)
-    __logger.info(f"Reverted entities from backup folder '{backup_path}' to '{path}'.")
+    __logger.info(f"Restored entities from backup folder '{backup_path}' to '{path}'.")
     return True
 
 
-def _clean_backup_file_entities(path: str) -> bool:
+def _remove_backup_file_entities(path: str) -> bool:
     backup_path = f"{path}_backup"
     if not os.path.exists(backup_path):
         __logger.error(f"The backup folder '{backup_path}' does not exist.")
         return False
 
     shutil.rmtree(backup_path)
-    __logger.info(f"Cleaned backup entities from backup folder '{backup_path}'.")
+    __logger.info(f"Removed backup entities from backup folder '{backup_path}'.")
     return True
 
 

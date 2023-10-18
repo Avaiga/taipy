@@ -140,7 +140,7 @@ def __write_entities_to_sql(_entities: Dict, _versions: Dict, db_file: str):
         __insert_version(version, conn)
 
 
-def _revert_migrate_sql_entities(path: str) -> bool:
+def _restore_migrate_sql_entities(path: str) -> bool:
     file_name, file_extension = path.rsplit(".", 1)
     backup_path = f"{file_name}_backup.{file_extension}"
 
@@ -154,11 +154,11 @@ def _revert_migrate_sql_entities(path: str) -> bool:
         __logger.warning(f"The original entities database '{path}' does not exist.")
 
     os.rename(backup_path, path)
-    __logger.info(f"Reverted entities from backup database '{backup_path}' to '{path}'.")
+    __logger.info(f"Restored entities from backup database '{backup_path}' to '{path}'.")
     return True
 
 
-def _clean_backup_sql_entities(path: str) -> bool:
+def _remove_backup_sql_entities(path: str) -> bool:
     file_name, file_extension = path.rsplit(".", 1)
     backup_path = f"{file_name}_backup.{file_extension}"
     if not os.path.exists(backup_path):
@@ -166,7 +166,7 @@ def _clean_backup_sql_entities(path: str) -> bool:
         return False
 
     os.remove(backup_path)
-    __logger.info(f"Cleaned backup entities from backup database '{backup_path}'.")
+    __logger.info(f"Removed backup entities from backup database '{backup_path}'.")
     return True
 
 

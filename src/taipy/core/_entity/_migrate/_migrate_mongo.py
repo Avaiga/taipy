@@ -104,7 +104,7 @@ def _backup_mongo_entities(
     return True
 
 
-def _revert_migrate_mongo_entities(
+def _restore_migrate_mongo_entities(
     hostname: str = "localhost",
     port: int = 27017,
     user: str = "",
@@ -116,17 +116,17 @@ def _revert_migrate_mongo_entities(
         if collection.endswith(".bson"):
             with open(os.path.join(MONGO_BACKUP_FOLDER, collection), "rb+") as f:
                 db[collection.split(".")[0]].insert_many(bson.decode_all(f.read()))
-    __logger.info(f"Reverted entities from folder '{MONGO_BACKUP_FOLDER}'.")
+    __logger.info(f"Restored entities from folder '{MONGO_BACKUP_FOLDER}'.")
     return True
 
 
-def _clean_backup_mongo_entities() -> bool:
+def _remove_backup_mongo_entities() -> bool:
     if not os.path.isdir(MONGO_BACKUP_FOLDER):
         __logger.info(f"Backup folder {MONGO_BACKUP_FOLDER} does not exist.")
         return False
 
     shutil.rmtree(MONGO_BACKUP_FOLDER)
-    __logger.info(f"Cleaned backup folder {MONGO_BACKUP_FOLDER}.")
+    __logger.info(f"Removed backup folder {MONGO_BACKUP_FOLDER}.")
     return True
 
 

@@ -17,7 +17,6 @@ from unittest.mock import patch
 import pytest
 
 from src.taipy.core._entity._migrate_cli import _MigrateCLI
-from src.taipy.core._repository.db._sql_session import _build_engine, _SQLSession
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -58,7 +57,7 @@ def test_migrate_fs_specified_folder(caplog):
         assert not subdir.diff_files and not subdir.left_only and not subdir.right_only
 
 
-def test_migrate_fs_backup_and_clean(caplog):
+def test_migrate_fs_backup_and_remove(caplog):
     _MigrateCLI.create_parser()
 
     # Copy data_sample to .data folder for testing
@@ -67,9 +66,9 @@ def test_migrate_fs_backup_and_clean(caplog):
     backup_path = "tests/core/_entity/.data_backup"
     shutil.copytree(data_sample_path, data_path)
 
-    # Clean backup when it does not exist should raise an error
+    # Remove backup when it does not exist should raise an error
     with pytest.raises(SystemExit) as err:
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--clean-backup"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--remove-backup"]):
             _MigrateCLI.parse_arguments()
     assert err.value.code == 1
     assert f"The backup folder '{backup_path}' does not exist." in caplog.text
@@ -83,15 +82,15 @@ def test_migrate_fs_backup_and_clean(caplog):
 
     assert os.path.exists(backup_path)
 
-    # Clean backup
+    # Remove backup
     with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--clean-backup"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--remove-backup"]):
             _MigrateCLI.parse_arguments()
-    assert f"Cleaned backup entities from backup folder '{backup_path}'." in caplog.text
+    assert f"Removed backup entities from backup folder '{backup_path}'." in caplog.text
     assert not os.path.exists(backup_path)
 
 
-def test_migrate_fs_backup_and_revert(caplog):
+def test_migrate_fs_backup_and_restore(caplog):
     _MigrateCLI.create_parser()
 
     # Copy data_sample to .data folder for testing
@@ -100,9 +99,9 @@ def test_migrate_fs_backup_and_revert(caplog):
     backup_path = "tests/core/_entity/.data_backup"
     shutil.copytree(data_sample_path, data_path)
 
-    # Revert backup when it does not exist should raise an error
+    # Restore backup when it does not exist should raise an error
     with pytest.raises(SystemExit) as err:
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--revert"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--restore"]):
             _MigrateCLI.parse_arguments()
     assert err.value.code == 1
     assert f"The backup folder '{backup_path}' does not exist." in caplog.text
@@ -115,14 +114,14 @@ def test_migrate_fs_backup_and_revert(caplog):
 
     assert os.path.exists(backup_path)
 
-    # Revert the backup
+    # restore the backup
     with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--revert"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--restore"]):
             _MigrateCLI.parse_arguments()
-    assert f"Reverted entities from backup folder '{backup_path}' to '{data_path}'." in caplog.text
+    assert f"Restored entities from backup folder '{backup_path}' to '{data_path}'." in caplog.text
     assert not os.path.exists(backup_path)
 
-    # Compare migrated .data folder with data_sample to ensure reverting the backup worked
+    # Compare migrated .data folder with data_sample to ensure restoreing the backup worked
     dircmp_result = filecmp.dircmp(data_path, "tests/core/_entity/data_sample")
     assert not dircmp_result.diff_files and not dircmp_result.left_only and not dircmp_result.right_only
     for subdir in dircmp_result.subdirs.values():
@@ -151,7 +150,7 @@ def test_migrate_sql_specified_path(_migrate_sql_entities_mock, tmp_sqlite):
             assert _migrate_sql_entities_mock.assert_called_once_with(path=tmp_sqlite)
 
 
-def test_migrate_sql_backup_and_clean(caplog, tmp_sqlite):
+def test_migrate_sql_backup_and_remove(caplog, tmp_sqlite):
     _MigrateCLI.create_parser()
 
     # Create the .sqlite file to test
@@ -161,9 +160,9 @@ def test_migrate_sql_backup_and_clean(caplog, tmp_sqlite):
     file_name, file_extension = tmp_sqlite.rsplit(".", 1)
     backup_sqlite = f"{file_name}_backup.{file_extension}"
 
-    # Clean backup when it does not exist should raise an error
+    # Remove backup when it does not exist should raise an error
     with pytest.raises(SystemExit) as err:
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--clean-backup"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--remove-backup"]):
             _MigrateCLI.parse_arguments()
     assert err.value.code == 1
     assert f"The backup database '{backup_sqlite}' does not exist." in caplog.text
@@ -176,15 +175,15 @@ def test_migrate_sql_backup_and_clean(caplog, tmp_sqlite):
 
     assert os.path.exists(backup_sqlite)
 
-    # Clean backup
+    # Remove backup
     with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--clean-backup"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--remove-backup"]):
             _MigrateCLI.parse_arguments()
-    assert f"Cleaned backup entities from backup database '{backup_sqlite}'." in caplog.text
+    assert f"Removed backup entities from backup database '{backup_sqlite}'." in caplog.text
     assert not os.path.exists(backup_sqlite)
 
 
-def test_migrate_sql_backup_and_revert(caplog, tmp_sqlite):
+def test_migrate_sql_backup_and_restore(caplog, tmp_sqlite):
     _MigrateCLI.create_parser()
 
     # Create the .sqlite file to test
@@ -194,9 +193,9 @@ def test_migrate_sql_backup_and_revert(caplog, tmp_sqlite):
     file_name, file_extension = tmp_sqlite.rsplit(".", 1)
     backup_sqlite = f"{file_name}_backup.{file_extension}"
 
-    # Revert backup when it does not exist should raise an error
+    # Restore backup when it does not exist should raise an error
     with pytest.raises(SystemExit) as err:
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--revert"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--restore"]):
             _MigrateCLI.parse_arguments()
     assert err.value.code == 1
     assert f"The backup database '{backup_sqlite}' does not exist." in caplog.text
@@ -209,11 +208,11 @@ def test_migrate_sql_backup_and_revert(caplog, tmp_sqlite):
 
     assert os.path.exists(backup_sqlite)
 
-    # Revert the backup
+    # restore the backup
     with pytest.raises(SystemExit):
-        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--revert"]):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--restore"]):
             _MigrateCLI.parse_arguments()
-    assert f"Reverted entities from backup database '{backup_sqlite}' to '{tmp_sqlite}'." in caplog.text
+    assert f"Restored entities from backup database '{backup_sqlite}' to '{tmp_sqlite}'." in caplog.text
     assert not os.path.exists(backup_sqlite)
 
 
@@ -253,12 +252,12 @@ def test_call_to_migrate_mongo(_migrate_mongo_entities_mock):
             assert _migrate_mongo_entities_mock.assert_called_once_with("host", "port", "user", "password")
 
 
-def test_migrate_mongo_backup_and_clean():
+def test_migrate_mongo_backup_and_remove():
     # TODO
     pass
 
 
-def test_migrate_mongo_backup_and_revert():
+def test_migrate_mongo_backup_and_restore():
     # TODO
     pass
 
