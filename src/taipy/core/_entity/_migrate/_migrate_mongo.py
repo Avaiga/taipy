@@ -121,6 +121,10 @@ def _revert_migrate_mongo_entities(
 
 
 def _clean_backup_mongo_entities() -> bool:
+    if not os.path.isdir(MONGO_BACKUP_FOLDER):
+        __logger.info(f"Backup folder {MONGO_BACKUP_FOLDER} does not exist.")
+        return False
+
     shutil.rmtree(MONGO_BACKUP_FOLDER)
     __logger.info(f"Cleaned backup folder {MONGO_BACKUP_FOLDER}.")
     return True

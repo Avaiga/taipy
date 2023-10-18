@@ -91,7 +91,6 @@ class _MigrateCLI:
             if not _clean_backup_sql_entities(repository_args[0]):
                 sys.exit(1)
         elif repository_type == "mongo":
-            path = repository_args[0] or ".mongo_backup"
             if not _clean_backup_mongo_entities():
                 sys.exit(1)
         else:
