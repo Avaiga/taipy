@@ -13,11 +13,10 @@ from datetime import datetime, timedelta
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Set
 
-import pymongo
-
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common._mongo_connector import _connect_mongodb
 from ..exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -59,6 +58,7 @@ class MongoCollectionDataNode(DataNode):
             - _"db_password"_ `(str)`: The database password.\n
             - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.\n
             - _"db_port"_ `(int)`: The database port. The default value is 27017.\n
+            - _"db_driver"_ `(str)`: The database driver.\n
             - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database
                 connection string.\n
     """
@@ -72,12 +72,12 @@ class MongoCollectionDataNode(DataNode):
     __DB_HOST_KEY = "db_host"
     __DB_PORT_KEY = "db_port"
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
+    __DB_DRIVER_KEY = "db_driver"
 
     __DB_HOST_DEFAULT = "localhost"
     __DB_PORT_DEFAULT = 27017
 
     _CUSTOM_DOCUMENT_PROPERTY = "custom_document"
-    __DB_EXTRA_ARGS_KEY = "db_extra_args"
     _REQUIRED_PROPERTIES: List[str] = [
         __DB_NAME_KEY,
         __COLLECTION_KEY,
@@ -132,7 +132,8 @@ class MongoCollectionDataNode(DataNode):
             db_port=properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT),
             db_username=properties.get(self.__DB_USERNAME_KEY, ""),
             db_password=properties.get(self.__DB_PASSWORD_KEY, ""),
-            db_extra_args=properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
+            db_driver=properties.get(self.__DB_DRIVER_KEY, ""),
+            db_extra_args=frozenset(properties.get(self.__DB_EXTRA_ARGS_KEY, {}).items()),
         )
         self.collection = mongo_client[properties.get(self.__DB_NAME_KEY, "")][
             properties.get(self.__COLLECTION_KEY, "")
@@ -162,6 +163,7 @@ class MongoCollectionDataNode(DataNode):
                 self.__DB_PASSWORD_KEY,
                 self.__DB_HOST_KEY,
                 self.__DB_PORT_KEY,
+                self.__DB_DRIVER_KEY,
                 self.__DB_EXTRA_ARGS_KEY,
             }
         )
@@ -231,32 +233,3 @@ class MongoCollectionDataNode(DataNode):
             The document dictionary.
         """
         return document_object.__dict__
-
-
-def _connect_mongodb(
-    db_host: str, db_port: int, db_username: str, db_password: str, db_extra_args: Dict[str, str]
-) -> pymongo.MongoClient:
-    """Create a connection to a Mongo database.
-
-    Args:
-        db_host (str): the database host.
-        db_port (int): the database port.
-        db_username (str): the database username.
-        db_password (str): the database password.
-        db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection
-            string.
-
-    Returns:
-        pymongo.MongoClient
-    """
-    auth_str = ""
-    if db_username and db_password:
-        auth_str = f"{db_username}:{db_password}@"
-
-    extra_args_str = "&".join(f"{k}={str(v)}" for k, v in db_extra_args.items())
-    if extra_args_str:
-        extra_args_str = "/?" + extra_args_str
-
-    connection_string = f"mongodb://{auth_str}{db_host}:{db_port}{extra_args_str}"
-
-    return pymongo.MongoClient(connection_string)

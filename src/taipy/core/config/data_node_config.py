@@ -128,6 +128,7 @@ class DataNodeConfig(Section):
     _OPTIONAL_PASSWORD_MONGO_PROPERTY = "db_password"
     _OPTIONAL_HOST_MONGO_PROPERTY = "db_host"
     _OPTIONAL_PORT_MONGO_PROPERTY = "db_port"
+    _OPTIONAL_DRIVER_MONGO_PROPERTY = "db_driver"
     _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY = "db_extra_args"
     # Pickle
     _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY = "default_path"
@@ -217,6 +218,7 @@ class DataNodeConfig(Section):
             _OPTIONAL_PASSWORD_MONGO_PROPERTY: "",
             _OPTIONAL_HOST_MONGO_PROPERTY: "localhost",
             _OPTIONAL_PORT_MONGO_PROPERTY: 27017,
+            _OPTIONAL_DRIVER_MONGO_PROPERTY: "",
             _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY: None,
         },
         _STORAGE_TYPE_VALUE_PICKLE: {
@@ -957,6 +959,7 @@ class DataNodeConfig(Section):
         db_password: Optional[str] = None,
         db_host: Optional[str] = None,
         db_port: Optional[int] = None,
+        db_driver: Optional[str] = None,
         db_extra_args: Optional[Dict[str, Any]] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -979,6 +982,7 @@ class DataNodeConfig(Section):
                 The default value is "localhost".
             db_port (Optional[int]): The database port.<br/>
                 The default value is 27017.
+            db_driver (Optional[str]): The database driver.
             db_extra_args (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
                 into database connection string.
             scope (Optional[Scope^]): The scope of the Mongo collection data node configuration.<br/>
@@ -1010,6 +1014,8 @@ class DataNodeConfig(Section):
             properties[cls._OPTIONAL_HOST_MONGO_PROPERTY] = db_host
         if db_port is not None:
             properties[cls._OPTIONAL_PORT_MONGO_PROPERTY] = db_port
+        if db_driver is not None:
+            properties[cls._OPTIONAL_DRIVER_MONGO_PROPERTY] = db_driver
         if db_extra_args is not None:
             properties[cls._OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY] = db_extra_args
 

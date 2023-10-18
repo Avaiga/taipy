@@ -20,10 +20,16 @@ from bson import ObjectId
 from bson.errors import InvalidDocument
 
 from src.taipy.core import MongoDefaultDocument
+from src.taipy.core.common._mongo_connector import _connect_mongodb
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.mongo import MongoCollectionDataNode
 from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from taipy.config.common.scope import Scope
+
+
+@pytest.fixture
+def clear_mongo_connection_cache():
+    _connect_mongodb.cache_clear()
 
 
 @dataclass
@@ -122,7 +128,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_read(self, properties):
+    def test_read(self, properties, clear_mongo_connection_cache):
         mock_client = pymongo.MongoClient("localhost")
         mock_client[properties["db_name"]][properties["collection_name"]].insert_many(
             [
@@ -167,7 +173,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_read_empty_as(self, properties):
+    def test_read_empty_as(self, properties, clear_mongo_connection_cache):
         mongo_dn = MongoCollectionDataNode(
             "foo",
             Scope.SCENARIO,
@@ -186,7 +192,7 @@ class TestMongoCollectionDataNode:
             ({"a": 1, "bar": 2}),
         ],
     )
-    def test_read_wrong_object_properties_name(self, properties, data):
+    def test_read_wrong_object_properties_name(self, properties, data, clear_mongo_connection_cache):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithoutArgs
         mongo_dn = MongoCollectionDataNode(
@@ -208,7 +214,7 @@ class TestMongoCollectionDataNode:
             ({"foo": 1, "bar": 2}, [{"foo": 1, "bar": 2}]),
         ],
     )
-    def test_write(self, properties, data, written_data):
+    def test_write(self, properties, data, written_data, clear_mongo_connection_cache):
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
         mongo_dn.write(data)
 
@@ -227,7 +233,7 @@ class TestMongoCollectionDataNode:
             [],
         ],
     )
-    def test_write_empty_list(self, properties, data):
+    def test_write_empty_list(self, properties, data, clear_mongo_connection_cache):
         mongo_dn = MongoCollectionDataNode(
             "foo",
             Scope.SCENARIO,
@@ -239,7 +245,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_write_non_serializable(self, properties):
+    def test_write_non_serializable(self, properties, clear_mongo_connection_cache):
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
         data = {"a": 1, "b": mongo_dn}
         with pytest.raises(InvalidDocument):
@@ -247,7 +253,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_write_custom_encoder(self, properties):
+    def test_write_custom_encoder(self, properties, clear_mongo_connection_cache):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithCustomEncoder
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=custom_properties)
@@ -272,7 +278,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_write_custom_encoder_decoder(self, properties):
+    def test_write_custom_encoder_decoder(self, properties, clear_mongo_connection_cache):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithCustomEncoderDecoder
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=custom_properties)

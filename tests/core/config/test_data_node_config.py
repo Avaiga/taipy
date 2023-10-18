@@ -91,6 +91,7 @@ def test_data_node_config_default_parameter():
     assert mongo_dn_cfg.custom_document == MongoDefaultDocument
     assert mongo_dn_cfg.db_username == ""
     assert mongo_dn_cfg.db_password == ""
+    assert mongo_dn_cfg.db_driver == ""
     assert mongo_dn_cfg.validity_period is None
 
 
