@@ -90,8 +90,9 @@ _inject_section(
 )
 
 _Checker.add_checker(_ConfigIdChecker)
-_Checker.add_checker(_JobConfigChecker)
 _Checker.add_checker(_CoreSectionChecker)
 _Checker.add_checker(_DataNodeConfigChecker)
+_Checker.add_checker(_JobConfigChecker)
+# We don't need to add _MigrationConfigChecker because it is run only when the Core service is run.
 _Checker.add_checker(_TaskConfigChecker)
 _Checker.add_checker(_ScenarioConfigChecker)
