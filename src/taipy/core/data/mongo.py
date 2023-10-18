@@ -10,11 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
-from functools import lru_cache
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Set
-
-import pymongo
 
 from taipy.config.common.scope import Scope
 
@@ -61,6 +58,7 @@ class MongoCollectionDataNode(DataNode):
             - _"db_password"_ `(str)`: The database password.\n
             - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.\n
             - _"db_port"_ `(int)`: The database port. The default value is 27017.\n
+            - _"db_driver"_ `(str)`: The database driver.\n
             - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database
                 connection string.\n
     """
@@ -74,12 +72,12 @@ class MongoCollectionDataNode(DataNode):
     __DB_HOST_KEY = "db_host"
     __DB_PORT_KEY = "db_port"
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
+    __DB_DRIVER_KEY = "db_driver"
 
     __DB_HOST_DEFAULT = "localhost"
     __DB_PORT_DEFAULT = 27017
 
     _CUSTOM_DOCUMENT_PROPERTY = "custom_document"
-    __DB_EXTRA_ARGS_KEY = "db_extra_args"
     _REQUIRED_PROPERTIES: List[str] = [
         __DB_NAME_KEY,
         __COLLECTION_KEY,
@@ -134,7 +132,8 @@ class MongoCollectionDataNode(DataNode):
             db_port=properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT),
             db_username=properties.get(self.__DB_USERNAME_KEY, ""),
             db_password=properties.get(self.__DB_PASSWORD_KEY, ""),
-            db_extra_args=properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
+            db_driver=properties.get(self.__DB_DRIVER_KEY, ""),
+            db_extra_args=frozenset(properties.get(self.__DB_EXTRA_ARGS_KEY, {}).items()),
         )
         self.collection = mongo_client[properties.get(self.__DB_NAME_KEY, "")][
             properties.get(self.__COLLECTION_KEY, "")
@@ -164,6 +163,7 @@ class MongoCollectionDataNode(DataNode):
                 self.__DB_PASSWORD_KEY,
                 self.__DB_HOST_KEY,
                 self.__DB_PORT_KEY,
+                self.__DB_DRIVER_KEY,
                 self.__DB_EXTRA_ARGS_KEY,
             }
         )

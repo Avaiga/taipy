@@ -527,6 +527,7 @@ def test_set_default_mongo_collection_data_node_configuration():
     assert dn1.custom_document == MongoDefaultDocument
     assert dn1.db_host == "default_host"
     assert dn1.db_port == 1010
+    assert dn1.db_driver == "default server"
     assert dn1.db_extra_args == {"default": "default"}
     assert dn1.scope == Scope.GLOBAL
     assert dn1.validity_period == timedelta(2)
@@ -547,6 +548,7 @@ def test_set_default_mongo_collection_data_node_configuration():
     assert dn2.custom_document == MongoDefaultDocument
     assert dn2.db_host == "host_2"
     assert dn2.db_port == 2020
+    assert dn2.db_driver == "default server"
     assert dn2.db_extra_args == {"default": "default"}
     assert dn2.scope == Scope.GLOBAL
     assert dn2.validity_period == timedelta(2)
