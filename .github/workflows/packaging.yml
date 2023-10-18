@@ -36,15 +36,15 @@ jobs:
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
           python -c "import taipy as tp; tp.rest"
-          
+
           echo """
           import taipy
           from pathlib import Path
           taipy_gui_core_path = Path(taipy.__file__).absolute().parent / 'gui_core' / 'lib' / 'taipy-gui-core.js'
           if not taipy_gui_core_path.exists():
               raise FileNotFoundError(f'taipy-gui-core.js not found in {taipy_gui_core_path}')
-          """ > /tmp/verify_gui_core.py
-          python /tmp/verify_gui_core.py
+          """ > ${{ runner.temp }}/verify_gui_core.py
+          python ${{ runner.temp }}/verify_gui_core.py
 
       - name: Notify user if failed
         if: failure()
