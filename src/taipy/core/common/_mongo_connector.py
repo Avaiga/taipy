@@ -9,29 +9,26 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Dict, Optional
+from functools import lru_cache
 
 import pymongo
 
 
+@lru_cache
 def _connect_mongodb(
-    db_host: str,
-    db_port: int,
-    db_username: str,
-    db_password: str,
-    db_extra_args: Dict[str, str],
-    db_driver: Optional[str] = None,
+    db_host: str, db_port: int, db_username: str, db_password: str, db_extra_args: frozenset, db_driver: str
 ) -> pymongo.MongoClient:
     """Create a connection to a Mongo database.
+    The `"mongodb_extra_args"` passed by the user is originally a dictionary, but since `@lru_cache` wrapper only accepts
+    hashable parameters, the `"mongodb_extra_args"` should be converted into a frozenset beforehand.
 
-    Args:
+    Parameters:
         db_host (str): the database host.
         db_port (int): the database port.
         db_username (str): the database username.
         db_password (str): the database password.
-        db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database connection
-            string.
-
+        db_extra_args (frozenset): A frozenset converted from a dictionary of additional arguments to be passed into
+            database connection string.
     Returns:
         pymongo.MongoClient
     """
@@ -39,7 +36,7 @@ def _connect_mongodb(
     if db_username and db_password:
         auth_str = f"{db_username}:{db_password}@"
 
-    extra_args_str = "&".join(f"{k}={str(v)}" for k, v in db_extra_args.items())
+    extra_args_str = "&".join(f"{k}={str(v)}" for k, v in db_extra_args)
     if extra_args_str:
         extra_args_str = "/?" + extra_args_str
 
