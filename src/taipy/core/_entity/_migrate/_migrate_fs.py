@@ -68,7 +68,7 @@ def _restore_migrate_file_entities(path: str) -> bool:
         __logger.warning(f"The original entities folder '{path}' does not exist.")
 
     os.rename(backup_path, path)
-    __logger.info(f"Restored entities from backup folder '{backup_path}' to '{path}'.")
+    __logger.info(f"Restored entities from the backup folder '{backup_path}' to '{path}'.")
     return True
 
 
@@ -79,7 +79,7 @@ def _remove_backup_file_entities(path: str) -> bool:
         return False
 
     shutil.rmtree(backup_path)
-    __logger.info(f"Removed backup entities from backup folder '{backup_path}'.")
+    __logger.info(f"Removed backup entities from the backup folder '{backup_path}'.")
     return True
 
 
@@ -102,7 +102,7 @@ def _migrate_fs_entities(path: str, backup: bool = True) -> bool:
         try:
             shutil.copytree(path, backup_path)
         except FileExistsError:
-            __logger.warning(f"Backup folder '{backup_path}' already exists. Migration canceled.")
+            __logger.warning(f"The backup folder '{backup_path}' already exists. Migration canceled.")
             return False
         else:
             __logger.info(f"Backed up entities from '{path}' to '{backup_path}' folder before migration.")

@@ -154,7 +154,7 @@ def _restore_migrate_sql_entities(path: str) -> bool:
         __logger.warning(f"The original entities database '{path}' does not exist.")
 
     os.rename(backup_path, path)
-    __logger.info(f"Restored entities from backup database '{backup_path}' to '{path}'.")
+    __logger.info(f"Restored entities from the backup database '{backup_path}' to '{path}'.")
     return True
 
 
@@ -166,7 +166,7 @@ def _remove_backup_sql_entities(path: str) -> bool:
         return False
 
     os.remove(backup_path)
-    __logger.info(f"Removed backup entities from backup database '{backup_path}'.")
+    __logger.info(f"Removed backup entities from the backup database '{backup_path}'.")
     return True
 
 

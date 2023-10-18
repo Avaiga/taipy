@@ -96,11 +96,15 @@ def _backup_mongo_entities(
 ) -> bool:
     client = _connect_mongodb(hostname, port, user, password)
     db = client[DATABASE_NAME]
+
+    if not os.path.exists(MONGO_BACKUP_FOLDER):
+        os.makedirs(MONGO_BACKUP_FOLDER, exist_ok=True)
+
     for collection in OLD_COLLECTIONS:
         with open(os.path.join(MONGO_BACKUP_FOLDER, f"{collection}.bson"), "wb+") as f:
             for doc in db[collection].find():
                 f.write(bson.BSON.encode(doc))
-    __logger.info(f"Backed up entities to folder '{MONGO_BACKUP_FOLDER} before migration.")
+    __logger.info(f"Backed up entities to folder '{MONGO_BACKUP_FOLDER}' before migration.")
     return True
 
 
@@ -112,21 +116,29 @@ def _restore_migrate_mongo_entities(
 ) -> bool:
     client = _connect_mongodb(hostname, port, user, password)
     db = client[DATABASE_NAME]
+
+    if not os.path.isdir(MONGO_BACKUP_FOLDER):
+        __logger.info(f"The backup folder '{MONGO_BACKUP_FOLDER}' does not exist.")
+        return False
+
     for collection in os.listdir(MONGO_BACKUP_FOLDER):
         if collection.endswith(".bson"):
             with open(os.path.join(MONGO_BACKUP_FOLDER, collection), "rb+") as f:
-                db[collection.split(".")[0]].insert_many(bson.decode_all(f.read()))
-    __logger.info(f"Restored entities from folder '{MONGO_BACKUP_FOLDER}'.")
+                if bson_data := bson.decode_all(f.read()):  # type: ignore
+                    db[collection.split(".")[0]].insert_many(bson_data)
+
+    shutil.rmtree(MONGO_BACKUP_FOLDER)
+    __logger.info(f"Restored entities from the backup folder '{MONGO_BACKUP_FOLDER}'.")
     return True
 
 
 def _remove_backup_mongo_entities() -> bool:
     if not os.path.isdir(MONGO_BACKUP_FOLDER):
-        __logger.info(f"Backup folder {MONGO_BACKUP_FOLDER} does not exist.")
+        __logger.info(f"The backup folder '{MONGO_BACKUP_FOLDER}' does not exist.")
         return False
 
     shutil.rmtree(MONGO_BACKUP_FOLDER)
-    __logger.info(f"Removed backup folder {MONGO_BACKUP_FOLDER}.")
+    __logger.info(f"Removed backup entities from the backup folder '{MONGO_BACKUP_FOLDER}'.")
     return True
 
 
