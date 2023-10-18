@@ -14,6 +14,7 @@ import os
 import shutil
 from unittest.mock import patch
 
+import mongomock
 import pytest
 
 from src.taipy.core._entity._migrate_cli import _MigrateCLI
@@ -86,7 +87,7 @@ def test_migrate_fs_backup_and_remove(caplog):
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--remove-backup"]):
             _MigrateCLI.parse_arguments()
-    assert f"Removed backup entities from backup folder '{backup_path}'." in caplog.text
+    assert f"Removed backup entities from the backup folder '{backup_path}'." in caplog.text
     assert not os.path.exists(backup_path)
 
 
@@ -118,7 +119,7 @@ def test_migrate_fs_backup_and_restore(caplog):
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "filesystem", data_path, "--restore"]):
             _MigrateCLI.parse_arguments()
-    assert f"Restored entities from backup folder '{backup_path}' to '{data_path}'." in caplog.text
+    assert f"Restored entities from the backup folder '{backup_path}' to '{data_path}'." in caplog.text
     assert not os.path.exists(backup_path)
 
     # Compare migrated .data folder with data_sample to ensure restoreing the backup worked
@@ -179,7 +180,7 @@ def test_migrate_sql_backup_and_remove(caplog, tmp_sqlite):
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--remove-backup"]):
             _MigrateCLI.parse_arguments()
-    assert f"Removed backup entities from backup database '{backup_sqlite}'." in caplog.text
+    assert f"Removed backup entities from the backup database '{backup_sqlite}'." in caplog.text
     assert not os.path.exists(backup_sqlite)
 
 
@@ -208,11 +209,11 @@ def test_migrate_sql_backup_and_restore(caplog, tmp_sqlite):
 
     assert os.path.exists(backup_sqlite)
 
-    # restore the backup
+    # Restore the backup
     with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite, "--restore"]):
             _MigrateCLI.parse_arguments()
-    assert f"Restored entities from backup database '{backup_sqlite}' to '{tmp_sqlite}'." in caplog.text
+    assert f"Restored entities from the backup database '{backup_sqlite}' to '{tmp_sqlite}'." in caplog.text
     assert not os.path.exists(backup_sqlite)
 
 
@@ -252,14 +253,62 @@ def test_call_to_migrate_mongo(_migrate_mongo_entities_mock):
             assert _migrate_mongo_entities_mock.assert_called_once_with("host", "port", "user", "password")
 
 
-def test_migrate_mongo_backup_and_remove():
-    # TODO
-    pass
+@mongomock.patch(servers=(("localhost", 27017),))
+def test_migrate_mongo_backup_and_remove(caplog):
+    _MigrateCLI.create_parser()
+
+    mongo_backup_path = ".mongo_backup"
+
+    # Remove backup when it does not exist should raise an error
+    with pytest.raises(SystemExit) as err:
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo", "--remove-backup"]):
+            _MigrateCLI.parse_arguments()
+    assert err.value.code == 1
+    assert f"The backup folder '{mongo_backup_path}' does not exist." in caplog.text
+    assert not os.path.exists(mongo_backup_path)
+
+    # Run without --skip-backup to create the backup database
+    with pytest.raises(Exception):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo"]):
+            _MigrateCLI.parse_arguments()
+
+    assert os.path.exists(mongo_backup_path)
+
+    # Remove backup
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo", "--remove-backup"]):
+            _MigrateCLI.parse_arguments()
+    assert f"Removed backup entities from the backup folder '{mongo_backup_path}'." in caplog.text
+    assert not os.path.exists(mongo_backup_path)
 
 
-def test_migrate_mongo_backup_and_restore():
-    # TODO
-    pass
+@mongomock.patch(servers=(("localhost", 27017),))
+def test_migrate_mongo_backup_and_restore(caplog):
+    _MigrateCLI.create_parser()
+
+    mongo_backup_path = ".mongo_backup"
+
+    # Restore backup when it does not exist should raise an error
+    with pytest.raises(SystemExit) as err:
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo", "--restore"]):
+            _MigrateCLI.parse_arguments()
+    assert err.value.code == 1
+    assert f"The backup folder '{mongo_backup_path}' does not exist." in caplog.text
+    assert not os.path.exists(mongo_backup_path)
+
+    # Run without --skip-backup to create the backup database
+    with pytest.raises(Exception):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo"]):
+            _MigrateCLI.parse_arguments()
+
+    assert os.path.exists(mongo_backup_path)
+
+    # Restore the backup
+    with pytest.raises(SystemExit):
+        with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo", "--restore"]):
+            _MigrateCLI.parse_arguments()
+    assert f"Restored entities from the backup folder '{mongo_backup_path}'." in caplog.text
+    assert not os.path.exists(mongo_backup_path)
 
 
 def test_not_provide_valid_repository_type(caplog):
