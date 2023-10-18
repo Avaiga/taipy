@@ -195,7 +195,6 @@ class Gui:
     __UI_BLOCK_NAME = "TaipyUiBlockVar"
     __MESSAGE_GROUPING_NAME = "TaipyMessageGrouping"
     __ON_INIT_NAME = "TaipyOnInit"
-    __ON_LIB_INIT_NAME = "TaipyOnLibsInit"
     __ARG_CLIENT_ID = "client_id"
     __INIT_URL = "taipy-init"
     __JSX_URL = "taipy-jsx"
@@ -1709,24 +1708,23 @@ class Gui:
         return True
 
     def __init_libs(self):
-        if not _hasscopeattr(self, Gui.__ON_LIB_INIT_NAME):
-            _setscopeattr(self, Gui.__ON_LIB_INIT_NAME, True)
-            for name, libs in self.__extensions.items():
-                for lib in libs:
-                    if not isinstance(lib, ElementLibrary):
-                        continue
-                    try:
-                        self._call_function_with_state(lib.on_user_init, [])
-                    except Exception as e:  # pragma: no cover
-                        if not self._call_on_exception(f"{name}.on_user_init", e):
-                            _warn(f"Exception raised in {name}.on_user_init()", e)
+        for name, libs in self.__extensions.items():
+            for lib in libs:
+                if not isinstance(lib, ElementLibrary):
+                    continue
+                try:
+                    self._call_function_with_state(lib.on_user_init, [])
+                except Exception as e:  # pragma: no cover
+                    if not self._call_on_exception(f"{name}.on_user_init", e):
+                        _warn(f"Exception raised in {name}.on_user_init()", e)
 
     def __init_route(self):
         self.__set_client_id_in_context()
-        self.__init_libs()
         if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
+            _setscopeattr(self, Gui.__ON_INIT_NAME, True)
+            self.__pre_render_pages()
+            self.__init_libs()
             if hasattr(self, "on_init") and callable(self.on_init):
-                _setscopeattr(self, Gui.__ON_INIT_NAME, True)
                 try:
                     self._call_function_with_state(self.on_init, [])
                 except Exception as e:  # pragma: no cover
@@ -1751,6 +1749,14 @@ class Gui:
                 if not self._call_on_exception("on_status", e):
                     _warn("Exception raised in on_status", e)
         return None
+
+    def __pre_render_pages(self) -> None:
+        """Pre-render all pages to have a proper initialization of all variables"""
+        self.__set_client_id_in_context()
+        for page in self._config.pages:
+            if page is not None:
+                with contextlib.suppress(Exception):
+                    page.render(self)
 
     def __render_page(self, page_name: str) -> t.Any:
         self.__set_client_id_in_context()
