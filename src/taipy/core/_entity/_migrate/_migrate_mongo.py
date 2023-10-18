@@ -100,6 +100,7 @@ def _backup_mongo_entities(
         with open(os.path.join(MONGO_BACKUP_FOLDER, f"{collection}.bson"), "wb+") as f:
             for doc in db[collection].find():
                 f.write(bson.BSON.encode(doc))
+    __logger.info(f"Backed up entities to folder '{MONGO_BACKUP_FOLDER} before migration.")
     return True
 
 
@@ -115,11 +116,13 @@ def _revert_migrate_mongo_entities(
         if collection.endswith(".bson"):
             with open(os.path.join(MONGO_BACKUP_FOLDER, collection), "rb+") as f:
                 db[collection.split(".")[0]].insert_many(bson.decode_all(f.read()))
+    __logger.info(f"Reverted entities from folder '{MONGO_BACKUP_FOLDER}'.")
     return True
 
 
 def _clean_backup_mongo_entities() -> bool:
     shutil.rmtree(MONGO_BACKUP_FOLDER)
+    __logger.info(f"Cleaned backup folder {MONGO_BACKUP_FOLDER}.")
     return True
 
 
