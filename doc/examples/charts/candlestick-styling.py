@@ -14,8 +14,9 @@
 #     python <script>
 # You may need to install the yfinance package as well.
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import yfinance
+
+from taipy.gui import Gui
 
 # Extraction of a few days of stock historical data for AAPL using
 # the yfinance package (see https://pypi.org/project/yfinance/).

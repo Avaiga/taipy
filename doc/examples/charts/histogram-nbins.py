@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import random
+
+from taipy.gui import Gui
 
 # Random set of 100 samples
 samples = {"x": [random.gauss() for i in range(100)]}

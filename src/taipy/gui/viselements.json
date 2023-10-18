@@ -386,7 +386,7 @@
           {
             "name": "columns",
             "type": "str|list[str]|dict[str, dict[str, str]]",
-            "default_value": "_All columns_",
+            "default_value": "<i>All columns</i>",
             "doc": "The list of column names\n<ul>\n<li>str: ;-separated list of column names</li>\n<li>list[str]: list of names</li>\n<li>dict: {\"column_name\": {format: \"format\", index: 1}} if index is specified, it represents the display order of the columns.\nIf not, the list order defines the index</li>\n</ul>"
           },
           {
@@ -467,7 +467,7 @@
           {
             "name": "width",
             "type": "str|int|float",
-            "default_value": "100%",
+            "default_value": "\"100%\"",
             "doc": "The width, in CSS units, of this element."
           },
           {

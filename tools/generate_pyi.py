@@ -1,8 +1,17 @@
-# generate gui.pyi file
-import os, json
+# ############################################################
+# Generate Python interface definition files
+# ############################################################
+import json
+import os
 import typing as t
 
-os.system("pipenv run stubgen ./src/taipy/gui/gui.py --no-import --parse-only --export-less -o ./")
+# ############################################################
+# Generate gui pyi file (gui/gui.pyi)
+# ############################################################
+gui_py_file = "./src/taipy/gui/gui.py"
+gui_pyi_file = gui_py_file + "i"
+
+os.system(f"pipenv run stubgen {gui_py_file} --no-import --parse-only --export-less -o ./")
 
 from src.taipy.gui.config import Config
 
@@ -14,7 +23,7 @@ gui_config = "".join(
 )
 
 replaced_content = ""
-with open("./src/taipy/gui/gui.pyi", "r") as file:
+with open(gui_pyi_file, "r") as file:
     for line in file:
         if "def run(" in line:
             line = line.replace(
@@ -22,18 +31,25 @@ with open("./src/taipy/gui/gui.pyi", "r") as file:
             )
         replaced_content = replaced_content + line
 
-with open("./src/taipy/gui/gui.pyi", "w") as write_file:
+with open(gui_pyi_file, "w") as write_file:
     write_file.write(replaced_content)
 
-# Generate class api pyi file (__init__.pyi)
+# ############################################################
+# Generate Page Builder pyi file (gui/builder/__init__.pyi)
+# ############################################################
+builder_py_file = "./src/taipy/gui/builder/__init__.py"
+builder_pyi_file = builder_py_file + "i"
 with open("./src/taipy/gui/viselements.json", "r") as file:
     viselements = json.load(file)
-with open("./tools/class_api_templates/block.txt", "r") as file:
+with open("./tools/builder/block.txt", "r") as file:
     block_template = file.read()
-with open("./tools/class_api_templates/control.txt", "r") as file:
+with open("./tools/builder/control.txt", "r") as file:
     control_template = file.read()
 
-os.system("pipenv run stubgen ./src/taipy/gui/builder/__init__.py --no-import --parse-only --export-less -o ./")
+os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")
+
+with open(builder_pyi_file, "a") as file:
+    file.write("from ._element import _Element, _Block\n")
 
 
 def get_properties(element, viselements) -> t.List[t.Dict[str, t.Any]]:
@@ -70,7 +86,7 @@ for control_element in viselements["controls"]:
     properties = ", ".join([f"{p} = ..." for p in property_names])
     doc_arguments = f"\n{12*' '}".join([build_doc(p) for p in property_list])
     # append properties to __init__.pyi
-    with open("./src/taipy/gui/builder/__init__.pyi", "a") as file:
+    with open(builder_pyi_file, "a") as file:
         file.write(
             control_template.replace("{{name}}", name)
             .replace("{{properties}}", properties)
@@ -88,14 +104,14 @@ for block_element in viselements["blocks"]:
     properties = ", ".join([f"{p} = ..." for p in property_names])
     doc_arguments = f"{8*' '}".join([build_doc(p) for p in property_list])
     # append properties to __init__.pyi
-    with open("./src/taipy/gui/builder/__init__.pyi", "a") as file:
+    with open(builder_pyi_file, "a") as file:
         file.write(
             block_template.replace("{{name}}", name)
             .replace("{{properties}}", properties)
             .replace("{{doc_arguments}}", doc_arguments)
         )
 
-os.system("pipenv run isort src/taipy/gui/*.pyi")
-os.system("pipenv run black src/taipy/gui/*.pyi")
-os.system("pipenv run isort src/taipy/gui/builder/*.pyi")
-os.system("pipenv run black src/taipy/gui/builder/*.pyi")
+os.system(f"pipenv run isort {gui_pyi_file}")
+os.system(f"pipenv run black {gui_pyi_file}")
+os.system(f"pipenv run isort {builder_pyi_file}")
+os.system(f"pipenv run black {builder_pyi_file}")

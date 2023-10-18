@@ -14,8 +14,9 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 # Face-to-face bar charts example
-from taipy.gui import Gui
 import numpy
+
+from taipy.gui import Gui
 
 n_years = 10
 

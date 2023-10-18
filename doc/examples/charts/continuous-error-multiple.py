@@ -13,9 +13,11 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import datetime
+
 import dateutil.relativedelta
+
+from taipy.gui import Gui
 
 # Data is collected from January 1st, 2010, every month
 start_date = datetime.datetime(year=2010, month=1, day=1)

@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
 import random
+
+from taipy import Gui
 
 # Random data set
 data = [random.gauss(0, 5) for i in range(1000)]

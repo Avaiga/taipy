@@ -15,44 +15,39 @@ from os import path
 
 from ..page import Page
 from ..utils import _is_in_notebook, _varname_from_content
-from ._class_api import (
-    BlockElementApi,
-    ControlElementApi,
-    DefaultBlockElement,
-    ElementApi,
-    _ElementApiContextManager,
-    _ElementApiGenerator,
-    html,
-)
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
+    from ..builder._element import _Element
     from ..gui import Gui
 
 
 class _Renderer(Page, ABC):
     def __init__(self, **kwargs) -> None:
-        """Initialize a new _Renderer with the indicated content.
+        """NOT DOCUMENTED
+        Initialize a new _Renderer with the indicated content.
 
         Arguments:
             content (str): The text content or the path to the file holding the text to be transformed.
 
         If *content* is a path to a readable file, the file is read entirely as the text template.
         """
+        from ..builder._element import _Element
+
         super().__init__(**kwargs)
-        content: t.Optional[t.Union[str, ElementApi]] = kwargs.get("content", None)
+        content: t.Optional[t.Union[str, _Element]] = kwargs.get("content", None)
         if content is None:
             raise ValueError("'content' argument is missing for class '_Renderer'")
         self._content = ""
-        self._base_element: t.Optional[ElementApi] = None
+        self._base_element: t.Optional[_Element] = None
         self._filepath = ""
         if isinstance(content, str):
             self.__process_content(content)
-        elif isinstance(content, ElementApi):
+        elif isinstance(content, _Element):
             self._base_element = content
         else:
             raise ValueError(
-                f"'content' argument has incorrect type '{type(content).__name__}'. Property must be type of Union[str, ElementApi]"
+                f"'content' argument has incorrect type '{type(content).__name__}'. This must be a string or an Builder element."
             )
 
     def __process_content(self, content: str) -> None:
@@ -72,9 +67,9 @@ class _Renderer(Page, ABC):
             self._filepath = content
 
     def set_content(self, content: str) -> None:
-        """Set a new renderer content.
+        """Set a new page content.
 
-        Reads the new renderer content and reinitializes the _Renderer instance to reflect the change.
+        Reads the new page content and reinitializes the `Page^` instance to reflect the change.
 
         !!! important
             This function can only be used in an IPython notebook context.
@@ -112,14 +107,13 @@ class _EmptyPage(_Renderer):
 
 
 class Markdown(_Renderer):
-    """
-    Page generator for _Markdown_ text.
+    """Page generator for *Markdown* text.
 
     Taipy can use Markdown text to create pages that are the base of
     user interfaces.
 
     You can find details on the Taipy Markdown-specific syntax and how to add
-    Taipy Visual Elements in the [section on HTML](../gui/pages.md#using-markdown)
+    Taipy Visual Elements in the [section on HTML](../gui/pages/index.md#using-markdown)
     of the User Manual.
     """
 
@@ -141,13 +135,13 @@ class Markdown(_Renderer):
 
 
 class Html(_Renderer):
-    """Page generator for _HTML_ text.
+    """Page generator for *HTML* text.
 
     Taipy can use HTML code to create pages that are the base of
     user interfaces.
 
     You can find details on HTML-specific constructs and how to add
-    Taipy Visual Elements in the [section on HTML](../gui/pages.md#using-html)
+    Taipy Visual Elements in the [section on HTML](../gui/pages/index.md#using-html)
     of the User Manual.
     """
 
@@ -157,7 +151,7 @@ class Html(_Renderer):
         Arguments:
             content (str): The text content or the path to the file holding the HTML text to
                 be transformed.<br/>
-                If _content_ is a path to a readable file, the file is read as the HTML
+                If *content* is a path to a readable file, the file is read as the HTML
                 template content.
         """
         kwargs["content"] = content
@@ -174,40 +168,3 @@ class Html(_Renderer):
         parser.feed_data(self._content)
         self.head = parser.head
         return parser.get_jsx()
-
-
-class ClassApi(_Renderer):
-    """
-    Page generator for Element Api.
-    """
-
-    def __init__(self, content: t.Optional[ElementApi] = None, **kwargs) -> None:
-        if content is None:
-            content = DefaultBlockElement()
-        kwargs["content"] = content
-        super().__init__(**kwargs)
-
-    # Generate JSX from Element Object
-    def render(self, gui) -> str:
-        if self._base_element is None:
-            return "<h1>No Base Element found for Page</h1>"
-        return self._base_element._render(gui)
-
-    def add(self, *elements: ElementApi):
-        if not isinstance(self._base_element, BlockElementApi):
-            raise RuntimeError("Can't add child element to non-block element")
-        for element in elements:
-            if element not in self._base_element._children:
-                self._base_element._children.append(element)
-        return self
-
-    def __enter__(self):
-        if self._base_element is None:
-            raise RuntimeError("Can't use context manager with missing block element for Page")
-        if not isinstance(self._base_element, BlockElementApi):
-            raise RuntimeError("Can't add child element to non-block element")
-        _ElementApiContextManager().push(self._base_element)
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        _ElementApiContextManager().pop()

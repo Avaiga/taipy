@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 from datetime import date, timedelta
+
+from taipy.gui import Gui
 
 # Create the list of dates (all year 2000)
 all_dates = {}

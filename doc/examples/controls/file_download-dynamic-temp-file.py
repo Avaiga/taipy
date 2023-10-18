@@ -13,10 +13,11 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui, download
-from decimal import getcontext, Decimal
-from tempfile import NamedTemporaryFile
 import os
+from decimal import Decimal, getcontext
+from tempfile import NamedTemporaryFile
+
+from taipy.gui import Gui, download
 
 # Initial precision
 precision = 10

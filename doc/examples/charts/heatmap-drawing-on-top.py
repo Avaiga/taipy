@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import numpy
+
+from taipy.gui import Gui
 
 
 # Return the x and y coordinates of the spiral for the given angle

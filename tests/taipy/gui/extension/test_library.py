@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 import inspect
 import typing as t
-import pytest
 from pathlib import Path
+
+import pytest
 
 from taipy.gui import Gui
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType

@@ -9,11 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
+
+import pandas as pd
 import pytest
+
 from taipy.gui import Gui
 from taipy.gui.utils import _TaipyContent
-import pandas as pd
-import json
 
 
 def test__get_real_var_name(gui: Gui):

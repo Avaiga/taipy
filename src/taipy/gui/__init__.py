@@ -24,7 +24,7 @@ Here is how you can create your first Taipy User Interface:
 
    - Create a Python source file.
      Copy these two lines into a file called *taipy_app.py*.
-     ```py
+     ```py title="taipy_app.py"
      from taipy import Gui
      Gui("# Hello Taipy!").run()
      ```

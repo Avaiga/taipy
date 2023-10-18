@@ -1,7 +1,9 @@
-from taipy.gui import Gui
-from example_library import ExampleLibrary
 import random
 import string
+
+from example_library import ExampleLibrary
+
+from taipy.gui import Gui
 
 # Initial value
 label = "Here is some text"

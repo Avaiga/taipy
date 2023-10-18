@@ -11,21 +11,21 @@
 
 import typing as t
 
-from ...utils.singleton import _Singleton
+from ..utils.singleton import _Singleton
 
 if t.TYPE_CHECKING:
-    from .element_api import BlockElementApi
+    from ._element import _Block
 
 
-class _ElementApiContextManager(object, metaclass=_Singleton):
+class _BuilderContextManager(object, metaclass=_Singleton):
     def __init__(self):
-        self.__element_list: t.List["BlockElementApi"] = []
+        self.__blocks: t.List["_Block"] = []
 
-    def push(self, element: "BlockElementApi") -> None:
-        self.__element_list.append(element)
+    def push(self, element: "_Block") -> None:
+        self.__blocks.append(element)
 
-    def pop(self) -> t.Optional["BlockElementApi"]:
-        return self.__element_list.pop() if self.__element_list else None
+    def pop(self) -> t.Optional["_Block"]:
+        return self.__blocks.pop() if self.__blocks else None
 
-    def peek(self) -> t.Optional["BlockElementApi"]:
-        return self.__element_list[-1] if self.__element_list else None
+    def peek(self) -> t.Optional["_Block"]:
+        return self.__blocks[-1] if self.__blocks else None

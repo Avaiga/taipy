@@ -13,9 +13,10 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import math
 import random
+
+from taipy.gui import Gui
 
 # Number of samples
 max_x = 20

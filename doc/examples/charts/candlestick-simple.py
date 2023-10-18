@@ -14,8 +14,9 @@
 #     python <script>
 # You may need to install the yfinance package as well.
 # -----------------------------------------------------------------------------------------
-from taipy import Gui
 import yfinance
+
+from taipy import Gui
 
 # Extraction of a month of stock data for AAPL using the
 # yfinance package (see https://pypi.org/project/yfinance/).

@@ -13,9 +13,10 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import numpy
 import pandas
+
+from taipy.gui import Gui
 
 # Largest cities: name, location and population
 # Source: https://simplemaps.com/data/world-cities

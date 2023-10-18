@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import random
+
+from taipy.gui import Gui
 
 # Random data set
 data = [random.random() for i in range(500)]

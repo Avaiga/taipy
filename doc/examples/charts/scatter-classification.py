@@ -14,11 +14,11 @@
 #     python <script>
 # You may need to install the scikit-learn package as well.
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
-
 import numpy
 import pandas
 from sklearn.datasets import make_classification
+
+from taipy.gui import Gui
 
 # Let scikit-learn generate a random 2-class classification problem
 features, label = make_classification(n_samples=1000, n_features=2, n_informative=2, n_redundant=0)

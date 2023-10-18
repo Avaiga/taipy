@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import random
+
+from taipy.gui import Gui
 
 # Number of samples
 n_samples = 10

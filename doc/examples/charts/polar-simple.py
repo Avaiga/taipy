@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import math
+
+from taipy.gui import Gui
 
 # One data point for each degree
 theta = range(0, 360)

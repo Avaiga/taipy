@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import datetime
+
+from taipy.gui import Gui
 
 # Retrieved history:
 # (Open, Close, Low, High)

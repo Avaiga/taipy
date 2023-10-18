@@ -14,7 +14,7 @@ import inspect
 import pytest
 
 from taipy.gui import Gui
-from taipy.gui.extension import ElementLibrary, Element
+from taipy.gui.extension import Element, ElementLibrary
 
 
 class MyLibrary(ElementLibrary):

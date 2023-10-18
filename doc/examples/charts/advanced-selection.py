@@ -13,9 +13,11 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
-import numpy
 import random
+
+import numpy
+
+from taipy.gui import Gui
 
 # x = [0..20]
 x = list(range(0, 21))

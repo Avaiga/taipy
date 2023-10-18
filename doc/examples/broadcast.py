@@ -19,9 +19,10 @@
 # The text of the button that starts or stops the thread is updated on every client's browser
 # using a direct assignment of the state property because the variable is declared 'shared'.
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui, State, broadcast_callback
-from threading import Thread, Event
+from threading import Event, Thread
 from time import sleep
+
+from taipy.gui import Gui, State, broadcast_callback
 
 counter = 0
 

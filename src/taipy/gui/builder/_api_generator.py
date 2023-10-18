@@ -18,16 +18,16 @@ import typing as t
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ...utils.singleton import _Singleton
-from .element_api import BlockElementApi, ControlElementApi
+from ..utils.singleton import _Singleton
+from ._element import _Block, _Control
 
 if t.TYPE_CHECKING:
-    from ...extension.library import ElementLibrary
+    from ..extension.library import ElementLibrary
 
 
 class _ElementApiGenerator(object, metaclass=_Singleton):
     def __init__(self):
-        self.__module: types.ModuleType | None = None
+        self.__module: t.Optional[types.ModuleType] = None
 
     @staticmethod
     def find_default_property(property_list: t.List[t.Dict[str, t.Any]]) -> str:
@@ -38,38 +38,37 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
 
     def add_default(self):
         current_frame = inspect.currentframe()
+        error_message = "Cannot generate elements API for the current module"
         if current_frame is None:
-            raise RuntimeError("Cannot generate Element API for the current module: No frame found.")
+            raise RuntimeError(f"{error_message}: No frame found.")
         if current_frame.f_back is None:
-            raise RuntimeError("Cannot generate Element API for the current module: taipy-gui module not found.")
+            raise RuntimeError(f"{error_message}: taipy-gui module not found.")
         module_name = current_frame.f_back.f_globals["__name__"]
         self.__module = module = sys.modules[module_name]
-        with open(
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "viselements.json"))
-        ) as viselements:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viselements.json"))) as viselements:
             data = json.load(viselements)
             if "blocks" not in data or "controls" not in data:
-                raise RuntimeError("Cannot generate Element API for the current module: Invalid viselements.json file.")
+                raise RuntimeError(f"{error_message}: Invalid viselements.json file.")
             for blockElement in data["blocks"]:
                 default_property = _ElementApiGenerator.find_default_property(blockElement[1]["properties"])
                 setattr(
                     module,
                     blockElement[0],
-                    _ElementApiGenerator.create_block_element(blockElement[0], blockElement[0], default_property),
+                    _ElementApiGenerator.create_block_api(blockElement[0], blockElement[0], default_property),
                 )
             for controlElement in data["controls"]:
                 default_property = _ElementApiGenerator.find_default_property(controlElement[1]["properties"])
                 setattr(
                     module,
                     controlElement[0],
-                    _ElementApiGenerator.create_control_element(controlElement[0], controlElement[0], default_property),
+                    _ElementApiGenerator.create_control_api(controlElement[0], controlElement[0], default_property),
                 )
 
     def add_library(self, library: "ElementLibrary"):
         library_name = library.get_name()
         if self.__module is None:
             _TaipyLogger._get_logger().info(
-                f"Python API for extension library '{library_name}' will not be available. To fix this, import 'taipy.gui.builder' before importing the extension library."
+                f"Python API for extension library '{library_name}' is not available. To fix this, import 'taipy.gui.builder' before importing the extension library."
             )
             return
         library_module = getattr(self.__module, library_name, None)
@@ -80,33 +79,33 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             setattr(
                 library_module,
                 element_name,
-                _ElementApiGenerator().create_control_element(
+                _ElementApiGenerator().create_control_api(
                     element_name, f"{library_name}.{element_name}", element.default_attribute
                 ),
             )
 
     @staticmethod
-    def create_block_element(
+    def create_block_api(
         classname: str,
         element_name: str,
         default_property: str,
     ):
-        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, BlockElementApi)
+        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, _Block)
 
     @staticmethod
-    def create_control_element(
+    def create_control_api(
         classname: str,
         element_name: str,
         default_property: str,
     ):
-        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, ControlElementApi)
+        return _ElementApiGenerator.create_element_api(classname, element_name, default_property, _Control)
 
     @staticmethod
     def create_element_api(
         classname: str,
         element_name: str,
         default_property: str,
-        ElementBaseClass: t.Union[t.Type[BlockElementApi], t.Type[ControlElementApi]],
+        ElementBaseClass: t.Union[t.Type[_Block], t.Type[_Control]],
     ):
         return type(
             classname,

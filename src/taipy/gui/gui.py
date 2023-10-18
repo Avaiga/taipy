@@ -241,16 +241,16 @@ class Gui:
 
         Arguments:
             page (Optional[Union[str, Page^]]): An optional `Page^` instance that is used
-                when there is a single page in this interface, referenced as the _root_
+                when there is a single page in this interface, referenced as the *root*
                 page (located at `/`).<br/>
-                If _page_ is a raw string and if it holds a path to a readable file then
+                If *page* is a raw string and if it holds a path to a readable file then
                 a `Markdown^` page is built from the content of that file.<br/>
-                If _page_ is a string that does not indicate a path to readable file then
+                If *page* is a string that does not indicate a path to readable file then
                 a `Markdown^` page is built from that string.<br/>
-                Note that if _pages_ is provided, those pages are added as well.
+                Note that if *pages* is provided, those pages are added as well.
             pages (Optional[dict]): Used if you want to initialize this instance with a set
                 of pages.<br/>
-                The method `(Gui.)add_pages(pages)^` is called if _pages_ is not None.
+                The method `(Gui.)add_pages(pages)^` is called if *pages* is not None.
                 You can find details on the possible values of this argument in the
                 documentation for this method.
             css_file (Optional[str]): A pathname to a CSS file that gets used as a style sheet in
@@ -260,11 +260,11 @@ class Gui:
                 with the `.css` extension.
             path_mapping (Optional[dict]): A dictionary that associates a URL prefix to
                 a path in the server file system.<br/>
-                If the assets of your application are located in _/home/me/app_assets_ and
-                you want to access them using only '_assets_' in your application, you can
-                set _path_mapping={"assets": "/home/me/app_assets"}_. If your application
-                then requests the file _"/assets/images/logo.png"_, the server searches
-                for the file  _"/home/me/app_assets/images/logo.png"_.<br/>
+                If the assets of your application are located in */home/me/app_assets* and
+                you want to access them using only '*assets*' in your application, you can
+                set *path_mapping={"assets": "/home/me/app_assets"}*. If your application
+                then requests the file *"/assets/images/logo.png"*, the server searches
+                for the file  *"/home/me/app_assets/images/logo.png"*.<br/>
                 If empty or not defined, access through the browser to all resources under the directory
                 of the main Python file is allowed.
             env_filename (Optional[str]): An optional file from which to load application
@@ -1521,7 +1521,7 @@ class Gui:
     ) -> Partial:
         """Create a new `Partial^`.
 
-        The [User Manual section on Partials](../gui/pages.md#partials) gives details on
+        The [User Manual section on Partials](../gui/pages/index.md#partials) gives details on
         when and how to use this class.
 
         Arguments:

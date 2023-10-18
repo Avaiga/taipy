@@ -14,8 +14,9 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 # Two data sets as a bar chart
-from taipy.gui import Gui
 import pandas
+
+from taipy.gui import Gui
 
 # Source https://en.wikipedia.org/wiki/List_of_United_States_presidential_elections_by_popular_vote_margin
 percentages = [

@@ -16,20 +16,22 @@ import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 
-from .element_api_context_manager import _ElementApiContextManager
-from .factory import _ClassApiFactory
+from ._context_manager import _BuilderContextManager
+from ._factory import _BuilderFactory
 
 if t.TYPE_CHECKING:
-    from ...gui import Gui
+    from ..gui import Gui
 
 
-class ElementApi(ABC):
+class _Element(ABC):
+    """NOT DOCUMENTED"""
+
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
 
     def __new__(cls, *args, **kwargs):
-        obj = super(ElementApi, cls).__new__(cls)
-        parent = _ElementApiContextManager().peek()
+        obj = super(_Element, cls).__new__(cls)
+        parent = _BuilderContextManager().peek()
         if parent is not None:
             parent.add(obj)
         return obj
@@ -47,10 +49,10 @@ class ElementApi(ABC):
 
     # Convert property value to string
     def parse_properties(self):
-        self._properties = {k: ElementApi._parse_property(v) for k, v in self._properties.items()}
+        self._properties = {k: _Element._parse_property(v) for k, v in self._properties.items()}
 
     # Get a deepcopy version of the properties
-    def _get_deepcopy_properties(self):
+    def _deepcopy_properties(self):
         return copy.deepcopy(self._properties)
 
     @staticmethod
@@ -66,41 +68,52 @@ class ElementApi(ABC):
         pass
 
 
-class BlockElementApi(ElementApi):
+class _Block(_Element):
+    """NOT DOCUMENTED"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._children: t.List[ElementApi] = []
+        self._children: t.List[_Element] = []
 
-    def add(self, *elements: ElementApi):
+    def add(self, *elements: _Element):
         for element in elements:
             if element not in self._children:
                 self._children.append(element)
         return self
 
     def __enter__(self):
-        _ElementApiContextManager().push(self)
+        _BuilderContextManager().push(self)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        _ElementApiContextManager().pop()
+        _BuilderContextManager().pop()
 
     def _render(self, gui: "Gui") -> str:
-        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._get_deepcopy_properties())
+        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
         return f"{el[0]}{self._render_children(gui)}</{el[1]}>"
 
     def _render_children(self, gui: "Gui") -> str:
         return "\n".join([child._render(gui) for child in self._children])
 
 
-class DefaultBlockElement(BlockElementApi):
+class _DefaultBlock(_Block):
     _ELEMENT_NAME = "part"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
-class html(BlockElementApi):
+class html(_Block):
+    """A visual element defined as an HTML tag.
+
+    This element can be used as a block element.
+    """
+
     def __init__(self, *args, **kwargs):
+        """Create a new `html` block.
+
+        TODO
+        """
         super().__init__(*args, **kwargs)
         if not args:
             raise RuntimeError("Can't render html element. Missing html tag name.")
@@ -113,12 +126,14 @@ class html(BlockElementApi):
         return f"{open_tag}{self._content}{self._render_children(gui)}</{self._ELEMENT_NAME}>"
 
 
-class ControlElementApi(ElementApi):
+class _Control(_Element):
+    """NOT DOCUMENTED"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _render(self, gui: "Gui") -> str:
-        el = _ClassApiFactory.create_element(gui, self._ELEMENT_NAME, self._get_deepcopy_properties())
+        el = _BuilderFactory.create_element(gui, self._ELEMENT_NAME, self._deepcopy_properties())
         return (
             f"<div>{el[0]}</{el[1]}></div>"
             if f"<{el[1]}" in el[0] and f"</{el[1]}" not in el[0]
@@ -126,7 +141,7 @@ class ControlElementApi(ElementApi):
         )
 
     def __enter__(self):
-        raise RuntimeError(f"Can't use context manager with control element '{self._ELEMENT_NAME}'")
+        raise RuntimeError(f"Can't use Context Manager for control type '{self._ELEMENT_NAME}'")
 
     def __exit__(self, exc_type, exc_value, traceback):
-        raise RuntimeError(f"Can't use context manager with control element '{self._ELEMENT_NAME}'")
+        raise RuntimeError(f"Can't use Context Manager for control type '{self._ELEMENT_NAME}'")

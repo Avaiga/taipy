@@ -11,13 +11,13 @@
 
 import typing as t
 
-from ..factory import _Factory
+from .._renderers.factory import _Factory
 
 
-class _ClassApiFactory(_Factory):
+class _BuilderFactory(_Factory):
     @staticmethod
-    def create_element(gui, control_type: str, all_properties: t.Dict[str, t.Any]) -> t.Tuple[str, str]:
-        builder_html = _Factory.call_builder(gui, control_type, all_properties, True)
+    def create_element(gui, element_type: str, properties: t.Dict[str, t.Any]) -> t.Tuple[str, str]:
+        builder_html = _Factory.call_builder(gui, element_type, properties, True)
         if builder_html is None:
-            return f"<div>INVALID SYNTAX - Control is '{control_type}'", "div"
+            return f"<div>INVALID SYNTAX - Element is '{element_type}'", "div"
         return builder_html  # type: ignore

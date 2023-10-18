@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import datetime
+
+from taipy.gui import Gui
 
 # Tasks definitions
 tasks = ["Plan", "Research", "Design", "Implement", "Test", "Deliver"]

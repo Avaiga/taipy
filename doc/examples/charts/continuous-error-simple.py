@@ -13,8 +13,9 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
-from taipy.gui import Gui
 import random
+
+from taipy.gui import Gui
 
 # Common axis for all data: [1..10]
 x = list(range(1, 11))
