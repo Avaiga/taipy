@@ -32,7 +32,7 @@ from .task_config import TaskConfig
 _inject_section(
     JobConfig,
     "job_config",
-    JobConfig("development"),
+    JobConfig.default_config(),
     [("configure_job_executions", JobConfig._configure)],
     add_to_unconflicted_sections=True,
 )
