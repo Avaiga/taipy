@@ -9,9 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
+import shutil
 from functools import lru_cache
 from typing import Dict
 
+import bson
 import pymongo
 
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -19,6 +22,27 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from ._utils import _migrate
 
 __logger = _TaipyLogger._get_logger()
+
+
+OLD_COLLECTIONS = [
+    "cycle",
+    "scenario",
+    "pipeline",
+    "task",
+    "data_node",
+    "job",
+    "version",
+]
+NEW_COLLECTIONS = [
+    "cycle",
+    "scenario",
+    "task",
+    "data_node",
+    "job",
+    "version",
+]
+DATABASE_NAME = "taipy"
+MONGO_BACKUP_FOLDER = ".mongo_backup"
 
 
 @lru_cache
@@ -39,18 +63,9 @@ def __load_all_entities_from_mongo(
     password: str,
 ):
     client = _connect_mongodb(hostname, port, user, password)
-    collections = [
-        "cycle",
-        "scenario",
-        "pipeline",
-        "task",
-        "data_node",
-        "job",
-        "version",
-    ]
     entities = {}
-    for collection in collections:
-        db = client["taipy"]
+    for collection in OLD_COLLECTIONS:
+        db = client[DATABASE_NAME]
         cursor = db[collection].find({})
         for document in cursor:
             entities[document["id"]] = {"data": document}
@@ -66,19 +81,26 @@ def __write_entities_to_mongo(
     password: str,
 ):
     client = _connect_mongodb(hostname, port, user, password)
-    collections = [
-        "cycle",
-        "scenario",
-        "task",
-        "data_node",
-        "job",
-        "version",
-    ]
-    for collection in collections:
-        db = client["taipy"]
+    for collection in NEW_COLLECTIONS:
+        db = client[DATABASE_NAME]
         db[collection].insert_many(
             [entity["data"] for entity in _entities.values() if collection in entity["data"]["id"]]
         )
+
+
+def _backup_mongo_entities(
+    hostname: str = "localhost",
+    port: int = 27017,
+    user: str = "",
+    password: str = "",
+) -> bool:
+    client = _connect_mongodb(hostname, port, user, password)
+    db = client[DATABASE_NAME]
+    for collection in OLD_COLLECTIONS:
+        with open(os.path.join(MONGO_BACKUP_FOLDER, f"{collection}.bson"), "wb+") as f:
+            for doc in db[collection].find():
+                f.write(bson.BSON.encode(doc))
+    return True
 
 
 def _revert_migrate_mongo_entities(
@@ -87,17 +109,17 @@ def _revert_migrate_mongo_entities(
     user: str = "",
     password: str = "",
 ) -> bool:
-    # TODO
+    client = _connect_mongodb(hostname, port, user, password)
+    db = client[DATABASE_NAME]
+    for collection in os.listdir(MONGO_BACKUP_FOLDER):
+        if collection.endswith(".bson"):
+            with open(os.path.join(MONGO_BACKUP_FOLDER, collection), "rb+") as f:
+                db[collection.split(".")[0]].insert_many(bson.decode_all(f.read()))
     return True
 
 
-def _clean_backup_mongo_entities(
-    hostname: str = "localhost",
-    port: int = 27017,
-    user: str = "",
-    password: str = "",
-) -> bool:
-    # TODO
+def _clean_backup_mongo_entities() -> bool:
+    shutil.rmtree(MONGO_BACKUP_FOLDER)
     return True
 
 
@@ -121,8 +143,7 @@ def _migrate_mongo_entities(
         bool: True if the migration was successful, False otherwise.
     """
     if backup:
-        # TODO: Back up entities in the mongodb
-        pass
+        _backup_mongo_entities(hostname=hostname, port=port, user=user, password=password)
 
     __logger.info(f"Starting entity migration from MongoDB {hostname}:{port}")
 

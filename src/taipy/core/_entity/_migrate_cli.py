@@ -90,11 +90,10 @@ class _MigrateCLI:
         elif repository_type == "sql":
             if not _clean_backup_sql_entities(repository_args[0]):
                 sys.exit(1)
-        # TODO
-        # elif repository_type == "mongo":
-        #     mongo_args = args.repository_type[1:] if path else []
-        #     if not _clean_backup_mongo_entities(*mongo_args):
-        #         sys.exit(1)
+        elif repository_type == "mongo":
+            path = repository_args[0] or ".mongo_backup"
+            if not _clean_backup_mongo_entities():
+                sys.exit(1)
         else:
             cls.__logger.error(f"Unknown repository type {repository_type}")
             sys.exit(1)
@@ -110,11 +109,10 @@ class _MigrateCLI:
         elif repository_type == "sql":
             if not _revert_migrate_sql_entities(repository_args[0]):
                 sys.exit(1)
-        # TODO
-        # elif repository_type == "mongo":
-        #     mongo_args = repository_args[1:5] if repository_args[0] else []
-        #     if not _revert_migrate_mongo_entities(*mongo_args):
-        #         sys.exit(1)
+        elif repository_type == "mongo":
+            mongo_args = repository_args[1:6] if repository_args[0] else []
+            if not _revert_migrate_mongo_entities(*mongo_args):
+                sys.exit(1)
         else:
             cls.__logger.error(f"Unknown repository type {repository_type}")
             sys.exit(1)
