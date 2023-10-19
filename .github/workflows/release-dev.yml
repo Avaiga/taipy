@@ -21,21 +21,6 @@ jobs:
         with:
           node-version: '18'
 
-      # - name: Extract branch name
-      #   shell: bash
-      #   run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-      #   id: extract_branch
-
-      # - name: Validate branch name (has 'dev' prefix)
-      #   run: |
-      #     echo """
-      #     import sys
-      #     PREFIX = 'dev'
-      #     if not sys.argv[1].startswith(PREFIX):
-      #         raise ValueError(f'Branch name must start with \"{PREFIX}\"')
-      #     """ > /tmp/check.py
-      #     python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
-
       - name: Ensure package version has 'dev' suffix
         run: |
           echo """
@@ -48,8 +33,8 @@ jobs:
               version = f'{version}.{vext}'
           if SUFFIX not in version:
               raise ValueError(f\"version {version} does not contain suffix {SUFFIX}\")
-          """ > /tmp/check1.py
-          python /tmp/check1.py
+          """ > ${{ runner.temp }}/check1.py
+          python ${{ runner.temp }}/check1.py
 
       - name: Extract package version
         id: current-version
@@ -62,8 +47,8 @@ jobs:
           if vext := version_o.get(\"ext\"):
               version = f'{version}.{vext}'
           print(f'VERSION={version}')
-          """ > /tmp/check2.py
-          python /tmp/check2.py >> $GITHUB_OUTPUT
+          """ > ${{ runner.temp }}/check2.py
+          python ${{ runner.temp }}/check2.py >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
@@ -97,8 +82,8 @@ jobs:
                                   end = line.rstrip().find(',')
                                   line = f'{line[:start]}\"taipy-config=={sys.argv[1]}\"{line[end:]}'
                   setup_w.write(line)
-          """ > /tmp/write_setup_taipy.py
-          python /tmp/write_setup_taipy.py "${{ github.event.inputs.taipy-config-version }}"
+          """ > ${{ runner.temp }}/write_setup_taipy.py
+          python ${{ runner.temp }}/write_setup_taipy.py "${{ github.event.inputs.taipy-config-version }}"
 
       - name: Generate pyi files
         run: |
@@ -169,8 +154,8 @@ jobs:
               if vext := version_o.get(\"ext\"):
                   version = f'{version}.{vext}'
               print(f'VERSION={version}')
-          """ > /tmp/increase_dev_version.py
-          python /tmp/increase_dev_version.py >> $GITHUB_OUTPUT
+          """ > ${{ runner.temp }}/increase_dev_version.py
+          python ${{ runner.temp }}/increase_dev_version.py >> $GITHUB_OUTPUT
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:

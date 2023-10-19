@@ -102,8 +102,9 @@ class _Server:
         self._is_running = False
 
         # Websocket (handle json message)
+        # adding args for the one call with a server ack request
         @self._ws.on("message")
-        def handle_message(message) -> None:
+        def handle_message(message, *args) -> None:
             if "status" in message:
                 _TaipyLogger._get_logger().info(message["status"])
             elif "type" in message:

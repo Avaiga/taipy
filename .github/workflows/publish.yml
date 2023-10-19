@@ -39,8 +39,8 @@ jobs:
             raise ValueError(f\"Invalid version {version} / {sys.argv[1]}\")
           if sys.argv[1] != sys.argv[2]:
             raise ValueError(f\"Invalid tag version {sys.argv[2]} with package version {sys.argv[1]}\")
-          """ > /tmp/check.py
-          python /tmp/check.py "${{ github.event.inputs.version }}" "${{ steps.vars.outputs.tag }}"
+          """ > ${{ runner.temp }}/check.py
+          python ${{ runner.temp }}p/check.py "${{ github.event.inputs.version }}" "${{ steps.vars.outputs.tag }}"
 
       - name: Download assets from github release tag
         run: |

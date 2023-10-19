@@ -39,8 +39,8 @@ jobs:
               version = f'{version}.{vext}'
           if version != sys.argv[1]:
               raise ValueError(f\"Invalid version {version} / {sys.argv[1]}\")
-          """ > /tmp/check1.py
-          python /tmp/check1.py "${{ github.event.inputs.version }}"
+          """ > ${{ runner.temp }}/check1.py
+          python ${{ runner.temp }}/check1.py "${{ github.event.inputs.version }}"
 
       - name: Validate branch name
         run: |
@@ -50,8 +50,8 @@ jobs:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
               raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
-          """ > /tmp/check.py
-          python /tmp/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
+          """ > ${{ runner.temp }}/check.py
+          python ${{ runner.temp }}/check.py "${{ steps.extract_branch.outputs.BRANCH }}"
 
       - name: Install dependencies
         run: |

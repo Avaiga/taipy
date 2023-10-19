@@ -460,9 +460,12 @@ class Gui:
             else getattr(g, Gui.__ARG_CLIENT_ID, "unknown id")
         )
 
-    def __set_client_id_in_context(self, client_id: t.Optional[str] = None):
+    def __set_client_id_in_context(self, client_id: t.Optional[str] = None, force=False):
         if not client_id and request:
             client_id = request.args.get(Gui.__ARG_CLIENT_ID, "")
+        if not client_id and force:
+            res = self._bindings()._get_or_create_scope("")
+            client_id = res[0] if res[1] else None
         if client_id and request:
             if sid := getattr(request, "sid", None):
                 sids = self.__client_id_2_sid.get(client_id, None)
@@ -502,7 +505,11 @@ class Gui:
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
-            self.__set_client_id_in_context(message.get(Gui.__ARG_CLIENT_ID))
+            client_id = None
+            if msg_type == _WsType.CLIENT_ID.value:
+                res = self._bindings()._get_or_create_scope(message.get("payload", ""))
+                client_id = res[0] if res[1] else None
+            self.__set_client_id_in_context(client_id or message.get(Gui.__ARG_CLIENT_ID))
             self._set_locals_context(message.get("module_context") or None)
             if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
@@ -519,8 +526,6 @@ class Gui:
                 self.__request_data_update(str(message.get("name")), message.get("payload"))
             elif msg_type == _WsType.REQUEST_UPDATE.value:
                 self.__request_var_update(message.get("payload"))
-            elif msg_type == _WsType.CLIENT_ID.value:
-                self._bindings()._get_or_create_scope(message.get("payload", ""))
             self._reset_locals_context()
             self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
@@ -916,8 +921,8 @@ class Gui:
                     )
             self.__send_var_list_update(payload["names"])
 
-    def __send_ws(self, payload: dict) -> None:
-        grouping_message = self.__get_message_grouping()
+    def __send_ws(self, payload: dict, allow_grouping=True) -> None:
+        grouping_message = self.__get_message_grouping() if allow_grouping else None
         if grouping_message is None:
             try:
                 self._server._ws.emit(
@@ -954,7 +959,8 @@ class Gui:
             {
                 "type": _WsType.CLIENT_ID.value,
                 "id": id,
-            }
+            },
+            allow_grouping=False,
         )
 
     def __send_ws_download(self, content: str, name: str, on_action: str) -> None:
@@ -1719,7 +1725,7 @@ class Gui:
                         _warn(f"Exception raised in {name}.on_user_init()", e)
 
     def __init_route(self):
-        self.__set_client_id_in_context()
+        self.__set_client_id_in_context(force=True)
         if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
             _setscopeattr(self, Gui.__ON_INIT_NAME, True)
             self.__pre_render_pages()
