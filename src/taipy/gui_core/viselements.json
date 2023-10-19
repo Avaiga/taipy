@@ -421,8 +421,8 @@
                     {
                         "name": "height",
                         "type": "str",
-                        "default_value": "50vh",
-                        "doc": "The maximum height, in CSS units,of the tree."
+                        "default_value": "\"50vh\"",
+                        "doc": "The maximum height, in CSS units, of the list."
                     }
                 ]
             }
