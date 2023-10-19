@@ -2092,12 +2092,15 @@ class Gui:
         if not hasattr(self, "_root_dir"):
             self._root_dir = run_root_dir
 
-        self.__run_kwargs = kwargs = {
-            **kwargs,
-            "run_server": run_server,
-            "run_in_thread": run_in_thread,
-            "async_mode": async_mode,
-        }
+        is_reloading = kwargs.pop("_reload", False)
+
+        if not is_reloading:
+            self.__run_kwargs = kwargs = {
+                **kwargs,
+                "run_server": run_server,
+                "run_in_thread": run_in_thread,
+                "async_mode": async_mode,
+            }
 
         # Load application config from multiple sources (env files, kwargs, command line)
         self._config._build_config(run_root_dir, self.__env_filename, kwargs)
@@ -2115,7 +2118,7 @@ class Gui:
 
         self.__var_dir.set_default(self.__frame)
 
-        if self.__state is None:
+        if self.__state is None or is_reloading:
             self.__state = State(self, self.__locals_context.get_all_keys(), self.__locals_context.get_all_context())
 
         if _is_in_notebook():
@@ -2191,7 +2194,7 @@ class Gui:
         """
         if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
             self._server.stop_thread()
-            self.run(**self.__run_kwargs)
+            self.run(**self.__run_kwargs, _reload=True)
             _TaipyLogger._get_logger().info("Gui server has been reloaded.")
 
     def stop(self):
