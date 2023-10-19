@@ -33,8 +33,8 @@ jobs:
               version = f'{version}.{vext}'
           if version != sys.argv[1]:
               raise ValueError(f\"Invalid version {version} / {sys.argv[1]}\")
-          """ > /tmp/check1.py
-          python /tmp/check1.py "${{ github.event.inputs.version }}"
+          """ > ${{ runner.temp }}/check1.py
+          python ${{ runner.temp }}/check1.py "${{ github.event.inputs.version }}"
 
       - name: Validate branch name
         run: |
@@ -44,13 +44,13 @@ jobs:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
               raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
-          """ > /tmp/check2.py
-          python /tmp/check2.py "${{ steps.extract_branch.outputs.branch }}"
-      
+          """ > ${{ runner.temp }}/check2.py
+          python ${{ runner.temp }}/check2.py "${{ steps.extract_branch.outputs.branch }}"
+
       - name: Modify README image file path
         run: |
           cp tools/modify_readme.py /tmp
-          python /tmp/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
+          python ${{ runner.temp }}/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
 
       - name: Get taipy-gui version from setup.py
         id: taipy_gui_version
@@ -63,8 +63,8 @@ jobs:
                       end = line.rstrip().find('\",')
                       print(f'VERSION={line[start:end]}')
                       break
-          """ > /tmp/get_gui_version.py
-          python /tmp/get_gui_version.py >> $GITHUB_OUTPUT
+          """ > ${{ runner.temp }}/get_gui_version.py
+          python ${{ runner.temp }}/get_gui_version.py >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
@@ -87,8 +87,8 @@ jobs:
           taipy_gui_core_path = Path(taipy.__file__).absolute().parent / 'gui_core' / 'lib' / 'taipy-gui-core.js'
           if not taipy_gui_core_path.exists():
               raise FileNotFoundError(f'taipy-gui-core.js not found in {taipy_gui_core_path}')
-          """ > /tmp/verify_gui_core.py
-          python /tmp/verify_gui_core.py
+          """ > ${{ runner.temp }}/verify_gui_core.py
+          python ${{ runner.temp }}/verify_gui_core.py
 
       - name: Extract commit hash
         shell: bash

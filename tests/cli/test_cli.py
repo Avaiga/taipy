@@ -55,8 +55,8 @@ positional arguments:
     run                 Run a Taipy application.
     manage-versions     Taipy version control system.
     create              Create a new Taipy application.
-    migrate             Migrate entities from old taipy versions to current taipy version. The entity migration should
-    be performed only after updating taipy code to the current version.
+    migrate             Migrate entities created from old taipy versions to be compatible with the current taipy
+    version. The entity migration should be performed only after updating taipy code to the current version.
     help                Show the Taipy help message.
 """
 

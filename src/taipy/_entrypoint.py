@@ -14,7 +14,7 @@ import sys
 
 from taipy._cli._base_cli import _CLI
 from taipy.core._core_cli import _CoreCLI
-from taipy.core._migrate_cli import _MigrateCLI
+from taipy.core._entity._migrate_cli import _MigrateCLI
 from taipy.core._version._cli._version_cli import _VersionCLI
 from taipy.gui._gui_cli import _GuiCLI
 

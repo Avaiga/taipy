@@ -38,8 +38,8 @@ jobs:
               version = f'{version}.{vext}'
           if SUFFIX not in version:
               raise ValueError(f\"version {version} does not contain suffix {SUFFIX}\")
-          """ > /tmp/check1.py
-          python /tmp/check1.py
+          """ > ${{ runner.temp }}/check1.py
+          python ${{ runner.temp }}/check1.py
 
       - name: Extract package version
         id: current-version
@@ -52,8 +52,8 @@ jobs:
           if vext := version_o.get(\"ext\"):
               version = f'{version}.{vext}'
           print(f'VERSION={version}')
-          """ > /tmp/check2.py
-          python /tmp/check2.py >> $GITHUB_OUTPUT
+          """ > ${{ runner.temp }}/check2.py
+          python ${{ runner.temp }}/check2.py >> $GITHUB_OUTPUT
 
       - name: Check taipy-gui dependencies
         run: |
@@ -70,7 +70,7 @@ jobs:
         run: |
           curl https://pypi.org/simple/taipy-rest/ | grep -o ">taipy-rest-${{ github.event.inputs.taipy-rest-version }}\.tar\.gz<"
           curl https://pypi.org/simple/taipy-templates/ | grep -o ">taipy-templates-${{ github.event.inputs.taipy-templates-version }}\.tar\.gz<"
-      
+
       - name: Update setup.py locally
         if: github.event.inputs.taipy-gui-version != '' && github.event.inputs.taipy-rest-version != '' && github.event.inputs.taipy-templates-version != ''
         run: |
@@ -101,8 +101,8 @@ jobs:
                                   end = line.rstrip().find(',')
                                   line = f'{line[:start]}\"taipy-templates=={sys.argv[3]}\"{line[end:]}'
                   setup_w.write(line)
-          """ > /tmp/write_setup_taipy.py
-          python /tmp/write_setup_taipy.py "${{ github.event.inputs.taipy-gui-version }}" "${{ github.event.inputs.taipy-rest-version }}" "${{ github.event.inputs.taipy-templates-version }}"
+          """ > ${{ runner.temp }}/write_setup_taipy.py
+          python ${{ runner.temp }}/write_setup_taipy.py "${{ github.event.inputs.taipy-gui-version }}" "${{ github.event.inputs.taipy-rest-version }}" "${{ github.event.inputs.taipy-templates-version }}"
 
       - name: Build package
         run: python setup.py build_py && python -m build
@@ -124,8 +124,8 @@ jobs:
           taipy_gui_core_path = Path(taipy.__file__).absolute().parent / 'gui_core' / 'lib' / 'taipy-gui-core.js'
           if not taipy_gui_core_path.exists():
               raise FileNotFoundError(f'taipy-gui-core.js not found in {taipy_gui_core_path}')
-          """ > /tmp/verify_gui_core.py
-          python /tmp/verify_gui_core.py
+          """ > ${{ runner.temp }}/verify_gui_core.py
+          python ${{ runner.temp }}/verify_gui_core.py
 
       - name: Extract commit hash
         shell: bash
@@ -165,8 +165,8 @@ jobs:
               if vext := version_o.get(\"ext\"):
                   version = f'{version}.{vext}'
               print(f'VERSION={version}')
-          """ > /tmp/increase_dev_version.py
-          python /tmp/increase_dev_version.py >> $GITHUB_OUTPUT
+          """ > ${{ runner.temp }}/increase_dev_version.py
+          python ${{ runner.temp }}/increase_dev_version.py >> $GITHUB_OUTPUT
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
