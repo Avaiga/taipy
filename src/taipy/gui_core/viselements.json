@@ -53,7 +53,7 @@
                     {
                         "name": "height",
                         "type": "str",
-                        "default_value": "50vh",
+                        "default_value": "\"50vh\"",
                         "doc": "The maximum height, in CSS units, of the tree."
                     },
                     {
@@ -187,13 +187,13 @@
                     {
                         "name": "height",
                         "type": "str",
-                        "default_value": "50vh",
+                        "default_value": "\"50vh\"",
                         "doc": "The maximum height, in CSS units, of the DAG."
                     },
                     {
                         "name": "width",
                         "type": "str",
-                        "default_value": "100%",
+                        "default_value": "\"100%\"",
                         "doc": "The maximum width, in CSS units, of the DAG."
                     }
                 ]
@@ -246,7 +246,7 @@
                     {
                         "name": "height",
                         "type": "str",
-                        "default_value": "50vh",
+                        "default_value": "\"50vh\"",
                         "doc": "The maximum height, in CSS units,of the tree."
                     },
                     {
@@ -335,7 +335,7 @@
                     {
                         "name": "height",
                         "type": "str",
-                        "default_value": "50vh",
+                        "default_value": "\"50vh\"",
                         "doc": "The maximum height, in CSS units,of the tree."
                     }
                 ]
