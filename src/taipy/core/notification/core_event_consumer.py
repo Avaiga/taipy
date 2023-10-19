@@ -59,6 +59,7 @@ class CoreEventConsumerBase(threading.Thread):
         self.daemon = True
         self.queue = queue
         self.__STOP_FLAG = False
+        self._TIMEOUT = 0.1
 
     def start(self):
         """Start the event consumer thread."""
@@ -72,7 +73,7 @@ class CoreEventConsumerBase(threading.Thread):
     def run(self):
         while not self.__STOP_FLAG:
             try:
-                event: Event = self.queue.get(block=True, timeout=1)
+                event: Event = self.queue.get(block=True, timeout=self._TIMEOUT)
                 self.process_event(event)
             except Empty:
                 pass
