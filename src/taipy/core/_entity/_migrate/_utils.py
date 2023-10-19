@@ -115,16 +115,17 @@ def __is_cacheable(task: Dict, data: Dict) -> bool:
     return True
 
 
-def __migrate_task(task: Dict, data: Dict) -> Dict:
-    # parent_id has been renamed to owner_id
-    try:
-        task["owner_id"] = task["parent_id"]
-        del task["parent_id"]
-    except KeyError:
-        pass
+def __migrate_task(task: Dict, data: Dict, is_entity: bool = True) -> Dict:
+    if is_entity:
+        # parent_id has been renamed to owner_id
+        try:
+            task["owner_id"] = task["parent_id"]
+            del task["parent_id"]
+        except KeyError:
+            pass
 
-    # properties was not present in 2.0
-    task["properties"] = task.get("properties", {})
+        # properties was not present in 2.0
+        task["properties"] = task.get("properties", {})
 
     # skippable was not present in 2.0
     task["skippable"] = task.get("skippable", False) or __is_cacheable(task, data)
@@ -137,9 +138,8 @@ def __migrate_task_entity(task: Dict, data: Dict) -> Dict:
     return __migrate_task(task, data)
 
 
-def __migrate_task_config(id: str, task: Dict, config: Dict) -> Dict:
-    task = __update_config_parent_ids(id, task, "TASK", config)
-    task = __migrate_task(task, config["DATA_NODE"])
+def __migrate_task_config(task: Dict, config: Dict) -> Dict:
+    task = __migrate_task(task, config["DATA_NODE"], False)
 
     # Convert the skippable boolean to a string if needed
     if isinstance(task.get("skippable"), bool):
@@ -205,10 +205,10 @@ def __migrate_datanode_entity(datanode: Dict, data: Dict) -> Dict:
     return __migrate_datanode(datanode)
 
 
-def __migrate_datanode_config(id: str, datanode: Dict, config: Dict) -> Dict:
-    datanode_cfg = __update_config_parent_ids(id, datanode, "DATA_NODE", config)
-    datanode_cfg = __migrate_datanode(datanode_cfg)
-    return datanode_cfg
+def __migrate_datanode_config(datanode: Dict) -> Dict:
+    if datanode["storage_type"] in ["csv", "json"]:
+        datanode["encoding"] = "utf-8"
+    return datanode
 
 
 def __migrate_job(job: Dict) -> Dict:
@@ -220,12 +220,33 @@ def __migrate_job(job: Dict) -> Dict:
     return job
 
 
+def __migrate_global_config(config: Dict):
+    fields_to_remove = ["clean_entities_enabled"]
+    fields_to_move = ["root_folder", "storage_folder", "repository_type", "read_entity_retry"]
+
+    for field in fields_to_remove:
+        if field in config["TAIPY"]:
+            del config["TAIPY"][field]
+    try:
+        for field in fields_to_move:
+            if field not in config["CORE"]:
+                config["CORE"][field] = config["TAIPY"][field]
+                del config["TAIPY"][field]
+    except KeyError:
+        pass
+
+    return config
+
+
 def __migrate_version(version: Dict) -> Dict:
     config_str = version["config"]
 
     # Remove PIPELINE scope
     config_str = config_str.replace("PIPELINE:SCOPE", "SCENARIO:SCOPE")
     config = json.loads(config_str)
+
+    # remove unused fields and move others from TAIPY to CORE section
+    config = __migrate_global_config(config)
 
     # replace pipelines for tasks
     pipelines_section = config["PIPELINE"]
@@ -238,11 +259,10 @@ def __migrate_version(version: Dict) -> Dict:
         del config["SCENARIO"][id]["pipelines"]
 
     for id, content in config["TASK"].items():
-        config["TASK"][id] = __migrate_task_config(id, content, config)
+        config["TASK"][id] = __migrate_task_config(content, config)
 
-    config["JOB"] = __migrate_job(config["JOB"])
     for id, content in config["DATA_NODE"].items():
-        config["DATA_NODE"][id] = __migrate_datanode_config(id, content, config)
+        config["DATA_NODE"][id] = __migrate_datanode_config(content)
 
     del config["PIPELINE"]
 
