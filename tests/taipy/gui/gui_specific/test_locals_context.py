@@ -28,10 +28,9 @@ def test_locals_context(gui: Gui):
         lc.add("test", temp_locals)
         assert lc.get_context() is None
         assert lc.get_locals() == current_locals
-        lc.set_locals_context("test")
-        assert lc.get_context() == "test"
-        assert lc.get_locals() == temp_locals
-        lc.reset_locals_context()
+        with lc.set_locals_context("test"):
+            assert lc.get_context() == "test"
+            assert lc.get_locals() == temp_locals
         assert lc.get_context() is None
         assert lc.get_locals() == current_locals
         assert lc.is_default() is True

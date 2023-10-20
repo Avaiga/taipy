@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import typing as t
 
 from flask import g
@@ -45,11 +46,20 @@ class _LocalsContext:
         if context is not None and locals_dict is not None and context not in self._locals_map:
             self._locals_map[context] = locals_dict
 
-    def set_locals_context(self, context: t.Optional[str]) -> None:
-        if context in self._locals_map:
+    @contextlib.contextmanager
+    def set_locals_context(self, context: t.Optional[str]) -> t.Iterator[None]:
+        try:
+            if context in self._locals_map:
+                if hasattr(g, _LocalsContext.__ctx_g_name):
+                    self._lc_stack.append(getattr(g, _LocalsContext.__ctx_g_name))
+                setattr(g, _LocalsContext.__ctx_g_name, context)
+            yield
+        finally:
             if hasattr(g, _LocalsContext.__ctx_g_name):
-                self._lc_stack.append(getattr(g, _LocalsContext.__ctx_g_name))
-            setattr(g, _LocalsContext.__ctx_g_name, context)
+                if len(self._lc_stack) > 0:
+                    setattr(g, _LocalsContext.__ctx_g_name, self._lc_stack.pop())
+                else:
+                    delattr(g, _LocalsContext.__ctx_g_name)
 
     def get_locals(self) -> t.Dict[str, t.Any]:
         return self.get_default() if (context := self.get_context()) is None else self._locals_map[context]
@@ -64,10 +74,3 @@ class _LocalsContext:
         if context is None:
             context = self.__default_module
         return self._locals_map[context]
-
-    def reset_locals_context(self) -> None:
-        if hasattr(g, _LocalsContext.__ctx_g_name):
-            if len(self._lc_stack) > 0:
-                setattr(g, _LocalsContext.__ctx_g_name, self._lc_stack.pop())
-            else:
-                delattr(g, _LocalsContext.__ctx_g_name)

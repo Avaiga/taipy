@@ -510,23 +510,22 @@ class Gui:
                 res = self._bindings()._get_or_create_scope(message.get("payload", ""))
                 client_id = res[0] if res[1] else None
             self.__set_client_id_in_context(client_id or message.get(Gui.__ARG_CLIENT_ID))
-            self._set_locals_context(message.get("module_context") or None)
-            if msg_type == _WsType.UPDATE.value:
-                payload = message.get("payload", {})
-                self.__front_end_update(
-                    str(message.get("name")),
-                    payload.get("value"),
-                    message.get("propagate", True),
-                    payload.get("relvar"),
-                    payload.get("on_change"),
-                )
-            elif msg_type == _WsType.ACTION.value:
-                self.__on_action(message.get("name"), message.get("payload"))
-            elif msg_type == _WsType.DATA_UPDATE.value:
-                self.__request_data_update(str(message.get("name")), message.get("payload"))
-            elif msg_type == _WsType.REQUEST_UPDATE.value:
-                self.__request_var_update(message.get("payload"))
-            self._reset_locals_context()
+            with self._set_locals_context(message.get("module_context") or None):
+                if msg_type == _WsType.UPDATE.value:
+                    payload = message.get("payload", {})
+                    self.__front_end_update(
+                        str(message.get("name")),
+                        payload.get("value"),
+                        message.get("propagate", True),
+                        payload.get("relvar"),
+                        payload.get("on_change"),
+                    )
+                elif msg_type == _WsType.ACTION.value:
+                    self.__on_action(message.get("name"), message.get("payload"))
+                elif msg_type == _WsType.DATA_UPDATE.value:
+                    self.__request_data_update(str(message.get("name")), message.get("payload"))
+                elif msg_type == _WsType.REQUEST_UPDATE.value:
+                    self.__request_var_update(message.get("payload"))
             self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             _warn(f"Decoding Message has failed: {message}", e)
@@ -1136,15 +1135,17 @@ class Gui:
             args = args[:argcount]
         return user_function(*args)
 
+    def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
+        return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
+
     def _call_user_callback(
         self, state_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
     ) -> t.Any:
         try:
             with self.get_flask_app().app_context():
                 self.__set_client_id_in_context(state_id)
-                if module_context is not None:
-                    self._set_locals_context(module_context)
-                return self._call_function_with_state(user_callback, args)
+                with self._set_module_context(module_context):
+                    return self._call_function_with_state(user_callback, args)
         except Exception as e:  # pragma: no cover
             if not self._call_on_exception(user_callback.__name__, e):
                 _warn(f"invoke_callback(): Exception raised in '{user_callback.__name__}()'", e)
@@ -1153,20 +1154,17 @@ class Gui:
     def _call_broadcast_callback(
         self, user_callback: t.Callable, args: t.List[t.Any], module_context: t.Optional[str]
     ) -> t.Any:
-        try:
-            with self.get_flask_app().app_context():
-                # Use global scopes for broadcast callbacks
-                self.__set_client_id_in_context(_DataScopes._GLOBAL_ID)
-                if module_context is not None:
-                    self._set_locals_context(module_context)
+        @contextlib.contextmanager
+        def _broadcast_callback() -> t.Iterator[None]:
+            try:
                 setattr(g, Gui.__BRDCST_CALLBACK_G_ID, True)
-                callback_result = self._call_function_with_state(user_callback, args)
+                yield
+            finally:
                 setattr(g, Gui.__BRDCST_CALLBACK_G_ID, False)
-                return callback_result
-        except Exception as e:
-            if not self._call_on_exception(user_callback.__name__, e):
-                _warn(f"invoke_callback(): Exception raised in '{user_callback.__name__}()':\n{e}")
-        return None
+
+        with _broadcast_callback():
+            # Use global scopes for broadcast callbacks
+            return self._call_user_callback(_DataScopes._GLOBAL_ID, user_callback, args, module_context)
 
     def _is_in_brdcst_callback(self):
         try:
@@ -1331,11 +1329,8 @@ class Gui:
         current_context = self.__locals_context.get_context()
         return current_context if current_context is not None else self.__default_module_name
 
-    def _set_locals_context(self, context: t.Optional[str]) -> None:
-        self.__locals_context.set_locals_context(context)
-
-    def _reset_locals_context(self) -> None:
-        self.__locals_context.reset_locals_context()
+    def _set_locals_context(self, context: t.Optional[str]) -> t.ContextManager[None]:
+        return self.__locals_context.set_locals_context(context)
 
     def _get_page_context(self, page_name: str) -> str | None:
         if page_name not in self._config.routes:

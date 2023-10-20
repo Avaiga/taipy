@@ -11,10 +11,12 @@
 
 import inspect
 import typing as t
+from contextlib import nullcontext
 from operator import attrgetter
 from types import FrameType
 
 from flask import has_app_context
+from flask.ctx import AppContext
 
 from .utils import _get_module_name_from_frame, _is_in_notebook
 from .utils._attributes import _attrsetter
@@ -83,7 +85,7 @@ class State:
         "get_gui",
         "refresh",
         "_set_context",
-        "_reset_context",
+        "_notebook_context",
         "_get_placeholder",
         "_set_placeholder",
         "_get_gui_attr",
@@ -127,19 +129,9 @@ class State:
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
-        if not has_app_context() and _is_in_notebook():
-            with gui.get_flask_app().app_context():
-                # Code duplication is ugly but necessary due to frame resolution
-                set_context = self._set_context(gui)
-                encoded_name = gui._bind_var(name)
-                attr = getattr(gui._bindings(), encoded_name)
-                self._reset_context(gui, set_context)
-                return attr
-        set_context = self._set_context(gui)
-        encoded_name = gui._bind_var(name)
-        attr = getattr(gui._bindings(), encoded_name)
-        self._reset_context(gui, set_context)
-        return attr
+        with self._notebook_context(gui), self._set_context(gui):
+            encoded_name = gui._bind_var(name)
+            return getattr(gui._bindings(), encoded_name)
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         gui: "Gui" = super().__getattribute__(State.__gui_attr)
@@ -149,18 +141,9 @@ class State:
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not accessible.")
-        if not has_app_context() and _is_in_notebook():
-            with gui.get_flask_app().app_context():
-                # Code duplication is ugly but necessary due to frame resolution
-                set_context = self._set_context(gui)
-                encoded_name = gui._bind_var(name)
-                setattr(gui._bindings(), encoded_name, value)
-                self._reset_context(gui, set_context)
-                return
-        set_context = self._set_context(gui)
-        encoded_name = gui._bind_var(name)
-        setattr(gui._bindings(), encoded_name, value)
-        self._reset_context(gui, set_context)
+        with self._notebook_context(gui), self._set_context(gui):
+            encoded_name = gui._bind_var(name)
+            setattr(gui._bindings(), encoded_name, value)
 
     def __getitem__(self, key: str):
         context = key if key in super().__getattribute__(State.__attrs[2]) else None
@@ -173,25 +156,21 @@ class State:
         self._set_placeholder(State.__placeholder_attrs[1], context)
         return self
 
-    def _set_context(self, gui: "Gui") -> bool:
+    def _set_context(self, gui: "Gui") -> t.ContextManager[None]:
         if (pl_ctx := self._get_placeholder(State.__placeholder_attrs[1])) is not None:
             self._set_placeholder(State.__placeholder_attrs[1], None)
             if pl_ctx != gui._get_locals_context():
-                gui._set_locals_context(pl_ctx)
-                return True
+                return gui._set_locals_context(pl_ctx)
         if len(inspect.stack()) > 1:
             ctx = _get_module_name_from_frame(t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame)))
             current_context = gui._get_locals_context()
             # ignore context if the current one starts with the new one (to resolve for class modules)
             if ctx != current_context and not current_context.startswith(str(ctx)):
-                gui._set_locals_context(ctx)
-                return True
-        return False
+                return gui._set_locals_context(ctx)
+        return nullcontext()
 
-    def _reset_context(self, gui: "Gui", set_context: bool) -> None:
-        if not set_context:
-            return
-        gui._reset_locals_context()
+    def _notebook_context(self, gui: "Gui"):
+        return gui.get_flask_app().app_context() if not has_app_context() and _is_in_notebook() else nullcontext()
 
     def _get_placeholder(self, name: str):
         if name in State.__placeholder_attrs:
@@ -255,10 +234,9 @@ class State:
             value (Any): The new variable value.
         """
         gui: "Gui" = super().__getattribute__(State.__gui_attr)
-        set_context = self._set_context(gui)
-        encoded_name = gui._bind_var(name)
-        gui._broadcast_all_clients(encoded_name, value)
-        self._reset_context(gui, set_context)
+        with self._set_context(gui):
+            encoded_name = gui._bind_var(name)
+            gui._broadcast_all_clients(encoded_name, value)
 
     def __enter__(self):
         super().__getattribute__(State.__attrs[0]).__enter__()
