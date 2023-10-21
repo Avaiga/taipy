@@ -1192,6 +1192,8 @@ class Gui:
         return self.__evaluator.evaluate_holders(self, expr)
 
     def _is_expression(self, expr: str) -> bool:
+        if self.__evaluator is None:
+            return False
         return self.__evaluator._is_expression(expr)
 
     # make components resettable

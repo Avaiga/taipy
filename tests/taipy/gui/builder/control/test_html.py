@@ -25,7 +25,7 @@ def test_html_builder(gui: Gui, test_client, helpers):
         '<h1 style="color:Tomato;">This is a header',
         '<p style="color:green;">This is a paragraph.',
         '<a href="https://www.w3schools.com" target="_blank">a text',
-        "<br >",
-        "<b >This is bold text inside the paragrah.",
+        "<br>",
+        "<b>This is bold text inside the paragrah.",
     ]
     helpers.test_control_builder(gui, page, expected_list)
