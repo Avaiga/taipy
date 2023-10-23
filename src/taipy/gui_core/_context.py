@@ -29,17 +29,8 @@ from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, cancel_job, cre
 from taipy.core import delete as core_delete
 from taipy.core import delete_job
 from taipy.core import get as core_get
-from taipy.core import (
-    get_cycles_scenarios,
-    get_data_nodes,
-    get_jobs,
-    is_deletable,
-    is_editable,
-    is_promotable,
-    is_readable,
-    is_submittable,
-    set_primary,
-)
+from taipy.core import (get_cycles_scenarios, get_data_nodes, get_jobs, is_deletable, is_editable, is_promotable,
+                        is_readable, is_submittable, set_primary)
 from taipy.core import submit as core_submit
 from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
@@ -144,10 +135,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
                     )
             except Exception as e:
-                _warn(
-                    f"Sequence ({event.entity_id if hasattr(sequence, 'id') else '<anonymous>'}) access raised an issue",
-                    e,
-                )
+                _warn(f"Access to sequence {event.entity_id} failed", e)
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
@@ -194,8 +182,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     )
         except Exception as e:
             _warn(
-                f"{type(scenario_or_cycle)} ({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'})"
-                + " access raised an issue",
+                f"Access to {type(scenario_or_cycle)} ({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'})"
+                + " failed",
                 e,
             )
         return None
@@ -557,7 +545,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                     )
         except Exception as e:
             _warn(
-                f"{type(data)} ({data.id if hasattr(data, 'id') else 'No_id'}) access raised an issue",
+                f"Access to {type(data)} ({data.id if hasattr(data, 'id') else 'No_id'}) failed",
                 e,
             )
 
@@ -588,7 +576,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         is_editable(job),
                     )
         except Exception as e:
-            _warn(f"Job ({job.id if hasattr(job, 'id') else 'No_id'}) access raised an issue", e)
+            _warn(f"Access to job ({job.id if hasattr(job, 'id') else 'No_id'}) failed", e)
         return None
 
     def act_on_jobs(self, state: State, id: str, payload: t.Dict[str, str]):
