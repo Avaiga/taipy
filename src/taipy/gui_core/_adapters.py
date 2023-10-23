@@ -29,6 +29,7 @@ class _GCDoNotUpdate(_DoNotUpdate):
 Scenario.__bases__ += (_GCDoNotUpdate,)
 Sequence.__bases__ += (_GCDoNotUpdate,)
 DataNode.__bases__ += (_GCDoNotUpdate,)
+Cycle.__bases__ += (_GCDoNotUpdate,)
 Job.__bases__ += (_GCDoNotUpdate,)
 
 

@@ -132,6 +132,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 event.entity_id if event.operation != EventOperation.DELETION and is_readable(event.entity_id) else None
             )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
+            sequence = None
             try:
                 sequence = (
                     core_get(event.entity_id)
@@ -143,7 +144,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
                     )
             except Exception as e:
-                _warn(f"Sequence ({sequence.id if hasattr(sequence, 'id') else 'No_id'}) access raised an issue", e)
+                _warn(
+                    f"Sequence ({sequence.id if hasattr(sequence, 'id') else '<anonymous>'}) access raised an issue", e
+                )
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
@@ -277,13 +280,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Invalid date ({date_str}).{e}")
                 return
+            scenario_id = None
             try:
                 gui: Gui = state._gui
                 on_creation = args[3] if len(args) > 3 and isinstance(args[3], str) else None
                 on_creation_function = gui._get_user_function(on_creation) if on_creation else None
                 if callable(on_creation_function):
                     try:
-                        scenario_id = None
                         res = gui._call_function_with_state(
                             on_creation_function,
                             [
