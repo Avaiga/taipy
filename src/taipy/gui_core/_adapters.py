@@ -29,6 +29,7 @@ class _GCDoNotUpdate(_DoNotUpdate):
 Scenario.__bases__ += (_GCDoNotUpdate,)
 Sequence.__bases__ += (_GCDoNotUpdate,)
 DataNode.__bases__ += (_GCDoNotUpdate,)
+Cycle.__bases__ += (_GCDoNotUpdate,)
 Job.__bases__ += (_GCDoNotUpdate,)
 
 
@@ -73,7 +74,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         is_editable(scenario),
                     ]
             except Exception as e:
-                _warn(f"Scenario ({data.id if hasattr(data, 'id') else 'No_id'}) access raised an issue", e)
+                _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
 
         return None
 
@@ -119,7 +120,7 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
                         ],
                     ]
             except Exception as e:
-                _warn(f"Scenario ({data.id if hasattr(data, 'id') else 'No_id'}) access raised an issue", e)
+                _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
 
         return None
 
@@ -163,7 +164,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         is_editable(datanode),
                     ]
             except Exception as e:
-                _warn(f"Datanode ({data.id if hasattr(data, 'id') else 'No_id'}) access raised an issue", e)
+                _warn(f"Access to datanode ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
 
         return None
 
