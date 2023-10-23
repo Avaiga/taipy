@@ -145,7 +145,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     )
             except Exception as e:
                 _warn(
-                    f"Sequence ({event.entity_id if hasattr(sequence, 'id') else '<anonymous>'}) access raised an issue", e
+                    f"Sequence ({event.entity_id if hasattr(sequence, 'id') else '<anonymous>'}) access raised an issue",
+                    e,
                 )
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
