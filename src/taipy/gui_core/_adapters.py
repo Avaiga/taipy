@@ -12,7 +12,7 @@
 import typing as t
 from enum import Enum
 
-from taipy.core import Cycle, DataNode, Job, Scenario, Sequence
+from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, Task
 from taipy.core import get as core_get
 from taipy.core import is_deletable, is_editable, is_promotable, is_readable, is_submittable
 from taipy.gui._warnings import _warn
@@ -31,6 +31,7 @@ Sequence.__bases__ += (_GCDoNotUpdate,)
 DataNode.__bases__ += (_GCDoNotUpdate,)
 Cycle.__bases__ += (_GCDoNotUpdate,)
 Job.__bases__ += (_GCDoNotUpdate,)
+Task.__bases__ += (_GCDoNotUpdate,)
 
 
 class _EntityType(Enum):
@@ -53,6 +54,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         scenario.id,
                         scenario.is_primary,
                         scenario.config_id,
+                        scenario.creation_date,
                         scenario.cycle.get_simple_label() if scenario.cycle else "",
                         scenario.get_simple_label(),
                         list(scenario.tags) if scenario.tags else [],
@@ -63,8 +65,11 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         ]
                         if scenario.properties
                         else [],
-                        [(p.id, p.get_simple_label(), is_submittable(p)) for p in scenario.sequences.values()]
-                        if scenario.sequences
+                        [
+                            (p.id, p.get_simple_label(), is_submittable(p), is_editable(p))
+                            for p in scenario.sequences.values()
+                        ]
+                        if hasattr(scenario, "sequences") and scenario.sequences
                         else [],
                         list(scenario.properties.get("authorized_tags", [])) if scenario.properties else [],
                         is_deletable(scenario),

@@ -12,7 +12,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from "react";
-import { Theme, alpha } from "@mui/material";
+import { Theme, Tooltip, alpha } from "@mui/material";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -222,9 +222,11 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                 <DialogTitle>
                     <Grid container direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="h5">{`${actionEdit ? `Edit` : `Create`} scenario`}</Typography>
-                        <IconButton aria-label="close" onClick={close} sx={IconButtonSx}>
-                            <Close />
-                        </IconButton>
+                        <Tooltip title="close">
+                            <IconButton aria-label="close" onClick={close} sx={IconButtonSx}>
+                                <Close />
+                            </IconButton>
+                        </Tooltip>
                     </Grid>
                 </DialogTitle>
                 <form onSubmit={form.handleSubmit}>
@@ -286,7 +288,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                             </Grid>
                             {properties
                                 ? properties.map((item, index) => (
-                                      <Grid item xs={12} key={item.id} container spacing={1} alignItems="center">
+                                      <Grid item xs={12} key={item.id} container spacing={1} alignItems="end">
                                           <Grid item xs={4}>
                                               <TextField
                                                   value={item.key}
@@ -308,20 +310,22 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                               />
                                           </Grid>
                                           <Grid item xs="auto">
-                                              <Button
-                                                  variant="outlined"
-                                                  color="inherit"
-                                                  data-id={item.id}
-                                                  onClick={propertyDelete}
-                                                  sx={SquareButtonSx}
-                                              >
-                                                  <DeleteOutline />
-                                              </Button>
+                                              <Tooltip title="Delete Property">
+                                                  <Button
+                                                      variant="outlined"
+                                                      color="inherit"
+                                                      data-id={item.id}
+                                                      onClick={propertyDelete}
+                                                      sx={SquareButtonSx}
+                                                  >
+                                                      <DeleteOutline />
+                                                  </Button>
+                                              </Tooltip>
                                           </Grid>
                                       </Grid>
                                   ))
                                 : null}
-                            <Grid item xs={12} container spacing={1} justifyContent="space-between">
+                            <Grid item xs={12} container spacing={1} justifyContent="space-between" alignItems="end">
                                 <Grid item xs={4}>
                                     <TextField
                                         value={newProp.key}
@@ -341,14 +345,18 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                     />
                                 </Grid>
                                 <Grid item xs="auto">
-                                    <Button
-                                        variant="outlined"
-                                        onClick={propertyAdd}
-                                        disabled={!newProp.key || !newProp.value}
-                                        sx={SquareButtonSx}
-                                    >
-                                        <Add />
-                                    </Button>
+                                    <Tooltip title="Add Property">
+                                        <span>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={propertyAdd}
+                                                disabled={!newProp.key || !newProp.value}
+                                                sx={SquareButtonSx}
+                                            >
+                                                <Add />
+                                            </Button>
+                                        </span>
+                                    </Tooltip>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -460,9 +468,11 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
     const EditScenario = useCallback(
         (props: EditProps) => (
-            <IconButton data-id={props.id} onClick={openEditDialog} sx={tinyEditIconButtonSx}>
-                <EditOutlined />
-            </IconButton>
+            <Tooltip title="Edit Scenario">
+                <IconButton data-id={props.id} onClick={openEditDialog} sx={tinyEditIconButtonSx}>
+                    <EditOutlined />
+                </IconButton>
+            </Tooltip>
         ),
         [openEditDialog]
     );

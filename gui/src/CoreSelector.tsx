@@ -19,6 +19,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
+import Tooltip from "@mui/material/Tooltip";
 import { ChevronRight, ExpandMore, FlagOutlined, PushPinOutlined } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
@@ -39,7 +40,16 @@ import {
     Sequence as SequenceIcon,
     Scenario as ScenarioIcon,
 } from "./icons";
-import { BadgePos, BadgeSx, BaseTreeViewSx, FlagSx, ParentItemSx, iconLabelSx, tinyIconButtonSx, tinySelPinIconButtonSx } from "./utils";
+import {
+    BadgePos,
+    BadgeSx,
+    BaseTreeViewSx,
+    FlagSx,
+    ParentItemSx,
+    iconLabelSx,
+    tinyIconButtonSx,
+    tinySelPinIconButtonSx,
+} from "./utils";
 
 export interface EditProps {
     id: string;
@@ -85,7 +95,7 @@ const tinyPinIconButtonSx = (theme: Theme) => ({
     },
 });
 
-const switchBoxSx = {ml: 2};
+const switchBoxSx = { ml: 2 };
 
 const CoreItem = (props: {
     item: Entity;
@@ -153,14 +163,16 @@ const CoreItem = (props: {
                     ) : null}
                     {props.onPin ? (
                         <Grid item xs="auto">
-                            <IconButton
-                                data-id={id}
-                                data-pinned={isPinned ? "pinned" : undefined}
-                                onClick={props.onPin}
-                                sx={isPinned ? tinySelPinIconButtonSx : tinyPinIconButtonSx}
-                            >
-                                <PushPinOutlined />
-                            </IconButton>
+                            <Tooltip title={isPinned ? "Unpin" : "Pin"}>
+                                <IconButton
+                                    data-id={id}
+                                    data-pinned={isPinned ? "pinned" : undefined}
+                                    onClick={props.onPin}
+                                    sx={isPinned ? tinySelPinIconButtonSx : tinyPinIconButtonSx}
+                                >
+                                    <PushPinOutlined />
+                                </IconButton>
+                            </Tooltip>
                         </Grid>
                     ) : null}
                 </Grid>
@@ -228,7 +240,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
         updateVars,
         onChange,
         onSelect,
-        coreChanged
+        coreChanged,
     } = props;
 
     const [selected, setSelected] = useState("");
@@ -264,9 +276,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
         setSelected((sel) => {
             if (sel) {
                 const lovVar = getUpdateVar(updateVars, lovPropertyName);
-                dispatch(
-                    createSendUpdateAction(updateVarName, undefined, module, onChange, propagate, lovVar)
-                );
+                dispatch(createSendUpdateAction(updateVarName, undefined, module, onChange, propagate, lovVar));
                 return "";
             }
             return sel;
@@ -369,7 +379,13 @@ const CoreSelector = (props: CoreSelectorProps) => {
             {showPins ? (
                 <Box sx={switchBoxSx}>
                     <FormControlLabel
-                        control={<Switch onChange={onShowPinsChange} checked={hideNonPinned} disabled={!hideNonPinned && !Object.keys(pins[0]).length} />}
+                        control={
+                            <Switch
+                                onChange={onShowPinsChange}
+                                checked={hideNonPinned}
+                                disabled={!hideNonPinned && !Object.keys(pins[0]).length}
+                            />
+                        }
                         label="Pinned only"
                     />
                 </Box>

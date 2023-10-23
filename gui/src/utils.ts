@@ -20,10 +20,11 @@ export type ScenarioFull = [
     boolean,    // is_primary
     string,     // config_id
     string,     // creation_date
+    string,     // cycle label
     string,     // label
     string[],   // tags
     Array<[string, string]>,    // properties
-    Array<[string, string, boolean]>,   // sequences
+    Array<[string, string, boolean, boolean]>,   // sequences
     string[],   // authorized_tags
     boolean,    // deletable
     boolean,    // promotable
@@ -37,6 +38,7 @@ export enum ScFProps {
     is_primary,
     config_id,
     creation_date,
+    cycle,
     label,
     tags,
     properties,

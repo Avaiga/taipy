@@ -16,6 +16,7 @@ import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { DeleteOutline, CheckCircle, Cancel } from "@mui/icons-material";
 
@@ -48,10 +49,11 @@ interface PropertiesEditorProps {
     setFocusName: (name: string) => void;
     isDefined: boolean;
     onEdit?: string;
+    editable: boolean;
 }
 
 const PropertiesEditor = (props: PropertiesEditorProps) => {
-    const { id, entityId, isDefined, show, active, onFocus, focusName, setFocusName, entProperties } = props;
+    const { id, entityId, isDefined, show, active, onFocus, focusName, setFocusName, entProperties, editable } = props;
 
     const dispatch = useDispatch();
     const module = useModule();
@@ -158,7 +160,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                   onClick={onFocus}
                                   sx={hoverSx}
                               >
-                                  {active && focusName === propName ? (
+                                  {active && editable && focusName === propName ? (
                                       <>
                                           <Grid item xs={4}>
                                               <TextField
@@ -192,20 +194,24 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                               alignItems="center"
                                               justifyContent="center"
                                           >
-                                              <IconButton
-                                                  sx={IconPaddingSx}
-                                                  data-id={property.id}
-                                                  onClick={editProperty}
-                                              >
-                                                  <CheckCircle color="primary" />
-                                              </IconButton>
-                                              <IconButton
-                                                  sx={IconPaddingSx}
-                                                  data-id={property.id}
-                                                  onClick={cancelProperty}
-                                              >
-                                                  <Cancel color="inherit" />
-                                              </IconButton>
+                                              <Tooltip title="Apply">
+                                                  <IconButton
+                                                      sx={IconPaddingSx}
+                                                      data-id={property.id}
+                                                      onClick={editProperty}
+                                                  >
+                                                      <CheckCircle color="primary" />
+                                                  </IconButton>
+                                              </Tooltip>
+                                              <Tooltip title="Cancel">
+                                                  <IconButton
+                                                      sx={IconPaddingSx}
+                                                      data-id={property.id}
+                                                      onClick={cancelProperty}
+                                                  >
+                                                      <Cancel color="inherit" />
+                                                  </IconButton>
+                                              </Tooltip>
                                           </Grid>
                                           <Grid
                                               item
@@ -215,17 +221,21 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                               alignItems="center"
                                               justifyContent="center"
                                           >
-                                              <IconButton
-                                                  sx={DeleteIconSx}
-                                                  data-id={property.id}
-                                                  onClick={deleteProperty}
-                                                  disabled={!isDefined}
-                                              >
-                                                  <DeleteOutline
-                                                      fontSize="small"
-                                                      color={disableColor("primary", !isDefined)}
-                                                  />
-                                              </IconButton>
+                                              <Tooltip title="Delete property">
+                                                  <span>
+                                                      <IconButton
+                                                          sx={DeleteIconSx}
+                                                          data-id={property.id}
+                                                          onClick={deleteProperty}
+                                                          disabled={!isDefined}
+                                                      >
+                                                          <DeleteOutline
+                                                              fontSize="small"
+                                                              color={disableColor("primary", !isDefined)}
+                                                          />
+                                                      </IconButton>
+                                                  </span>
+                                              </Tooltip>
                                           </Grid>
                                       </>
                                   ) : (
@@ -285,12 +295,16 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                 alignItems="center"
                                 justifyContent="center"
                             >
-                                <IconButton sx={IconPaddingSx} onClick={editProperty}>
-                                    <CheckCircle color="primary" />
-                                </IconButton>
-                                <IconButton sx={IconPaddingSx} onClick={cancelProperty}>
-                                    <Cancel color="inherit" />
-                                </IconButton>
+                                <Tooltip title="Apply">
+                                    <IconButton sx={IconPaddingSx} onClick={editProperty}>
+                                        <CheckCircle color="primary" />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Cancel">
+                                    <IconButton sx={IconPaddingSx} onClick={cancelProperty}>
+                                        <Cancel color="inherit" />
+                                    </IconButton>
+                                </Tooltip>
                             </Grid>
                             <Grid item xs={1} />
                         </>

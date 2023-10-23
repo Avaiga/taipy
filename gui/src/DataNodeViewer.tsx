@@ -92,20 +92,20 @@ const editSx = {
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotsComponentsProps<Date>;
 
 type DataNodeFull = [
-    string,     // id
-    string,     // type
-    string,     // config_id
-    string,     // last_edit_date
-    string,     // expiration_date
-    string,     // label
-    string,     // ownerId
-    string,     // ownerLabel
-    number,     // ownerType
-    Array<[string, string]>,    // properties
-    boolean,    // editInProgress
-    string,     // editorId
-    boolean,    // readable
-    boolean,    // editable
+    string, // id
+    string, // type
+    string, // config_id
+    string, // last_edit_date
+    string, // expiration_date
+    string, // label
+    string, // ownerId
+    string, // ownerLabel
+    number, // ownerType
+    Array<[string, string]>, // properties
+    boolean, // editInProgress
+    string, // editorId
+    boolean, // readable
+    boolean // editable
 ];
 
 enum DataNodeFullProps {
@@ -122,7 +122,7 @@ enum DataNodeFullProps {
     editInProgress,
     editorId,
     readable,
-    editable
+    editable,
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
@@ -252,7 +252,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [id, dispatch, module, props.onLock]
     );
 
-    const active = useDynamicProperty(props.active, props.defaultActive, true) && dnEditable && dnReadable;
+    const active = useDynamicProperty(props.active, props.defaultActive, true) && dnReadable;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
 
     // history & data
@@ -516,7 +516,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         onClick={onFocus}
                                         sx={hoverSx}
                                     >
-                                        {active && focusName === "label" ? (
+                                        {active && dnEditable && focusName === "label" ? (
                                             <TextField
                                                 label="Label"
                                                 variant="outlined"
@@ -527,12 +527,16 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 InputProps={{
                                                     endAdornment: (
                                                         <InputAdornment position="end">
-                                                            <IconButton sx={IconPaddingSx} onClick={editLabel}>
-                                                                <CheckCircle color="primary" />
-                                                            </IconButton>
-                                                            <IconButton sx={IconPaddingSx} onClick={cancelLabel}>
-                                                                <Cancel color="inherit" />
-                                                            </IconButton>
+                                                            <Tooltip title="Apply">
+                                                                <IconButton sx={IconPaddingSx} onClick={editLabel}>
+                                                                    <CheckCircle color="primary" />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <Tooltip title="Cancel">
+                                                                <IconButton sx={IconPaddingSx} onClick={cancelLabel}>
+                                                                    <Cancel color="inherit" />
+                                                                </IconButton>
+                                                            </Tooltip>
                                                         </InputAdornment>
                                                     ),
                                                 }}
@@ -594,13 +598,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             <Typography variant="subtitle2">{dnOwnerLabel}</Typography>
                                         </Grid>
                                         <Grid item xs={1}>
-                                            <IconButton
-                                                sx={tinySelPinIconButtonSx}
-                                                onClick={showScenarios}
-                                                disabled={!isDataNode}
-                                            >
-                                                <Launch />
-                                            </IconButton>
+                                            <Tooltip title="Show Scenarios">
+                                                <span>
+                                                    <IconButton
+                                                        sx={tinySelPinIconButtonSx}
+                                                        onClick={showScenarios}
+                                                        disabled={!isDataNode}
+                                                    >
+                                                        <Launch />
+                                                    </IconButton>
+                                                </span>
+                                            </Tooltip>
                                             <Popover
                                                 open={Boolean(anchorEl)}
                                                 anchorEl={anchorEl}
@@ -634,6 +642,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     setFocusName={setFocusName}
                                     onFocus={onFocus}
                                     onEdit={props.onEdit}
+                                    editable={dnEditable}
                                 />
                             </Grid>
                         </div>
@@ -703,6 +712,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             sx={hoverSx}
                                         >
                                             {active &&
+                                            dnEditable &&
                                             dnEditInProgress &&
                                             dnEditorId === editorId &&
                                             focusName === dataValueFocus ? (
@@ -716,20 +726,24 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 />
                                                             </Grid>
                                                             <Grid item xs={2}>
-                                                                <IconButton
-                                                                    onClick={editDataValue}
-                                                                    size="small"
-                                                                    sx={IconPaddingSx}
-                                                                >
-                                                                    <CheckCircle color="primary" />
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    onClick={cancelDataValue}
-                                                                    size="small"
-                                                                    sx={IconPaddingSx}
-                                                                >
-                                                                    <Cancel color="inherit" />
-                                                                </IconButton>
+                                                                <Tooltip title="Apply">
+                                                                    <IconButton
+                                                                        onClick={editDataValue}
+                                                                        size="small"
+                                                                        sx={IconPaddingSx}
+                                                                    >
+                                                                        <CheckCircle color="primary" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip title="Cancel">
+                                                                    <IconButton
+                                                                        onClick={cancelDataValue}
+                                                                        size="small"
+                                                                        sx={IconPaddingSx}
+                                                                    >
+                                                                        <Cancel color="inherit" />
+                                                                    </IconButton>
+                                                                </Tooltip>
                                                             </Grid>
                                                         </>
                                                     ) : dtType == "date" ? (
@@ -742,20 +756,24 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 />
                                                             </Grid>
                                                             <Grid item xs={2}>
-                                                                <IconButton
-                                                                    onClick={editDataValue}
-                                                                    size="small"
-                                                                    sx={IconPaddingSx}
-                                                                >
-                                                                    <CheckCircle color="primary" />
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    onClick={cancelDataValue}
-                                                                    size="small"
-                                                                    sx={IconPaddingSx}
-                                                                >
-                                                                    <Cancel color="inherit" />
-                                                                </IconButton>
+                                                                <Tooltip title="Apply">
+                                                                    <IconButton
+                                                                        onClick={editDataValue}
+                                                                        size="small"
+                                                                        sx={IconPaddingSx}
+                                                                    >
+                                                                        <CheckCircle color="primary" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip title="Cancel">
+                                                                    <IconButton
+                                                                        onClick={cancelDataValue}
+                                                                        size="small"
+                                                                        sx={IconPaddingSx}
+                                                                    >
+                                                                        <Cancel color="inherit" />
+                                                                    </IconButton>
+                                                                </Tooltip>
                                                             </Grid>
                                                         </LocalizationProvider>
                                                     ) : (
@@ -770,18 +788,22 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                             InputProps={{
                                                                 endAdornment: (
                                                                     <InputAdornment position="end">
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={editDataValue}
-                                                                        >
-                                                                            <CheckCircle color="primary" />
-                                                                        </IconButton>
-                                                                        <IconButton
-                                                                            sx={IconPaddingSx}
-                                                                            onClick={cancelDataValue}
-                                                                        >
-                                                                            <Cancel color="inherit" />
-                                                                        </IconButton>
+                                                                        <Tooltip title="Apply">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={editDataValue}
+                                                                            >
+                                                                                <CheckCircle color="primary" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                        <Tooltip title="Cancel">
+                                                                            <IconButton
+                                                                                sx={IconPaddingSx}
+                                                                                onClick={cancelDataValue}
+                                                                            >
+                                                                                <Cancel color="inherit" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
                                                                     </InputAdornment>
                                                                 ),
                                                             }}
@@ -837,6 +859,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 onLock={props.onLock}
                                                 editInProgress={dnEditInProgress && dnEditorId !== editorId}
                                                 editLock={editLock}
+                                                editable={dnEditable}
                                             />
                                         ) : (
                                             <DataNodeChart

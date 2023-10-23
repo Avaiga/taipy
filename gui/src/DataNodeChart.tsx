@@ -29,6 +29,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Switch from "@mui/material/Switch";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Tooltip from "@mui/material/Tooltip";
 
 import { Chart, ColumnDesc, TraceValueType } from "taipy-gui";
 
@@ -261,7 +262,10 @@ const DataNodeChart = (props: DataNodeChartProps) => {
         }
     }, [defaultConfig, chartConfigs, configId]);
 
-    const columns: Array<[string, string]> = useMemo(() => Object.entries(props.columns || {}).map(([k, c]) => [c.dfid, k]), [props.columns]);
+    const columns: Array<[string, string]> = useMemo(
+        () => Object.entries(props.columns || {}).map(([k, c]) => [c.dfid, k]),
+        [props.columns]
+    );
 
     const setTypeChange = useCallback(
         (trace: number, cType: string) =>
@@ -339,9 +343,9 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 if (check) {
                     addCumulative(cfg);
                 } else {
-                    cfg.options?.forEach(o => delete o.fill);
+                    cfg.options?.forEach((o) => delete o.fill);
                 }
-                return storeConf(configId, { ...cfg});
+                return storeConf(configId, { ...cfg });
             });
         },
         [configId]
@@ -364,7 +368,9 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 </Grid>
                 <Grid item>
                     <FormControlLabel
-                        control={<Switch checked={!!config?.cumulative} onChange={onCumulativeChange} color="primary" />}
+                        control={
+                            <Switch checked={!!config?.cumulative} onChange={onCumulativeChange} color="primary" />
+                        }
                         label="Cumulative"
                     />
                 </Grid>
@@ -418,9 +424,11 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                       </Grid>
                                       <Grid item xs={1}>
                                           {config.traces && config.traces.length > 1 ? (
-                                              <IconButton onClick={onRemoveTrace} data-idx={idx}>
-                                                  <DeleteOutline color="primary" />
-                                              </IconButton>
+                                              <Tooltip title="Remove Trace">
+                                                  <IconButton onClick={onRemoveTrace} data-idx={idx}>
+                                                      <DeleteOutline color="primary" />
+                                                  </IconButton>
+                                              </Tooltip>
                                           ) : null}
                                       </Grid>
                                   </Fragment>
