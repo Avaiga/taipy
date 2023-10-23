@@ -6,8 +6,9 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import {Close} from "@mui/icons-material";
+import { Close } from "@mui/icons-material";
 
 const IconButtonSx = { p: 0 };
 
@@ -20,30 +21,32 @@ interface ConfirmDialogProps {
     onClose: () => void;
 }
 
-const ConfirmDialog = ({title, message, confirm, open, onClose, onConfirm}: ConfirmDialogProps) => (
+const ConfirmDialog = ({ title, message, confirm, open, onClose, onConfirm }: ConfirmDialogProps) => (
     <Dialog onClose={onClose} open={open}>
-    <DialogTitle>
-        <Grid container direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h5">{title}</Typography>
-            <IconButton aria-label="close" onClick={onClose} sx={IconButtonSx}>
-                <Close />
-            </IconButton>
-        </Grid>
-    </DialogTitle>
-    <DialogContent dividers>
-        <Typography>{message}</Typography>
-    </DialogContent>
+        <DialogTitle>
+            <Grid container direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="h5">{title}</Typography>
+                <Tooltip title="close">
+                    <IconButton aria-label="close" onClick={onClose} sx={IconButtonSx}>
+                        <Close />
+                    </IconButton>
+                </Tooltip>
+            </Grid>
+        </DialogTitle>
+        <DialogContent dividers>
+            <Typography>{message}</Typography>
+        </DialogContent>
 
-    <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={onClose}>
-            Cancel
-        </Button>
+        <DialogActions>
+            <Button variant="outlined" color="inherit" onClick={onClose}>
+                Cancel
+            </Button>
 
-        <Button variant="contained" color="primary" onClick={onConfirm}>
-            {confirm}
-        </Button>
-    </DialogActions>
-</Dialog>
-)
+            <Button variant="contained" color="primary" onClick={onConfirm}>
+                {confirm}
+            </Button>
+        </DialogActions>
+    </Dialog>
+);
 
 export default ConfirmDialog;

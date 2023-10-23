@@ -166,6 +166,63 @@ class _GuiCoreContext(CoreEventConsumerBase):
             {"scenario": scenario_id or True},
         )
 
+    def scenario_status_callback(self, job_id: str, is_submission: t.Optional[bool] = False):
+        if not job_id or not (is_submission or is_readable(job_id)):
+            return
+        try:
+            if is_submission:
+                sub_id = job_id
+                job = None
+            else:
+                job = core_get(job_id)
+                if not job:
+                    return
+                sub_id = job.submit_id
+            sub_details = self.client_jobs_by_submission.get(sub_id)
+            if not sub_details:
+                return
+
+            if (
+                not sub_details.callback
+                or not sub_details.client_id
+                or not sub_details.entity_id
+                or not sub_details.jobs
+            ):
+                return
+
+            entity = core_get(sub_details.entity_id)
+            if not entity:
+                return
+
+            submission_function = self.gui._get_user_function(sub_details.callback)
+            if not callable(submission_function):
+                return
+
+            new_status = self._get_submittable_status(sub_details.jobs)
+            if sub_details.status is not new_status:
+                # callback
+                self.gui._call_user_callback(
+                    sub_details.client_id,
+                    submission_function,
+                    [entity, {"submission_status": new_status.name, "job": job}],
+                    sub_details.module_context,
+                )
+            with self.submissions_lock:
+                if new_status in (
+                    _SubmissionStatus.COMPLETED,
+                    _SubmissionStatus.FAILED,
+                    _SubmissionStatus.CANCELED,
+                ):
+                    self.client_jobs_by_submission.pop(sub_id, None)
+                else:
+                    self.client_jobs_by_submission[sub_id] = sub_details.set_status(new_status)
+
+        except Exception as e:
+            _warn(f"Job ({job_id}) is not available", e)
+
+        finally:
+            self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
+
     def scenario_adapter(self, scenario_or_cycle):
         try:
             if (
@@ -450,63 +507,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if completed:
             return _SubmissionStatus.COMPLETED
         return _SubmissionStatus.UNDEFINED
-
-    def scenario_status_callback(self, job_id: str, is_submission: t.Optional[bool] = False):
-        if not job_id or not (is_submission or is_readable(job_id)):
-            return
-        try:
-            if is_submission:
-                sub_id = job_id
-                job = None
-            else:
-                job = core_get(job_id)
-                if not job:
-                    return
-                sub_id = job.submit_id
-            sub_details = self.client_jobs_by_submission.get(sub_id)
-            if not sub_details:
-                return
-
-            if (
-                not sub_details.callback
-                or not sub_details.client_id
-                or not sub_details.entity_id
-                or not sub_details.jobs
-            ):
-                return
-
-            entity = core_get(sub_details.entity_id)
-            if not entity:
-                return
-
-            submission_function = self.gui._get_user_function(sub_details.callback)
-            if not callable(submission_function):
-                return
-
-            new_status = self._get_submittable_status(sub_details.jobs)
-            if sub_details.status is not new_status:
-                # callback
-                self.gui._call_user_callback(
-                    sub_details.client_id,
-                    submission_function,
-                    [entity, {"submission_status": new_status.name, "job": job}],
-                    sub_details.module_context,
-                )
-            with self.submissions_lock:
-                if new_status in (
-                    _SubmissionStatus.COMPLETED,
-                    _SubmissionStatus.FAILED,
-                    _SubmissionStatus.CANCELED,
-                ):
-                    self.client_jobs_by_submission.pop(sub_id, None)
-                else:
-                    self.client_jobs_by_submission[sub_id] = sub_details.set_status(new_status)
-
-        except Exception as e:
-            _warn(f"Job ({job_id}) is not available", e)
-
-        finally:
-            self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:

@@ -5,6 +5,7 @@ import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
 import { ZoomIn } from "@mui/icons-material";
 import createEngine from "@projectstorm/react-diagrams";
 import deepEqual from "fast-deep-equal/es6";
@@ -48,10 +49,12 @@ interface DagTitleProps {
 const DagTitle = (props: DagTitleProps) => (
     <AppBar sx={appBarSx}>
         <Toolbar>
-            <Box sx={titleSx} />{" "}
-            <IconButton edge="end" color="inherit" onClick={props.zoomToFit} title="zoom to fit">
-                <ZoomIn />
-            </IconButton>
+            <Box sx={titleSx} />
+            <Tooltip title="Zoom to fit">
+                <IconButton edge="end" color="inherit" onClick={props.zoomToFit} title="Zoom to fit">
+                    <ZoomIn />
+                </IconButton>
+            </Tooltip>
         </Toolbar>
     </AppBar>
 );

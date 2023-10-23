@@ -264,9 +264,11 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                           />
                                       </Grid>
                                       <Grid item xs={1}>
-                                          <IconButton data-idx={index} onClick={removeFilter}>
-                                              <DeleteOutline />
-                                          </IconButton>
+                                          <Tooltip title="Delete Filter">
+                                              <IconButton data-idx={index} onClick={removeFilter}>
+                                                  <DeleteOutline />
+                                              </IconButton>
+                                          </Tooltip>
                                       </Grid>
                                   </Grid>
                               );
@@ -314,9 +316,13 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                             <TextField label="Value" variant="outlined" {...form.getFieldProps(`newValue`)} />
                         </Grid>
                         <Grid item xs={1}>
-                            <IconButton onClick={addFilter} disabled={typeof form.values.newData === "string"}>
-                                <Add color={disableColor("primary", typeof form.values.newData === "string")} />
-                            </IconButton>
+                            <Tooltip
+                                title={typeof form.values.newData === "string" ? "Cannot Add Filter" : "Add Filter"}
+                            >
+                                <IconButton onClick={addFilter} disabled={typeof form.values.newData === "string"}>
+                                    <Add color={disableColor("primary", typeof form.values.newData === "string")} />
+                                </IconButton>
+                            </Tooltip>
                         </Grid>
                     </Grid>
                     <Grid item xs={12} container justifyContent="space-between" mt={2}>
@@ -445,14 +451,14 @@ const JobSelectedTableRow = ({
                       status === JobStatus.PENDING ||
                       status === JobStatus.SUBMITTED ? (
                         showCancel ? (
-                            <Tooltip title="Cancel">
+                            <Tooltip title="Cancel Job">
                                 <IconButton data-id={id} onClick={handleCancelJobs}>
                                     <StopCircleOutlined />
                                 </IconButton>
                             </Tooltip>
                         ) : null
                     ) : showDelete ? (
-                        <Tooltip title="Delete">
+                        <Tooltip title="Delete Job">
                             <IconButton data-id={id} onClick={handleDeleteJobs}>
                                 <DeleteOutline color="primary" />
                             </IconButton>
@@ -672,7 +678,8 @@ const JobSelector = (props: JobSelectorProps) => {
 
     useEffect(() => {
         let filteredJobRows = [...(props.jobs || [])];
-        filteredJobRows.length && filters &&
+        filteredJobRows.length &&
+            filters &&
             filters
                 .filter((filter) => filter.data && filter.operator)
                 .forEach((filter) => {
@@ -681,9 +688,7 @@ const JobSelector = (props: JobSelectorProps) => {
                         if (filter.data === JobProps.status) {
                             rowColumnValue = JobStatus[job[JobProps.status]].toLowerCase();
                         } else if (filter.data === JobProps.id) {
-                            rowColumnValue = `${job[JobProps.id].toLowerCase()}${job[
-                                JobProps.name
-                            ].toLowerCase()}`;
+                            rowColumnValue = `${job[JobProps.id].toLowerCase()}${job[JobProps.name].toLowerCase()}`;
                         } else if (filter.data === JobProps.submitted_id) {
                             rowColumnValue = `${job[JobProps.submitted_id].toLowerCase()}${job[
                                 JobProps.submitted_label
@@ -698,8 +703,8 @@ const JobSelector = (props: JobSelectorProps) => {
                     });
                 });
         setJobRows(filteredJobRows);
-        const jobIds = filteredJobRows.map(j => j[JobProps.id]);
-        setChecked(ids => ids.filter(id => jobIds.includes(id)));
+        const jobIds = filteredJobRows.map((j) => j[JobProps.id]);
+        setChecked((ids) => ids.filter((id) => jobIds.includes(id)));
     }, [filters, props.jobs]);
 
     useEffect(() => {
@@ -748,7 +753,7 @@ const JobSelector = (props: JobSelectorProps) => {
                                 </Grid>
                                 <Grid item container justifyContent="flex-end" spacing={1} xs={2}>
                                     {showCancel ? (
-                                        <Tooltip title="Cancel">
+                                        <Tooltip title="Cancel Jobs">
                                             <span>
                                                 <IconButton
                                                     disabled={!allowCancelJobs}
@@ -764,7 +769,7 @@ const JobSelector = (props: JobSelectorProps) => {
                                         </Tooltip>
                                     ) : null}
                                     {showDelete ? (
-                                        <Tooltip title="Delete">
+                                        <Tooltip title="Delete Jobs">
                                             <span>
                                                 <IconButton
                                                     disabled={!allowDeleteJobs}
