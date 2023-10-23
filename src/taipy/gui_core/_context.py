@@ -29,8 +29,17 @@ from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, cancel_job, cre
 from taipy.core import delete as core_delete
 from taipy.core import delete_job
 from taipy.core import get as core_get
-from taipy.core import (get_cycles_scenarios, get_data_nodes, get_jobs, is_deletable, is_editable, is_promotable,
-                        is_readable, is_submittable, set_primary)
+from taipy.core import (
+    get_cycles_scenarios,
+    get_data_nodes,
+    get_jobs,
+    is_deletable,
+    is_editable,
+    is_promotable,
+    is_readable,
+    is_submittable,
+    set_primary,
+)
 from taipy.core import submit as core_submit
 from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
@@ -182,7 +191,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     )
         except Exception as e:
             _warn(
-                f"Access to {type(scenario_or_cycle)} ({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'})"
+                f"Access to {type(scenario_or_cycle)} "
+                + f"({scenario_or_cycle.id if hasattr(scenario_or_cycle, 'id') else 'No_id'})"
                 + " failed",
                 e,
             )
