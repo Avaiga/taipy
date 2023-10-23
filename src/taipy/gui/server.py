@@ -16,7 +16,6 @@ import logging
 import os
 import pathlib
 import re
-import socket
 import sys
 import time
 import typing as t
@@ -36,7 +35,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
-from .utils import _is_in_notebook, _RuntimeManager
+from .utils import _is_in_notebook, _is_port_open, _RuntimeManager
 from .utils.proxy import NotebookProxy
 
 if t.TYPE_CHECKING:
@@ -237,12 +236,6 @@ class _Server:
     def _get_async_mode(self) -> str:
         return self._ws.async_mode
 
-    def _is_port_open(self, host, port) -> bool:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex((host, port))
-        sock.close()
-        return result == 0
-
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
             from gevent import monkey
@@ -258,7 +251,7 @@ class _Server:
     def _get_random_port(self):  # pragma: no cover
         while True:
             port = randint(49152, 65535)
-            if port not in _RuntimeManager().get_used_port() and not self._is_port_open(self._host, port):
+            if port not in _RuntimeManager().get_used_port() and not _is_port_open(self._host, port):
                 return port
 
     def run(self, host, port, debug, use_reloader, flask_log, run_in_thread, allow_unsafe_werkzeug, notebook_proxy):
@@ -273,7 +266,7 @@ class _Server:
         if _is_in_notebook() or run_in_thread:
             runtime_manager = _RuntimeManager()
             runtime_manager.add_gui(self._gui, port)
-        if debug and not is_running_from_reloader() and self._is_port_open(host_value, port):
+        if debug and not is_running_from_reloader() and _is_port_open(host_value, port):
             raise ConnectionError(
                 f"Port {port} is already opened on {host_value}. You have another server application running on the same port."
             )
@@ -316,7 +309,7 @@ class _Server:
                         self._thread.kill()
                 else:
                     self._thread.kill()
-            while self._is_port_open(self._host, self._port):
+            while _is_port_open(self._host, self._port):
                 time.sleep(0.1)
 
     def stop_proxy(self):

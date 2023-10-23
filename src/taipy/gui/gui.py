@@ -1629,9 +1629,11 @@ class Gui:
         self.__send_ws_broadcast(name, value)
 
     def _broadcast_all_clients(self, name: str, value: t.Any):
-        self._set_broadcast()
-        self._update_var(name, value)
-        self._set_broadcast(False)
+        try:
+            self._set_broadcast()
+            self._update_var(name, value)
+        finally:
+            self._set_broadcast(False)
 
     def _set_broadcast(self, broadcast: bool = True):
         with contextlib.suppress(RuntimeError):

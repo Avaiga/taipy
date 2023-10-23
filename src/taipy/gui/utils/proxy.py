@@ -27,6 +27,7 @@ from twisted.web.proxy import ProxyClient, ProxyClientFactory
 from twisted.web.resource import Resource
 from twisted.web.server import NOT_DONE_YET, Site
 
+from .is_port_open import _is_port_open
 from .singleton import _Singleton
 
 if t.TYPE_CHECKING:
@@ -93,10 +94,16 @@ class NotebookProxy(object, metaclass=_Singleton):
     def run(self):
         if self._is_running:
             return
-        self._is_running = True
-        site = Site(_TaipyReverseProxyResource(self._gui._get_config("host", "127.0.0.1"), b"", self._gui))
-        reactor.listenTCP(self._listening_port, site)
+        host = self._gui._get_config("host", "127.0.0.1")
+        port = self._listening_port
+        if _is_port_open(host, port):
+            raise ConnectionError(
+                f"Port {port} is already opened on {host}. You have another server application running on the same port."
+            )
+        site = Site(_TaipyReverseProxyResource(host, b"", self._gui))
+        reactor.listenTCP(port, site)
         Thread(target=reactor.run, args=(False,)).start()
+        self._is_running = True
 
     def stop(self):
         if not self._is_running:

@@ -34,6 +34,7 @@ from .get_page_from_module import _get_page_from_module
 from .getdatecolstrname import _RE_PD_TYPE, _get_date_col_str_name
 from .html import _get_css_var_value
 from .is_debugging import is_debugging
+from .is_port_open import _is_port_open
 from .isnotebook import _is_in_notebook
 from .types import (
     _TaipyBase,
