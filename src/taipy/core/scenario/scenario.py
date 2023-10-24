@@ -209,7 +209,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         self.sequences = _sequences  # type: ignore
         if not self.sequences[name]._is_consistent():
             raise InvalidSequence(name)
-        _publish_event(EventEntityType.SEQUENCE, _sequences[name].id, EventOperation.CREATION, None)
+        _publish_event(EventEntityType.SEQUENCE, self.sequences[name].id, EventOperation.CREATION, None)
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
         """Add multiple sequences to the scenario.
@@ -240,10 +240,11 @@ class Scenario(_Entity, Submittable, _Labeled):
         Parameters:
             name (str): The name of the sequence to remove.
         """
+        seq_id = self.sequences[name].id
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
-        seq = _sequences.pop(name)
+        _sequences.pop(name)
         self.sequences = _sequences  # type: ignore
-        _publish_event(EventEntityType.SEQUENCE, seq.id, EventOperation.DELETION, None)
+        _publish_event(EventEntityType.SEQUENCE, seq_id, EventOperation.DELETION, None)
 
     def remove_sequences(self, sequence_names: List[str]):
         """
@@ -254,8 +255,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         """
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         for sequence_name in sequence_names:
-            seq = _sequences.pop(sequence_name)
-            _publish_event(EventEntityType.SEQUENCE, seq.id, EventOperation.DELETION, None)
+            seq_id = self.sequences[sequence_name].id
+            _sequences.pop(sequence_name)
+            _publish_event(EventEntityType.SEQUENCE, seq_id, EventOperation.DELETION, None)
         self.sequences = _sequences  # type: ignore
 
     @staticmethod
