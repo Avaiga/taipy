@@ -54,7 +54,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         scenario.id,
                         scenario.is_primary,
                         scenario.config_id,
-                        scenario.creation_date,
+                        scenario.creation_date.isoformat(),
                         scenario.cycle.get_simple_label() if scenario.cycle else "",
                         scenario.get_simple_label(),
                         list(scenario.tags) if scenario.tags else [],
