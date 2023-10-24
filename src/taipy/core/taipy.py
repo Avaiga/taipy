@@ -93,7 +93,6 @@ def is_editable(
         DataNode, Task, Job, Sequence, Scenario, Cycle, DataNodeId, TaskId, JobId, SequenceId, ScenarioId, CycleId
     ]
 ) -> bool:
-
     """Indicate if an entity can be edited.
 
     This function checks if the given entity can be edited.
@@ -121,7 +120,6 @@ def is_readable(
         DataNode, Task, Job, Sequence, Scenario, Cycle, DataNodeId, TaskId, JobId, SequenceId, ScenarioId, CycleId
     ]
 ) -> bool:
-
     """Indicate if an entity can be read.
 
     This function checks if the given entity can be read.

@@ -180,6 +180,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for sequence_name in sequences.keys():
             if not actual_sequences[sequence_name]._is_consistent():
                 raise InvalidSequence(actual_sequences[sequence_name].id)
+            _publish_event(EventEntityType.SEQUENCE, actual_sequences[sequence_name].id, EventOperation.CREATION, None)
 
         _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)
         return scenario
@@ -397,12 +398,10 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for data_node in scenario.data_nodes.values():
             if data_node.owner_id == scenario.id:
                 entity_ids.data_node_ids.add(data_node.id)
-
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
-
         return entity_ids
 
     @classmethod

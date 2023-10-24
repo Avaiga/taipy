@@ -21,12 +21,16 @@ from tests.core.utils import assert_true_after_time
 
 class AllCoreEventConsumerProcessor(CoreEventConsumerBase):
     def __init__(self, registration_id: str, queue: SimpleQueue):
-        self.event_type_collected: dict = {}
+        self.event_collected = 0
+        self.event_entity_type_collected: dict = {}
         self.event_operation_collected: dict = {}
         super().__init__(registration_id, queue)
 
     def process_event(self, event: Event):
-        self.event_type_collected[event.entity_type] = self.event_type_collected.get(event.entity_type, 0) + 1
+        self.event_collected += 1
+        self.event_entity_type_collected[event.entity_type] = (
+            self.event_entity_type_collected.get(event.entity_type, 0) + 1
+        )
         self.event_operation_collected[event.operation] = self.event_operation_collected.get(event.operation, 0) + 1
 
 
@@ -54,43 +58,48 @@ class TaskCreationCoreEventConsumerProcessor(CoreEventConsumerBase):
 
 def test_core_event_consumer():
     register_id_0, register_queue_0 = Notifier.register()
-    event_processor_0 = AllCoreEventConsumerProcessor(register_id_0, register_queue_0)
+    all_evt_csumer_0 = AllCoreEventConsumerProcessor(register_id_0, register_queue_0)
 
     register_id_1, register_queue_1 = Notifier.register(entity_type=EventEntityType.SCENARIO)
-    event_processor_1 = ScenarioCoreEventConsumerProcessor(register_id_1, register_queue_1)
+    sc_evt_csumer_1 = ScenarioCoreEventConsumerProcessor(register_id_1, register_queue_1)
 
     register_id_2, register_queue_2 = Notifier.register(
         entity_type=EventEntityType.TASK, operation=EventOperation.CREATION
     )
-    event_processor_2 = TaskCreationCoreEventConsumerProcessor(register_id_2, register_queue_2)
+    task_creation_evt_csumer_2 = TaskCreationCoreEventConsumerProcessor(register_id_2, register_queue_2)
 
-    event_processor_0.start()
-    event_processor_1.start()
-    event_processor_2.start()
+    all_evt_csumer_0.start()
+    sc_evt_csumer_1.start()
+    task_creation_evt_csumer_2.start()
 
     dn_config = Config.configure_data_node("dn_config")
     task_config = Config.configure_task("task_config", print, [dn_config])
-    scenario_config = Config.configure_scenario("scenario_config", [task_config], frequency=Frequency.DAILY)
+    scenario_config = Config.configure_scenario(
+        "scenario_config", [task_config], frequency=Frequency.DAILY, sequences={"seq": [task_config]}
+    )
 
+    # Create a scenario trigger 5 creation events
     scenario = tp.create_scenario(scenario_config)
+    assert_true_after_time(lambda: all_evt_csumer_0.event_collected == 5, time=10)
+    assert_true_after_time(lambda: len(all_evt_csumer_0.event_entity_type_collected) == 5, time=10)
+    assert_true_after_time(lambda: all_evt_csumer_0.event_operation_collected[EventOperation.CREATION] == 5, time=10)
+    assert_true_after_time(lambda: sc_evt_csumer_1.scenario_event_collected == 1, time=10)
+    assert_true_after_time(lambda: sc_evt_csumer_1.event_operation_collected[EventOperation.CREATION] == 1, time=10)
+    assert_true_after_time(lambda: len(sc_evt_csumer_1.event_operation_collected) == 1, time=10)
+    assert_true_after_time(lambda: task_creation_evt_csumer_2.task_event_collected == 1, time=10)
+    assert_true_after_time(lambda: task_creation_evt_csumer_2.creation_event_operation_collected == 1, time=10)
 
-    assert_true_after_time(lambda: len(event_processor_0.event_type_collected) == 4, time=10)
-    assert_true_after_time(lambda: event_processor_0.event_operation_collected[EventOperation.CREATION] == 4, time=10)
-    assert_true_after_time(lambda: event_processor_1.scenario_event_collected == 1, time=10)
-    assert_true_after_time(lambda: event_processor_1.event_operation_collected[EventOperation.CREATION] == 1, time=10)
-    assert_true_after_time(lambda: len(event_processor_1.event_operation_collected) == 1, time=10)
-    assert_true_after_time(lambda: event_processor_2.task_event_collected == 1, time=10)
-    assert_true_after_time(lambda: event_processor_2.creation_event_operation_collected == 1, time=10)
-
+    # Delete a scenario trigger 5 update events
     tp.delete(scenario.id)
-    assert_true_after_time(lambda: len(event_processor_0.event_type_collected) == 4, time=10)
-    assert_true_after_time(lambda: event_processor_0.event_operation_collected[EventOperation.DELETION] == 4, time=10)
-    assert_true_after_time(lambda: event_processor_1.scenario_event_collected == 2, time=10)
-    assert_true_after_time(lambda: event_processor_1.event_operation_collected[EventOperation.DELETION] == 1, time=10)
-    assert_true_after_time(lambda: len(event_processor_1.event_operation_collected) == 2, time=10)
-    assert_true_after_time(lambda: event_processor_2.task_event_collected == 1, time=10)
-    assert_true_after_time(lambda: event_processor_2.creation_event_operation_collected == 1, time=10)
+    assert_true_after_time(lambda: all_evt_csumer_0.event_collected == 10, time=10)
+    assert_true_after_time(lambda: len(all_evt_csumer_0.event_entity_type_collected) == 5, time=10)
+    assert_true_after_time(lambda: all_evt_csumer_0.event_operation_collected[EventOperation.DELETION] == 5, time=10)
+    assert_true_after_time(lambda: sc_evt_csumer_1.scenario_event_collected == 2, time=10)
+    assert_true_after_time(lambda: sc_evt_csumer_1.event_operation_collected[EventOperation.DELETION] == 1, time=10)
+    assert_true_after_time(lambda: len(sc_evt_csumer_1.event_operation_collected) == 2, time=10)
+    assert_true_after_time(lambda: task_creation_evt_csumer_2.task_event_collected == 1, time=10)
+    assert_true_after_time(lambda: task_creation_evt_csumer_2.creation_event_operation_collected == 1, time=10)
 
-    event_processor_0.stop()
-    event_processor_1.stop()
-    event_processor_2.stop()
+    all_evt_csumer_0.stop()
+    sc_evt_csumer_1.stop()
+    task_creation_evt_csumer_2.stop()
