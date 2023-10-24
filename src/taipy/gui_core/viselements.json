@@ -287,13 +287,13 @@
                         "name": "expandable",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If True, the scenario visualizer can be expanded.<br/>If False, the scenario visualizer is not expandable and it is shown depending on expanded value."
+                        "doc": "If True, the datanode visualizer can be expanded.<br/>If False, the datanode visualizer is not expandable and it is shown depending on expanded value."
                     },
                     {
                         "name": "expanded",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If True, when a valid scenario is selected, the scenario visualizer is expanded and its content is displayed.<br/>If False, the scenario visualizer is collapsed and only its name and <i>submit</i> button are visible."
+                        "doc": "If True, when a valid datanode is selected, the datanode visualizer is expanded and its content is displayed.<br/>If False, the datanode visualizer is collapsed and only its name is visible."
                     },
                     {
                         "name": "show_config",
@@ -403,7 +403,7 @@
                         "name": "show_delete",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the Delete button are not shown in the selector."
+                        "doc": "If False, the Delete buttons are not shown in the selector."
                     },
                     {
                         "name": "on_change",
