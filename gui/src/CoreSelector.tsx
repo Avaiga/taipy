@@ -21,8 +21,8 @@ import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import { ChevronRight, ExpandMore, FlagOutlined, PushPinOutlined } from "@mui/icons-material";
-import TreeItem from "@mui/lab/TreeItem";
-import TreeView from "@mui/lab/TreeView";
+import { TreeView } from '@mui/x-tree-view/TreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 
 import {
     useDispatch,
