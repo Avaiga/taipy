@@ -223,7 +223,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                     <Grid container direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="h5">{`${actionEdit ? `Edit` : `Create`} scenario`}</Typography>
                         <Tooltip title="close">
-                            <IconButton aria-label="close" onClick={close} sx={IconButtonSx}>
+                            <IconButton onClick={close} sx={IconButtonSx}>
                                 <Close />
                             </IconButton>
                         </Tooltip>

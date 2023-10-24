@@ -528,12 +528,20 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <Tooltip title="Apply">
-                                                                <IconButton sx={IconPaddingSx} onClick={editLabel}>
+                                                                <IconButton
+                                                                    sx={IconPaddingSx}
+                                                                    onClick={editLabel}
+                                                                    size="small"
+                                                                >
                                                                     <CheckCircle color="primary" />
                                                                 </IconButton>
                                                             </Tooltip>
                                                             <Tooltip title="Cancel">
-                                                                <IconButton sx={IconPaddingSx} onClick={cancelLabel}>
+                                                                <IconButton
+                                                                    sx={IconPaddingSx}
+                                                                    onClick={cancelLabel}
+                                                                    size="small"
+                                                                >
                                                                     <Cancel color="inherit" />
                                                                 </IconButton>
                                                             </Tooltip>
@@ -792,6 +800,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                             <IconButton
                                                                                 sx={IconPaddingSx}
                                                                                 onClick={editDataValue}
+                                                                                size="small"
                                                                             >
                                                                                 <CheckCircle color="primary" />
                                                                             </IconButton>
@@ -800,6 +809,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                             <IconButton
                                                                                 sx={IconPaddingSx}
                                                                                 onClick={cancelDataValue}
+                                                                                size="small"
                                                                             >
                                                                                 <Cancel color="inherit" />
                                                                             </IconButton>

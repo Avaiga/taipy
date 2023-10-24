@@ -27,7 +27,7 @@ const ConfirmDialog = ({ title, message, confirm, open, onClose, onConfirm }: Co
             <Grid container direction="row" justifyContent="space-between" alignItems="center">
                 <Typography variant="h5">{title}</Typography>
                 <Tooltip title="close">
-                    <IconButton aria-label="close" onClick={onClose} sx={IconButtonSx}>
+                    <IconButton onClick={onClose} sx={IconButtonSx}>
                         <Close />
                     </IconButton>
                 </Tooltip>

@@ -11,16 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    useState,
-    useCallback,
-    useEffect,
-    useMemo,
-    ChangeEvent,
-    SyntheticEvent,
-    MouseEvent,
-    KeyboardEvent,
-} from "react";
+import React, { useState, useCallback, useEffect, ChangeEvent, SyntheticEvent, MouseEvent, KeyboardEvent } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -36,6 +27,7 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { FlagOutlined, Send, CheckCircle, Cancel, ArrowForwardIosSharp } from "@mui/icons-material";
+import deepEqual from "fast-deep-equal/es6";
 
 import {
     createRequestUpdateAction,
@@ -157,7 +149,7 @@ const SequenceRow = ({
         [submitEntity, id]
     );
     const onKeyDown = useCallback(
-        (e: KeyboardEvent<HTMLDivElement>) => {
+        (e: KeyboardEvent<HTMLInputElement>) => {
             if (!e.shiftKey && !e.ctrlKey && !e.altKey) {
                 if (e.key == "Enter") {
                     onSaveField();
@@ -187,20 +179,20 @@ const SequenceRow = ({
                         variant="outlined"
                         value={sequence}
                         onChange={onChange}
-                        onKeyDown={onKeyDown}
                         sx={FieldNoMaxWidth}
                         disabled={!enableScenarioFields || !active}
                         fullWidth
                         InputProps={{
+                            onKeyDown: onKeyDown,
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <Tooltip title="Apply">
-                                        <IconButton sx={IconPaddingSx} onClick={onSaveField}>
+                                        <IconButton sx={IconPaddingSx} onClick={onSaveField} size="small">
                                             <CheckCircle color="primary" />
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title="Cancel">
-                                        <IconButton sx={IconPaddingSx} onClick={onCancelField}>
+                                        <IconButton sx={IconPaddingSx} onClick={onCancelField} size="small">
                                             <Cancel color="inherit" />
                                         </IconButton>
                                     </Tooltip>
@@ -216,12 +208,7 @@ const SequenceRow = ({
                 {submit ? (
                     <Tooltip title={disabled ? "Cannot submit Sequence" : "Submit Sequence"}>
                         <span>
-                            <IconButton
-                                size="small"
-                                onClick={onSubmitSequence}
-                                disabled={disabled}
-                                title="Submit Sequence"
-                            >
+                            <IconButton size="small" onClick={onSubmitSequence} disabled={disabled}>
                                 <Send color={disableColor("info", disabled)} />
                             </IconButton>
                         </span>
@@ -238,6 +225,8 @@ const getValidScenario = (scenar: ScenarioFull | ScenarioFull[]) =>
         : scenar.length == 1
         ? (scenar[0] as ScenarioFull)
         : undefined;
+
+const invalidScenario: ScenarioFull = ["", false, "", "", "", "", [], [], [], [], false, false, false, false, false];
 
 const ScenarioViewer = (props: ScenarioViewerProps) => {
     const {
@@ -258,6 +247,24 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
+    const [scenario, setScenario] = useState<ScenarioFull>();
+    const [valid, setValid] = useState(false);
+
+    useEffect(() => {
+        let sc: ScenarioFull | undefined = undefined;
+        if (Array.isArray(props.scenario)) {
+            sc = getValidScenario(props.scenario);
+        } else if (props.defaultScenario) {
+            try {
+                sc = getValidScenario(JSON.parse(props.defaultScenario));
+            } catch {
+                // DO nothing
+            }
+        }
+        setValid(!!sc);
+        setScenario((oldSc) => (sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
+    }, [props.scenario, props.defaultScenario]);
+
     const [
         scId,
         scPrimary,
@@ -274,20 +281,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         scSubmittable,
         scReadable,
         scEditable,
-        isScenario,
-    ] = useMemo(() => {
-        let sc: ScenarioFull | undefined = undefined;
-        if (Array.isArray(props.scenario)) {
-            sc = getValidScenario(props.scenario);
-        } else if (props.defaultScenario) {
-            try {
-                sc = getValidScenario(JSON.parse(props.defaultScenario));
-            } catch {
-                // DO nothing
-            }
-        }
-        return sc ? [...sc, true] : ["", false, "", "", "", "", [], [], [], [], false, false, false, false, false, false];
-    }, [props.scenario, props.defaultScenario]);
+    ] = scenario || invalidScenario;
 
     const active = useDynamicProperty(props.active, props.defaultActive, true) && scReadable;
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -297,23 +291,23 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const closeDeleteDialog = useCallback(() => setDeleteDialogOpen(false), []);
     const onDeleteScenario = useCallback(() => {
         setDeleteDialogOpen(false);
-        if (isScenario) {
+        if (valid) {
             dispatch(createSendActionNameAction(id, module, props.onDelete, true, true, { id: scId }));
         }
-    }, [isScenario, props.onDelete, scId, id, dispatch, module]);
+    }, [valid, props.onDelete, scId, id, dispatch, module]);
 
     const [primaryDialog, setPrimaryDialog] = useState(false);
     const openPrimaryDialog = useCallback(() => setPrimaryDialog(true), []);
     const closePrimaryDialog = useCallback(() => setPrimaryDialog(false), []);
     const onPromote = useCallback(() => {
         setPrimaryDialog(false);
-        if (isScenario) {
+        if (valid) {
             dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, primary: true }));
         }
-    }, [isScenario, props.onEdit, scId, id, dispatch, module]);
+    }, [valid, props.onEdit, scId, id, dispatch, module]);
 
     // userExpanded
-    const [userExpanded, setUserExpanded] = useState(isScenario && expanded);
+    const [userExpanded, setUserExpanded] = useState(valid && expanded);
     const onExpand = useCallback(
         (e: SyntheticEvent, expand: boolean) => expandable && setUserExpanded(expand),
         [expandable]
@@ -336,7 +330,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const submitScenario = useCallback(
         (e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            if (isScenario) {
+            if (valid) {
                 dispatch(
                     createSendActionNameAction(id, module, props.onSubmit, {
                         id: scId,
@@ -345,7 +339,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 );
             }
         },
-        [isScenario, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module]
+        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module]
     );
 
     // focus
@@ -360,12 +354,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const editLabel = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
             e && e.stopPropagation();
-            if (isScenario) {
+            if (valid) {
                 dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, name: label }));
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit, scId, label, id, dispatch, module]
+        [valid, props.onEdit, scId, label, id, dispatch, module]
     );
     const cancelLabel = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -377,7 +371,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     );
     const onLabelChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
     const onLabelKeyDown = useCallback(
-        (e: KeyboardEvent<HTMLDivElement>) => {
+        (e: KeyboardEvent<HTMLInputElement>) => {
             if (!e.shiftKey && !e.ctrlKey && !e.altKey) {
                 if (e.key == "Enter") {
                     editLabel();
@@ -398,12 +392,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const editTags = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            if (isScenario) {
+            if (valid) {
                 dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, tags: tags }));
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit, scId, tags, id, dispatch, module]
+        [valid, props.onEdit, scId, tags, id, dispatch, module]
     );
     const cancelTags = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -418,22 +412,22 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // sequences
     const editSequence = useCallback(
         (id: string, label: string) => {
-            if (isScenario) {
+            if (valid) {
                 dispatch(
                     createSendActionNameAction(id, module, props.onEdit, { id: id, name: label, type: "Sequence" })
                 );
                 setFocusName("");
             }
         },
-        [isScenario, props.onEdit, dispatch, module]
+        [valid, props.onEdit, dispatch, module]
     );
 
     // on scenario change
     useEffect(() => {
         showTags && setTags(scTags);
         setLabel(scLabel);
-        setUserExpanded(expanded && isScenario);
-    }, [scTags, scLabel, isScenario, showTags, expanded]);
+        setUserExpanded(expanded && valid);
+    }, [scTags, scLabel, valid, showTags, expanded]);
 
     // Refresh on broadcast
     useEffect(() => {
@@ -443,17 +437,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         }
     }, [props.coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
-    const disabled = !isScenario || !active || !scSubmittable;
+    const disabled = !valid || !active || !scSubmittable;
 
     return (
         <>
             <Box sx={MainBoxSx} id={id} onClick={onFocus} className={className}>
-                <Accordion
-                    defaultExpanded={expanded}
-                    expanded={userExpanded}
-                    onChange={onExpand}
-                    disabled={!isScenario}
-                >
+                <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
@@ -479,14 +468,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (
-                                    <Tooltip title={disabled ? "Cannot submit Sequence" : "Submit Scenario"}>
+                                    <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
                                         <span>
-                                            <IconButton
-                                                sx={IconPaddingSx}
-                                                onClick={submitScenario}
-                                                disabled={disabled}
-                                                title="Submit Scenario"
-                                            >
+                                            <IconButton sx={IconPaddingSx} onClick={submitScenario} disabled={disabled}>
                                                 <Send fontSize="medium" color={disableColor("info", disabled)} />
                                             </IconButton>
                                         </span>
@@ -545,24 +529,32 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             sx={FieldNoMaxWidth}
                                             value={label || ""}
                                             onChange={onLabelChange}
-                                            onKeyDown={onLabelKeyDown}
                                             InputProps={{
+                                                onKeyDown: onLabelKeyDown,
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <Tooltip title="Apply">
-                                                            <IconButton sx={IconPaddingSx} onClick={editLabel}>
+                                                            <IconButton
+                                                                sx={IconPaddingSx}
+                                                                onClick={editLabel}
+                                                                size="small"
+                                                            >
                                                                 <CheckCircle color="primary" />
                                                             </IconButton>
                                                         </Tooltip>
                                                         <Tooltip title="Cancel">
-                                                            <IconButton sx={IconPaddingSx} onClick={cancelLabel}>
+                                                            <IconButton
+                                                                sx={IconPaddingSx}
+                                                                onClick={cancelLabel}
+                                                                size="small"
+                                                            >
                                                                 <Cancel color="inherit" />
                                                             </IconButton>
                                                         </Tooltip>
                                                     </InputAdornment>
                                                 ),
                                             }}
-                                            disabled={!isScenario}
+                                            disabled={!valid}
                                         />
                                     ) : (
                                         <>
@@ -621,6 +613,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                         <IconButton
                                                                             sx={IconPaddingSx}
                                                                             onClick={editTags}
+                                                                            size="small"
                                                                         >
                                                                             <CheckCircle color="primary" />
                                                                         </IconButton>
@@ -629,6 +622,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                         <IconButton
                                                                             sx={IconPaddingSx}
                                                                             onClick={cancelTags}
+                                                                            size="small"
                                                                         >
                                                                             <Cancel color="inherit" />
                                                                         </IconButton>
@@ -638,7 +632,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         }}
                                                     />
                                                 )}
-                                                disabled={!isScenario}
+                                                disabled={!valid}
                                             />
                                         ) : (
                                             <>
@@ -662,7 +656,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             <PropertiesEditor
                                 entityId={scId}
                                 active={active}
-                                isDefined={isScenario}
+                                isDefined={valid}
                                 entProperties={scProperties}
                                 show={showProperties}
                                 focusName={focusName}
@@ -688,7 +682,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                     label={value}
                                                     key={key}
                                                     submitEntity={submitSequence}
-                                                    enableScenarioFields={isScenario}
+                                                    enableScenarioFields={valid}
                                                     submit={showSubmitSequences}
                                                     editLabel={editSequence}
                                                     onFocus={onFocus}
@@ -707,19 +701,19 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             ) : null}
                             <Grid item xs={12} container justifyContent="space-between">
                                 {showDelete ? (
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                                disabled={!active || !isScenario || !scDeletable}
-                                                onClick={openDeleteDialog}
-                                            >
-                                                DELETE
-                                            </Button>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        disabled={!active || !valid || !scDeletable}
+                                        onClick={openDeleteDialog}
+                                    >
+                                        DELETE
+                                    </Button>
                                 ) : null}
                                 <Button
                                     variant="outlined"
                                     color="primary"
-                                    disabled={!active || !isScenario || scPrimary || !scPromotable}
+                                    disabled={!active || !valid || scPrimary || !scPromotable}
                                     onClick={openPrimaryDialog}
                                 >
                                     PROMOTE TO PRIMARY

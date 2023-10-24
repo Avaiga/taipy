@@ -199,6 +199,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                       sx={IconPaddingSx}
                                                       data-id={property.id}
                                                       onClick={editProperty}
+                                                      size="small"
                                                   >
                                                       <CheckCircle color="primary" />
                                                   </IconButton>
@@ -208,6 +209,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                       sx={IconPaddingSx}
                                                       data-id={property.id}
                                                       onClick={cancelProperty}
+                                                      size="small"
                                                   >
                                                       <Cancel color="inherit" />
                                                   </IconButton>
@@ -296,12 +298,12 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                 justifyContent="center"
                             >
                                 <Tooltip title="Apply">
-                                    <IconButton sx={IconPaddingSx} onClick={editProperty}>
+                                    <IconButton sx={IconPaddingSx} onClick={editProperty} size="small">
                                         <CheckCircle color="primary" />
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Cancel">
-                                    <IconButton sx={IconPaddingSx} onClick={cancelProperty}>
+                                    <IconButton sx={IconPaddingSx} onClick={cancelProperty} size="small">
                                         <Cancel color="inherit" />
                                     </IconButton>
                                 </Tooltip>
