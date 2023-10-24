@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useCallback, useEffect, ChangeEvent, MouseEvent } from "react";
+import React, { useState, useCallback, useEffect, ChangeEvent, MouseEvent, KeyboardEvent } from "react";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
@@ -78,10 +78,10 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
     }, []);
 
     const editProperty = useCallback(
-        (e: MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
+        (e?: MouseEvent<HTMLElement>, dataset?: DOMStringMap) => {
+            e && e.stopPropagation();
             if (isDefined) {
-                const { id: propId = "" } = e.currentTarget.dataset || {};
+                const { id: propId = "" } = dataset || e?.currentTarget.dataset || {};
                 const property = propId ? properties.find((p) => p.id === propId) : newProp;
                 if (property) {
                     const oldId = property.id;
@@ -98,10 +98,10 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
         [isDefined, props.onEdit, entityId, properties, newProp, id, dispatch, module, setFocusName]
     );
     const cancelProperty = useCallback(
-        (e: MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
+        (e?: MouseEvent<HTMLElement>, dataset?: DOMStringMap) => {
+            e && e.stopPropagation();
             if (isDefined) {
-                const { id: propId = "" } = e.currentTarget.dataset || {};
+                const { id: propId = "" } = dataset || e?.currentTarget.dataset || {};
                 const property = entProperties.find(([key]) => key === propId);
                 property &&
                     setProperties((ps) =>
@@ -111,6 +111,23 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
             }
         },
         [isDefined, entProperties, setFocusName]
+    );
+
+    const onKeyDown = useCallback(
+        (e: KeyboardEvent<HTMLInputElement>) => {
+            if (!e.shiftKey && !e.ctrlKey && !e.altKey) {
+                if (e.key == "Enter" && e.currentTarget.dataset.enter) {
+                    editProperty(undefined, e.currentTarget.parentElement?.parentElement?.dataset);
+                    e.preventDefault();
+                    e.stopPropagation();
+                } else if (e.key == "Escape") {
+                    cancelProperty(undefined, e.currentTarget.parentElement?.parentElement?.dataset);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+
+        }, [editProperty, cancelProperty]
     );
 
     const deleteProperty = useCallback(
@@ -172,6 +189,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                   data-name="key"
                                                   data-id={property.id}
                                                   onChange={updatePropertyField}
+                                                  inputProps={{onKeyDown}}
                                               />
                                           </Grid>
                                           <Grid item xs={5}>
@@ -184,6 +202,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                   data-name="value"
                                                   data-id={property.id}
                                                   onChange={updatePropertyField}
+                                                  inputProps={{onKeyDown, "data-enter": true}}
                                               />
                                           </Grid>
                                           <Grid
@@ -276,6 +295,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     variant="outlined"
                                     sx={FieldNoMaxWidth}
                                     disabled={!isDefined}
+                                    inputProps={{onKeyDown}}
                                 />
                             </Grid>
                             <Grid item xs={5}>
@@ -287,6 +307,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     variant="outlined"
                                     sx={FieldNoMaxWidth}
                                     disabled={!isDefined}
+                                    inputProps={{onKeyDown, "data-enter": true}}
                                 />
                             </Grid>
                             <Grid
