@@ -195,12 +195,12 @@ const SequenceRow = ({
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <Tooltip title="Apply">
-                                        <IconButton sx={IconPaddingSx} onClick={onSaveField}>
+                                        <IconButton sx={IconPaddingSx} onClick={onSaveField} size="small">
                                             <CheckCircle color="primary" />
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title="Cancel">
-                                        <IconButton sx={IconPaddingSx} onClick={onCancelField}>
+                                        <IconButton sx={IconPaddingSx} onClick={onCancelField} size="small">
                                             <Cancel color="inherit" />
                                         </IconButton>
                                     </Tooltip>
@@ -216,12 +216,7 @@ const SequenceRow = ({
                 {submit ? (
                     <Tooltip title={disabled ? "Cannot submit Sequence" : "Submit Sequence"}>
                         <span>
-                            <IconButton
-                                size="small"
-                                onClick={onSubmitSequence}
-                                disabled={disabled}
-                                title="Submit Sequence"
-                            >
+                            <IconButton size="small" onClick={onSubmitSequence} disabled={disabled}>
                                 <Send color={disableColor("info", disabled)} />
                             </IconButton>
                         </span>
@@ -286,7 +281,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 // DO nothing
             }
         }
-        return sc ? [...sc, true] : ["", false, "", "", "", "", [], [], [], [], false, false, false, false, false, false];
+        return sc
+            ? [...sc, true]
+            : ["", false, "", "", "", "", [], [], [], [], false, false, false, false, false, false];
     }, [props.scenario, props.defaultScenario]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true) && scReadable;
@@ -479,14 +476,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             </Grid>
                             <Grid item>
                                 {showSubmit ? (
-                                    <Tooltip title={disabled ? "Cannot submit Sequence" : "Submit Scenario"}>
+                                    <Tooltip title={disabled ? "Cannot submit Scenario" : "Submit Scenario"}>
                                         <span>
-                                            <IconButton
-                                                sx={IconPaddingSx}
-                                                onClick={submitScenario}
-                                                disabled={disabled}
-                                                title="Submit Scenario"
-                                            >
+                                            <IconButton sx={IconPaddingSx} onClick={submitScenario} disabled={disabled}>
                                                 <Send fontSize="medium" color={disableColor("info", disabled)} />
                                             </IconButton>
                                         </span>
@@ -550,12 +542,20 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <Tooltip title="Apply">
-                                                            <IconButton sx={IconPaddingSx} onClick={editLabel}>
+                                                            <IconButton
+                                                                sx={IconPaddingSx}
+                                                                onClick={editLabel}
+                                                                size="small"
+                                                            >
                                                                 <CheckCircle color="primary" />
                                                             </IconButton>
                                                         </Tooltip>
                                                         <Tooltip title="Cancel">
-                                                            <IconButton sx={IconPaddingSx} onClick={cancelLabel}>
+                                                            <IconButton
+                                                                sx={IconPaddingSx}
+                                                                onClick={cancelLabel}
+                                                                size="small"
+                                                            >
                                                                 <Cancel color="inherit" />
                                                             </IconButton>
                                                         </Tooltip>
@@ -621,6 +621,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                         <IconButton
                                                                             sx={IconPaddingSx}
                                                                             onClick={editTags}
+                                                                            size="small"
                                                                         >
                                                                             <CheckCircle color="primary" />
                                                                         </IconButton>
@@ -629,6 +630,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                         <IconButton
                                                                             sx={IconPaddingSx}
                                                                             onClick={cancelTags}
+                                                                            size="small"
                                                                         >
                                                                             <Cancel color="inherit" />
                                                                         </IconButton>
@@ -707,14 +709,14 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             ) : null}
                             <Grid item xs={12} container justifyContent="space-between">
                                 {showDelete ? (
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                                disabled={!active || !isScenario || !scDeletable}
-                                                onClick={openDeleteDialog}
-                                            >
-                                                DELETE
-                                            </Button>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        disabled={!active || !isScenario || !scDeletable}
+                                        onClick={openDeleteDialog}
+                                    >
+                                        DELETE
+                                    </Button>
                                 ) : null}
                                 <Button
                                     variant="outlined"

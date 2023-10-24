@@ -51,7 +51,7 @@ const DagTitle = (props: DagTitleProps) => (
         <Toolbar>
             <Box sx={titleSx} />
             <Tooltip title="Zoom to fit">
-                <IconButton edge="end" color="inherit" onClick={props.zoomToFit} title="Zoom to fit">
+                <IconButton edge="end" color="inherit" onClick={props.zoomToFit}>
                     <ZoomIn />
                 </IconButton>
             </Tooltip>

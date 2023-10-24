@@ -168,6 +168,7 @@ const CoreItem = (props: {
                                     data-id={id}
                                     data-pinned={isPinned ? "pinned" : undefined}
                                     onClick={props.onPin}
+                                    size="small"
                                     sx={isPinned ? tinySelPinIconButtonSx : tinyPinIconButtonSx}
                                 >
                                     <PushPinOutlined />
