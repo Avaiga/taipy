@@ -254,10 +254,9 @@ def test_publish_event():
     cycle = scenario.cycle
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
-    # NOTE: sequence is created only when accessed via scenario.sequences
     sequence = scenario.sequences["sequence_config"]
 
-    assert registration_queue.qsize() == 6
+    assert registration_queue.qsize() == 5
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -269,9 +268,8 @@ def test_publish_event():
         EventEntityType.TASK,
         EventEntityType.SEQUENCE,
         EventEntityType.SCENARIO,
-        EventEntityType.SEQUENCE,
     ]
-    expected_event_entity_id = [cycle.id, dn.id, task.id, sequence.id, scenario.id, sequence.id]
+    expected_event_entity_id = [cycle.id, dn.id, task.id, sequence.id, scenario.id]
 
     assert all(
         [
@@ -328,37 +326,37 @@ def test_publish_event():
     assert registration_queue.qsize() == 15
 
     sequence.properties["name"] = "weather_forecast"
-    assert registration_queue.qsize() == 17
+    assert registration_queue.qsize() == 16
 
     tp.subscribe_sequence(print, None, sequence)
-    assert registration_queue.qsize() == 18
+    assert registration_queue.qsize() == 17
 
     tp.unsubscribe_sequence(print, None, sequence)
-    assert registration_queue.qsize() == 19
+    assert registration_queue.qsize() == 18
 
     task.skippable = True
-    assert registration_queue.qsize() == 20
+    assert registration_queue.qsize() == 19
 
     task.properties["number_of_run"] = 2
-    assert registration_queue.qsize() == 21
+    assert registration_queue.qsize() == 20
 
     task.properties.update({"debug": True})
-    assert registration_queue.qsize() == 22
+    assert registration_queue.qsize() == 21
 
     task.properties.pop("debug")
-    assert registration_queue.qsize() == 23
+    assert registration_queue.qsize() == 22
 
     dn.name = "new datanode name"
-    assert registration_queue.qsize() == 24
+    assert registration_queue.qsize() == 23
 
     dn.properties["sorted"] = True
-    assert registration_queue.qsize() == 25
+    assert registration_queue.qsize() == 24
 
     dn.properties.update({"only_fetch_first_100": True})
-    assert registration_queue.qsize() == 26
+    assert registration_queue.qsize() == 25
 
     dn.properties.pop("only_fetch_first_100")
-    assert registration_queue.qsize() == 27
+    assert registration_queue.qsize() == 26
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -380,7 +378,6 @@ def test_publish_event():
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
         EventEntityType.CYCLE,
-        EventEntityType.SEQUENCE,
         EventEntityType.SEQUENCE,
         EventEntityType.SEQUENCE,
         EventEntityType.SEQUENCE,
@@ -409,7 +406,6 @@ def test_publish_event():
         "properties",
         "properties",
         "properties",
-        None,
         "properties",
         "subscribers",
         "subscribers",
@@ -441,7 +437,6 @@ def test_publish_event():
         sequence.id,
         sequence.id,
         sequence.id,
-        sequence.id,
         task.id,
         task.id,
         task.id,
@@ -453,7 +448,6 @@ def test_publish_event():
     ]
 
     expected_event_operation_type = [EventOperation.UPDATE] * len(expected_event_types)
-    expected_event_operation_type[15] = EventOperation.CREATION
 
     assert all(
         [
@@ -471,7 +465,7 @@ def test_publish_event():
 
     # If multiple entities is in context, the last to enter will be the first to exit
     # So the published event will have the order starting with scenario first and ending with dn
-    with dn as d, task as t, sequence as pl, cycle as c, scenario as sc:
+    with dn as d, task as t, sequence as s, cycle as c, scenario as sc:
 
         sc.is_primary = True
         assert registration_queue.qsize() == 0
@@ -500,8 +494,7 @@ def test_publish_event():
         c.properties.update({"re_run_periodically": True})
         assert registration_queue.qsize() == 0
 
-        pl.properties["name"] = "weather_forecast"
-        registration_queue.get()  # creation event due to Sequence was recreated
+        s.properties["name"] = "weather_forecast"
         assert registration_queue.qsize() == 0
 
         t.skippable = True
@@ -619,26 +612,23 @@ def test_publish_event():
     # Test DELETION Event
 
     tp.delete(scenario.id)
-    assert registration_queue.qsize() == 7
+    assert registration_queue.qsize() == 6
 
     published_events = []
     while registration_queue.qsize() != 0:
         published_events.append(registration_queue.get())
 
     expected_event_types = [
-        EventEntityType.SEQUENCE,
         EventEntityType.CYCLE,
         EventEntityType.SEQUENCE,
         EventEntityType.SCENARIO,
-        # EventEntityType.SCENARIO,
         EventEntityType.TASK,
         EventEntityType.JOB,
         EventEntityType.DATA_NODE,
     ]
 
-    expected_event_entity_id = [sequence.id, cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id]
+    expected_event_entity_id = [cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id]
     expected_event_operation_type = [EventOperation.DELETION] * len(expected_event_types)
-    expected_event_operation_type[0] = EventOperation.CREATION
 
     assert all(
         [

@@ -41,6 +41,7 @@ from ..exceptions.exceptions import (
     SequenceTaskDoesNotExistInScenario,
 )
 from ..job.job import Job
+from ..notification import EventEntityType, EventOperation, _publish_event
 from ..sequence.sequence import Sequence
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
@@ -195,7 +196,6 @@ class Scenario(_Entity, Submittable, _Labeled):
         _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
         _sequence_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
-
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
             {
@@ -209,6 +209,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         self.sequences = _sequences  # type: ignore
         if not self.sequences[name]._is_consistent():
             raise InvalidSequence(name)
+        _publish_event(EventEntityType.SEQUENCE, self.sequences[name].id, EventOperation.CREATION, None)
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
         """Add multiple sequences to the scenario.
@@ -239,9 +240,11 @@ class Scenario(_Entity, Submittable, _Labeled):
         Parameters:
             name (str): The name of the sequence to remove.
         """
+        seq_id = self.sequences[name].id
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.pop(name)
         self.sequences = _sequences  # type: ignore
+        _publish_event(EventEntityType.SEQUENCE, seq_id, EventOperation.DELETION, None)
 
     def remove_sequences(self, sequence_names: List[str]):
         """
@@ -252,7 +255,9 @@ class Scenario(_Entity, Submittable, _Labeled):
         """
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         for sequence_name in sequence_names:
+            seq_id = self.sequences[sequence_name].id
             _sequences.pop(sequence_name)
+            _publish_event(EventEntityType.SEQUENCE, seq_id, EventOperation.DELETION, None)
         self.sequences = _sequences  # type: ignore
 
     @staticmethod

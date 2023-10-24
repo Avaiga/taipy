@@ -20,7 +20,6 @@ from .._version._version_mixin import _VersionMixin
 from ..common._utils import _Subscriber
 from ..common.warn_if_inputs_not_ready import _warn_if_inputs_not_ready
 from ..exceptions.exceptions import (
-    InvalidSequence,
     InvalidSequenceId,
     ModelNotFound,
     NonExistingSequence,
@@ -174,8 +173,6 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             if sequence_id not in task._parent_ids:
                 task._parent_ids.update([sequence_id])
                 task_manager._set(task)
-
-        _publish_event(cls._EVENT_ENTITY_TYPE, sequence.id, EventOperation.CREATION, None)
         return sequence
 
     @classmethod
@@ -217,7 +214,6 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         scenarios = _ScenarioManagerFactory._build_manager()._get_all(version_number)
         for scenario in scenarios:
             sequences.extend(list(scenario.sequences.values()))
-
         return sequences
 
     @classmethod
@@ -263,7 +259,6 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             for pln in sequences:
                 cls.__add_subscriber(callback, params, pln)
             return
-
         cls.__add_subscriber(callback, params, sequence)
 
     @classmethod
@@ -278,7 +273,6 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             for pln in sequences:
                 cls.__remove_subscriber(callback, params, pln)
             return
-
         cls.__remove_subscriber(callback, params, sequence)
 
     @classmethod
