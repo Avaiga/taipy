@@ -155,7 +155,7 @@ const SequenceRow = ({
                     onSaveField();
                     e.preventDefault();
                     e.stopPropagation();
-                } else if (e.key == "Esc") {
+                } else if (e.key == "Escape") {
                     onCancelField();
                     e.preventDefault();
                     e.stopPropagation();
@@ -377,7 +377,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     editLabel();
                     e.preventDefault();
                     e.stopPropagation();
-                } else if (e.key == "Esc") {
+                } else if (e.key == "Escape") {
                     cancelLabel();
                     e.preventDefault();
                     e.stopPropagation();
@@ -390,8 +390,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     // tags
     const [tags, setTags] = useState<string[]>([]);
     const editTags = useCallback(
-        (e: MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
+        (e?: MouseEvent<HTMLElement>) => {
+            e && e.stopPropagation();
             if (valid) {
                 dispatch(createSendActionNameAction(id, module, props.onEdit, { id: scId, tags: tags }));
                 setFocusName("");
@@ -400,14 +400,24 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         [valid, props.onEdit, scId, tags, id, dispatch, module]
     );
     const cancelTags = useCallback(
-        (e: MouseEvent<HTMLElement>) => {
-            e.stopPropagation();
+        (e?: MouseEvent<HTMLElement>) => {
+            e && e.stopPropagation();
             setTags(scTags);
             setFocusName("");
         },
         [scTags]
     );
     const onChangeTags = useCallback((_: SyntheticEvent, tags: string[]) => setTags(tags), []);
+    const onTagsKeyDown = useCallback(
+        (e: KeyboardEvent<HTMLInputElement>) => {
+            if (!e.shiftKey && !e.ctrlKey && !e.altKey && e.key == "Escape") {
+                cancelTags();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        },
+        [cancelTags]
+    );
 
     // sequences
     const editSequence = useCallback(
@@ -607,6 +617,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         fullWidth
                                                         InputProps={{
                                                             ...params.InputProps,
+                                                            onKeyDown: onTagsKeyDown,
                                                             endAdornment: (
                                                                 <>
                                                                     <Tooltip title="Apply">
