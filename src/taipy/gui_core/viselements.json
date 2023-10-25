@@ -54,7 +54,7 @@
                         "name": "height",
                         "type": "str",
                         "default_value": "\"50vh\"",
-                        "doc": "The maximum height, in CSS units, of the tree."
+                        "doc": "The maximum height, in CSS units, of the control."
                     },
                     {
                         "name": "show_pins",
@@ -65,7 +65,7 @@
                     {
                       "name": "on_creation",
                       "type": "Callback",
-                      "doc": "The name of the function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the scenario selector.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>config: the name of the selected scenario configuration.</li>\n<li>date: the creation date for the new scenario.</li>\n<li>label: the user entered label.</li>\n<li>properties: a dictionnary.</li>\n</ul>\n</li>\n<li>return: the callback can return a scenario, a string containing an error message (a scenario will not be created) or None (then a new scenario is created with the user parameters).</li>\n</ul>",
+                      "doc": "The name of the function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of the scenario selector.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>config: the name of the selected scenario configuration.</li>\n<li>date: the creation date for the new scenario.</li>\n<li>label: the user entered label.</li>\n<li>properties: a dictionnary containing all the user-defined custom properties.</li>\n</ul>\n</li>\n<li>return: the callback can return a scenario, a string containing an error message (a scenario will not be created) or None (then a new scenario is created with the user parameters).</li>\n</ul>",
                       "signature": [["state", "State"], ["id", "str"], ["payload", "dict"]]
                     }
                 ]
@@ -194,13 +194,13 @@
                         "name": "height",
                         "type": "str",
                         "default_value": "\"50vh\"",
-                        "doc": "The maximum height, in CSS units, of the DAG."
+                        "doc": "The maximum height, in CSS units, of the control."
                     },
                     {
                         "name": "width",
                         "type": "str",
                         "default_value": "\"100%\"",
-                        "doc": "The maximum width, in CSS units, of the DAG."
+                        "doc": "The maximum width, in CSS units, of the control."
                     }
                 ]
             }
@@ -233,7 +233,7 @@
                     {
                         "name": "on_change",
                         "type": "callback",
-                        "doc": "The name of a function that is triggered when a datanode is selected.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>DataNode^</code>): the selected datanode.</li>\n</ul>",
+                        "doc": "The name of a function that is triggered when a data node is selected.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>DataNode^</code>): the selected data node.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -253,7 +253,7 @@
                         "name": "height",
                         "type": "str",
                         "default_value": "\"50vh\"",
-                        "doc": "The maximum height, in CSS units, of the tree."
+                        "doc": "The maximum height, in CSS units, of the control."
                     },
                     {
                         "name": "show_pins",
@@ -275,7 +275,7 @@
                         "name": "data_node",
                         "default_property": true,
                         "type": "dynamic(DataNode|list[DataNode])",
-                        "doc": "The datanode to display and edit.<br/>If the value is a list, it must have a single element otherwise nothing is shown."
+                        "doc": "The data node to display and edit.<br/>If the value is a list, it must have a single element otherwise nothing is shown."
                     },
                     {
                         "name": "active",
@@ -287,60 +287,60 @@
                         "name": "expandable",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If True, the datanode viewer can be expanded.<br/>If False, the datanode viewer is not expandable and it is shown depending on expanded value."
+                        "doc": "If True, the data node viewer can be expanded.<br/>If False, the data node viewer is not expandable and it is shown depending on expanded value."
                     },
                     {
                         "name": "expanded",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If True, when a valid datanode is selected, the datanode viewer is expanded and its content is displayed.<br/>If False, the datanode viewer is collapsed and only its name is visible."
+                        "doc": "If True, when a valid data node is selected, the data node viewer is expanded and its content is displayed.<br/>If False, the data node viewer is collapsed and only its name is visible."
                     },
                     {
                         "name": "show_config",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "If False, the datanode configuration label is not visible."
+                        "doc": "If False, the data node configuration label is not visible."
                     },
                     {
                         "name": "show_owner",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the datanode owner label is not visible."
+                        "doc": "If False, the data node owner label is not visible."
                     },
                     {
                         "name": "show_edit_date",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "If False, the datanode edition date is not visible."
+                        "doc": "If False, the data node edition date is not visible."
                     },
                     {
                         "name": "show_expiration_date",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "If False, the datanode expiration date is not visible."
+                        "doc": "If False, the data node expiration date is not visible."
                     },
                     {
                         "name": "show_properties",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the datanode properties are not visible."
+                        "doc": "If False, the data node properties are not visible."
                     },
                     {
                         "name": "show_history",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the datanode history is not visible."
+                        "doc": "If False, the data node history is not visible."
                     },
                     {
                         "name": "show_data",
                         "type": "bool",
                         "default_value": "True",
-                        "doc": "If False, the datanode value is not visible."
+                        "doc": "If False, the data node value is not visible."
                     },
                     {
                         "name": "chart_config",
                         "type": "dict",
-                        "doc": "Chart configs by datanode configuration id."
+                        "doc": "Chart configs by data node configuration id."
                     },
                     {
                         "name": "scenario",
@@ -428,7 +428,7 @@
                         "name": "height",
                         "type": "str",
                         "default_value": "\"50vh\"",
-                        "doc": "The maximum height, in CSS units, of the list."
+                        "doc": "The maximum height, in CSS units, of the control."
                     }
                 ]
             }
@@ -447,7 +447,7 @@
                     {
                         "name": "class_name",
                         "type": "dynamic(str)",
-                        "doc": "The list of CSS class names that will be associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
+                        "doc": "The list of CSS class names associated with the generated HTML Element.<br/>These class names will be added to the default <code>taipy_gui_core-&lt;element_type&gt;</code>."
                     }
                 ]
             }
