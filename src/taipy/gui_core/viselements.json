@@ -345,7 +345,7 @@
                     {
                         "name": "scenario",
                         "type": "dynamic(Scenario)",
-                        "doc": "Bound to the selected <code>Scenario^</code> from the owner list of Scenarios, or None if there is none."
+                        "doc": "A variable bound to this property is set to the selected <code>Scenario^</code> when the user picks it from the list of owner scenarios accessible from the 'Owner' field in the 'Properties' tab.<br/>This property is set to None if there is no selected owner scenario."
                     }
                 ]
             }
