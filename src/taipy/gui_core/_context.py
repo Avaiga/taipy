@@ -195,7 +195,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return
 
             new_status = self._get_submittable_status(sub_details.jobs)
-            if sub_details.status is not new_status:
+            if sub_details.status != new_status:
                 # callback
                 self.gui._call_user_callback(
                     sub_details.client_id,
