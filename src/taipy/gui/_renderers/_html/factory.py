@@ -19,5 +19,5 @@ class _HtmlFactory(_Factory):
     def create_element(gui, namespace: str, control_type: str, all_properties: t.Dict[str, str]) -> t.Tuple[str, str]:
         builder_html = _Factory.call_builder(gui, f"{namespace}.{control_type}", all_properties, True)
         if builder_html is None:
-            return f"<div>INVALID SYNTAX - Control is '{namespace}:{control_type}'", "div"
+            return f"<div>INVALID SYNTAX - Control is '{namespace}:{control_type}'</div>", "div"
         return builder_html  # type: ignore

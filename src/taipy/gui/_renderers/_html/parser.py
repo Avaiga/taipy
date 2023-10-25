@@ -93,7 +93,7 @@ class _TaipyHTMLParser(HTMLParser):
     def parse_taipy_tag(self) -> None:
         tp_string, tp_element_name = self.taipy_tag.parse(self._gui)
         self.append_data(tp_string)
-        self.tag_mapping[f"taipy:{self.taipy_tag.control_type}"] = tp_element_name
+        self.tag_mapping[f"{self.taipy_tag.namespace}:{self.taipy_tag.control_type}"] = tp_element_name
         self.taipy_tag = None
 
     def get_jsx(self) -> str:
