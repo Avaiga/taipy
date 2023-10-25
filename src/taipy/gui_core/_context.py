@@ -68,7 +68,7 @@ class _SubmissionDetails:
         self,
         client_id: str,
         module_context: str,
-        callback: callable,
+        callback: t.Callable,
         entity_id: str,
         status: _SubmissionStatus,
         jobs: t.List[Job],
@@ -178,7 +178,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 if not job:
                     return
                 sub_id = job.submit_id
-            sub_details: _SubmissionDetails = self.client_jobs_by_submission.get(sub_id)
+            sub_details = self.client_jobs_by_submission.get(sub_id)
             if not sub_details:
                 return
 
