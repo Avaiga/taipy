@@ -645,34 +645,38 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                             <Typography variant="subtitle2">{dnOwnerLabel}</Typography>
                                         </Grid>
                                         <Grid item xs={1}>
-                                            <Tooltip title="Show Scenarios">
-                                                <span>
-                                                    <IconButton
-                                                        sx={tinySelPinIconButtonSx}
-                                                        onClick={showScenarios}
-                                                        disabled={!valid}
+                                            {dnOwnerId ? (
+                                                <>
+                                                    <Tooltip title="Show Scenarios">
+                                                        <span>
+                                                            <IconButton
+                                                                sx={tinySelPinIconButtonSx}
+                                                                onClick={showScenarios}
+                                                                disabled={!valid}
+                                                            >
+                                                                <Launch />
+                                                            </IconButton>
+                                                        </span>
+                                                    </Tooltip>
+                                                    <Popover
+                                                        open={Boolean(anchorEl)}
+                                                        anchorEl={anchorEl}
+                                                        onClose={handleClose}
+                                                        anchorOrigin={popoverOrigin}
                                                     >
-                                                        <Launch />
-                                                    </IconButton>
-                                                </span>
-                                            </Tooltip>
-                                            <Popover
-                                                open={Boolean(anchorEl)}
-                                                anchorEl={anchorEl}
-                                                onClose={handleClose}
-                                                anchorOrigin={popoverOrigin}
-                                            >
-                                                <CoreSelector
-                                                    entities={props.scenarios}
-                                                    leafType={NodeType.SCENARIO}
-                                                    lovPropertyName="scenarios"
-                                                    height="50vh"
-                                                    showPins={false}
-                                                    updateVarName={scenarioUpdateVars[0]}
-                                                    updateVars={`scenarios=${scenarioUpdateVars[1]}`}
-                                                    onSelect={handleClose}
-                                                />
-                                            </Popover>
+                                                        <CoreSelector
+                                                            entities={props.scenarios}
+                                                            leafType={NodeType.SCENARIO}
+                                                            lovPropertyName="scenarios"
+                                                            height="50vh"
+                                                            showPins={false}
+                                                            updateVarName={scenarioUpdateVars[0]}
+                                                            updateVars={`scenarios=${scenarioUpdateVars[1]}`}
+                                                            onSelect={handleClose}
+                                                        />
+                                                    </Popover>
+                                                </>
+                                            ) : null}
                                         </Grid>
                                     </Grid>
                                 ) : null}
