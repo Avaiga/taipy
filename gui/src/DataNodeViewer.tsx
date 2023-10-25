@@ -43,6 +43,7 @@ import { BaseDateTimePickerSlotsComponentsProps } from "@mui/x-date-pickers/Date
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
+import deepEqual from "fast-deep-equal/es6";
 
 import {
     ColumnDesc,
@@ -182,6 +183,8 @@ const getValidDataNode = (datanode: DataNodeFull | DataNodeFull[]) =>
         ? (datanode[0] as DataNodeFull)
         : undefined;
 
+const invalidDatanode: DataNodeFull = ["", "", "", "", "", "", "", "", -1, [], false, "", false, false];
+
 const DataNodeViewer = (props: DataNodeViewerProps) => {
     const {
         id = "",
@@ -201,7 +204,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const uniqid = useUniqueId(id);
     const editorId = (state as { id: string }).id;
     const editLock = useRef(false);
-    const oldId = useRef<string | undefined>(undefined);
+    const [valid, setValid] = useState(false);
+    const [datanode, setDatanode] = useState<DataNodeFull>(invalidDatanode);
 
     const [
         dnId,
@@ -218,8 +222,36 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnEditorId,
         dnReadable,
         dnEditable,
-        isDataNode,
-    ] = useMemo(() => {
+    ] = datanode;
+
+    // Tabs
+    const [tabValue, setTabValue] = useState(0);
+    const handleTabChange = useCallback(
+        (_: SyntheticEvent, newValue: number) => {
+            if (valid) {
+                if (newValue == 1) {
+                    setHistoryRequested(
+                        (req) =>
+                            req ||
+                            dispatch(createSendActionNameAction(id, module, props.onIdSelect, { history_id: dnId })) ||
+                            true
+                    );
+                } else if (newValue == 2) {
+                    setDataRequested(
+                        (req) =>
+                            req ||
+                            dispatch(createSendActionNameAction(id, module, props.onIdSelect, { data_id: dnId })) ||
+                            true
+                    );
+                    setHistoryRequested(false);
+                }
+                setTabValue(newValue);
+            }
+        },
+        [dnId, dispatch, id, valid, module, props.onIdSelect]
+    );
+
+    useEffect(() => {
         let dn: DataNodeFull | undefined = undefined;
         if (Array.isArray(props.dataNode)) {
             dn = getValidDataNode(props.dataNode);
@@ -230,26 +262,65 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 // DO nothing
             }
         }
-        // clean lock on change
-        if (dn && dn[DataNodeFullProps.id] !== oldId.current) {
-            oldId.current &&
-                editLock.current &&
-                dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
-            editLock.current = false;
-            oldId.current = dn[DataNodeFullProps.id];
-        }
-        editLock.current = dn ? dn[DataNodeFullProps.editInProgress] : false;
-        return dn ? [...dn, true] : ["", "", "", "", "", "", "", "", -1, [], false, "", false, false, false];
-    }, [props.dataNode, props.defaultDataNode, oldId, id, dispatch, module, props.onLock]);
+        setValid(!!dn);
+        setDatanode((oldDn) => {
+            if (oldDn === dn) {
+                return oldDn;
+            }
+            const isNewDn = oldDn[DataNodeFullProps.id] !== (dn || invalidDatanode)[DataNodeFullProps.id];
+            // clean lock on change
+            if (oldDn[DataNodeFullProps.id] && isNewDn && editLock.current) {
+                dispatch(
+                    createSendActionNameAction(id, module, props.onLock, {
+                        id: oldDn[DataNodeFullProps.id],
+                        lock: false,
+                    })
+                );
+            }
+            if (!dn || isNewDn) {
+                setTabValue(0);
+            }
+            if (!dn) {
+                return invalidDatanode;
+            }
+            editLock.current = dn[DataNodeFullProps.editInProgress];
+            setHistoryRequested((req) => {
+                if (req && !isNewDn && tabValue == 1) {
+                    dispatch(
+                        createSendActionNameAction(id, module, props.onIdSelect, {
+                            history_id: oldDn[DataNodeFullProps.id],
+                        })
+                    );
+                    return true;
+                }
+                return false;
+            });
+            setDataRequested((req) => {
+                if (req && !isNewDn && tabValue == 2) {
+                    dispatch(
+                        createSendActionNameAction(id, module, props.onIdSelect, {
+                            data_id: oldDn[DataNodeFullProps.id],
+                        })
+                    );
+                    return true;
+                }
+                return false;
+            });
+            if (deepEqual(oldDn, dn)) {
+                return oldDn;
+            }
+            return dn;
+        });
+    }, [props.dataNode, props.defaultDataNode, id, dispatch, module, props.onLock, tabValue, props.onIdSelect]);
 
     // clean lock on unmount
     useEffect(
         () => () => {
-            oldId.current &&
+            dnId &&
                 editLock.current &&
-                dispatch(createSendActionNameAction(id, module, props.onLock, { id: oldId.current, lock: false }));
+                dispatch(createSendActionNameAction(id, module, props.onLock, { id: dnId, lock: false }));
         },
-        [id, dispatch, module, props.onLock]
+        [dnId, id, dispatch, module, props.onLock]
     );
 
     const active = useDynamicProperty(props.active, props.defaultActive, true) && dnReadable;
@@ -260,7 +331,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const [dataRequested, setDataRequested] = useState(false);
 
     // userExpanded
-    const [userExpanded, setUserExpanded] = useState(isDataNode && expanded);
+    const [userExpanded, setUserExpanded] = useState(valid && expanded);
     const onExpand = useCallback(
         (e: SyntheticEvent, expand: boolean) => expandable && setUserExpanded(expand),
         [expandable]
@@ -285,12 +356,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const editLabel = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            if (isDataNode) {
+            if (valid) {
                 dispatch(createSendActionNameAction(id, module, props.onEdit, { id: dnId, name: label }));
                 setFocusName("");
             }
         },
-        [isDataNode, props.onEdit, dnId, label, id, dispatch, module]
+        [valid, props.onEdit, dnId, label, id, dispatch, module]
     );
     const cancelLabel = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -307,12 +378,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const showScenarios = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            if (isDataNode) {
+            if (valid) {
                 dispatch(createSendActionNameAction(id, module, props.onIdSelect, { owner_id: dnOwnerId }));
                 setAnchorEl(e.currentTarget);
             }
         },
-        [dnOwnerId, dispatch, id, isDataNode, module, props.onIdSelect]
+        [dnOwnerId, dispatch, id, valid, module, props.onIdSelect]
     );
     const handleClose = useCallback(() => setAnchorEl(null), []);
     const scenarioUpdateVars = useMemo(
@@ -328,13 +399,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     // on datanode change
     useEffect(() => {
         setLabel(dnLabel);
-        setUserExpanded(expanded && isDataNode);
+        setUserExpanded(expanded && valid);
         setTabValue(0);
         setHistoryRequested(false);
         setDataRequested(false);
         setViewType(TableViewType);
         setComment("");
-    }, [dnId, dnLabel, isDataNode, expanded]);
+    }, [dnId, dnLabel, valid, expanded]);
 
     // Datanode data
     const dtValue = (props.data && props.data[DatanodeDataProps.value]) ?? undefined;
@@ -345,7 +416,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const editDataValue = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            if (isDataNode) {
+            if (valid) {
                 dispatch(
                     createSendActionNameAction(id, module, props.onDataValue, {
                         id: dnId,
@@ -357,7 +428,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 setFocusName("");
             }
         },
-        [isDataNode, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module, comment]
+        [valid, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module, comment]
     );
     const cancelDataValue = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -375,41 +446,6 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             setDataValue(getDataValue(dtValue, dtType));
         }
     }, [dtValue, dtType]);
-
-    // Refresh on broadcast
-    useEffect(() => {
-        const ids = props.coreChanged?.datanode;
-        if (typeof ids === "string" ? ids === dnId : Array.isArray(ids) ? ids.includes(dnId) : ids) {
-            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
-        }
-    }, [props.coreChanged, props.updateVarName, id, module, dispatch, dnId]);
-
-    // Tabs
-    const [tabValue, setTabValue] = useState(0);
-    const handleTabChange = useCallback(
-        (_: SyntheticEvent, newValue: number) => {
-            if (isDataNode) {
-                if (newValue == 1) {
-                    setHistoryRequested(
-                        (req) =>
-                            req ||
-                            dispatch(createSendActionNameAction(id, module, props.onIdSelect, { history_id: dnId })) ||
-                            true
-                    );
-                } else if (newValue == 2) {
-                    setDataRequested(
-                        (req) =>
-                            req ||
-                            dispatch(createSendActionNameAction(id, module, props.onIdSelect, { data_id: dnId })) ||
-                            true
-                    );
-                    setHistoryRequested(false);
-                }
-                setTabValue(newValue);
-            }
-        },
-        [dnId, dispatch, id, isDataNode, module, props.onIdSelect]
-    );
 
     // Tabular viewType
     const [viewType, setViewType] = useState(TableViewType);
@@ -440,15 +476,18 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [props.width]
     );
 
+    // Refresh on broadcast
+    useEffect(() => {
+        const ids = props.coreChanged?.datanode;
+        if ((typeof ids === "string" && ids === dnId) || (Array.isArray(ids) && ids.includes(dnId))) {
+            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+        }
+    }, [props.coreChanged, props.updateVarName, id, module, dispatch, dnId]);
+
     return (
         <>
             <Box sx={dnMainBoxSx} id={id} onClick={onFocus} className={className}>
-                <Accordion
-                    defaultExpanded={expanded}
-                    expanded={userExpanded}
-                    onChange={onExpand}
-                    disabled={!isDataNode}
-                >
+                <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
@@ -548,7 +587,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                         </InputAdornment>
                                                     ),
                                                 }}
-                                                disabled={!isDataNode}
+                                                disabled={!valid}
                                             />
                                         ) : (
                                             <>
@@ -611,7 +650,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     <IconButton
                                                         sx={tinySelPinIconButtonSx}
                                                         onClick={showScenarios}
-                                                        disabled={!isDataNode}
+                                                        disabled={!valid}
                                                     >
                                                         <Launch />
                                                     </IconButton>
@@ -643,7 +682,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                 <PropertiesEditor
                                     entityId={dnId}
                                     active={active}
-                                    isDefined={isDataNode}
+                                    isDefined={valid}
                                     entProperties={dnProperties}
                                     show={showProperties}
                                     focusName={focusName}
@@ -817,7 +856,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                     </InputAdornment>
                                                                 ),
                                                             }}
-                                                            disabled={!isDataNode}
+                                                            disabled={!valid}
                                                         />
                                                     )}
                                                     <TextField

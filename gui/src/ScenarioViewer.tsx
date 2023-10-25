@@ -247,7 +247,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
-    const [scenario, setScenario] = useState<ScenarioFull>();
+    const [scenario, setScenario] = useState<ScenarioFull>(invalidScenario);
     const [valid, setValid] = useState(false);
 
     useEffect(() => {
@@ -262,7 +262,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             }
         }
         setValid(!!sc);
-        setScenario((oldSc) => (sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
+        setScenario((oldSc) => (oldSc === sc ? oldSc : sc ? (deepEqual(oldSc, sc) ? oldSc : sc) : invalidScenario));
     }, [props.scenario, props.defaultScenario]);
 
     const [
