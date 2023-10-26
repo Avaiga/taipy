@@ -49,7 +49,7 @@ jobs:
 
       - name: Modify README image file path
         run: |
-          cp tools/modify_readme.py /tmp
+          cp tools/modify_readme.py ${{ runner.temp }}
           python ${{ runner.temp }}/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
 
       - name: Get taipy-gui version from setup.py
