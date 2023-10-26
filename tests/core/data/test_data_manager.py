@@ -44,6 +44,11 @@ class TestDataManager:
         assert dn.properties.get("foo") == "bar"
         assert dn.properties.get("baz") == "qux"
 
+    def test_create_data_node_with_name_provided(self):
+        dn_config = Config.configure_data_node(id="dn", foo="bar", name="acb")
+        dn = _DataManager._create_and_set(dn_config, None, None)
+        assert dn.name == "acb"
+
     def test_create_and_get_csv_data_node(self):
         # Test we can instantiate a CsvDataNode from DataNodeConfig with :
         # - a csv type
