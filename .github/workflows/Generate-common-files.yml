@@ -1,0 +1,35 @@
+name: Copy Common Files
+
+on:
+  push:
+    branches:
+      - main  # Replace with the branch where changes trigger this action
+
+jobs:
+  copy-common-files:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Copy Common Files
+      run: |
+        # Copy common files from a specific location to the repository root.
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/.flake8" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/.gitattributes" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/.license-header" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/LICENSE" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/mypy.ini" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/pyproject.toml" .
+        cp -r "https://github.com/Avaiga/taipy/blob/develop/src/taipy/__init__.py" .
+        
+        
+        git add .
+        git commit -m "Copy common files"
+        git push
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
