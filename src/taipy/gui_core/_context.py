@@ -68,7 +68,7 @@ class _SubmissionDetails:
         self,
         client_id: str,
         module_context: str,
-        callback: str,
+        callback: t.Callable,
         entity_id: str,
         status: _SubmissionStatus,
         jobs: t.List[Job],
@@ -194,16 +194,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if not entity:
                 return
 
-            submission_function = self.gui._get_user_function(sub_details.callback)
-            if not callable(submission_function):
-                return
-
             new_status = self._get_submittable_status(sub_details.jobs)
-            if sub_details.status is not new_status:
+            if sub_details.status != new_status:
                 # callback
                 self.gui._call_user_callback(
                     sub_details.client_id,
-                    submission_function,
+                    sub_details.callback,
                     [entity, {"submission_status": new_status.name, "job": job}],
                     sub_details.module_context,
                 )
@@ -449,7 +445,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
             try:
                 jobs = core_submit(entity)
                 if submission_cb := data.get("on_submission_change"):
-                    if callable(self.gui._get_user_function(submission_cb)):
+                    submission_fn = self.gui._get_user_function(submission_cb)
+                    if callable(submission_fn):
                         job_ids = [j.id for j in (jobs if isinstance(jobs, list) else [jobs])]
                         client_id = self.gui._get_client_id()
                         module_context = self.gui._get_locals_context()
@@ -458,7 +455,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             self.client_jobs_by_submission[sub_id] = _SubmissionDetails(
                                 client_id,
                                 module_context,
-                                submission_cb,
+                                submission_fn,
                                 entity_id,
                                 _SubmissionStatus.SUBMITTED,
                                 job_ids,
