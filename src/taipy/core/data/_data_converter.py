@@ -144,7 +144,7 @@ class _DataNodeConverter(_AbstractConverter):
             data_node.config_id,
             data_node._scope,
             data_node.storage_type(),
-            data_node._name,
+            properties.pop("name", None) or data_node._name,
             data_node.owner_id,
             list(data_node._parent_ids),
             data_node._last_edit_date.isoformat() if data_node._last_edit_date else None,
