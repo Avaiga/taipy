@@ -75,7 +75,10 @@ jobs:
       - name: Build and test the package
         run: |
           python setup.py build_py && python -m build
+          pwd
+          ls -l .
           rm -rf taipy
+          ls -l dist/
           pip install dist/*.tar.gz
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
