@@ -61,7 +61,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         tasks (Set[Task^]): The set of tasks.
         additional_data_nodes (Set[DataNode^]): The set of additional data nodes.
         sequences (Dict[str, Sequence^]): The dictionary of sequences: subsets of tasks that can be submitted
-            together independently from the rest of the scenario's tasks.
+            together independently of the rest of the scenario's tasks.
         properties (dict[str, Any]): A dictionary of additional properties.
         scenario_id (str): The unique identifier of this scenario.
         creation_date (datetime): The date and time of the scenario's creation.
