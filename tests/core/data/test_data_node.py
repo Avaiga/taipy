@@ -913,3 +913,14 @@ class TestDataNode:
         )
         assert dn.get_label() == "a label"
         assert dn.get_simple_label() == "a label"
+
+    def test_change_data_node_name(self):
+        cgf = Config.configure_data_node("foo", scope=Scope.GLOBAL)
+        dn = tp.create_global_data_node(cgf)
+
+        dn.name = "bar"
+        assert dn.name == "bar"
+
+        # This new syntax will be the only one allowed: https://github.com/Avaiga/taipy-core/issues/806
+        dn.properties["name"] = "baz"
+        assert dn.name == "baz"
