@@ -12,6 +12,7 @@
 from queue import SimpleQueue
 
 from src.taipy.core import taipy as tp
+from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from src.taipy.core.notification.event import Event, EventEntityType, EventOperation
 from src.taipy.core.notification.notifier import Notifier
@@ -40,6 +41,11 @@ def identity(x):
 
 
 def test_event_published():
+    if _OrchestratorFactory._orchestrator is None:
+        _OrchestratorFactory._build_orchestrator()
+    _OrchestratorFactory._build_dispatcher()
+    Config.unblock_update()
+
     register_id_0, register_queue_0 = Notifier.register()
     all_evts = AllCoreEventConsumer(register_id_0, register_queue_0)
     all_evts.start()

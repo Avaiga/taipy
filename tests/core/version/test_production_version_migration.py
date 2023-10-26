@@ -185,26 +185,30 @@ def test_migrate_compatible_version():
     scenario_cfg = config_scenario_v1()
     # Production 1.0
     with patch("sys.argv", ["prog", "--production", "1.0"]):
-        Core().run()
+        core = Core()
+        core.run()
 
         scenario_v1 = _ScenarioManager._create(scenario_cfg)
         _ScenarioManager._submit(scenario_v1)
 
         assert scenario_v1.d2.read() == 2
         assert len(_DataManager._get_all(version_number="all")) == 2
+        core.stop()
 
     init_config()
     scenario_cfg = config_scenario_v1()
 
     # Production 2.0 is a compatible version
     with patch("sys.argv", ["prog", "--production", "2.0"]):
-        Core().run()
+        core = Core()
+        core.run()
 
         scenario_v2 = _ScenarioManager._create(scenario_cfg)
         _ScenarioManager._submit(scenario_v2)
 
         assert scenario_v2.d2.read() == 2
         assert len(_DataManager._get_all(version_number="all")) == 4
+        core.stop()
 
     init_config()
 
@@ -217,9 +221,11 @@ def test_migrate_compatible_version():
     scenario_cfg_v2_1 = config_scenario_v2()
 
     with patch("sys.argv", ["prog", "--production", "2.1"]):
-        Core().run()
+        core = Core()
+        core.run()
         scenario_v2_1 = _ScenarioManager._create(scenario_cfg_v2_1)
         _ScenarioManager._submit(scenario_v2_1)
+        core.stop()
 
     assert scenario_v2_1.d2.read() == 6
     assert len(_DataManager._get_all(version_number="all")) == 6
@@ -251,6 +257,7 @@ def submit_v2():
         core.run()
         scenario_v2 = _ScenarioManager._create(scenario_cfg_v2)
         _ScenarioManager._submit(scenario_v2)
+        core.stop()
     return scenario_v2
 
 

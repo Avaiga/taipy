@@ -11,9 +11,7 @@
 
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime
 from functools import partial
-from time import sleep
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -28,6 +26,7 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job.job import Job
 from src.taipy.core.task.task import Task
 from taipy.config.config import Config
+from tests.core.utils import assert_true_after_time
 
 
 def execute(lock):
@@ -66,10 +65,10 @@ def test_build_standalone_job_dispatcher():
     assert isinstance(dispatcher, _StandaloneJobDispatcher)
     assert isinstance(dispatcher._executor, ProcessPoolExecutor)
     assert dispatcher._nb_available_workers == 2
-    assert_true_after_120_second_max(dispatcher.is_running)
+    assert_true_after_time(dispatcher.is_running)
     dispatcher.stop()
     dispatcher.join()
-    assert_true_after_120_second_max(lambda: not dispatcher.is_running())
+    assert_true_after_time(lambda: not dispatcher.is_running())
 
 
 def test_can_execute_2_workers():
@@ -103,7 +102,7 @@ def test_can_execute_2_workers():
         dispatcher._dispatch(job)
         assert not dispatcher._can_execute()
 
-    assert_true_after_120_second_max(lambda: dispatcher._can_execute())
+    assert_true_after_time(lambda: dispatcher._can_execute())
 
 
 def test_can_execute_synchronous():
@@ -158,12 +157,3 @@ def test_exception_in_writing_data():
         dispatcher._dispatch(job)
         assert job.is_failed()
         assert "node" in job.stacktrace[0]
-
-
-def assert_true_after_120_second_max(assertion):
-    start = datetime.now()
-    while (datetime.now() - start).seconds < 120:
-        sleep(0.1)  # Limit CPU usage
-        if assertion():
-            return
-    assert assertion()
