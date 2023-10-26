@@ -33,9 +33,9 @@ with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
 requirements = [
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
     "cookiecutter>=2.1.1,<2.2",
-    "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
-    "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
-    "taipy-templates@git+https://git@github.com/Avaiga/taipy-templates.git@develop",
+    "taipy-gui>=3.0,<3.1",
+    "taipy-rest>=3.0,<3.1",
+    "taipy-templates>=3.0,<3.1",
 ]
 
 setup_requirements = [(requirement for requirement in requirements if requirement.startswith("taipy-gui"))]
