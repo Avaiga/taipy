@@ -71,14 +71,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install build wheel
           # install taipy-gui from based on setup.py version
+          pip install "${{ steps.taipy_gui_version.outputs.VERSION }}"
 
       - name: Build and test the package
         run: |
           python setup.py build_py && python -m build
-          pwd
-          ls -l .
           rm -rf taipy
-          ls -l dist/
           pip install dist/*.tar.gz
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"

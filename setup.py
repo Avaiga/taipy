@@ -38,8 +38,6 @@ requirements = [
     "taipy-templates>=3.0,<3.1",
 ]
 
-setup_requirements = [(requirement for requirement in requirements if requirement.startswith("taipy-gui"))]
-
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
@@ -95,7 +93,6 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     description="A 360° open-source platform from Python pilots to production-ready web apps.",
-    setup_requires=setup_requirements,
     install_requires=requirements,
     entry_points={
         "console_scripts": [
