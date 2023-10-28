@@ -49,7 +49,7 @@ jobs:
 
       - name: Modify README image file path
         run: |
-          cp tools/modify_readme.py /tmp
+          cp tools/modify_readme.py ${{ runner.temp }}
           python ${{ runner.temp }}/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
 
       - name: Get taipy-gui version from setup.py
@@ -71,6 +71,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install build wheel
           # install taipy-gui from based on setup.py version
+          pip install "${{ steps.taipy_gui_version.outputs.VERSION }}"
 
       - name: Build and test the package
         run: |
