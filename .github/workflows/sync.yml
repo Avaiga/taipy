@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@master
+        uses: actions/checkout@develop
       - name: Run GitHub File Sync
         uses: BetaHuhn/repo-file-sync-action@v1
         with:
