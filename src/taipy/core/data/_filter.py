@@ -10,11 +10,16 @@
 # specific language governing permissions and limitations under the License.
 
 from collections.abc import Hashable
-from typing import Dict, Iterable, List, Union
+from functools import reduce
+from operator import and_, or_
+from typing import Dict, Iterable, List, Tuple, Union
 
 import modin.pandas as modin_pd
+import numpy as np
 import pandas as pd
 from pandas.core.common import is_bool_indexer
+
+from .operator import JoinOperator, Operator
 
 
 class _FilterDataNode:
@@ -105,78 +110,115 @@ class _FilterDataNode:
             filtered_data.append({k: getattr(e, k) for k in keys})
         return filtered_data
 
-    def __eq__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data == value
+    @staticmethod
+    def _filter_dataframe(
+        df_data: Union[pd.DataFrame, modin_pd.DataFrame], operators: Union[List, Tuple], join_operator=JoinOperator.AND
+    ):
+        filtered_df_data = []
+        if join_operator == JoinOperator.AND:
+            how = "inner"
+        elif join_operator == JoinOperator.OR:
+            how = "outer"
         else:
-            filtered_data = [e == value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            return NotImplementedError
+        for key, value, operator in operators:
+            filtered_df_data.append(_FilterDataNode._filter_dataframe_per_key_value(df_data, key, value, operator))
+        return _FilterDataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
 
-    def __lt__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data < value
+    @staticmethod
+    def _filter_dataframe_per_key_value(
+        df_data: Union[pd.DataFrame, modin_pd.DataFrame], key: str, value, operator: Operator
+    ):
+        df_by_col = df_data[key]
+        if operator == Operator.EQUAL:
+            df_by_col = df_by_col == value
+        if operator == Operator.NOT_EQUAL:
+            df_by_col = df_by_col != value
+        if operator == Operator.LESS_THAN:
+            df_by_col = df_by_col < value
+        if operator == Operator.LESS_OR_EQUAL:
+            df_by_col = df_by_col <= value
+        if operator == Operator.GREATER_THAN:
+            df_by_col = df_by_col > value
+        if operator == Operator.GREATER_OR_EQUAL:
+            df_by_col = df_by_col >= value
+        return df_data[df_by_col]
+
+    @staticmethod
+    def __dataframe_merge(df_list: List, how="inner"):
+        return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
+
+    @staticmethod
+    def _filter_numpy_array(data: np.ndarray, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+        conditions = []
+        for key, value, operator in operators:
+            conditions.append(_FilterDataNode.__get_filter_condition_per_key_value(data, key, value, operator))
+
+        if join_operator == JoinOperator.AND:
+            join_conditions = reduce(and_, conditions)
+        elif join_operator == JoinOperator.OR:
+            join_conditions = reduce(or_, conditions)
         else:
-            filtered_data = [e < value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            return NotImplementedError
 
-    def __le__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data <= value
+        return data[join_conditions]
+
+    @staticmethod
+    def __get_filter_condition_per_key_value(array_data: np.ndarray, key, value, operator: Operator):
+        if not isinstance(key, int):
+            key = int(key)
+
+        if operator == Operator.EQUAL:
+            return array_data[:, key] == value
+        if operator == Operator.NOT_EQUAL:
+            return array_data[:, key] != value
+        if operator == Operator.LESS_THAN:
+            return array_data[:, key] < value
+        if operator == Operator.LESS_OR_EQUAL:
+            return array_data[:, key] <= value
+        if operator == Operator.GREATER_THAN:
+            return array_data[:, key] > value
+        if operator == Operator.GREATER_OR_EQUAL:
+            return array_data[:, key] >= value
+
+        return NotImplementedError
+
+    @staticmethod
+    def _filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+        filtered_list_data = []
+        for key, value, operator in operators:
+            filtered_list_data.append(_FilterDataNode._filter_list_per_key_value(list_data, key, value, operator))
+        if len(filtered_list_data) == 0:
+            return filtered_list_data
+        if join_operator == JoinOperator.AND:
+            return _FilterDataNode.__list_intersect(filtered_list_data)
+        elif join_operator == JoinOperator.OR:
+            return list(set(np.concatenate(filtered_list_data)))
         else:
-            filtered_data = [e <= value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            return NotImplementedError
 
-    def __gt__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data > value
-        else:
-            filtered_data = [e > value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+    @staticmethod
+    def _filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
+        filtered_list = []
+        for row in list_data:
+            row_value = getattr(row, key, None)
+            if row_value is None:
+                continue
 
-    def __ge__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data >= value
-        else:
-            filtered_data = [e >= value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            if operator == Operator.EQUAL and row_value == value:
+                filtered_list.append(row)
+            if operator == Operator.NOT_EQUAL and row_value != value:
+                filtered_list.append(row)
+            if operator == Operator.LESS_THAN and row_value < value:
+                filtered_list.append(row)
+            if operator == Operator.LESS_OR_EQUAL and row_value <= value:
+                filtered_list.append(row)
+            if operator == Operator.GREATER_THAN and row_value > value:
+                filtered_list.append(row)
+            if operator == Operator.GREATER_OR_EQUAL and row_value >= value:
+                filtered_list.append(row)
+        return filtered_list
 
-    def __ne__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data != value
-        else:
-            filtered_data = [e != value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
-
-    def __and__(self, other):
-        if self.data_is_dataframe():
-            if other.data_is_dataframe():
-                filtered_data = self.data & other.data
-            else:
-                raise NotImplementedError
-        else:
-            if other.data_is_dataframe():
-                raise NotImplementedError
-            else:
-                filtered_data = [s and o for s, o in zip(self.data, other.data)]
-        return _FilterDataNode(self.data_node_id, filtered_data)
-
-    def __or__(self, other):
-        if self.data_is_dataframe():
-            if other.data_is_dataframe():
-                filtered_data = self.data | other.data
-            else:
-                raise NotImplementedError
-        else:
-            if other.data_is_dataframe():
-                raise NotImplementedError
-            else:
-                filtered_data = [s or o for s, o in zip(self.data, other.data)]
-        return _FilterDataNode(self.data_node_id, filtered_data)
-
-    def __str__(self) -> str:
-        if self.data_is_dataframe():
-            return str(self.data)
-        list_to_string = ""
-        for e in self.data:
-            list_to_string += str(e) + "\n"
-        return list_to_string
+    @staticmethod
+    def __list_intersect(list_data):
+        return list(set(list_data.pop()).intersection(*map(set, list_data)))
