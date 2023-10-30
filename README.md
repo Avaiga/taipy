@@ -3,7 +3,7 @@
 
 <img align="left" src="readme_img/readme_logo.png" alt="Taipy Logo" width="20%" ></img>
 <br>
-#  Welcome to Taipy
+#  Welcome to Taipy - Your Web Application Builder
 <p align="left">
     <a href="https://pypi.python.org/pypi/taipy/" alt="Taipy version">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/taipy.svg?label=pip&logo=PyPI&color=ff462b&labelColor=283282"></a>
@@ -20,25 +20,19 @@
 ###  <div align="left">Turns Data and AI algorithms into full web applications in no time.
 ###  How? Taipy GUI with Taipy Core pops out as a 360° platform to build production-ready web applications</div>
 
-
-
-<br>
 <br>
 
-###  <div align="left">*Open Source, 100% Python*</div>
+###  <div align="left">Pure Python & Open-Source. <div align="left"> How? Taipy pops out as a 360° platform to build production-ready web applications.
 
-
-<br>
-<br>
 <br>
 
 #  <div align="center"> 📊 We make both ends meet ⚙️ </div>
 <br>
  <div align="center">
 
-| TAIPY GUI - the frond-end  | TAIPY Core - the back-end |
+| TAIPY - the frond-end  | TAIPY - the back-end |
 | --------  | -------- |
-|<img src="readme_img/readme_gui_intro.gif" alt="Taipy GUI Animation"  width="100%"/> | <img src="readme_img/readme_core_intro.gif" alt="Taipy Core Animation"  width="100%"/>
+|<img src="readme_img/readme_gui_intro.gif" alt="Taipy FE Animation"  width="100%"/> | <img src="readme_img/readme_be_intro.gif" alt="Taipy BE Animation"  width="100%"/>
 
 
 </div>
@@ -66,14 +60,14 @@ Join our [Discord](https://discord.gg/XcFhrJZru3) to give us feedback, share you
 
 ## Ready, Set, GUI
 
-### Tiny Taipy GUI Demo
+### Tiny Taipy Front-End Demo
 
 ```python
 from taipy import Gui
 
 excitement_page = """
 # Welcome to Taipy
-## Getting started with Taipy GUI
+## Getting started with Taipy
 ### How excited are you to try Taipy?
 
 <|{excitement}|slider|min=1|max=100|>
@@ -87,20 +81,26 @@ Gui(page=excitement_page).run()
 *RUN*🏃🏽‍♀️
 <div align="center">🎊 TA-DA! 🎊</div>
 <br>
-<div align="center"><img src="readme_img/readme_gui_app.gif" width="60%" alt="GUI demo"></img></div>
+<div align="center"><img src="readme_img/readme_fe_app.gif" width="50%" alt="FE demo"></img></div>
 
 <br>
 <br>
 
 ### <div align="center">*Find out more*</div>
-*<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/getting-started-gui/) and [Documentation](https://docs.taipy.io/en/latest/manuals/gui/)</div>*
+*<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/gui/)</div>*
 
 <br>
 <br>
 
-## EN-CORE?
+## Taipy Back-End ⚙️
 
-#### <div align="center">Let's create a back-end execution, also called *scenario* using Taipy Core. Our scenario will filter movie data based on the genre you choose. This scenario will be submitted (i.e., executed) each time the genre selection changes and output the seven most popular movies of that genre. </div>
+**<div align="left">Let's create a back-end execution, also called *scenario* in Taipy. Our scenario will filter movie data based on the genre you choose. This scenario will be submitted (i.e., executed) each time the genre selection changes and output the seven most popular movies of that genre. </div>**
+
+<br>
+
+<div align="center"> ⚠️ Here, the backend involves the execution of a very simple pipeline (made of a single task). Note that Taipy is designed to build much more complex pipelines 🚀 (with many tasks!) </div>
+
+<br>
 <br>
 
 *Here is our filter function: a standard Python function that is used by the unique task in the scenario*
@@ -113,13 +113,13 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/readme_exec_g.png" alt="Taipy Core Graph"  width="60%"/></div>
+<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Taipy BE Graph"  width="40%"/></div>
 
 
 ### Taipy Studio - The easy peasy way
 *You can use the Taipy Studio extension in VSCode to configure your sequence with no code*
 
-<div align="center"><img src="readme_img/readme_studio.gif" width="80%" alt="GUI demo"></img></div>
+<div align="center"><img src="readme_img/readme_demo_studio.gif" width="60%" alt="demo BE"></img></div>
 
 *Your configuration is automatically saved as a TOML file*
 
@@ -127,14 +127,14 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 <br>
 
 ### <div align="center">*Find out more*</div>
-*<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/getting-started-core/) and [Documentation](https://docs.taipy.io/en/latest/manuals/studio/) </div>*
+*<div align="center">Check out our [Documentation](https://docs.taipy.io/en/latest/manuals/studio/) </div>*
 
 <br>
 <br>
 <br>
 <br>
 
-### Taipy Core - a walk on the code side
+### Taipy Back-End - a walk on the code side
 <div align="left">For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Taipy has your back! </div>
 
 *<div align="left">Check out the movie genre demo scenario creation with this [Demo](https://www.taipy.io/project/movie-genre-selector/) </div>*
@@ -144,7 +144,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 <br>
 
 ### <div align="center">*Find out more*</div>
-*<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/getting-started-core/) and [Documentation](https://docs.taipy.io/en/latest/manuals/core/) </div>*
+*<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/core/) </div>*
 
 <br>
 <br>
@@ -158,7 +158,7 @@ import taipy as tp
 import pandas as pd
 from taipy import Config, Scope, Gui
 
-# TAIPY Core
+# TAIPY Back-end
 
 # Filtering function - task
 def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
@@ -177,8 +177,8 @@ tp.Core().run()
 scenario = tp.create_scenario(scenario_cfg)
 
 
-# TAIPY GUI
-# Let's add Taipy GUI to our Taipy Core for a full application
+# TAIPY Front-end
+# Let's add fa GUI to our back-end for a full application
 
 # Callback definition - submits scenario with genre selection
 def on_genre_selected(state):
@@ -194,7 +194,11 @@ genres = [
 
 # Initialization of variables
 df = pd.DataFrame(columns=['Title', 'Popularity %'])
-selected_genre = None
+selected_genre = 'Action'
+
+## Set initial value to Action
+def on_init(state):
+    on_genre_selected(state)
 
 # User interface definition
 my_page = """
@@ -216,11 +220,21 @@ Gui(page=my_page).run()
 
 <div align="center">🎊TA-DA!🎊</div>
 <br>
-<div align="center"><img src="readme_img/readme_app.gif" width="80%" alt="GUI demo"></img></div>
+<div align="center"><img src="readme_img/readme_app.gif" width="80%" alt="Demo app"></img></div>
 
 <br>
 
 <br>
+
+## ☁️Taipy Cloud☁️
+With Taipy Cloud, you can deploy your Taipy application in a *few clicks* and *for free*!
+
+<div align="center"><img src="readme_img/readme_cloud_demo.gif" alt="cloud demo" width="60%" ></img></div>
+
+<br>
+<br>
+
+***<div align="center"> Click [here](https://www.taipy.io/taipy-cloud/) to get started for free </div>***
 
 <br>
 <br>
