@@ -444,7 +444,7 @@ class DataNode(_Entity, _Labeled):
                 return DataNode.__filter_dataframe(data, operators, join_operator=join_operator)
             if isinstance(data, List):
                 return DataNode.__filter_list(data, operators, join_operator=join_operator)
-        return NotImplementedError
+        raise NotImplementedError
 
     @staticmethod
     def __filter_dataframe(
@@ -456,7 +456,7 @@ class DataNode(_Entity, _Labeled):
         elif join_operator == JoinOperator.OR:
             how = "outer"
         else:
-            return NotImplementedError
+            raise NotImplementedError
         for key, value, operator in operators:
             filtered_df_data.append(DataNode.__filter_dataframe_per_key_value(df_data, key, value, operator))
         return DataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
@@ -496,7 +496,7 @@ class DataNode(_Entity, _Labeled):
         elif join_operator == JoinOperator.OR:
             return list(set(np.concatenate(filtered_list_data)))
         else:
-            return NotImplementedError
+            raise NotImplementedError
 
     @staticmethod
     def __filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
@@ -600,7 +600,15 @@ class DataNode(_Entity, _Labeled):
                 subclasses.update(all_subclasses(s))
             return subclasses
 
-        return {c.storage_type(): c for c in all_subclasses(DataNode) if c.storage_type() is not None}
+        class_map = {}
+        for c in all_subclasses(DataNode):
+            try:
+                if c.storage_type() is not None:
+                    class_map[c.storage_type()] = c
+            except NotImplementedError:
+                pass
+
+        return class_map
 
     def get_label(self) -> str:
         """Returns the data node simple label prefixed by its owner label.
