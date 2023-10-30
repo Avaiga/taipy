@@ -17,11 +17,6 @@
 
 <br>
 
-###  <div align="left">Turns Data and AI algorithms into full web applications in no time.
-###  How? Taipy GUI with Taipy Core pops out as a 360° platform to build production-ready web applications</div>
-
-<br>
-
 ###  <div align="left">Pure Python & Open-Source. <div align="left"> How? Taipy pops out as a 360° platform to build production-ready web applications.
 
 <br>
