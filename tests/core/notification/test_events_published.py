@@ -41,11 +41,6 @@ def identity(x):
 
 
 def test_event_published():
-    if _OrchestratorFactory._orchestrator is None:
-        _OrchestratorFactory._build_orchestrator()
-    _OrchestratorFactory._build_dispatcher()
-    Config.unblock_update()
-
     register_id_0, register_queue_0 = Notifier.register()
     all_evts = AllCoreEventConsumer(register_id_0, register_queue_0)
     all_evts.start()

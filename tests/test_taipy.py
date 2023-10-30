@@ -541,8 +541,6 @@ class TestTaipy:
             mck.assert_called_once_with("job_id")
 
     def test_block_config_when_core_is_running_in_development_mode(self):
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.SCENARIO)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.SCENARIO)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)

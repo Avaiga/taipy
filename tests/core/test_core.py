@@ -43,7 +43,6 @@ class TestCore:
         assert core._dispatcher is None
         assert _OrchestratorFactory._dispatcher is None
 
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
         core.run()
         assert core._orchestrator is not None
         assert core._orchestrator == _Orchestrator
@@ -79,7 +78,6 @@ class TestCore:
     def test_core_service_can_only_be_run_once(self):
         core_instance_1 = Core()
         core_instance_2 = Core()
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
         core_instance_1.run()
 
@@ -100,7 +98,6 @@ class TestCore:
         _OrchestratorFactory._dispatcher = None
 
         core = Core()
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
         core.run()
         with pytest.raises(ConfigurationUpdateBlocked):
             Config.configure_data_node(id="i1")
