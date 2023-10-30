@@ -187,6 +187,9 @@ def __migrate_datanode(datanode: Dict) -> Dict:
     # Update Scope enum after Pipeline removal
     datanode["scope"] = __update_scope(datanode["scope"])
 
+    # Update move name attribute to properties dictionary
+    datanode["data_node_properties"]["name"] = datanode.pop("name", None)
+
     if "last_edit_date" not in datanode:
         datanode["last_edit_date"] = datanode.get("last_edition_date")
         if "last_edition_date" in datanode:

@@ -54,7 +54,7 @@ class TestGenericDataNode:
 
     def test_create(self):
         dn = GenericDataNode(
-            "foo_bar", Scope.SCENARIO, name="super name", properties={"read_fct": read_fct, "write_fct": write_fct}
+            "foo_bar", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": write_fct, "name": "super name"}
         )
         assert isinstance(dn, GenericDataNode)
         assert dn.storage_type() == "generic"
@@ -69,7 +69,9 @@ class TestGenericDataNode:
         assert dn.properties["read_fct"] == read_fct
         assert dn.properties["write_fct"] == write_fct
 
-        dn_1 = GenericDataNode("foo", Scope.SCENARIO, name="foo", properties={"read_fct": read_fct, "write_fct": None})
+        dn_1 = GenericDataNode(
+            "foo", Scope.SCENARIO, properties={"read_fct": read_fct, "write_fct": None, "name": "foo"}
+        )
         assert isinstance(dn, GenericDataNode)
         assert dn_1.storage_type() == "generic"
         assert dn_1.config_id == "foo"
@@ -83,7 +85,9 @@ class TestGenericDataNode:
         assert dn_1.properties["read_fct"] == read_fct
         assert dn_1.properties["write_fct"] is None
 
-        dn_2 = GenericDataNode("xyz", Scope.SCENARIO, name="xyz", properties={"read_fct": None, "write_fct": write_fct})
+        dn_2 = GenericDataNode(
+            "xyz", Scope.SCENARIO, properties={"read_fct": None, "write_fct": write_fct, "name": "xyz"}
+        )
         assert isinstance(dn, GenericDataNode)
         assert dn_2.storage_type() == "generic"
         assert dn_2.config_id == "xyz"
@@ -97,7 +101,7 @@ class TestGenericDataNode:
         assert dn_2.properties["read_fct"] is None
         assert dn_2.properties["write_fct"] == write_fct
 
-        dn_3 = GenericDataNode("xyz", Scope.SCENARIO, name="xyz", properties={"read_fct": read_fct})
+        dn_3 = GenericDataNode("xyz", Scope.SCENARIO, properties={"read_fct": read_fct, "name": "xyz"})
         assert isinstance(dn, GenericDataNode)
         assert dn_3.storage_type() == "generic"
         assert dn_3.config_id == "xyz"
@@ -111,7 +115,7 @@ class TestGenericDataNode:
         assert dn_3.properties["read_fct"] == read_fct
         assert dn_3.properties["write_fct"] is None
 
-        dn_4 = GenericDataNode("xyz", Scope.SCENARIO, name="xyz", properties={"write_fct": write_fct})
+        dn_4 = GenericDataNode("xyz", Scope.SCENARIO, properties={"write_fct": write_fct, "name": "xyz"})
         assert isinstance(dn, GenericDataNode)
         assert dn_4.storage_type() == "generic"
         assert dn_4.config_id == "xyz"

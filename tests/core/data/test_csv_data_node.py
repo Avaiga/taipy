@@ -46,7 +46,9 @@ class MyCustomObject:
 class TestCSVDataNode:
     def test_create(self):
         path = "data/node/path"
-        dn = CSVDataNode("foo_bar", Scope.SCENARIO, name="super name", properties={"path": path, "has_header": False})
+        dn = CSVDataNode(
+            "foo_bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "name": "super name"}
+        )
         assert isinstance(dn, CSVDataNode)
         assert dn.storage_type() == "csv"
         assert dn.config_id == "foo_bar"
@@ -63,7 +65,7 @@ class TestCSVDataNode:
 
         with pytest.raises(InvalidConfigurationId):
             dn = CSVDataNode(
-                "foo bar", Scope.SCENARIO, name="super name", properties={"path": path, "has_header": False}
+                "foo bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "name": "super name"}
             )
 
     def test_get_user_properties(self, csv_file):

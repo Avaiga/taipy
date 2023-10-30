@@ -121,13 +121,13 @@ class TestDataNode:
             "foo_bar",
             Scope.SCENARIO,
             DataNodeId("an_id"),
-            "a name",
             "a_scenario_id",
             {"a_parent_id"},
             a_date,
             [dict(job_id="a_job_id")],
             edit_in_progress=False,
             prop="erty",
+            name="a name",
         )
         assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.SCENARIO
@@ -138,8 +138,8 @@ class TestDataNode:
         assert dn.last_edit_date == a_date
         assert dn.job_ids == ["a_job_id"]
         assert dn.is_ready_for_reading
-        assert len(dn.properties) == 1
-        assert dn.properties["prop"] == "erty"
+        assert len(dn.properties) == 2
+        assert dn.properties == {"prop": "erty", "name": "a name"}
 
         with pytest.raises(InvalidConfigurationId):
             DataNode("foo bar")
@@ -620,13 +620,15 @@ class TestDataNode:
             "foo",
             scope=Scope.GLOBAL,
             id=DataNodeId("an_id"),
-            name="foo",
             owner_id=None,
             parent_ids=None,
             last_edit_date=current_datetime,
             edits=[dict(job_id="a_job_id")],
             edit_in_progress=False,
             validity_period=None,
+            properties={
+                "name": "foo",
+            },
         )
 
         dm = _DataManager()
@@ -706,14 +708,14 @@ class TestDataNode:
         assert dn_2.validity_period == time_period_2
 
         # auto set & reload on properties attribute
-        assert dn_1.properties == {}
-        assert dn_2.properties == {}
+        assert dn_1.properties == {"name": "def"}
+        assert dn_2.properties == {"name": "def"}
         dn_1._properties["qux"] = 4
         assert dn_1.properties["qux"] == 4
         assert dn_2.properties["qux"] == 4
 
-        assert dn_1.properties == {"qux": 4}
-        assert dn_2.properties == {"qux": 4}
+        assert dn_1.properties == {"qux": 4, "name": "def"}
+        assert dn_2.properties == {"qux": 4, "name": "def"}
         dn_2._properties["qux"] = 5
         assert dn_1.properties["qux"] == 5
         assert dn_2.properties["qux"] == 5
@@ -721,11 +723,13 @@ class TestDataNode:
         dn_1.properties["temp_key_1"] = "temp_value_1"
         dn_1.properties["temp_key_2"] = "temp_value_2"
         assert dn_1.properties == {
+            "name": "def",
             "qux": 5,
             "temp_key_1": "temp_value_1",
             "temp_key_2": "temp_value_2",
         }
         assert dn_2.properties == {
+            "name": "def",
             "qux": 5,
             "temp_key_1": "temp_value_1",
             "temp_key_2": "temp_value_2",
@@ -734,28 +738,60 @@ class TestDataNode:
         assert "temp_key_1" not in dn_1.properties.keys()
         assert "temp_key_1" not in dn_1.properties.keys()
         assert dn_1.properties == {
+            "name": "def",
             "qux": 5,
             "temp_key_2": "temp_value_2",
         }
         assert dn_2.properties == {
+            "name": "def",
             "qux": 5,
             "temp_key_2": "temp_value_2",
         }
         dn_2.properties.pop("temp_key_2")
-        assert dn_1.properties == {"qux": 5}
-        assert dn_2.properties == {"qux": 5}
+        assert dn_1.properties == {
+            "qux": 5,
+            "name": "def",
+        }
+        assert dn_2.properties == {
+            "qux": 5,
+            "name": "def",
+        }
         assert "temp_key_2" not in dn_1.properties.keys()
         assert "temp_key_2" not in dn_2.properties.keys()
 
         dn_1.properties["temp_key_3"] = 0
-        assert dn_1.properties == {"qux": 5, "temp_key_3": 0}
-        assert dn_2.properties == {"qux": 5, "temp_key_3": 0}
+        assert dn_1.properties == {
+            "qux": 5,
+            "temp_key_3": 0,
+            "name": "def",
+        }
+        assert dn_2.properties == {
+            "qux": 5,
+            "temp_key_3": 0,
+            "name": "def",
+        }
         dn_1.properties.update({"temp_key_3": 1})
-        assert dn_1.properties == {"qux": 5, "temp_key_3": 1}
-        assert dn_2.properties == {"qux": 5, "temp_key_3": 1}
+        assert dn_1.properties == {
+            "qux": 5,
+            "temp_key_3": 1,
+            "name": "def",
+        }
+        assert dn_2.properties == {
+            "qux": 5,
+            "temp_key_3": 1,
+            "name": "def",
+        }
         dn_1.properties.update(dict())
-        assert dn_1.properties == {"qux": 5, "temp_key_3": 1}
-        assert dn_2.properties == {"qux": 5, "temp_key_3": 1}
+        assert dn_1.properties == {
+            "qux": 5,
+            "temp_key_3": 1,
+            "name": "def",
+        }
+        assert dn_2.properties == {
+            "qux": 5,
+            "temp_key_3": 1,
+            "name": "def",
+        }
         dn_1.properties["temp_key_4"] = 0
         dn_1.properties["temp_key_5"] = 0
 
@@ -885,13 +921,13 @@ class TestDataNode:
             "foo_bar",
             Scope.SCENARIO,
             DataNodeId("an_id"),
-            "a name",
             "a_scenario_id",
             {"a_parent_id"},
             a_date,
             [dict(job_id="a_job_id")],
             edit_in_progress=False,
             prop="erty",
+            name="a name",
         )
         with mock.patch("src.taipy.core.get") as get_mck:
 
@@ -911,13 +947,13 @@ class TestDataNode:
             "foo_bar",
             Scope.SCENARIO,
             DataNodeId("an_id"),
-            "a name",
             "a_scenario_id",
             {"a_parent_id"},
             a_date,
             [dict(job_id="a_job_id")],
             edit_in_progress=False,
             label="a label",
+            name="a name",
         )
         assert dn.get_label() == "a label"
         assert dn.get_simple_label() == "a label"

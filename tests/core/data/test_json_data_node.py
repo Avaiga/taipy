@@ -85,7 +85,7 @@ class MyCustomDecoder(json.JSONDecoder):
 class TestJSONDataNode:
     def test_create(self):
         path = "data/node/path"
-        dn = JSONDataNode("foo_bar", Scope.SCENARIO, name="super name", properties={"default_path": path})
+        dn = JSONDataNode("foo_bar", Scope.SCENARIO, properties={"default_path": path, "name": "super name"})
         assert isinstance(dn, JSONDataNode)
         assert dn.storage_type() == "json"
         assert dn.config_id == "foo_bar"
@@ -100,7 +100,7 @@ class TestJSONDataNode:
 
         with pytest.raises(InvalidConfigurationId):
             dn = JSONDataNode(
-                "foo bar", Scope.SCENARIO, name="super name", properties={"default_path": path, "has_header": False}
+                "foo bar", Scope.SCENARIO, properties={"default_path": path, "has_header": False, "name": "super name"}
             )
 
     def test_get_user_properties(self, json_file):

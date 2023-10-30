@@ -24,9 +24,8 @@ class TestInMemoryDataNodeEntity:
             "foobar_bazy",
             Scope.SCENARIO,
             DataNodeId("id_uio"),
-            "my name",
             "owner_id",
-            properties={"default_data": "In memory Data Node"},
+            properties={"default_data": "In memory Data Node", "name": "my name"},
         )
         assert isinstance(dn, InMemoryDataNode)
         assert dn.storage_type() == "in_memory"

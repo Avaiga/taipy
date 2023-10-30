@@ -96,7 +96,6 @@ class DataNode(_Entity, _Labeled):
         config_id,
         scope: Scope = Scope(Scope.SCENARIO),
         id: Optional[DataNodeId] = None,
-        name: Optional[str] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
@@ -114,7 +113,6 @@ class DataNode(_Entity, _Labeled):
         self._parent_ids = parent_ids or set()
         self._scope = scope
         self._last_edit_date = last_edit_date
-        self._name = name
         self._edit_in_progress = edit_in_progress
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
         self._validity_period = validity_period
@@ -201,14 +199,12 @@ class DataNode(_Entity, _Labeled):
         return last_edit_date + validity_period if validity_period else last_edit_date
 
     @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def name(self):
-        return self._name
+    def name(self) -> Optional[str]:
+        return self.properties.get("name")
 
     @name.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
     def name(self, val):
-        self._name = val
+        self.properties["name"] = val
 
     @property
     def version(self):
