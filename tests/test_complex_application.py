@@ -12,11 +12,12 @@
 import os
 import pathlib
 from time import sleep
+from unittest.mock import patch
 
 import pandas as pd
 
 import src.taipy.core.taipy as tp
-from src.taipy.core import Status
+from src.taipy.core import Core, Status
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from taipy.config import Config
@@ -79,20 +80,25 @@ def test_skipped_jobs():
     task_config_2 = Config.configure_task("second", mult_by_2, intermediate_config, output_config, skippable=True)
     scenario_config = Config.configure_scenario("scenario", [task_config_1, task_config_2])
 
-    scenario = tp.create_scenario(scenario_config)
-    scenario.input.write(2)
-    scenario.submit()
-    assert len(tp.get_jobs()) == 2
-    for job in tp.get_jobs():
-        assert job.status == Status.COMPLETED
-    scenario.submit()
-    assert len(tp.get_jobs()) == 4
-    skipped = []
-    for job in tp.get_jobs():
-        if job.status != Status.COMPLETED:
-            assert job.status == Status.SKIPPED
-            skipped.append(job)
-    assert len(skipped) == 2
+    with patch("sys.argv", ["prog"]):
+        core = Core()
+        core.run()
+
+        scenario = tp.create_scenario(scenario_config)
+        scenario.input.write(2)
+        scenario.submit()
+        assert len(tp.get_jobs()) == 2
+        for job in tp.get_jobs():
+            assert job.status == Status.COMPLETED
+        scenario.submit()
+        assert len(tp.get_jobs()) == 4
+        skipped = []
+        for job in tp.get_jobs():
+            if job.status != Status.COMPLETED:
+                assert job.status == Status.SKIPPED
+                skipped.append(job)
+        assert len(skipped) == 2
+        core.stop()
 
 
 def test_complex():
@@ -174,9 +180,12 @@ def test_complex():
         ],
     )
 
-    scenario = tp.create_scenario(scenario_config)
-
-    tp.submit(scenario)
+    with patch("sys.argv", ["prog"]):
+        core = Core()
+        core.run()
+        scenario = tp.create_scenario(scenario_config)
+        tp.submit(scenario)
+        core.stop()
 
     csv_sum_res = pd.read_csv(csv_path_sum)
     excel_sum_res = pd.read_excel(excel_path_sum)

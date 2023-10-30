@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from multiprocessing import Lock
 from typing import Optional
 
 from taipy.config import Config
@@ -21,12 +22,16 @@ from ._orchestrator._orchestrator import _Orchestrator
 from ._orchestrator._orchestrator_factory import _OrchestratorFactory
 from ._version._version_manager_factory import _VersionManagerFactory
 from .config import CoreSection
+from .exceptions.exceptions import CoreServiceIsAlreadyRunning
 
 
 class Core:
     """
     Core service
     """
+
+    __is_running = False
+    __lock_is_running = Lock()
 
     __logger = _TaipyLogger._get_logger()
 
@@ -46,10 +51,18 @@ class Core:
         This function checks the configuration, manages application's version,
         and starts a dispatcher and lock the Config.
         """
+        if self.__class__.__is_running:
+            raise CoreServiceIsAlreadyRunning
+
+        with self.__class__.__lock_is_running:
+            self.__class__.__is_running = True
+
         self.__update_and_check_config()
         self.__manage_version()
+
         if self._orchestrator is None:
             self._orchestrator = _OrchestratorFactory._build_orchestrator()
+
         self.__start_dispatcher(force_restart)
 
     def stop(self):
@@ -63,6 +76,9 @@ class Core:
         if self._dispatcher:
             self._dispatcher = _OrchestratorFactory._remove_dispatcher()
             self.__logger.info("Core service has been stopped.")
+
+        with self.__class__.__lock_is_running:
+            self.__class__.__is_running = False
 
     @staticmethod
     def __update_and_check_config():

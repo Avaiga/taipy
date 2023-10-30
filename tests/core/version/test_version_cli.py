@@ -33,35 +33,49 @@ def test_delete_version(caplog):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--development"]):
-        Core().run()
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
+        core = Core()
+        core.run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+        core.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Core().run()
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
+        core = Core()
+        core.run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+        core.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "1.1"]):
-        Core().run()
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
+        core = Core()
+        core.run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+        core.stop()
 
     with patch("sys.argv", ["prog", "--production", "1.1"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
-        Core().run()
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
+        core = Core()
+        core.run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+        core.stop()
 
     with patch("sys.argv", ["prog", "--experiment", "2.1"]):
-        Core().run()
-    scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._submit(scenario)
+        core = Core()
+        core.run()
+        scenario = _ScenarioManager._create(scenario_config)
+        _ScenarioManager._submit(scenario)
+        core.stop()
 
     with patch("sys.argv", ["prog", "--production", "2.1"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
 
     all_versions = [version.id for version in _VersionManager._get_all()]
     production_version = _VersionManager._get_production_versions()
@@ -109,25 +123,39 @@ def test_delete_version(caplog):
 
 def test_list_versions(capsys):
     with patch("sys.argv", ["prog", "--development"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--experiment", "1.1"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--production", "1.1"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--experiment", "2.1"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     sleep(0.05)
     with patch("sys.argv", ["prog", "--production", "2.1"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
 
     _VersionCLI.create_parser()
     with pytest.raises(SystemExit):
@@ -149,13 +177,19 @@ def test_rename_version(caplog):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Core().run()
+        core = Core()
+        core.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
+        core.stop()
+
     with patch("sys.argv", ["prog", "--production", "2.0"]):
-        Core().run()
+        core = Core()
+        core.run()
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
+        core.stop()
+
     dev_ver = _VersionManager._get_development_version()
 
     _VersionCLI.create_parser()
@@ -204,9 +238,11 @@ def test_compare_version_config(caplog):
     scenario_config_1 = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
-        Core().run()
+        core = Core()
+        core.run()
         scenario = _ScenarioManager._create(scenario_config_1)
         _ScenarioManager._submit(scenario)
+        core.stop()
 
     init_config()
 
@@ -214,9 +250,11 @@ def test_compare_version_config(caplog):
     Config.configure_data_node(id="d2", storage_type="csv", default_path="bar.csv")
 
     with patch("sys.argv", ["prog", "--experiment", "2.0"]):
-        Core().run()
+        core = Core()
+        core.run()
         scenario = _ScenarioManager._create(scenario_config_2)
         _ScenarioManager._submit(scenario)
+        core.stop()
 
     _VersionCLI.create_parser()
     with pytest.raises(SystemExit):

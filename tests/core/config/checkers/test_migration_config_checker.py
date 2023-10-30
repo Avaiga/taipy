@@ -25,16 +25,19 @@ def mock_func():
 
 def test_check_if_entity_property_key_used_is_predefined(caplog):
     with patch("sys.argv", ["prog", "--production", "1.0"]):
-        Core().run()
-
+        core = Core()
+        core.run()
     assert caplog.text == ""
+    core.stop()
 
     caplog.clear()
 
     Config.unique_sections[MigrationConfig.name]._properties["_entity_owner"] = None
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         with pytest.raises(SystemExit):
-            Core().run()
+            core = Core()
+            core.run()
+        core.stop()
     assert (
         "Properties of MigrationConfig `VERSION_MIGRATION` cannot have `_entity_owner` as its property." in caplog.text
     )
@@ -44,7 +47,9 @@ def test_check_if_entity_property_key_used_is_predefined(caplog):
     Config.unique_sections[MigrationConfig.name]._properties["_entity_owner"] = "entity_owner"
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         with pytest.raises(SystemExit):
-            Core().run()
+            core = Core()
+            core.run()
+        core.stop()
     expected_error_message = (
         "Properties of MigrationConfig `VERSION_MIGRATION` cannot have `_entity_owner` as its property."
         ' Current value of property `_entity_owner` is "entity_owner".'
@@ -58,15 +63,19 @@ def test_check_valid_version(caplog):
     Config.add_migration_function("2.0", data_nodes1, mock_func)
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         with pytest.raises(SystemExit):
-            Core().run()
+            core = Core()
+            core.run()
+        core.stop()
     assert "The target version for a migration function must be a production version." in caplog.text
 
     caplog.clear()
     Config.unblock_update()
 
     with patch("sys.argv", ["prog", "--production", "2.0"]):
-        Core().run()
+        core = Core()
+        core.run()
     assert caplog.text == ""
+    core.stop()
 
 
 def test_check_callable_function(caplog):
@@ -74,7 +83,9 @@ def test_check_callable_function(caplog):
     Config.add_migration_function("1.0", data_nodes1, 1)
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         with pytest.raises(SystemExit):
-            Core().run()
+            core = Core()
+            core.run()
+        core.stop()
     expected_error_message = (
         "The migration function of config `data_nodes1` from version 1.0 must be populated with"
         " Callable value. Current value of property `migration_fcts` is 1."
@@ -87,7 +98,9 @@ def test_check_callable_function(caplog):
     Config.add_migration_function("1.0", data_nodes1, "bar")
     with patch("sys.argv", ["prog", "--production", "1.0"]):
         with pytest.raises(SystemExit):
-            Core().run()
+            core = Core()
+            core.run()
+        core.stop()
     expected_error_message = (
         "The migration function of config `data_nodes1` from version 1.0 must be populated with"
         ' Callable value. Current value of property `migration_fcts` is "bar".'
@@ -99,7 +112,9 @@ def test_check_callable_function(caplog):
 
     Config.add_migration_function("1.0", data_nodes1, mock_func)
     with patch("sys.argv", ["prog", "--production", "1.0"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
 
 
 def test_check_migration_from_productions_to_productions_exist(caplog):
@@ -108,7 +123,9 @@ def test_check_migration_from_productions_to_productions_exist(caplog):
     _VersionManager._set_production_version("1.2", True)
 
     with patch("sys.argv", ["prog", "--production", "1.0"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     assert 'There is no migration function from production version "1.0" to version "1.1".' in caplog.text
     assert 'There is no migration function from production version "1.1" to version "1.2".' in caplog.text
 
@@ -117,5 +134,7 @@ def test_check_migration_from_productions_to_productions_exist(caplog):
 
     Config.add_migration_function("1.2", "data_nodes1", mock_func)
     with patch("sys.argv", ["prog", "--production", "1.0"]):
-        Core().run()
+        core = Core()
+        core.run()
+        core.stop()
     assert 'There is no migration function from production version "1.0" to version "1.1".' in caplog.text

@@ -22,6 +22,10 @@ class ConfigCoreVersionMismatched(Exception):
         )
 
 
+class CoreServiceIsAlreadyRunning(Exception):
+    """Raised if the Core service is already running."""
+
+
 class CycleAlreadyExists(Exception):
     """Raised if it is trying to create a Cycle that has already exists."""
 
