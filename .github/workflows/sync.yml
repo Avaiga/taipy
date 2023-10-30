@@ -2,7 +2,7 @@ name: Sync Files
 on:
   push:
     branches:
-      - master
+      - develop
   workflow_dispatch:
 jobs:
   sync:
