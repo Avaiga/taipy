@@ -15,4 +15,3 @@ jobs:
         with:
           GH_PAT: ${{ secrets.GH_PAT }}
 
-#In order for the Action to access your repositories you have to specify a Personal Access token as the value for GH_PAT (GITHUB_TOKEN will not work). [The PAT needs the full repo scope . ](https://github.com/BetaHuhn/repo-file-sync-action/discussions/31#discussioncomment-674804)
