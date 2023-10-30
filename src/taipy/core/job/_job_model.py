@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+import json
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
@@ -61,3 +62,18 @@ class _JobModel(_BaseModel):
             stacktrace=data["stacktrace"],
             version=data["version"],
         )
+
+    @staticmethod
+    def to_list(model):
+        return [
+            model.id,
+            model.task_id,
+            repr(model.status),
+            model.force,
+            model.submit_id,
+            model.submit_entity_id,
+            model.creation_date,
+            json.dumps(model.subscribers),
+            json.dumps(model.stacktrace),
+            model.version,
+        ]

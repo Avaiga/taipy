@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 from dataclasses import dataclass
 from typing import Any, Dict
 
@@ -45,12 +46,27 @@ class _CycleModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
+        if properties := data["properties"]:
+            if isinstance(properties, str):
+                properties = json.loads(properties.replace("'", '"'))
         return _CycleModel(
             id=data["id"],
             name=data["name"],
             frequency=Frequency._from_repr(data["frequency"]),
-            properties=data["properties"],
+            properties=properties,
             creation_date=data["creation_date"],
             start_date=data["start_date"],
             end_date=data["end_date"],
         )
+
+    @staticmethod
+    def to_list(model):
+        return [
+            model.id,
+            model.name,
+            repr(model.frequency),
+            json.dumps(model.properties),
+            model.creation_date,
+            model.start_date,
+            model.end_date,
+        ]

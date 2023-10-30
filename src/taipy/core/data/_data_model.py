@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -81,3 +82,24 @@ class _DataNodeModel(_BaseModel):
             editor_expiration_date=data.get("editor_expiration_date"),
             data_node_properties=dn_properties,
         )
+
+    @staticmethod
+    def to_list(model):
+        return [
+            model.id,
+            model.config_id,
+            repr(model.scope),
+            model.storage_type,
+            model.name,
+            model.owner_id,
+            json.dumps(model.parent_ids),
+            model.last_edit_date,
+            json.dumps(model.edits),
+            model.version,
+            model.validity_days,
+            model.validity_seconds,
+            model.edit_in_progress,
+            model.editor_id,
+            model.editor_expiration_date,
+            json.dumps(model.data_node_properties),
+        ]

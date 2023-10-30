@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -63,3 +64,19 @@ class _TaskModel(_BaseModel):
             skippable=data["skippable"],
             properties=data["properties"] if "properties" in data.keys() else {},
         )
+
+    @staticmethod
+    def to_list(model):
+        return [
+            model.id,
+            model.owner_id,
+            json.dumps(model.parent_ids),
+            model.config_id,
+            json.dumps(model.input_ids),
+            model.function_name,
+            model.function_module,
+            json.dumps(model.output_ids),
+            model.version,
+            model.skippable,
+            json.dumps(model.properties),
+        ]

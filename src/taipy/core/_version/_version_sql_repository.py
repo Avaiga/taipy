@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from sqlalchemy.dialects import sqlite
+
 from .._repository._sql_repository import _SQLRepository
 from ..exceptions.exceptions import ModelNotFound, VersionIsNotProductionVersion
 from ._version_converter import _VersionConverter
@@ -30,7 +32,9 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         self.db.commit()
 
     def _get_latest_version(self):
-        if latest := self.db.query(self.model_type).filter_by(is_latest=True).first():
+        if latest := self.db.execute(
+            str(self.model_type.__table__.select().filter_by(is_latest=True).compile(dialect=sqlite.dialect()))
+        ).fetchone():
             return latest.id
         return ""
 
