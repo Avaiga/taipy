@@ -12,7 +12,6 @@
 from queue import SimpleQueue
 
 from src.taipy.core import taipy as tp
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from src.taipy.core.notification.event import Event, EventEntityType, EventOperation
 from src.taipy.core.notification.notifier import Notifier
