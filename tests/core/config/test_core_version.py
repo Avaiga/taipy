@@ -9,32 +9,63 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from unittest.mock import patch
+
 import pytest
 
+from src.taipy.core._init_version import _read_version
 from src.taipy.core.config.core_section import CoreSection
 from src.taipy.core.exceptions import ConfigCoreVersionMismatched
 from taipy.config.config import Config
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
+_MOCK_CORE_VERSION = "3.1.1"
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_core_version():
+    with patch("src.taipy.core.config.core_section._read_version") as mock_read_version:
+        mock_read_version.return_value = _MOCK_CORE_VERSION
+        CoreSection._CURRENT_CORE_VERSION = _MOCK_CORE_VERSION
+        Config.unique_sections[CoreSection.name] = CoreSection.default_config()
+        Config._default_config._unique_sections[CoreSection.name] = CoreSection.default_config()
+
+        yield
+
+
+@pytest.fixture(scope="session", autouse=True)
+def reset_core_version():
+    yield
+    CoreSection._CURRENT_CORE_VERSION = _read_version()
+
 
 class TestCoreVersionInCoreSectionConfig:
-    CoreSection._CURRENT_CORE_VERSION = "3.0.1"
+    major, minor, patch = _MOCK_CORE_VERSION.split(".")
 
-    @pytest.mark.parametrize(
-        "core_version,is_compatible",
-        [
-            ("3.0.1", True),  # current version
-            ("3.0.1.dev0", True),  # current dev version
-            ("3.0.2", True),  # future but compatible
-            ("3.0.2.dev0", True),  # dev future but compatible
-            ("3.0.0", True),  # past but compatible
-            ("3.0.0.dev0", True),  # dev past but compatible
-            ("3.1.0", False),  # future but incompatible
-            ("3.1.0.dev0", False),  # dev future but incompatible
-            ("2.1.0", False),  # past but incompatible
-            ("2.1.0.dev0", False),  # dev past but incompatible
-        ],
-    )
+    current_version = f"{major}.{minor}.{patch}"
+    current_dev_version = f"{major}.{minor}.{patch}.dev0"
+    compatible_future_version = f"{major}.{minor}.{int(patch) + 1}"
+    compatible_future_dev_version = f"{major}.{minor}.{int(patch) + 1}.dev0"
+
+    core_version_is_compatible = [
+        # Current version and dev version should be compatible
+        (f"{major}.{minor}.{patch}", True),
+        (f"{major}.{minor}.{patch}.dev0", True),
+        # Future versions with same major and minor should be compatible
+        (f"{major}.{minor}.{int(patch) + 1}", True),
+        (f"{major}.{minor}.{int(patch) + 1}.dev0", True),
+        # Past versions with same major and minor should be compatible
+        (f"{major}.{minor}.{int(patch) - 1}", True),
+        (f"{major}.{minor}.{int(patch) - 1}.dev0", True),
+        # Future versions with different minor number should be incompatible
+        (f"{major}.{int(minor) + 1}.{patch}", False),
+        (f"{major}.{int(minor) + 1}.{patch}.dev0", False),
+        # Past versions with different minor number should be incompatible
+        (f"{major}.{int(minor) - 1}.{patch}", False),
+        (f"{major}.{int(minor) - 1}.{patch}.dev0", False),
+    ]
+
+    @pytest.mark.parametrize("core_version, is_compatible", core_version_is_compatible)
     def test_load_configuration_file(self, core_version, is_compatible):
         file_config = NamedTemporaryFile(
             f"""
@@ -59,26 +90,12 @@ class TestCoreVersionInCoreSectionConfig:
         )
         if is_compatible:
             Config.load(file_config.filename)
-            assert Config.unique_sections[CoreSection.name]._core_version == "3.0.1"
+            assert Config.unique_sections[CoreSection.name]._core_version == _MOCK_CORE_VERSION
         else:
             with pytest.raises(ConfigCoreVersionMismatched):
                 Config.load(file_config.filename)
 
-    @pytest.mark.parametrize(
-        "core_version,is_compatible",
-        [
-            ("3.0.1", True),  # current version
-            ("3.0.1.dev0", True),  # current dev version
-            ("3.0.2", True),  # future but compatible
-            ("3.0.2.dev0", True),  # dev future but compatible
-            ("3.0.0", True),  # past but compatible
-            ("3.0.0.dev0", True),  # dev past but compatible
-            ("3.1.0", False),  # future but incompatible
-            ("3.1.0.dev0", False),  # dev future but incompatible
-            ("2.1.0", False),  # past but incompatible
-            ("2.1.0.dev0", False),  # dev past but incompatible
-        ],
-    )
+    @pytest.mark.parametrize("core_version,is_compatible", core_version_is_compatible)
     def test_override_configuration_file(self, core_version, is_compatible):
         file_config = NamedTemporaryFile(
             f"""
@@ -103,7 +120,7 @@ class TestCoreVersionInCoreSectionConfig:
         )
         if is_compatible:
             Config.override(file_config.filename)
-            assert Config.unique_sections[CoreSection.name]._core_version == "3.0.1"
+            assert Config.unique_sections[CoreSection.name]._core_version == _MOCK_CORE_VERSION
         else:
             with pytest.raises(ConfigCoreVersionMismatched):
                 Config.override(file_config.filename)
@@ -127,4 +144,4 @@ class TestCoreVersionInCoreSectionConfig:
             """
         )
         Config.load(file_config.filename)
-        assert Config.unique_sections[CoreSection.name]._core_version == "3.0.1"
+        assert Config.unique_sections[CoreSection.name]._core_version == _MOCK_CORE_VERSION
