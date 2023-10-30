@@ -227,4 +227,4 @@ class _VersionManager(_Manager[_Version]):
 
     @classmethod
     def _delete_entities_of_multiple_types(cls, _entity_ids):
-        return NotImplementedError
+        raise NotImplementedError
