@@ -31,12 +31,12 @@ class Core:
     """
 
     __is_running = False
+    __lock_is_running = Lock()
 
     __logger = _TaipyLogger._get_logger()
 
     _orchestrator: Optional[_Orchestrator] = None
     _dispatcher: Optional[_JobDispatcher] = None
-    _lock = Lock()
 
     def __init__(self):
         """
@@ -54,7 +54,7 @@ class Core:
         if self.__class__.__is_running:
             raise CoreServiceIsAlreadyRunning
 
-        with self.__class__._lock:
+        with self.__class__.__lock_is_running:
             self.__class__.__is_running = True
 
         self.__update_and_check_config()
@@ -77,7 +77,7 @@ class Core:
             self._dispatcher = _OrchestratorFactory._remove_dispatcher()
             self.__logger.info("Core service has been stopped.")
 
-        with self.__class__._lock:
+        with self.__class__.__lock_is_running:
             self.__class__.__is_running = False
 
     @staticmethod
