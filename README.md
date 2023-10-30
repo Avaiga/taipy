@@ -79,9 +79,7 @@ Gui(page=excitement_page).run()
 <div align="center"><img src="readme_img/readme_fe_app.gif" width="50%" alt="FE demo"></img></div>
 
 <br>
-<br>
 
-### <div align="center">*Find out more*</div>
 *<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/gui/)</div>*
 
 <br>
@@ -108,7 +106,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Taipy BE Graph"  width="40%"/></div>
+<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Taipy BE Graph"  width="60%"/></div>
 
 
 ### Taipy Studio - The easy peasy way
@@ -119,12 +117,9 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 *Your configuration is automatically saved as a TOML file*
 
 <br>
-<br>
 
-### <div align="center">*Find out more*</div>
 *<div align="center">Check out our [Documentation](https://docs.taipy.io/en/latest/manuals/studio/) </div>*
 
-<br>
 <br>
 <br>
 <br>
@@ -135,13 +130,9 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 *<div align="left">Check out the movie genre demo scenario creation with this [Demo](https://www.taipy.io/project/movie-genre-selector/) </div>*
 
 <br>
-<br>
-<br>
 
-### <div align="center">*Find out more*</div>
 *<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/core/) </div>*
 
-<br>
 <br>
 <br>
 
