@@ -80,7 +80,7 @@ Gui(page=excitement_page).run()
 
 <br>
 
-*<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/gui/)</div>*
+***<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/gui/)</div>***
 
 <br>
 <br>
@@ -106,21 +106,20 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Taipy BE Graph"  width="60%"/></div>
+<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Taipy BE Graph"  width="80%"/></div>
 
 
 ### Taipy Studio - The easy peasy way
 *You can use the Taipy Studio extension in VSCode to configure your sequence with no code*
 
-<div align="center"><img src="readme_img/readme_demo_studio.gif" width="60%" alt="demo BE"></img></div>
+<div align="center"><img src="readme_img/readme_demo_studio.gif" width="80%" alt="demo BE"></img></div>
 
 *Your configuration is automatically saved as a TOML file*
 
 <br>
 
-*<div align="center">Check out our [Documentation](https://docs.taipy.io/en/latest/manuals/studio/) </div>*
+***<div align="center">Check out our [Documentation](https://docs.taipy.io/en/latest/manuals/studio/) </div>***
 
-<br>
 <br>
 <br>
 
@@ -131,7 +130,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 <br>
 
-*<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/core/) </div>*
+***<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/core/) </div>***
 
 <br>
 <br>
