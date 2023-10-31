@@ -1,0 +1,20 @@
+group:
+  repos: |
+    Avaiga/taipy-config
+    Avaiga/taipy-core
+    Avaiga/taipy-gui
+    Avaiga/taipy-rest
+    
+  files: 
+    - .flake8
+    - .gitattributes
+    - .license-header
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - LICENSE
+    - mypy.ini
+    - pyproject.toml
+    - src/taipy/__init__.py
+    # - .isort.cfg
+    # - src/__init__.py
+    
