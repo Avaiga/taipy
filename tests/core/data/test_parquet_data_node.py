@@ -22,6 +22,7 @@ import pytest
 
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.data_node_id import DataNodeId
+from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.data.parquet import ParquetDataNode
 from src.taipy.core.exceptions.exceptions import (
     InvalidExposedType,
@@ -312,6 +313,72 @@ class TestParquetDataNode:
 
         assert pathlib.Path(temp_file_path).exists()
         assert isinstance(dn.read(), pd.DataFrame)
+
+    def test_filter_pandas_exposed_type(self, parquet_file_path):
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "pandas"})
+        dn.write(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+            ]
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert dn["foo"].equals(pd.Series([1, 1, 1, 2, None]))
+        assert dn["bar"].equals(pd.Series([1, 2, None, 2, 2]))
+        assert dn[:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_modin_exposed_type(self, parquet_file_path):
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "modin"})
+        dn.write(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+            ]
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert dn["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
+        assert dn["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
+        assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_numpy_exposed_type(self, parquet_file_path):
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "numpy"})
+        dn.write(
+            [
+                [1, 1],
+                [1, 2],
+                [1, 3],
+                [2, 1],
+                [2, 2],
+                [2, 3],
+            ]
+        )
+
+        assert len(dn.filter((0, 1, Operator.EQUAL))) == 3
+        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))) == 3
+        assert len(dn.filter((1, 2, Operator.EQUAL))) == 2
+        assert len(dn.filter([(0, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert np.array_equal(dn[0], np.array([1, 1]))
+        assert np.array_equal(dn[1], np.array([1, 2]))
+        assert np.array_equal(dn[:3], np.array([[1, 1], [1, 2], [1, 3]]))
+        assert np.array_equal(dn[:, 0], np.array([1, 1, 1, 2, 2, 2]))
+        assert np.array_equal(dn[1:4, :1], np.array([[1], [1], [2]]))
 
     @pytest.mark.parametrize("engine", __engine)
     def test_pandas_parquet_config_kwargs(self, engine, tmpdir_factory):

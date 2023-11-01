@@ -28,7 +28,7 @@ from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingR
 from taipy.config.common.scope import Scope
 
 
-@pytest.fixture
+@pytest.fixture(scope="function", autouse=True)
 def clear_mongo_connection_cache():
     _connect_mongodb.cache_clear()
 
@@ -129,7 +129,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_read(self, properties, clear_mongo_connection_cache):
+    def test_read(self, properties):
         mock_client = pymongo.MongoClient("localhost")
         mock_client[properties["db_name"]][properties["collection_name"]].insert_many(
             [
@@ -174,33 +174,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_filter(self, properties):
-        mock_client = pymongo.MongoClient("localhost")
-        mock_client[properties["db_name"]][properties["collection_name"]].insert_many(
-            [
-                {"foo": 1, "bar": 1},
-                {"foo": 1, "bar": 2},
-                {"foo": 1},
-                {"foo": 2, "bar": 2},
-                {"bar": 2},
-                {"KWARGS_KEY": "KWARGS_VALUE"},
-            ]
-        )
-
-        mongo_dn = MongoCollectionDataNode(
-            "foo",
-            Scope.SCENARIO,
-            properties=properties,
-        )
-
-        assert len(mongo_dn.filter(("foo", 1, Operator.EQUAL))) == 3
-        assert len(mongo_dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 1
-        assert len(mongo_dn.filter(("bar", 2, Operator.EQUAL))) == 3
-        assert len(mongo_dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
-
-    @mongomock.patch(servers=(("localhost", 27017),))
-    @pytest.mark.parametrize("properties", __properties)
-    def test_read_empty_as(self, properties, clear_mongo_connection_cache):
+    def test_read_empty_as(self, properties):
         mongo_dn = MongoCollectionDataNode(
             "foo",
             Scope.SCENARIO,
@@ -219,7 +193,7 @@ class TestMongoCollectionDataNode:
             ({"a": 1, "bar": 2}),
         ],
     )
-    def test_read_wrong_object_properties_name(self, properties, data, clear_mongo_connection_cache):
+    def test_read_wrong_object_properties_name(self, properties, data):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithoutArgs
         mongo_dn = MongoCollectionDataNode(
@@ -241,7 +215,7 @@ class TestMongoCollectionDataNode:
             ({"foo": 1, "bar": 2}, [{"foo": 1, "bar": 2}]),
         ],
     )
-    def test_write(self, properties, data, written_data, clear_mongo_connection_cache):
+    def test_write(self, properties, data, written_data):
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
         mongo_dn.write(data)
 
@@ -260,7 +234,7 @@ class TestMongoCollectionDataNode:
             [],
         ],
     )
-    def test_write_empty_list(self, properties, data, clear_mongo_connection_cache):
+    def test_write_empty_list(self, properties, data):
         mongo_dn = MongoCollectionDataNode(
             "foo",
             Scope.SCENARIO,
@@ -272,7 +246,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_write_non_serializable(self, properties, clear_mongo_connection_cache):
+    def test_write_non_serializable(self, properties):
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
         data = {"a": 1, "b": mongo_dn}
         with pytest.raises(InvalidDocument):
@@ -280,7 +254,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_write_custom_encoder(self, properties, clear_mongo_connection_cache):
+    def test_write_custom_encoder(self, properties):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithCustomEncoder
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=custom_properties)
@@ -305,7 +279,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_write_custom_encoder_decoder(self, properties, clear_mongo_connection_cache):
+    def test_write_custom_encoder_decoder(self, properties):
         custom_properties = properties.copy()
         custom_properties["custom_document"] = CustomObjectWithCustomEncoderDecoder
         mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=custom_properties)
@@ -327,3 +301,41 @@ class TestMongoCollectionDataNode:
         assert read_data[1].integer == 2
         assert read_data[1].text == "def"
         assert isinstance(read_data[1].time, datetime)
+
+    @mongomock.patch(servers=(("localhost", 27017),))
+    @pytest.mark.parametrize("properties", __properties)
+    def test_filter(self, properties):
+        mock_client = pymongo.MongoClient("localhost")
+        mock_client[properties["db_name"]][properties["collection_name"]].insert_many(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+                {"KWARGS_KEY": "KWARGS_VALUE"},
+            ]
+        )
+
+        mongo_dn = MongoCollectionDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties=properties,
+        )
+
+        assert len(mongo_dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(mongo_dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 3
+        assert len(mongo_dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(mongo_dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert mongo_dn["foo"] == [1, 1, 1, 2, None, None]
+        assert mongo_dn["bar"] == [1, 2, None, 2, 2, None]
+        assert [m.__dict__ for m in mongo_dn[:3]] == [m.__dict__ for m in mongo_dn.read()[:3]]
+        assert mongo_dn[["foo", "bar"]] == [
+            {"foo": 1, "bar": 1},
+            {"foo": 1, "bar": 2},
+            {"foo": 1},
+            {"foo": 2, "bar": 2},
+            {"bar": 2},
+            {},
+        ]

@@ -23,6 +23,7 @@ import pytest
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.excel import ExcelDataNode
+from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.exceptions.exceptions import (
     ExposedTypeLengthMismatch,
     InvalidExposedType,
@@ -934,6 +935,306 @@ class TestExcelDataNode:
 
         for sheet_name in sheet_names:
             assert np.array_equal(excel_dn.read()[sheet_name].values, multi_sheet_content[sheet_name].values)
+
+    def test_filter_pandas_exposed_type_with_sheetname(self, excel_file):
+        dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "pandas"}
+        )
+        dn.write(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+            ]
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert dn["foo"].equals(pd.Series([1, 1, 1, 2, None]))
+        assert dn["bar"].equals(pd.Series([1, 2, None, 2, 2]))
+        assert dn[:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_pandas_exposed_type_without_sheetname(self, excel_file):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file, "exposed_type": "pandas"})
+        dn.write(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+            ]
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))["Sheet1"]) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))["Sheet1"]) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))["Sheet1"]) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)["Sheet1"]) == 4
+
+        assert dn["Sheet1"]["foo"].equals(pd.Series([1, 1, 1, 2, None]))
+        assert dn["Sheet1"]["bar"].equals(pd.Series([1, 2, None, 2, 2]))
+        assert dn["Sheet1"][:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_pandas_exposed_type_multisheet(self, excel_file):
+        dn = ExcelDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties={"path": excel_file, "sheet_name": ["sheet_1", "sheet_2"], "exposed_type": "pandas"},
+        )
+        dn.write(
+            {
+                "sheet_1": pd.DataFrame(
+                    [
+                        {"foo": 1, "bar": 1},
+                        {"foo": 1, "bar": 2},
+                        {"foo": 1},
+                        {"foo": 2, "bar": 2},
+                        {"bar": 2},
+                    ]
+                ),
+                "sheet_2": pd.DataFrame(
+                    [
+                        {"foo": 1, "bar": 3},
+                        {"foo": 1, "bar": 4},
+                        {"foo": 1},
+                        {"foo": 2, "bar": 4},
+                        {"bar": 4},
+                    ]
+                ),
+            }
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 2
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))["sheet_1"]) == 3
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))["sheet_2"]) == 3
+
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))["sheet_1"]) == 2
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))["sheet_2"]) == 2
+
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))["sheet_1"]) == 3
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))["sheet_2"]) == 0
+
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 2
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)["sheet_1"]) == 4
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)["sheet_2"]) == 0
+
+        assert dn["sheet_1"]["foo"].equals(pd.Series([1, 1, 1, 2, None]))
+        assert dn["sheet_2"]["foo"].equals(pd.Series([1, 1, 1, 2, None]))
+        assert dn["sheet_1"]["bar"].equals(pd.Series([1, 2, None, 2, 2]))
+        assert dn["sheet_2"]["bar"].equals(pd.Series([3, 4, None, 4, 4]))
+        assert dn["sheet_1"][:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+        assert dn["sheet_2"][:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 3.0}, {"foo": 1.0, "bar": 4.0}]))
+
+    def test_filter_modin_exposed_type_with_sheetname(self, excel_file):
+        dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "modin"}
+        )
+        dn.write(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+            ]
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert dn["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
+        assert dn["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
+        assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_modin_exposed_type_without_sheetname(self, excel_file):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file, "exposed_type": "modin"})
+        dn.write(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+            ]
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))["Sheet1"]) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))["Sheet1"]) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))["Sheet1"]) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)["Sheet1"]) == 4
+
+        assert dn["Sheet1"]["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
+        assert dn["Sheet1"]["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
+        assert dn["Sheet1"][:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_modin_exposed_type_multisheet(self, excel_file):
+        dn = ExcelDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties={"path": excel_file, "sheet_name": ["sheet_1", "sheet_2"], "exposed_type": "modin"},
+        )
+        dn.write(
+            {
+                "sheet_1": pd.DataFrame(
+                    [
+                        {"foo": 1, "bar": 1},
+                        {"foo": 1, "bar": 2},
+                        {"foo": 1},
+                        {"foo": 2, "bar": 2},
+                        {"bar": 2},
+                    ]
+                ),
+                "sheet_2": pd.DataFrame(
+                    [
+                        {"foo": 1, "bar": 3},
+                        {"foo": 1, "bar": 4},
+                        {"foo": 1},
+                        {"foo": 2, "bar": 4},
+                        {"bar": 4},
+                    ]
+                ),
+            }
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 2
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))["sheet_1"]) == 3
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))["sheet_2"]) == 3
+
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))["sheet_1"]) == 2
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))["sheet_2"]) == 2
+
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))["sheet_1"]) == 3
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))["sheet_2"]) == 0
+
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 2
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)["sheet_1"]) == 4
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)["sheet_2"]) == 0
+
+        assert dn["sheet_1"]["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
+        assert dn["sheet_2"]["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
+        assert dn["sheet_1"]["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
+        assert dn["sheet_2"]["bar"].equals(modin_pd.Series([3, 4, None, 4, 4]))
+        assert dn["sheet_1"][:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+        assert dn["sheet_2"][:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 3.0}, {"foo": 1.0, "bar": 4.0}]))
+
+    def test_filter_numpy_exposed_type_with_sheetname(self, excel_file):
+        dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "numpy"}
+        )
+        dn.write(
+            [
+                [1, 1],
+                [1, 2],
+                [1, 3],
+                [2, 1],
+                [2, 2],
+                [2, 3],
+            ]
+        )
+
+        assert len(dn.filter((0, 1, Operator.EQUAL))) == 3
+        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))) == 3
+        assert len(dn.filter((1, 2, Operator.EQUAL))) == 2
+        assert len(dn.filter([(0, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert np.array_equal(dn[0], np.array([1, 1]))
+        assert np.array_equal(dn[1], np.array([1, 2]))
+        assert np.array_equal(dn[:3], np.array([[1, 1], [1, 2], [1, 3]]))
+        assert np.array_equal(dn[:, 0], np.array([1, 1, 1, 2, 2, 2]))
+        assert np.array_equal(dn[1:4, :1], np.array([[1], [1], [2]]))
+
+    def test_filter_numpy_exposed_type_without_sheetname(self, excel_file):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file, "exposed_type": "numpy"})
+        dn.write(
+            [
+                [1, 1],
+                [1, 2],
+                [1, 3],
+                [2, 1],
+                [2, 2],
+                [2, 3],
+            ]
+        )
+
+        assert len(dn.filter((0, 1, Operator.EQUAL))["Sheet1"]) == 3
+        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))["Sheet1"]) == 3
+        assert len(dn.filter((1, 2, Operator.EQUAL))["Sheet1"]) == 2
+        assert len(dn.filter([(0, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)["Sheet1"]) == 4
+
+        assert np.array_equal(dn["Sheet1"][0], np.array([1, 1]))
+        assert np.array_equal(dn["Sheet1"][1], np.array([1, 2]))
+        assert np.array_equal(dn["Sheet1"][:3], np.array([[1, 1], [1, 2], [1, 3]]))
+        assert np.array_equal(dn["Sheet1"][:, 0], np.array([1, 1, 1, 2, 2, 2]))
+        assert np.array_equal(dn["Sheet1"][1:4, :1], np.array([[1], [1], [2]]))
+
+    def test_filter_numpy_exposed_type_multisheet(self, excel_file):
+        dn = ExcelDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties={"path": excel_file, "sheet_name": ["sheet_1", "sheet_2"], "exposed_type": "numpy"},
+        )
+        dn.write(
+            {
+                "sheet_1": pd.DataFrame(
+                    [
+                        [1, 1],
+                        [1, 2],
+                        [1, 3],
+                        [2, 1],
+                        [2, 2],
+                        [2, 3],
+                    ]
+                ),
+                "sheet_2": pd.DataFrame(
+                    [
+                        [1, 4],
+                        [1, 5],
+                        [1, 6],
+                        [2, 4],
+                        [2, 5],
+                        [2, 6],
+                    ]
+                ),
+            }
+        )
+
+        assert len(dn.filter((0, 1, Operator.EQUAL))) == 2
+        assert len(dn.filter((0, 1, Operator.EQUAL))["sheet_1"]) == 3
+        assert len(dn.filter((0, 1, Operator.EQUAL))["sheet_2"]) == 3
+
+        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))["sheet_1"]) == 3
+        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))["sheet_2"]) == 3
+
+        assert len(dn.filter((1, 2, Operator.EQUAL))) == 2
+        assert len(dn.filter((1, 2, Operator.EQUAL))["sheet_1"]) == 2
+        assert len(dn.filter((1, 2, Operator.EQUAL))["sheet_2"]) == 0
+
+        assert len(dn.filter([(1, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)) == 2
+        assert len(dn.filter([(1, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)["sheet_1"]) == 4
+        assert len(dn.filter([(1, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)["sheet_2"]) == 0
+
+        assert np.array_equal(dn["sheet_1"][0], np.array([1, 1]))
+        assert np.array_equal(dn["sheet_2"][0], np.array([1, 4]))
+        assert np.array_equal(dn["sheet_1"][1], np.array([1, 2]))
+        assert np.array_equal(dn["sheet_2"][1], np.array([1, 5]))
+        assert np.array_equal(dn["sheet_1"][:3], np.array([[1, 1], [1, 2], [1, 3]]))
+        assert np.array_equal(dn["sheet_2"][:3], np.array([[1, 4], [1, 5], [1, 6]]))
+        assert np.array_equal(dn["sheet_1"][:, 0], np.array([1, 1, 1, 2, 2, 2]))
+        assert np.array_equal(dn["sheet_2"][:, 1], np.array([4, 5, 6, 4, 5, 6]))
+        assert np.array_equal(dn["sheet_1"][1:4, :1], np.array([[1], [1], [2]]))
+        assert np.array_equal(dn["sheet_2"][1:4, 1:2], np.array([[5], [6], [4]]))
 
     def test_set_path(self):
         dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"default_path": "foo.xlsx"})

@@ -24,6 +24,7 @@ import pytest
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.json import JSONDataNode
+from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.exceptions.exceptions import NoData
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -253,6 +254,28 @@ class TestJSONDataNode:
         assert read_data[0].text == "abc"
         assert read_data[1] == 100
 
+    def test_filter(self, json_file):
+        json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})
+        json_dn.write(
+            [
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 1},
+                {"foo": 2, "bar": 2},
+                {"bar": 2},
+                {"KWARGS_KEY": "KWARGS_VALUE"},
+            ]
+        )
+
+        assert len(json_dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(json_dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 3
+        assert len(json_dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(json_dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert json_dn[0] == {"foo": 1, "bar": 1}
+        assert json_dn[2] == {"foo": 1}
+        assert json_dn[:2] == [{"foo": 1, "bar": 1}, {"foo": 1, "bar": 2}]
+
     @pytest.mark.parametrize(
         ["properties", "exists"],
         [
@@ -285,7 +308,7 @@ class TestJSONDataNode:
     def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.json"))
         pd.DataFrame([]).to_json(temp_file_path)
-        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path, "exposed_type": "pandas"})
+        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path})
 
         dn.write([1, 2, 3])
         previous_edit_date = dn.last_edit_date
