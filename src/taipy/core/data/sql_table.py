@@ -141,9 +141,8 @@ class SQLTableDataNode(_AbstractSQLDataNode):
 
     def _create_table(self, engine) -> Table:
         return Table(
-            self.table,
+            self.properties[self.__TABLE_KEY],
             MetaData(),
-            autoload=True,
             autoload_with=engine,
         )
 

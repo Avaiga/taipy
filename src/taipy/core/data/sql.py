@@ -12,6 +12,8 @@
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
+from sqlalchemy import text
+
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
@@ -133,6 +135,8 @@ class SQLDataNode(_AbstractSQLDataNode):
             queries = [queries]
         for query in queries:
             if isinstance(query, str):
-                connection.execute(query)
+                connection.execute(text(query))
             else:
-                connection.execute(*query)
+                statement = query[0]
+                parameters = query[1]
+                connection.execute(text(statement), parameters)
