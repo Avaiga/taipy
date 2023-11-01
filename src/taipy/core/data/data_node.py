@@ -429,29 +429,17 @@ class DataNode(_Entity, _Labeled):
                 each is in the form of (key, value, `Operator^`).
             join_operator (JoinOperator^): The operator used to join the multiple filter
                 3-tuples.
+        Returns:
+            The filtered data.
+        Raises:
+            NotImplementedError: If the data type is not supported.
         """
-        if self.storage_type in ["sql", "sql_table", "mongo_collection"]:
-            raise NotImplementedError
-
         data = self._read()
-        if len(operators) == 0:
-            return data
-        if not ((isinstance(operators[0], list)) or (isinstance(operators[0], tuple))):
-            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-                return _FilterDataNode._filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
-            if isinstance(data, np.ndarray):
-                list_operators = [operators]
-                return _FilterDataNode._filter_numpy_array(data, list_operators)
-            if isinstance(data, List):
-                return _FilterDataNode._filter_list_per_key_value(data, operators[0], operators[1], operators[2])
-        else:
-            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-                return _FilterDataNode._filter_dataframe(data, operators, join_operator=join_operator)
-            if isinstance(data, np.ndarray):
-                return _FilterDataNode._filter_numpy_array(data, operators, join_operator=join_operator)
-            if isinstance(data, List):
-                return _FilterDataNode._filter_list(data, operators, join_operator=join_operator)
-        raise NotImplementedError
+        return _FilterDataNode._filter(data, operators, join_operator)
+
+    def __getitem__(self, item):
+        data = self._read()
+        return _FilterDataNode._filter_by_key(data, item)
 
     @abstractmethod
     def _read(self):
@@ -460,10 +448,6 @@ class DataNode(_Entity, _Labeled):
     @abstractmethod
     def _write(self, data):
         raise NotImplementedError
-
-    def __getitem__(self, items):
-        # TODO
-        return _FilterDataNode(self.id, self._read())[items]
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
