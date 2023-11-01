@@ -28,6 +28,15 @@ from ..exceptions import MissingRequiredProperty, ModelNotFound
 connection = None
 
 
+from taipy.config.config import Config
+
+from .._repository._abstract_repository import _AbstractRepository
+from .._repository.db._sql_session import _SQLSession
+from ..exceptions import MissingRequiredProperty, ModelNotFound
+
+connection = None
+
+
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -42,7 +51,6 @@ def init_db():
     except KeyError:
         raise MissingRequiredProperty("Missing property db_location")
 
-    # More sql databases can be easily added in the future
     sqlite3.threadsafety = 3
 
     global connection
@@ -138,6 +146,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         if cursor.rowcount == 0:
             raise ModelNotFound(str(self.model_type.__name__), entity_id)
 
+        if cursor.rowcount == 0:
+            raise ModelNotFound(str(self.model_type.__name__), entity_id)
+
     def _delete_all(self):
         self.db.execute(str(self.model_type.__table__.delete().compile(dialect=sqlite.dialect())))
         self.db.commit()
@@ -224,22 +235,27 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         return res
 
     def __get_entities_by_config_and_owner(
-        self, config_id: str, owner_id: Optional[str] = "", filters: Optional[List[Dict]] = None
+        self, config_id: str, owner_id: Optional[str] = None, filters: Optional[List[Dict]] = None
     ) -> ModelType:
         if not filters:
             filters = []
         versions = [item.get("version") for item in filters if item.get("version")]
 
         query = self.model_type.__table__.select().filter_by(config_id=config_id)
+        parameters = [config_id]
 
         if owner_id:
-            query = query.filter_by(owner_id=owner_id)
-        else:
-            query = query.filter_by(owner_id=None)
+            parameters.append(owner_id)
+        query = query.filter_by(owner_id=owner_id)
+
         if versions:
-            query = query.filter(self.model_type.version.in_(versions))  # type: ignore
+            query = str(query.filter(self.model_type.version.in_(versions)).compile(dialect=sqlite.dialect()))  # type: ignore
+            return self.db.execute(query)
+
         query = str(query.compile(dialect=sqlite.dialect()))
-        return self.db.execute(query).fetchone()
+        if entry := self.db.execute(query, parameters).fetchone():
+            return self.model_type.from_dict(entry)
+        return None
 
     #############################
     # ##   Private methods   ## #

@@ -23,7 +23,7 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         super().__init__(model_type=_VersionModel, converter=_VersionConverter)
 
     def _set_latest_version(self, version_number):
-        if old_latest := self.db.query(self.model_type).filter_by(is_latest=True).first():
+        if old_latest := self.db.execute(str(self.model_type.__table__.select().filter_by(is_latest=True))).fetchone():
             old_latest.is_latest = False
 
         version = self.__get_by_id(version_number)
@@ -39,7 +39,9 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         return ""
 
     def _set_development_version(self, version_number):
-        if old_development := self.db.query(self.model_type).filter_by(is_development=True).first():
+        if old_development := self.db.execute(
+            str(self.model_type.__table__.select().filter_by(is_development=True))
+        ).fetchone():
             old_development.is_development = False
 
         version = self.__get_by_id(version_number)
@@ -50,7 +52,9 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         self.db.commit()
 
     def _get_development_version(self):
-        if development := self.db.query(self.model_type).filter_by(is_development=True).first():
+        if development := self.db.execute(
+            str(self.model_type.__table__.select().filter_by(is_development=True))
+        ).fetchone():
             return development.id
         raise ModelNotFound(self.model_type, "")
 
@@ -63,7 +67,11 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         self.db.commit()
 
     def _get_production_versions(self):
-        if productions := self.db.query(self.model_type).filter_by(is_production=True).all():
+        if productions := self.db.execute(
+            str(self.model_type.__table__.select().filter_by(is_production=True).compile(dialect=sqlite.dialect())),
+        ).fetchall():
+
+            # if productions := self.db.query(self.model_type).filter_by(is_production=True).all():
             return [p.id for p in productions]
         return []
 
@@ -77,4 +85,6 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         self.db.commit()
 
     def __get_by_id(self, version_id):
-        return self.db.query(self.model_type).filter_by(id=version_id).first()
+        query = str(self.model_type.__table__.select().filter_by(id=version_id).compile(dialect=sqlite.dialect()))
+        entry = self.db.execute(query, [version_id]).fetchone()
+        return self.model_type.from_dict(entry) if entry else None

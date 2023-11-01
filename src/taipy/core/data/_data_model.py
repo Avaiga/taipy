@@ -65,6 +65,13 @@ class _DataNodeModel(_BaseModel):
     @staticmethod
     def from_dict(data: Dict[str, Any]):
         dn_properties = data["data_node_properties"]
+        if isinstance(dn_properties, str):
+            dn_properties = json.loads(dn_properties.replace("'", '"'))
+
+        edits = data["edits"]
+        if isinstance(edits, str):
+            edits = json.loads(edits.replace("'", '"'))
+
         return _DataNodeModel(
             id=data["id"],
             config_id=data["config_id"],
@@ -73,7 +80,7 @@ class _DataNodeModel(_BaseModel):
             owner_id=data.get("owner_id"),
             parent_ids=data.get("parent_ids", []),
             last_edit_date=data.get("last_edit_date"),
-            edits=data["edits"],
+            edits=edits,
             version=data["version"],
             validity_days=data["validity_days"],
             validity_seconds=data["validity_seconds"],

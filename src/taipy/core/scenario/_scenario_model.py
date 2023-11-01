@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -56,17 +57,58 @@ class _ScenarioModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
+        tasks = data.get("tasks", None)
+        if isinstance(tasks, str):
+            tasks = json.loads(tasks.replace("'", '"'))
+
+        additional_data_nodes = data.get("additional_data_nodes", None)
+        if isinstance(additional_data_nodes, str):
+            additional_data_nodes = json.loads(additional_data_nodes.replace("'", '"'))
+
+        properties = data["properties"]
+        if isinstance(properties, str):
+            properties = json.loads(properties.replace("'", '"'))
+
+        subscribers = data["subscribers"]
+        if isinstance(subscribers, str):
+            subscribers = json.loads(subscribers.replace("'", '"'))
+
+        tags = data["tags"]
+        if isinstance(tags, str):
+            tags = json.loads(tags.replace("'", '"'))
+
+        sequences = data.get("sequences", None)
+        if isinstance(sequences, str):
+            sequences = json.loads(sequences.replace("'", '"'))
+
         return _ScenarioModel(
             id=data["id"],
             config_id=data["config_id"],
-            tasks=data.get("tasks", None),
-            additional_data_nodes=data.get("additional_data_nodes", None),
-            properties=data["properties"],
+            tasks=tasks,
+            additional_data_nodes=additional_data_nodes,
+            properties=properties,
             creation_date=data["creation_date"],
             primary_scenario=data["primary_scenario"],
-            subscribers=data["subscribers"],
-            tags=data["tags"],
+            subscribers=subscribers,
+            tags=tags,
             version=data["version"],
-            sequences=data.get("sequences", None),
+            sequences=sequences,
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )
+
+    @staticmethod
+    def to_list(model):
+        return [
+            model.id,
+            model.config_id,
+            json.dumps(model.tasks),
+            json.dumps(model.additional_data_nodes),
+            json.dumps(model.properties),
+            model.creation_date,
+            model.primary_scenario,
+            json.dumps(model.subscribers),
+            json.dumps(model.tags),
+            model.version,
+            json.dumps(model.sequences),
+            model.cycle,
+        ]

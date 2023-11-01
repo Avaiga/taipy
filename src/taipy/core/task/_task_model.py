@@ -51,18 +51,34 @@ class _TaskModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
+        parent_ids = data.get("parent_ids", [])
+        if isinstance(parent_ids, str):
+            parent_ids = json.loads(parent_ids.replace("'", '"'))
+
+        input_ids = data["input_ids"]
+        if isinstance(input_ids, str):
+            input_ids = json.loads(input_ids.replace("'", '"'))
+
+        output_ids = data["output_ids"]
+        if isinstance(output_ids, str):
+            output_ids = json.loads(output_ids.replace("'", '"'))
+
+        properties = data["properties"] if "properties" in data.keys() else {}
+        if isinstance(properties, str):
+            properties = json.loads(properties.replace("'", '"'))
+
         return _TaskModel(
             id=data["id"],
             owner_id=data.get("owner_id"),
-            parent_ids=data.get("parent_ids", []),
+            parent_ids=parent_ids,
             config_id=data["config_id"],
-            input_ids=data["input_ids"],
+            input_ids=input_ids,
             function_name=data["function_name"],
             function_module=data["function_module"],
-            output_ids=data["output_ids"],
+            output_ids=output_ids,
             version=data["version"],
             skippable=data["skippable"],
-            properties=data["properties"] if "properties" in data.keys() else {},
+            properties=properties,
         )
 
     @staticmethod

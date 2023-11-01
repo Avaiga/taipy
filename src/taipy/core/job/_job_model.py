@@ -50,6 +50,14 @@ class _JobModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
+        subscribers = data["subscribers"]
+        if isinstance(subscribers, str):
+            subscribers = json.loads(subscribers.replace("'", '"'))
+
+        stacktrace = data["stacktrace"]
+        if isinstance(stacktrace, str):
+            stacktrace = json.loads(stacktrace.replace("'", '"'))
+
         return _JobModel(
             id=data["id"],
             task_id=data["task_id"],
@@ -58,8 +66,8 @@ class _JobModel(_BaseModel):
             submit_id=data["submit_id"],
             submit_entity_id=data["submit_entity_id"],
             creation_date=data["creation_date"],
-            subscribers=data["subscribers"],
-            stacktrace=data["stacktrace"],
+            subscribers=subscribers,
+            stacktrace=stacktrace,
             version=data["version"],
         )
 
