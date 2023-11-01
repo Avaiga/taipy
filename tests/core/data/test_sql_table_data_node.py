@@ -442,7 +442,7 @@ class TestSQLTableDataNode:
         dn = SQLTableDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
         data = dn.read()
 
-        assert data.equals(pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]))
+        assert data.equals(pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]))
 
     def test_filter_pandas_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
