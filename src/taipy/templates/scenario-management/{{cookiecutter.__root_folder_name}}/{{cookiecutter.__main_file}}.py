@@ -1,6 +1,6 @@
 from config.config import configure
-from pages import scenario_page, job_page
-from pages.root import root, selected_scenario, selected_data_node, content
+from pages import job_page, scenario_page
+from pages.root import content, root, selected_data_node, selected_scenario
 
 import taipy as tp
 from taipy import Core, Gui
@@ -44,4 +44,4 @@ if __name__ == "__main__":
     # Instantiate, configure and run the GUI
     gui = Gui(pages=pages)
     data_node_partial = gui.add_partial("")
-    gui.run(title="{{cookiecutter.__application_title}}")
+    gui.run(title="{{cookiecutter.__application_title}}", margin="0em")
