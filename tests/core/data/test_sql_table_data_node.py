@@ -18,6 +18,7 @@ import pandas as pd
 import pytest
 
 from src.taipy.core.data.data_node_id import DataNodeId
+from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.data.sql_table import SQLTableDataNode
 from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 from taipy.config.common.scope import Scope
@@ -432,7 +433,7 @@ class TestSQLTableDataNode:
         folder_path, db_name, file_extension = tmp_sqlite_path
         properties = {
             "db_engine": "sqlite",
-            "table_name": "example",
+            "table_name": "foo",
             "db_name": db_name,
             "sqlite_folder_path": folder_path,
             "sqlite_file_extension": file_extension,
@@ -441,4 +442,103 @@ class TestSQLTableDataNode:
         dn = SQLTableDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
         data = dn.read()
 
-        assert data.equals(pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]))
+        assert data.equals(pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]))
+
+    def test_filter_pandas_exposed_type(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "table_name": "foo",
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+            "exposed_type": "pandas",
+        }
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=properties)
+        dn.write(
+            pd.DataFrame(
+                [
+                    {"foo": 1, "bar": 1},
+                    {"foo": 1, "bar": 2},
+                    {"foo": 1},
+                    {"foo": 2, "bar": 2},
+                    {"bar": 2},
+                ]
+            )
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert dn["foo"].equals(pd.Series([1, 1, 1, 2, None]))
+        assert dn["bar"].equals(pd.Series([1, 2, None, 2, 2]))
+        assert dn[:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_modin_exposed_type(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "table_name": "foo",
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+            "exposed_type": "modin",
+        }
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=properties)
+        dn.write(
+            pd.DataFrame(
+                [
+                    {"foo": 1, "bar": 1},
+                    {"foo": 1, "bar": 2},
+                    {"foo": 1},
+                    {"foo": 2, "bar": 2},
+                    {"bar": 2},
+                ]
+            )
+        )
+
+        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
+        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
+        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
+        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert dn["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
+        assert dn["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
+        assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+    def test_filter_numpy_exposed_type(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "table_name": "foo",
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+            "exposed_type": "numpy",
+        }
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=properties)
+        dn.write(
+            pd.DataFrame(
+                [
+                    {"foo": 1, "bar": 1},
+                    {"foo": 1, "bar": 2},
+                    {"foo": 1, "bar": 3},
+                    {"foo": 2, "bar": 1},
+                    {"foo": 2, "bar": 2},
+                    {"foo": 2, "bar": 3},
+                ]
+            )
+        )
+
+        assert len(dn.filter((0, 1, Operator.EQUAL))) == 3
+        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))) == 3
+        assert len(dn.filter((1, 2, Operator.EQUAL))) == 2
+        assert len(dn.filter([(0, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)) == 4
+
+        assert np.array_equal(dn[0], np.array([1, 1]))
+        assert np.array_equal(dn[1], np.array([1, 2]))
+        assert np.array_equal(dn[:3], np.array([[1, 1], [1, 2], [1, 3]]))
+        assert np.array_equal(dn[:, 0], np.array([1, 1, 1, 2, 2, 2]))
+        assert np.array_equal(dn[1:4, :1], np.array([[1], [1], [2]]))

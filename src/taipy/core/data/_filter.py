@@ -10,173 +10,250 @@
 # specific language governing permissions and limitations under the License.
 
 from collections.abc import Hashable
-from typing import Dict, Iterable, List, Union
+from functools import reduce
+from itertools import chain
+from operator import and_, or_
+from typing import Dict, Iterable, List, Tuple, Union
 
 import modin.pandas as modin_pd
+import numpy as np
 import pandas as pd
 from pandas.core.common import is_bool_indexer
 
+from .operator import JoinOperator, Operator
+
 
 class _FilterDataNode:
-    __DATAFRAME_DATA_TYPE = "dataframe"
-    __MULTI_SHEET_EXCEL_DATA_TYPE = "multi_sheet_excel"
-    __CUSTOM_DATA_TYPE = "custom"
+    @staticmethod
+    def __is_pandas_object(data) -> bool:
+        return isinstance(data, (pd.DataFrame, modin_pd.DataFrame)) or isinstance(data, (pd.Series, modin_pd.DataFrame))
 
-    def __init__(self, data_node_id, data: Union[pd.DataFrame, modin_pd.DataFrame, List]) -> None:
-        self.data_node_id = data_node_id
-        self.data = data
-        self.data_type = None
-        if self._is_pandas_object():
-            self.data_type = self.__DATAFRAME_DATA_TYPE
-        elif self.is_multi_sheet_excel():
-            self.data_type = self.__MULTI_SHEET_EXCEL_DATA_TYPE
-        else:
-            self.data_type = self.__CUSTOM_DATA_TYPE
-
-    def _is_pandas_object(self) -> bool:
-        return isinstance(self.data, (pd.DataFrame, modin_pd.DataFrame)) or isinstance(
-            self.data, (pd.Series, modin_pd.DataFrame)
-        )
-
-    def is_multi_sheet_excel(self) -> bool:
-        if isinstance(self.data, Dict):
-            has_df_children = all([isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in self.data.values()])
-            has_list_children = all([isinstance(e, List) for e in self.data.values()])
-            return has_df_children or has_list_children
+    @staticmethod
+    def __is_multi_sheet_excel(data) -> bool:
+        if isinstance(data, Dict):
+            has_df_children = all([isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in data.values()])
+            has_list_children = all([isinstance(e, List) for e in data.values()])
+            has_np_array_children = all([isinstance(e, np.ndarray) for e in data.values()])
+            return has_df_children or has_list_children or has_np_array_children
         return False
 
-    def data_is_dataframe(self) -> bool:
-        return self.data_type == self.__DATAFRAME_DATA_TYPE
+    @staticmethod
+    def __is_list_of_dict(data) -> bool:
+        return all(isinstance(x, Dict) for x in data)
 
-    def data_is_multi_sheet_excel(self) -> bool:
-        return self.data_type == self.__MULTI_SHEET_EXCEL_DATA_TYPE
+    @staticmethod
+    def _filter_by_key(data, key):
+        if isinstance(key, int):
+            return _FilterDataNode.__getitem_int(data, key)
 
-    def __getitem__(self, key):
-        if isinstance(key, _FilterDataNode):
-            key = key.data
+        if isinstance(key, slice) or (isinstance(key, tuple) and any(isinstance(e, slice) for e in key)):
+            return _FilterDataNode.__getitem_slice(data, key)
+
         if isinstance(key, Hashable):
-            filtered_data = self.__getitem_hashable(key)
-        elif isinstance(key, slice):
-            filtered_data = self.__getitem_slice(key)
-        elif isinstance(key, (pd.DataFrame, modin_pd.DataFrame)):
-            filtered_data = self.__getitem_dataframe(key)
-        elif is_bool_indexer(key):
-            filtered_data = self.__getitem_bool_indexer(key)
-        elif isinstance(key, Iterable):
-            filtered_data = self.__getitem_iterable(key)
-        else:
-            filtered_data = None
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            return _FilterDataNode.__getitem_hashable(data, key)
 
-    def __getitem_hashable(self, key):
-        if self.data_is_dataframe() or self.data_is_multi_sheet_excel():
-            return self.data.get(key)
-        return [getattr(e, key) for e in self.data]
+        if isinstance(key, (pd.DataFrame, modin_pd.DataFrame)):
+            return _FilterDataNode.__getitem_dataframe(data, key)
 
-    def __getitem_slice(self, key):
-        return self.data[key]
+        if is_bool_indexer(key):
+            return _FilterDataNode.__getitem_bool_indexer(data, key)
 
-    def __getitem_dataframe(self, key: Union[pd.DataFrame, modin_pd.DataFrame]):
-        if self.data_is_dataframe():
-            return self.data[key]
-        if self.data_is_list_of_dict():
+        if isinstance(key, Iterable):
+            return _FilterDataNode.__getitem_iterable(data, key)
+
+        return None
+
+    @staticmethod
+    def __getitem_int(data, key):
+        return data[key]
+
+    @staticmethod
+    def __getitem_hashable(data, key):
+        if _FilterDataNode.__is_pandas_object(data) or _FilterDataNode.__is_multi_sheet_excel(data):
+            return data.get(key)
+        return [getattr(entry, key, None) for entry in data]
+
+    @staticmethod
+    def __getitem_slice(data, key):
+        return data[key]
+
+    @staticmethod
+    def __getitem_dataframe(data, key: Union[pd.DataFrame, modin_pd.DataFrame]):
+        if _FilterDataNode.__is_pandas_object(data):
+            return data[key]
+        if _FilterDataNode.__is_list_of_dict(data):
             filtered_data = list()
             for i, row in key.iterrows():
                 filtered_row = dict()
                 for col in row.index:
-                    filtered_row[col] = self.data[i][col] if row[col] else None
+                    filtered_row[col] = data[i][col] if row[col] else None
                 filtered_data.append(filtered_row)
             return filtered_data
         return None
 
-    def data_is_list_of_dict(self) -> bool:
-        return all(isinstance(x, Dict) for x in self.data)
+    @staticmethod
+    def __getitem_bool_indexer(data, key):
+        if _FilterDataNode.__is_pandas_object(data):
+            return data[key]
+        return [e for i, e in enumerate(data) if key[i]]
 
-    def __getitem_bool_indexer(self, key):
-        if self.data_is_dataframe():
-            return self.data[key]
-        return [e for i, e in enumerate(self.data) if key[i]]
-
-    def __getitem_iterable(self, keys):
-        if self.data_is_dataframe():
-            return self.data[keys]
+    @staticmethod
+    def __getitem_iterable(data, keys):
+        if _FilterDataNode.__is_pandas_object(data):
+            return data[keys]
         filtered_data = []
-        for e in self.data:
-            filtered_data.append({k: getattr(e, k) for k in keys})
+        for entry in data:
+            filtered_data.append({k: getattr(entry, k) for k in keys if hasattr(entry, k)})
         return filtered_data
 
-    def __eq__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data == value
-        else:
-            filtered_data = [e == value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+    @staticmethod
+    def _filter(data, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+        if len(operators) == 0:
+            return data
 
-    def __lt__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data < value
-        else:
-            filtered_data = [e < value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+        if isinstance(data, Dict):
+            return {k: _FilterDataNode._filter(v, operators, join_operator) for k, v in data.items()}
 
-    def __le__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data <= value
+        if not ((isinstance(operators[0], list)) or (isinstance(operators[0], tuple))):
+            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+                return _FilterDataNode.__filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
+            if isinstance(data, np.ndarray):
+                list_operators = [operators]
+                return _FilterDataNode.__filter_numpy_array(data, list_operators)
+            if isinstance(data, List):
+                return _FilterDataNode.__filter_list_per_key_value(data, operators[0], operators[1], operators[2])
         else:
-            filtered_data = [e <= value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+                return _FilterDataNode.__filter_dataframe(data, operators, join_operator=join_operator)
+            if isinstance(data, np.ndarray):
+                return _FilterDataNode.__filter_numpy_array(data, operators, join_operator=join_operator)
+            if isinstance(data, List):
+                return _FilterDataNode.__filter_list(data, operators, join_operator=join_operator)
+        raise NotImplementedError
 
-    def __gt__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data > value
+    @staticmethod
+    def __filter_dataframe(
+        df_data: Union[pd.DataFrame, modin_pd.DataFrame], operators: Union[List, Tuple], join_operator=JoinOperator.AND
+    ):
+        filtered_df_data = []
+        if join_operator == JoinOperator.AND:
+            how = "inner"
+        elif join_operator == JoinOperator.OR:
+            how = "outer"
         else:
-            filtered_data = [e > value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            return NotImplementedError
+        for key, value, operator in operators:
+            filtered_df_data.append(_FilterDataNode.__filter_dataframe_per_key_value(df_data, key, value, operator))
 
-    def __ge__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data >= value
+        if isinstance(df_data, modin_pd.DataFrame):
+            if filtered_df_data:
+                return _FilterDataNode.__modin_dataframe_merge(filtered_df_data, how)
+            return modin_pd.DataFrame()
+
+        return _FilterDataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
+
+    @staticmethod
+    def __filter_dataframe_per_key_value(
+        df_data: Union[pd.DataFrame, modin_pd.DataFrame], key: str, value, operator: Operator
+    ):
+        df_by_col = df_data[key]
+        if operator == Operator.EQUAL:
+            df_by_col = df_by_col == value
+        if operator == Operator.NOT_EQUAL:
+            df_by_col = df_by_col != value
+        if operator == Operator.LESS_THAN:
+            df_by_col = df_by_col < value
+        if operator == Operator.LESS_OR_EQUAL:
+            df_by_col = df_by_col <= value
+        if operator == Operator.GREATER_THAN:
+            df_by_col = df_by_col > value
+        if operator == Operator.GREATER_OR_EQUAL:
+            df_by_col = df_by_col >= value
+        return df_data[df_by_col]
+
+    @staticmethod
+    def __dataframe_merge(df_list: List, how="inner"):
+        return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
+
+    @staticmethod
+    def __modin_dataframe_merge(df_list: List, how="inner"):
+        return reduce(lambda df1, df2: modin_pd.merge(df1, df2, how=how), df_list)
+
+    @staticmethod
+    def __filter_numpy_array(data: np.ndarray, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+        conditions = []
+        for key, value, operator in operators:
+            conditions.append(_FilterDataNode.__get_filter_condition_per_key_value(data, key, value, operator))
+
+        if join_operator == JoinOperator.AND:
+            join_conditions = reduce(and_, conditions)
+        elif join_operator == JoinOperator.OR:
+            join_conditions = reduce(or_, conditions)
         else:
-            filtered_data = [e >= value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            return NotImplementedError
 
-    def __ne__(self, value):
-        if self.data_is_dataframe():
-            filtered_data = self.data != value
+        return data[join_conditions]
+
+    @staticmethod
+    def __get_filter_condition_per_key_value(array_data: np.ndarray, key, value, operator: Operator):
+        if not isinstance(key, int):
+            key = int(key)
+
+        if operator == Operator.EQUAL:
+            return array_data[:, key] == value
+        if operator == Operator.NOT_EQUAL:
+            return array_data[:, key] != value
+        if operator == Operator.LESS_THAN:
+            return array_data[:, key] < value
+        if operator == Operator.LESS_OR_EQUAL:
+            return array_data[:, key] <= value
+        if operator == Operator.GREATER_THAN:
+            return array_data[:, key] > value
+        if operator == Operator.GREATER_OR_EQUAL:
+            return array_data[:, key] >= value
+
+        return NotImplementedError
+
+    @staticmethod
+    def __filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+        filtered_list_data = []
+        for key, value, operator in operators:
+            filtered_list_data.append(_FilterDataNode.__filter_list_per_key_value(list_data, key, value, operator))
+        if len(filtered_list_data) == 0:
+            return filtered_list_data
+        if join_operator == JoinOperator.AND:
+            return _FilterDataNode.__list_intersect(filtered_list_data)
+        elif join_operator == JoinOperator.OR:
+            merged_list = list(chain.from_iterable(filtered_list_data))
+            if all(isinstance(e, Dict) for e in merged_list):
+                return list({frozenset(item.items()) for item in merged_list})
+            return list(set(merged_list))
         else:
-            filtered_data = [e != value for e in self.data]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            return NotImplementedError
 
-    def __and__(self, other):
-        if self.data_is_dataframe():
-            if other.data_is_dataframe():
-                filtered_data = self.data & other.data
+    @staticmethod
+    def __filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
+        filtered_list = []
+        for row in list_data:
+            if isinstance(row, Dict):
+                row_value = row.get(key, None)
             else:
-                raise NotImplementedError
-        else:
-            if other.data_is_dataframe():
-                raise NotImplementedError
-            else:
-                filtered_data = [s and o for s, o in zip(self.data, other.data)]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+                row_value = getattr(row, key, None)
 
-    def __or__(self, other):
-        if self.data_is_dataframe():
-            if other.data_is_dataframe():
-                filtered_data = self.data | other.data
-            else:
-                raise NotImplementedError
-        else:
-            if other.data_is_dataframe():
-                raise NotImplementedError
-            else:
-                filtered_data = [s or o for s, o in zip(self.data, other.data)]
-        return _FilterDataNode(self.data_node_id, filtered_data)
+            if operator == Operator.EQUAL and row_value == value:
+                filtered_list.append(row)
+            if operator == Operator.NOT_EQUAL and row_value != value:
+                filtered_list.append(row)
+            if operator == Operator.LESS_THAN and row_value < value:
+                filtered_list.append(row)
+            if operator == Operator.LESS_OR_EQUAL and row_value <= value:
+                filtered_list.append(row)
+            if operator == Operator.GREATER_THAN and row_value > value:
+                filtered_list.append(row)
+            if operator == Operator.GREATER_OR_EQUAL and row_value >= value:
+                filtered_list.append(row)
+        return filtered_list
 
-    def __str__(self) -> str:
-        if self.data_is_dataframe():
-            return str(self.data)
-        list_to_string = ""
-        for e in self.data:
-            list_to_string += str(e) + "\n"
-        return list_to_string
+    @staticmethod
+    def __list_intersect(list_data):
+        return list(set(list_data.pop()).intersection(*map(set, list_data)))

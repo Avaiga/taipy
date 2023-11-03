@@ -8,9 +8,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-import json
+
 import os
-import pathlib
 import pickle
 import shutil
 from datetime import datetime
@@ -145,9 +144,9 @@ def tmp_sqlite_db_file_path(tmpdir_factory):
     file_extension = ".db"
     db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
     conn = db.connect()
-    conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
-    conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
-    conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.execute(text("CREATE TABLE foo (foo int, bar int);"))
+    conn.execute(text("INSERT INTO foo (foo, bar) VALUES (1, 2);"))
+    conn.execute(text("INSERT INTO foo (foo, bar) VALUES (3, 4);"))
     conn.commit()
     conn.close()
     db.dispose()
@@ -163,9 +162,9 @@ def tmp_sqlite_sqlite3_file_path(tmpdir_factory):
 
     db = create_engine("sqlite:///" + os.path.join(fn.strpath, f"{db_name}{file_extension}"))
     conn = db.connect()
-    conn.execute(text("CREATE TABLE example (a int, b int, c int);"))
-    conn.execute(text("INSERT INTO example (a, b, c) VALUES (1, 2, 3);"))
-    conn.execute(text("INSERT INTO example (a, b, c) VALUES (4, 5, 6);"))
+    conn.execute(text("CREATE TABLE foo (foo int, bar int);"))
+    conn.execute(text("INSERT INTO foo (foo, bar) VALUES (1, 2);"))
+    conn.execute(text("INSERT INTO foo (foo, bar) VALUES (3, 4);"))
     conn.commit()
     conn.close()
     db.dispose()

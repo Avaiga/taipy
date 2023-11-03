@@ -13,7 +13,6 @@ import os
 import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from functools import reduce
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
@@ -35,7 +34,7 @@ from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
-from .operator import JoinOperator, Operator
+from .operator import JoinOperator
 
 
 class DataNode(_Entity, _Labeled):
@@ -423,103 +422,24 @@ class DataNode(_Entity, _Labeled):
         The data is filtered by the provided list of 3-tuples (key, value, `Operator^`).
 
         If multiple filter operators are provided, filtered data will be joined based on the
-        join operator (_AND_ or _OR_).
+        join operator (*AND* or *OR*).
 
         Parameters:
             operators (Union[List[Tuple], Tuple]): A 3-element tuple or a list of 3-element tuples,
                 each is in the form of (key, value, `Operator^`).
             join_operator (JoinOperator^): The operator used to join the multiple filter
                 3-tuples.
+        Returns:
+            The filtered data.
+        Raises:
+            NotImplementedError: If the data type is not supported.
         """
         data = self._read()
-        if len(operators) == 0:
-            return data
-        if not ((type(operators[0]) == list) or (type(operators[0]) == tuple)):
-            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-                return DataNode.__filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
-            if isinstance(data, List):
-                return DataNode.__filter_list_per_key_value(data, operators[0], operators[1], operators[2])
-        else:
-            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
-                return DataNode.__filter_dataframe(data, operators, join_operator=join_operator)
-            if isinstance(data, List):
-                return DataNode.__filter_list(data, operators, join_operator=join_operator)
-        raise NotImplementedError
+        return _FilterDataNode._filter(data, operators, join_operator)
 
-    @staticmethod
-    def __filter_dataframe(
-        df_data: Union[pd.DataFrame, modin_pd.DataFrame], operators: Union[List, Tuple], join_operator=JoinOperator.AND
-    ):
-        filtered_df_data = []
-        if join_operator == JoinOperator.AND:
-            how = "inner"
-        elif join_operator == JoinOperator.OR:
-            how = "outer"
-        else:
-            raise NotImplementedError
-        for key, value, operator in operators:
-            filtered_df_data.append(DataNode.__filter_dataframe_per_key_value(df_data, key, value, operator))
-        return DataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
-
-    @staticmethod
-    def __filter_dataframe_per_key_value(
-        df_data: Union[pd.DataFrame, modin_pd.DataFrame], key: str, value, operator: Operator
-    ):
-        df_by_col = df_data[key]
-        if operator == Operator.EQUAL:
-            df_by_col = df_by_col == value
-        if operator == Operator.NOT_EQUAL:
-            df_by_col = df_by_col != value
-        if operator == Operator.LESS_THAN:
-            df_by_col = df_by_col < value
-        if operator == Operator.LESS_OR_EQUAL:
-            df_by_col = df_by_col <= value
-        if operator == Operator.GREATER_THAN:
-            df_by_col = df_by_col > value
-        if operator == Operator.GREATER_OR_EQUAL:
-            df_by_col = df_by_col >= value
-        return df_data[df_by_col]
-
-    @staticmethod
-    def __dataframe_merge(df_list: List, how="inner"):
-        return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
-
-    @staticmethod
-    def __filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
-        filtered_list_data = []
-        for key, value, operator in operators:
-            filtered_list_data.append(DataNode.__filter_list_per_key_value(list_data, key, value, operator))
-        if len(filtered_list_data) == 0:
-            return filtered_list_data
-        if join_operator == JoinOperator.AND:
-            return DataNode.__list_intersect(filtered_list_data)
-        elif join_operator == JoinOperator.OR:
-            return list(set(np.concatenate(filtered_list_data)))
-        else:
-            raise NotImplementedError
-
-    @staticmethod
-    def __filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
-        filtered_list = []
-        for row in list_data:
-            row_value = getattr(row, key)
-            if operator == Operator.EQUAL and row_value == value:
-                filtered_list.append(row)
-            if operator == Operator.NOT_EQUAL and row_value != value:
-                filtered_list.append(row)
-            if operator == Operator.LESS_THAN and row_value < value:
-                filtered_list.append(row)
-            if operator == Operator.LESS_OR_EQUAL and row_value <= value:
-                filtered_list.append(row)
-            if operator == Operator.GREATER_THAN and row_value > value:
-                filtered_list.append(row)
-            if operator == Operator.GREATER_OR_EQUAL and row_value >= value:
-                filtered_list.append(row)
-        return filtered_list
-
-    @staticmethod
-    def __list_intersect(list_data):
-        return list(set(list_data.pop()).intersection(*map(set, list_data)))
+    def __getitem__(self, item):
+        data = self._read()
+        return _FilterDataNode._filter_by_key(data, item)
 
     @abstractmethod
     def _read(self):
@@ -528,9 +448,6 @@ class DataNode(_Entity, _Labeled):
     @abstractmethod
     def _write(self, data):
         raise NotImplementedError
-
-    def __getitem__(self, items):
-        return _FilterDataNode(self.id, self._read())[items]
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

@@ -15,6 +15,7 @@ from os.path import isdir, isfile
 from typing import Any, Dict, List, Optional, Set
 
 import modin.pandas as modin_pd
+import numpy as np
 import pandas as pd
 
 from taipy.config.common.scope import Scope
@@ -220,7 +221,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         list_of_dicts = self._read_as_pandas_dataframe(read_kwargs).to_dict(orient="records")
         return [custom_class(**dct) for dct in list_of_dicts]
 
-    def _read_as_numpy(self, read_kwargs: Dict):
+    def _read_as_numpy(self, read_kwargs: Dict) -> np.ndarray:
         return self._read_as_pandas_dataframe(read_kwargs).to_numpy()
 
     def _read_as_pandas_dataframe(self, read_kwargs: Dict) -> pd.DataFrame:

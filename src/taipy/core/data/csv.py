@@ -16,6 +16,7 @@ from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
 
 import modin.pandas as modin_pd
+import numpy as np
 import pandas as pd
 
 from taipy.config.common.scope import Scope
@@ -198,7 +199,7 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
                     res.append(custom_class(*line))
             return res
 
-    def _read_as_numpy(self):
+    def _read_as_numpy(self) -> np.ndarray:
         return self._read_as_pandas_dataframe().to_numpy()
 
     def _read_as_pandas_dataframe(
