@@ -51,6 +51,7 @@ def __search_parent_ids(entity_id: str, data: Dict) -> List:
         if entity_type == "TASK" and "SCENARIO" in _id:
             if entity_id in entity_data["tasks"]:
                 parents.append(_id)
+    parents.sort()
     return parents
 
 
@@ -68,6 +69,8 @@ def __search_parent_config(entity_id: str, config: Dict, entity_type: str) -> Li
         if entity_type == "TASK" and possible_parents == "SCENARIO":
             if section_id in entity_data["tasks"]:
                 parents.append(section_id)
+
+    parents.sort()
     return parents
 
 
