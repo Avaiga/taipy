@@ -98,7 +98,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _save(self, entity: Entity):
         obj = self.converter._entity_to_model(entity)
         if self._exists(entity.id):
-            self.__update_entry(obj)
+            self._update_entry(obj)
             return
         self.__insert_model(obj)
 
@@ -247,12 +247,14 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         if owner_id:
             parameters.append(owner_id)
         query = query.filter_by(owner_id=owner_id)
+        query = str(query.compile(dialect=sqlite.dialect()))
 
         if versions:
-            query = str(query.filter(self.model_type.version.in_(versions)).compile(dialect=sqlite.dialect()))  # type: ignore
-            return self.db.execute(query)
 
-        query = str(query.compile(dialect=sqlite.dialect()))
+            query = query + f" AND {self.model_type.__table__.name}.version IN ({','.join(['?']*len(versions))})"
+            # query = str(query.filter(self.model_type.version.in_(versions)).compile(dialect=sqlite.dialect()))  # type: ignore
+            parameters.extend(versions)
+
         if entry := self.db.execute(query, parameters).fetchone():
             return self.model_type.from_dict(entry)
         return None
@@ -265,7 +267,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         self.db.execute(query, model.to_list(model))
         self.db.commit()
 
-    def __update_entry(self, model):
+    def _update_entry(self, model):
         query = str(self.model_type.__table__.update().filter_by(id=model.id).compile(dialect=sqlite.dialect()))
         self.db.execute(query, model.to_list(model) + [model.id])
         self.db.commit()
