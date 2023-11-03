@@ -38,8 +38,8 @@ class _FilterDataNode:
         return False
 
     @staticmethod
-    def __is_list_of_dict(self) -> bool:
-        return all(isinstance(x, Dict) for x in self.data)
+    def __is_list_of_dict(data) -> bool:
+        return all(isinstance(x, Dict) for x in data)
 
     @staticmethod
     def _filter_by_key(data, key):
