@@ -21,6 +21,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.schema import CreateTable, DropTable
 
+from src.taipy.core._core import Core
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._repository._sql_repository import connection
 from src.taipy.core._version._version import _Version
@@ -409,6 +410,7 @@ def init_config():
     _Checker.add_checker(_ScenarioConfigChecker)
 
     Config.configure_core(read_entity_retry=0)
+    Core._is_running = False
 
 
 def init_managers():
