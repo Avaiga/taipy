@@ -3,7 +3,6 @@
 "config_id": "predictions",
 "scope": "<Scope.SCENARIO: 1>",
 "storage_type": "pickle",
-"name": null,
 "owner_id": "SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4",
 "parent_ids": [
 "TASK_predict_cf8b3c83-5ea7-40eb-b8af-d5240852ff5b",
@@ -21,6 +20,7 @@
 "validity_seconds": null,
 "edit_in_progress": false,
 "data_node_properties": {
-"is_generated": true
+"is_generated": true,
+"name": null
 }
 }
