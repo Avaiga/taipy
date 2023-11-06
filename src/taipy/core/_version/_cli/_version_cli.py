@@ -17,7 +17,7 @@ from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...data._data_manager_factory import _DataManagerFactory
-from ...exceptions.exceptions import VersionIsNotProductionVersion
+from ...exceptions.exceptions import ModelNotFound, VersionIsNotProductionVersion
 from ...job._job_manager_factory import _JobManagerFactory
 from ...scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ...sequence._sequence_manager_factory import _SequenceManagerFactory
@@ -199,8 +199,10 @@ class _VersionCLI:
             _version_manager._delete_production_version(old_version)
         except VersionIsNotProductionVersion:
             pass
-        version_entity.id = new_version
-        _version_manager._set(version_entity)
+
+        if not _version_manager._get(new_version):
+            version_entity.id = new_version
+            _version_manager._set(version_entity)
 
     @classmethod
     def __compare_version_config(cls, version_1: str, version_2: str):
