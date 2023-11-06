@@ -27,7 +27,7 @@
 
 | User Interface Generation  | Scenario and Data Management |
 | --------  | -------- |
-|<img src="readme_img/gui_creation.webp" alt="Interface Animation"  width="100%"/> | <img src="readme_img/scenario_and_data_mgt.gif" alt="Back-End Animation"  width="70%"/>
+|<img src="readme_img/gui_creation.webp" alt="Interface Animation"  width="850px" height="250px" /> | <img src="readme_img/scenario_and_data_mgt.gif" alt="Back-End Animation"  width="100%"/>
 
 
 </div>
@@ -106,7 +106,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Demo Execution Graph"  width="80%"/></div>
+<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Demo Execution Graph"  width="40%"/></div>
 
 
 ### Taipy Studio - The easy peasy way
