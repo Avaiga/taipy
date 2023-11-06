@@ -17,7 +17,7 @@
 
 <br>
 
-###  <div align="left">Pure Python & Open-Source. <div align="left"> "How? Taipy covers front-end, back-end, and deployment to build production-ready web applications."
+###  <div align="left">Pure Python & Open-Source. <div align="left"> How? Taipy covers front-end, back-end, and deployment to build production-ready web applications."
 
 <br>
 
@@ -27,7 +27,7 @@
 
 | User Interface Generation  | Scenario and Data Management |
 | --------  | -------- |
-|<img src="readme_img/gui_creation.webp" alt="Interface Animation"  width="100%"/> | <img src="readme_img/scenario_and_data_mgt.gif" alt="Back-End Animation"  width="100%"/>
+|<img src="readme_img/gui_creation.webp" alt="Interface Animation"  width="100%"/> | <img src="readme_img/scenario_and_data_mgt.gif" alt="Back-End Animation"  width="70%"/>
 
 
 </div>
