@@ -106,7 +106,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Demo Execution Graph"  width="40%"/></div>
+<div align="center"><img src="readme_img/demo_exec_graph.png" alt="Demo Execution Graph"  width="40%"/></div>
 
 
 ### Taipy Studio - The easy peasy way
