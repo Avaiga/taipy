@@ -131,6 +131,23 @@ class _TaipyDate(_TaipyBase):
         return _TaipyBase._HOLDER_PREFIX + "Dt"
 
 
+class _TaipyDateRange(_TaipyBase):
+    def get(self):
+        val = super().get()
+        if isinstance(val, list):
+            return [_date_to_string(v) if isinstance(v, datetime) else None if v is None else str(v) for v in val]
+        return val
+
+    def cast_value(self, value: t.Any):
+        if isinstance(value, list):
+            return [_string_to_date(v) if isinstance(v, str) else str(v) for v in value]
+        return super().cast_value(value)
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Dr"
+
+
 class _TaipyLovValue(_TaipyBase):
     @staticmethod
     def get_hash():

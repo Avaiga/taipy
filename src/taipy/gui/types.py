@@ -21,6 +21,7 @@ from .utils import (
     _TaipyContentImage,
     _TaipyData,
     _TaipyDate,
+    _TaipyDateRange,
     _TaipyDict,
     _TaipyLoNumbers,
     _TaipyLov,
@@ -68,6 +69,7 @@ class PropertyType(Enum):
     content = _TaipyContent
     data = _TaipyData
     date = _TaipyDate
+    date_range = _TaipyDateRange
     dict = "dict"
     """
     The property holds a dictionary.

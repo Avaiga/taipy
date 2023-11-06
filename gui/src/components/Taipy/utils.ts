@@ -60,10 +60,9 @@ export interface TaipyLabelProps {
 }
 
 export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined => {
-    const val = (Array.isArray(arr) && idx < arr.length) ? arr[idx] : undefined;
+    const val = Array.isArray(arr) && idx < arr.length ? arr[idx] : undefined;
     return val ?? defVal;
-}
-
+};
 
 /**
  * Extracts the backend name of a property.
@@ -105,4 +104,8 @@ export const getCssSize = (val: string | number) => {
     return val;
 };
 
-export const getSuffixedClassNames = (names: string | undefined, suffix: string) => (names || "").split(/\s+/).map(n => n+suffix).join(" ")
+export const getSuffixedClassNames = (names: string | undefined, suffix: string) =>
+    (names || "")
+        .split(/\s+/)
+        .map((n) => n + suffix)
+        .join(" ");

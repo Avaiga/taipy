@@ -1,6 +1,6 @@
 {
   "name": "taipy-gui",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.0",
@@ -107,7 +107,7 @@
     "jest": "^29.0.3",
     "jest-environment-jsdom": "^29.0.3",
     "jest-websocket-mock": "^2.2.1",
-    "lint-staged": "^14.0.1",
+    "lint-staged": "^15.0.2",
     "mock-socket": "^9.0.7",
     "mock-xmlhttprequest": "^8.2.0",
     "ts-jest": "^29.0.0",

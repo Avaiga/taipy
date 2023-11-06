@@ -17,7 +17,7 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import DateSelector from "./DateSelector";
 import { TaipyContext } from "../../context/taipyContext";
@@ -64,7 +64,7 @@ const curDate = new Date();
 curDate.setHours(1, 1, 1, 1);
 const curDateStr = curDate.toISOString();
 
-const cleanText = (val: string) => val.replace(/\u200e|\u2066|\u2067|\u2068|\u2069/g, '');
+const cleanText = (val: string) => val.replace(/\u200e|\u2066|\u2067|\u2068|\u2069/g, "");
 
 describe("DateSelector Component", () => {
     it("renders", async () => {
@@ -95,6 +95,20 @@ describe("DateSelector Component", () => {
         const input = document.querySelector("input");
         expect(input).toBeInTheDocument();
         expect(cleanText(input?.value || "")).toEqual("01/01/2001");
+    });
+    it("shows label", async () => {
+        const { getByLabelText } = render(
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DateSelector
+                    defaultDate="2001-01-01T00:00:01.001Z"
+                    date={undefined as unknown as string}
+                    className="taipy-date"
+                    label="a label"
+                />
+            </LocalizationProvider>
+        );
+        const input = getByLabelText("a label") as HTMLInputElement;
+        expect(input.value).toBe("01/01/2001");
     });
     it("is disabled", async () => {
         render(
@@ -174,7 +188,11 @@ describe("DateSelector with time Component", () => {
     it("displays the default value", async () => {
         render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector defaultDate="2001-01-01T01:01:01.001Z" withTime={true} date={undefined as unknown as string} />
+                <DateSelector
+                    defaultDate="2001-01-01T01:01:01.001Z"
+                    withTime={true}
+                    date={undefined as unknown as string}
+                />
             </LocalizationProvider>
         );
         const input = document.querySelector("input");
@@ -225,7 +243,11 @@ describe("DateSelector with time Component", () => {
         expect(input).toBeInTheDocument();
         if (input) {
             await userEvent.clear(input);
-            await userEvent.type(input, "{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}010120010101am", { delay: 1 });
+            await userEvent.type(
+                input,
+                "{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}010120010101am",
+                { delay: 1 }
+            );
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "varname",
                 payload: { value: "2001-01-01T01:01:00.000Z" },

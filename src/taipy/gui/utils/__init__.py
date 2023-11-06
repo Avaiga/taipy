@@ -43,6 +43,7 @@ from .types import (
     _TaipyContentImage,
     _TaipyData,
     _TaipyDate,
+    _TaipyDateRange,
     _TaipyDict,
     _TaipyLoNumbers,
     _TaipyLov,

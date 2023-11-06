@@ -219,8 +219,7 @@ const Slider = (props: SliderProps) => {
                         const val = lovList.findIndex((item) => item.id === arr[0])
                         return val === -1 ? 0 : val
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     throw new Error("Slider lov value couldn't be parsed");
                 }
             }
@@ -242,7 +241,7 @@ const Slider = (props: SliderProps) => {
                     return val
                 }
             }
-        } 
+        }
         return defaultValue as number
     }, [defaultValue, lovList])
 

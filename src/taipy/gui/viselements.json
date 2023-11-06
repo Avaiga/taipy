@@ -244,11 +244,60 @@
             "type": "dynamic(bool)",
             "default_value": "True",
             "doc": "Shows the date as a formatted string if not editable."
+          },
+          {
+            "name": "label",
+            "type": "str",
+            "doc": "The label associated with the input."
           }
         ]
       }
     ],
     [
+        "date_range",
+        {
+          "inherits": [
+            "on_change",
+            "propagate"
+          ],
+          "properties": [
+            {
+              "name": "dates",
+              "default_property": true,
+              "type": "dynamic(list(datetime))",
+              "doc": "The dates that this control represents and can modify.<br/>It is typically bound to a list of two <code>datetime</code> object."
+            },
+            {
+              "name": "with_time",
+              "type": "bool",
+              "default_value": "False",
+              "doc": "Whether or not to show the time part of the date."
+            },
+            {
+              "name": "format",
+              "type": "str",
+              "doc": "The format to apply to the value. See below."
+            },
+            {
+              "name": "editable",
+              "type": "dynamic(bool)",
+              "default_value": "True",
+              "doc": "Shows the date as a formatted string if not editable."
+            },
+            {
+              "name": "label_start",
+              "type": "str",
+              "doc": "The label associated with the first input."
+            },
+            {
+              "name": "label_end",
+              "type": "str",
+              "doc": "The label associated with the second input."
+            }
+          ]
+        }
+      ],
+      [
       "chart",
       {
         "inherits": [

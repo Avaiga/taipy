@@ -14,6 +14,7 @@
 import { ComponentType } from "react";
 import Button from "./Button";
 import Chart from "./Chart";
+import DateRange from "./DateRange";
 import DateSelector from "./DateSelector";
 import Dialog from "./Dialog";
 import Expandable from "./Expandable";
@@ -45,6 +46,7 @@ export const getRegisteredComponents = () => {
             a: Link,
             Button: Button,
             Chart: Chart,
+            DateRange: DateRange,
             DateSelector: DateSelector,
             Dialog: Dialog,
             Expandable: Expandable,

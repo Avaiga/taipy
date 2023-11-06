@@ -34,6 +34,7 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     defaultDate?: string;
     defaultEditable?: boolean;
     editable?: boolean;
+    label?: string;
 }
 
 const boxSx = { display: "inline-block" };
@@ -90,6 +91,7 @@ const DateSelector = (props: DateSelectorProps) => {
                                 className={getSuffixedClassNames(className, "-picker")}
                                 disabled={!active}
                                 slotProps={textFieldProps}
+                                label={props.label}
                             />
                         ) : (
                             <DatePicker
@@ -98,6 +100,7 @@ const DateSelector = (props: DateSelectorProps) => {
                                 className={getSuffixedClassNames(className, "-picker")}
                                 disabled={!active}
                                 slotProps={textFieldProps}
+                                label={props.label}
                             />
                         )
                     ) : (

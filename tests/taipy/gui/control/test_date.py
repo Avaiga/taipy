@@ -28,13 +28,14 @@ def test_date_md_1(gui: Gui, test_client, helpers):
 
 def test_date_md_2(gui: Gui, test_client, helpers):
     gui._bind_var_val("date", datetime.strptime("15 Dec 2020", "%d %b %Y"))
-    md_string = "<|{date}|date|with_time|>"
+    md_string = "<|{date}|date|with_time|label=a label|>"
     expected_list = [
         "<DateSelector",
         'defaultDate="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
         "date={_TpDt_tpec_TpExPr_date_TPMDL_0}",
         "withTime={true}",
+        'label="a label"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 

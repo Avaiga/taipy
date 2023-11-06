@@ -34,6 +34,7 @@ class _Factory:
         "chart": "data",
         "content": "value",
         "date": "date",
+        "date_range": "dates",
         "dialog": "open",
         "expandable": "title",
         "file_download": "content",
@@ -124,6 +125,28 @@ class _Factory:
                 ("active", PropertyType.dynamic_boolean, True),
                 ("editable", PropertyType.dynamic_boolean, True),
                 ("hover_text", PropertyType.dynamic_string),
+                ("label",),
+                ("on_change", PropertyType.function),
+                ("format",),
+            ]
+        )
+        ._set_propagate(),
+        "date_range": lambda gui, control_type, attrs: _Builder(
+            gui=gui,
+            control_type=control_type,
+            element_name="DateRange",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_type=PropertyType.date_range)
+        .set_attributes(
+            [
+                ("with_time", PropertyType.boolean),
+                ("id",),
+                ("active", PropertyType.dynamic_boolean, True),
+                ("editable", PropertyType.dynamic_boolean, True),
+                ("hover_text", PropertyType.dynamic_string),
+                ("label_start",),
+                ("label_end",),
                 ("on_change", PropertyType.function),
                 ("format",),
             ]

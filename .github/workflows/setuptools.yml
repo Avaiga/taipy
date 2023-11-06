@@ -23,9 +23,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
       - name: Install npm
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install Taipy without dependencies
         run: |
@@ -67,9 +67,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
       - name: Install npm
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: install libmagic on macos
         if: matrix.os == 'macos-latest'
