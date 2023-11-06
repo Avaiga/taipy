@@ -3,7 +3,6 @@
 "config_id": "evaluation",
 "scope": "<Scope.SCENARIO: 1>",
 "storage_type": "pickle",
-"name": null,
 "owner_id": "SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4",
 "parent_ids": [
 "TASK_evaluate_57cbea3b-332e-47ac-a468-472e4885eb82"
@@ -20,6 +19,7 @@
 "validity_seconds": null,
 "edit_in_progress": false,
 "data_node_properties": {
-"is_generated": true
+"is_generated": true,
+"name": null
 }
 }

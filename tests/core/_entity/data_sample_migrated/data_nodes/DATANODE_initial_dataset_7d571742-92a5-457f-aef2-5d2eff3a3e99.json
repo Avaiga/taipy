@@ -3,7 +3,6 @@
 "config_id": "initial_dataset",
 "scope": "<Scope.GLOBAL: 3>",
 "storage_type": "csv",
-"name": null,
 "owner_id": null,
 "parent_ids": [
 "TASK_clean_data_2b17fa43-6746-45d6-b22d-0f5b09b9048a"
@@ -17,6 +16,7 @@
 "data_node_properties": {
 "path": "data/dataset.csv",
 "has_header": true,
-"exposed_type": "pandas"
+"exposed_type": "pandas",
+"name": null
 }
 }

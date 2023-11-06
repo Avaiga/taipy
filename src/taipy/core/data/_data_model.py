@@ -31,7 +31,6 @@ class _DataNodeModel(_BaseModel):
         Column("config_id", String),
         Column("scope", Enum(Scope)),
         Column("storage_type", String),
-        Column("name", String),
         Column("owner_id", String),
         Column("parent_ids", JSON),
         Column("last_edit_date", String),
@@ -50,7 +49,6 @@ class _DataNodeModel(_BaseModel):
     config_id: str
     scope: Scope
     storage_type: str
-    name: Optional[str]
     owner_id: Optional[str]
     parent_ids: List[str]
     last_edit_date: Optional[str]
@@ -71,7 +69,6 @@ class _DataNodeModel(_BaseModel):
             config_id=data["config_id"],
             scope=Scope._from_repr(data["scope"]),
             storage_type=data["storage_type"],
-            name=data.get("name"),
             owner_id=data.get("owner_id"),
             parent_ids=data.get("parent_ids", []),
             last_edit_date=data.get("last_edit_date"),

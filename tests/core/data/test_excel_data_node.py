@@ -83,8 +83,7 @@ class TestExcelDataNode:
         dn = ExcelDataNode(
             "foo_bar",
             Scope.SCENARIO,
-            name="super name",
-            properties={"path": path, "has_header": False, "sheet_name": sheet_names},
+            properties={"path": path, "has_header": False, "sheet_name": sheet_names, "name": "super name"},
         )
         assert isinstance(dn, ExcelDataNode)
         assert dn.storage_type() == "excel"

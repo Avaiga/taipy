@@ -3,7 +3,6 @@
 "config_id": "cleaned_dataset",
 "scope": "<Scope.GLOBAL: 3>",
 "storage_type": "parquet",
-"name": null,
 "owner_id": null,
 "parent_ids": [
 "TASK_predict_cf8b3c83-5ea7-40eb-b8af-d5240852ff5b",
@@ -29,6 +28,7 @@
 "compression": "snappy",
 "exposed_type": "pandas",
 "read_kwargs": {},
-"write_kwargs": {}
+"write_kwargs": {},
+"name": null
 }
 }

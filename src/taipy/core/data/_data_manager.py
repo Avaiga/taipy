@@ -96,7 +96,6 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             return cls.__DATA_NODE_CLASS_MAP[storage_type](
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
-                name=props.pop(cls.__NAME_KEY, None),
                 validity_period=data_node_config.validity_period,
                 owner_id=owner_id,
                 parent_ids=parent_ids,

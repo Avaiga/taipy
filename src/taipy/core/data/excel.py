@@ -43,7 +43,6 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             identifier.
         scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
-        name (str): A user-readable name of this data node.
         owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or
             `None`.
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
@@ -89,7 +88,6 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         config_id: str,
         scope: Scope,
         id: Optional[DataNodeId] = None,
-        name: Optional[str] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
@@ -120,7 +118,6 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             config_id,
             scope,
             id,
-            name,
             owner_id,
             parent_ids,
             last_edit_date,

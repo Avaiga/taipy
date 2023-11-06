@@ -346,7 +346,7 @@ def test_publish_event():
     task.properties.pop("debug")
     assert registration_queue.qsize() == 22
 
-    dn.name = "new datanode name"
+    dn.editor_id = "new editor id"
     assert registration_queue.qsize() == 23
 
     dn.properties["sorted"] = True
@@ -413,7 +413,7 @@ def test_publish_event():
         "properties",
         "properties",
         "properties",
-        "name",
+        "editor_id",
         "properties",
         "properties",
         "properties",
@@ -506,7 +506,7 @@ def test_publish_event():
         t.properties.update({"debug": True})
         assert registration_queue.qsize() == 0
 
-        d.name = "another new datanode name"
+        d.editor_id = "another new editor id"
         assert registration_queue.qsize() == 0
 
         d.properties["sorted"] = True
@@ -553,7 +553,7 @@ def test_publish_event():
         "skippable",
         "properties",
         "properties",
-        "name",
+        "editor_id",
         "properties",
         "properties",
     ]

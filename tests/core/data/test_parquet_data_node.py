@@ -71,7 +71,7 @@ class TestParquetDataNode:
         path = "data/node/path"
         compression = "snappy"
         dn = ParquetDataNode(
-            "foo_bar", Scope.SCENARIO, name="super name", properties={"path": path, "compression": compression}
+            "foo_bar", Scope.SCENARIO, properties={"path": path, "compression": compression, "name": "super name"}
         )
         assert isinstance(dn, ParquetDataNode)
         assert dn.storage_type() == "parquet"
@@ -89,7 +89,7 @@ class TestParquetDataNode:
         assert dn.engine == "pyarrow"
 
         with pytest.raises(InvalidConfigurationId):
-            dn = ParquetDataNode("foo bar", Scope.SCENARIO, name="super name", properties={"path": path})
+            dn = ParquetDataNode("foo bar", Scope.SCENARIO, properties={"path": path, "name": "super name"})
 
     def test_get_user_properties(self, parquet_file_path):
         dn_1 = ParquetDataNode("dn_1", Scope.SCENARIO, properties={"path": parquet_file_path})

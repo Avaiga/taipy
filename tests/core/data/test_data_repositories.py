@@ -52,9 +52,9 @@ class TestDataNodeRepository:
 
         for i in range(10):
             data_node.id = DataNodeId(f"data_node-{i}")
-            data_node.name = f"data_node-{i}"
+            data_node.owner_id = f"task-{i}"
             repository._save(data_node)
-        objs = repository._load_all(filters=[{"name": "data_node-2"}])
+        objs = repository._load_all(filters=[{"owner_id": "task-2"}])
 
         assert len(objs) == 1
 
@@ -119,20 +119,20 @@ class TestDataNodeRepository:
 
         for i in range(10):
             data_node.id = DataNodeId(f"data_node-{i}")
-            data_node.name = f"data_node-{i}"
+            data_node.owner_id = f"task-{i}"
             repository._save(data_node)
 
         assert len(repository._load_all()) == 10
 
-        objs = repository._search("name", "data_node-2")
+        objs = repository._search("owner_id", "task-2")
         assert len(objs) == 1
         assert isinstance(objs[0], DataNode)
 
-        objs = repository._search("name", "data_node-2", filters=[{"version": "random_version_number"}])
+        objs = repository._search("owner_id", "task-2", filters=[{"version": "random_version_number"}])
         assert len(objs) == 1
         assert isinstance(objs[0], DataNode)
 
-        assert repository._search("name", "data_node-2", filters=[{"version": "non_existed_version"}]) == []
+        assert repository._search("owner_id", "task-2", filters=[{"version": "non_existed_version"}]) == []
 
     @pytest.mark.parametrize("repo", [_DataFSRepository, _DataSQLRepository])
     def test_export(self, tmpdir, data_node, repo, init_sql_repo):
