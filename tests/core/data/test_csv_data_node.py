@@ -18,6 +18,8 @@ import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 import pytest
+from modin.pandas.test.utils import df_equals
+from pandas.testing import assert_frame_equal
 
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
@@ -315,14 +317,42 @@ class TestCSVDataNode:
             ]
         )
 
-        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
-        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
-        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
-        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
-
+        # Test datanode indexing and slicing
         assert dn["foo"].equals(pd.Series([1, 1, 1, 2, None]))
         assert dn["bar"].equals(pd.Series([1, 2, None, 2, 2]))
         assert dn[:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+        # Test filter data
+        filtered_by_filter_method = dn.filter(("foo", 1, Operator.EQUAL))
+        filtered_by_indexing = dn[dn["foo"] == 1]
+        expected_data = pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}, {"foo": 1.0}])
+        assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
+
+        filtered_by_filter_method = dn.filter(("foo", 1, Operator.NOT_EQUAL))
+        filtered_by_indexing = dn[dn["foo"] != 1]
+        expected_data = pd.DataFrame([{"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
+        assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
+
+        filtered_by_filter_method = dn.filter(("bar", 2, Operator.EQUAL))
+        filtered_by_indexing = dn[dn["bar"] == 2]
+        expected_data = pd.DataFrame([{"foo": 1.0, "bar": 2.0}, {"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
+        assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
+
+        filtered_by_filter_method = dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
+        filtered_by_indexing = dn[(dn["bar"] == 1) | (dn["bar"] == 2)]
+        expected_data = pd.DataFrame(
+            [
+                {"foo": 1.0, "bar": 1.0},
+                {"foo": 1.0, "bar": 2.0},
+                {"foo": 2.0, "bar": 2.0},
+                {"bar": 2.0},
+            ]
+        )
+        assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
 
     def test_filter_modin_exposed_type(self, csv_file):
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "modin"})
@@ -336,14 +366,42 @@ class TestCSVDataNode:
             ]
         )
 
-        assert len(dn.filter(("foo", 1, Operator.EQUAL))) == 3
-        assert len(dn.filter(("foo", 1, Operator.NOT_EQUAL))) == 2
-        assert len(dn.filter(("bar", 2, Operator.EQUAL))) == 3
-        assert len(dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)) == 4
-
+        # Test datanode indexing and slicing
         assert dn["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
         assert dn["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
         assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+
+        # Test filter data
+        filtered_by_filter_method = dn.filter(("foo", 1, Operator.EQUAL))
+        filtered_by_indexing = dn[dn["foo"] == 1]
+        expected_data = modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}, {"foo": 1.0}])
+        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
+
+        filtered_by_filter_method = dn.filter(("foo", 1, Operator.NOT_EQUAL))
+        filtered_by_indexing = dn[dn["foo"] != 1]
+        expected_data = modin_pd.DataFrame([{"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
+        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
+
+        filtered_by_filter_method = dn.filter(("bar", 2, Operator.EQUAL))
+        filtered_by_indexing = dn[dn["bar"] == 2]
+        expected_data = modin_pd.DataFrame([{"foo": 1.0, "bar": 2.0}, {"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
+        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
+
+        filtered_by_filter_method = dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
+        filtered_by_indexing = dn[(dn["bar"] == 1) | (dn["bar"] == 2)]
+        expected_data = modin_pd.DataFrame(
+            [
+                {"foo": 1.0, "bar": 1.0},
+                {"foo": 1.0, "bar": 2.0},
+                {"foo": 2.0, "bar": 2.0},
+                {"bar": 2.0},
+            ]
+        )
+        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
+        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
 
     def test_filter_numpy_exposed_type(self, csv_file):
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "numpy"})
@@ -358,16 +416,28 @@ class TestCSVDataNode:
             ]
         )
 
-        assert len(dn.filter((0, 1, Operator.EQUAL))) == 3
-        assert len(dn.filter((0, 1, Operator.NOT_EQUAL))) == 3
-        assert len(dn.filter((1, 2, Operator.EQUAL))) == 2
-        assert len(dn.filter([(0, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR)) == 4
-
+        # Test datanode indexing and slicing
         assert np.array_equal(dn[0], np.array([1, 1]))
         assert np.array_equal(dn[1], np.array([1, 2]))
         assert np.array_equal(dn[:3], np.array([[1, 1], [1, 2], [1, 3]]))
         assert np.array_equal(dn[:, 0], np.array([1, 1, 1, 2, 2, 2]))
         assert np.array_equal(dn[1:4, :1], np.array([[1], [1], [2]]))
+
+        # Test filter data
+        assert np.array_equal(dn.filter((0, 1, Operator.EQUAL)), np.array([[1, 1], [1, 2], [1, 3]]))
+        assert np.array_equal(dn[dn[:, 0] == 1], np.array([[1, 1], [1, 2], [1, 3]]))
+
+        assert np.array_equal(dn.filter((0, 1, Operator.NOT_EQUAL)), np.array([[2, 1], [2, 2], [2, 3]]))
+        assert np.array_equal(dn[dn[:, 0] != 1], np.array([[2, 1], [2, 2], [2, 3]]))
+
+        assert np.array_equal(dn.filter((1, 2, Operator.EQUAL)), np.array([[1, 2], [2, 2]]))
+        assert np.array_equal(dn[dn[:, 1] == 2], np.array([[1, 2], [2, 2]]))
+
+        assert np.array_equal(
+            dn.filter([(1, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR),
+            np.array([[1, 1], [1, 2], [2, 1], [2, 2]]),
+        )
+        assert np.array_equal(dn[(dn[:, 1] == 1) | (dn[:, 1] == 2)], np.array([[1, 1], [1, 2], [2, 1], [2, 2]]))
 
     def test_raise_error_invalid_exposed_type(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
