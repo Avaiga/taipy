@@ -17,7 +17,7 @@
 
 <br>
 
-###  <div align="left">Pure Python & Open-Source. <div align="left"> How? Taipy covers front-end, back-end, and deployment to build production-ready web applications."
+###  <div align="left">Pure Python & Open-Source. <div align="left"> How? Taipy covers front-end, back-end, and deployment to build production-ready web applications.
 
 <br>
 
