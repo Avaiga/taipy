@@ -15,10 +15,7 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import modin.pandas as modin_pd
 import networkx as nx
-import numpy as np
-import pandas as pd
 
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
@@ -430,8 +427,10 @@ class DataNode(_Entity, _Labeled):
         Raises:
             NotImplementedError: If the data type is not supported.
         """
-        data = self._read()
-        return _FilterDataNode._filter(data, operators, join_operator)
+        try:
+            return self._read_by(operators, join_operator)
+        except NotImplementedError:
+            return _FilterDataNode._filter(self._read(), operators, join_operator)
 
     def __getitem__(self, item):
         data = self._read()
@@ -439,6 +438,10 @@ class DataNode(_Entity, _Labeled):
 
     @abstractmethod
     def _read(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _read_by(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         raise NotImplementedError
 
     @abstractmethod

@@ -14,7 +14,7 @@ import re
 import urllib.parse
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import modin.pandas as modin_pd
 import numpy as np
@@ -24,6 +24,7 @@ from sqlalchemy import create_engine, text
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..data.operator import JoinOperator, Operator
 from ..exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
 from ._abstract_tabular import _AbstractTabularDataNode
 from .data_node import DataNode
@@ -207,32 +208,85 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
             return self._read_as_numpy()
         return self._read_as()
 
-    def _read_as(self):
+    def _read_by(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
+            return self._read_as_modin_dataframe(operators=operators, join_operator=join_operator)
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(operators=operators, join_operator=join_operator)
+        return self._read_as(operators=operators, join_operator=join_operator)
+
+    def _read_as(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         with self._get_engine().connect() as connection:
-            query_result = connection.execute(text(self._get_read_query()))
+            query_result = connection.execute(text(self._get_read_query(operators, join_operator)))
         return list(map(lambda row: custom_class(**row), query_result))
 
-    def _read_as_numpy(self) -> np.ndarray:
-        return self._read_as_pandas_dataframe().to_numpy()
+    def _read_as_numpy(
+        self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND
+    ) -> np.ndarray:
+        return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator).to_numpy()
 
-    def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
+    def _read_as_pandas_dataframe(
+        self,
+        columns: Optional[List[str]] = None,
+        operators: Optional[Union[List, Tuple]] = None,
+        join_operator=JoinOperator.AND,
+    ):
         with self._get_engine().connect() as conn:
             if columns:
-                return pd.DataFrame(conn.execute(text(self._get_read_query())))[columns]
-            return pd.DataFrame(conn.execute(text(self._get_read_query())))
+                return pd.DataFrame(conn.execute(text(self._get_read_query(operators, join_operator))))[columns]
+            return pd.DataFrame(conn.execute(text(self._get_read_query(operators, join_operator))))
 
-    def _read_as_modin_dataframe(self, columns: Optional[List[str]] = None):
+    def _read_as_modin_dataframe(
+        self,
+        columns: Optional[List[str]] = None,
+        operators: Optional[Union[List, Tuple]] = None,
+        join_operator=JoinOperator.AND,
+    ):
         if columns:
-            return modin_pd.read_sql_query(self._get_read_query(), con=self._get_engine())[columns]
-        return modin_pd.read_sql_query(self._get_read_query(), con=self._get_engine())
+            return modin_pd.read_sql_query(self._get_read_query(operators, join_operator), con=self._get_engine())[
+                columns
+            ]
+        return modin_pd.read_sql_query(self._get_read_query(operators, join_operator), con=self._get_engine())
 
     @abstractmethod
-    def _get_read_query(self):
-        raise NotImplementedError
+    def _get_read_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        query = self._get_base_read_query()
+
+        if not operators:
+            return query
+
+        if not isinstance(operators, List):
+            operators = [operators]
+
+        conditions = []
+        for key, value, operator in operators:
+            if operator == Operator.EQUAL:
+                conditions.append(f"{key} = '{value}'")
+            elif operator == Operator.NOT_EQUAL:
+                conditions.append(f"{key} <> '{value}'")
+            elif operator == Operator.GREATER_THAN:
+                conditions.append(f"{key} > '{value}'")
+            elif operator == Operator.GREATER_OR_EQUAL:
+                conditions.append(f"{key} >= '{value}'")
+            elif operator == Operator.LESS_THAN:
+                conditions.append(f"{key} < '{value}'")
+            elif operator == Operator.LESS_OR_EQUAL:
+                conditions.append(f"{key} <= '{value}'")
+
+        if join_operator == JoinOperator.AND:
+            query += f" WHERE {' AND '.join(conditions)}"
+        elif join_operator == JoinOperator.OR:
+            query += f" WHERE {' OR '.join(conditions)}"
+        else:
+            raise NotImplementedError(f"Join operator {join_operator} not implemented.")
+
+        return query
 
     @abstractmethod
-    def _do_write(self, data, engine, connection) -> None:
+    def _get_base_read_query(self) -> str:
         raise NotImplementedError
 
     def _write(self, data) -> None:
@@ -247,6 +301,10 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
                     raise e
                 else:
                     transaction.commit()
+
+    @abstractmethod
+    def _do_write(self, data, engine, connection) -> None:
+        raise NotImplementedError
 
     def __setattr__(self, key: str, value) -> None:
         if key in self.__ENGINE_PROPERTIES:
