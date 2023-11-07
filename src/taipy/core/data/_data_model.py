@@ -97,7 +97,6 @@ class _DataNodeModel(_BaseModel):
             model.config_id,
             repr(model.scope),
             model.storage_type,
-            model.name,
             model.owner_id,
             json.dumps(model.parent_ids),
             model.last_edit_date,
