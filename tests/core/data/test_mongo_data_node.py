@@ -12,6 +12,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from unittest.mock import DEFAULT, patch
 
 import mongomock
 import pymongo
@@ -339,3 +340,23 @@ class TestMongoCollectionDataNode:
             {"bar": 2},
             {},
         ]
+
+        # MongoCollectionDataNode.filter() should not call the MongoCollectionDataNode._read() method to read all data
+        # but call the MongoCollectionDataNode._read_by() method instead
+        with patch.multiple(MongoCollectionDataNode, _read=DEFAULT, _read_by=DEFAULT) as read_mock:
+            mongo_dn.filter(("foo", 1, Operator.EQUAL))
+            assert read_mock["_read"].call_count == 0
+            assert read_mock["_read_by"].call_count == 1
+            read_mock["_read_by"].assert_called_with(("foo", 1, Operator.EQUAL), JoinOperator.AND)
+
+            mongo_dn.filter(("bar", 2, Operator.NOT_EQUAL))
+            assert read_mock["_read"].call_count == 0
+            assert read_mock["_read_by"].call_count == 2
+            read_mock["_read_by"].assert_called_with(("bar", 2, Operator.NOT_EQUAL), JoinOperator.AND)
+
+            mongo_dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
+            assert read_mock["_read"].call_count == 0
+            assert read_mock["_read_by"].call_count == 3
+            read_mock["_read_by"].assert_called_with(
+                [("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR
+            )

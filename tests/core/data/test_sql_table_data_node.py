@@ -39,7 +39,7 @@ class TestSQLTableDataNode:
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
-            "table_name": "foo",
+            "table_name": "example",
             "db_extra_args": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
@@ -51,7 +51,7 @@ class TestSQLTableDataNode:
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
-            "table_name": "foo",
+            "table_name": "example",
             "exposed_type": "modin",
             "db_extra_args": {
                 "TrustServerCertificate": "yes",
@@ -67,7 +67,7 @@ class TestSQLTableDataNode:
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
                 "db_engine": "mssql",
-                "table_name": "foo",
+                "table_name": "example",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
                 },
@@ -79,7 +79,7 @@ class TestSQLTableDataNode:
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
                 "db_engine": "mssql",
-                "table_name": "foo",
+                "table_name": "example",
                 "exposed_type": "modin",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
@@ -94,7 +94,7 @@ class TestSQLTableDataNode:
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
                 "db_engine": "mysql",
-                "table_name": "foo",
+                "table_name": "example",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
                 },
@@ -106,7 +106,7 @@ class TestSQLTableDataNode:
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
                 "db_engine": "mysql",
-                "table_name": "foo",
+                "table_name": "example",
                 "exposed_type": "modin",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
@@ -121,7 +121,7 @@ class TestSQLTableDataNode:
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
                 "db_engine": "postgresql",
-                "table_name": "foo",
+                "table_name": "example",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
                 },
@@ -133,7 +133,7 @@ class TestSQLTableDataNode:
                 "db_password": "Passw0rd",
                 "db_name": "taipy",
                 "db_engine": "postgresql",
-                "table_name": "foo",
+                "table_name": "example",
                 "exposed_type": "modin",
                 "db_extra_args": {
                     "TrustServerCertificate": "yes",
@@ -158,8 +158,8 @@ class TestSQLTableDataNode:
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.exposed_type == "pandas"
-        assert dn.table_name == "foo"
-        assert dn._get_read_query() == "SELECT * FROM foo"
+        assert dn.table_name == "example"
+        assert dn._get_base_read_query() == "SELECT * FROM example"
 
         dn = SQLTableDataNode(
             "foo_bar",
@@ -175,8 +175,8 @@ class TestSQLTableDataNode:
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.exposed_type == "modin"
-        assert dn.table_name == "foo"
-        assert dn._get_read_query() == "SELECT * FROM foo"
+        assert dn.table_name == "example"
+        assert dn._get_base_read_query() == "SELECT * FROM example"
 
     @pytest.mark.parametrize("properties", __pandas_properties)
     def test_get_user_properties(self, properties):
@@ -435,7 +435,7 @@ class TestSQLTableDataNode:
         folder_path, db_name, file_extension = tmp_sqlite_path
         properties = {
             "db_engine": "sqlite",
-            "table_name": "foo",
+            "table_name": "example",
             "db_name": db_name,
             "sqlite_folder_path": folder_path,
             "sqlite_file_extension": file_extension,
@@ -450,7 +450,7 @@ class TestSQLTableDataNode:
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {
             "db_engine": "sqlite",
-            "table_name": "foo",
+            "table_name": "example",
             "db_name": db_name,
             "sqlite_folder_path": folder_path,
             "sqlite_file_extension": file_extension,
@@ -462,34 +462,29 @@ class TestSQLTableDataNode:
                 [
                     {"foo": 1, "bar": 1},
                     {"foo": 1, "bar": 2},
-                    {"foo": 1},
+                    {"foo": 1, "bar": 3},
+                    {"foo": 2, "bar": 1},
                     {"foo": 2, "bar": 2},
-                    {"bar": 2},
+                    {"foo": 2, "bar": 3},
                 ]
             )
         )
 
         # Test datanode indexing and slicing
-        assert dn["foo"].equals(pd.Series([1, 1, 1, 2, None]))
-        assert dn["bar"].equals(pd.Series([1, 2, None, 2, 2]))
-        assert dn[:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+        assert dn["foo"].equals(pd.Series([1, 1, 1, 2, 2, 2]))
+        assert dn["bar"].equals(pd.Series([1, 2, 3, 1, 2, 3]))
+        assert dn[:2].equals(pd.DataFrame([{"foo": 1, "bar": 1}, {"foo": 1, "bar": 2}]))
 
         # Test filter data
         filtered_by_filter_method = dn.filter(("foo", 1, Operator.EQUAL))
         filtered_by_indexing = dn[dn["foo"] == 1]
-        expected_data = pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}, {"foo": 1.0}])
+        expected_data = pd.DataFrame([{"foo": 1, "bar": 1}, {"foo": 1, "bar": 2}, {"foo": 1, "bar": 3}])
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
         assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
 
         filtered_by_filter_method = dn.filter(("foo", 1, Operator.NOT_EQUAL))
         filtered_by_indexing = dn[dn["foo"] != 1]
-        expected_data = pd.DataFrame([{"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
-        assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-        filtered_by_filter_method = dn.filter(("bar", 2, Operator.EQUAL))
-        filtered_by_indexing = dn[dn["bar"] == 2]
-        expected_data = pd.DataFrame([{"foo": 1.0, "bar": 2.0}, {"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
+        expected_data = pd.DataFrame([{"foo": 2, "bar": 1}, {"foo": 2, "bar": 2}, {"foo": 2, "bar": 3}])
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
         assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
 
@@ -497,10 +492,10 @@ class TestSQLTableDataNode:
         filtered_by_indexing = dn[(dn["bar"] == 1) | (dn["bar"] == 2)]
         expected_data = pd.DataFrame(
             [
-                {"foo": 1.0, "bar": 1.0},
-                {"foo": 1.0, "bar": 2.0},
-                {"foo": 2.0, "bar": 2.0},
-                {"bar": 2.0},
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 2, "bar": 1},
+                {"foo": 2, "bar": 2},
             ]
         )
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
@@ -510,7 +505,7 @@ class TestSQLTableDataNode:
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {
             "db_engine": "sqlite",
-            "table_name": "foo",
+            "table_name": "example",
             "db_name": db_name,
             "sqlite_folder_path": folder_path,
             "sqlite_file_extension": file_extension,
@@ -522,34 +517,29 @@ class TestSQLTableDataNode:
                 [
                     {"foo": 1, "bar": 1},
                     {"foo": 1, "bar": 2},
-                    {"foo": 1},
+                    {"foo": 1, "bar": 3},
+                    {"foo": 2, "bar": 1},
                     {"foo": 2, "bar": 2},
-                    {"bar": 2},
+                    {"foo": 2, "bar": 3},
                 ]
             )
         )
 
         # Test datanode indexing and slicing
-        assert dn["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
-        assert dn["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
-        assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
+        assert dn["foo"].equals(pd.Series([1, 1, 1, 2, 2, 2]))
+        assert dn["bar"].equals(pd.Series([1, 2, 3, 1, 2, 3]))
+        assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1, "bar": 1}, {"foo": 1, "bar": 2}]))
 
         # Test filter data
         filtered_by_filter_method = dn.filter(("foo", 1, Operator.EQUAL))
         filtered_by_indexing = dn[dn["foo"] == 1]
-        expected_data = modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}, {"foo": 1.0}])
+        expected_data = modin_pd.DataFrame([{"foo": 1, "bar": 1}, {"foo": 1, "bar": 2}, {"foo": 1, "bar": 3}])
         df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
         df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
 
         filtered_by_filter_method = dn.filter(("foo", 1, Operator.NOT_EQUAL))
         filtered_by_indexing = dn[dn["foo"] != 1]
-        expected_data = modin_pd.DataFrame([{"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-        filtered_by_filter_method = dn.filter(("bar", 2, Operator.EQUAL))
-        filtered_by_indexing = dn[dn["bar"] == 2]
-        expected_data = modin_pd.DataFrame([{"foo": 1.0, "bar": 2.0}, {"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
+        expected_data = modin_pd.DataFrame([{"foo": 2, "bar": 1}, {"foo": 2, "bar": 2}, {"foo": 2, "bar": 3}])
         df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
         df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
 
@@ -557,10 +547,10 @@ class TestSQLTableDataNode:
         filtered_by_indexing = dn[(dn["bar"] == 1) | (dn["bar"] == 2)]
         expected_data = modin_pd.DataFrame(
             [
-                {"foo": 1.0, "bar": 1.0},
-                {"foo": 1.0, "bar": 2.0},
-                {"foo": 2.0, "bar": 2.0},
-                {"bar": 2.0},
+                {"foo": 1, "bar": 1},
+                {"foo": 1, "bar": 2},
+                {"foo": 2, "bar": 1},
+                {"foo": 2, "bar": 2},
             ]
         )
         df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
@@ -570,7 +560,7 @@ class TestSQLTableDataNode:
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {
             "db_engine": "sqlite",
-            "table_name": "foo",
+            "table_name": "example",
             "db_name": db_name,
             "sqlite_folder_path": folder_path,
             "sqlite_file_extension": file_extension,
@@ -598,17 +588,17 @@ class TestSQLTableDataNode:
         assert np.array_equal(dn[1:4, :1], np.array([[1], [1], [2]]))
 
         # Test filter data
-        assert np.array_equal(dn.filter((0, 1, Operator.EQUAL)), np.array([[1, 1], [1, 2], [1, 3]]))
+        assert np.array_equal(dn.filter(("foo", 1, Operator.EQUAL)), np.array([[1, 1], [1, 2], [1, 3]]))
         assert np.array_equal(dn[dn[:, 0] == 1], np.array([[1, 1], [1, 2], [1, 3]]))
 
-        assert np.array_equal(dn.filter((0, 1, Operator.NOT_EQUAL)), np.array([[2, 1], [2, 2], [2, 3]]))
+        assert np.array_equal(dn.filter(("foo", 1, Operator.NOT_EQUAL)), np.array([[2, 1], [2, 2], [2, 3]]))
         assert np.array_equal(dn[dn[:, 0] != 1], np.array([[2, 1], [2, 2], [2, 3]]))
 
-        assert np.array_equal(dn.filter((1, 2, Operator.EQUAL)), np.array([[1, 2], [2, 2]]))
+        assert np.array_equal(dn.filter(("bar", 2, Operator.EQUAL)), np.array([[1, 2], [2, 2]]))
         assert np.array_equal(dn[dn[:, 1] == 2], np.array([[1, 2], [2, 2]]))
 
         assert np.array_equal(
-            dn.filter([(1, 1, Operator.EQUAL), (1, 2, Operator.EQUAL)], JoinOperator.OR),
+            dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR),
             np.array([[1, 1], [1, 2], [2, 1], [2, 2]]),
         )
         assert np.array_equal(dn[(dn[:, 1] == 1) | (dn[:, 1] == 2)], np.array([[1, 1], [1, 2], [2, 1], [2, 2]]))
