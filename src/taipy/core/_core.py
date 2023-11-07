@@ -57,8 +57,9 @@ class Core:
         with self.__class__.__lock_is_running:
             self.__class__.__is_running = True
 
-        self.__update_and_check_config()
+        self.__update_core_section()
         self.__manage_version()
+        self.__check_and_block_config()
 
         if self._orchestrator is None:
             self._orchestrator = _OrchestratorFactory._build_orchestrator()
@@ -81,16 +82,22 @@ class Core:
             self.__class__.__is_running = False
 
     @staticmethod
-    def __update_and_check_config():
+    def __update_core_section():
         _CoreCLI.create_parser()
         Config._applied_config._unique_sections[CoreSection.name]._update(_CoreCLI.parse_arguments())
-        Config.check()
-        Config.block_update()
-        _init_backup_file_with_storage_folder()
 
     @staticmethod
     def __manage_version():
         _VersionManagerFactory._build_manager()._manage_version()
+        Config._applied_config._unique_sections[CoreSection.name]._update(
+            {"version_number": _VersionManagerFactory._build_manager()._get_latest_version()}
+        )
+
+    @staticmethod
+    def __check_and_block_config():
+        Config.check()
+        Config.block_update()
+        _init_backup_file_with_storage_folder()
 
     def __start_dispatcher(self, force_restart):
         if dispatcher := _OrchestratorFactory._build_dispatcher(force_restart=force_restart):

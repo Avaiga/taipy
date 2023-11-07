@@ -15,6 +15,7 @@ import pytest
 
 from src.taipy.core import Core
 from src.taipy.core._version._version_manager import _VersionManager
+from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core.common._utils import _load_fct
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data._data_manager import _DataManager
@@ -35,7 +36,7 @@ def test_core_cli_no_arguments():
         core = Core()
         core.run()
         assert Config.core.mode == "development"
-        assert Config.core.version_number == ""
+        assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
         assert not Config.core.force
         core.stop()
 
@@ -45,6 +46,7 @@ def test_core_cli_development_mode():
         core = Core()
         core.run()
         assert Config.core.mode == "development"
+        assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
         core.stop()
 
 
@@ -53,6 +55,7 @@ def test_core_cli_dev_mode():
         core = Core()
         core.run()
         assert Config.core.mode == "development"
+        assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
         core.stop()
 
 
@@ -61,7 +64,7 @@ def test_core_cli_experiment_mode():
         core = Core()
         core.run()
         assert Config.core.mode == "experiment"
-        assert Config.core.version_number == ""
+        assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_latest_version()
         assert not Config.core.force
         core.stop()
 
@@ -92,7 +95,7 @@ def test_core_cli_production_mode():
         core = Core()
         core.run()
         assert Config.core.mode == "production"
-        assert Config.core.version_number == ""
+        assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_latest_version()
         assert not Config.core.force
         core.stop()
 

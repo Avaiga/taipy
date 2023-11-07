@@ -12,6 +12,7 @@
 from unittest.mock import patch
 
 from src.taipy.core import Core
+from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.config import Config
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
@@ -21,7 +22,7 @@ def test_core_section():
         core = Core()
         core.run()
     assert Config.core.mode == "development"
-    assert Config.core.version_number == ""
+    assert Config.core.version_number == _VersionManagerFactory._build_manager()._get_development_version()
     assert not Config.core.force
     core.stop()
 
@@ -74,5 +75,6 @@ def test_clean_config():
 
     assert core_config.mode == "development"
     assert core_config.version_number == ""
+
     assert core_config.force is False
     assert core_config.properties == {}
