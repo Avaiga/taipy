@@ -81,10 +81,7 @@ class Submission(_Entity, _Labeled):
         job_manager = _JobManagerFactory._build_manager()
 
         for job in self._jobs:
-            if not isinstance(job, Job):
-                jobs.append(job_manager._get(job))
-            else:
-                jobs.append(job)
+            jobs.append(job_manager._get(job))
         return jobs
 
     @jobs.setter
@@ -118,7 +115,7 @@ class Submission(_Entity, _Labeled):
         completed = False
 
         for job in self.jobs:
-            # job = job_manager._get(id)
+            job = job_manager._get(job)
             if not job:
                 continue
             if job.is_failed():
