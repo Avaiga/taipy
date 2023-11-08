@@ -94,7 +94,6 @@ Gui(page=excitement_page).run()
 <div align="center"> ⚠️ Here, the back-end involves the execution of a very simple pipeline (made of a single task). Note that Taipy is designed to build much more complex pipelines 🚀 (with many tasks!) </div>
 
 <br>
-<br>
 
 *Here is our filter function: a standard Python function that is used by the unique task in the scenario*
 ```python
