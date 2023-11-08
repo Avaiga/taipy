@@ -2,3 +2,16 @@
 line-length = 120
 
 [tool.pyright]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+testpaths = [
+    "taipy-config",
+    "taipy-core",
+]
+pythonpath = [
+  ".",
+  "taipy-config/"
+]

@@ -1,0 +1,15 @@
+[submodule "taipy-core"]
+	path = taipy-core
+	url = git@github.com:Avaiga/taipy-core.git
+[submodule "taipy-gui"]
+	path = taipy-gui
+	url = git@github.com:Avaiga/taipy-gui.git
+[submodule "taipy-config"]
+	path = taipy-config
+	url = git@github.com:Avaiga/taipy-config.git
+[submodule "taipy-templates"]
+	path = taipy-templates
+	url = git@github.com:Avaiga/taipy-templates.git
+[submodule "taipy-rest"]
+	path = taipy-rest
+	url = git@github.com:Avaiga/taipy-rest.git
