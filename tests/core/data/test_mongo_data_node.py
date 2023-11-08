@@ -12,6 +12,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from unittest.mock import patch
 
 import mongomock
 import pymongo
@@ -339,3 +340,16 @@ class TestMongoCollectionDataNode:
             {"bar": 2},
             {},
         ]
+
+    @mongomock.patch(servers=(("localhost", 27017),))
+    @pytest.mark.parametrize("properties", __properties)
+    def test_filter_does_not_read_all_entities(self, properties):
+        mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
+
+        # MongoCollectionDataNode.filter() should not call the MongoCollectionDataNode._read() method
+        with patch.object(MongoCollectionDataNode, "_read") as read_mock:
+            mongo_dn.filter(("foo", 1, Operator.EQUAL))
+            mongo_dn.filter(("bar", 2, Operator.NOT_EQUAL))
+            mongo_dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
+
+            assert read_mock["_read"].call_count == 0

@@ -11,12 +11,13 @@
 
 from datetime import datetime, timedelta
 from inspect import isclass
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._mongo_connector import _connect_mongodb
+from ..data.operator import JoinOperator, Operator
 from ..exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -175,19 +176,49 @@ class MongoCollectionDataNode(DataNode):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    def _read(self):
-        cursor = self._read_by_query()
-
+    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        cursor = self._read_by_query(operators, join_operator)
         return list(map(lambda row: self._decoder(row), cursor))
 
-    def _read_by_query(self):
-        """Query from a Mongo collection, exclude the _id field"""
+    def _read(self):
+        cursor = self._read_by_query()
+        return list(map(lambda row: self._decoder(row), cursor))
 
-        return self.collection.find()
+    def _read_by_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        """Query from a Mongo collection, exclude the _id field"""
+        if not operators:
+            return self.collection.find()
+
+        if not isinstance(operators, List):
+            operators = [operators]
+
+        conditions = []
+        for key, value, operator in operators:
+            if operator == Operator.EQUAL:
+                conditions.append({key: value})
+            elif operator == Operator.NOT_EQUAL:
+                conditions.append({key: {"$ne": value}})
+            elif operator == Operator.GREATER_THAN:
+                conditions.append({key: {"$gt": value}})
+            elif operator == Operator.GREATER_OR_EQUAL:
+                conditions.append({key: {"$gte": value}})
+            elif operator == Operator.LESS_THAN:
+                conditions.append({key: {"$lt": value}})
+            elif operator == Operator.LESS_OR_EQUAL:
+                conditions.append({key: {"$lte": value}})
+
+        query = {}
+        if join_operator == JoinOperator.AND:
+            query = {"$and": conditions}
+        elif join_operator == JoinOperator.OR:
+            query = {"$or": conditions}
+        else:
+            raise NotImplementedError(f"Join operator {join_operator} is not supported.")
+
+        return self.collection.find(query)
 
     def _write(self, data) -> None:
         """Check data against a collection of types to handle insertion on the database."""
-
         if not isinstance(data, list):
             data = [data]
 

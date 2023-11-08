@@ -15,10 +15,7 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import modin.pandas as modin_pd
 import networkx as nx
-import numpy as np
-import pandas as pd
 
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope

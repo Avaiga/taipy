@@ -113,7 +113,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    def _get_read_query(self):
+    def _get_base_read_query(self) -> str:
         return f"SELECT * FROM {self.properties[self.__TABLE_KEY]}"
 
     def _do_write(self, data, engine, connection) -> None:
