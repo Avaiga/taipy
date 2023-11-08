@@ -106,11 +106,11 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 
 *This is the execution graph of the scenario we are implementing*
 
-<div align="center"><img src="readme_img/demo_exec_graph.png" alt="Demo Execution Graph"  width="40%"/></div>
+<div align="center"><img src="readme_img/execution_graph_readme.png" alt="Demo Execution Graph"  width="40%"/></div>
 
 
 ### Taipy Studio - The easy peasy way
-*You can use the Taipy Studio extension in VSCode to configure your sequence with no code*
+*You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code*
 
 <div align="center"><img src="readme_img/readme_demo_studio.gif" width="80%" alt="Demo Studio Gif"></img></div>
 
@@ -143,7 +143,7 @@ import taipy as tp
 import pandas as pd
 from taipy import Config, Scope, Gui
 
-# TAIPY Scenario & Data Management
+# Taipy Scenario & Data Management
 
 # Filtering function - task
 def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
@@ -162,7 +162,7 @@ tp.Core().run()
 scenario = tp.create_scenario(scenario_cfg)
 
 
-# TAIPY User Interface
+# Taipy User Interface
 # Let's add a GUI to our Scenario Management for a full application
 
 # Callback definition - submits scenario with genre selection
