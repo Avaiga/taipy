@@ -199,6 +199,15 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
 
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 
+    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
+            return self._read_as_modin_dataframe(operators=operators, join_operator=join_operator)
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy(operators=operators, join_operator=join_operator)
+        return self._read_as(operators=operators, join_operator=join_operator)
+
     def _read(self):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe()
@@ -207,15 +216,6 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy()
         return self._read_as()
-
-    def _read_by(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
-            return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
-            return self._read_as_modin_dataframe(operators=operators, join_operator=join_operator)
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
-            return self._read_as_numpy(operators=operators, join_operator=join_operator)
-        return self._read_as(operators=operators, join_operator=join_operator)
 
     def _read_as(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]

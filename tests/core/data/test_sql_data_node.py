@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from importlib import util
-from unittest import mock
+from unittest.mock import patch
 
 import modin.pandas as modin_pd
 import numpy as np
@@ -236,7 +236,7 @@ class TestSQLDataNode:
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert len(engine_mock.mock_calls[4].args) == 1
@@ -252,7 +252,7 @@ class TestSQLDataNode:
         custom_properties["write_query_builder"] = single_write_query_builder
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert len(engine_mock.mock_calls[4].args) == 1
@@ -261,7 +261,7 @@ class TestSQLDataNode:
         custom_properties = modin_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(modin_pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert len(engine_mock.mock_calls[4].args) == 1
@@ -277,7 +277,7 @@ class TestSQLDataNode:
         custom_properties["write_query_builder"] = single_write_query_builder
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(modin_pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert len(engine_mock.mock_calls[4].args) == 1
@@ -465,3 +465,24 @@ class TestSQLDataNode:
             np.array([[1, 1], [1, 2], [2, 1], [2, 2]]),
         )
         assert np.array_equal(dn[(dn[:, 1] == 1) | (dn[:, 1] == 2)], np.array([[1, 1], [1, 2], [2, 1], [2, 2]]))
+
+    def test_filter_does_not_read_all_entities(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "read_query": "SELECT * FROM example",
+            "write_query_builder": my_write_query_builder_with_pandas,
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+            "exposed_type": "numpy",
+        }
+        dn = SQLDataNode("foo", Scope.SCENARIO, properties=properties)
+
+        # SQLDataNode.filter() should not call the MongoCollectionDataNode._read() method
+        with patch.object(SQLDataNode, "_read") as read_mock:
+            dn.filter(("foo", 1, Operator.EQUAL))
+            dn.filter(("bar", 2, Operator.NOT_EQUAL))
+            dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
+
+            assert read_mock["_read"].call_count == 0

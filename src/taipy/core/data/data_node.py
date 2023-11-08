@@ -427,10 +427,8 @@ class DataNode(_Entity, _Labeled):
         Raises:
             NotImplementedError: If the data type is not supported.
         """
-        try:
-            return self._read_by(operators, join_operator)
-        except NotImplementedError:
-            return _FilterDataNode._filter(self._read(), operators, join_operator)
+        data = self._read()
+        return _FilterDataNode._filter(data, operators, join_operator)
 
     def __getitem__(self, item):
         data = self._read()
@@ -438,10 +436,6 @@ class DataNode(_Entity, _Labeled):
 
     @abstractmethod
     def _read(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def _read_by(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         raise NotImplementedError
 
     @abstractmethod

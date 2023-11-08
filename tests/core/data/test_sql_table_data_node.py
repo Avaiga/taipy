@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from importlib import util
-from unittest import mock
+from unittest.mock import patch
 
 import modin.pandas as modin_pd
 import numpy as np
@@ -204,10 +204,10 @@ class TestSQLTableDataNode:
         with pytest.raises(MissingRequiredProperty):
             SQLTableDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
-    @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as", return_value="custom")
-    @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
-    @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_modin_dataframe", return_value="modin")
-    @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_numpy", return_value="numpy")
+    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as", return_value="custom")
+    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
+    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_modin_dataframe", return_value="modin")
+    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_numpy", return_value="numpy")
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     @pytest.mark.parametrize("modin_properties", __modin_properties)
     def test_read(
@@ -254,7 +254,7 @@ class TestSQLTableDataNode:
         custom_properties["exposed_type"] = MyCustomObject
         sql_data_node = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.return_value = [
                 {"foo": "baz", "bar": "qux"},
@@ -290,7 +290,7 @@ class TestSQLTableDataNode:
         assert len(data[5].args) == 0
         assert len(data[5].kwargs) == 0
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.return_value = []
             data_2 = sql_data_node._read_as()
@@ -318,13 +318,13 @@ class TestSQLTableDataNode:
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ) as create_table_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with mock.patch(f"src.taipy.core.data.sql_table.SQLTableDataNode.{called_func}") as mck:
+            with patch(f"src.taipy.core.data.sql_table.SQLTableDataNode.{called_func}") as mck:
                 dn.write(data)
                 mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
 
@@ -345,13 +345,13 @@ class TestSQLTableDataNode:
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
+            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
                 dn.write(df)
                 assert mck.call_args[0][0].equals(df)
 
@@ -361,13 +361,13 @@ class TestSQLTableDataNode:
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         df = modin_pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
+            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
                 dn.write(df)
                 assert mck.call_args[0][0].equals(df)
 
@@ -384,18 +384,18 @@ class TestSQLTableDataNode:
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ) as create_table_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._delete_all_rows") as mck:
+            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._delete_all_rows") as mck:
                 dn.write(data)
                 mck.assert_called_once_with(create_table_mock.return_value, cursor_mock)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    @mock.patch("pandas.read_sql_query")
+    @patch("pandas.read_sql_query")
     def test_engine_cache(self, _, pandas_properties):
         dn = SQLTableDataNode(
             "foo",
@@ -405,7 +405,7 @@ class TestSQLTableDataNode:
 
         assert dn._engine is None
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+        with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
@@ -602,3 +602,23 @@ class TestSQLTableDataNode:
             np.array([[1, 1], [1, 2], [2, 1], [2, 2]]),
         )
         assert np.array_equal(dn[(dn[:, 1] == 1) | (dn[:, 1] == 2)], np.array([[1, 1], [1, 2], [2, 1], [2, 2]]))
+
+    def test_filter_does_not_read_all_entities(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "table_name": "example",
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+            "exposed_type": "numpy",
+        }
+        dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=properties)
+
+        # SQLTableDataNode.filter() should not call the MongoCollectionDataNode._read() method
+        with patch.object(SQLTableDataNode, "_read") as read_mock:
+            dn.filter(("foo", 1, Operator.EQUAL))
+            dn.filter(("bar", 2, Operator.NOT_EQUAL))
+            dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
+
+            assert read_mock["_read"].call_count == 0

@@ -176,12 +176,12 @@ class MongoCollectionDataNode(DataNode):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    def _read(self):
-        cursor = self._read_by_query()
+    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+        cursor = self._read_by_query(operators, join_operator)
         return list(map(lambda row: self._decoder(row), cursor))
 
-    def _read_by(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
-        cursor = self._read_by_query(operators, join_operator)
+    def _read(self):
+        cursor = self._read_by_query()
         return list(map(lambda row: self._decoder(row), cursor))
 
     def _read_by_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
