@@ -91,6 +91,7 @@ def _get_manager(manager: str):
     from ..job._job_manager_factory import _JobManagerFactory
     from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
     from ..sequence._sequence_manager_factory import _SequenceManagerFactory
+    from ..submission._submission_manager_factory import _SubmissionManagerFactory
     from ..task._task_manager_factory import _TaskManagerFactory
 
     return {
@@ -100,4 +101,5 @@ def _get_manager(manager: str):
         "cycle": _CycleManagerFactory._build_manager(),
         "job": _JobManagerFactory._build_manager(),
         "task": _TaskManagerFactory._build_manager(),
+        "submission": _SubmissionManagerFactory._build_manager(),
     }[manager]

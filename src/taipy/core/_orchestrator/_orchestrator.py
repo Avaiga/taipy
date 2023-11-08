@@ -25,6 +25,7 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..job.job_id import JobId
+from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task.task import Task
 from ._abstract_orchestrator import _AbstractOrchestrator
 
@@ -66,7 +67,9 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created Jobs.
         """
-        submit_id = cls.__generate_submit_id()
+        submission = _SubmissionManagerFactory._build_manager()._create(submittable.id, None)
+        submit_id = submission.id
+
         res = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
@@ -74,23 +77,27 @@ class _Orchestrator(_AbstractOrchestrator):
                 for task in ts:
                     res.append(
                         cls._submit_task(
-                            task, submit_id, submittable.id, callbacks=callbacks, force=force  # type: ignore
+                            task, submit_id, submission.entity_id, callbacks=callbacks, force=force  # type: ignore
                         )
                     )
 
+        submission.jobs = res
+        submission.update_submission_status()
+
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
+            submission.update_submission_status()
         else:
             if wait:
                 cls.__wait_until_job_finished(res, timeout=timeout)
+                submission.update_submission_status()
+
         return res
 
     @classmethod
     def submit_task(
         cls,
         task: Task,
-        submit_id: Optional[str] = None,
-        submit_entity_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,
@@ -110,28 +117,34 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created `Job^`.
         """
+        submission = _SubmissionManagerFactory._build_manager()._create(task.id, None)
+        submit_id = submission.id
+
         with cls.lock:
-            job = cls._submit_task(task, submit_id, submit_entity_id, callbacks, force)
+            job = cls._submit_task(task, submit_id, submission.entity_id, callbacks, force)
+
+        submission.jobs = [job]
+        submission.update_submission_status()
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
+            submission.update_submission_status()
         else:
             if wait:
                 cls.__wait_until_job_finished(job, timeout=timeout)
+                submission.update_submission_status()
+
         return job
 
     @classmethod
     def _submit_task(
         cls,
         task: Task,
-        submit_id: Optional[str] = None,
-        submit_entity_id: Optional[str] = None,
+        submit_id: str,
+        submit_entity_id: str,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
     ) -> Job:
-        submit_id = submit_id if submit_id else cls.__generate_submit_id()
-        submit_entity_id = submit_entity_id if submit_entity_id else task.id
-
         for dn in task.output.values():
             dn.lock_edit()
         job = _JobManagerFactory._build_manager()._create(

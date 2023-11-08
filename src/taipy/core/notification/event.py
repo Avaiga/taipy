@@ -35,7 +35,7 @@ class EventEntityType(_ReprEnum):
 
     `EventEntityType` is used as an attribute of the `Event^` object to describe
     an entity that was changed.<br>
-    The possible operations are `CYCLE`, `SCENARIO`, `SEQUENCE`, `TASK`, `DATA_NODE`, or `JOB`.
+    The possible operations are `CYCLE`, `SCENARIO`, `SEQUENCE`, `TASK`, `DATA_NODE`, `JOB` or `SUBMISSION`.
     """
 
     CYCLE = 1
@@ -44,6 +44,7 @@ class EventEntityType(_ReprEnum):
     TASK = 4
     DATA_NODE = 5
     JOB = 6
+    SUBMISSION = 7
 
 
 _NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION])
@@ -55,6 +56,7 @@ _ENTITY_TO_EVENT_ENTITY_TYPE = {
     "data": EventEntityType.DATA_NODE,
     "job": EventEntityType.JOB,
     "cycle": EventEntityType.CYCLE,
+    "submission": EventEntityType.SUBMISSION,
 }
 
 

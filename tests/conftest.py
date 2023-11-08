@@ -56,6 +56,8 @@ from src.taipy.core.scenario.scenario_id import ScenarioId
 from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
 from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.sequence.sequence_id import SequenceId
+from src.taipy.core.submission._submission_model import _SubmissionModel
+from src.taipy.core.submission.submission import Submission
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config import _inject_section
