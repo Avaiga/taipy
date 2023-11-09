@@ -117,6 +117,7 @@ class Job(_Entity, _Labeled):
     @_self_setter(_MANAGER_NAME)
     def status(self, val):
         self._status = val
+        # TODO: update_submission_entity_status()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

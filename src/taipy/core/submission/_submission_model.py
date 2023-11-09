@@ -30,12 +30,14 @@ class _SubmissionModel(_BaseModel):
         Column("job_ids", JSON),
         Column("creation_date", String),
         Column("submission_status", Enum(SubmissionStatus)),
+        Column("version", String),
     )
     id: str
     entity_id: str
     job_ids: List[str]
     creation_date: str
     submission_status: SubmissionStatus
+    version: str
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
@@ -45,6 +47,7 @@ class _SubmissionModel(_BaseModel):
             job_ids=_BaseModel._deserialize_attribute(data["job_ids"]),
             creation_date=data["creation_date"],
             submission_status=SubmissionStatus._from_repr(data["submission_status"]),
+            version=data["version"],
         )
     
     def to_list(self):

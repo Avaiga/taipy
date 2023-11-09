@@ -25,7 +25,6 @@ from ..config.task_config import TaskConfig
 from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
-from ..job.job import Job, JobId
 from ..notification import EventEntityType, EventOperation, _publish_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
@@ -39,6 +38,14 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
     _EVENT_ENTITY_TYPE = EventEntityType.SUBMISSION
 
     @classmethod
+    def _get_all(cls, version_number: Optional[str] = None) -> List[Submission]:
+        """
+        Returns all entities.
+        """
+        filters = cls._build_filters_with_version(version_number)
+        return cls._repository._load_all(filters)
+
+    @classmethod
     def _create(
         cls,
         entity_id: str,
@@ -49,3 +56,15 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         _publish_event(cls._EVENT_ENTITY_TYPE, submission.id, EventOperation.CREATION, None)
 
         return submission
+
+    @classmethod
+    def _get_latest(cls, submittable) -> Optional[Submission]:
+        # TODO: add get latest as api in tp
+        submittable_id = submittable.id if not isinstance(submittable, str) else submittable
+        submissions_of_task = list(filter(lambda submission: submission.entity_id == submittable_id, cls._get_all()))
+        if len(submissions_of_task) == 0:
+            return None
+        if len(submissions_of_task) == 1:
+            return submissions_of_task[0]
+        else:
+            return max(submissions_of_task)

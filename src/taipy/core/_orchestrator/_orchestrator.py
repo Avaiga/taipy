@@ -67,8 +67,7 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created Jobs.
         """
-        submission = _SubmissionManagerFactory._build_manager()._create(submittable.id, None)
-        submit_id = submission.id
+        submission = _SubmissionManagerFactory._build_manager()._create(submittable.id)
 
         res = []
         tasks = submittable._get_sorted_tasks()
@@ -77,11 +76,13 @@ class _Orchestrator(_AbstractOrchestrator):
                 for task in ts:
                     res.append(
                         cls._submit_task(
-                            task, submit_id, submission.entity_id, callbacks=callbacks, force=force  # type: ignore
+                            task, submission.id, submission.entity_id, callbacks=callbacks, force=force  # type: ignore
                         )
                     )
 
         submission.jobs = res
+
+        # TODO: orchestrate jobs after assigning it to a Submission entity
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
@@ -114,13 +115,15 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created `Job^`.
         """
-        submission = _SubmissionManagerFactory._build_manager()._create(task.id, None)
+        submission = _SubmissionManagerFactory._build_manager()._create(task.id)
         submit_id = submission.id
 
         with cls.lock:
             job = cls._submit_task(task, submit_id, submission.entity_id, callbacks, force)
 
         submission.jobs = [job]
+
+        # TODO: orchestrate jobs after assigning it to a Submission entity
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
@@ -131,7 +134,7 @@ class _Orchestrator(_AbstractOrchestrator):
         return job
 
     @classmethod
-    def _submit_task(
+    def _submit_task(  # TODO: rename to create job
         cls,
         task: Task,
         submit_id: str,
@@ -147,10 +150,6 @@ class _Orchestrator(_AbstractOrchestrator):
         cls._orchestrate_job_to_run_or_block(job)
 
         return job
-
-    @staticmethod
-    def __generate_submit_id():
-        return f"SUBMISSION_{str(uuid.uuid4())}"
 
     @classmethod
     def _orchestrate_job_to_run_or_block(cls, job: Job):

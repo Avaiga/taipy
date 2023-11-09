@@ -16,6 +16,7 @@ from typing import List, Optional, Union
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._reload import _self_reload, _self_setter
+from .._version._version_manager_factory import _VersionManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job, JobId
 from .submission_id import SubmissionId
@@ -52,12 +53,18 @@ class Submission(_Entity, _Labeled):
     def __init__(
         self,
         entity_id: str,
+        id: Optional[str] = None,
+        jobs: Optional[Union[List[Job], List[JobId]]] = None,
+        creation_date: Optional[datetime] = None,
+        submission_status: Optional[SubmissionStatus] = None,
+        version: Optional[str] = None,
     ):
-        self.id = self.__new_id()
         self._entity_id = entity_id
-        self._jobs = []
-        self._creation_date = datetime.now()
-        self._submission_status = SubmissionStatus.UNDEFINED
+        self.id = id or self.__new_id()
+        self._jobs = jobs or []
+        self._creation_date = creation_date or datetime.now()
+        self._submission_status = submission_status or SubmissionStatus.UNDEFINED
+        self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
     def __new_id() -> str:
@@ -104,9 +111,19 @@ class Submission(_Entity, _Labeled):
     def submission_status(self, submission_status):
         self._submission_status = submission_status
 
-    def update_submission_status(self):
-        job_manager = _JobManagerFactory._build_manager()
+    def __lt__(self, other):
+        return self.creation_date.timestamp() < other.creation_date.timestamp()
 
+    def __le__(self, other):
+        return self.creation_date.timestamp() == other.creation_date.timestamp() or self < other
+
+    def __gt__(self, other):
+        return self.creation_date.timestamp() > other.creation_date.timestamp()
+
+    def __ge__(self, other):
+        return self.creation_date.timestamp() == other.creation_date.timestamp() or self > other
+
+    def update_submission_status(self):
         submission_status = SubmissionStatus.UNDEFINED
         blocked = False
         pending = False
@@ -114,7 +131,6 @@ class Submission(_Entity, _Labeled):
         completed = False
 
         for job in self.jobs:
-            job = job_manager._get(job)
             if not job:
                 continue
             if job.is_failed():

@@ -27,15 +27,17 @@ class _SubmissionConverter(_AbstractConverter):
             job_ids=[job.id if isinstance(job, Job) else JobId(str(job)) for job in list(submission._jobs)],
             creation_date=submission._creation_date.isoformat(),
             submission_status=submission._submission_status,
+            version=submission._version,
         )
 
     @classmethod
     def _model_to_entity(cls, model: _SubmissionModel) -> Submission:
         submission = Submission(
             entity_id=model.entity_id,
+            id=SubmissionId(model.id),
+            jobs=model.job_ids,
+            creation_date=datetime.fromisoformat(model.creation_date),
+            submission_status=model.submission_status,
+            version=model.version,
         )
-        submission.id = SubmissionId(model.id)
-        submission._jobs = model.job_ids
-        submission._creation_date = datetime.fromisoformat(model.creation_date)
-        submission._submission_status = model.submission_status
         return submission

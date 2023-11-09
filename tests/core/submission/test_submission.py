@@ -24,15 +24,26 @@ from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 
 
-def test_create_submission(scenario):
-    _ScenarioManagerFactory._build_manager()._set(scenario)
-    submission = _SubmissionManagerFactory._build_manager()._create(scenario.id)
+def test_create_submission(scenario, job, current_datetime):
+    submission_1 = Submission(scenario.id)
 
-    assert submission.id is not None
-    assert submission.entity_id == scenario.id
-    assert submission.jobs == []
-    assert isinstance(submission.creation_date, datetime)
-    assert submission._submission_status == SubmissionStatus.UNDEFINED
+    assert submission_1.id is not None
+    assert submission_1.entity_id == scenario.id
+    assert submission_1.jobs == []
+    assert isinstance(submission_1.creation_date, datetime)
+    assert submission_1._submission_status == SubmissionStatus.UNDEFINED
+    assert submission_1._version is not None
+
+    submission_2 = Submission(
+        scenario.id, "submission_id", [job], current_datetime, SubmissionStatus.COMPLETED, "version_id"
+    )
+
+    assert submission_2.id == "submission_id"
+    assert submission_2.entity_id == scenario.id
+    assert submission_2._jobs == [job]
+    assert submission_2.creation_date == current_datetime
+    assert submission_2._submission_status == SubmissionStatus.COMPLETED
+    assert submission_2._version == "version_id"
 
 
 def test_update_submission_status():

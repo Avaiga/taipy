@@ -124,58 +124,46 @@ class TestSubmissionRepository:
 
         assert len(submission_repository._load_all()) == 7
 
-    # @pytest.mark.parametrize("configure_repo", [configure_fs_repo, configure_sql_repo])
-    # def test_delete_by(self, data_node, job, configure_repo):
-    #     configure_repo()
+    @pytest.mark.parametrize("configure_repo", [configure_fs_repo, configure_sql_repo])
+    def test_delete_by(self, configure_repo):
+        configure_repo()
 
-    #     _DataManagerFactory._build_manager()._repository._save(data_node)
-    #     task = Task("task_config_id", {}, print, [data_node], [data_node])
-    #     _TaskManagerFactory._build_manager()._repository._save(task)
-    #     job._task = task
-    #     _JobManagerFactory._build_manager()._repository._save(job)
+        # Create 5 entities with version 1.0 and 5 entities with version 2.0
+        submission_repository = _SubmissionManagerFactory._build_manager()._repository
+        submission = Submission("entity_id")
 
-    #     # Create 5 entities with version 1.0 and 5 entities with version 2.0
-    #     submission_repository = _SubmissionManagerFactory._build_manager()._repository
-    #     submission = Submission(task.id, [job])
+        for i in range(10):
+            submission.id = f"submission-{i}"
+            submission._version = f"{(i+1) // 5}.0"
+            submission_repository._save(submission)
 
-    #     for i in range(10):
-    #         submission.id = f"submission-{i}"
-    #         submission._version = f"{(i+1) // 5}.0"
-    #         submission_repository._save(submission)
+        objs = submission_repository._load_all()
+        assert len(objs) == 10
+        submission_repository._delete_by("version", "1.0")
 
-    #     objs = submission_repository._load_all()
-    #     assert len(objs) == 10
-    #     submission_repository._delete_by("version", "1.0")
+        assert len(submission_repository._load_all()) == 5
 
-    #     assert len(submission_repository._load_all()) == 5
+    @pytest.mark.parametrize("configure_repo", [configure_fs_repo, configure_sql_repo])
+    def test_search(self, configure_repo):
+        configure_repo()
 
-    # @pytest.mark.parametrize("configure_repo", [configure_fs_repo, configure_sql_repo])
-    # def test_search(self, data_node, job, configure_repo):
-    #     configure_repo()
+        submission_repository = _SubmissionManagerFactory._build_manager()._repository
+        submission = Submission("entity_id", version="random_version_number")
+        for i in range(10):
+            submission.id = f"submission-{i}"
+            submission_repository._save(submission)
 
-    #     _DataManagerFactory._build_manager()._repository._save(data_node)
-    #     task = Task("task_config_id", {}, print, [data_node], [data_node])
-    #     _TaskManagerFactory._build_manager()._repository._save(task)
-    #     job._task = task
-    #     _JobManagerFactory._build_manager()._repository._save(job)
+        assert len(submission_repository._load_all()) == 10
 
-    #     submission_repository = _SubmissionManagerFactory._build_manager()._repository
-    #     submission = Submission(task.id, [job])
-    #     for _ in range(10):
-    #         submission.id = "submission-{i}"
-    #         submission_repository._save(submission)
+        objs = submission_repository._search("id", "submission-2")
+        assert len(objs) == 1
+        assert isinstance(objs[0], Submission)
 
-    #     assert len(submission_repository._load_all()) == 10
+        objs = submission_repository._search("id", "submission-2", filters=[{"version": "random_version_number"}])
+        assert len(objs) == 1
+        assert isinstance(objs[0], Submission)
 
-    #     objs = submission_repository._search("id", "submission-2")
-    #     assert len(objs) == 1
-    #     assert isinstance(objs[0], Submission)
-
-    #     objs = submission_repository._search("id", "submission-2", filters=[{"version": "random_version_number"}])
-    #     assert len(objs) == 1
-    #     assert isinstance(objs[0], Submission)
-
-    #     assert submission_repository._search("id", "submission-2", filters=[{"version": "non_existed_version"}]) == []
+        assert submission_repository._search("id", "submission-2", filters=[{"version": "non_existed_version"}]) == []
 
     @pytest.mark.parametrize("configure_repo", [configure_fs_repo, configure_sql_repo])
     def test_export(self, tmpdir, configure_repo):
