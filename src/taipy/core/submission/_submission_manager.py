@@ -42,9 +42,10 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
     def _create(
         cls,
         entity_id: str,
-        jobs: Union[List[Job], List[JobId]] = None,
     ) -> Submission:
-        submission = Submission(entity_id=entity_id, jobs=jobs)
+        submission = Submission(entity_id=entity_id)
         cls._set(submission)
+
+        _publish_event(cls._EVENT_ENTITY_TYPE, submission.id, EventOperation.CREATION, None)
 
         return submission

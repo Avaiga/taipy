@@ -82,15 +82,12 @@ class _Orchestrator(_AbstractOrchestrator):
                     )
 
         submission.jobs = res
-        submission.update_submission_status()
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
-            submission.update_submission_status()
         else:
             if wait:
                 cls.__wait_until_job_finished(res, timeout=timeout)
-                submission.update_submission_status()
 
         return res
 
@@ -124,15 +121,12 @@ class _Orchestrator(_AbstractOrchestrator):
             job = cls._submit_task(task, submit_id, submission.entity_id, callbacks, force)
 
         submission.jobs = [job]
-        submission.update_submission_status()
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
-            submission.update_submission_status()
         else:
             if wait:
                 cls.__wait_until_job_finished(job, timeout=timeout)
-                submission.update_submission_status()
 
         return job
 

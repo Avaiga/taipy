@@ -33,9 +33,9 @@ class _SubmissionConverter(_AbstractConverter):
     def _model_to_entity(cls, model: _SubmissionModel) -> Submission:
         submission = Submission(
             entity_id=model.entity_id,
-            jobs=model.job_ids,
-            submission_id=SubmissionId(model.id),
         )
+        submission.id = SubmissionId(model.id)
+        submission._jobs = model.job_ids
         submission._creation_date = datetime.fromisoformat(model.creation_date)
         submission._submission_status = model.submission_status
         return submission

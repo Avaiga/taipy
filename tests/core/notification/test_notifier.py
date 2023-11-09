@@ -594,10 +594,22 @@ def test_publish_event():
     while registration_queue.qsize() != 0:
         published_events.append(registration_queue.get())
 
-    expected_operations = [EventOperation.CREATION, EventOperation.UPDATE, EventOperation.SUBMISSION]
-    expected_attribute_names = [None, "status", None]
-    expected_event_types = [EventEntityType.JOB, EventEntityType.JOB, EventEntityType.SCENARIO]
-    expected_event_entity_id = [job.id, job.id, scenario.id]
+    expected_operations = [
+        EventOperation.CREATION,
+        EventOperation.CREATION,
+        EventOperation.UPDATE,
+        EventOperation.UPDATE,
+        EventOperation.SUBMISSION,
+    ]
+    expected_attribute_names = [None, None, "status", "jobs", None]
+    expected_event_types = [
+        EventEntityType.SUBMISSION,
+        EventEntityType.JOB,
+        EventEntityType.JOB,
+        EventEntityType.SUBMISSION,
+        EventEntityType.SCENARIO,
+    ]
+    expected_event_entity_id = [job.submit_id, job.id, job.id, job.submit_id, scenario.id]
 
     assert all(
         [

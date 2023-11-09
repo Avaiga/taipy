@@ -52,12 +52,10 @@ class Submission(_Entity, _Labeled):
     def __init__(
         self,
         entity_id: str,
-        jobs: Optional[Union[List[JobId], List[Job]]] = None,
-        submission_id: Optional[str] = None,
     ):
-        self.id = submission_id or self.__new_id()
+        self.id = self.__new_id()
         self._entity_id = entity_id
-        self._jobs = jobs or []
+        self._jobs = []
         self._creation_date = datetime.now()
         self._submission_status = SubmissionStatus.UNDEFINED
 
@@ -82,6 +80,7 @@ class Submission(_Entity, _Labeled):
 
         for job in self._jobs:
             jobs.append(job_manager._get(job))
+
         return jobs
 
     @jobs.setter
