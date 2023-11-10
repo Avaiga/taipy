@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -64,14 +63,6 @@ class _DataNodeModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        dn_properties = data["data_node_properties"]
-        if isinstance(dn_properties, str):
-            dn_properties = json.loads(dn_properties.replace("'", '"'))
-
-        edits = data["edits"]
-        if isinstance(edits, str):
-            edits = json.loads(edits.replace("'", '"'))
-
         return _DataNodeModel(
             id=data["id"],
             config_id=data["config_id"],
@@ -80,14 +71,14 @@ class _DataNodeModel(_BaseModel):
             owner_id=data.get("owner_id"),
             parent_ids=data.get("parent_ids", []),
             last_edit_date=data.get("last_edit_date"),
-            edits=edits,
+            edits=_BaseModel._deserialize_attribute(data["edits"]),
             version=data["version"],
             validity_days=data["validity_days"],
             validity_seconds=data["validity_seconds"],
             edit_in_progress=bool(data.get("edit_in_progress", False)),
             editor_id=data.get("editor_id", None),
             editor_expiration_date=data.get("editor_expiration_date"),
-            data_node_properties=dn_properties,
+            data_node_properties=_BaseModel._deserialize_attribute(data["data_node_properties"]),
         )
 
     @staticmethod
@@ -98,14 +89,14 @@ class _DataNodeModel(_BaseModel):
             repr(model.scope),
             model.storage_type,
             model.owner_id,
-            json.dumps(model.parent_ids),
+            _BaseModel._serialize_attribute(model.parent_ids),
             model.last_edit_date,
-            json.dumps(model.edits),
+            _BaseModel._serialize_attribute(model.edits),
             model.version,
             model.validity_days,
             model.validity_seconds,
             model.edit_in_progress,
             model.editor_id,
             model.editor_expiration_date,
-            json.dumps(model.data_node_properties),
+            _BaseModel._serialize_attribute(model.data_node_properties),
         ]

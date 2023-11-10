@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -57,42 +56,18 @@ class _ScenarioModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        tasks = data.get("tasks", None)
-        if isinstance(tasks, str):
-            tasks = json.loads(tasks.replace("'", '"'))
-
-        additional_data_nodes = data.get("additional_data_nodes", None)
-        if isinstance(additional_data_nodes, str):
-            additional_data_nodes = json.loads(additional_data_nodes.replace("'", '"'))
-
-        properties = data["properties"]
-        if isinstance(properties, str):
-            properties = json.loads(properties.replace("'", '"'))
-
-        subscribers = data["subscribers"]
-        if isinstance(subscribers, str):
-            subscribers = json.loads(subscribers.replace("'", '"'))
-
-        tags = data["tags"]
-        if isinstance(tags, str):
-            tags = json.loads(tags.replace("'", '"'))
-
-        sequences = data.get("sequences", None)
-        if isinstance(sequences, str):
-            sequences = json.loads(sequences.replace("'", '"'))
-
         return _ScenarioModel(
             id=data["id"],
             config_id=data["config_id"],
-            tasks=tasks,
-            additional_data_nodes=additional_data_nodes,
-            properties=properties,
+            tasks=_BaseModel._deserialize_attribute(data["tasks"]),
+            additional_data_nodes=_BaseModel._deserialize_attribute(data["additional_data_nodes"]),
+            properties=_BaseModel._deserialize_attribute(data["properties"]),
             creation_date=data["creation_date"],
             primary_scenario=data["primary_scenario"],
-            subscribers=subscribers,
-            tags=tags,
+            subscribers=_BaseModel._deserialize_attribute(data["subscribers"]),
+            tags=_BaseModel._deserialize_attribute(data["tags"]),
             version=data["version"],
-            sequences=sequences,
+            sequences=_BaseModel._deserialize_attribute(data["sequences"]),
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )
 
@@ -101,14 +76,14 @@ class _ScenarioModel(_BaseModel):
         return [
             model.id,
             model.config_id,
-            json.dumps(model.tasks),
-            json.dumps(model.additional_data_nodes),
-            json.dumps(model.properties),
+            _BaseModel._serialize_attribute(model.tasks),
+            _BaseModel._serialize_attribute(model.additional_data_nodes),
+            _BaseModel._serialize_attribute(model.properties),
             model.creation_date,
             model.primary_scenario,
-            json.dumps(model.subscribers),
-            json.dumps(model.tags),
+            _BaseModel._serialize_attribute(model.subscribers),
+            _BaseModel._serialize_attribute(model.tags),
             model.version,
-            json.dumps(model.sequences),
+            _BaseModel._serialize_attribute(model.sequences),
             model.cycle,
         ]

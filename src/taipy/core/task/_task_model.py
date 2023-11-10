@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -51,34 +50,18 @@ class _TaskModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        parent_ids = data.get("parent_ids", [])
-        if isinstance(parent_ids, str):
-            parent_ids = json.loads(parent_ids.replace("'", '"'))
-
-        input_ids = data["input_ids"]
-        if isinstance(input_ids, str):
-            input_ids = json.loads(input_ids.replace("'", '"'))
-
-        output_ids = data["output_ids"]
-        if isinstance(output_ids, str):
-            output_ids = json.loads(output_ids.replace("'", '"'))
-
-        properties = data["properties"] if "properties" in data.keys() else {}
-        if isinstance(properties, str):
-            properties = json.loads(properties.replace("'", '"'))
-
         return _TaskModel(
             id=data["id"],
             owner_id=data.get("owner_id"),
-            parent_ids=parent_ids,
+            parent_ids=_BaseModel._deserialize_attribute(data.get("parent_ids", [])),
             config_id=data["config_id"],
-            input_ids=input_ids,
+            input_ids=_BaseModel._deserialize_attribute(data["input_ids"]),
             function_name=data["function_name"],
             function_module=data["function_module"],
-            output_ids=output_ids,
+            output_ids=_BaseModel._deserialize_attribute(data["output_ids"]),
             version=data["version"],
             skippable=data["skippable"],
-            properties=properties,
+            properties=_BaseModel._deserialize_attribute(data["properties"] if "properties" in data.keys() else {}),
         )
 
     @staticmethod
@@ -86,13 +69,13 @@ class _TaskModel(_BaseModel):
         return [
             model.id,
             model.owner_id,
-            json.dumps(model.parent_ids),
+            _BaseModel._serialize_attribute(model.parent_ids),
             model.config_id,
-            json.dumps(model.input_ids),
+            _BaseModel._serialize_attribute(model.input_ids),
             model.function_name,
             model.function_module,
-            json.dumps(model.output_ids),
+            _BaseModel._serialize_attribute(model.output_ids),
             model.version,
             model.skippable,
-            json.dumps(model.properties),
+            _BaseModel._serialize_attribute(model.properties),
         ]

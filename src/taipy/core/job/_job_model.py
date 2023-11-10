@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-import json
+
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
@@ -50,14 +50,6 @@ class _JobModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        subscribers = data["subscribers"]
-        if isinstance(subscribers, str):
-            subscribers = json.loads(subscribers.replace("'", '"'))
-
-        stacktrace = data["stacktrace"]
-        if isinstance(stacktrace, str):
-            stacktrace = json.loads(stacktrace.replace("'", '"'))
-
         return _JobModel(
             id=data["id"],
             task_id=data["task_id"],
@@ -66,8 +58,8 @@ class _JobModel(_BaseModel):
             submit_id=data["submit_id"],
             submit_entity_id=data["submit_entity_id"],
             creation_date=data["creation_date"],
-            subscribers=subscribers,
-            stacktrace=stacktrace,
+            subscribers=_BaseModel._deserialize_attribute(data["subscribers"]),
+            stacktrace=data["stacktrace"],
             version=data["version"],
         )
 
@@ -81,7 +73,7 @@ class _JobModel(_BaseModel):
             model.submit_id,
             model.submit_entity_id,
             model.creation_date,
-            json.dumps(model.subscribers),
-            json.dumps(model.stacktrace),
+            _BaseModel._serialize_attribute(model.subscribers),
+            _BaseModel._serialize_attribute(model.stacktrace),
             model.version,
         ]
