@@ -14,7 +14,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from sqlalchemy import Column, String, Table, create_engine
+from sqlalchemy import Column, String, Table
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.orm import declarative_base, registry
 from sqlalchemy.schema import CreateTable

@@ -17,7 +17,7 @@ from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...data._data_manager_factory import _DataManagerFactory
-from ...exceptions.exceptions import ModelNotFound, VersionIsNotProductionVersion
+from ...exceptions.exceptions import VersionIsNotProductionVersion
 from ...job._job_manager_factory import _JobManagerFactory
 from ...scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ...sequence._sequence_manager_factory import _SequenceManagerFactory
