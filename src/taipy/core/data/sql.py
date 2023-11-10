@@ -138,8 +138,8 @@ class SQLDataNode(_AbstractSQLDataNode):
         queries = self.properties.get(self._WRITE_QUERY_BUILDER_KEY)(data)
         self.__execute_queries(queries, connection)
 
-    def __execute_queries(self, queries: List[str], connection) -> None:
-        if not isinstance(queries, list):
+    def __execute_queries(self, queries, connection) -> None:
+        if not isinstance(queries, List):
             queries = [queries]
         for query in queries:
             if isinstance(query, str):
