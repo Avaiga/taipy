@@ -301,6 +301,50 @@ class TestParquetDataNode:
         os.unlink(temp_file_path)
 
     @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+        ],
+    )
+    def test_append_pandas(self, parquet_file_path, default_data_frame, content):
+        # !!! append data only works with `fastparquet`
+        if not util.find_spec("fastparquet"):
+            pass
+
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path})
+        assert_frame_equal(dn.read(), default_data_frame)
+
+        dn.append(content)
+        assert_frame_equal(
+            dn.read(),
+            pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
+        )
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+        ],
+    )
+    def test_append_modin(self, parquet_file_path, default_data_frame, content):
+        # !!! append data only works with `fastparquet`
+        if not util.find_spec("fastparquet"):
+            pass
+
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "modin"})
+        df_equals(dn.read(), modin_pd.DataFrame(default_data_frame))
+
+        dn.append(content)
+        df_equals(
+            dn.read(),
+            modin_pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(
+                drop=True
+            ),
+        )
+
+    @pytest.mark.parametrize(
         "data",
         [
             [{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}],

@@ -227,6 +227,9 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
     def _read_as_modin_dataframe(self, read_kwargs: Dict) -> modin_pd.DataFrame:
         return modin_pd.read_parquet(self._path, **read_kwargs)
 
+    def _append(self, data: Any):
+        self.write_with_kwargs(data, engine="fastparquet", append=True)
+
     def _write(self, data: Any):
         self.write_with_kwargs(data)
 
