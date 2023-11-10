@@ -44,6 +44,16 @@ def my_write_query_builder_with_modin(data: modin_pd.DataFrame):
     return ["DELETE FROM example", ("INSERT INTO example VALUES (:foo, :bar)", insert_data)]
 
 
+def my_append_query_builder_with_pandas(data: pd.DataFrame):
+    insert_data = data.to_dict("records")
+    return [("INSERT INTO example VALUES (:foo, :bar)", insert_data)]
+
+
+def my_append_query_builder_with_modin(data: modin_pd.DataFrame):
+    insert_data = data.to_dict("records")
+    return [("INSERT INTO example VALUES (:foo, :bar)", insert_data)]
+
+
 def single_write_query_builder(data):
     return "DELETE FROM example"
 
@@ -305,6 +315,49 @@ class TestSQLDataNode:
         dn = SQLDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
         data = dn.read()
         assert data.equals(pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]))
+
+    def test_sqlite_append_pandas(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "read_query": "SELECT * FROM example",
+            "write_query_builder": my_write_query_builder_with_pandas,
+            "append_query_builder": my_append_query_builder_with_pandas,
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+        }
+
+        dn = SQLDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
+        original_data = pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}])
+        data = dn.read()
+        assert_frame_equal(data, original_data)
+
+        append_data_1 = pd.DataFrame([{"foo": 5, "bar": 6}, {"foo": 7, "bar": 8}])
+        dn.append(append_data_1)
+        assert_frame_equal(dn.read(), pd.concat([original_data, append_data_1]).reset_index(drop=True))
+
+    def test_sqlite_append_modin(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "read_query": "SELECT * FROM example",
+            "write_query_builder": my_write_query_builder_with_pandas,
+            "append_query_builder": my_append_query_builder_with_pandas,
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+            "exposed_type": "modin",
+        }
+
+        dn = SQLDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
+        original_data = modin_pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}])
+        data = dn.read()
+        df_equals(data, original_data)
+
+        append_data_1 = modin_pd.DataFrame([{"foo": 5, "bar": 6}, {"foo": 7, "bar": 8}])
+        dn.append(append_data_1)
+        df_equals(dn.read(), modin_pd.concat([original_data, append_data_1]).reset_index(drop=True))
 
     def test_filter_pandas_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path

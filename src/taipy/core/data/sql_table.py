@@ -116,17 +116,8 @@ class SQLTableDataNode(_AbstractSQLDataNode):
     def _get_base_read_query(self) -> str:
         return f"SELECT * FROM {self.properties[self.__TABLE_KEY]}"
 
-    def _append(self, data) -> None:
-        engine = self._get_engine()
-        with engine.connect() as connection:
-            with connection.begin() as transaction:
-                try:
-                    self.__insert_data(data, engine, connection)
-                except Exception as e:
-                    transaction.rollback()
-                    raise e
-                else:
-                    transaction.commit()
+    def _do_append(self, data, engine, connection) -> None:
+        self.__insert_data(data, engine, connection)
 
     def _do_write(self, data, engine, connection) -> None:
         self.__insert_data(data, engine, connection, delete_table=True)

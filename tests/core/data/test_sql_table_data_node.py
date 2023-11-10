@@ -465,6 +465,26 @@ class TestSQLTableDataNode:
         dn.append(append_data_1)
         assert_frame_equal(dn.read(), pd.concat([original_data, append_data_1]).reset_index(drop=True))
 
+    def test_sqlite_append_modin(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "table_name": "example",
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+            "exposed_type": "modin",
+        }
+
+        dn = SQLTableDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
+        original_data = modin_pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}])
+        data = dn.read()
+        df_equals(data, original_data)
+
+        append_data_1 = modin_pd.DataFrame([{"foo": 5, "bar": 6}, {"foo": 7, "bar": 8}])
+        dn.append(append_data_1)
+        df_equals(dn.read(), modin_pd.concat([original_data, append_data_1]).reset_index(drop=True))
+
     def test_filter_pandas_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {

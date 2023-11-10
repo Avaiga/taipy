@@ -164,6 +164,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             ],
             DataNodeConfig._STORAGE_TYPE_VALUE_SQL: [
                 DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
+                DataNodeConfig._OPTIONAL_APPEND_QUERY_BUILDER_SQL_PROPERTY,
             ],
         }
 

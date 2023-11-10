@@ -289,6 +289,22 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
     def _get_base_read_query(self) -> str:
         raise NotImplementedError
 
+    def _append(self, data) -> None:
+        engine = self._get_engine()
+        with engine.connect() as connection:
+            with connection.begin() as transaction:
+                try:
+                    self._do_append(data, engine, connection)
+                except Exception as e:
+                    transaction.rollback()
+                    raise e
+                else:
+                    transaction.commit()
+
+    @abstractmethod
+    def _do_append(self, data, engine, connection) -> None:
+        raise NotImplementedError
+
     def _write(self, data) -> None:
         """Check data against a collection of types to handle insertion on the database."""
         engine = self._get_engine()

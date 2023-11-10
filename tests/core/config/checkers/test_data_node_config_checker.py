@@ -440,16 +440,22 @@ class TestDataNodeConfigChecker:
             "db_engine": "foo",
             "read_query": "foo",
             "write_query_builder": 1,
+            "append_query_builder": 2,
         }
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 1
-        expected_error_message = (
+        assert len(Config._collector.errors) == 2
+        expected_error_message_1 = (
             "`write_query_builder` of DataNodeConfig `new` must be populated with a Callable function."
             " Current value of property `write_query_builder` is 1."
         )
-        assert expected_error_message in caplog.text
+        assert expected_error_message_1 in caplog.text
+        expected_error_message_2 = (
+            "`append_query_builder` of DataNodeConfig `new` must be populated with a Callable function."
+            " Current value of property `append_query_builder` is 2."
+        )
+        assert expected_error_message_2 in caplog.text
 
         config._sections[DataNodeConfig.name]["new"].storage_type = "generic"
         config._sections[DataNodeConfig.name]["new"].properties = {"write_fct": 12}
