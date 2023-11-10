@@ -45,32 +45,25 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     ###############################
     def _save(self, entity: Entity):
         obj = self.converter._entity_to_model(entity)
-        if self._exists(entity.id):
+        if self._exists(entity.id):  # type: ignore
             self._update_entry(obj)
             return
         self.__insert_model(obj)
 
     def _exists(self, entity_id: str):
-        return bool(
-            self.db.execute(str(self.model_type.__table__.select().filter_by(id=entity_id)), [entity_id]).fetchone()
-        )
+        query = self.model_type.__table__.select().filter_by(id=entity_id)  # type: ignore
+        return bool(self.db.execute(str(query), [entity_id]).fetchone())
 
     def _load(self, entity_id: str) -> Entity:
-        get_query = str(self.model_type.__table__.select().filter_by(id=entity_id).compile(dialect=sqlite.dialect()))
+        query = self.model_type.__table__.select().filter_by(id=entity_id)  # type: ignore
 
-        if entry := self.db.execute(str(get_query), [entity_id]).fetchone():  # type: ignore
-            entry = self.model_type.from_dict(entry)
+        if entry := self.db.execute(str(query.compile(dialect=sqlite.dialect())), [entity_id]).fetchone():
+            entry = self.model_type.from_dict(entry)  # type: ignore
             return self.converter._model_to_entity(entry)
         raise ModelNotFound(str(self.model_type.__name__), entity_id)
 
-    @staticmethod
-    def serialize_filter_values(value):
-        if isinstance(value, (dict, list)):
-            return json.dumps(value).replace('"', "'")
-        return value
-
     def _load_all(self, filters: Optional[List[Dict]] = None) -> List[Entity]:
-        query = self.model_type.__table__.select()
+        query = self.model_type.__table__.select()  # type: ignore
         entities: List[Entity] = []
 
         for f in filters or [{}]:
@@ -78,17 +71,19 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             try:
                 entries = self.db.execute(
                     str(filtered_query.compile(dialect=sqlite.dialect())),
-                    [self.serialize_filter_values(val) for val in list(f.values())],
+                    [self.__serialize_filter_values(val) for val in list(f.values())],
                 ).fetchall()
 
-                entities.extend([self.converter._model_to_entity(self.model_type.from_dict(m)) for m in entries])
+                entities.extend(
+                    [self.converter._model_to_entity(self.model_type.from_dict(m)) for m in entries]  # type: ignore
+                )
             except NoResultFound:
                 continue
         return entities
 
     def _delete(self, entity_id: str):
-        delete_query = self.model_type.__table__.delete().filter_by(id=entity_id).compile(dialect=sqlite.dialect())
-        cursor = self.db.execute(str(delete_query), [entity_id])
+        delete_query = self.model_type.__table__.delete().filter_by(id=entity_id)  # type: ignore
+        cursor = self.db.execute(str(delete_query.compile(dialect=sqlite.dialect())), [entity_id])
         self.db.commit()
 
         if cursor.rowcount == 0:
@@ -98,7 +93,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             raise ModelNotFound(str(self.model_type.__name__), entity_id)
 
     def _delete_all(self):
-        self.db.execute(str(self.model_type.__table__.delete().compile(dialect=sqlite.dialect())))
+        self.db.execute(str(self.model_type.__table__.delete().compile(dialect=sqlite.dialect())))  # type: ignore
         self.db.commit()
 
     def _delete_many(self, ids: Iterable[str]):
@@ -106,22 +101,23 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             self._delete(entity_id)
 
     def _delete_by(self, attribute: str, value: str):
-        delete_by_query = (
-            self.model_type.__table__.delete().filter_by(**{attribute: value}).compile(dialect=sqlite.dialect())
-        )
-        self.db.execute(str(delete_by_query), [value])
+        delete_by_query = self.model_type.__table__.delete().filter_by(**{attribute: value})  # type: ignore
+
+        self.db.execute(str(delete_by_query.compile(dialect=sqlite.dialect())), [value])
         self.db.commit()
 
     def _search(self, attribute: str, value: Any, filters: Optional[List[Dict]] = None) -> List[Entity]:
-        query = self.model_type.__table__.select().filter_by(**{attribute: value})
+        query = self.model_type.__table__.select().filter_by(**{attribute: value})  # type: ignore
 
         entities: List[Entity] = []
         for f in filters or [{}]:
             entries = self.db.execute(
                 str(query.filter_by(**f).compile(dialect=sqlite.dialect())),
-                [value] + [self.serialize_filter_values(val) for val in list(f.values())],
+                [value] + [self.__serialize_filter_values(val) for val in list(f.values())],
             ).fetchall()
-            entities.extend([self.converter._model_to_entity(self.model_type.from_dict(m)) for m in entries])
+            entities.extend(
+                [self.converter._model_to_entity(self.model_type.from_dict(m)) for m in entries]  # type: ignore
+            )
 
         return entities
 
@@ -137,9 +133,9 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
         export_path = export_dir / f"{entity_id}.json"
 
-        get_query = str(self.model_type.__table__.select().filter_by(id=entity_id).compile(dialect=sqlite.dialect()))
+        query = self.model_type.__table__.select().filter_by(id=entity_id)  # type: ignore
 
-        if entry := self.db.execute(str(get_query), [entity_id]).fetchone():  # type: ignore
+        if entry := self.db.execute(str(query.compile(dialect=sqlite.dialect())), [entity_id]).fetchone():
             with open(export_path, "w", encoding="utf-8") as export_file:
                 export_file.write(json.dumps(entry))
         else:
@@ -149,12 +145,12 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     # ##   Specific or optimized methods   ## #
     ###########################################
     def _get_multi(self, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
-        query = str(self.model_type.__table__.select().offset(skip).limit(limit).compile(dialect=sqlite.dialect()))
-        return self.db.execute(query).fetchall()
+        query = self.model_type.__table__.select().offset(skip).limit(limit)  # type: ignore
+        return self.db.execute(str(query.compile(dialect=sqlite.dialect()))).fetchall()
 
     def _get_by_config(self, config_id: Any) -> Optional[ModelType]:
-        query = str(self.model_type.__table__.select().filter_by(config_id=config_id).compile(dialect=sqlite.dialect()))
-        return self.db.execute(query, [config_id]).fetchall()
+        query = self.model_type.__table__.select().filter_by(config_id=config_id)  # type: ignore
+        return self.db.execute(str(query.compile(dialect=sqlite.dialect())), [config_id]).fetchall()
 
     def _get_by_config_and_owner_id(
         self, config_id: str, owner_id: Optional[str], filters: Optional[List[Dict]] = None
@@ -184,12 +180,12 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def __get_entities_by_config_and_owner(
         self, config_id: str, owner_id: Optional[str] = None, filters: Optional[List[Dict]] = None
-    ) -> ModelType:
+    ) -> Optional[ModelType]:
         if not filters:
             filters = []
         versions = [item.get("version") for item in filters if item.get("version")]
 
-        query = self.model_type.__table__.select().filter_by(config_id=config_id)
+        query = self.model_type.__table__.select().filter_by(config_id=config_id)  # type: ignore
         parameters = [config_id]
 
         if owner_id:
@@ -198,24 +194,29 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         query = str(query.compile(dialect=sqlite.dialect()))
 
         if versions:
-
-            query = query + f" AND {self.model_type.__table__.name}.version IN ({','.join(['?']*len(versions))})"
-            # query = str(query.filter(self.model_type.version.in_(versions)).compile(dialect=sqlite.dialect()))  # type: ignore
-            parameters.extend(versions)
+            table_name = self.model_type.__table__.name  # type: ignore
+            query = query + f" AND {table_name}.version IN ({','.join(['?']*len(versions))})"  # type: ignore
+            parameters.extend(versions)  # type: ignore
 
         if entry := self.db.execute(query, parameters).fetchone():
-            return self.model_type.from_dict(entry)
+            return self.model_type.from_dict(entry)  # type: ignore
         return None
 
     #############################
     # ##   Private methods   ## #
     #############################
     def __insert_model(self, model: ModelType):
-        query = str(self.model_type.__table__.insert().compile(dialect=sqlite.dialect()))
-        self.db.execute(query, model.to_list(model))
+        query = self.model_type.__table__.insert()  # type: ignore
+        self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list(model))  # type: ignore
         self.db.commit()
 
     def _update_entry(self, model):
-        query = str(self.model_type.__table__.update().filter_by(id=model.id).compile(dialect=sqlite.dialect()))
-        self.db.execute(query, model.to_list(model) + [model.id])
+        query = self.model_type.__table__.update().filter_by(id=model.id)
+        self.db.execute(str(query.compile(dialect=sqlite.dialect())), model.to_list(model) + [model.id])
         self.db.commit()
+
+    @staticmethod
+    def __serialize_filter_values(value):
+        if isinstance(value, (dict, list)):
+            return json.dumps(value).replace('"', "'")
+        return value
