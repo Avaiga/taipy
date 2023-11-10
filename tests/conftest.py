@@ -440,7 +440,7 @@ def sql_engine():
 
 @pytest.fixture
 def init_sql_repo(tmp_sqlite):
-    Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
+    Config.configure_core(repository_type="sql", repository_properties={"db_location": "tmp_sqlite"})
 
     # Clean SQLite database
     if _SQLConnection._connection:

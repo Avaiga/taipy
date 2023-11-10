@@ -117,7 +117,10 @@ class Job(_Entity, _Labeled):
     @_self_setter(_MANAGER_NAME)
     def status(self, val):
         self._status = val
-        # TODO: update_submission_entity_status()
+        if self.submit_id:
+            from ..submission._submission_manager_factory import _SubmissionManagerFactory
+
+            _SubmissionManagerFactory._build_manager()._get(self.submit_id).update_submission_status()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

@@ -28,6 +28,7 @@ from src.taipy.core.exceptions.exceptions import JobNotDeletedException
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job_id import JobId
 from src.taipy.core.job.status import Status
+from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
@@ -334,6 +335,8 @@ def test_cancel_single_running_job():
 def test_cancel_subsequent_jobs():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
     _OrchestratorFactory._build_dispatcher()
+    orchestrator = _OrchestratorFactory._orchestrator
+    submission_manager = _SubmissionManagerFactory._build_manager()
 
     lock_0 = m.Lock()
 
@@ -345,22 +348,24 @@ def test_cancel_subsequent_jobs():
     task_2 = Task("task_config_2", {}, multiply, [dn_1, dn_3], [dn_4], id="task_2")
     task_3 = Task("task_config_3", {}, print, [dn_4], id="task_3")
 
+    # Can't get tasks under 1 scenario due to partial not serializable
+    submission_1 = submission_manager._create("scenario_id")
+    submission_2 = submission_manager._create("scenario_id")
+
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)
     _DataManager._set(dn_3)
     _DataManager._set(dn_4)
 
     with lock_0:
-        submit_id_1 = "submit_1"
-        job_1 = _OrchestratorFactory._orchestrator._submit_task(
-            task_1, submit_id=submit_id_1, submit_entity_id=task_1.id
-        )
-        job_2 = _OrchestratorFactory._orchestrator._submit_task(
-            task_2, submit_id=submit_id_1, submit_entity_id=task_2.id
-        )
-        job_3 = _OrchestratorFactory._orchestrator._submit_task(
-            task_3, submit_id=submit_id_1, submit_entity_id=task_3.id
-        )
+        job_1 = orchestrator._submit_task(task_1, submit_id=submission_1.id, submit_entity_id=submission_1.entity_id)
+        orchestrator._orchestrate_job_to_run_or_block(job_1)
+        job_2 = orchestrator._submit_task(task_2, submit_id=submission_1.id, submit_entity_id=submission_1.entity_id)
+        orchestrator._orchestrate_job_to_run_or_block(job_2)
+        job_3 = orchestrator._submit_task(task_3, submit_id=submission_1.id, submit_entity_id=submission_1.entity_id)
+        orchestrator._orchestrate_job_to_run_or_block(job_3)
+
+        submission_1.jobs = [job_1, job_2, job_3]
 
         assert_true_after_time(lambda: _OrchestratorFactory._orchestrator.jobs_to_run.qsize() == 0)
         assert_true_after_time(lambda: len(_OrchestratorFactory._orchestrator.blocked_jobs) == 2)
@@ -368,16 +373,20 @@ def test_cancel_subsequent_jobs():
         assert_true_after_time(job_2.is_blocked)
         assert_true_after_time(job_3.is_blocked)
 
-        submit_id_2 = "submit_2"
         job_4 = _OrchestratorFactory._orchestrator._submit_task(
-            task_1, submit_id=submit_id_2, submit_entity_id=task_1.id
+            task_1, submit_id=submission_2.id, submit_entity_id=submission_2.entity_id
         )
+        orchestrator._orchestrate_job_to_run_or_block(job_4)
         job_5 = _OrchestratorFactory._orchestrator._submit_task(
-            task_2, submit_id=submit_id_2, submit_entity_id=task_2.id
+            task_2, submit_id=submission_2.id, submit_entity_id=submission_2.entity_id
         )
+        orchestrator._orchestrate_job_to_run_or_block(job_5)
         job_6 = _OrchestratorFactory._orchestrator._submit_task(
-            task_3, submit_id=submit_id_2, submit_entity_id=task_3.id
+            task_3, submit_id=submission_2.id, submit_entity_id=submission_2.entity_id
         )
+        orchestrator._orchestrate_job_to_run_or_block(job_6)
+
+        submission_2.jobs = [job_4, job_5, job_6]
 
         assert_true_after_time(job_4.is_pending)
         assert_true_after_time(job_5.is_blocked)

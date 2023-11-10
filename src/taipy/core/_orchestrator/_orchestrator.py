@@ -69,28 +69,29 @@ class _Orchestrator(_AbstractOrchestrator):
         """
         submission = _SubmissionManagerFactory._build_manager()._create(submittable.id)
 
-        res = []
+        jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
             for ts in tasks:
                 for task in ts:
-                    res.append(
+                    jobs.append(
                         cls._submit_task(
                             task, submission.id, submission.entity_id, callbacks=callbacks, force=force  # type: ignore
                         )
                     )
 
-        submission.jobs = res
+        submission.jobs = jobs
 
-        # TODO: orchestrate jobs after assigning it to a Submission entity
+        for job in jobs:
+            cls._orchestrate_job_to_run_or_block(job)
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(res, timeout=timeout)
+                cls.__wait_until_job_finished(jobs, timeout=timeout)
 
-        return res
+        return jobs
 
     @classmethod
     def submit_task(
@@ -123,7 +124,7 @@ class _Orchestrator(_AbstractOrchestrator):
 
         submission.jobs = [job]
 
-        # TODO: orchestrate jobs after assigning it to a Submission entity
+        cls._orchestrate_job_to_run_or_block(job)
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
@@ -147,7 +148,6 @@ class _Orchestrator(_AbstractOrchestrator):
         job = _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, submit_entity_id, force=force
         )
-        cls._orchestrate_job_to_run_or_block(job)
 
         return job
 

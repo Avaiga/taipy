@@ -86,7 +86,7 @@ def test_get_all_submission(init_sql_repo):
             submission_manager._set(
                 Submission("entity_id", f"submission_{version_name}_{i}", version=f"{version_name}")
             )
-
+    breakpoint()
     assert len(submission_manager._get_all()) == 1
 
     version_manager._set_experiment_version("xyz")
