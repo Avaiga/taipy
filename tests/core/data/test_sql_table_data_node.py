@@ -300,20 +300,20 @@ class TestSQLTableDataNode:
     @pytest.mark.parametrize(
         "data,written_data,called_func",
         [
-            ([{"a": 1, "b": 2}, {"a": 3, "b": 4}], [{"a": 1, "b": 2}, {"a": 3, "b": 4}], "_insert_dicts"),
-            ({"a": 1, "b": 2}, [{"a": 1, "b": 2}], "_insert_dicts"),
-            ([(1, 2), (3, 4)], [(1, 2), (3, 4)], "_insert_tuples"),
-            ([[1, 2], [3, 4]], [[1, 2], [3, 4]], "_insert_tuples"),
-            ((1, 2), [(1, 2)], "_insert_tuples"),
-            ([1, 2, 3, 4], [(1,), (2,), (3,), (4,)], "_insert_tuples"),
-            ("foo", [("foo",)], "_insert_tuples"),
-            (None, [(None,)], "_insert_tuples"),
-            (np.array([1, 2, 3, 4]), [(1,), (2,), (3,), (4,)], "_insert_tuples"),
-            (np.array([np.array([1, 2]), np.array([3, 4])]), [[1, 2], [3, 4]], "_insert_tuples"),
+            ([{"a": 1, "b": 2}, {"a": 3, "b": 4}], [{"a": 1, "b": 2}, {"a": 3, "b": 4}], "__insert_dicts"),
+            ({"a": 1, "b": 2}, [{"a": 1, "b": 2}], "__insert_dicts"),
+            ([(1, 2), (3, 4)], [(1, 2), (3, 4)], "__insert_tuples"),
+            ([[1, 2], [3, 4]], [[1, 2], [3, 4]], "__insert_tuples"),
+            ((1, 2), [(1, 2)], "__insert_tuples"),
+            ([1, 2, 3, 4], [(1,), (2,), (3,), (4,)], "__insert_tuples"),
+            ("foo", [("foo",)], "__insert_tuples"),
+            (None, [(None,)], "__insert_tuples"),
+            (np.array([1, 2, 3, 4]), [(1,), (2,), (3,), (4,)], "__insert_tuples"),
+            (np.array([np.array([1, 2]), np.array([3, 4])]), [[1, 2], [3, 4]], "__insert_tuples"),
         ],
     )
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_write(self, data, written_data, called_func, pandas_properties):
+    def test_write_1(self, data, written_data, called_func, pandas_properties):
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
@@ -324,9 +324,9 @@ class TestSQLTableDataNode:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch(f"src.taipy.core.data.sql_table.SQLTableDataNode.{called_func}") as mck:
+            with patch(f"src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode{called_func}") as mck:
                 dn.write(data)
-                mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
+                mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock, True)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     def test_raise_error_invalid_exposed_type(self, pandas_properties):
@@ -351,7 +351,7 @@ class TestSQLTableDataNode:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
+            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__insert_dataframe") as mck:
                 dn.write(df)
                 assert mck.call_args[0][0].equals(df)
 
@@ -367,7 +367,7 @@ class TestSQLTableDataNode:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
+            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__insert_dataframe") as mck:
                 dn.write(df)
                 assert mck.call_args[0][0].equals(df)
 
@@ -390,9 +390,9 @@ class TestSQLTableDataNode:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._delete_all_rows") as mck:
+            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__delete_all_rows") as mck:
                 dn.write(data)
-                mck.assert_called_once_with(create_table_mock.return_value, cursor_mock)
+                mck.assert_called_once_with(create_table_mock.return_value, cursor_mock, True)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     @patch("pandas.read_sql_query")
@@ -445,6 +445,25 @@ class TestSQLTableDataNode:
         data = dn.read()
 
         assert data.equals(pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]))
+
+    def test_sqlite_append_pandas(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "table_name": "example",
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+        }
+
+        dn = SQLTableDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
+        original_data = pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}])
+        data = dn.read()
+        assert_frame_equal(data, original_data)
+
+        append_data_1 = pd.DataFrame([{"foo": 5, "bar": 6}, {"foo": 7, "bar": 8}])
+        dn.append(append_data_1)
+        assert_frame_equal(dn.read(), pd.concat([original_data, append_data_1]).reset_index(drop=True))
 
     def test_filter_pandas_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path

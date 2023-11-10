@@ -332,6 +332,22 @@ class DataNode(_Entity, _Labeled):
             )
             return None
 
+    def append(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
+        """Append some data to this data node.
+
+        Parameters:
+            data (Any): The data to write to this data node.
+            job_id (JobId^): An optional identifier of the writer.
+            **kwargs (dict[str, any]): Extra information to attach to the edit document
+                corresponding to this write.
+        """
+        from ._data_manager_factory import _DataManagerFactory
+
+        self._append(data)
+        self.track_edit(job_id=job_id, **kwargs)
+        self.unlock_edit()
+        _DataManagerFactory._build_manager()._set(self)
+
     def write(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
         """Write some data to this data node.
 
@@ -436,6 +452,10 @@ class DataNode(_Entity, _Labeled):
 
     @abstractmethod
     def _read(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _append(self, data):
         raise NotImplementedError
 
     @abstractmethod

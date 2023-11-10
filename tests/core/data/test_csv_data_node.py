@@ -202,6 +202,44 @@ class TestCSVDataNode:
             assert row_pandas[2] == row_custom.text
 
     @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+            ([[11, 22, 33], [44, 55, 66]]),
+        ],
+    )
+    def test_append(self, csv_file, default_data_frame, content):
+        csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": csv_file})
+        assert_frame_equal(csv_dn.read(), default_data_frame)
+
+        csv_dn.append(content)
+        assert_frame_equal(
+            csv_dn.read(),
+            pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
+        )
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+            ([[11, 22, 33], [44, 55, 66]]),
+        ],
+    )
+    def test_append_modin(self, csv_file, default_data_frame, content):
+        csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "modin"})
+        df_equals(csv_dn.read(), modin_pd.DataFrame(default_data_frame))
+
+        csv_dn.append(content)
+        df_equals(
+            csv_dn.read(),
+            modin_pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(
+                drop=True
+            ),
+        )
+
+    @pytest.mark.parametrize(
         "content,columns",
         [
             ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], None),

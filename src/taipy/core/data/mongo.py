@@ -217,8 +217,25 @@ class MongoCollectionDataNode(DataNode):
 
         return self.collection.find(query)
 
+    def _append(self, data) -> None:
+        """Append data to a Mongo collection."""
+        if not isinstance(data, list):
+            data = [data]
+
+        if len(data) == 0:
+            return
+
+        if isinstance(data[0], dict):
+            self._insert_dicts(data)
+        else:
+            self._insert_dicts([self._encoder(row) for row in data])
+
     def _write(self, data) -> None:
-        """Check data against a collection of types to handle insertion on the database."""
+        """Check data against a collection of types to handle insertion on the database.
+
+        Parameters:
+            data (Any): the data to write to the database.
+        """
         if not isinstance(data, list):
             data = [data]
 
@@ -227,25 +244,28 @@ class MongoCollectionDataNode(DataNode):
             return
 
         if isinstance(data[0], dict):
-            self._insert_dicts(data)
+            self._insert_dicts(data, drop=True)
         else:
-            self._insert_dicts([self._encoder(row) for row in data])
+            self._insert_dicts([self._encoder(row) for row in data], drop=True)
 
-    def _insert_dicts(self, data: List[Dict]) -> None:
+    def _insert_dicts(self, data: List[Dict], drop=False) -> None:
         """
-        :param data: a list of dictionaries
+        This method will insert data contained in a list of dictionaries into a collection.
 
-        This method will overwrite the data contained in a list of dictionaries into a collection.
+        Parameters:
+            data (List[Dict]): a list of dictionaries
+            drop (bool): drop the collection before inserting the data to overwrite the data in the collection.
         """
-        self.collection.drop()
+        if drop:
+            self.collection.drop()
+
         self.collection.insert_many(data)
 
     def _default_decoder(self, document: Dict) -> Any:
         """Decode a Mongo dictionary to a custom document object for reading.
 
-        Args:
+        Parameters:
             document (Dict): the document dictionary return by Mongo query.
-
         Returns:
             A custom document object.
         """

@@ -233,6 +233,14 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         except pd.errors.EmptyDataError:
             return modin_pd.DataFrame()
 
+    def _append(self, data: Any):
+        if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+            data.to_csv(self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False)
+        else:
+            pd.DataFrame(data).to_csv(
+                self._path, mode="a", index=False, encoding=self.properties[self.__ENCODING_KEY], header=False
+            )
+
     def _write(self, data: Any):
         if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
             data.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])

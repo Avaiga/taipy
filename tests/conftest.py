@@ -101,7 +101,7 @@ def excel_file_with_sheet_name(tmpdir_factory) -> str:
 def json_file(tmpdir_factory) -> str:
     json_data = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
     fn = tmpdir_factory.mktemp("data").join("df.json")
-    json_data.to_json(str(fn))
+    json_data.to_json(str(fn), orient="records")
     return fn.strpath
 
 
