@@ -20,7 +20,7 @@ import pytest
 from src.taipy.core import Task
 from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db._sql_session import _build_engine, _SQLSession
+from src.taipy.core._repository.db._sql_connection import _build_connection, _SQLConnection
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data import InMemoryDataNode
 from src.taipy.core.data._data_manager import _DataManager
@@ -53,9 +53,8 @@ def init_managers():
 
 
 def clear_sql_session():
-    _build_engine.cache_clear()
-    _SQLSession._SessionLocal = None
-    _SQLSession._engine = None
+    _build_connection.cache_clear()
+    _SQLConnection._connection = None
 
 
 def test_create_jobs(init_sql_repo):

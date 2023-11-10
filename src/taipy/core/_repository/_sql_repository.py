@@ -11,71 +11,19 @@
 
 import json
 import pathlib
-import sqlite3
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy.schema import CreateTable
-
-from taipy.config.config import Config
 
 from .._repository._abstract_repository import _AbstractRepository
-from .._repository.db._sql_session import _SQLSession
 from ..common.typing import Converter, Entity, ModelType
-from ..exceptions import MissingRequiredProperty, ModelNotFound
-
-connection = None
-
-
-from taipy.config.config import Config
-
-from .._repository._abstract_repository import _AbstractRepository
-from .._repository.db._sql_session import _SQLSession
-from ..exceptions import MissingRequiredProperty, ModelNotFound
-
-connection = None
-
-
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
-
-
-def init_db():
-    properties = Config.core.repository_properties
-    try:
-        db_location = properties["db_location"]
-    except KeyError:
-        raise MissingRequiredProperty("Missing property db_location")
-
-    sqlite3.threadsafety = 3
-
-    global connection
-    connection = connection if connection else sqlite3.connect(db_location, check_same_thread=False)
-    connection.row_factory = dict_factory
-
-    from .._version._version_model import _VersionModel
-    from ..cycle._cycle_model import _CycleModel
-    from ..data._data_model import _DataNodeModel
-    from ..job._job_model import _JobModel
-    from ..scenario._scenario_model import _ScenarioModel
-    from ..task._task_model import _TaskModel
-
-    connection.execute(str(CreateTable(_CycleModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_DataNodeModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_JobModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_ScenarioModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_TaskModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_VersionModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-
-    return connection
+from ..exceptions import ModelNotFound
+from .db._sql_connection import _SQLConnection
 
 
 class _SQLRepository(_AbstractRepository[ModelType, Entity]):
-    def __init__(self, model_type: Type[ModelType], converter: Type[Converter], session=None):
+    def __init__(self, model_type: Type[ModelType], converter: Type[Converter]):
         """
         Holds common methods to be used and extended when the need for saving
         dataclasses in a SqlLite database.
@@ -88,7 +36,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             converter: A class that handles conversion to and from a database backend
             db: An SQLAlchemy session object
         """
-        self.db = init_db()
+        self.db = _SQLConnection.init_db()
         self.model_type = model_type
         self.converter = converter
 
