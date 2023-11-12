@@ -22,7 +22,7 @@ from pandas.testing import assert_frame_equal
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.data.sql import SQLDataNode
-from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
+from src.taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
 
@@ -358,6 +358,21 @@ class TestSQLDataNode:
         append_data_1 = modin_pd.DataFrame([{"foo": 5, "bar": 6}, {"foo": 7, "bar": 8}])
         dn.append(append_data_1)
         df_equals(dn.read(), modin_pd.concat([original_data, append_data_1]).reset_index(drop=True))
+
+    def test_sqlite_append_without_append_query_builder(self, tmp_sqlite_sqlite3_file_path):
+        folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
+        properties = {
+            "db_engine": "sqlite",
+            "read_query": "SELECT * FROM example",
+            "write_query_builder": my_write_query_builder_with_pandas,
+            "db_name": db_name,
+            "sqlite_folder_path": folder_path,
+            "sqlite_file_extension": file_extension,
+        }
+
+        dn = SQLDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
+        with pytest.raises(MissingAppendQueryBuilder):
+            dn.append(pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]))
 
     def test_filter_pandas_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path

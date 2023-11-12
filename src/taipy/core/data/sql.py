@@ -17,7 +17,7 @@ from sqlalchemy import text
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..exceptions.exceptions import MissingRequiredProperty
+from ..exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
 from ._abstract_sql import _AbstractSQLDataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -131,6 +131,9 @@ class SQLDataNode(_AbstractSQLDataNode):
         return self.properties.get(self.__READ_QUERY_KEY)
 
     def _do_append(self, data, engine, connection) -> None:
+        if not self.properties.get(self._APPEND_QUERY_BUILDER_KEY):
+            raise MissingAppendQueryBuilder
+
         queries = self.properties.get(self._APPEND_QUERY_BUILDER_KEY)(data)
         self.__execute_queries(queries, connection)
 

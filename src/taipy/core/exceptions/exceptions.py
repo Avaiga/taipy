@@ -62,6 +62,10 @@ class UnknownDatabaseEngine(Exception):
     """Raised if the database engine is not known when creating a connection with a SQLDataNode."""
 
 
+class MissingAppendQueryBuilder(Exception):
+    """Raised if no append query build is provided when appending data to a SQLDataNode."""
+
+
 class UnknownParquetEngine(Exception):
     """Raised if the parquet engine is not known or not supported when create a ParquetDataNode."""
 
