@@ -300,6 +300,7 @@ class TestParquetDataNode:
 
         os.unlink(temp_file_path)
 
+    @pytest.mark.skipif(not util.find_spec("fastparquet"), reason="Append parquet requires fastparquet to be installed")
     @pytest.mark.parametrize(
         "content",
         [
@@ -308,10 +309,6 @@ class TestParquetDataNode:
         ],
     )
     def test_append_pandas(self, parquet_file_path, default_data_frame, content):
-        # !!! append data only works with `fastparquet`
-        if not util.find_spec("fastparquet"):
-            pass
-
         dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path})
         assert_frame_equal(dn.read(), default_data_frame)
 
@@ -321,6 +318,7 @@ class TestParquetDataNode:
             pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
         )
 
+    @pytest.mark.skipif(not util.find_spec("fastparquet"), reason="Append parquet requires fastparquet to be installed")
     @pytest.mark.parametrize(
         "content",
         [
@@ -329,10 +327,6 @@ class TestParquetDataNode:
         ],
     )
     def test_append_modin(self, parquet_file_path, default_data_frame, content):
-        # !!! append data only works with `fastparquet`
-        if not util.find_spec("fastparquet"):
-            pass
-
         dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "modin"})
         df_equals(dn.read(), modin_pd.DataFrame(default_data_frame))
 
