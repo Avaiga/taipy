@@ -270,7 +270,7 @@ def test_submit():
             force: bool = False,
         ):
             cls.submit_calls.append(task)
-            return None  # type: ignore
+            return super()._submit_task(task, submit_id, submit_entity_id, callbacks, force)
 
     with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         # sequence does not exists. We expect an exception to be raised

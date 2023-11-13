@@ -599,17 +599,21 @@ def test_publish_event():
         EventOperation.CREATION,
         EventOperation.UPDATE,
         EventOperation.UPDATE,
+        EventOperation.UPDATE,
+        EventOperation.UPDATE,
         EventOperation.SUBMISSION,
     ]
-    expected_attribute_names = [None, None, "status", "jobs", None]
+    expected_attribute_names = [None, None, "jobs", "submission_status", "submission_status", "status", None]
     expected_event_types = [
         EventEntityType.SUBMISSION,
         EventEntityType.JOB,
-        EventEntityType.JOB,
         EventEntityType.SUBMISSION,
+        EventEntityType.SUBMISSION,
+        EventEntityType.SUBMISSION,
+        EventEntityType.JOB,
         EventEntityType.SCENARIO,
     ]
-    expected_event_entity_id = [job.submit_id, job.id, job.id, job.submit_id, scenario.id]
+    expected_event_entity_id = [job.submit_id, job.id, job.submit_id, job.submit_id, job.submit_id, job.id, scenario.id]
 
     assert all(
         [
