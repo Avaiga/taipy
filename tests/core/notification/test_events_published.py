@@ -81,9 +81,11 @@ def test_event_published():
     assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.CREATION] == 6, time=10)
     assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.UPDATE] == 4, time=10)
 
-    # Submit a scenario trigger 1 scenario submission event
+    # Submit a scenario triggers 12 events:
+    # 1 scenario submission event
     # 7 data node update events (for last_edit_date, editor_id(x2), editor_expiration_date(x2) and edit_in_progress(x2))
-    # 1 job creation event and 3 job update events (for status: PENDING, RUNNING and COMPLETED)
+    # 1 job creation event
+    # 3 job update events (for status: PENDING, RUNNING and COMPLETED)
     sc.submit()
     assert_true_after_time(lambda: all_evts.event_collected == 22, time=10)
     assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.CYCLE] == 1, time=10)
