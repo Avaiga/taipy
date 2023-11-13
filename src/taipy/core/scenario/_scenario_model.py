@@ -71,19 +71,18 @@ class _ScenarioModel(_BaseModel):
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )
 
-    @staticmethod
-    def to_list(model):
+    def to_list(self):
         return [
-            model.id,
-            model.config_id,
-            _BaseModel._serialize_attribute(model.tasks),
-            _BaseModel._serialize_attribute(model.additional_data_nodes),
-            _BaseModel._serialize_attribute(model.properties),
-            model.creation_date,
-            model.primary_scenario,
-            _BaseModel._serialize_attribute(model.subscribers),
-            _BaseModel._serialize_attribute(model.tags),
-            model.version,
-            _BaseModel._serialize_attribute(model.sequences),
-            model.cycle,
+            self.id,
+            self.config_id,
+            _BaseModel._serialize_attribute(self.tasks),
+            _BaseModel._serialize_attribute(self.additional_data_nodes),
+            _BaseModel._serialize_attribute(self.properties),
+            self.creation_date,
+            self.primary_scenario,
+            _BaseModel._serialize_attribute(self.subscribers),
+            _BaseModel._serialize_attribute(self.tags),
+            self.version,
+            _BaseModel._serialize_attribute(self.sequences),
+            self.cycle,
         ]

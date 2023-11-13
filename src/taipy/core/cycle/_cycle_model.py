@@ -55,14 +55,13 @@ class _CycleModel(_BaseModel):
             end_date=data["end_date"],
         )
 
-    @staticmethod
-    def to_list(model):
+    def to_list(self):
         return [
-            model.id,
-            model.name,
-            repr(model.frequency),
-            _BaseModel._serialize_attribute(model.properties),
-            model.creation_date,
-            model.start_date,
-            model.end_date,
+            self.id,
+            self.name,
+            repr(self.frequency),
+            _BaseModel._serialize_attribute(self.properties),
+            self.creation_date,
+            self.start_date,
+            self.end_date,
         ]

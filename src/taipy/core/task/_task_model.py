@@ -64,18 +64,17 @@ class _TaskModel(_BaseModel):
             properties=_BaseModel._deserialize_attribute(data["properties"] if "properties" in data.keys() else {}),
         )
 
-    @staticmethod
-    def to_list(model):
+    def to_list(self):
         return [
-            model.id,
-            model.owner_id,
-            _BaseModel._serialize_attribute(model.parent_ids),
-            model.config_id,
-            _BaseModel._serialize_attribute(model.input_ids),
-            model.function_name,
-            model.function_module,
-            _BaseModel._serialize_attribute(model.output_ids),
-            model.version,
-            model.skippable,
-            _BaseModel._serialize_attribute(model.properties),
+            self.id,
+            self.owner_id,
+            _BaseModel._serialize_attribute(self.parent_ids),
+            self.config_id,
+            _BaseModel._serialize_attribute(self.input_ids),
+            self.function_name,
+            self.function_module,
+            _BaseModel._serialize_attribute(self.output_ids),
+            self.version,
+            self.skippable,
+            _BaseModel._serialize_attribute(self.properties),
         ]

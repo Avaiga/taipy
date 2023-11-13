@@ -47,13 +47,12 @@ class _VersionModel(_BaseModel):
         model.is_latest = data.get("is_latest")  # type: ignore
         return model
 
-    @staticmethod
-    def to_list(model):
+    def to_list(self):
         return [
-            model.id,
-            model.config,
-            model.creation_date,
-            model.is_production,
-            model.is_development,
-            model.is_latest,
+            self.id,
+            self.config,
+            self.creation_date,
+            self.is_production,
+            self.is_development,
+            self.is_latest,
         ]

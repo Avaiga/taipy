@@ -72,9 +72,8 @@ class MockModel(Base):  # type: ignore
     def _from_entity(cls, entity: MockObj):
         return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
-    @staticmethod
-    def to_list(model):
-        return [model.id, model.name, model.version]
+    def to_list(self):
+        return [self.id, self.name, self.version]
 
 
 class MockConverter(_AbstractConverter):

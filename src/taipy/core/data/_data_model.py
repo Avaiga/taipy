@@ -81,22 +81,21 @@ class _DataNodeModel(_BaseModel):
             data_node_properties=_BaseModel._deserialize_attribute(data["data_node_properties"]),
         )
 
-    @staticmethod
-    def to_list(model):
+    def to_list(self):
         return [
-            model.id,
-            model.config_id,
-            repr(model.scope),
-            model.storage_type,
-            model.owner_id,
-            _BaseModel._serialize_attribute(model.parent_ids),
-            model.last_edit_date,
-            _BaseModel._serialize_attribute(model.edits),
-            model.version,
-            model.validity_days,
-            model.validity_seconds,
-            model.edit_in_progress,
-            model.editor_id,
-            model.editor_expiration_date,
-            _BaseModel._serialize_attribute(model.data_node_properties),
+            self.id,
+            self.config_id,
+            repr(self.scope),
+            self.storage_type,
+            self.owner_id,
+            _BaseModel._serialize_attribute(self.parent_ids),
+            self.last_edit_date,
+            _BaseModel._serialize_attribute(self.edits),
+            self.version,
+            self.validity_days,
+            self.validity_seconds,
+            self.edit_in_progress,
+            self.editor_id,
+            self.editor_expiration_date,
+            _BaseModel._serialize_attribute(self.data_node_properties),
         ]

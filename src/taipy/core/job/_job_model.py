@@ -63,17 +63,16 @@ class _JobModel(_BaseModel):
             version=data["version"],
         )
 
-    @staticmethod
-    def to_list(model):
+    def to_list(self):
         return [
-            model.id,
-            model.task_id,
-            repr(model.status),
-            model.force,
-            model.submit_id,
-            model.submit_entity_id,
-            model.creation_date,
-            _BaseModel._serialize_attribute(model.subscribers),
-            _BaseModel._serialize_attribute(model.stacktrace),
-            model.version,
+            self.id,
+            self.task_id,
+            repr(self.status),
+            self.force,
+            self.submit_id,
+            self.submit_entity_id,
+            self.creation_date,
+            _BaseModel._serialize_attribute(self.subscribers),
+            _BaseModel._serialize_attribute(self.stacktrace),
+            self.version,
         ]

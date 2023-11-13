@@ -14,11 +14,15 @@ import enum
 import json
 from typing import Any, Dict
 
+from sqlalchemy import Table
+
 from ._decoder import _Decoder
 from ._encoder import _Encoder
 
 
 class _BaseModel:
+    __table__: Table
+
     def __iter__(self):
         for attr, value in self.__dict__.items():
             yield attr, value
@@ -40,3 +44,10 @@ class _BaseModel:
         if isinstance(value, str):
             return json.loads(value.replace("'", '"'), cls=_Decoder)
         return value
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]):
+        pass
+
+    def to_list(self):
+        pass

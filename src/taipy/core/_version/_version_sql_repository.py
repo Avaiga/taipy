@@ -23,7 +23,7 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         super().__init__(model_type=_VersionModel, converter=_VersionConverter)
 
     def _set_latest_version(self, version_number):
-        if old_latest := self.db.execute(str(self.model_type.__table__.select().filter_by(is_latest=True))).fetchone():
+        if old_latest := self.db.execute(str(self.table.select().filter_by(is_latest=True))).fetchone():
             old_latest = self.model_type.from_dict(old_latest)
             old_latest.is_latest = False
             self._update_entry(old_latest)
@@ -34,15 +34,13 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
 
     def _get_latest_version(self):
         if latest := self.db.execute(
-            str(self.model_type.__table__.select().filter_by(is_latest=True).compile(dialect=sqlite.dialect()))
+            str(self.table.select().filter_by(is_latest=True).compile(dialect=sqlite.dialect()))
         ).fetchone():
             return latest["id"]
         return ""
 
     def _set_development_version(self, version_number):
-        if old_development := self.db.execute(
-            str(self.model_type.__table__.select().filter_by(is_development=True))
-        ).fetchone():
+        if old_development := self.db.execute(str(self.table.select().filter_by(is_development=True))).fetchone():
             old_development = self.model_type.from_dict(old_development)
             old_development.is_development = False
             self._update_entry(old_development)
@@ -54,9 +52,7 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         self._set_latest_version(version_number)
 
     def _get_development_version(self):
-        if development := self.db.execute(
-            str(self.model_type.__table__.select().filter_by(is_development=True))
-        ).fetchone():
+        if development := self.db.execute(str(self.table.select().filter_by(is_development=True))).fetchone():
             return development["id"]
         raise ModelNotFound(self.model_type, "")
 
@@ -69,7 +65,7 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
 
     def _get_production_versions(self):
         if productions := self.db.execute(
-            str(self.model_type.__table__.select().filter_by(is_production=True).compile(dialect=sqlite.dialect())),
+            str(self.table.select().filter_by(is_production=True).compile(dialect=sqlite.dialect())),
         ).fetchall():
             return [p["id"] for p in productions]
         return []
@@ -83,6 +79,6 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
         self._update_entry(version)
 
     def __get_by_id(self, version_id):
-        query = str(self.model_type.__table__.select().filter_by(id=version_id).compile(dialect=sqlite.dialect()))
+        query = str(self.table.select().filter_by(id=version_id).compile(dialect=sqlite.dialect()))
         entry = self.db.execute(query, [version_id]).fetchone()
         return self.model_type.from_dict(entry) if entry else None
