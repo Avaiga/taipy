@@ -34,7 +34,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         Attributes:
             model_type: Generic dataclass.
             converter: A class that handles conversion to and from a database backend
-            db: An SQLAlchemy session object
+            db: An sqlite3 session object
         """
         self.db = _SQLConnection.init_db()
         self.model_type = model_type
@@ -83,13 +83,11 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def _delete(self, entity_id: str):
         delete_query = self.table.delete().filter_by(id=entity_id)
         cursor = self.db.execute(str(delete_query.compile(dialect=sqlite.dialect())), [entity_id])
+
+        if cursor.rowcount == 0:
+            raise ModelNotFound(str(self.model_type.__name__), entity_id)
+
         self.db.commit()
-
-        if cursor.rowcount == 0:
-            raise ModelNotFound(str(self.model_type.__name__), entity_id)
-
-        if cursor.rowcount == 0:
-            raise ModelNotFound(str(self.model_type.__name__), entity_id)
 
     def _delete_all(self):
         self.db.execute(str(self.table.delete().compile(dialect=sqlite.dialect())))
