@@ -76,7 +76,7 @@ Gui(page=excitement_page).run()
 *RUN*🏃🏽‍♀️
 <div align="center">🎊 TA-DA! 🎊</div>
 <br>
-<div align="center"><img src="readme_img/readme_fe_app.gif" width="50%" alt="Tiny Demo"></img></div>
+<div align="center"><img src="tiny_demo_readme.gif" width="50%" alt="Tiny Demo"></img></div>
 
 <br>
 
