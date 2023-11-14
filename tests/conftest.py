@@ -23,7 +23,7 @@ from sqlalchemy.schema import CreateTable, DropTable
 
 from src.taipy.core._core import Core
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db._sql_connection import _build_connection
+from src.taipy.core._repository.db._sql_connection import _build_connection, _SQLConnection
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core._version._version_model import _VersionModel
@@ -445,7 +445,8 @@ def init_sql_repo(tmp_sqlite):
     Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
 
     # Clean SQLite database
-    connection = _build_connection()
+    _SQLConnection._connection = None
+    connection = _SQLConnection.init_db()
     connection.execute(str(DropTable(_CycleModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
     connection.execute(str(DropTable(_DataNodeModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
     connection.execute(str(DropTable(_JobModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))

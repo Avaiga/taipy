@@ -52,11 +52,6 @@ def init_managers():
     _JobManagerFactory._build_manager()._delete_all()
 
 
-def clear_sql_session():
-    _build_connection.cache_clear()
-    _SQLConnection._connection = None
-
-
 def test_create_jobs(init_sql_repo):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     init_managers()
@@ -165,8 +160,6 @@ def test_delete_job(init_sql_repo):
 
 
 def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
-    clear_sql_session()
-
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     init_managers()
 
@@ -196,8 +189,6 @@ def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
 
 
 def test_force_deleting_unfinished_job(init_sql_repo):
-    clear_sql_session()
-
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     init_managers()
 

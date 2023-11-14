@@ -21,15 +21,15 @@ from taipy.config.config import Config
 from ...exceptions import MissingRequiredProperty
 
 
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
 class _SQLConnection:
     _connection = None
-
-    @classmethod
-    def dict_factory(cls, cursor, row):
-        d = {}
-        for idx, col in enumerate(cursor.description):
-            d[col[0]] = row[idx]
-        return d
 
     @classmethod
     def init_db(cls):
@@ -37,7 +37,7 @@ class _SQLConnection:
             return cls._connection
 
         cls._connection = _build_connection()
-        cls._connection.row_factory = cls.dict_factory
+        cls._connection.row_factory = dict_factory
 
         from ..._version._version_model import _VersionModel
         from ...cycle._cycle_model import _CycleModel
@@ -68,7 +68,6 @@ class _SQLConnection:
         return cls._connection
 
 
-@lru_cache
 def _build_connection() -> Connection:
     # Set SQLite threading mode to Serialized, means that threads may share the module, connections and cursors
     sqlite3.threadsafety = 3
