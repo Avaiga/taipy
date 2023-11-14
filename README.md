@@ -62,7 +62,6 @@ from taipy import Gui
 
 excitement_page = """
 # Welcome to Taipy
-## Getting started with Taipy
 ### How excited are you to try Taipy?
 
 <|{excitement}|slider|min=1|max=100|>
@@ -76,7 +75,7 @@ Gui(page=excitement_page).run()
 *RUN*🏃🏽‍♀️
 <div align="center">🎊 TA-DA! 🎊</div>
 <br>
-<div align="center"><img src="tiny_demo_readme.gif" width="50%" alt="Tiny Demo"></img></div>
+<div align="center"><img src="readme_img/tiny_demo_readme.gif" width="50%" alt="Tiny Demo"></img></div>
 
 <br>
 
