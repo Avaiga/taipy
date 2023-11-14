@@ -59,7 +59,7 @@ class _JobModel(_BaseModel):
             submit_entity_id=data["submit_entity_id"],
             creation_date=data["creation_date"],
             subscribers=_BaseModel._deserialize_attribute(data["subscribers"]),
-            stacktrace=data["stacktrace"],
+            stacktrace=_BaseModel._deserialize_attribute(data["stacktrace"]),
             version=data["version"],
         )
 
