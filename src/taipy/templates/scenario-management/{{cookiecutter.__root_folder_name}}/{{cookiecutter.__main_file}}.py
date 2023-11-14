@@ -11,11 +11,7 @@ def on_init(state):
 
 
 def on_change(state, var, val):
-    if var == "selected_scenario" and val:
-        state.selected_scenario = val  # BUG
-        state.selected_data_node = None
     if var == "selected_data_node" and val:
-        state.selected_data_node = val  # BUG
         state["scenario"].manage_data_node_partial(state)
 
 

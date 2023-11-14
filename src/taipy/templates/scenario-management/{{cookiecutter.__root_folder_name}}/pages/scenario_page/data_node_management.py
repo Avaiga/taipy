@@ -19,7 +19,7 @@ def build_dn_partial(dn, dn_label):
     #                                                                                                                  #
     # Example:                                                                                                         #
     if dn_label == "initial_dataset":
-        partial_content += "Select your CSV file: <|{selected_data_node.path}|file_selector|extensions=.csv|>\n\n"
+        partial_content += "Select your CSV file: <|{selected_data_node.path}|file_selector|extensions=.csv|on_action={lambda s: s.refresh('selected_scenario')}|>\n\n"
     # Comment, remove or replace the previous lines with your own use case                                             #
     # ##################################################################################################################
 

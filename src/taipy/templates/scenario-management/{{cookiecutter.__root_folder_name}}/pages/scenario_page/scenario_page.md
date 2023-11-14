@@ -2,7 +2,7 @@
 
 <|part|render={selected_scenario}|
 
-<|{selected_scenario}|scenario|not expandable|expanded|>
+<|{selected_scenario}|scenario|not expandable|expanded|on_submission_change=notify_on_submission|>
 
 <|{selected_scenario}|scenario_dag|>
 |>
