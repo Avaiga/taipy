@@ -120,7 +120,7 @@ class Job(_Entity, _Labeled):
         if self.submit_id:
             from ..submission._submission_manager_factory import _SubmissionManagerFactory
 
-            _SubmissionManagerFactory._build_manager()._get(self.submit_id).update_submission_status()
+            _SubmissionManagerFactory._build_manager()._get(self.submit_id)._update_submission_status()
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

@@ -62,7 +62,7 @@ def __test_update_submission_status(job_ids, job_statuses, expected_submission_s
     submission.jobs = jobs
 
     assert submission.submission_status == SubmissionStatus.UNDEFINED
-    submission.update_submission_status()
+    submission._update_submission_status()
     assert submission.submission_status == expected_submission_status
 
 
