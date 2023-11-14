@@ -325,8 +325,8 @@ def test_submit_task():
         submit_calls = []
         submit_ids = []
 
-        def submit_task(self, task, submit_id=None, callbacks=None, force=False, wait=False, timeout=None):
-            submit_id = submit_id if submit_id else f"SUBMISSION_{str(uuid.uuid4())}"
+        def submit_task(self, task, callbacks=None, force=False, wait=False, timeout=None):
+            submit_id = f"SUBMISSION_{str(uuid.uuid4())}"
             self.submit_calls.append(task)
             self.submit_ids.append(submit_id)
             return None

@@ -67,19 +67,19 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created Jobs.
         """
-        submission = _SubmissionManagerFactory._build_manager()._create(submittable.id)
+        submission = _SubmissionManagerFactory._build_manager()._create(submittable.id)  # type: ignore
         jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
             for ts in tasks:
                 for task in ts:
                     jobs.append(
-                        cls._submit_task(
+                        cls._lock_dn_output_and_create_job(
                             task, submission.id, submission.entity_id, callbacks=callbacks, force=force  # type: ignore
                         )
                     )
 
-        submission.jobs = jobs
+        submission.jobs = jobs  # type: ignore
 
         for job in jobs:
             cls._orchestrate_job_to_run_or_block(job)
@@ -119,9 +119,9 @@ class _Orchestrator(_AbstractOrchestrator):
         submit_id = submission.id
 
         with cls.lock:
-            job = cls._submit_task(task, submit_id, submission.entity_id, callbacks, force)
+            job = cls._lock_dn_output_and_create_job(task, submit_id, submission.entity_id, callbacks, force)
 
-        submission.jobs = [job]
+        submission.jobs = [job]  # type: ignore
 
         cls._orchestrate_job_to_run_or_block(job)
 
@@ -134,7 +134,7 @@ class _Orchestrator(_AbstractOrchestrator):
         return job
 
     @classmethod
-    def _submit_task(  # TODO: rename to create job
+    def _lock_dn_output_and_create_job(
         cls,
         task: Task,
         submit_id: str,

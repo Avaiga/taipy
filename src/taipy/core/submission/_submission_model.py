@@ -10,12 +10,13 @@
 # specific language governing permissions and limitations under the License.
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from sqlalchemy import JSON, Column, Enum, String, Table
 
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
+from ..job.job_id import JobId
 from .submission_status import SubmissionStatus
 
 
@@ -34,7 +35,7 @@ class _SubmissionModel(_BaseModel):
     )
     id: str
     entity_id: str
-    job_ids: List[str]
+    job_ids: Union[List[JobId], List]
     creation_date: str
     submission_status: SubmissionStatus
     version: str

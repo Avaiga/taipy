@@ -61,7 +61,7 @@ class Submission(_Entity, _Labeled):
     ):
         self._entity_id = entity_id
         self.id = id or self.__new_id()
-        self._jobs = jobs or []
+        self._jobs: Union[List[Job], List[JobId], List] = jobs or []
         self._creation_date = creation_date or datetime.now()
         self._submission_status = submission_status or SubmissionStatus.UNDEFINED
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
@@ -79,7 +79,23 @@ class Submission(_Entity, _Labeled):
     def creation_date(self):
         return self._creation_date
 
-    @property
+    def get_label(self) -> str:
+        """Returns the submission simple label prefixed by its owner label.
+
+        Returns:
+            The label of the submission as a string.
+        """
+        return self._get_label()
+
+    def get_simple_label(self) -> str:
+        """Returns the submission simple label.
+
+        Returns:
+            The simple label of the submission as a string.
+        """
+        return self._get_simple_label()
+
+    @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def jobs(self) -> List[Job]:
         jobs = []
@@ -90,7 +106,7 @@ class Submission(_Entity, _Labeled):
 
         return jobs
 
-    @jobs.setter
+    @jobs.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
     def jobs(self, jobs: Union[List[Job], List[JobId]]):
         self._jobs = jobs
