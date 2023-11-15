@@ -17,7 +17,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.taipy.core import JobId, TaskId
+from src.taipy.core import TaskId
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
@@ -35,7 +35,7 @@ def test_create_submission(scenario, job, current_datetime):
     assert submission_1.entity_id == scenario.id
     assert submission_1.jobs == []
     assert isinstance(submission_1.creation_date, datetime)
-    assert submission_1._submission_status == SubmissionStatus.UNDEFINED
+    assert submission_1._submission_status == SubmissionStatus.SUBMITTED
     assert submission_1._version is not None
 
     submission_2 = Submission(
@@ -139,6 +139,7 @@ def test_update_single_submission_status(job_ids, expected_submission_status):
         (["job1_failed", "job6_completed"], SubmissionStatus.FAILED),
         (["job1_failed", "job7_skipped"], SubmissionStatus.FAILED),
         (["job1_failed", "job8_abandoned"], SubmissionStatus.FAILED),
+        (["job2_canceled", "job1_failed"], SubmissionStatus.FAILED),
         (["job3_blocked", "job1_failed"], SubmissionStatus.FAILED),
         (["job4_pending", "job1_failed"], SubmissionStatus.FAILED),
         (["job5_running", "job1_failed"], SubmissionStatus.FAILED),
@@ -161,7 +162,6 @@ def test_update_submission_status_with_one_failed_job_in_jobs(job_ids, expected_
         (["job2_canceled", "job6_completed"], SubmissionStatus.CANCELED),
         (["job2_canceled", "job7_skipped"], SubmissionStatus.CANCELED),
         (["job2_canceled", "job8_abandoned"], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job1_failed"], SubmissionStatus.CANCELED),
         (["job3_blocked", "job2_canceled"], SubmissionStatus.CANCELED),
         (["job4_pending", "job2_canceled"], SubmissionStatus.CANCELED),
         (["job5_running", "job2_canceled"], SubmissionStatus.CANCELED),
@@ -296,8 +296,8 @@ def test_auto_set_and_reload():
     assert submission_2.jobs == [job_2, job_1]
 
     # auto set & reload on submission_status attribute
-    assert submission_1.submission_status == SubmissionStatus.UNDEFINED
-    assert submission_2.submission_status == SubmissionStatus.UNDEFINED
+    assert submission_1.submission_status == SubmissionStatus.SUBMITTED
+    assert submission_2.submission_status == SubmissionStatus.SUBMITTED
     submission_1.submission_status = SubmissionStatus.BLOCKED
     assert submission_1.submission_status == SubmissionStatus.BLOCKED
     assert submission_2.submission_status == SubmissionStatus.BLOCKED

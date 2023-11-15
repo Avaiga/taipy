@@ -26,7 +26,7 @@ def test_create_submission(scenario):
     assert submission_1.entity_id == scenario.id
     assert submission_1.jobs == []
     assert isinstance(submission_1.creation_date, datetime)
-    assert submission_1._submission_status == SubmissionStatus.UNDEFINED
+    assert submission_1._submission_status == SubmissionStatus.SUBMITTED
 
 
 def test_get_submission():

@@ -53,7 +53,7 @@ class Submission(_Entity, _Labeled):
         self.id = id or self.__new_id()
         self._jobs: Union[List[Job], List[JobId], List] = jobs or []
         self._creation_date = creation_date or datetime.now()
-        self._submission_status = submission_status or SubmissionStatus.UNDEFINED
+        self._submission_status = submission_status or SubmissionStatus.SUBMITTED
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
 
     @staticmethod
@@ -129,8 +129,9 @@ class Submission(_Entity, _Labeled):
     def __ge__(self, other):
         return self.creation_date.timestamp() == other.creation_date.timestamp() or self > other
 
-    def _update_submission_status(self, plop: Job):
-        submission_status = SubmissionStatus.UNDEFINED
+    def _update_submission_status(self, _: Job):
+        abandoned = False
+        canceled = False
         blocked = False
         pending = False
         running = False
@@ -140,28 +141,40 @@ class Submission(_Entity, _Labeled):
             if not job:
                 continue
             if job.is_failed():
-                submission_status = SubmissionStatus.FAILED
-                break
+                self.submission_status = SubmissionStatus.FAILED  # type: ignore
+                return
             if job.is_canceled():
-                submission_status = SubmissionStatus.CANCELED
-                break
-            if not blocked and job.is_blocked():
+                canceled = True
+            if job.is_blocked():
                 blocked = True
-            if not pending and job.is_pending():
+                continue
+            if job.is_pending() or job.is_submitted():
                 pending = True
-            if not running and job.is_running():
+                continue
+            if job.is_running():
                 running = True
-            if not completed and (job.is_completed() or job.is_skipped()):
+                continue
+            if job.is_completed() or job.is_skipped():
                 completed = True
-
-        if submission_status == SubmissionStatus.UNDEFINED:
-            if pending:
-                submission_status = SubmissionStatus.PENDING
-            elif blocked:
-                submission_status = SubmissionStatus.BLOCKED
-            elif running:
-                submission_status = SubmissionStatus.RUNNING
-            elif completed:
-                submission_status = SubmissionStatus.COMPLETED
-
-        self.submission_status = submission_status  # type: ignore
+                continue
+            if job.is_abandoned():
+                abandoned = True
+        if canceled:
+            self.submission_status = SubmissionStatus.CANCELED  # type: ignore
+            return
+        if abandoned:
+            self.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
+            return
+        if running:
+            self.submission_status = SubmissionStatus.RUNNING  # type: ignore
+            return
+        if pending:
+            self.submission_status = SubmissionStatus.PENDING  # type: ignore
+            return
+        if blocked:
+            self.submission_status = SubmissionStatus.BLOCKED  # type: ignore
+            return
+        if completed:
+            self.submission_status = SubmissionStatus.COMPLETED  # type: ignore
+            return
+        self.submission_status = SubmissionStatus.UNDEFINED  # type: ignore

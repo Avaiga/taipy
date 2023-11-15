@@ -19,8 +19,11 @@ class SubmissionStatus(_ReprEnum):
 
     The possible values are:
 
-    - `UNDEFINED`: AN `UNDEFINED` submission has been created for execution but not processed yet by
+    - `SUBMITTED`: A `SUBMITTED` submission has been submitted for execution but not processed yet by
         the orchestrator.
+
+    - `UNDEFINED`: AN `UNDEFINED` submission's jobs have been submitted for execution but got some undefined
+        status changes.
 
     - `PENDING`: A `PENDING` submission has been enqueued by the orchestrator. It is waiting for an executor
         to be available for its execution.
@@ -36,6 +39,7 @@ class SubmissionStatus(_ReprEnum):
     - `COMPLETED`: A `COMPLETED` submission has successfully been executed.
     """
 
+    SUBMITTED = 0
     UNDEFINED = 1
     BLOCKED = 2
     PENDING = 3

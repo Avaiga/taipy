@@ -12,28 +12,12 @@
 from datetime import datetime
 from time import sleep
 
-import pytest
-
 from src.taipy.core import Task
-from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._repository.db._sql_session import _build_engine, _SQLSession
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data import InMemoryDataNode
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.exceptions.exceptions import JobNotDeletedException
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job.job_id import JobId
-from src.taipy.core.job.status import Status
 from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from src.taipy.core.submission.submission import Submission
 from src.taipy.core.submission.submission_status import SubmissionStatus
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
 
 
 def init_managers():
@@ -56,7 +40,7 @@ def test_create_submission(scenario, init_sql_repo):
     assert submission_1.entity_id == scenario.id
     assert submission_1.jobs == []
     assert isinstance(submission_1.creation_date, datetime)
-    assert submission_1._submission_status == SubmissionStatus.UNDEFINED
+    assert submission_1._submission_status == SubmissionStatus.SUBMITTED
 
 
 def test_get_submission(init_sql_repo):
