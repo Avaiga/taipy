@@ -20,6 +20,7 @@ from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from ..job._job_manager_factory import _JobManagerFactory
 from ..notification import EventEntityType, EventOperation, _publish_event
+from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from .cycle import Cycle
 from .cycle_id import CycleId
 
@@ -117,6 +118,12 @@ class _CycleManager(_Manager[Cycle]):
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
+
+        submissions = _SubmissionManagerFactory._build_manager()._get_all()
+        submitted_entity_ids = list(entity_ids.scenario_ids.union(entity_ids.sequence_ids, entity_ids.task_ids))
+        for submission in submissions:
+            if submission.entity_id in submitted_entity_ids:
+                entity_ids.submission_ids.add(submission.id)
 
         return entity_ids
 

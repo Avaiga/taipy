@@ -20,6 +20,7 @@ class _EntityIds:
         self.sequence_ids = set()
         self.job_ids = set()
         self.cycle_ids = set()
+        self.submission_ids = set()
 
     def __add__(self, other: _EntityIds):
         self.data_node_ids.update(other.data_node_ids)
@@ -28,6 +29,7 @@ class _EntityIds:
         self.sequence_ids.update(other.sequence_ids)
         self.job_ids.update(other.job_ids)
         self.cycle_ids.update(other.cycle_ids)
+        self.submission_ids.update(other.submission_ids)
         return self
 
     def __iadd__(self, other: _EntityIds):

@@ -174,4 +174,4 @@ class Submission(_Entity, _Labeled):
             elif completed:
                 submission_status = SubmissionStatus.COMPLETED
 
-        self.submission_status = submission_status
+        self.submission_status = submission_status  # type: ignore

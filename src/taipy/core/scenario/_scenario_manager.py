@@ -40,6 +40,7 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import EventEntityType, EventOperation, _publish_event
+from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from .scenario import Scenario
 from .scenario_id import ScenarioId
@@ -398,10 +399,18 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for data_node in scenario.data_nodes.values():
             if data_node.owner_id == scenario.id:
                 entity_ids.data_node_ids.add(data_node.id)
+
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
+
+        submissions = _SubmissionManagerFactory._build_manager()._get_all()
+        submitted_entity_ids = list(entity_ids.scenario_ids.union(entity_ids.sequence_ids, entity_ids.task_ids))
+        for submission in submissions:
+            if submission.entity_id in submitted_entity_ids:
+                entity_ids.submission_ids.add(submission.id)
+
         return entity_ids
 
     @classmethod

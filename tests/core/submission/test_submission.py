@@ -17,7 +17,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.taipy.core import TaskId, JobId
+from src.taipy.core import JobId, TaskId
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
@@ -99,9 +99,13 @@ def mock_get_jobs(job_ids):
 
 
 def __test_update_submission_status(job_ids, expected_submission_status):
-    with (patch("src.taipy.core.submission.submission.Submission.jobs",
-                new_callable=mock.PropertyMock,
-                return_value=(mock_get_jobs(job_ids)))):
+    with (
+        patch(
+            "src.taipy.core.submission.submission.Submission.jobs",
+            new_callable=mock.PropertyMock,
+            return_value=(mock_get_jobs(job_ids)),
+        )
+    ):
         submission = Submission("submission_id")
         submission._update_submission_status(None)
         assert submission.submission_status == expected_submission_status
@@ -122,7 +126,6 @@ def __test_update_submission_status(job_ids, expected_submission_status):
 )
 def test_update_single_submission_status(job_ids, expected_submission_status):
     __test_update_submission_status(job_ids, expected_submission_status)
-
 
 
 @pytest.mark.parametrize(
@@ -167,9 +170,7 @@ def test_update_submission_status_with_one_failed_job_in_jobs(job_ids, expected_
         (["job8_abandoned", "job2_canceled"], SubmissionStatus.CANCELED),
     ],
 )
-def test_update_submission_status_with_one_canceled_job_in_jobs(
-    job_ids, expected_submission_status
-):
+def test_update_submission_status_with_one_canceled_job_in_jobs(job_ids, expected_submission_status):
     __test_update_submission_status(job_ids, expected_submission_status)
 
 
@@ -185,9 +186,7 @@ def test_update_submission_status_with_one_canceled_job_in_jobs(
         (["job7_skipped", "job4_pending"], SubmissionStatus.PENDING),
     ],
 )
-def test_update_submission_status_with_no_failed_or_cancel_one_pending_in_jobs(
-    job_ids, expected_submission_status
-):
+def test_update_submission_status_with_no_failed_or_cancel_one_pending_in_jobs(job_ids, expected_submission_status):
     __test_update_submission_status(job_ids, expected_submission_status)
 
 
@@ -195,14 +194,14 @@ def test_update_submission_status_with_no_failed_or_cancel_one_pending_in_jobs(
     "job_ids, expected_submission_status",
     [
         (["job5_running", "job3_blocked"], SubmissionStatus.RUNNING),
-        # (["job5_running", "job4_pending"], SubmissionStatus.RUNNING),
-        # (["job5_running", "job5_running"], SubmissionStatus.RUNNING),
-        # (["job5_running", "job6_completed"], SubmissionStatus.RUNNING),
-        # (["job5_running", "job7_skipped"], SubmissionStatus.RUNNING),
-        # (["job3_blocked", "job5_running"], SubmissionStatus.RUNNING),
-        # (["job4_pending", "job5_running"], SubmissionStatus.RUNNING),
-        # (["job6_completed", "job5_running"], SubmissionStatus.RUNNING),
-        # (["job7_skipped", "job5_running"], SubmissionStatus.RUNNING),
+        (["job5_running", "job4_pending"], SubmissionStatus.RUNNING),
+        (["job5_running", "job5_running"], SubmissionStatus.RUNNING),
+        (["job5_running", "job6_completed"], SubmissionStatus.RUNNING),
+        (["job5_running", "job7_skipped"], SubmissionStatus.RUNNING),
+        (["job3_blocked", "job5_running"], SubmissionStatus.RUNNING),
+        (["job4_pending", "job5_running"], SubmissionStatus.RUNNING),
+        (["job6_completed", "job5_running"], SubmissionStatus.RUNNING),
+        (["job7_skipped", "job5_running"], SubmissionStatus.RUNNING),
     ],
 )
 def test_update_submission_status_with_no_failed_cancel_nor_pending_one_running_in_jobs(
@@ -236,9 +235,7 @@ def test_update_submission_status_with_no_failed_cancel_pending_nor_running_one_
         (["job7_skipped", "job7_skipped"], SubmissionStatus.COMPLETED),
     ],
 )
-def test_update_submission_status_with_only_completed_or_skipped_in_jobs(
-    job_ids, expected_submission_status
-):
+def test_update_submission_status_with_only_completed_or_skipped_in_jobs(job_ids, expected_submission_status):
     __test_update_submission_status(job_ids, expected_submission_status)
 
 

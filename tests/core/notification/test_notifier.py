@@ -590,6 +590,7 @@ def test_publish_event():
 
     job = scenario.submit()[0]
 
+    assert registration_queue.qsize() == 6
     published_events = []
     while registration_queue.qsize() != 0:
         published_events.append(registration_queue.get())
@@ -600,21 +601,18 @@ def test_publish_event():
         EventOperation.UPDATE,
         EventOperation.UPDATE,
         EventOperation.UPDATE,
-        EventOperation.UPDATE,
         EventOperation.SUBMISSION,
     ]
-    expected_attribute_names = [None, None, "jobs", "submission_status", "submission_status", "status", None]
+    expected_attribute_names = [None, None, "jobs", "status", "submission_status", None]
     expected_event_types = [
         EventEntityType.SUBMISSION,
         EventEntityType.JOB,
         EventEntityType.SUBMISSION,
-        EventEntityType.SUBMISSION,
-        EventEntityType.SUBMISSION,
         EventEntityType.JOB,
+        EventEntityType.SUBMISSION,
         EventEntityType.SCENARIO,
     ]
-    expected_event_entity_id = [job.submit_id, job.id, job.submit_id, job.submit_id, job.submit_id, job.id, scenario.id]
-
+    expected_event_entity_id = [job.submit_id, job.id, job.submit_id, job.id, job.submit_id, scenario.id]
     assert all(
         [
             event.entity_type == expected_event_types[i]
@@ -628,7 +626,7 @@ def test_publish_event():
     # Test DELETION Event
 
     tp.delete(scenario.id)
-    assert registration_queue.qsize() == 6
+    assert registration_queue.qsize() == 7
 
     published_events = []
     while registration_queue.qsize() != 0:
@@ -641,9 +639,10 @@ def test_publish_event():
         EventEntityType.TASK,
         EventEntityType.JOB,
         EventEntityType.DATA_NODE,
+        EventEntityType.SUBMISSION,
     ]
 
-    expected_event_entity_id = [cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id]
+    expected_event_entity_id = [cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id, job.submit_id]
     expected_event_operation_type = [EventOperation.DELETION] * len(expected_event_types)
 
     assert all(
