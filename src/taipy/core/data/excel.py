@@ -311,6 +311,46 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         except pd.errors.EmptyDataError:
             return modin_pd.DataFrame()
 
+    def __append_excel_with_single_sheet(self, append_excel_fct, *args, **kwargs):
+        sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
+
+        with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
+            if sheet_name:
+                if not isinstance(sheet_name, str):
+                    sheet_name = sheet_name[0]
+                append_excel_fct(
+                    writer, *args, **kwargs, sheet_name=sheet_name, startrow=writer.sheets[sheet_name].max_row
+                )
+            else:
+                sheet_name = list(writer.sheets.keys())[0]
+                append_excel_fct(writer, *args, **kwargs, startrow=writer.sheets[sheet_name].max_row)
+
+    def __append_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
+        with pd.ExcelWriter(self._path, mode="a", engine="openpyxl", if_sheet_exists="overlay") as writer:
+            # Each key stands for a sheet name
+            for sheet_name in data.keys():
+                if isinstance(data[sheet_name], np.ndarray):
+                    df = pd.DataFrame(data[sheet_name])
+                else:
+                    df = data[sheet_name]
+
+                if columns:
+                    data[sheet_name].columns = columns
+
+                df.to_excel(
+                    writer, sheet_name=sheet_name, index=False, header=False, startrow=writer.sheets[sheet_name].max_row
+                )
+
+    def _append(self, data: Any):
+        if isinstance(data, Dict) and all(
+            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
+        ):
+            self.__append_excel_with_multiple_sheets(data)
+        elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+            self.__append_excel_with_single_sheet(data.to_excel, index=False, header=False)
+        else:
+            self.__append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
+
     def __write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
         sheet_name = self.properties.get(self.__SHEET_NAME_PROPERTY)
         if sheet_name:

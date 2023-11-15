@@ -67,7 +67,7 @@ class TestConfig:
         assert len(Config.data_nodes) == 2
 
     def test_configure_sql_data_node(self):
-        a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope, vp, k = (
+        a, b, c, d, e, f, g, h, i, j, k, extra_args, exposed_type, scope, vp, k = (
             "foo",
             "user",
             "pwd",
@@ -75,6 +75,7 @@ class TestConfig:
             "engine",
             "read_query",
             "write_query_builder",
+            "append_query_builder",
             "port",
             "host",
             "driver",
@@ -84,7 +85,7 @@ class TestConfig:
             timedelta(1),
             "qux",
         )
-        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope, vp, property=k)
+        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, k, extra_args, exposed_type, scope, vp, property=k)
         assert len(Config.data_nodes) == 2
 
     def test_configure_mongo_data_node(self):

@@ -210,6 +210,25 @@ class TestMongoCollectionDataNode:
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
     @pytest.mark.parametrize(
+        "data",
+        [
+            ([{"foo": 11, "bar": 22}, {"foo": 33, "bar": 44}]),
+            ({"foz": 1, "baz": 2}),
+        ],
+    )
+    def test_append(self, properties, data):
+        mongo_dn = MongoCollectionDataNode("foo", Scope.SCENARIO, properties=properties)
+        mongo_dn.append(data)
+
+        original_data = [{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]
+        mongo_dn.write(original_data)
+
+        mongo_dn.append(data)
+        assert len(mongo_dn.read()) == len(data if isinstance(data, list) else [data]) + len(original_data)
+
+    @mongomock.patch(servers=(("localhost", 27017),))
+    @pytest.mark.parametrize("properties", __properties)
+    @pytest.mark.parametrize(
         "data,written_data",
         [
             ([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}], [{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]),

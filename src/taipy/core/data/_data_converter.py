@@ -33,6 +33,8 @@ class _DataNodeConverter(_AbstractConverter):
     _EXPOSED_TYPE_KEY = "exposed_type"
     __WRITE_QUERY_BUILDER_NAME_KEY = "write_query_builder_name"
     __WRITE_QUERY_BUILDER_MODULE_KEY = "write_query_builder_module"
+    __APPEND_QUERY_BUILDER_NAME_KEY = "append_query_builder_name"
+    __APPEND_QUERY_BUILDER_MODULE_KEY = "append_query_builder_module"
     # TODO: This limits the valid string to only the ones provided by the Converter.
     # While in practice, each data nodes might have different exposed type possibilities.
     # The previous implementation used tabular datanode but it's no longer suitable so
@@ -71,10 +73,15 @@ class _DataNodeConverter(_AbstractConverter):
 
     @classmethod
     def __serialize_sql_dn_properties(cls, datanode_properties: dict) -> dict:
-        query_builder = datanode_properties.get(SQLDataNode._WRITE_QUERY_BUILDER_KEY)
-        datanode_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY] = query_builder.__name__ if query_builder else None
-        datanode_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY] = query_builder.__module__ if query_builder else None
+        write_qb = datanode_properties.get(SQLDataNode._WRITE_QUERY_BUILDER_KEY)
+        datanode_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY] = write_qb.__name__ if write_qb else None
+        datanode_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY] = write_qb.__module__ if write_qb else None
         datanode_properties.pop(SQLDataNode._WRITE_QUERY_BUILDER_KEY, None)
+
+        append_qb = datanode_properties.get(SQLDataNode._APPEND_QUERY_BUILDER_KEY)
+        datanode_properties[cls.__APPEND_QUERY_BUILDER_NAME_KEY] = append_qb.__name__ if append_qb else None
+        datanode_properties[cls.__APPEND_QUERY_BUILDER_MODULE_KEY] = append_qb.__module__ if append_qb else None
+        datanode_properties.pop(SQLDataNode._APPEND_QUERY_BUILDER_KEY, None)
 
         return datanode_properties
 
@@ -209,7 +216,6 @@ class _DataNodeConverter(_AbstractConverter):
 
     @classmethod
     def __deserialize_sql_dn_model_properties(cls, datanode_model_properties: dict) -> dict:
-
         if datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]:
             datanode_model_properties[SQLDataNode._WRITE_QUERY_BUILDER_KEY] = _load_fct(
                 datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY],
@@ -220,6 +226,17 @@ class _DataNodeConverter(_AbstractConverter):
 
         del datanode_model_properties[cls.__WRITE_QUERY_BUILDER_NAME_KEY]
         del datanode_model_properties[cls.__WRITE_QUERY_BUILDER_MODULE_KEY]
+
+        if datanode_model_properties[cls.__APPEND_QUERY_BUILDER_MODULE_KEY]:
+            datanode_model_properties[SQLDataNode._APPEND_QUERY_BUILDER_KEY] = _load_fct(
+                datanode_model_properties[cls.__APPEND_QUERY_BUILDER_MODULE_KEY],
+                datanode_model_properties[cls.__APPEND_QUERY_BUILDER_NAME_KEY],
+            )
+        else:
+            datanode_model_properties[SQLDataNode._APPEND_QUERY_BUILDER_KEY] = None
+
+        del datanode_model_properties[cls.__APPEND_QUERY_BUILDER_NAME_KEY]
+        del datanode_model_properties[cls.__APPEND_QUERY_BUILDER_MODULE_KEY]
 
         return datanode_model_properties
 

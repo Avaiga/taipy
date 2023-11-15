@@ -120,6 +120,7 @@ class DataNodeConfig(Section):
     # SQL
     _REQUIRED_READ_QUERY_SQL_PROPERTY = "read_query"
     _REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY = "write_query_builder"
+    _OPTIONAL_APPEND_QUERY_BUILDER_SQL_PROPERTY = "append_query_builder"
     # MONGO
     _REQUIRED_DB_NAME_MONGO_PROPERTY = "db_name"
     _REQUIRED_COLLECTION_NAME_MONGO_PROPERTY = "collection_name"
@@ -207,6 +208,7 @@ class DataNodeConfig(Section):
             _OPTIONAL_HOST_SQL_PROPERTY: "localhost",
             _OPTIONAL_PORT_SQL_PROPERTY: 1433,
             _OPTIONAL_DRIVER_SQL_PROPERTY: "",
+            _OPTIONAL_APPEND_QUERY_BUILDER_SQL_PROPERTY: None,
             _OPTIONAL_FOLDER_PATH_SQLITE_PROPERTY: None,
             _OPTIONAL_FILE_EXTENSION_SQLITE_PROPERTY: ".db",
             _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY: None,
@@ -867,6 +869,7 @@ class DataNodeConfig(Section):
         db_engine: str,
         read_query: str,
         write_query_builder: Callable,
+        append_query_builder: Optional[Callable] = None,
         db_username: Optional[str] = None,
         db_password: Optional[str] = None,
         db_host: Optional[str] = None,
@@ -889,7 +892,9 @@ class DataNodeConfig(Section):
                 or *"postgresql"*.
             read_query (str): The SQL query string used to read the data from the database.
             write_query_builder (Callable): A callback function that takes the data as an input parameter
-                and returns a list of SQL queries.
+                and returns a list of SQL queries to be executed when writing data to the data node.
+            append_query_builder (Optional[Callable]): A callback function that takes the data as an input parameter
+                and returns a list of SQL queries to be executed when appending data to the data node.
             db_username (Optional[str]): The database username. Required by the *"mssql"*, *"mysql"*, and
                 *"postgresql"* engines.
             db_password (Optional[str]): The database password. Required by the *"mssql"*, *"mysql"*, and
@@ -927,6 +932,8 @@ class DataNodeConfig(Section):
             }
         )
 
+        if append_query_builder is not None:
+            properties[cls._OPTIONAL_APPEND_QUERY_BUILDER_SQL_PROPERTY] = append_query_builder
         if db_username is not None:
             properties[cls._OPTIONAL_DB_USERNAME_SQL_PROPERTY] = db_username
         if db_password is not None:

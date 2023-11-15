@@ -937,6 +937,204 @@ class TestExcelDataNode:
         for sheet_name in sheet_names:
             assert np.array_equal(excel_dn.read()[sheet_name].values, multi_sheet_content[sheet_name].values)
 
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+            ([[11, 22, 33], [44, 55, 66]]),
+        ],
+    )
+    def test_append_pandas_with_sheetname(self, excel_file, default_data_frame, content):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1"})
+        assert_frame_equal(dn.read(), default_data_frame)
+
+        dn.append(content)
+        assert_frame_equal(
+            dn.read(),
+            pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
+        )
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+            ([[11, 22, 33], [44, 55, 66]]),
+        ],
+    )
+    def test_append_pandas_without_sheetname(self, excel_file, default_data_frame, content):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file})
+        assert_frame_equal(dn.read()["Sheet1"], default_data_frame)
+
+        dn.append(content)
+        assert_frame_equal(
+            dn.read()["Sheet1"],
+            pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
+        )
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            (
+                {
+                    "Sheet1": pd.DataFrame([{"a": 11, "b": 22, "c": 33}]),
+                    "Sheet2": pd.DataFrame([{"a": 44, "b": 55, "c": 66}]),
+                }
+            ),
+            (
+                {
+                    "Sheet1": pd.DataFrame({"a": [11, 44], "b": [22, 55], "c": [33, 66]}),
+                    "Sheet2": pd.DataFrame([{"a": 77, "b": 88, "c": 99}]),
+                }
+            ),
+            ({"Sheet1": np.array([[11, 22, 33], [44, 55, 66]]), "Sheet2": np.array([[77, 88, 99]])}),
+        ],
+    )
+    def test_append_pandas_multisheet(self, excel_file_with_multi_sheet, default_multi_sheet_data_frame, content):
+        dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file_with_multi_sheet, "sheet_name": ["Sheet1", "Sheet2"]}
+        )
+        assert_frame_equal(dn.read()["Sheet1"], default_multi_sheet_data_frame["Sheet1"])
+        assert_frame_equal(dn.read()["Sheet2"], default_multi_sheet_data_frame["Sheet2"])
+
+        dn.append(content)
+
+        assert_frame_equal(
+            dn.read()["Sheet1"],
+            pd.concat(
+                [default_multi_sheet_data_frame["Sheet1"], pd.DataFrame(content["Sheet1"], columns=["a", "b", "c"])]
+            ).reset_index(drop=True),
+        )
+        assert_frame_equal(
+            dn.read()["Sheet2"],
+            pd.concat(
+                [default_multi_sheet_data_frame["Sheet2"], pd.DataFrame(content["Sheet2"], columns=["a", "b", "c"])]
+            ).reset_index(drop=True),
+        )
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ({"Sheet1": pd.DataFrame([{"a": 11, "b": 22, "c": 33}])}),
+            (pd.DataFrame({"a": [11, 44], "b": [22, 55], "c": [33, 66]})),
+            ([[11, 22, 33], [44, 55, 66]]),
+        ],
+    )
+    def test_append_only_first_sheet_of_a_multisheet_file(
+        self, excel_file_with_multi_sheet, default_multi_sheet_data_frame, content
+    ):
+        dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file_with_multi_sheet, "sheet_name": ["Sheet1", "Sheet2"]}
+        )
+        assert_frame_equal(dn.read()["Sheet1"], default_multi_sheet_data_frame["Sheet1"])
+        assert_frame_equal(dn.read()["Sheet2"], default_multi_sheet_data_frame["Sheet2"])
+
+        dn.append(content)
+
+        appended_content = content["Sheet1"] if isinstance(content, dict) else content
+        assert_frame_equal(
+            dn.read()["Sheet1"],
+            pd.concat(
+                [default_multi_sheet_data_frame["Sheet1"], pd.DataFrame(appended_content, columns=["a", "b", "c"])]
+            ).reset_index(drop=True),
+        )
+        assert_frame_equal(dn.read()["Sheet2"], default_multi_sheet_data_frame["Sheet2"])
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+            ([[11, 22, 33], [44, 55, 66]]),
+        ],
+    )
+    def test_append_modin_with_sheetname(self, excel_file, default_data_frame, content):
+        dn = ExcelDataNode(
+            "foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "modin"}
+        )
+        df_equals(dn.read(), modin_pd.DataFrame(default_data_frame))
+
+        dn.append(content)
+        df_equals(
+            dn.read(),
+            modin_pd.concat(
+                [modin_pd.DataFrame(default_data_frame), modin_pd.DataFrame(content, columns=["a", "b", "c"])]
+            ).reset_index(drop=True),
+        )
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            (modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
+            ([[11, 22, 33], [44, 55, 66]]),
+        ],
+    )
+    def test_append_modin_without_sheetname(self, excel_file, default_data_frame, content):
+        dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file, "exposed_type": "modin"})
+        df_equals(dn.read()["Sheet1"], default_data_frame)
+
+        dn.append(content)
+        df_equals(
+            dn.read()["Sheet1"],
+            modin_pd.concat([default_data_frame, modin_pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(
+                drop=True
+            ),
+        )
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            (
+                {
+                    "Sheet1": modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}]),
+                    "Sheet2": modin_pd.DataFrame([{"a": 44, "b": 55, "c": 66}]),
+                }
+            ),
+            (
+                {
+                    "Sheet1": modin_pd.DataFrame({"a": [11, 44], "b": [22, 55], "c": [33, 66]}),
+                    "Sheet2": modin_pd.DataFrame([{"a": 77, "b": 88, "c": 99}]),
+                }
+            ),
+            ({"Sheet1": np.array([[11, 22, 33], [44, 55, 66]]), "Sheet2": np.array([[77, 88, 99]])}),
+        ],
+    )
+    def test_append_modin_multisheet(self, excel_file_with_multi_sheet, default_multi_sheet_data_frame, content):
+        dn = ExcelDataNode(
+            "foo",
+            Scope.SCENARIO,
+            properties={
+                "path": excel_file_with_multi_sheet,
+                "sheet_name": ["Sheet1", "Sheet2"],
+                "exposed_type": "modin",
+            },
+        )
+        df_equals(dn.read()["Sheet1"], default_multi_sheet_data_frame["Sheet1"])
+        df_equals(dn.read()["Sheet2"], default_multi_sheet_data_frame["Sheet2"])
+
+        dn.append(content)
+
+        df_equals(
+            dn.read()["Sheet1"],
+            modin_pd.concat(
+                [
+                    default_multi_sheet_data_frame["Sheet1"],
+                    modin_pd.DataFrame(content["Sheet1"], columns=["a", "b", "c"]),
+                ]
+            ).reset_index(drop=True),
+        )
+        df_equals(
+            dn.read()["Sheet2"],
+            modin_pd.concat(
+                [
+                    default_multi_sheet_data_frame["Sheet2"],
+                    modin_pd.DataFrame(content["Sheet2"], columns=["a", "b", "c"]),
+                ]
+            ).reset_index(drop=True),
+        )
+
     def test_filter_pandas_exposed_type_with_sheetname(self, excel_file):
         dn = ExcelDataNode(
             "foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "pandas"}

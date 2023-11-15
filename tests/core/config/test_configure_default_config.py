@@ -431,6 +431,7 @@ def test_set_default_sql_data_node_configuration():
         db_engine="mssql",
         read_query="SELECT * FROM default_table",
         write_query_builder=query_builder,
+        append_query_builder=query_builder,
         db_port=1010,
         db_host="default_host",
         db_driver="default server",
@@ -449,6 +450,7 @@ def test_set_default_sql_data_node_configuration():
     assert dn1.db_engine == "mssql"
     assert dn1.read_query == "SELECT * FROM default_table"
     assert dn1.write_query_builder == query_builder
+    assert dn1.append_query_builder == query_builder
     assert dn1.db_port == 1010
     assert dn1.db_host == "default_host"
     assert dn1.db_driver == "default server"
@@ -468,6 +470,7 @@ def test_set_default_sql_data_node_configuration():
     assert dn2.db_engine == "mssql"
     assert dn2.read_query == "SELECT * FROM table_2"
     assert dn2.write_query_builder == query_builder
+    assert dn2.append_query_builder == query_builder
     assert dn2.db_port == 2020
     assert dn2.db_host == "host_2"
     assert dn2.db_driver == "default server"
@@ -495,6 +498,7 @@ def test_set_default_sql_data_node_configuration():
     assert dn3.db_engine == "postgresql"
     assert dn3.read_query == "SELECT * FROM table_3"
     assert dn3.write_query_builder == query_builder
+    assert dn3.append_query_builder == query_builder
     assert dn3.db_port == 1010
     assert dn3.db_host == "default_host"
     assert dn3.db_driver == "default server"

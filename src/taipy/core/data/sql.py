@@ -17,7 +17,7 @@ from sqlalchemy import text
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..exceptions.exceptions import MissingRequiredProperty
+from ..exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
 from ._abstract_sql import _AbstractSQLDataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -55,7 +55,9 @@ class SQLDataNode(_AbstractSQLDataNode):
                 _"postgresql"_.
             - _"read_query"_ `(str)`: The SQL query string used to read the data from the database.
             - _"write_query_builder"_ `(Callable)`: A callback function that takes the data as an input parameter and
-                returns a list of SQL queries.
+                returns a list of SQL queries to be executed when writing data to the data node.
+            - _"append_query_builder"_ `(Callable)`: A callback function that takes the data as an input parameter and
+                returns a list of SQL queries to be executed when appending data to the data node.
             - _"db_username"_ `(str)`: The database username.
             - _"db_password"_ `(str)`: The database password.
             - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.
@@ -72,6 +74,7 @@ class SQLDataNode(_AbstractSQLDataNode):
     __STORAGE_TYPE = "sql"
     __READ_QUERY_KEY = "read_query"
     _WRITE_QUERY_BUILDER_KEY = "write_query_builder"
+    _APPEND_QUERY_BUILDER_KEY = "append_query_builder"
 
     def __init__(
         self,
@@ -116,6 +119,7 @@ class SQLDataNode(_AbstractSQLDataNode):
             {
                 self.__READ_QUERY_KEY,
                 self._WRITE_QUERY_BUILDER_KEY,
+                self._APPEND_QUERY_BUILDER_KEY,
             }
         )
 
@@ -126,9 +130,19 @@ class SQLDataNode(_AbstractSQLDataNode):
     def _get_base_read_query(self) -> str:
         return self.properties.get(self.__READ_QUERY_KEY)
 
+    def _do_append(self, data, engine, connection) -> None:
+        if not self.properties.get(self._APPEND_QUERY_BUILDER_KEY):
+            raise MissingAppendQueryBuilder
+
+        queries = self.properties.get(self._APPEND_QUERY_BUILDER_KEY)(data)
+        self.__execute_queries(queries, connection)
+
     def _do_write(self, data, engine, connection) -> None:
         queries = self.properties.get(self._WRITE_QUERY_BUILDER_KEY)(data)
-        if not isinstance(queries, list):
+        self.__execute_queries(queries, connection)
+
+    def __execute_queries(self, queries, connection) -> None:
+        if not isinstance(queries, List):
             queries = [queries]
         for query in queries:
             if isinstance(query, str):

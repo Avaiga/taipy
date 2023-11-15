@@ -183,6 +183,20 @@ class JSONDataNode(DataNode, _AbstractFileDataNode):
         with open(self._path, "r", encoding=self.properties[self.__ENCODING_KEY]) as f:
             return json.load(f, cls=self._decoder)
 
+    def _append(self, data: Any):
+        with open(self._path, "r+", encoding=self.properties[self.__ENCODING_KEY]) as f:
+            file_data = json.load(f, cls=self._decoder)
+            if isinstance(file_data, List):
+                if isinstance(data, List):
+                    file_data.extend(data)
+                else:
+                    file_data.append(data)
+            elif isinstance(data, Dict):
+                file_data.update(data)
+
+            f.seek(0)
+            json.dump(file_data, f, indent=4, cls=self._encoder)
+
     def _write(self, data: Any):
         with open(self._path, "w", encoding=self.properties[self.__ENCODING_KEY]) as f:  # type: ignore
             json.dump(data, f, indent=4, cls=self._encoder)

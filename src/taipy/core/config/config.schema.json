@@ -178,6 +178,11 @@
             "type": "string",
             "taipy_function": true
           },
+          "append_query_builder": {
+            "description": "storage_type: sql specific. A callable function that takes in the data as an input parameter and returns a list of SQL queries to be executed when the append data node method is called.",
+            "type": "string",
+            "taipy_function": true
+          },
           "collection_name ": {
             "description": "storage_type: mongo_collection specific.",
             "type": "string"
