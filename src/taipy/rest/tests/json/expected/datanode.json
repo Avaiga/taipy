@@ -1,0 +1,18 @@
+{
+    "id": "DATANODE_day_8c0595aa-2dcf-4080-aa78-2eebd7619c9b",
+    "config_id": "day",
+    "scope": "<Scope.SCENARIO: 2>",
+    "storage_type": "pickle",
+    "name": "DATANODE_day_8c0595aa-2dcf-4080-aa78-2eebd7619c9b",
+    "owner_id": "SCENARIO_scenario_a9c3eea2-2af3-4a85-a0c3-ef98ff5bd586",
+    "parent_ids": ["TASK_evaluate_task_31f1ecdf-2b75-4cd8-9509-9e70edab9189"],
+    "last_edit_date": null,
+    "job_ids": [],
+    "validity_days": null,
+    "validity_seconds": null,
+    "edit_in_progress": false,
+    "cacheable": false,
+    "data_node_properties": {
+    },
+    "version": "1.0"
+}

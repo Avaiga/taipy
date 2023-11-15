@@ -1,0 +1,32 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+apispec = {extras = ["yaml"], version = "==5.0"}
+apispec-webframeworks = "==0.5.2"
+Flask-Migrate = ">=3.0"
+Flask-RESTful = ">=0.3.9"
+flask-marshmallow = ">=0.14"
+markupsafe = "==2.1.1"
+passlib = "==1.7.4"
+taipy-core = {ref = "develop", git = "https://github.com/avaiga/taipy-core.git"}
+flask = "==3.0.0"
+
+[dev-packages]
+tox = ">=3.24.5"
+black = "*"
+pytest = "*"
+pytest-factoryboy = "*"
+pre-commit = "*"
+pytest-mock = "*"
+pytest-cov = "*"
+python-dotenv = "*"
+requests = "*"
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
