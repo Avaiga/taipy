@@ -79,7 +79,7 @@ class _Orchestrator(_AbstractOrchestrator):
                             submission.id,
                             submission.entity_id,
                             callbacks=itertools.chain([submission._update_submission_status], callbacks or []),
-                            force=force  # type: ignore
+                            force=force,  # type: ignore
                         )
                     )
 
@@ -112,10 +112,10 @@ class _Orchestrator(_AbstractOrchestrator):
              submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
-             wait (bool): Wait for the orchestrated job created from the task submission to be finished in asynchronous
-                mode.
-             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished
-                before returning.
+             wait (bool): Wait for the orchestrated job created from the task submission to be finished
+                in asynchronous mode.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
+                to be finished before returning.
         Returns:
             The created `Job^`.
         """
@@ -127,7 +127,8 @@ class _Orchestrator(_AbstractOrchestrator):
                 submit_id,
                 submission.entity_id,
                 itertools.chain([submission._update_submission_status], callbacks or []),
-                force)
+                force,
+            )
 
         submission.jobs = [job]  # type: ignore
 
