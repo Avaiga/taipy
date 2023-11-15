@@ -238,7 +238,7 @@ def test_matching():
     )
 
 
-def test_publish_event():
+def test_publish_creation_event():
     _, registration_queue = Notifier.register()
 
     dn_config = Config.configure_data_node("dn_config")
@@ -280,6 +280,27 @@ def test_publish_event():
             for i, event in enumerate(published_events)
         ]
     )
+
+
+def test_publish_update_event():
+    _, registration_queue = Notifier.register()
+
+    dn_config = Config.configure_data_node("dn_config")
+    task_config = Config.configure_task("task_config", print, [dn_config])
+    scenario_config = Config.configure_scenario(
+        "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
+    )
+    scenario_config.add_sequences({"sequence_config": [task_config]})
+
+    scenario = tp.create_scenario(scenario_config)
+    cycle = scenario.cycle
+    task = scenario.tasks[task_config.id]
+    dn = scenario.data_nodes[dn_config.id]
+    sequence = scenario.sequences["sequence_config"]
+
+    assert registration_queue.qsize() == 5
+    while registration_queue.qsize() > 0:
+        registration_queue.get()
 
     # Test UPDATE Event
 
@@ -459,6 +480,28 @@ def test_publish_event():
         ]
     )
 
+
+def test_publish_update_event_in_context_manager():
+    _, registration_queue = Notifier.register()
+
+    dn_config = Config.configure_data_node("dn_config")
+    task_config = Config.configure_task("task_config", print, [dn_config])
+    scenario_config = Config.configure_scenario(
+        "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
+    )
+    scenario_config.add_sequences({"sequence_config": [task_config]})
+
+    scenario = tp.create_scenario(scenario_config)
+    cycle = scenario.cycle
+    task = scenario.tasks[task_config.id]
+    dn = scenario.data_nodes[dn_config.id]
+    sequence = scenario.sequences["sequence_config"]
+    scenario.properties.update({"description": "a scenario"})
+
+    assert registration_queue.qsize() == 6
+    while registration_queue.qsize() > 0:
+        registration_queue.get()
+
     # Test UPDATE Event in Context Manager
 
     assert registration_queue.qsize() == 0
@@ -586,6 +629,22 @@ def test_publish_event():
         ]
     )
 
+
+def test_publish_submission_event():
+    _, registration_queue = Notifier.register()
+
+    dn_config = Config.configure_data_node("dn_config")
+    task_config = Config.configure_task("task_config", print, [dn_config])
+    scenario_config = Config.configure_scenario(
+        "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
+    )
+    scenario_config.add_sequences({"sequence_config": [task_config]})
+    scenario = tp.create_scenario(scenario_config)
+
+    assert registration_queue.qsize() == 5
+    while registration_queue.qsize() > 0:
+        registration_queue.get()
+
     # Test SUBMISSION Event
 
     job = scenario.submit()[0]
@@ -622,6 +681,27 @@ def test_publish_event():
             for i, event in enumerate(published_events)
         ]
     )
+
+
+def test_publish_deletion_event():
+    _, registration_queue = Notifier.register()
+
+    dn_config = Config.configure_data_node("dn_config")
+    task_config = Config.configure_task("task_config", print, [dn_config])
+    scenario_config = Config.configure_scenario(
+        "scenario_config", [task_config], frequency=Frequency.DAILY, flag="test"
+    )
+    scenario_config.add_sequences({"sequence_config": [task_config]})
+    scenario = tp.create_scenario(scenario_config)
+    cycle = scenario.cycle
+    task = scenario.tasks[task_config.id]
+    dn = scenario.data_nodes[dn_config.id]
+    sequence = scenario.sequences["sequence_config"]
+    job = scenario.submit()[0]
+
+    assert registration_queue.qsize() == 11
+    while registration_queue.qsize() > 0:
+        registration_queue.get()
 
     # Test DELETION Event
 
