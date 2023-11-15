@@ -24,26 +24,16 @@ from .submission_status import SubmissionStatus
 
 
 class Submission(_Entity, _Labeled):
-    """Hold a user function that will be executed, its parameters and the results.
-
-    A `Task` brings together the user code as function, the inputs and the outputs as data nodes
-    (instances of the `DataNode^` class).
+    """Hold the jobs and submission status when a Scenario^, Sequence^ or Task^ is submitted.
 
     Attributes:
-        entity_id (str): The identifier of the `Submittable^` entity.
-        jobs (Union[List[JobId], List[Job]]): A list of jobs.
-        function (callable): The python function to execute. The _function_ must take as parameter the
-            data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
-        input (Union[DataNode^, List[DataNode^]]): The list of inputs.
-        output (Union[DataNode^, List[DataNode^]]): The list of outputs.
-        id (str): The unique identifier of the task.
-        owner_id (str):  The identifier of the owner (sequence_id, scenario_id, cycle_id) or None.
-        parent_ids (Optional[Set[str]]): The set of identifiers of the parent sequences.
-        version (str): The string indicates the application version of the task to instantiate. If not provided, the
+        entity_id (str): The identifier of the entity that was submitted.
+        id (str): The identifier of the `Submission^` entity.
+        jobs (Optional[Union[List[Job], List[JobId]]]): A list of jobs.
+        creation_date (Optional[datetime]): The date of this submission's creation.
+        submission_status (Optional[SubmissionStatus]): The current status of this submission.
+        version (Optional[str]): The string indicates the application version of the submission to instantiate. If not provided, the
             latest version is used.
-        skippable (bool): If True, indicates that the task can be skipped if no change has been made on inputs. The
-            default value is _False_.
-
     """
 
     _ID_PREFIX = "SUBMISSION"

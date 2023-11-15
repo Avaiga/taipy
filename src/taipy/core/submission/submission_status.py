@@ -19,27 +19,21 @@ class SubmissionStatus(_ReprEnum):
 
     The possible values are:
 
-    - `SUBMITTED`: A `SUBMITTED` job has been submitted for execution but not processed yet by
+    - `UNDEFINED`: AN `UNDEFINED` submission has been created for execution but not processed yet by
         the orchestrator.
 
-    - `PENDING`: A `PENDING` job has been enqueued by the orchestrator. It is waiting for an executor
+    - `PENDING`: A `PENDING` submission has been enqueued by the orchestrator. It is waiting for an executor
         to be available for its execution.
 
-    - `BLOCKED`: A `BLOCKED` job has been blocked because its input data nodes are not ready yet.
-        It is waiting for the completion of another `Job^`
+    - `BLOCKED`: A `BLOCKED` submission has been blocked because it has been finished with a job being blocked.
 
-    - `RUNNING`: A `RUNNING` job is currently executed by a dedicated executor.
+    - `RUNNING`: A `RUNNING` submission has its jobs currently being executed.
 
-    - `CANCELED`: A `CANCELED` job has been submitted but its execution has been canceled.
+    - `CANCELED`: A `CANCELED` submission has been submitted but its execution has been canceled.
 
-    - `FAILED`: A `FAILED` job raised an exception during its execution.
+    - `FAILED`: A `FAILED` submission has a job failed during its execution.
 
-    - `COMPLETED`: A `COMPLETED` job has successfully been executed.
-
-    - `SKIPPED`: A `SKIPPED` job has not been executed because its outputs were already computed.
-
-    - `ABANDONED`: An `ABANDONED` job has not been executed because it depends on a job that could not complete (
-        cancelled, failed, or abandoned).
+    - `COMPLETED`: A `COMPLETED` submission has successfully been executed.
     """
 
     UNDEFINED = 1
