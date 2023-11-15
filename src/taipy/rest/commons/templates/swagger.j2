@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf8">
+    <title>Taipy Rest - Swagger</title>
+    <link rel="stylesheet" type="text/css" href="//unpkg.com/swagger-ui-dist@3.28.0/swagger-ui.css">
+    <style>
+      html
+      {
+          box-sizing: border-box;
+          overflow: -moz-scrollbars-vertical;
+          overflow-y: scroll;
+      }
+      *,
+      *:before,
+      *:after
+      {
+          box-sizing: inherit;
+      }
+
+      body {
+          margin:0;
+          background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="//unpkg.com/swagger-ui-dist@3.28.0/swagger-ui-bundle.js"></script>
+    <script src="//unpkg.com/swagger-ui-dist@3.28.0/swagger-ui-standalone-preset.js"></script>
+    <script type="text/javascript">
+      window.onload = function() {
+      SwaggerUIBundle({
+          deepLinking: true,
+          dom_id: '#swagger-ui',
+          showExtensions: true,
+          showCommonExtensions: true,
+          url: "{{ url_for('swagger.swagger_json') }}",
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: "StandaloneLayout"
+        });
+      };
+    </script>
+  </body>
+</html>
