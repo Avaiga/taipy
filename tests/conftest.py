@@ -18,15 +18,12 @@ from queue import Queue
 import pandas as pd
 import pytest
 from sqlalchemy import create_engine, text
-from sqlalchemy.dialects import sqlite
-from sqlalchemy.schema import CreateTable, DropTable
 
 from src.taipy.core._core import Core
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db._sql_connection import _build_connection, _SQLConnection
+from src.taipy.core._repository.db._sql_connection import _SQLConnection
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core._version._version_model import _VersionModel
 from src.taipy.core.config import (
     CoreSection,
     DataNodeConfig,
@@ -49,7 +46,6 @@ from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data._data_model import _DataNodeModel
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job._job_model import _JobModel
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.job_id import JobId
 from src.taipy.core.notification.notifier import Notifier
@@ -61,7 +57,6 @@ from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFa
 from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task.task import Task
 from taipy.config import _inject_section
 from taipy.config._config import _Config
@@ -448,19 +443,6 @@ def init_sql_repo(tmp_sqlite):
     if _SQLConnection._connection:
         _SQLConnection._connection.close()
         _SQLConnection._connection = None
-    connection = _SQLConnection.init_db()
-    connection.execute(str(DropTable(_CycleModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(DropTable(_DataNodeModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(DropTable(_JobModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(DropTable(_ScenarioModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(DropTable(_TaskModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(DropTable(_VersionModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
-
-    connection.execute(str(CreateTable(_CycleModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_DataNodeModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_JobModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_ScenarioModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_TaskModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
-    connection.execute(str(CreateTable(_VersionModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))
+    _SQLConnection.init_db()
 
     return tmp_sqlite
