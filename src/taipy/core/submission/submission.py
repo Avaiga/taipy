@@ -32,8 +32,8 @@ class Submission(_Entity, _Labeled):
         jobs (Optional[Union[List[Job], List[JobId]]]): A list of jobs.
         creation_date (Optional[datetime]): The date of this submission's creation.
         submission_status (Optional[SubmissionStatus]): The current status of this submission.
-        version (Optional[str]): The string indicates the application version of the submission to instantiate. If not provided, the
-            latest version is used.
+        version (Optional[str]): The string indicates the application version of the submission to instantiate.
+            If not provided, the latest version is used.
     """
 
     _ID_PREFIX = "SUBMISSION"
