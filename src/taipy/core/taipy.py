@@ -676,7 +676,8 @@ def get_latest_submission(entity: Union[Scenario, Sequence, Task]) -> Optional[S
     This function retrieves the latest submission associated with a scenario, sequence or task.
 
     Parameters:
-        entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to retrieve the latest submission from.
+        entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to
+        retrieve the latest submission from.
     Returns:
         The latest submission created from _scenario_, _sequence_ and _task_, or None
         if no submission has been created from _scenario_, _sequence_ and _task_.
