@@ -75,7 +75,11 @@ class _Orchestrator(_AbstractOrchestrator):
                 for task in ts:
                     jobs.append(
                         cls._lock_dn_output_and_create_job(
-                            task, submission.id, submission.entity_id, callbacks=callbacks, force=force  # type: ignore
+                            task,
+                            submission.id,
+                            submission.entity_id,
+                            callbacks=itertools.chain([submission._update_submission_status], callbacks or []),
+                            force=force  # type: ignore
                         )
                     )
 
@@ -117,9 +121,13 @@ class _Orchestrator(_AbstractOrchestrator):
         """
         submission = _SubmissionManagerFactory._build_manager()._create(task.id)
         submit_id = submission.id
-
         with cls.lock:
-            job = cls._lock_dn_output_and_create_job(task, submit_id, submission.entity_id, callbacks, force)
+            job = cls._lock_dn_output_and_create_job(
+                task,
+                submit_id,
+                submission.entity_id,
+                itertools.chain([submission._update_submission_status], callbacks or []),
+                force)
 
         submission.jobs = [job]  # type: ignore
 

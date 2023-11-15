@@ -10,10 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
+from functools import partial
+from typing import Union
+from unittest import mock
+from unittest.mock import patch
 
 import pytest
 
-from src.taipy.core import TaskId
+from src.taipy.core import TaskId, JobId
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
@@ -46,180 +50,218 @@ def test_create_submission(scenario, job, current_datetime):
     assert submission_2._version == "version_id"
 
 
-def __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task):
-    _TaskManagerFactory._build_manager()._set(task)
+class MockJob:
+    def __init__(self, id: str, status):
+        self.status = status
+        self.id = id
 
-    submission = Submission(task.id)
-    jobs = []
-    for job_id, job_status in zip(job_ids, job_statuses):
-        job = Job(job_id, task, submission.id, submission.entity_id)
-        job._status = job_status
-        _JobManagerFactory._build_manager()._set(job)
-        jobs.append(job)
+    def is_failed(self):
+        return self.status == Status.FAILED
 
-    _SubmissionManagerFactory._build_manager()._set(submission)
+    def is_canceled(self):
+        return self.status == Status.CANCELED
 
-    submission.jobs = jobs
+    def is_blocked(self):
+        return self.status == Status.BLOCKED
 
-    assert submission.submission_status == SubmissionStatus.UNDEFINED
-    submission._update_submission_status()
-    assert submission.submission_status == expected_submission_status
+    def is_pending(self):
+        return self.status == Status.PENDING
+
+    def is_running(self):
+        return self.status == Status.RUNNING
+
+    def is_completed(self):
+        return self.status == Status.COMPLETED
+
+    def is_skipped(self):
+        return self.status == Status.SKIPPED
+
+    def is_abandoned(self):
+        return self.status == Status.ABANDONED
+
+    def is_submitted(self):
+        return self.status == Status.SUBMITTED
+
+
+def mock_get_jobs(job_ids):
+    jobs = {
+        "job0_submitted": MockJob("job0_submitted", Status.SUBMITTED),
+        "job1_failed": MockJob("job1_failed", Status.FAILED),
+        "job2_canceled": MockJob("job2_canceled", Status.CANCELED),
+        "job3_blocked": MockJob("job3_blocked", Status.BLOCKED),
+        "job4_pending": MockJob("job4_pending", Status.PENDING),
+        "job5_running": MockJob("job5_running", Status.RUNNING),
+        "job6_completed": MockJob("job6_completed", Status.COMPLETED),
+        "job7_skipped": MockJob("job7_skipped", Status.SKIPPED),
+        "job8_abandoned": MockJob("job8_abandoned", Status.ABANDONED),
+    }
+    return [jobs[job_id] for job_id in job_ids]
+
+
+def __test_update_submission_status(job_ids, expected_submission_status):
+    with (patch("src.taipy.core.submission.submission.Submission.jobs",
+                new_callable=mock.PropertyMock,
+                return_value=(mock_get_jobs(job_ids)))):
+        submission = Submission("submission_id")
+        submission._update_submission_status(None)
+        assert submission.submission_status == expected_submission_status
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job1_failed"], [Status.FAILED], SubmissionStatus.FAILED),
-        (["job2_canceled"], [Status.CANCELED], SubmissionStatus.CANCELED),
-        (["job3_blocked"], [Status.BLOCKED], SubmissionStatus.BLOCKED),
-        (["job4_pending"], [Status.PENDING], SubmissionStatus.PENDING),
-        (["job5_running"], [Status.RUNNING], SubmissionStatus.RUNNING),
-        (["job6_completed"], [Status.COMPLETED], SubmissionStatus.COMPLETED),
-        (["job7_skipped"], [Status.COMPLETED], SubmissionStatus.COMPLETED),
-        (["job8_abandoned"], [Status.ABANDONED], SubmissionStatus.UNDEFINED),
+        (["job1_failed"], SubmissionStatus.FAILED),
+        (["job2_canceled"], SubmissionStatus.CANCELED),
+        (["job3_blocked"], SubmissionStatus.BLOCKED),
+        (["job4_pending"], SubmissionStatus.PENDING),
+        (["job5_running"], SubmissionStatus.RUNNING),
+        (["job6_completed"], SubmissionStatus.COMPLETED),
+        (["job7_skipped"], SubmissionStatus.COMPLETED),
+        (["job8_abandoned"], SubmissionStatus.UNDEFINED),
     ],
 )
-def test_update_single_submission_status(job_ids, job_statuses, expected_submission_status, task):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+def test_update_single_submission_status(job_ids, expected_submission_status):
+    __test_update_submission_status(job_ids, expected_submission_status)
+
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job1_failed", "job1_failed"], [Status.FAILED, Status.FAILED], SubmissionStatus.FAILED),
-        (["job1_failed", "job2_canceled"], [Status.FAILED, Status.CANCELED], SubmissionStatus.FAILED),
-        (["job1_failed", "job3_blocked"], [Status.FAILED, Status.BLOCKED], SubmissionStatus.FAILED),
-        (["job1_failed", "job4_pending"], [Status.FAILED, Status.PENDING], SubmissionStatus.FAILED),
-        (["job1_failed", "job5_running"], [Status.FAILED, Status.RUNNING], SubmissionStatus.FAILED),
-        (["job1_failed", "job6_completed"], [Status.FAILED, Status.COMPLETED], SubmissionStatus.FAILED),
-        (["job1_failed", "job7_skipped"], [Status.FAILED, Status.SKIPPED], SubmissionStatus.FAILED),
-        (["job1_failed", "job8_abandoned"], [Status.FAILED, Status.ABANDONED], SubmissionStatus.FAILED),
-        (["job3_blocked", "job1_failed"], [Status.BLOCKED, Status.FAILED], SubmissionStatus.FAILED),
-        (["job4_pending", "job1_failed"], [Status.PENDING, Status.FAILED], SubmissionStatus.FAILED),
-        (["job5_running", "job1_failed"], [Status.RUNNING, Status.FAILED], SubmissionStatus.FAILED),
-        (["job6_completed", "job1_failed"], [Status.COMPLETED, Status.FAILED], SubmissionStatus.FAILED),
-        (["job7_skipped", "job1_failed"], [Status.SKIPPED, Status.FAILED], SubmissionStatus.FAILED),
-        (["job8_abandoned", "job1_failed"], [Status.ABANDONED, Status.FAILED], SubmissionStatus.FAILED),
+        (["job1_failed", "job1_failed"], SubmissionStatus.FAILED),
+        (["job1_failed", "job2_canceled"], SubmissionStatus.FAILED),
+        (["job1_failed", "job3_blocked"], SubmissionStatus.FAILED),
+        (["job1_failed", "job4_pending"], SubmissionStatus.FAILED),
+        (["job1_failed", "job5_running"], SubmissionStatus.FAILED),
+        (["job1_failed", "job6_completed"], SubmissionStatus.FAILED),
+        (["job1_failed", "job7_skipped"], SubmissionStatus.FAILED),
+        (["job1_failed", "job8_abandoned"], SubmissionStatus.FAILED),
+        (["job3_blocked", "job1_failed"], SubmissionStatus.FAILED),
+        (["job4_pending", "job1_failed"], SubmissionStatus.FAILED),
+        (["job5_running", "job1_failed"], SubmissionStatus.FAILED),
+        (["job6_completed", "job1_failed"], SubmissionStatus.FAILED),
+        (["job7_skipped", "job1_failed"], SubmissionStatus.FAILED),
+        (["job8_abandoned", "job1_failed"], SubmissionStatus.FAILED),
     ],
 )
-def test_update_submission_status_with_one_failed_job_in_jobs(job_ids, job_statuses, expected_submission_status, task):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+def test_update_submission_status_with_one_failed_job_in_jobs(job_ids, expected_submission_status):
+    __test_update_submission_status(job_ids, expected_submission_status)
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job2_canceled", "job2_canceled"], [Status.CANCELED, Status.CANCELED], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job3_blocked"], [Status.CANCELED, Status.BLOCKED], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job4_pending"], [Status.CANCELED, Status.PENDING], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job5_running"], [Status.CANCELED, Status.RUNNING], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job6_completed"], [Status.CANCELED, Status.COMPLETED], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job7_skipped"], [Status.CANCELED, Status.SKIPPED], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job8_abandoned"], [Status.CANCELED, Status.ABANDONED], SubmissionStatus.CANCELED),
-        (["job2_canceled", "job1_failed"], [Status.CANCELED, Status.FAILED], SubmissionStatus.CANCELED),
-        (["job3_blocked", "job2_canceled"], [Status.BLOCKED, Status.CANCELED], SubmissionStatus.CANCELED),
-        (["job4_pending", "job2_canceled"], [Status.PENDING, Status.CANCELED], SubmissionStatus.CANCELED),
-        (["job5_running", "job2_canceled"], [Status.RUNNING, Status.CANCELED], SubmissionStatus.CANCELED),
-        (["job6_completed", "job2_canceled"], [Status.COMPLETED, Status.CANCELED], SubmissionStatus.CANCELED),
-        (["job7_skipped", "job2_canceled"], [Status.SKIPPED, Status.CANCELED], SubmissionStatus.CANCELED),
-        (["job8_abandoned", "job2_canceled"], [Status.ABANDONED, Status.CANCELED], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job2_canceled"], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job3_blocked"], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job4_pending"], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job5_running"], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job6_completed"], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job7_skipped"], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job8_abandoned"], SubmissionStatus.CANCELED),
+        (["job2_canceled", "job1_failed"], SubmissionStatus.CANCELED),
+        (["job3_blocked", "job2_canceled"], SubmissionStatus.CANCELED),
+        (["job4_pending", "job2_canceled"], SubmissionStatus.CANCELED),
+        (["job5_running", "job2_canceled"], SubmissionStatus.CANCELED),
+        (["job6_completed", "job2_canceled"], SubmissionStatus.CANCELED),
+        (["job7_skipped", "job2_canceled"], SubmissionStatus.CANCELED),
+        (["job8_abandoned", "job2_canceled"], SubmissionStatus.CANCELED),
     ],
 )
 def test_update_submission_status_with_one_canceled_job_in_jobs(
-    job_ids, job_statuses, expected_submission_status, task
+    job_ids, expected_submission_status
 ):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+    __test_update_submission_status(job_ids, expected_submission_status)
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job4_pending", "job3_blocked"], [Status.PENDING, Status.BLOCKED], SubmissionStatus.PENDING),
-        (["job4_pending", "job4_pending"], [Status.PENDING, Status.PENDING], SubmissionStatus.PENDING),
-        (["job4_pending", "job6_completed"], [Status.PENDING, Status.COMPLETED], SubmissionStatus.PENDING),
-        (["job4_pending", "job7_skipped"], [Status.PENDING, Status.SKIPPED], SubmissionStatus.PENDING),
-        (["job3_blocked", "job4_pending"], [Status.BLOCKED, Status.PENDING], SubmissionStatus.PENDING),
-        (["job6_completed", "job4_pending"], [Status.COMPLETED, Status.PENDING], SubmissionStatus.PENDING),
-        (["job7_skipped", "job4_pending"], [Status.SKIPPED, Status.PENDING], SubmissionStatus.PENDING),
+        (["job4_pending", "job3_blocked"], SubmissionStatus.PENDING),
+        (["job4_pending", "job4_pending"], SubmissionStatus.PENDING),
+        (["job4_pending", "job6_completed"], SubmissionStatus.PENDING),
+        (["job4_pending", "job7_skipped"], SubmissionStatus.PENDING),
+        (["job3_blocked", "job4_pending"], SubmissionStatus.PENDING),
+        (["job6_completed", "job4_pending"], SubmissionStatus.PENDING),
+        (["job7_skipped", "job4_pending"], SubmissionStatus.PENDING),
     ],
 )
 def test_update_submission_status_with_no_failed_or_cancel_one_pending_in_jobs(
-    job_ids, job_statuses, expected_submission_status, task
+    job_ids, expected_submission_status
 ):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+    __test_update_submission_status(job_ids, expected_submission_status)
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job5_running", "job3_blocked"], [Status.RUNNING, Status.BLOCKED], SubmissionStatus.RUNNING),
-        (["job5_running", "job4_pending"], [Status.RUNNING, Status.PENDING], SubmissionStatus.RUNNING),
-        # (["job5_running", "job5_running"], [Status.RUNNING, Status.RUNNING], SubmissionStatus.RUNNING),
-        # (["job5_running", "job6_completed"], [Status.RUNNING, Status.COMPLETED], SubmissionStatus.RUNNING),
-        # (["job5_running", "job7_skipped"], [Status.RUNNING, Status.SKIPPED], SubmissionStatus.RUNNING),
-        (["job3_blocked", "job5_running"], [Status.BLOCKED, Status.RUNNING], SubmissionStatus.RUNNING),
-        (["job4_pending", "job5_running"], [Status.PENDING, Status.RUNNING], SubmissionStatus.RUNNING),
-        # (["job6_completed", "job5_running"], [Status.COMPLETED, Status.RUNNING], SubmissionStatus.RUNNING),
-        # (["job7_skipped", "job5_running"], [Status.SKIPPED, Status.RUNNING], SubmissionStatus.RUNNING),
+        (["job5_running", "job3_blocked"], SubmissionStatus.RUNNING),
+        # (["job5_running", "job4_pending"], SubmissionStatus.RUNNING),
+        # (["job5_running", "job5_running"], SubmissionStatus.RUNNING),
+        # (["job5_running", "job6_completed"], SubmissionStatus.RUNNING),
+        # (["job5_running", "job7_skipped"], SubmissionStatus.RUNNING),
+        # (["job3_blocked", "job5_running"], SubmissionStatus.RUNNING),
+        # (["job4_pending", "job5_running"], SubmissionStatus.RUNNING),
+        # (["job6_completed", "job5_running"], SubmissionStatus.RUNNING),
+        # (["job7_skipped", "job5_running"], SubmissionStatus.RUNNING),
     ],
 )
 def test_update_submission_status_with_no_failed_cancel_nor_pending_one_running_in_jobs(
-    job_ids, job_statuses, expected_submission_status, task
+    job_ids, expected_submission_status
 ):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+    __test_update_submission_status(job_ids, expected_submission_status)
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job3_blocked", "job3_blocked"], [Status.BLOCKED, Status.BLOCKED], SubmissionStatus.BLOCKED),
-        (["job3_blocked", "job6_completed"], [Status.BLOCKED, Status.COMPLETED], SubmissionStatus.BLOCKED),
-        (["job3_blocked", "job7_skipped"], [Status.BLOCKED, Status.SKIPPED], SubmissionStatus.BLOCKED),
-        (["job6_completed", "job3_blocked"], [Status.COMPLETED, Status.BLOCKED], SubmissionStatus.BLOCKED),
-        (["job7_skipped", "job3_blocked"], [Status.SKIPPED, Status.BLOCKED], SubmissionStatus.BLOCKED),
+        (["job3_blocked", "job3_blocked"], SubmissionStatus.BLOCKED),
+        (["job3_blocked", "job6_completed"], SubmissionStatus.BLOCKED),
+        (["job3_blocked", "job7_skipped"], SubmissionStatus.BLOCKED),
+        (["job6_completed", "job3_blocked"], SubmissionStatus.BLOCKED),
+        (["job7_skipped", "job3_blocked"], SubmissionStatus.BLOCKED),
     ],
 )
 def test_update_submission_status_with_no_failed_cancel_pending_nor_running_one_blocked_in_jobs(
-    job_ids, job_statuses, expected_submission_status, task
+    job_ids, expected_submission_status
 ):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+    __test_update_submission_status(job_ids, expected_submission_status)
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job6_completed", "job6_completed"], [Status.COMPLETED, Status.COMPLETED], SubmissionStatus.COMPLETED),
-        (["job6_completed", "job7_skipped"], [Status.COMPLETED, Status.SKIPPED], SubmissionStatus.COMPLETED),
-        (["job7_skipped", "job6_completed"], [Status.SKIPPED, Status.COMPLETED], SubmissionStatus.COMPLETED),
-        (["job7_skipped", "job7_skipped"], [Status.SKIPPED, Status.SKIPPED], SubmissionStatus.COMPLETED),
+        (["job6_completed", "job6_completed"], SubmissionStatus.COMPLETED),
+        (["job6_completed", "job7_skipped"], SubmissionStatus.COMPLETED),
+        (["job7_skipped", "job6_completed"], SubmissionStatus.COMPLETED),
+        (["job7_skipped", "job7_skipped"], SubmissionStatus.COMPLETED),
     ],
 )
 def test_update_submission_status_with_only_completed_or_skipped_in_jobs(
-    job_ids, job_statuses, expected_submission_status, task
+    job_ids, expected_submission_status
 ):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+    __test_update_submission_status(job_ids, expected_submission_status)
 
 
 @pytest.mark.parametrize(
-    "job_ids, job_statuses, expected_submission_status",
+    "job_ids, expected_submission_status",
     [
-        (["job3_blocked", "job8_abandoned"], [Status.BLOCKED, Status.ABANDONED], SubmissionStatus.UNDEFINED),
-        (["job4_pending", "job8_abandoned"], [Status.PENDING, Status.ABANDONED], SubmissionStatus.UNDEFINED),
-        (["job5_running", "job8_abandoned"], [Status.RUNNING, Status.ABANDONED], SubmissionStatus.UNDEFINED),
-        (["job6_completed", "job8_abandoned"], [Status.COMPLETED, Status.ABANDONED], SubmissionStatus.UNDEFINED),
-        (["job7_skipped", "job8_abandoned"], [Status.SKIPPED, Status.ABANDONED], SubmissionStatus.UNDEFINED),
-        # (["job8_abandoned", "job8_abandoned"], [Status.ABANDONED, Status.ABANDONED], SubmissionStatus.UNDEFINED),
-        (["job8_abandoned", "job3_blocked"], [Status.ABANDONED, Status.BLOCKED], SubmissionStatus.UNDEFINED),
-        (["job8_abandoned", "job4_pending"], [Status.ABANDONED, Status.PENDING], SubmissionStatus.UNDEFINED),
-        (["job8_abandoned", "job5_running"], [Status.ABANDONED, Status.RUNNING], SubmissionStatus.UNDEFINED),
-        (["job8_abandoned", "job6_completed"], [Status.ABANDONED, Status.COMPLETED], SubmissionStatus.UNDEFINED),
-        (["job8_abandoned", "job7_skipped"], [Status.ABANDONED, Status.SKIPPED], SubmissionStatus.UNDEFINED),
+        (["job3_blocked", "job8_abandoned"], SubmissionStatus.UNDEFINED),
+        (["job4_pending", "job8_abandoned"], SubmissionStatus.UNDEFINED),
+        (["job5_running", "job8_abandoned"], SubmissionStatus.UNDEFINED),
+        (["job6_completed", "job8_abandoned"], SubmissionStatus.UNDEFINED),
+        (["job7_skipped", "job8_abandoned"], SubmissionStatus.UNDEFINED),
+        (["job8_abandoned", "job8_abandoned"], SubmissionStatus.UNDEFINED),
+        (["job8_abandoned", "job3_blocked"], SubmissionStatus.UNDEFINED),
+        (["job8_abandoned", "job4_pending"], SubmissionStatus.UNDEFINED),
+        (["job8_abandoned", "job5_running"], SubmissionStatus.UNDEFINED),
+        (["job8_abandoned", "job6_completed"], SubmissionStatus.UNDEFINED),
+        (["job8_abandoned", "job7_skipped"], SubmissionStatus.UNDEFINED),
     ],
 )
 def test_update_submission_status_with_wrong_case_abandoned_without_cancel_or_failed_in_jobs(
-    job_ids, job_statuses, expected_submission_status, task
+    job_ids, expected_submission_status
 ):
-    __test_update_submission_status(job_ids, job_statuses, expected_submission_status, task)
+    __test_update_submission_status(job_ids, expected_submission_status)
 
 
 def test_auto_set_and_reload():

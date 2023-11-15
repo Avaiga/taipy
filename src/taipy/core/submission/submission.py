@@ -139,7 +139,7 @@ class Submission(_Entity, _Labeled):
     def __ge__(self, other):
         return self.creation_date.timestamp() == other.creation_date.timestamp() or self > other
 
-    def _update_submission_status(self):
+    def _update_submission_status(self, plop: Job):
         submission_status = SubmissionStatus.UNDEFINED
         blocked = False
         pending = False
