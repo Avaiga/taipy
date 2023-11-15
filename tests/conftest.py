@@ -445,7 +445,9 @@ def init_sql_repo(tmp_sqlite):
     Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
 
     # Clean SQLite database
-    _SQLConnection._connection = None
+    if _SQLConnection._connection:
+        _SQLConnection._connection.close()
+        _SQLConnection._connection = None
     connection = _SQLConnection.init_db()
     connection.execute(str(DropTable(_CycleModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))
     connection.execute(str(DropTable(_DataNodeModel.__table__, if_exists=True).compile(dialect=sqlite.dialect())))

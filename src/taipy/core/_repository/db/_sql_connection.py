@@ -78,5 +78,9 @@ def _build_connection() -> Connection:
     except KeyError:
         raise MissingRequiredProperty("Missing property db_location")
 
-    connection = sqlite3.connect(db_location, check_same_thread=False)
-    return connection
+    return __build_connection(db_location)
+
+
+@lru_cache
+def __build_connection(db_location: str):
+    return sqlite3.connect(db_location, check_same_thread=False)
