@@ -43,6 +43,8 @@ from .scenario.scenario_id import ScenarioId
 from .sequence._sequence_manager_factory import _SequenceManagerFactory
 from .sequence.sequence import Sequence
 from .sequence.sequence_id import SequenceId
+from .submission._submission_manager_factory import _SubmissionManagerFactory
+from .submission.submission import Submission
 from .task._task_manager_factory import _TaskManagerFactory
 from .task.task import Task
 from .task.task_id import TaskId
@@ -666,6 +668,20 @@ def get_latest_job(task: Task) -> Optional[Job]:
         The latest job created from _task_, or None if no job has been created from _task_.
     """
     return _JobManagerFactory._build_manager()._get_latest(task)
+
+
+def get_latest_submission(entity: Union[Scenario, Sequence, Task]) -> Optional[Submission]:
+    """Return the latest submission of a scenario, sequence or task.
+
+    This function retrieves the latest submission associated with a scenario, sequence or task.
+
+    Parameters:
+        entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to retrieve the latest submission from.
+    Returns:
+        The latest submission created from _scenario_, _sequence_ and _task_, or None
+        if no submission has been created from _scenario_, _sequence_ and _task_.
+    """
+    return _SubmissionManagerFactory._build_manager()._get_latest(entity)
 
 
 def get_data_nodes() -> List[DataNode]:

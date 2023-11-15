@@ -535,6 +535,11 @@ class TestTaipy:
             tp.get_latest_job(task)
             mck.assert_called_once_with(task)
 
+    def test_get_latest_submission(self, task):
+        with mock.patch("src.taipy.core.submission._submission_manager._SubmissionManager._get_latest") as mck:
+            tp.get_latest_submission(task)
+            mck.assert_called_once_with(task)
+
     def test_cancel_job(self):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._cancel") as mck:
             tp.cancel_job("job_id")
