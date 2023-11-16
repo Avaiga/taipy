@@ -460,7 +460,7 @@ class ScenarioExecutor(Resource):
 
             === "Curl"
                 ```shell
-                    curl -X POST http://localhost:5000/api/v1/scenarios/submit/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c
+                    curl -X POST http://localhost:5000/api/v1/scenarios/submit/SCENARIO_658d-5834-4d73-84e4-a6343df5e08c
                 ```
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.

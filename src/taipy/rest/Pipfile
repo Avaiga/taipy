@@ -4,21 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-apispec = {extras = ["yaml"], version = "==5.0"}
+apispec = {extras = ["yaml"], version = "==6.3"}
 apispec-webframeworks = "==0.5.2"
-Flask-Migrate = ">=3.0"
 Flask-RESTful = ">=0.3.9"
-flask-marshmallow = ">=0.14"
-markupsafe = "==2.1.1"
-passlib = "==1.7.4"
 taipy-core = {ref = "develop", git = "https://github.com/avaiga/taipy-core.git"}
 flask = "==3.0.0"
+marshmallow = "==3.20.1"
 
 [dev-packages]
 tox = ">=3.24.5"
 black = "*"
 pytest = "*"
-pytest-factoryboy = "*"
 pre-commit = "*"
 pytest-mock = "*"
 pytest-cov = "*"

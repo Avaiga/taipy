@@ -163,7 +163,8 @@ class SequenceList(Resource):
         - api
       summary: Create a sequence.
       description: |
-        Create a sequence from scenario_id, sequence_name and task_ids. If the scenario_id does not exist or sequence_name is not provided, a 404 error is returned.
+        Create a sequence from scenario_id, sequence_name and task_ids. If the scenario_id does not exist or
+        sequence_name is not provided, a 404 error is returned.
         !!! Note
           When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
           requires _TAIPY_EDITOR_ role.
@@ -171,7 +172,8 @@ class SequenceList(Resource):
         Code example:
 
         ```shell
-          curl -X POST --data '{"scenario_id": "SCENARIO_scenario_id", "sequence_name": "sequence", "tasks": []}' http://localhost:5000/api/v1/sequences
+          curl -X POST --data '{"scenario_id": "SCENARIO_scenario_id", "sequence_name": "sequence", "tasks": []}' \\
+           http://localhost:5000/api/v1/sequences
         ```
 
       parameters:
@@ -256,7 +258,7 @@ class SequenceExecutor(Resource):
         Code example:
 
         ```shell
-          curl -X POST http://localhost:5000/api/v1/sequences/submit/SEQUENCE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+          curl -X POST http://localhost:5000/api/v1/sequences/submit/SEQUENCE_my_config_7575-4e09-4e00-958d-e352ee426cc9
         ```
 
       parameters:

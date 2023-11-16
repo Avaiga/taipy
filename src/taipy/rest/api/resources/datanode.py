@@ -32,10 +32,10 @@ from ..schemas import (
     GenericDataNodeConfigSchema,
     InMemoryDataNodeConfigSchema,
     JSONDataNodeConfigSchema,
-    PickleDataNodeConfigSchema,
-    SQLTableDataNodeConfigSchema,
-    SQLDataNodeConfigSchema,
     MongoCollectionDataNodeConfigSchema,
+    PickleDataNodeConfigSchema,
+    SQLDataNodeConfigSchema,
+    SQLTableDataNodeConfigSchema,
 )
 
 ds_schema_map = {
@@ -612,15 +612,19 @@ class DataNodeWriter(Resource):
         - api
       summary: Write into a data node.
       description: |
-        Write data from request body into a data node by *datanode_id*. If the data node does not exist, a 404 error is returned.
+        Write data from request body into a data node by *datanode_id*. If the data node does not exist, a 404 error is
+        returned.
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint
+          requires `TAIPY_EDITOR` role.
 
         Code example:
 
         ```shell
-          curl -X PUT -d '[{"path": "/abc", "type": 1}, {"path": "/def", "type": 2}]' -H 'Content-Type: application/json'  http://localhost:5000/api/v1/datanodes/DATANODE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9/write
+          curl -X PUT -d '[{"path": "/abc", "type": 1}, {"path": "/def", "type": 2}]' \\
+          -H 'Content-Type: application/json' \\
+           http://localhost:5000/api/v1/datanodes/DATANODE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9/write
         ```
 
       parameters:

@@ -31,8 +31,9 @@ class Rest:
         However, editing these parameters is only recommended for advanced users. Indeed, the default behavior of the
         REST server without any required configuration satisfies all the standard and basic needs.
         """
-        self._app = _create_app(Config.global_config.testing or False, Config.global_config.env,
-                                Config.global_config.secret_key)
+        self._app = _create_app(
+            Config.global_config.testing or False, Config.global_config.env, Config.global_config.secret_key
+        )
 
     def run(self, **kwargs):
         """

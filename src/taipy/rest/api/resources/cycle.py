@@ -77,7 +77,7 @@ class CycleResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.get("http://localhost:5000/api/v1/cycles/CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a")
+                    response = requests.get("http://localhost:5000/api/v1/cycles/CYCLE_223894_e019-b50b-4b9f-ac09-527a")
                     print(response)
                     print(response.json())
                 ```
@@ -156,9 +156,9 @@ class CycleResource(Resource):
                 This Python example requires the 'requests' package to be installed (`pip install requests`).
                 ```python
                 import requests
-                    response = requests.delete("http://localhost:5000/api/v1/cycles/CYCLE_797384_ef210412-af91-4f41-b6e8-74d1648edcba")
-                    print(response)
-                    print(response.json())
+                response = requests.delete("http://localhost:5000/api/v1/cycles/CYCLE_794_ef21-af91-4f41-b6e8-7648eda")
+                print(response)
+                print(response.json())
                 ```
                 `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* parameter. It
                 represents the identifier of the Cycle we want to delete.

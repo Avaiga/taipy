@@ -13,7 +13,6 @@ from marshmallow import Schema, fields
 
 
 class TaskSchema(Schema):
-
     config_id = fields.String()
     id = fields.String()
     owner_id = fields.String()
