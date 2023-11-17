@@ -85,8 +85,7 @@ class _Orchestrator(_AbstractOrchestrator):
 
         submission.jobs = jobs  # type: ignore
 
-        for job in jobs:
-            cls._orchestrate_job_to_run_or_block(job)
+        cls._orchestrate_job_to_run_or_block(jobs)
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
@@ -130,9 +129,10 @@ class _Orchestrator(_AbstractOrchestrator):
                 force,
             )
 
-        submission.jobs = [job]  # type: ignore
+        jobs = [job]
+        submission.jobs = jobs  # type: ignore
 
-        cls._orchestrate_job_to_run_or_block(job)
+        cls._orchestrate_job_to_run_or_block(jobs)
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
@@ -160,12 +160,20 @@ class _Orchestrator(_AbstractOrchestrator):
         return job
 
     @classmethod
-    def _orchestrate_job_to_run_or_block(cls, job: Job):
-        if cls._is_blocked(job):
-            job.blocked()
-            cls.blocked_jobs.append(job)
-        else:
-            job.pending()
+    def _orchestrate_job_to_run_or_block(cls, jobs: List[Job]):
+        blocked_jobs = []
+        pending_jobs = []
+
+        for job in jobs:
+            if cls._is_blocked(job):
+                job.blocked()
+                blocked_jobs.append(job)
+            else:
+                job.pending()
+                pending_jobs.append(job)
+
+        cls.blocked_jobs.extend(blocked_jobs)
+        for job in pending_jobs:
             cls.jobs_to_run.put(job)
 
     @classmethod
@@ -214,6 +222,7 @@ class _Orchestrator(_AbstractOrchestrator):
         if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
         elif job.is_failed():
+            print(f"\nJob {job.id} failed, abandoning subsequent jobs.\n")
             cls._fail_subsequent_jobs(job)
 
     @classmethod
@@ -286,6 +295,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys()))
             )
             for job in to_fail_or_abandon_jobs:
+                print(f"Abandoning job: {job.id}")
                 job.abandoned()
             to_fail_or_abandon_jobs.update([failed_job])
             cls.__remove_blocked_jobs(to_fail_or_abandon_jobs)

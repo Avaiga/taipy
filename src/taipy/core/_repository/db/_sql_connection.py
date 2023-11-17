@@ -44,8 +44,8 @@ class _SQLConnection:
         from ...data._data_model import _DataNodeModel
         from ...job._job_model import _JobModel
         from ...scenario._scenario_model import _ScenarioModel
-        from ...task._task_model import _TaskModel
         from ...submission._submission_model import _SubmissionModel
+        from ...task._task_model import _TaskModel
 
         cls._connection.execute(
             str(CreateTable(_CycleModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect()))

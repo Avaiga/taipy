@@ -361,15 +361,15 @@ def test_cancel_subsequent_jobs():
         job_1 = orchestrator._lock_dn_output_and_create_job(
             task_1, submit_id=submission_1.id, submit_entity_id=submission_1.entity_id
         )
-        orchestrator._orchestrate_job_to_run_or_block(job_1)
+        orchestrator._orchestrate_job_to_run_or_block([job_1])
         job_2 = orchestrator._lock_dn_output_and_create_job(
             task_2, submit_id=submission_1.id, submit_entity_id=submission_1.entity_id
         )
-        orchestrator._orchestrate_job_to_run_or_block(job_2)
+        orchestrator._orchestrate_job_to_run_or_block([job_2])
         job_3 = orchestrator._lock_dn_output_and_create_job(
             task_3, submit_id=submission_1.id, submit_entity_id=submission_1.entity_id
         )
-        orchestrator._orchestrate_job_to_run_or_block(job_3)
+        orchestrator._orchestrate_job_to_run_or_block([job_3])
 
         submission_1.jobs = [job_1, job_2, job_3]
 
@@ -382,15 +382,15 @@ def test_cancel_subsequent_jobs():
         job_4 = _OrchestratorFactory._orchestrator._lock_dn_output_and_create_job(
             task_1, submit_id=submission_2.id, submit_entity_id=submission_2.entity_id
         )
-        orchestrator._orchestrate_job_to_run_or_block(job_4)
+        orchestrator._orchestrate_job_to_run_or_block([job_4])
         job_5 = _OrchestratorFactory._orchestrator._lock_dn_output_and_create_job(
             task_2, submit_id=submission_2.id, submit_entity_id=submission_2.entity_id
         )
-        orchestrator._orchestrate_job_to_run_or_block(job_5)
+        orchestrator._orchestrate_job_to_run_or_block([job_5])
         job_6 = _OrchestratorFactory._orchestrator._lock_dn_output_and_create_job(
             task_3, submit_id=submission_2.id, submit_entity_id=submission_2.entity_id
         )
-        orchestrator._orchestrate_job_to_run_or_block(job_6)
+        orchestrator._orchestrate_job_to_run_or_block([job_6])
 
         submission_2.jobs = [job_4, job_5, job_6]
 
