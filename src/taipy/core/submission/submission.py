@@ -121,13 +121,13 @@ class Submission(_Entity, _Labeled):
         return self.creation_date.timestamp() < other.creation_date.timestamp()
 
     def __le__(self, other):
-        return self.creation_date.timestamp() == other.creation_date.timestamp() or self < other
+        return self.creation_date.timestamp() <= other.creation_date.timestamp()
 
     def __gt__(self, other):
         return self.creation_date.timestamp() > other.creation_date.timestamp()
 
     def __ge__(self, other):
-        return self.creation_date.timestamp() == other.creation_date.timestamp() or self > other
+        return self.creation_date.timestamp() >= other.creation_date.timestamp()
 
     def _update_submission_status(self, _: Job):
         abandoned = False
@@ -147,16 +147,12 @@ class Submission(_Entity, _Labeled):
                 canceled = True
             if job.is_blocked():
                 blocked = True
-                continue
             if job.is_pending() or job.is_submitted():
                 pending = True
-                continue
             if job.is_running():
                 running = True
-                continue
             if job.is_completed() or job.is_skipped():
                 completed = True
-                continue
             if job.is_abandoned():
                 abandoned = True
         if canceled:

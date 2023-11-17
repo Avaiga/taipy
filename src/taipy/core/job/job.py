@@ -143,13 +143,13 @@ class Job(_Entity, _Labeled):
         return self.creation_date.timestamp() < other.creation_date.timestamp()
 
     def __le__(self, other):
-        return self.creation_date.timestamp() == other.creation_date.timestamp() or self < other
+        return self.creation_date.timestamp() <= other.creation_date.timestamp()
 
     def __gt__(self, other):
         return self.creation_date.timestamp() > other.creation_date.timestamp()
 
     def __ge__(self, other):
-        return self.creation_date.timestamp() == other.creation_date.timestamp() or self > other
+        return self.creation_date.timestamp() >= other.creation_date.timestamp()
 
     def __eq__(self, other):
         return self.id == other.id
