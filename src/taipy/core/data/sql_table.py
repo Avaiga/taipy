@@ -91,7 +91,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
         if properties is None:
             properties = {}
         if properties.get(self.__TABLE_KEY) is None:
-            raise MissingRequiredProperty(f"Property {self.__TABLE_KEY} is not informed and is required")
+            raise MissingRequiredProperty(f"Property {self.__TABLE_KEY} is not informed and is required.")
         super().__init__(
             config_id,
             scope,

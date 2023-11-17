@@ -104,7 +104,7 @@ class MongoCollectionDataNode(DataNode):
         required = self._REQUIRED_PROPERTIES
         if missing := set(required) - set(properties.keys()):
             raise MissingRequiredProperty(
-                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
+                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required."
             )
 
         self._check_custom_document(properties[self._CUSTOM_DOCUMENT_PROPERTY])

@@ -76,7 +76,7 @@ def _build_connection() -> Connection:
     try:
         db_location = properties["db_location"]
     except KeyError:
-        raise MissingRequiredProperty("Missing property db_location")
+        raise MissingRequiredProperty("Missing property db_location.")
 
     return __build_connection(db_location)
 

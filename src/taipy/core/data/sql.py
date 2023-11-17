@@ -95,9 +95,9 @@ class SQLDataNode(_AbstractSQLDataNode):
         if properties is None:
             properties = {}
         if properties.get(self.__READ_QUERY_KEY) is None:
-            raise MissingRequiredProperty(f"Property {self.__READ_QUERY_KEY} is not informed and is required")
+            raise MissingRequiredProperty(f"Property {self.__READ_QUERY_KEY} is not informed and is required.")
         if properties.get(self._WRITE_QUERY_BUILDER_KEY) is None:
-            raise MissingRequiredProperty(f"Property {self._WRITE_QUERY_BUILDER_KEY} is not informed and is required")
+            raise MissingRequiredProperty(f"Property {self._WRITE_QUERY_BUILDER_KEY} is not informed and is required.")
 
         super().__init__(
             config_id,
