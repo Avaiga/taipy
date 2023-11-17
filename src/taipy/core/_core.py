@@ -30,7 +30,7 @@ class Core:
     Core service
     """
 
-    __is_running = False
+    _is_running = False
     __lock_is_running = Lock()
 
     __logger = _TaipyLogger._get_logger()
@@ -51,11 +51,11 @@ class Core:
         This function checks the configuration, manages application's version,
         and starts a dispatcher and lock the Config.
         """
-        if self.__class__.__is_running:
+        if self.__class__._is_running:
             raise CoreServiceIsAlreadyRunning
 
         with self.__class__.__lock_is_running:
-            self.__class__.__is_running = True
+            self.__class__._is_running = True
 
         self.__update_core_section()
         self.__manage_version()
@@ -79,7 +79,7 @@ class Core:
             self.__logger.info("Core service has been stopped.")
 
         with self.__class__.__lock_is_running:
-            self.__class__.__is_running = False
+            self.__class__._is_running = False
 
     @staticmethod
     def __update_core_section():

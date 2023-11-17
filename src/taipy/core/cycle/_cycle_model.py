@@ -49,8 +49,19 @@ class _CycleModel(_BaseModel):
             id=data["id"],
             name=data["name"],
             frequency=Frequency._from_repr(data["frequency"]),
-            properties=data["properties"],
+            properties=_BaseModel._deserialize_attribute(data["properties"]),
             creation_date=data["creation_date"],
             start_date=data["start_date"],
             end_date=data["end_date"],
         )
+
+    def to_list(self):
+        return [
+            self.id,
+            self.name,
+            repr(self.frequency),
+            _BaseModel._serialize_attribute(self.properties),
+            self.creation_date,
+            self.start_date,
+            self.end_date,
+        ]

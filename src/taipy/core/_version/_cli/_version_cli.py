@@ -199,8 +199,10 @@ class _VersionCLI:
             _version_manager._delete_production_version(old_version)
         except VersionIsNotProductionVersion:
             pass
-        version_entity.id = new_version
-        _version_manager._set(version_entity)
+
+        if not _version_manager._get(new_version):
+            version_entity.id = new_version
+            _version_manager._set(version_entity)
 
     @classmethod
     def __compare_version_config(cls, version_1: str, version_2: str):

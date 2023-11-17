@@ -19,11 +19,11 @@ import pandas as pd
 import pytest
 from sqlalchemy import create_engine, text
 
+from src.taipy.core._core import Core
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db._sql_session import _build_engine
+from src.taipy.core._repository.db._sql_connection import _SQLConnection
 from src.taipy.core._version._version import _Version
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core._version._version_model import _VersionModel
 from src.taipy.core.config import (
     CoreSection,
     DataNodeConfig,
@@ -46,7 +46,6 @@ from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data._data_model import _DataNodeModel
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job._job_model import _JobModel
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.job_id import JobId
 from src.taipy.core.notification.notifier import Notifier
@@ -58,7 +57,6 @@ from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFa
 from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task.task import Task
 from taipy.config import _inject_section
 from taipy.config._config import _Config
@@ -407,6 +405,7 @@ def init_config():
     _Checker.add_checker(_ScenarioConfigChecker)
 
     Config.configure_core(read_entity_retry=0)
+    Core._is_running = False
 
 
 def init_managers():
@@ -441,20 +440,9 @@ def init_sql_repo(tmp_sqlite):
     Config.configure_core(repository_type="sql", repository_properties={"db_location": tmp_sqlite})
 
     # Clean SQLite database
-    engine = _build_engine()
-
-    _CycleModel.__table__.drop(bind=engine, checkfirst=True)
-    _DataNodeModel.__table__.drop(bind=engine, checkfirst=True)
-    _JobModel.__table__.drop(bind=engine, checkfirst=True)
-    _ScenarioModel.__table__.drop(bind=engine, checkfirst=True)
-    _TaskModel.__table__.drop(bind=engine, checkfirst=True)
-    _VersionModel.__table__.drop(bind=engine, checkfirst=True)
-
-    _CycleModel.__table__.create(bind=engine, checkfirst=True)
-    _DataNodeModel.__table__.create(bind=engine, checkfirst=True)
-    _JobModel.__table__.create(bind=engine, checkfirst=True)
-    _ScenarioModel.__table__.create(bind=engine, checkfirst=True)
-    _TaskModel.__table__.create(bind=engine, checkfirst=True)
-    _VersionModel.__table__.create(bind=engine, checkfirst=True)
+    if _SQLConnection._connection:
+        _SQLConnection._connection.close()
+        _SQLConnection._connection = None
+    _SQLConnection.init_db()
 
     return tmp_sqlite

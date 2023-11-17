@@ -14,8 +14,6 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any
 
-from ..common.typing import Json
-
 
 class _Encoder(json.JSONEncoder):
     def _timedelta_to_str(self, obj: timedelta) -> str:
@@ -27,7 +25,7 @@ class _Encoder(json.JSONEncoder):
             f"{int(total_seconds % 60)}s"
         )
 
-    def default(self, o: Any) -> Json:
+    def default(self, o: Any):
         if isinstance(o, Enum):
             result = o.value
         elif isinstance(o, datetime):

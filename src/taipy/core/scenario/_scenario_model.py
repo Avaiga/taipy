@@ -59,14 +59,30 @@ class _ScenarioModel(_BaseModel):
         return _ScenarioModel(
             id=data["id"],
             config_id=data["config_id"],
-            tasks=data.get("tasks", None),
-            additional_data_nodes=data.get("additional_data_nodes", None),
-            properties=data["properties"],
+            tasks=_BaseModel._deserialize_attribute(data["tasks"]),
+            additional_data_nodes=_BaseModel._deserialize_attribute(data["additional_data_nodes"]),
+            properties=_BaseModel._deserialize_attribute(data["properties"]),
             creation_date=data["creation_date"],
             primary_scenario=data["primary_scenario"],
-            subscribers=data["subscribers"],
-            tags=data["tags"],
+            subscribers=_BaseModel._deserialize_attribute(data["subscribers"]),
+            tags=_BaseModel._deserialize_attribute(data["tags"]),
             version=data["version"],
-            sequences=data.get("sequences", None),
+            sequences=_BaseModel._deserialize_attribute(data["sequences"]),
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )
+
+    def to_list(self):
+        return [
+            self.id,
+            self.config_id,
+            _BaseModel._serialize_attribute(self.tasks),
+            _BaseModel._serialize_attribute(self.additional_data_nodes),
+            _BaseModel._serialize_attribute(self.properties),
+            self.creation_date,
+            self.primary_scenario,
+            _BaseModel._serialize_attribute(self.subscribers),
+            _BaseModel._serialize_attribute(self.tags),
+            self.version,
+            _BaseModel._serialize_attribute(self.sequences),
+            self.cycle,
+        ]

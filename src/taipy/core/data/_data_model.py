@@ -63,7 +63,6 @@ class _DataNodeModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        dn_properties = data["data_node_properties"]
         return _DataNodeModel(
             id=data["id"],
             config_id=data["config_id"],
@@ -72,12 +71,31 @@ class _DataNodeModel(_BaseModel):
             owner_id=data.get("owner_id"),
             parent_ids=data.get("parent_ids", []),
             last_edit_date=data.get("last_edit_date"),
-            edits=data["edits"],
+            edits=_BaseModel._deserialize_attribute(data["edits"]),
             version=data["version"],
             validity_days=data["validity_days"],
             validity_seconds=data["validity_seconds"],
             edit_in_progress=bool(data.get("edit_in_progress", False)),
             editor_id=data.get("editor_id", None),
             editor_expiration_date=data.get("editor_expiration_date"),
-            data_node_properties=dn_properties,
+            data_node_properties=_BaseModel._deserialize_attribute(data["data_node_properties"]),
         )
+
+    def to_list(self):
+        return [
+            self.id,
+            self.config_id,
+            repr(self.scope),
+            self.storage_type,
+            self.owner_id,
+            _BaseModel._serialize_attribute(self.parent_ids),
+            self.last_edit_date,
+            _BaseModel._serialize_attribute(self.edits),
+            self.version,
+            self.validity_days,
+            self.validity_seconds,
+            self.edit_in_progress,
+            self.editor_id,
+            self.editor_expiration_date,
+            _BaseModel._serialize_attribute(self.data_node_properties),
+        ]

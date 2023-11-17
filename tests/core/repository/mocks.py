@@ -14,8 +14,10 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from sqlalchemy import Column, String, Table, create_engine
-from sqlalchemy.orm import declarative_base, registry, sessionmaker
+from sqlalchemy import Column, String, Table
+from sqlalchemy.dialects import sqlite
+from sqlalchemy.orm import declarative_base, registry
+from sqlalchemy.schema import CreateTable
 
 from src.taipy.core._repository._abstract_converter import _AbstractConverter
 from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
@@ -70,6 +72,9 @@ class MockModel(Base):  # type: ignore
     def _from_entity(cls, entity: MockObj):
         return MockModel(id=entity.id, name=entity.name, version=entity._version)
 
+    def to_list(self):
+        return [self.id, self.name, self.version]
+
 
 class MockConverter(_AbstractConverter):
     @classmethod
@@ -90,13 +95,7 @@ class MockFSRepository(_FileSystemRepository):
         return pathlib.Path(Config.core.storage_folder)  # type: ignore
 
 
-def create_database(engine):
-    MockModel.__table__.create(engine, checkfirst=True)
-
-
 class MockSQLRepository(_SQLRepository):
     def __init__(self, **kwargs):
-        engine = create_engine("sqlite:///:memory:")
-        create_database(engine)
-        kwargs.update({"session": sessionmaker(autocommit=False, autoflush=False, bind=engine)()})
         super().__init__(**kwargs)
+        self.db.execute(str(CreateTable(MockModel.__table__, if_not_exists=True).compile(dialect=sqlite.dialect())))

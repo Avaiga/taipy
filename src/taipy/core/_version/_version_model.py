@@ -37,8 +37,22 @@ class _VersionModel(_BaseModel):
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return _VersionModel(
+        model = _VersionModel(
             id=data["id"],
             config=data["config"],
             creation_date=data["creation_date"],
         )
+        model.is_production = data.get("is_production")  # type: ignore
+        model.is_development = data.get("is_development")  # type: ignore
+        model.is_latest = data.get("is_latest")  # type: ignore
+        return model
+
+    def to_list(self):
+        return [
+            self.id,
+            self.config,
+            self.creation_date,
+            self.is_production,
+            self.is_development,
+            self.is_latest,
+        ]

@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
@@ -57,7 +58,21 @@ class _JobModel(_BaseModel):
             submit_id=data["submit_id"],
             submit_entity_id=data["submit_entity_id"],
             creation_date=data["creation_date"],
-            subscribers=data["subscribers"],
-            stacktrace=data["stacktrace"],
+            subscribers=_BaseModel._deserialize_attribute(data["subscribers"]),
+            stacktrace=_BaseModel._deserialize_attribute(data["stacktrace"]),
             version=data["version"],
         )
+
+    def to_list(self):
+        return [
+            self.id,
+            self.task_id,
+            repr(self.status),
+            self.force,
+            self.submit_id,
+            self.submit_entity_id,
+            self.creation_date,
+            _BaseModel._serialize_attribute(self.subscribers),
+            _BaseModel._serialize_attribute(self.stacktrace),
+            self.version,
+        ]
