@@ -13,7 +13,7 @@ from datetime import datetime
 from time import sleep
 
 from src.taipy.core import Task
-from src.taipy.core._repository.db._sql_session import _build_engine, _SQLSession
+from src.taipy.core._repository.db._sql_connection import _SQLConnection
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from src.taipy.core.submission.submission import Submission
@@ -23,12 +23,6 @@ from src.taipy.core.submission.submission_status import SubmissionStatus
 def init_managers():
     _VersionManagerFactory._build_manager()._delete_all()
     _SubmissionManagerFactory._build_manager()._delete_all()
-
-
-def clear_sql_session():
-    _build_engine.cache_clear()
-    _SQLSession._SessionLocal = None
-    _SQLSession._engine = None
 
 
 def test_create_submission(scenario, init_sql_repo):

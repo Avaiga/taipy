@@ -50,7 +50,7 @@ class _SubmissionModel(_BaseModel):
             submission_status=SubmissionStatus._from_repr(data["submission_status"]),
             version=data["version"],
         )
-    
+
     def to_list(self):
         return [
             self.id,
@@ -58,4 +58,5 @@ class _SubmissionModel(_BaseModel):
             _BaseModel._serialize_attribute(self.job_ids),
             self.creation_date,
             repr(self.submission_status),
+            self.version,
         ]

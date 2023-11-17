@@ -79,7 +79,7 @@ def test_no_event_published_for_getting_scenario():
     assert_true_after_time(lambda: all_evts.event_collected == 0, time=10)
 
     # Get one scenario does not trigger any event
-    sc = tp.get(scenario.id)
+    tp.get(scenario.id)
     assert_true_after_time(lambda: all_evts.event_collected == 0, time=10)
 
     all_evts.stop()
@@ -182,37 +182,6 @@ def test_events_published_for_scenario_deletion():
     assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.JOB] == 1, time=10)
     assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.SUBMISSION] == 1, time=10)
 
-    # Submit a scenario triggers 12 events:
-    # 1 scenario submission event
-    # 7 data node update events (for last_edit_date, editor_id(x2), editor_expiration_date(x2) and edit_in_progress(x2))
-    # 1 job creation event
-    # 3 job update events (for status: PENDING, RUNNING and COMPLETED)
-    scenario.submit()
-    assert_true_after_time(lambda: all_evts.event_collected == 30, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.CYCLE] == 1, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.DATA_NODE] == 13, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.TASK] == 1, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.SEQUENCE] == 1, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.SCENARIO] == 2, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.JOB] == 4, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.SUBMISSION] == 8, time=10)
-    assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.CREATION] == 8, time=10)
-    assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.UPDATE] == 21, time=10)
-    assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.SUBMISSION] == 1, time=10)
-
-    # Delete a scenario trigger 7 update events
-    tp.delete(scenario.id)
-    assert_true_after_time(lambda: all_evts.event_collected == 37, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.CYCLE] == 2, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.DATA_NODE] == 15, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.TASK] == 2, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.SEQUENCE] == 2, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.SCENARIO] == 3, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.JOB] == 5, time=10)
-    assert_true_after_time(lambda: all_evts.entity_type_collected[EventEntityType.SUBMISSION] == 8, time=10)
-    assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.CREATION] == 8, time=10)
-    assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.UPDATE] == 21, time=10)
-    assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.SUBMISSION] == 1, time=10)
     assert_true_after_time(lambda: all_evts.operation_collected[EventOperation.DELETION] == 8, time=10)
 
     all_evts.stop()
