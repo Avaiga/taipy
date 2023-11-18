@@ -388,6 +388,12 @@ class _Builder:
                 var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
+            elif var_type == str.__name__ and callable(adapter):
+                var_type += (
+                    _get_expr_var_name(str(adapter.__code__))
+                    if adapter.__name__ == "<lambda>"
+                    else _get_expr_var_name(adapter.__name__)
+                )
             if lov_name := self.__hashes.get(var_name):
                 if adapter is None:
                     adapter = self.__gui._get_adapter_for_type(lov_name)
