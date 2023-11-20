@@ -117,6 +117,7 @@ class _Manager(Generic[EntityType]):
         from ..job._job_manager_factory import _JobManagerFactory
         from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
         from ..sequence._sequence_manager_factory import _SequenceManagerFactory
+        from ..submission._submission_manager_factory import _SubmissionManagerFactory
         from ..task._task_manager_factory import _TaskManagerFactory
 
         _CycleManagerFactory._build_manager()._delete_many(_entity_ids.cycle_ids)
@@ -125,6 +126,7 @@ class _Manager(Generic[EntityType]):
         _TaskManagerFactory._build_manager()._delete_many(_entity_ids.task_ids)
         _JobManagerFactory._build_manager()._delete_many(_entity_ids.job_ids)
         _DataManagerFactory._build_manager()._delete_many(_entity_ids.data_node_ids)
+        _SubmissionManagerFactory._build_manager()._delete_many(_entity_ids.submission_ids)
 
     @classmethod
     def _export(cls, id: str, folder_path: Union[str, pathlib.Path]):

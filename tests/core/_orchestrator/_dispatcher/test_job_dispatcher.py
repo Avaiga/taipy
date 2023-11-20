@@ -24,6 +24,7 @@ from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFact
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job.job import Job
+from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.config import Config
 from tests.core.utils import assert_true_after_time
@@ -111,8 +112,9 @@ def test_can_execute_synchronous():
 
     task_id = TaskId("task_id1")
     task = Task(config_id="name", properties={}, input=[], function=print, output=[], id=task_id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task_id)
     job_id = JobId("id1")
-    job = Job(job_id, task, "submit_id", task.id)
+    job = Job(job_id, task, submission.id, task.id)
 
     dispatcher = _OrchestratorFactory._dispatcher
 
@@ -128,7 +130,8 @@ def test_exception_in_user_function():
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
     task = Task(config_id="name", properties={}, input=[], function=_error, output=[], id=task_id)
-    job = Job(job_id, task, "submit_id", task.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task_id)
+    job = Job(job_id, task, submission.id, task.id)
 
     dispatcher = _OrchestratorFactory._dispatcher
     dispatcher._dispatch(job)
@@ -148,7 +151,8 @@ def test_exception_in_writing_data():
     output._is_in_cache = False
     output.write.side_effect = ValueError()
     task = Task(config_id="name", properties={}, input=[], function=print, output=[output], id=task_id)
-    job = Job(job_id, task, "submit_id", task.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task_id)
+    job = Job(job_id, task, submission.id, task.id)
 
     dispatcher = _OrchestratorFactory._dispatcher
 

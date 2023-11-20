@@ -28,6 +28,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
     _ENTITY_NAME = Job.__name__
     _ID_PREFIX = "JOB_"
     _repository: _AbstractRepository
+    _EVENT_ENTITY_TYPE = EventEntityType.JOB
 
     @classmethod
     def _get_all(cls, version_number: Optional[str] = None) -> List[Job]:
@@ -36,8 +37,6 @@ class _JobManager(_Manager[Job], _VersionMixin):
         """
         filters = cls._build_filters_with_version(version_number)
         return cls._repository._load_all(filters)
-
-    _EVENT_ENTITY_TYPE = EventEntityType.JOB
 
     @classmethod
     def _create(

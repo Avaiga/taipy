@@ -87,11 +87,11 @@ def test_get_job(init_sql_repo):
 
     _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task)
     assert _JobManager._get(job_1.id) == job_1
     assert _JobManager._get(job_1.id).submit_entity_id == task.id
 
-    job_2 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_2")
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task)
     assert job_1 != job_2
     assert _JobManager._get(job_1.id).id == job_1.id
     assert _JobManager._get(job_2.id).id == job_2.id
@@ -107,17 +107,17 @@ def test_get_latest_job(init_sql_repo):
 
     _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task)
     assert _JobManager._get_latest(task) == job_1
     assert _JobManager._get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = _OrchestratorFactory._orchestrator.submit_task(task_2, "submit_id_2")
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task_2)
     assert _JobManager._get_latest(task).id == job_1.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_1_bis = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1_bis")
+    job_1_bis = _OrchestratorFactory._orchestrator.submit_task(task)
     assert _JobManager._get_latest(task).id == job_1_bis.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
@@ -135,8 +135,8 @@ def test_get_jobs(init_sql_repo):
 
     _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
-    job_2 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_2")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task)
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task)
 
     assert {job.id for job in _JobManager._get_all()} == {job_1.id, job_2.id}
 
@@ -150,8 +150,8 @@ def test_delete_job(init_sql_repo):
 
     _OrchestratorFactory._build_dispatcher()
 
-    job_1 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_1")
-    job_2 = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id_2")
+    job_1 = _OrchestratorFactory._orchestrator.submit_task(task)
+    job_2 = _OrchestratorFactory._orchestrator.submit_task(task)
 
     _JobManager._delete(job_1)
 
@@ -176,7 +176,7 @@ def test_raise_when_trying_to_delete_unfinished_job(init_sql_repo):
     _OrchestratorFactory._build_dispatcher()
 
     with lock:
-        job = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id")
+        job = _OrchestratorFactory._orchestrator.submit_task(task)
 
         assert_true_after_time(lambda: len(_JobDispatcher._dispatched_processes) == 1)
         assert_true_after_time(job.is_running)
@@ -208,7 +208,7 @@ def test_force_deleting_unfinished_job(init_sql_repo):
     _OrchestratorFactory._build_dispatcher()
 
     with lock:
-        job = _OrchestratorFactory._orchestrator.submit_task(task_1, "submit_id")
+        job = _OrchestratorFactory._orchestrator.submit_task(task_1)
         assert_true_after_time(job.is_running)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
@@ -223,7 +223,7 @@ def test_is_deletable(init_sql_repo):
 
     assert len(_JobManager._get_all()) == 0
     task = _create_task(print, 0, "task")
-    job = _OrchestratorFactory._orchestrator.submit_task(task, "submit_id")
+    job = _OrchestratorFactory._orchestrator.submit_task(task)
 
     assert job.is_completed()
     assert _JobManager._is_deletable(job)

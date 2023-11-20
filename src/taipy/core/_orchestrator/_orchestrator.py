@@ -25,6 +25,7 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..job.job_id import JobId
+from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task.task import Task
 from ._abstract_orchestrator import _AbstractOrchestrator
 
@@ -66,31 +67,38 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created Jobs.
         """
-        submit_id = cls.__generate_submit_id()
-        res = []
+        submission = _SubmissionManagerFactory._build_manager()._create(submittable.id)  # type: ignore
+        jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
             for ts in tasks:
                 for task in ts:
-                    res.append(
-                        cls._submit_task(
-                            task, submit_id, submittable.id, callbacks=callbacks, force=force  # type: ignore
+                    jobs.append(
+                        cls._lock_dn_output_and_create_job(
+                            task,
+                            submission.id,
+                            submission.entity_id,
+                            callbacks=itertools.chain([submission._update_submission_status], callbacks or []),
+                            force=force,  # type: ignore
                         )
                     )
+
+        submission.jobs = jobs  # type: ignore
+
+        cls._orchestrate_job_to_run_or_block(jobs)
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(res, timeout=timeout)
-        return res
+                cls.__wait_until_job_finished(jobs, timeout=timeout)
+
+        return jobs
 
     @classmethod
     def submit_task(
         cls,
         task: Task,
-        submit_id: Optional[str] = None,
-        submit_entity_id: Optional[str] = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,
@@ -103,55 +111,69 @@ class _Orchestrator(_AbstractOrchestrator):
              submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
-             wait (bool): Wait for the orchestrated job created from the task submission to be finished in asynchronous
-                mode.
-             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished
-                before returning.
+             wait (bool): Wait for the orchestrated job created from the task submission to be finished
+                in asynchronous mode.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job
+                to be finished before returning.
         Returns:
             The created `Job^`.
         """
+        submission = _SubmissionManagerFactory._build_manager()._create(task.id)
+        submit_id = submission.id
         with cls.lock:
-            job = cls._submit_task(task, submit_id, submit_entity_id, callbacks, force)
+            job = cls._lock_dn_output_and_create_job(
+                task,
+                submit_id,
+                submission.entity_id,
+                itertools.chain([submission._update_submission_status], callbacks or []),
+                force,
+            )
+
+        jobs = [job]
+        submission.jobs = jobs  # type: ignore
+
+        cls._orchestrate_job_to_run_or_block(jobs)
 
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
                 cls.__wait_until_job_finished(job, timeout=timeout)
+
         return job
 
     @classmethod
-    def _submit_task(
+    def _lock_dn_output_and_create_job(
         cls,
         task: Task,
-        submit_id: Optional[str] = None,
-        submit_entity_id: Optional[str] = None,
+        submit_id: str,
+        submit_entity_id: str,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
     ) -> Job:
-        submit_id = submit_id if submit_id else cls.__generate_submit_id()
-        submit_entity_id = submit_entity_id if submit_entity_id else task.id
-
         for dn in task.output.values():
             dn.lock_edit()
         job = _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, submit_entity_id, force=force
         )
-        cls._orchestrate_job_to_run_or_block(job)
 
         return job
 
-    @staticmethod
-    def __generate_submit_id():
-        return f"SUBMISSION_{str(uuid.uuid4())}"
-
     @classmethod
-    def _orchestrate_job_to_run_or_block(cls, job: Job):
-        if cls._is_blocked(job):
-            job.blocked()
-            cls.blocked_jobs.append(job)
-        else:
-            job.pending()
+    def _orchestrate_job_to_run_or_block(cls, jobs: List[Job]):
+        blocked_jobs = []
+        pending_jobs = []
+
+        for job in jobs:
+            if cls._is_blocked(job):
+                job.blocked()
+                blocked_jobs.append(job)
+            else:
+                job.pending()
+                pending_jobs.append(job)
+
+        cls.blocked_jobs.extend(blocked_jobs)
+        for job in pending_jobs:
             cls.jobs_to_run.put(job)
 
     @classmethod
@@ -200,6 +222,7 @@ class _Orchestrator(_AbstractOrchestrator):
         if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
         elif job.is_failed():
+            print(f"\nJob {job.id} failed, abandoning subsequent jobs.\n")
             cls._fail_subsequent_jobs(job)
 
     @classmethod
@@ -272,6 +295,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys()))
             )
             for job in to_fail_or_abandon_jobs:
+                print(f"Abandoning job: {job.id}")
                 job.abandoned()
             to_fail_or_abandon_jobs.update([failed_job])
             cls.__remove_blocked_jobs(to_fail_or_abandon_jobs)

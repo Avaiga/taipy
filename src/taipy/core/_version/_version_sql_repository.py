@@ -37,7 +37,7 @@ class _VersionSQLRepository(_SQLRepository, _VersionRepositoryInterface):
             str(self.table.select().filter_by(is_latest=True).compile(dialect=sqlite.dialect()))
         ).fetchone():
             return latest["id"]
-        return ""
+        raise ModelNotFound(self.model_type, "")
 
     def _set_development_version(self, version_number):
         if old_development := self.db.execute(str(self.table.select().filter_by(is_development=True))).fetchone():

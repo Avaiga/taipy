@@ -261,16 +261,16 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def _submit_task(
+        def _lock_dn_output_and_create_job(
             cls,
             task: Task,
-            submit_id: Optional[str] = None,
-            submit_entity_id: Optional[str] = None,
+            submit_id: str,
+            submit_entity_id: str,
             callbacks: Optional[Iterable[Callable]] = None,
             force: bool = False,
         ):
             cls.submit_calls.append(task)
-            return None  # type: ignore
+            return super()._lock_dn_output_and_create_job(task, submit_id, submit_entity_id, callbacks, force)
 
     with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         # sequence does not exists. We expect an exception to be raised

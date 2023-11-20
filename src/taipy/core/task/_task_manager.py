@@ -145,12 +145,20 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         entity_ids = _EntityIds()
 
         from ..job._job_manager_factory import _JobManagerFactory
+        from ..submission._submission_manager_factory import _SubmissionManagerFactory
 
         jobs = _JobManagerFactory._build_manager()._get_all()
 
         for job in jobs:
             if job.task.id == task.id:
                 entity_ids.job_ids.add(job.id)
+
+        submissions = _SubmissionManagerFactory._build_manager()._get_all()
+        submitted_entity_ids = list(entity_ids.task_ids)
+        for submission in submissions:
+            if submission.entity_id in submitted_entity_ids:
+                entity_ids.submission_ids.add(submission.id)
+
         return entity_ids
 
     @classmethod

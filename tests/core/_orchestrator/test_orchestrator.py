@@ -84,7 +84,7 @@ def test_submit_task():
 
     before_submission_creation = datetime.now()
     sleep(0.1)
-    job = _Orchestrator.submit_task(task, "submit_id")
+    job = _Orchestrator.submit_task(task)
     sleep(0.1)
     after_submission_creation = datetime.now()
     assert _DataManager._get(output_dn_id).read() == 42
@@ -183,8 +183,8 @@ def test_submit_task_that_return_multiple_outputs():
 
     _OrchestratorFactory._build_dispatcher()
 
-    _Orchestrator.submit_task(with_tuple, "submit_id_1")
-    _Orchestrator.submit_task(with_list, "submit_id_2")
+    _Orchestrator.submit_task(with_tuple)
+    _Orchestrator.submit_task(with_list)
 
     assert (
         with_tuple.output[f"{with_tuple.config_id}_output0"].read()
@@ -212,10 +212,10 @@ def test_submit_task_returns_single_iterable_output():
 
     _OrchestratorFactory._build_dispatcher()
 
-    _Orchestrator.submit_task(task_with_tuple, "submit_id_1")
+    _Orchestrator.submit_task(task_with_tuple)
     assert task_with_tuple.output[f"{task_with_tuple.config_id}_output0"].read() == (42, 21)
     assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
-    _Orchestrator.submit_task(task_with_list, "submit_id_2")
+    _Orchestrator.submit_task(task_with_list)
     assert task_with_list.output[f"{task_with_list.config_id}_output0"].read() == [42, 21]
     assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
 
@@ -230,7 +230,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
 
     _OrchestratorFactory._build_dispatcher()
 
-    job = _Orchestrator.submit_task(task, "submit_id")
+    job = _Orchestrator.submit_task(task)
     assert task.output[f"{task.config_id}_output0"].read() == 0
     assert job.is_failed()
     assert len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0
@@ -297,7 +297,7 @@ def test_update_status_fail_job():
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
 
-    job = _Orchestrator.submit_task(task_0, "submit_id")
+    job = _Orchestrator.submit_task(task_0)
     assert job.is_failed()
 
     jobs = _Orchestrator.submit(scenario_1)
@@ -354,7 +354,7 @@ def test_update_status_fail_job_in_parallel():
 
     sequence_1 = scenario_1.sequences["sequence_1"]
 
-    job = _Orchestrator.submit_task(task_0, "submit_id")
+    job = _Orchestrator.submit_task(task_0)
     assert_true_after_time(job.is_failed)
 
     jobs = _Orchestrator.submit(sequence_1)
@@ -396,7 +396,7 @@ def test_submit_task_in_parallel():
 
     with lock:
         assert task.output[f"{task.config_id}_output0"].read() == 0
-        job = _Orchestrator.submit_task(task, "submit_id")
+        job = _Orchestrator.submit_task(task)
         assert_true_after_time(job.is_running)
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
 
@@ -466,7 +466,7 @@ def test_submit_task_synchronously_in_parallel():
     sleep_period = 1
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep, sleep_period))
-    job = _Orchestrator.submit_task(task, "submit_id", wait=True)
+    job = _Orchestrator.submit_task(task, wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_completed)
 
@@ -506,7 +506,7 @@ def test_submit_fail_task_synchronously_in_parallel():
     sleep_period = 1.0
     start_time = datetime.now()
     task = Task("sleep_task", {}, function=partial(sleep_and_raise_error_fct, sleep_period))
-    job = _Orchestrator.submit_task(task, "submit_id", wait=True)
+    job = _Orchestrator.submit_task(task, wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
     assert_true_after_time(job.is_failed)
 
@@ -548,7 +548,7 @@ def test_submit_task_synchronously_in_parallel_with_timeout():
     task = Task("sleep_task", {}, function=partial(sleep, task_duration))
 
     start_time = datetime.now()
-    job = _Orchestrator.submit_task(task, "submit_id", wait=True, timeout=timeout_duration)
+    job = _Orchestrator.submit_task(task, wait=True, timeout=timeout_duration)
     end_time = datetime.now()
 
     assert timeout_duration <= (end_time - start_time).seconds
@@ -569,8 +569,8 @@ def test_submit_task_multithreading_multiple_task():
 
     with lock_1:
         with lock_2:
-            job_1 = _Orchestrator.submit_task(task_1, "submit_id_1")
-            job_2 = _Orchestrator.submit_task(task_2, "submit_id_2")
+            job_1 = _Orchestrator.submit_task(task_1)
+            job_2 = _Orchestrator.submit_task(task_2)
 
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
@@ -681,15 +681,15 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     _OrchestratorFactory._build_dispatcher()
 
     with lock_0:
-        job_0 = _Orchestrator.submit_task(task_0, "submit_id_0")
+        job_0 = _Orchestrator.submit_task(task_0)
         assert_true_after_time(job_0.is_running)
         assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
         with lock_1:
             with lock_2:
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
-                job_2 = _Orchestrator.submit_task(task_2, "submit_id_2")
-                job_1 = _Orchestrator.submit_task(task_1, "submit_id_1")
+                job_2 = _Orchestrator.submit_task(task_2)
+                job_1 = _Orchestrator.submit_task(task_1)
                 assert_true_after_time(job_0.is_running)
                 assert_true_after_time(job_1.is_pending)
                 assert_true_after_time(job_2.is_running)
@@ -741,13 +741,15 @@ def test_blocked_task():
     assert not task_2.baz.is_ready_for_reading  # neither does baz
 
     assert len(_Orchestrator.blocked_jobs) == 0
-    job_2 = _Orchestrator.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
+    job_2 = _Orchestrator.submit_task(task_2)  # job 2 is submitted first
     assert job_2.is_blocked()  # since bar is not is_valid the job 2 is blocked
     assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 0)
     assert len(_Orchestrator.blocked_jobs) == 1
     with lock_2:
         with lock_1:
-            job_1 = _Orchestrator.submit_task(task_1, "submit_id_1")  # job 1 is submitted and locked
+            job_1 = _Orchestrator.submit_task(
+                task_1,
+            )  # job 1 is submitted and locked
             assert_true_after_time(job_1.is_running)  # so it is still running
             assert_true_after_time(lambda: len(_OrchestratorFactory._dispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
@@ -988,7 +990,7 @@ def test_need_to_run_skippable_task_no_input():
 
     task = _create_task_from_config(task_cfg)
     assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    _Orchestrator.submit_task(task, "submit_id")
+    _Orchestrator.submit_task(task)
 
     assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
 
@@ -1007,7 +1009,7 @@ def test_need_to_run_skippable_task_no_validity_period_on_output():
 
     task = _create_task_from_config(task_cfg)
     assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    _Orchestrator.submit_task(task, "submit_id")
+    _Orchestrator.submit_task(task)
 
     assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
 
@@ -1026,10 +1028,10 @@ def test_need_to_run_skippable_task_with_validity_period_is_valid_on_output():
     task = _create_task_from_config(task_cfg)
 
     assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    job = _Orchestrator.submit_task(task, "submit_id_1")
+    job = _Orchestrator.submit_task(task)
 
     assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
-    job_skipped = _Orchestrator.submit_task(task, "submit_id_2")
+    job_skipped = _Orchestrator.submit_task(task)
 
     assert job.is_completed()
     assert job.is_finished()
@@ -1047,7 +1049,7 @@ def test_need_to_run_skippable_task_with_validity_period_obsolete_on_output():
     task = _create_task_from_config(task_cfg)
 
     assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    _Orchestrator.submit_task(task, "submit_id")
+    _Orchestrator.submit_task(task)
 
     output = task.hello_world
     output._last_edit_date = datetime.now() - timedelta(days=1, minutes=30)

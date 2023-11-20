@@ -32,6 +32,7 @@ from ..notification import EventEntityType, EventOperation, _publish_event
 from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ..scenario.scenario import Scenario
 from ..scenario.scenario_id import ScenarioId
+from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task, TaskId
 from .sequence import Sequence
@@ -241,10 +242,18 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             for data_node in task.data_nodes.values():
                 if data_node.owner_id == sequence.id:
                     entity_ids.data_node_ids.add(data_node.id)
+
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
+
+        submissions = _SubmissionManagerFactory._build_manager()._get_all()
+        submitted_entity_ids = list(entity_ids.sequence_ids.union(entity_ids.task_ids))
+        for submission in submissions:
+            if submission.entity_id in submitted_entity_ids:
+                entity_ids.submission_ids.add(submission.id)
+
         return entity_ids
 
     @classmethod
