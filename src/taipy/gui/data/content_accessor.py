@@ -13,6 +13,7 @@ import base64
 import pathlib
 import tempfile
 import typing as t
+import urllib.parse
 from importlib import util
 from pathlib import Path
 from sys import getsizeof
@@ -112,7 +113,7 @@ class _ContentAccessor:
             self.__content_paths[url_path] = dir_path
             file_url = f"{url_path}/{path.name}"
             self.__url_is_image[file_url] = image
-            return (file_url,)
+            return (urllib.parse.quote_plus(file_url, safe="/"),)
         elif _has_magic_module:
             try:
                 mime = magic.from_buffer(value, mime=True)

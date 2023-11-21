@@ -36,7 +36,7 @@ interface FileDownloadProps extends TaipyActiveProps {
 }
 
 const FileDownload = (props: FileDownloadProps) => {
-    const { id, auto, name = "", bypassPreview, onAction, label, defaultLabel = "" } = props;
+    const { id, auto, name = "", bypassPreview = true, onAction, label, defaultLabel = "" } = props;
     const aRef = useRef<HTMLAnchorElement>(null);
     const dispatch = useDispatch();
     const module = useModule();
@@ -57,7 +57,7 @@ const FileDownload = (props: FileDownloadProps) => {
             usp.append("bypass", "");
         }
         const ret = usp.toString();
-        return [ret.length ? url + "?" + ret : url, !!bypassPreview && (name || true)];
+        return [ret.length ? url + "?" + ret : url, bypassPreview && (name || true)];
     }, [props.content, bypassPreview, name, props.defaultContent]);
 
     useEffect(() => {

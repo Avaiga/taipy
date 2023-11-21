@@ -78,7 +78,7 @@ describe("FileDownload Component", () => {
     });
     it("dispatch a well formed message when content is not empty", async () => {
         const server = newServer({
-            get: ['/some/link/to.png', {
+            get: ['/some/link/to.png?bypass=', {
               // status: 200 is the default
               //headers: { 'Content-Type': 'application/json' },
               body: '{ "message": "Success!" }',
@@ -96,7 +96,7 @@ describe("FileDownload Component", () => {
         await userEvent.click(elt);
         await waitFor(() => expect(dispatch).toHaveBeenCalledWith({
             name: "anId",
-            payload: { args: ["from.png", "/some/link/to.png"], action: "on_action" },
+            payload: { args: ["from.png", "/some/link/to.png?bypass="], action: "on_action" },
             type: "SEND_ACTION_ACTION",
         }));
         server.remove();
