@@ -36,7 +36,6 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
 from .utils import _is_in_notebook, _is_port_open, _RuntimeManager
-from .utils.proxy import NotebookProxy
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -259,6 +258,8 @@ class _Server:
         self._host = host
         self._port = port
         if _is_in_notebook() and notebook_proxy:  # pragma: no cover
+            from .utils.proxy import NotebookProxy
+
             # Start proxy if not already started
             self._proxy = NotebookProxy(gui=self._gui, listening_port=port)
             self._proxy.run()
