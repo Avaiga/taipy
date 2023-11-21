@@ -19,6 +19,9 @@
 
 ### <div align="left"> Taipy is an open-source Python library for building your web application front-end & back-end. <div align="left"> No knowledge of web development is required!
 
+### <div align="center"> <a href="https://docs.taipy.io/en/latest/">Documentation</a> • <a href="https://discord.com/invite/SJyz2VJGxV">Join our Discord</a> • <a href="https://docs.taipy.io/en/latest/knowledge_base/demos/">Check out Taipy Applications</a>
+</div>
+
 <br>
 
 #  <div align="center"> 📊 We make both ends meet ⚙️ </div>
