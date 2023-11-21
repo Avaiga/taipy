@@ -12,6 +12,7 @@
 import contextlib
 import json
 import numbers
+import time as _time
 import typing as t
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
@@ -854,6 +855,23 @@ class _Builder:
             self.__set_react_attribute(_to_camel_case(name), _get_client_var_name(hash_name))
         return self
 
+    def __set_html_content(self, name: str, property_name: str, property_type: PropertyType):
+        hash_name = self.__hashes.get(name)
+        if not hash_name:
+            return self
+        front_var = self.__get_typed_hash_name(hash_name, property_type)
+        self.set_attribute(
+            _to_camel_case(f"default_{property_name}"),
+            self.__gui._get_user_content_url(
+                None,
+                {
+                    "variable_name": front_var,
+                    self.__gui._HTML_CONTENT_KEY: str(_time.time()),
+                },
+            ),
+        )
+        return self.__set_react_attribute(_to_camel_case(property_name), _get_client_var_name(front_var))
+
     def set_attributes(self, attributes: t.List[tuple]):  # noqa: C901
         """
         TODO-undocumented
@@ -928,6 +946,8 @@ class _Builder:
                 self.__set_dynamic_property_without_default(
                     attr[0], var_type, _get_tuple_val(attr, 2, None) == "optional"
                 )
+            elif var_type == PropertyType.toHtmlContent:
+                self.__set_html_content(attr[0], "page", var_type)
             elif isclass(var_type) and issubclass(var_type, _TaipyBase):
                 if hash_name := self.__hashes.get(attr[0]):
                     prop_name = _to_camel_case(attr[0])

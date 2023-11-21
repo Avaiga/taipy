@@ -172,6 +172,12 @@ class _TaipyContentImage(_TaipyBase):
         return _TaipyBase._HOLDER_PREFIX + "Ci"
 
 
+class _TaipyContentHtml(_TaipyBase):
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Ch"
+
+
 class _TaipyDict(_TaipyBase):
     def get(self):
         val = super().get()

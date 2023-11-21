@@ -329,3 +329,6 @@ class _Evaluator:
                     modified_vars.add(holder_hash)
             modified_vars.add(hash_expr)
         return modified_vars
+
+    def _get_instance_in_context(self, name: str):
+        return self.__global_ctx.get(name)

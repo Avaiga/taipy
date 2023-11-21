@@ -40,6 +40,7 @@ from .types import (
     _TaipyBase,
     _TaipyBool,
     _TaipyContent,
+    _TaipyContentHtml,
     _TaipyContentImage,
     _TaipyData,
     _TaipyDate,

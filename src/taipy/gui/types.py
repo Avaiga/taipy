@@ -18,6 +18,7 @@ from .utils import (
     _TaipyBase,
     _TaipyBool,
     _TaipyContent,
+    _TaipyContentHtml,
     _TaipyContentImage,
     _TaipyData,
     _TaipyDate,
@@ -66,6 +67,7 @@ class PropertyType(Enum):
     """
     The property holds a Boolean value.
     """
+    toHtmlContent = _TaipyContentHtml
     content = _TaipyContent
     data = _TaipyData
     date = _TaipyDate

@@ -1183,6 +1183,11 @@
             "name": "height",
             "type": "dynamic(str)",
             "doc": "The height, in CSS units, of this block."
+          },
+          {
+            "name": "content",
+            "type": "dynamic(any)",
+            "doc": "The content provided to the part. See the documentation section on content providers."
           }
         ]
       }
