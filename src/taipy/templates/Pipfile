@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+autopep8 = "*"
+black = "*"
+cookiecutter = "==2.1.1"
+flake8 = "*"
+flake8-docstrings = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
+taipy = {ref = "develop", git = "https://github.com/avaiga/taipy.git"}
+tox = "*"
+types-python-dateutil = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
