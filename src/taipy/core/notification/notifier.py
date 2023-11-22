@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import Dict, Optional, Set, Tuple
+from typing import Any, Dict, Optional, Set, Tuple
 
 from ._registration import _Registration
 from ._topic import _Topic
@@ -19,11 +19,35 @@ from .event import Event, EventEntityType, EventOperation
 
 def _publish_event(
     entity_type: EventEntityType,
-    entity_id: Optional[str],
     operation: EventOperation,
+    /,
+    entity_id: Optional[str] = None,
     attribute_name: Optional[str] = None,
+    attribute_value: Optional[Any] = None,
+    **kwargs,
 ):
-    Notifier.publish(Event(entity_type, entity_id, operation, attribute_name))
+    """Internal helper function to send events.
+
+    It basically creates an event corresponding to the given arguments
+    and send it using `Notifier.publish(event)`
+
+    Parameters:
+        entity_type (EventEntityType^)
+        operation (EventOperation^)
+        entity_id (Optional[str])
+        attribute_name (Optional[str])
+        attribute_value (Optional[Any])
+        **kwargs
+    """
+    event = Event(
+        entity_id=entity_id,
+        entity_type=entity_type,
+        operation=operation,
+        attribute_name=attribute_name,
+        attribute_value=attribute_value,
+        metadata=kwargs,
+    )
+    Notifier.publish(event)
 
 
 class Notifier:

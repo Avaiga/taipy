@@ -11,11 +11,10 @@
 
 from collections import UserDict
 
-from ..notification import _ENTITY_TO_EVENT_ENTITY_TYPE, EventOperation, _publish_event
+from ..notification import _ENTITY_TO_EVENT_ENTITY_TYPE, EventOperation, Notifier, _make_event
 
 
 class _Properties(UserDict):
-
     __PROPERTIES_ATTRIBUTE_NAME = "properties"
 
     def __init__(self, entity_owner, **kwargs):
@@ -29,20 +28,20 @@ class _Properties(UserDict):
         from ... import core as tp
 
         if hasattr(self, "_entity_owner"):
-            to_publish_event_parameters = [
-                _ENTITY_TO_EVENT_ENTITY_TYPE[self._entity_owner._MANAGER_NAME],
-                self._entity_owner.id,
+            event = _make_event(
+                self._entity_owner,
                 EventOperation.UPDATE,
-                self.__PROPERTIES_ATTRIBUTE_NAME,
-            ]
+                attribute_name=self.__PROPERTIES_ATTRIBUTE_NAME,
+                attribute_value=value,
+            )
             if not self._entity_owner._is_in_context:
                 tp.set(self._entity_owner)
-                _publish_event(*to_publish_event_parameters)
+                Notifier.publish(event)
             else:
                 if key in self._pending_deletions:
                     self._pending_deletions.remove(key)
                 self._pending_changes[key] = value
-                self._entity_owner._in_context_attributes_changed_collector.append(to_publish_event_parameters)
+                self._entity_owner._in_context_attributes_changed_collector.append(event)
 
     def __getitem__(self, key):
         from taipy.config.common._template_handler import _TemplateHandler as _tpl
@@ -54,16 +53,16 @@ class _Properties(UserDict):
         from ... import core as tp
 
         if hasattr(self, "_entity_owner"):
-            to_publish_event_parameters = [
-                _ENTITY_TO_EVENT_ENTITY_TYPE[self._entity_owner._MANAGER_NAME],
-                self._entity_owner.id,
+            event = _make_event(
+                self._entity_owner,
                 EventOperation.UPDATE,
-                self.__PROPERTIES_ATTRIBUTE_NAME,
-            ]
+                attribute_name=self.__PROPERTIES_ATTRIBUTE_NAME,
+                attribute_value=None,
+            )
             if not self._entity_owner._is_in_context:
                 tp.set(self._entity_owner)
-                _publish_event(*to_publish_event_parameters)
+                Notifier.publish(event)
             else:
                 self._pending_changes.pop(key, None)
                 self._pending_deletions.add(key)
-                self._entity_owner._in_context_attributes_changed_collector.append(to_publish_event_parameters)
+                self._entity_owner._in_context_attributes_changed_collector.append(event)

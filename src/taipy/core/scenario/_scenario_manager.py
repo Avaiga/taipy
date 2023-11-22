@@ -39,7 +39,7 @@ from ..exceptions.exceptions import (
 )
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task._task_manager_factory import _TaskManagerFactory
 from .scenario import Scenario
@@ -94,12 +94,16 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def __add_subscriber(cls, callback, params, scenario: Scenario):
         scenario._add_subscriber(callback, params)
-        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "subscribers")
+        Notifier.publish(
+            _make_event(scenario, EventOperation.UPDATE, attribute_name="subscribers", attribute_value=params)
+        )
 
     @classmethod
     def __remove_subscriber(cls, callback, params, scenario: Scenario):
         scenario._remove_subscriber(callback, params)
-        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "subscribers")
+        Notifier.publish(
+            _make_event(scenario, EventOperation.UPDATE, attribute_name="subscribers", attribute_value=params)
+        )
 
     @classmethod
     def _create(
@@ -181,9 +185,9 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for sequence_name in sequences.keys():
             if not actual_sequences[sequence_name]._is_consistent():
                 raise InvalidSequence(actual_sequences[sequence_name].id)
-            _publish_event(EventEntityType.SEQUENCE, actual_sequences[sequence_name].id, EventOperation.CREATION, None)
+            Notifier.publish(_make_event(actual_sequences[sequence_name], EventOperation.CREATION))
 
-        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.CREATION, None)
+        Notifier.publish(_make_event(scenario, EventOperation.CREATION))
         return scenario
 
     @classmethod
@@ -216,7 +220,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             ._orchestrator()
             .submit(scenario, callbacks=scenario_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
-        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.SUBMISSION, None)
+        Notifier.publish(_make_event(scenario, EventOperation.SUBMISSION))
         return jobs
 
     @classmethod
@@ -298,13 +302,17 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                 cls._set(old_tagged_scenario)
         scenario._add_tag(tag)
         cls._set(scenario)
-        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "tags")
+        Notifier.publish(
+            _make_event(scenario, EventOperation.UPDATE, attribute_name="tags", attribute_value=scenario.tags)
+        )
 
     @classmethod
     def _untag(cls, scenario: Scenario, tag: str):
         scenario._remove_tag(tag)
         cls._set(scenario)
-        _publish_event(cls._EVENT_ENTITY_TYPE, scenario.id, EventOperation.UPDATE, "tags")
+        Notifier.publish(
+            _make_event(scenario, EventOperation.UPDATE, attribute_name="tags", attribute_value=scenario.tags)
+        )
 
     @classmethod
     def _compare(cls, *scenarios: Scenario, data_node_config_id: Optional[str] = None):

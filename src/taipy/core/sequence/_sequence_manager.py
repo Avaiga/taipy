@@ -14,6 +14,8 @@ import pathlib
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
+from src.taipy.core.notification.event import _make_event
+
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
@@ -28,7 +30,7 @@ from ..exceptions.exceptions import (
 )
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import Event, EventEntityType, EventOperation, Notifier
 from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ..scenario.scenario import Scenario
 from ..scenario.scenario_id import ScenarioId
@@ -40,7 +42,6 @@ from .sequence_id import SequenceId
 
 
 class _SequenceManager(_Manager[Sequence], _VersionMixin):
-
     _ENTITY_NAME = Sequence.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.SEQUENCE
     _model_name = "sequences"
@@ -56,7 +57,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             if sequence_name in scenario._sequences.keys():
                 scenario.remove_sequences([sequence_name])
                 if hasattr(cls, "_EVENT_ENTITY_TYPE"):
-                    _publish_event(cls._EVENT_ENTITY_TYPE, sequence_id, EventOperation.DELETION, None)
+                    Notifier.publish(Event(cls._EVENT_ENTITY_TYPE, EventOperation.DELETION, entity_id=sequence_id))
                 return
         raise ModelNotFound(cls._model_name, sequence_id)
 
@@ -69,7 +70,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         for scenario in scenarios:
             scenario.sequences = {}
         if hasattr(cls, "_EVENT_ENTITY_TYPE"):
-            _publish_event(cls._EVENT_ENTITY_TYPE, "all", EventOperation.DELETION, None)
+            Notifier.publish(Event(cls._EVENT_ENTITY_TYPE, EventOperation.DELETION, metadata={"delete_all": True}))
 
     @classmethod
     def _delete_many(cls, sequence_ids: Iterable[str]):
@@ -95,7 +96,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
 
             if hasattr(cls, "_EVENT_ENTITY_TYPE"):
                 for sequence_id in sequence_ids:
-                    _publish_event(cls._EVENT_ENTITY_TYPE, sequence_id, EventOperation.DELETION, None)
+                    Notifier.publish(Event(cls._EVENT_ENTITY_TYPE, EventOperation.DELETION, entity_id=sequence_id))
         except (ModelNotFound, KeyError):
             cls.__log_error_entity_not_found(sequence_id)
             raise ModelNotFound(cls._model_name, sequence_id)
@@ -287,12 +288,12 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
     @classmethod
     def __add_subscriber(cls, callback, params, sequence):
         sequence._add_subscriber(callback, params)
-        _publish_event(cls._EVENT_ENTITY_TYPE, sequence.id, EventOperation.UPDATE, "subscribers")
+        Notifier.publish(_make_event(sequence, EventOperation.UPDATE, attribute_name="subscribers"))
 
     @classmethod
     def __remove_subscriber(cls, callback, params, sequence):
         sequence._remove_subscriber(callback, params)
-        _publish_event(cls._EVENT_ENTITY_TYPE, sequence.id, EventOperation.UPDATE, "subscribers")
+        Notifier.publish(_make_event(sequence, EventOperation.UPDATE, attribute_name="subscribers"))
 
     @classmethod
     def _is_submittable(cls, sequence: Union[Sequence, SequenceId]) -> bool:
@@ -324,7 +325,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             ._orchestrator()
             .submit(sequence, callbacks=sequence_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
-        _publish_event(cls._EVENT_ENTITY_TYPE, sequence.id, EventOperation.SUBMISSION, None)
+        Notifier.publish(_make_event(sequence, EventOperation.SUBMISSION))
         return jobs
 
     @classmethod

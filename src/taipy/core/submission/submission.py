@@ -11,7 +11,7 @@
 
 import uuid
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
@@ -19,6 +19,7 @@ from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job, JobId
+from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from .submission_id import SubmissionId
 from .submission_status import SubmissionStatus
 
@@ -174,3 +175,23 @@ class Submission(_Entity, _Labeled):
             self.submission_status = SubmissionStatus.COMPLETED  # type: ignore
             return
         self.submission_status = SubmissionStatus.UNDEFINED  # type: ignore
+
+
+@_make_event.register(Submission)
+def _make_event_for_submission(
+    submission: Submission,
+    operation: EventOperation,
+    /,
+    attribute_name: Optional[str] = None,
+    attribute_value: Optional[Any] = None,
+    **kwargs,
+) -> Event:
+    metadata = {"creation_date": submission.creation_date, "version": submission._version}
+    return Event(
+        entity_type=EventEntityType.SUBMISSION,
+        entity_id=submission.id,
+        operation=operation,
+        attribute_name=attribute_name,
+        attribute_value=attribute_value,
+        metadata={**metadata, **kwargs},
+    )

@@ -11,7 +11,7 @@
 
 import functools
 
-from ..notification import EventOperation, _publish_event
+from ..notification import EventOperation, Notifier, _make_event
 
 
 class _Reloader:
@@ -65,19 +65,23 @@ def _self_setter(manager):
         def _do_set_entity(self, *args, **kwargs):
             fct(self, *args, **kwargs)
             entity_manager = _get_manager(manager)
-            to_publish_event_parameters = [
-                entity_manager._EVENT_ENTITY_TYPE,
-                self.id,
+            if len(args) == 1:
+                value = args[0]
+            else:
+                value = args
+            event = _make_event(
+                self,
                 EventOperation.UPDATE,
-                fct.__name__,
-            ]
+                attribute_name=fct.__name__,
+                attribute_value=value,
+            )
             if not self._is_in_context:
                 entity = _Reloader()._reload(manager, self)
                 fct(entity, *args, **kwargs)
                 entity_manager._set(entity)
-                _publish_event(*to_publish_event_parameters)
+                Notifier.publish(event)
             else:
-                self._in_context_attributes_changed_collector.append(to_publish_event_parameters)
+                self._in_context_attributes_changed_collector.append(event)
 
         return _do_set_entity
 

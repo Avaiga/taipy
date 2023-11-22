@@ -41,7 +41,11 @@ class _CycleManager(_Manager[Cycle]):
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
         )
         cls._set(cycle)
-        _publish_event(cls._EVENT_ENTITY_TYPE, cycle.id, EventOperation.CREATION, None)
+        _publish_event(
+            cls._EVENT_ENTITY_TYPE,
+            EventOperation.CREATION,
+            entity_id=cycle.id,
+        )
         return cycle
 
     @classmethod

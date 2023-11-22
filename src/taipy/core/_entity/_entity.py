@@ -12,7 +12,7 @@
 from typing import List
 
 from .._entity._reload import _get_manager
-from ..notification import _publish_event
+from ..notification import Notifier
 
 
 class _Entity:
@@ -34,6 +34,6 @@ class _Entity:
             self._properties.data.update(self._properties._pending_changes)
         _get_manager(self._MANAGER_NAME)._set(self)
 
-        while self._in_context_attributes_changed_collector:
-            _publish_event(*self._in_context_attributes_changed_collector.pop(0))
+        for event in self._in_context_attributes_changed_collector:
+            Notifier.publish(event)
         _get_manager(self._MANAGER_NAME)._set(self)

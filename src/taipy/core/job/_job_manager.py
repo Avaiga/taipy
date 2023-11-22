@@ -17,14 +17,13 @@ from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_manager_factory import _VersionManagerFactory
 from .._version._version_mixin import _VersionMixin
 from ..exceptions.exceptions import JobNotDeletedException
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..task.task import Task
 from .job import Job
 from .job_id import JobId
 
 
 class _JobManager(_Manager[Job], _VersionMixin):
-
     _ENTITY_NAME = Job.__name__
     _ID_PREFIX = "JOB_"
     _repository: _AbstractRepository
@@ -52,7 +51,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
             version=version,
         )
         cls._set(job)
-        _publish_event(cls._EVENT_ENTITY_TYPE, job.id, EventOperation.CREATION, None)
+        Notifier.publish(_make_event(job, EventOperation.CREATION))
         job._on_status_change(*callbacks)
         return job
 

@@ -29,6 +29,7 @@ from ..common._utils import _Subscriber
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
 from ..job.job import Job
+from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..task.task import Task
 from ..task.task_id import TaskId
 from .sequence_id import SequenceId
@@ -255,3 +256,23 @@ class Sequence(_Entity, Submittable, _Labeled):
             The simple label of the sequence as a string.
         """
         return self._get_simple_label()
+
+
+@_make_event.register(Sequence)
+def _make_event_for_sequence(
+    sequence: Sequence,
+    operation: EventOperation,
+    /,
+    attribute_name: Optional[str] = None,
+    attribute_value: Optional[Any] = None,
+    **kwargs,
+) -> Event:
+    metadata = {**kwargs}
+    return Event(
+        entity_type=EventEntityType.SEQUENCE,
+        entity_id=sequence.id,
+        operation=operation,
+        attribute_name=attribute_name,
+        attribute_value=attribute_value,
+        metadata=metadata,
+    )

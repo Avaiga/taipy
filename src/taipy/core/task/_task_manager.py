@@ -25,7 +25,7 @@ from ..config.task_config import TaskConfig
 from ..cycle.cycle_id import CycleId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ..task.task import Task
@@ -33,7 +33,6 @@ from .task_id import TaskId
 
 
 class _TaskManager(_Manager[Task], _VersionMixin):
-
     _ENTITY_NAME = Task.__name__
     _repository: _AbstractRepository
     _EVENT_ENTITY_TYPE = EventEntityType.TASK
@@ -115,7 +114,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                 for dn in set(inputs + outputs):
                     dn._parent_ids.update([task.id])
                 cls._set(task)
-                _publish_event(cls._EVENT_ENTITY_TYPE, task.id, EventOperation.CREATION, None)
+                Notifier.publish(_make_event(task, EventOperation.CREATION))
                 tasks.append(task)
         return tasks
 
@@ -184,7 +183,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(task.input.values())
         job = cls._orchestrator().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)
-        _publish_event(cls._EVENT_ENTITY_TYPE, task.id, EventOperation.SUBMISSION, None)
+        Notifier.publish(_make_event(task, EventOperation.SUBMISSION))
         return job
 
     @classmethod

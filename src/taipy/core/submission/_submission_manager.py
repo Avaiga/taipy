@@ -14,7 +14,7 @@ from typing import List, Optional, Union
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario import Scenario
 from ..sequence.sequence import Sequence
 from ..submission.submission import Submission
@@ -22,7 +22,6 @@ from ..task.task import Task
 
 
 class _SubmissionManager(_Manager[Submission], _VersionMixin):
-
     _ENTITY_NAME = Submission.__name__
     _repository: _AbstractRepository
     _EVENT_ENTITY_TYPE = EventEntityType.SUBMISSION
@@ -43,7 +42,7 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         submission = Submission(entity_id=entity_id)
         cls._set(submission)
 
-        _publish_event(cls._EVENT_ENTITY_TYPE, submission.id, EventOperation.CREATION, None)
+        Notifier.publish(_make_event(submission, EventOperation.CREATION))
 
         return submission
 

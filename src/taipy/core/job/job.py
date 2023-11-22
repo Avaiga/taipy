@@ -13,7 +13,7 @@ __all__ = ["Job"]
 
 import traceback
 from datetime import datetime
-from typing import Callable, List
+from typing import Any, Callable, List, Optional
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
@@ -22,6 +22,7 @@ from .._entity._labeled import _Labeled
 from .._entity._reload import _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._utils import _fcts_to_dict
+from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ..task.task import Task
 from .job_id import JobId
 from .status import Status
@@ -69,6 +70,9 @@ class Job(_Entity, _Labeled):
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
+
+    def get_event_context(self):
+        return {"task_config_id": self._task.config_id}
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -351,3 +355,23 @@ class Job(_Entity, _Labeled):
         from ... import core as tp
 
         return tp.is_deletable(self)
+
+
+@_make_event.register(Job)
+def _make_event_for_job(
+    job: Job,
+    operation: EventOperation,
+    /,
+    attribute_name: Optional[str] = None,
+    attribute_value: Optional[Any] = None,
+    **kwargs,
+) -> Event:
+    metadata = {"creation_date": job.creation_date, "task_config_id": job._task.config_id}
+    return Event(
+        entity_type=EventEntityType.JOB,
+        entity_id=job.id,
+        operation=operation,
+        attribute_name=attribute_name,
+        attribute_value=attribute_value,
+        metadata={**metadata, **kwargs},
+    )

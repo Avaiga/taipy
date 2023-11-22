@@ -29,6 +29,7 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from ..job.job_id import JobId
+from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
@@ -555,3 +556,23 @@ class DataNode(_Entity, _Labeled):
             The simple label of the data node as a string.
         """
         return self._get_simple_label()
+
+
+@_make_event.register(DataNode)
+def make_event_for_datanode(
+    data_node: DataNode,
+    operation: EventOperation,
+    /,
+    attribute_name: Optional[str] = None,
+    attribute_value: Optional[Any] = None,
+    **kwargs,
+) -> Event:
+    metadata = {"config_id": data_node.config_id, **kwargs}
+    return Event(
+        entity_type=EventEntityType.DATA_NODE,
+        entity_id=data_node.id,
+        operation=operation,
+        attribute_name=attribute_name,
+        attribute_value=attribute_value,
+        metadata=metadata,
+    )

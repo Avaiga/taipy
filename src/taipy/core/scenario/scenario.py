@@ -41,7 +41,7 @@ from ..exceptions.exceptions import (
     SequenceTaskDoesNotExistInScenario,
 )
 from ..job.job import Job
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..sequence.sequence import Sequence
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
@@ -209,7 +209,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         self.sequences = _sequences  # type: ignore
         if not self.sequences[name]._is_consistent():
             raise InvalidSequence(name)
-        _publish_event(EventEntityType.SEQUENCE, self.sequences[name].id, EventOperation.CREATION, None)
+        Notifier.publish(_make_event(self.sequences[name], EventOperation.CREATION))
 
     def add_sequences(self, sequences: Dict[str, Union[List[Task], List[TaskId]]]):
         """Add multiple sequences to the scenario.
@@ -244,7 +244,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.pop(name)
         self.sequences = _sequences  # type: ignore
-        _publish_event(EventEntityType.SEQUENCE, seq_id, EventOperation.DELETION, None)
+        Notifier.publish(Event(EventEntityType.SEQUENCE, EventOperation.DELETION, entity_id=seq_id))
 
     def remove_sequences(self, sequence_names: List[str]):
         """
@@ -257,7 +257,13 @@ class Scenario(_Entity, Submittable, _Labeled):
         for sequence_name in sequence_names:
             seq_id = self.sequences[sequence_name].id
             _sequences.pop(sequence_name)
-            _publish_event(EventEntityType.SEQUENCE, seq_id, EventOperation.DELETION, None)
+            Notifier.publish(
+                Event(
+                    EventEntityType.SEQUENCE,
+                    EventOperation.DELETION,
+                    entity_id=seq_id,
+                )
+            )
         self.sequences = _sequences  # type: ignore
 
     @staticmethod
@@ -586,3 +592,23 @@ class Scenario(_Entity, Submittable, _Labeled):
                 continue
             return False
         return True
+
+
+@_make_event.register(Scenario)
+def _make_event_for_scenario(
+    scenario: Scenario,
+    operation: EventOperation,
+    /,
+    attribute_name: Optional[str] = None,
+    attribute_value: Optional[Any] = None,
+    **kwargs,
+) -> Event:
+    metadata = {"config_id": scenario.config_id, "version": scenario.version, **kwargs}
+    return Event(
+        entity_type=EventEntityType.SCENARIO,
+        entity_id=scenario.id,
+        operation=operation,
+        attribute_name=attribute_name,
+        attribute_value=attribute_value,
+        metadata=metadata,
+    )

@@ -9,8 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from functools import singledispatch
+from typing import Any, Optional
 
 from ..common._repr_enum import _ReprEnum
 from ..exceptions.exceptions import InvalidEventAttributeName, InvalidEventOperation
@@ -60,6 +62,7 @@ _ENTITY_TO_EVENT_ENTITY_TYPE = {
 }
 
 
+@dataclass(frozen=True)
 class Event:
     """Event object used to notify any change in the Core service.
 
@@ -73,30 +76,59 @@ class Event:
             and `SUBMISSION`) that was performed on the entity.
         attribute_name (Optional[str]): Name of the entity's attribute changed. Only relevant for `UPDATE`
             operations
+        attribute_value (Optional[str]): Name of the entity's attribute changed. Only relevant for `UPDATE`
+            operations
+        metadata (dict): A dict of additional medata about the source of this event
         creation_date (datetime): Date and time of the event creation.
     """
 
-    def __init__(
-        self,
-        entity_type: EventEntityType,
-        entity_id: Optional[str],
-        operation: EventOperation,
-        attribute_name: Optional[str] = None,
-    ):
-        self.creation_date = datetime.now()
-        self.entity_id = entity_id
-        self.entity_type = entity_type
-        self.operation = self.__preprocess_operation(operation, entity_type)
-        self.attribute_name = self.__preprocess_attribute_name(attribute_name, operation)
+    entity_type: EventEntityType
+    operation: EventOperation
+    entity_id: Optional[str] = None
+    attribute_name: Optional[str] = None
+    attribute_value: Optional[Any] = None
 
-    @classmethod
-    def __preprocess_attribute_name(cls, attribute_name: Optional[str], operation: EventOperation) -> Optional[str]:
-        if operation in _NO_ATTRIBUTE_NAME_OPERATIONS and attribute_name is not None:
-            raise InvalidEventAttributeName
-        return attribute_name
+    metadata: dict = field(default_factory=dict)
+    creation_date: datetime = field(init=False)
 
-    @classmethod
-    def __preprocess_operation(cls, operation: EventOperation, entity_type: EventEntityType) -> EventOperation:
-        if entity_type in _UNSUBMITTABLE_ENTITY_TYPES and operation == EventOperation.SUBMISSION:
+    def __post_init__(self):
+        # Creation date
+        super().__setattr__("creation_date", datetime.now())
+
+        # Check operation:
+        if self.entity_type in _UNSUBMITTABLE_ENTITY_TYPES and self.operation == EventOperation.SUBMISSION:
             raise InvalidEventOperation
-        return operation
+
+        # Check attribute name:
+        if self.operation in _NO_ATTRIBUTE_NAME_OPERATIONS and self.attribute_name is not None:
+            raise InvalidEventAttributeName
+
+
+@singledispatch
+def _make_event(
+    entity: Any,
+    operation: EventOperation,
+    /,
+    attribute_name: Optional[str] = None,
+    attribute_value: Optional[Any] = None,
+    **kwargs,
+) -> Event:
+    """Helper function to make an event for this entity with the given `EventOperation^` type.
+    In case of `EventOperation.UPDATE^` events, an attribute name and value must be given.
+
+    Parameters:
+        entity (Any): The entity object to generate an event for.
+        operation (EventOperation^): The operation of the event. The possible values are:
+            <ul>
+                <li>CREATION</li>
+                <li>UPDATE</li>
+                <li>DELETION</li>
+                <li>SUBMISSION</li>
+            </ul>
+        attribute_name (Optional[str]): The name of the updated attribute for a `EventOperation.UPDATE`.
+            This argument is always given in case of an UPDATE.
+        attribute_value (Optional[Any]): The value of the udated attribute for a `EventOperation.UPDATE`.
+            This argument is always given in case of an UPDATE.
+        **kwargs (dict[str, any]): Any extra information that would be passed to the metadata event.
+            Note: you should pass only simple types: str, float, double as values."""
+    raise Exception(f"Unexpected entity type: {type(entity)}")

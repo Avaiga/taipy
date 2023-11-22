@@ -22,7 +22,7 @@ from .._version._version_mixin import _VersionMixin
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
-from ..notification import EventEntityType, EventOperation, _publish_event
+from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ._abstract_file import _AbstractFileDataNode
@@ -33,7 +33,6 @@ from .pickle import PickleDataNode
 
 
 class _DataManager(_Manager[DataNode], _VersionMixin):
-
     __DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.DATA_NODE
@@ -77,7 +76,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         cls._set(data_node)
         if isinstance(data_node, _AbstractFileDataNode):
             _append_to_backup_file(new_file_path=data_node._path)
-        _publish_event(cls._EVENT_ENTITY_TYPE, data_node.id, EventOperation.CREATION, None)
+        Notifier.publish(_make_event(data_node, EventOperation.CREATION))
         return data_node
 
     @classmethod
@@ -166,7 +165,9 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         cls._clean_pickle_files(data_nodes)
         cls._remove_dn_file_paths_in_backup_file(data_nodes)
         cls._repository._delete_by(attribute="version", value=version_number)
-        _publish_event(cls._EVENT_ENTITY_TYPE, None, EventOperation.DELETION, None)
+        Notifier.publish(
+            Event(EventEntityType.DATA_NODE, EventOperation.DELETION, metadata={"delete_by_version": version_number})
+        )
 
     @classmethod
     def _get_by_config_id(cls, config_id: str, version_number: Optional[str] = None) -> List[DataNode]:
