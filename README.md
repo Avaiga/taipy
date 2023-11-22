@@ -17,7 +17,7 @@
 
 <br>
 
-### <div align="left"> Taipy is an open-source Python library for building your web application front-end & back-end. <div align="left"> Turns Data and AI algorithms into full web applications in no time.
+### <div align="left"> Taipy is an open-source Python library for building your web application front-end & back-end.<div align="left"> Turns data and AI algorithms into production-ready web applications in no time. </div>
 
 ### <div align="center"> <a href="https://docs.taipy.io/en/latest/">Documentation</a> • <a href="https://discord.com/invite/SJyz2VJGxV">Join our Discord</a> • <a href="https://docs.taipy.io/en/latest/knowledge_base/demos/">Check out Taipy Applications</a>
 </div>
