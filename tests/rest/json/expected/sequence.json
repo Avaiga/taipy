@@ -1,0 +1,13 @@
+{
+    "id": "SEQUENCE_sequence_0e1c5dd3-9896-4221-bfc8-6924pjg11147",
+    "owner_id": "SCENARIO_scenario_a9c3eea2-2af3-4a85-a0c3-ef98ff5bd586",
+    "parent_ids": [],
+    "config_id": "sequence",
+    "properties": {},
+    "tasks": [
+        "TASK_forecast_task_7e1bac33-15f1-4cfd-8702-17adeee902cb",
+        "TASK_evaluate_task_31f1ecdf-2b75-4cd8-9509-9e70eddc6973"
+    ],
+    "subscribers": [],
+    "version": "1.0"
+}

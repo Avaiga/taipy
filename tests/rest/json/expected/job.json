@@ -1,0 +1,15 @@
+{
+    "id": "JOB_602e112d-2bfa-4813-8d02-79da294fe56f",
+    "task_id": "TASK_evaluate_task_bf7796b3-e248-4e44-a87f-420b748ea461",
+    "status": "<Status.BLOCKED: 2>",
+    "force": false,
+    "creation_date": "2022-03-31T22:00:23.710789",
+    "subscribers": [
+        {
+            "fct_name": "_Orchestrator._on_status_change",
+            "fct_module": "taipy.core._orchestrator._orchestrator"
+        }
+    ],
+    "stacktrace": [],
+    "version": "1.0"
+}
