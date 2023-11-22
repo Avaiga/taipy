@@ -14,8 +14,6 @@ import pathlib
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-from src.taipy.core.notification.event import _make_event
-
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
@@ -31,6 +29,7 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier
+from ..notification.event import _make_event
 from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 from ..scenario.scenario import Scenario
 from ..scenario.scenario_id import ScenarioId
