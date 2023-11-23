@@ -1,0 +1,16 @@
+{
+"id": "PIPELINE_baseline_08c57938-83e8-4848-aca5-c98a4ca21e58",
+"owner_id": "SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4",
+"parent_ids": [
+"SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4"
+],
+"config_id": "baseline",
+"properties": {},
+"tasks": [
+"TASK_clean_data_2b17fa43-6746-45d6-b22d-0f5b09b9048a",
+"TASK_predict_cf8b3c83-5ea7-40eb-b8af-d5240852ff5b",
+"TASK_evaluate_57cbea3b-332e-47ac-a468-472e4885eb82"
+],
+"subscribers": [],
+"version": "b11ea9f9-b2d7-4b58-a1c2-c6b1700bed97"
+}
