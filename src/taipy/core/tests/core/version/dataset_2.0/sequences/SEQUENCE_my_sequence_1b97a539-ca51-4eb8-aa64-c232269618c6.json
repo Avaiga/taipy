@@ -1,0 +1,13 @@
+{
+"id": "SEQUENCE_my_sequence_1b97a539-ca51-4eb8-aa64-c232269618c6",
+"owner_id": "SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1",
+"parent_ids": [
+"SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1"
+],
+"config_id": "my_sequence",
+"properties": {"custom_prop": "foo"},
+"tasks": [
+"TASK_my_task_53cf9993-047f-4220-9c03-e28fa250f6b3"
+],
+"subscribers": []
+}

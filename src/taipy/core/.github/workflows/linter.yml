@@ -1,0 +1,24 @@
+name: Python linter and type checker
+
+on:
+  push:
+    branches: [ develop, dev/*, release/* ]
+  pull_request:
+    branches: [ develop, dev/*, release/* ]
+
+jobs:
+  linter:
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python' ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: ricardochaves/python-lint@v1.4.0
+        with:
+          use-pylint: false
+          extra-black-options: "--line-length=120"
+          extra-pycodestyle-options: "--max-line-length=120 --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
+          extra-mypy-options: "--ignore-missing-imports --implicit-optional"

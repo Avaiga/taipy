@@ -1,0 +1,16 @@
+{
+"id": "TASK_my_task_53cf9993-047f-4220-9c03-e28fa250f6b3",
+"owner_id": "SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1",
+"parent_ids": [
+"SEQUENCE_my_sequence_1b97a539-ca51-4eb8-aa64-c232269618c6"
+],
+"config_id": "my_task",
+"input_ids": [
+"DATANODE_d1_3d65c33b-b188-4402-8d2c-3b26d98b9a9e"
+],
+"function_name": "twice",
+"function_module": "tests.core.version.test_legacy_version_migration",
+"output_ids": [
+"DATANODE_d2_bd8ee43e-6fa9-4832-b2e7-c0c9516b1e1c"
+]
+}
