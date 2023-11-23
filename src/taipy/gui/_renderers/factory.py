@@ -492,7 +492,13 @@ class _Factory:
         .set_value_and_default(with_update=False)
         ._set_dataType()
         .set_attributes(
-            [("format",), ("id",), ("hover_text", PropertyType.dynamic_string), ("raw", PropertyType.boolean, False)]
+            [
+                ("format",),
+                ("id",),
+                ("hover_text", PropertyType.dynamic_string),
+                ("raw", PropertyType.boolean, False),
+                ("mode", PropertyType.string),
+            ]
         ),
         "toggle": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None

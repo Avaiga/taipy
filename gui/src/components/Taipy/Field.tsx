@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useMemo } from "react";
+import React, { lazy, useMemo } from "react";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
@@ -25,9 +25,12 @@ interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     defaultValue?: string;
     format?: string;
     raw?: boolean;
+    mode?: string;
 }
 
-const unsetWeightSx = {fontWeight: "unset"};
+const unsetWeightSx = { fontWeight: "unset" };
+
+const Markdown = lazy(() => import("react-markdown"));
 
 const Field = (props: TaipyFieldProps) => {
     const { id, dataType, format, defaultValue, raw } = props;
@@ -35,6 +38,8 @@ const Field = (props: TaipyFieldProps) => {
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+
+    const mode = typeof props.mode === "string" ? props.mode.toLowerCase() : undefined;
 
     const value = useMemo(() => {
         return formatWSValue(
@@ -47,7 +52,13 @@ const Field = (props: TaipyFieldProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            {raw ? (
+            {mode == "pre" ? (
+                <pre className={className} id={id}>
+                    {value}
+                </pre>
+            ) : mode == "markdown" || mode == "md" ? (
+                <Markdown className={className}>{value}</Markdown>
+            ) : raw || mode == "raw" ? (
                 <span className={className} id={id}>
                     {value}
                 </span>

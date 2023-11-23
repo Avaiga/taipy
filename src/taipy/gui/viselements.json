@@ -21,6 +21,11 @@
             "doc": "If set to True, the component renders as an HTML &lt;span&gt; element without any default style."
           },
           {
+            "name": "mode",
+            "type": "str",
+            "doc": "Define the way the text is processed:<ul><li>&quote;raw&quote;: synonym for setting the *raw* property to True</li><li>&quote;pre&quote;: keeps spaces and new lines</li><li>&quote;markdown&quote; or &quote;md&quote;: basic support for Markdown."
+          },
+          {
             "name": "format",
             "type": "str",
             "doc": "The format to apply to the value.<br/>See below."
