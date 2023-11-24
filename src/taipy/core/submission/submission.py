@@ -146,14 +146,19 @@ class Submission(_Entity, _Labeled):
                 return
             if job.is_canceled():
                 canceled = True
+                continue
             if job.is_blocked():
                 blocked = True
+                continue
             if job.is_pending() or job.is_submitted():
                 pending = True
+                continue
             if job.is_running():
                 running = True
+                continue
             if job.is_completed() or job.is_skipped():
                 completed = True
+                continue
             if job.is_abandoned():
                 abandoned = True
         if canceled:
