@@ -34,7 +34,7 @@ from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.core.utils import assert_true_after_time
+from tests.core.utils import assert_true_after_time
 
 
 def multiply(nb1: float, nb2: float):

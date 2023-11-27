@@ -25,8 +25,7 @@ from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-
-from ...conftest import init_config
+from tests.core.conftest import init_config
 
 
 def test_delete_version(caplog):

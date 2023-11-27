@@ -15,7 +15,7 @@ from unittest import mock
 from src.taipy.core.config import DataNodeConfig
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.core.utils.named_temporary_file import NamedTemporaryFile
+from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def _configure_task_in_toml():

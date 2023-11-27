@@ -50,8 +50,8 @@ from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.core.utils import assert_true_after_time
-from tests.core.core.utils.NotifyMock import NotifyMock
+from tests.core.utils import assert_true_after_time
+from tests.core.utils.NotifyMock import NotifyMock
 
 
 def test_set_and_get_scenario(cycle):

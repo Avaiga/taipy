@@ -18,7 +18,7 @@ from src.taipy.core.config.core_section import CoreSection
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.core.utils.named_temporary_file import NamedTemporaryFile
+from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_write_configuration_file():
