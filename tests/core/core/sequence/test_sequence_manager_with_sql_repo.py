@@ -26,7 +26,7 @@ from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.conftest import init_managers
+from tests.core.conftest import init_managers
 
 
 def test_set_and_get_sequence(init_sql_repo):

@@ -14,7 +14,7 @@ from unittest.mock import patch
 from src.taipy.core import Core
 from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.config import Config
-from tests.core.utils.named_temporary_file import NamedTemporaryFile
+from tests.core.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_core_section():

@@ -23,7 +23,7 @@ from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.utils.named_temporary_file import NamedTemporaryFile
+from tests.core.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def file_exists(file_path: str) -> bool:

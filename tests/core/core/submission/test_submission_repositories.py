@@ -21,7 +21,7 @@ from src.taipy.core.submission.submission import Submission
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.config import Config
-from tests.conftest import init_sql_repo
+from tests.core.conftest import init_sql_repo
 
 
 def configure_fs_repo():

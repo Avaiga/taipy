@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
 cookiecutter = "==2.1.1"
-
 taipy-gui = {ref = "develop", git = "https://github.com/avaiga/taipy-gui.git"}
 taipy-rest = {ref = "develop", git = "https://github.com/avaiga/taipy-rest.git"}
 taipy-templates = {ref = "develop", git = "https://github.com/avaiga/taipy-templates.git"}
@@ -22,6 +21,7 @@ pre-commit = "*"
 pytest = "*"
 tox = "*"
 types-python-dateutil = "*"
+mongomock = "*"
 
 [requires]
 python_version = "3"

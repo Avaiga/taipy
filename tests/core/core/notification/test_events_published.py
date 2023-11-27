@@ -22,7 +22,7 @@ from src.taipy.core.notification.core_event_consumer import CoreEventConsumerBas
 from src.taipy.core.notification.event import Event, EventEntityType, EventOperation
 from src.taipy.core.notification.notifier import Notifier
 from taipy.config import Config, Frequency
-from tests.core.utils import assert_true_after_time
+from tests.core.core.utils import assert_true_after_time
 
 
 class Snapshot:

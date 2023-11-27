@@ -27,8 +27,8 @@ from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.conftest import init_config
-from tests.core.utils import assert_true_after_time
+from tests.core.conftest import init_config
+from tests.core.core.utils import assert_true_after_time
 
 
 def test_core_cli_no_arguments():

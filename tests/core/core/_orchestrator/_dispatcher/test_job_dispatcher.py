@@ -27,7 +27,7 @@ from src.taipy.core.job.job import Job
 from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from src.taipy.core.task.task import Task
 from taipy.config.config import Config
-from tests.core.utils import assert_true_after_time
+from tests.core.core.utils import assert_true_after_time
 
 
 def execute(lock):

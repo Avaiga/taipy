@@ -16,7 +16,7 @@ import pytest
 
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
-from tests.core.utils.named_temporary_file import NamedTemporaryFile
+from tests.core.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_override_default_configuration_with_code_configuration():

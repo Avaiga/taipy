@@ -16,7 +16,7 @@ from src.taipy.core import Core, taipy
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.config.config import Config
-from tests.core.utils import assert_true_after_time
+from tests.core.core.utils import assert_true_after_time
 
 from ...conftest import init_config
 

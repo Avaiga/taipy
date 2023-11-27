@@ -17,7 +17,7 @@ from src.taipy.core._init_version import _read_version
 from src.taipy.core.config.core_section import CoreSection
 from src.taipy.core.exceptions import ConfigCoreVersionMismatched
 from taipy.config.config import Config
-from tests.core.utils.named_temporary_file import NamedTemporaryFile
+from tests.core.core.utils.named_temporary_file import NamedTemporaryFile
 
 _MOCK_CORE_VERSION = "3.1.1"
 

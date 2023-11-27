@@ -37,7 +37,7 @@ from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.conftest import init_managers
+from tests.core.conftest import init_managers
 
 
 def test_set_and_get_scenario(cycle, init_sql_repo):
