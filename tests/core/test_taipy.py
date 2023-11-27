@@ -551,8 +551,9 @@ class TestTaipy:
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
         scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
-        core = Core()
-        core.run()
+        with mock.patch("sys.argv", ["prog"]):
+            core = Core()
+            core.run()
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
         tp.submit(scenario_1)
@@ -569,8 +570,9 @@ class TestTaipy:
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
         scenario_cfg_1 = Config.configure_scenario("s1", [task_cfg_1], [], Frequency.DAILY)
 
-        core = Core()
-        core.run()
+        with mock.patch("sys.argv", ["prog"]):
+            core = Core()
+            core.run()
 
         scenario_1 = tp.create_scenario(scenario_cfg_1)
         tp.submit(scenario_1, wait=True)
