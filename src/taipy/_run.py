@@ -57,7 +57,7 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
         return None
 
     if gui and rest:
-        gui._set_flask(rest._app)
+        gui._set_flask(rest._app)  # type: ignore
         return gui.run(**kwargs)
     else:
         app = rest or gui

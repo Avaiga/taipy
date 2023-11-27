@@ -81,23 +81,24 @@ class TestCore:
             core.stop()
 
     def test_core_service_can_only_be_run_once(self):
-        core_instance_1 = Core()
-        core_instance_2 = Core()
+        with patch("sys.argv", ["prog"]):
+            core_instance_1 = Core()
+            core_instance_2 = Core()
 
-        core_instance_1.run()
-
-        with pytest.raises(CoreServiceIsAlreadyRunning):
             core_instance_1.run()
-        with pytest.raises(CoreServiceIsAlreadyRunning):
+
+            with pytest.raises(CoreServiceIsAlreadyRunning):
+                core_instance_1.run()
+            with pytest.raises(CoreServiceIsAlreadyRunning):
+                core_instance_2.run()
+
+            # Stop the Core service and run it again should work
+            core_instance_1.stop()
+
+            core_instance_1.run()
+            core_instance_1.stop()
             core_instance_2.run()
-
-        # Stop the Core service and run it again should work
-        core_instance_1.stop()
-
-        core_instance_1.run()
-        core_instance_1.stop()
-        core_instance_2.run()
-        core_instance_2.stop()
+            core_instance_2.stop()
 
     def test_block_config_update_when_core_service_is_running_development_mode(self):
         _OrchestratorFactory._dispatcher = None
