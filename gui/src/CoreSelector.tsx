@@ -21,8 +21,8 @@ import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import { ChevronRight, ExpandMore, FlagOutlined, PushPinOutlined } from "@mui/icons-material";
-import { TreeView } from '@mui/x-tree-view/TreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import { TreeView } from "@mui/x-tree-view/TreeView";
+import { TreeItem } from "@mui/x-tree-view/TreeItem";
 
 import {
     useDispatch,
@@ -251,7 +251,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, undefined, true);
 
     const onNodeSelect = useCallback(
         (e: SyntheticEvent, nodeId: string) => {
