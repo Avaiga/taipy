@@ -360,13 +360,15 @@ export const useDynamicJsonProperty: <T>(value: string | T, defaultValue: string
  * @param context - The execution context (property `context`).
  * @param updateVars - The content of the property `updateVars`.
  * @param varName - The default property backend provided variable (through property `updateVarName`).
+ * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values.
  */
 export declare const useDispatchRequestUpdateOnFirstRender: (
     dispatch: React.Dispatch<Action>,
     id?: string,
     context?: string,
     updateVars?: string,
-    varName?: string
+    varName?: string,
+    forceRefresh?: boolean
 ) => void;
 /**
  * A React hook that returns the *dispatch* function.

@@ -705,6 +705,7 @@ export const createRequestDataUpdateAction = (
  * This action will generate an update of the elements holding the variables named
  * *names* on the front-end.
  * @param id - The identifier of the visual element.
+ * @param context - The execution context.
  * @param names - The names of the requested variables as received in updateVarName and/or updateVars properties.
  * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values
  * @returns The action fed to the reducer.

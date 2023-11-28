@@ -81,19 +81,21 @@ export const useDynamicJsonProperty = <T>(value: string | undefined, defaultValu
  * @param context - The execution context.
  * @param updateVars - The content of the property `updateVars`.
  * @param varName - The default property backend provided variable (through property `updateVarName`).
+ * @param forceRefresh - Should Taipy re-evaluate the variables or use the current values.
  */
 export const useDispatchRequestUpdateOnFirstRender = (
     dispatch: Dispatch<TaipyBaseAction>,
     id?: string,
     context?: string,
     updateVars?: string,
-    varName?: string
+    varName?: string,
+    forceRefresh?: boolean
 ) => {
     useEffect(() => {
         const updateArray = getUpdateVars(updateVars);
         varName && updateArray.push(varName);
-        updateArray.length && dispatch(createRequestUpdateAction(id, context, updateArray));
-    }, [updateVars, dispatch, id, context, varName]);
+        updateArray.length && dispatch(createRequestUpdateAction(id, context, updateArray, forceRefresh));
+    }, [updateVars, dispatch, id, context, varName, forceRefresh]);
 };
 
 export const useFormatConfig = (): FormatConfig => {
@@ -117,7 +119,6 @@ export const useIsMobile = () => {
     return useMediaQuery(theme.breakpoints.down("sm"));
 };
 
-
 /**
  * A React hook that returns the *dispatch* function.
  *
@@ -126,9 +127,9 @@ export const useIsMobile = () => {
  * @returns The *dispatch* function.
  */
 export const useDispatch = () => {
-    const {dispatch} = useContext(TaipyContext);
+    const { dispatch } = useContext(TaipyContext);
     return dispatch;
-}
+};
 
 /**
  * A React hook that returns the page module.
@@ -137,9 +138,9 @@ export const useDispatch = () => {
  * @returns The page module.
  */
 export const useModule = () => {
-    const {module} = useContext(PageContext);
+    const { module } = useContext(PageContext);
     return module;
-}
+};
 
 /**
  * A React hook to manage classNames (dynamic and static).
@@ -150,7 +151,8 @@ export const useModule = () => {
  * @param className - The default user set className.
  * @returns The complete list of applicable classNames.
  */
-export const useClassNames = (libClassName?: string, dynamicClassName?: string, className?: string) => ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();
+export const useClassNames = (libClassName?: string, dynamicClassName?: string, className?: string) =>
+    ((libClassName || "") + " " + (useDynamicProperty(dynamicClassName, className, undefined) || "")).trim();
 
 export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>): void => {
     // Get a mutable ref object where we can store props ...
