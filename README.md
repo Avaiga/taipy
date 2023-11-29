@@ -1,3 +1,11 @@
+# 🚧 Under construction 🚧
+
+⚠️ WARNING: Taipy team is performing a repository restructuration. This current repository taipy-config is about to be 
+merged into the main repository: taipy. Once the merge is done, the current code base will be located in the 
+[taipy repository](https://github.com/Avaiga/taipy). The migration should take a maximum of a few days.
+<br>
+
+
 # Taipy config
 
 ## License
@@ -26,9 +34,9 @@ Taipy is a Python library for creating Business Applications. More information o
 [website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-config_ to let users
 install the minimum they need.
 
-[Taipy config](https://github.com/Avaiga/taipy-config) is dedicated to help the user configure a Taipy application.
+[Taipy config](https://github.com/Avaiga/taipy-config) is dedicated to helping the user configure a Taipy application.
 
-A more in depth documentation of taipy can be found [here](https://docs.taipy.io).
+More in-depth documentation of taipy can be found [here](https://docs.taipy.io).
 
 ## Installation
 
@@ -45,7 +53,7 @@ Want to be part of the _Taipy config_ community? Check out our [`CODE_OF_CONDUCT
 ## Directory Structure
 
 - `taipy/`:
-    - `config`: Configuration definition, management and implementation. `config.config.Config` is the main
+    - `config`: Configuration definition, management, and implementation. `config.config.Config` is the main
       entrypoint for configuring a Taipy Core application.
     - `logger`: Taipy logger.
     - `tests`: Unit tests following the `taipy/` structure.
