@@ -502,7 +502,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                     </AccordionSummary>
                     <AccordionDetails>
                         <Box sx={tabBoxSx}>
-                            <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
+                            <Tabs value={tabValue} onChange={handleTabChange}>
                                 <Tab
                                     label="Properties"
                                     id={`${uniqid}-properties`}
