@@ -1,3 +1,10 @@
+# 🚧 Under construction 🚧
+
+WARNING: The Taipy team is performing a repository restructuration. This current repository taipy-gui is about to be 
+merged into the main repository: taipy. Once the merge is done, the current code base will be in the 
+[taipy repository](https://github.com/Avaiga/taipy). The migration should take a maximum of a few days.
+<be>
+
 # Taipy GUI
 
 ## License
