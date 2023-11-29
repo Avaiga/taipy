@@ -65,11 +65,11 @@ def _build_webapp():
             site_packages_path = Path(taipy.__file__).absolute().parent.parent
 
         # Specify the correct path to taipy-gui in gui/.env file
-        env_file_path = Path(__file__).absolute().parent / "gui_core" / ".env"
+        env_file_path = Path(__file__).absolute().parent / "frontend" / "taipy" / ".env"
         if not os.path.exists(env_file_path):
             with open(env_file_path, "w") as env_file:
                 env_file.write(f"TAIPY_GUI_DIR={site_packages_path}\n")
-        os.system("cd gui_core && npm ci && npm run build")
+        os.system("cd frontend/taipy && npm ci && npm run build")
 
 
 class NPMInstall(build_py):
