@@ -34,14 +34,14 @@ jobs:
         run: docker run -d -p 4000:4000 taipy-nginx-proxy
 
       - name: Install dom dependencies
-        working-directory: ./gui/dom
+        working-directory: ./frontend/taipy-gui/dom
         run: npm ci
       - name: Install dependencies
-        working-directory: ./gui
+        working-directory: ./frontend/taipy-gui
         run: npm ci --omit=optional
       - name: Run npm build
         run: npm run build --if-present
-        working-directory: ./gui
+        working-directory: ./frontend/taipy-gui
       - name: install libmagic on macos
         if: matrix.os == 'macos-latest'
         run: brew install libmagic

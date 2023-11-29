@@ -28,14 +28,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dom dependencies
-        working-directory: ./gui/dom
+        working-directory: ./frontend/taipy-gui/dom
         run: npm ci
       - name: Install dependencies
-        working-directory: ./gui
+        working-directory: ./frontend/taipy-gui
         run: npm ci --omit=optional
       - name: Run npm build
         run: npm run build --if-present
-        working-directory: ./gui
+        working-directory: ./frontend/taipy-gui
 
       - name: install libmagic on macos
         if: matrix.os == 'macos-latest'
@@ -66,7 +66,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./gui
+        working-directory: ./frontend/taipy-gui
 
     steps:
       - uses: actions/checkout@v3
@@ -76,7 +76,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dom dependencies
-        working-directory: ./gui/dom
+        working-directory: ./frontend/taipy-gui/dom
         run: npm ci
       - name: Install dependencies
         run: npm ci --omit=optional
@@ -89,5 +89,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           threshold: "80"
-          working-directory: "gui"
+          working-directory: "frontend/taipy-gui"
           skip-step: "install"
