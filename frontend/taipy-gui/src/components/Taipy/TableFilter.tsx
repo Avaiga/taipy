@@ -12,26 +12,26 @@
  */
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Popover, { PopoverOrigin } from "@mui/material/Popover";
-import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-import Tooltip from "@mui/material/Tooltip";
-import FormControl from "@mui/material/FormControl";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import TextField from "@mui/material/TextField";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SendIcon from "@mui/icons-material/Send";
+import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Popover, { PopoverOrigin } from "@mui/material/Popover";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import { DateField, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
-import { ColumnDesc, defaultDateFormat, iconInRowSx, iconsWrapperSx } from "./tableUtils";
+import { ColumnDesc, defaultDateFormat, iconInRowSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { getSuffixedClassNames } from "./utils";
 
@@ -83,33 +83,11 @@ const actionsByType = {
     },
 } as Record<string, Record<string, string>>;
 
+const gridSx = { p: "0.5em" };
+const rightButtonSx = { ml: "auto" };
+
 const getActionsByType = (colType?: string) =>
     (colType && colType in actionsByType && actionsByType[colType]) || actionsByType["string"];
-
-const filtersSx = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "stretch",
-    p: 4,
-};
-
-const filterBoxSx = {
-    display: "flex",
-    flexDirection: "row",
-    gap: 2,
-};
-
-const buttonBoxSx = {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    mt: 2,
-    gap: 2,
-};
-
-const colSx = { width: "15em" };
-const actSx = { width: "10em" };
-const valSx = { width: "15em" };
 
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
@@ -216,83 +194,89 @@ const FilterRow = (props: FilterRowProps) => {
     const colFormat = colId in columns && columns[colId].format ? columns[colId].format : defaultDateFormat;
 
     return (
-        <Box sx={filterBoxSx}>
-            <FormControl margin="dense">
-                <InputLabel>Column</InputLabel>
-                <Select value={colId || ""} onChange={onColSelect} sx={colSx} input={<OutlinedInput label="Column" />}>
-                    {colsOrder.map((col) =>
-                        columns[col].filter ? (
-                            <MenuItem key={col} value={col}>
-                                {columns[col].title || columns[col].dfid}
-                            </MenuItem>
-                        ) : null
-                    )}
-                </Select>
-            </FormControl>
-            <FormControl margin="dense">
-                <InputLabel>Action</InputLabel>
-                <Select value={action || ""} onChange={onActSelect} sx={actSx} input={<OutlinedInput label="Action" />}>
-                    {Object.keys(getActionsByType(colType)).map((a) => (
-                        <MenuItem key={a} value={a}>
-                            {getActionsByType(colType)[a]}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-            {colType == "number" ? (
-                <TextField
-                    type="number"
-                    value={typeof val == "number" ? val : val || ""}
-                    onChange={onValueChange}
-                    label="Number"
-                    sx={valSx}
-                    margin="dense"
-                />
-            ) : colType == "boolean" ? (
+        <Grid container item xs={12} alignItems="center">
+            <Grid item xs={3.5}>
                 <FormControl margin="dense">
-                    <InputLabel>Boolean</InputLabel>
-                    <Select
-                        value={typeof val === "boolean" ? (val ? "1" : "0") : val || ""}
-                        onChange={onValueSelect}
-                        sx={valSx}
-                        input={<OutlinedInput label="Boolean" />}
-                    >
-                        <MenuItem value={"1"}>True</MenuItem>
-                        <MenuItem value={"0"}>False</MenuItem>
+                    <InputLabel>Column</InputLabel>
+                    <Select value={colId || ""} onChange={onColSelect} input={<OutlinedInput label="Column" />}>
+                        {colsOrder.map((col) =>
+                            columns[col].filter ? (
+                                <MenuItem key={col} value={col}>
+                                    {columns[col].title || columns[col].dfid}
+                                </MenuItem>
+                            ) : null
+                        )}
                     </Select>
                 </FormControl>
-            ) : colType == "date" ? (
-                <DateField
-                    value={(val && new Date(val)) || null}
-                    onChange={onDateChange}
-                    format={colFormat}
-                    sx={valSx}
-                    margin="dense"
-                />
-            ) : (
-                <TextField
-                    value={val || ""}
-                    onChange={onValueChange}
-                    label={`${val ? "" : "Empty "}String`}
-                    sx={valSx}
-                    margin="dense"
-                />
-            )}
-            <Tooltip title="Validate">
-                <Box component="span" sx={iconsWrapperSx}>
-                    <IconButton onClick={onCheckClick} disabled={!enableCheck} sx={iconInRowSx}>
-                        <CheckIcon />
-                    </IconButton>
-                </Box>
-            </Tooltip>
-            <Tooltip title="Delete">
-                <Box component="span" sx={iconsWrapperSx}>
-                    <IconButton onClick={onDeleteClick} disabled={!enableDel} sx={iconInRowSx}>
-                        <DeleteIcon />
-                    </IconButton>
-                </Box>
-            </Tooltip>
-        </Box>
+            </Grid>
+            <Grid item xs={3}>
+                <FormControl margin="dense">
+                    <InputLabel>Action</InputLabel>
+                    <Select value={action || ""} onChange={onActSelect} input={<OutlinedInput label="Action" />}>
+                        {Object.keys(getActionsByType(colType)).map((a) => (
+                            <MenuItem key={a} value={a}>
+                                {getActionsByType(colType)[a]}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Grid>
+            <Grid item xs={3.5}>
+                {colType == "number" ? (
+                    <TextField
+                        type="number"
+                        value={typeof val == "number" ? val : val || ""}
+                        onChange={onValueChange}
+                        label="Number"
+                        margin="dense"
+                    />
+                ) : colType == "boolean" ? (
+                    <FormControl margin="dense">
+                        <InputLabel>Boolean</InputLabel>
+                        <Select
+                            value={typeof val === "boolean" ? (val ? "1" : "0") : val || ""}
+                            onChange={onValueSelect}
+                            input={<OutlinedInput label="Boolean" />}
+                        >
+                            <MenuItem value={"1"}>True</MenuItem>
+                            <MenuItem value={"0"}>False</MenuItem>
+                        </Select>
+                    </FormControl>
+                ) : colType == "date" ? (
+                    <DateField
+                        value={(val && new Date(val)) || null}
+                        onChange={onDateChange}
+                        format={colFormat}
+                        margin="dense"
+                    />
+                ) : (
+                    <TextField
+                        value={val || ""}
+                        onChange={onValueChange}
+                        label={`${val ? "" : "Empty "}String`}
+                        margin="dense"
+                    />
+                )}
+            </Grid>
+            <Grid item xs={1}>
+                <Tooltip title="Validate">
+                    <span>
+                        <IconButton onClick={onCheckClick} disabled={!enableCheck} sx={iconInRowSx}>
+                            <CheckIcon />
+                        </IconButton>
+                    </span>
+                </Tooltip>
+            </Grid>
+            <Grid item xs={1}>
+                <Tooltip title="Delete">
+                    <span>
+                        <IconButton onClick={onDeleteClick} disabled={!enableDel} sx={iconInRowSx}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </span>
+                </Tooltip>
+            </Grid>
+        </Grid>
     );
 };
 
@@ -331,7 +315,9 @@ const TableFilter = (props: TableFilterProps) => {
     }, [onValidate, onShowFilterClick]);
 
     useEffect(() => {
-        columns && appliedFilters && setFilters(appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col)));
+        columns &&
+            appliedFilters &&
+            setFilters(appliedFilters.filter((fd) => Object.values(columns).some((cd) => cd.dfid === fd.col)));
     }, [columns, appliedFilters]);
 
     return (
@@ -354,7 +340,7 @@ const TableFilter = (props: TableFilterProps) => {
                 onClose={onShowFilterClick}
                 className={getSuffixedClassNames(className, "-filter")}
             >
-                <Box sx={filtersSx}>
+                <Grid container sx={gridSx} gap={0.5}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         {filters.map((fd, idx) => (
                             <FilterRow
@@ -373,26 +359,30 @@ const TableFilter = (props: TableFilterProps) => {
                             setFilter={updateFilter}
                         />
                     </LocalizationProvider>
-                    <Box sx={buttonBoxSx}>
-                        <Button
-                            endIcon={<ClearIcon />}
-                            onClick={onRemove}
-                            disabled={filters.length == 0}
-                            variant="outlined"
-                            color="inherit"
-                        >
-                            {`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}
-                        </Button>
-                        <Button
-                            endIcon={<SendIcon />}
-                            onClick={onApply}
-                            disabled={filters.length == 0}
-                            variant="outlined"
-                        >
-                            {`Apply ${filters.length} filter${filters.length > 1 ? "s" : ""}`}
-                        </Button>
-                    </Box>
-                </Box>
+                    <Grid item xs={12} container>
+                        <Grid item>
+                            <Button
+                                endIcon={<ClearIcon />}
+                                onClick={onRemove}
+                                disabled={filters.length == 0}
+                                variant="outlined"
+                                color="inherit"
+                            >
+                                {`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}
+                            </Button>
+                        </Grid>
+                        <Grid item sx={rightButtonSx}>
+                            <Button
+                                endIcon={<SendIcon />}
+                                onClick={onApply}
+                                disabled={filters.length == 0}
+                                variant="outlined"
+                            >
+                                {`Apply ${filters.length} filter${filters.length > 1 ? "s" : ""}`}
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
             </Popover>
         </>
     );
