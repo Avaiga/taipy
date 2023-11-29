@@ -312,4 +312,6 @@ def create_job_list():
 def cleanup_files():
     Config.unblock_update()
     if os.path.exists(".data"):
-        shutil.rmtree(".data")
+        shutil.rmtree(".data", ignore_errors=True)
+    if os.path.exists(".my_data"):
+        shutil.rmtree(".my_data", ignore_errors=True)
