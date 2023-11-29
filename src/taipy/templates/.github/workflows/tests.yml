@@ -1,0 +1,36 @@
+name: Python tests
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  backend:
+    timeout-minutes: 40
+    strategy:
+      matrix:
+        python-versions: ['3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: Tests
+        run: |
+          pip install tox
+          tox -e tests
+
+      - name: Notify user if failed
+        if: failure() && github.event_name == 'workflow_dispatch'
+        run: |
+          if [[ -n "${{ github.event.inputs.user-to-notify }}" ]]; then
+            curl "${{ secrets.notify_endpoint }}" -d '{"username": "${{ github.event.inputs.user-to-notify }}", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }' -H "Content-Type: application/json"
+          fi
+        shell: bash
