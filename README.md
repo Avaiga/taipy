@@ -128,7 +128,7 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 ### Taipy Scenario & Data Management - a walk on the code side
 <div align="left">For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Taipy has your back! </div>
 
-*<div align="left">Check out the movie genre demo scenario creation with this [Demo](https://www.taipy.io/project/movie-genre-selector/) </div>*
+*<div align="left">Check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/knowledge_base/demos/movie_genre_selector/) </div>*
 
 <br>
 
