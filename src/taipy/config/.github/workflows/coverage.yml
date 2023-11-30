@@ -1,0 +1,34 @@
+name: Coverage
+
+on:
+  pull_request:
+    branches: [ develop, dev/*, release/* ]
+
+jobs:
+  backend-coverage:
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-versions: [3.9]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: Generate coverage report
+        env:
+          TOX_PARALLEL_NO_SPINNER: 1
+        run: |
+          pip install tox
+          tox -e coverage
+
+      - name: Code coverage
+        uses: orgoro/coverage@v2
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: 0.85

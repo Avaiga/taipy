@@ -1,0 +1,37 @@
+name: Python tests
+
+on:
+  push:
+    branches: [ develop, dev/*, release/* ]
+  pull_request:
+    branches: [ develop, dev/*, release/* ]
+
+jobs:
+  backend:
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-versions: ['3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: Install Tox
+        run: pip install tox
+
+      - name: Run linter and all tests except Pyodbc's
+        if: matrix.python-versions == '3.10' && matrix.os == 'windows-latest'
+        env:
+          TOX_PARALLEL_NO_SPINNER: 1
+        run: tox -p all
+
+      - name: Run all tests
+        if: matrix.python-versions != '3.10' || matrix.os != 'windows-latest'
+        env:
+          TOX_PARALLEL_NO_SPINNER: 1
+        run: tox -e all-tests
