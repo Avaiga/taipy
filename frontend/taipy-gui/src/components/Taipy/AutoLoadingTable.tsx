@@ -60,6 +60,7 @@ import {
     getRowIndex,
     getTooltip,
     defaultColumns,
+    OnRowClick,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -85,6 +86,7 @@ interface RowData {
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
     onRowSelection?: OnRowSelection;
+    onRowClick?: OnRowClick;
     lineStyle?: string;
     nanValue?: string;
 }
@@ -104,6 +106,7 @@ const Row = ({
         onValidation,
         onDeletion,
         onRowSelection,
+        onRowClick,
         lineStyle,
         nanValue,
     },
@@ -122,6 +125,7 @@ const Row = ({
             className={(classes && classes.row) + " " + getClassName(rows[index], lineStyle)}
             data-index={index}
             selected={selection.indexOf(index) > -1}
+            onClick={onRowClick}
         >
             {colsOrder.map((col, cidx) => (
                 <EditableCell
@@ -413,7 +417,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     col: colName,
                     user_value: userValue,
                     tz: tz,
-                    user_data: userData
+                    user_data: userData,
                 })
             ),
         [dispatch, updateVarName, onEdit, rows, module, userData]
@@ -432,16 +436,27 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     const onRowSelection: OnRowSelection = useCallback(
-        (rowIndex: number, colName: string) =>
+        (rowIndex: number, colName?: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex),
-                    col: colName,
-                    user_data: userData
+                    col: colName === undefined ? null : colName,
+                    user_data: userData,
                 })
             ),
         [dispatch, updateVarName, onAction, rows, module, userData]
+    );
+
+    const onRowClick = useCallback(
+        (e: MouseEvent<HTMLTableRowElement>) => {
+            const { index } = e.currentTarget.dataset || {};
+            const rowIndex = index === undefined ? NaN : Number(index);
+            if (!isNaN(rowIndex)) {
+                onRowSelection(rowIndex);
+            }
+        },
+        [onRowSelection]
     );
 
     const onTaipyItemsRendered = useCallback(
@@ -471,6 +486,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onValidation: active && onEdit ? onCellValidation : undefined,
             onDeletion: active && onDelete ? onRowDeletion : undefined,
             onRowSelection: active && onAction ? onRowSelection : undefined,
+            onRowClick: active && onAction ? onRowClick : undefined,
             lineStyle: props.lineStyle,
             nanValue: props.nanValue,
         }),
@@ -488,6 +504,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onRowDeletion,
             onAction,
             onRowSelection,
+            onRowClick,
             props.lineStyle,
             props.nanValue,
             size,

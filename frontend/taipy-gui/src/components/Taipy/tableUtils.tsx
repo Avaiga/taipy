@@ -147,7 +147,11 @@ export interface OnRowDeletion {
 }
 
 export interface OnRowSelection {
-    (rowIndex: number, colName: string): void;
+    (rowIndex: number, colName?: string): void;
+}
+
+export interface OnRowClick {
+    (e: MouseEvent<HTMLTableRowElement>): void;
 }
 
 interface EditableCellProps {
@@ -343,8 +347,8 @@ export const EditableCell = (props: EditableCellProps) => {
 
     const onDeleteClick = useCallback(
         (evt?: MouseEvent) => {
-            onDeletion && setDeletion((d) => !d);
             evt && evt.stopPropagation();
+            onDeletion && setDeletion((d) => !d);
         },
         [onDeletion]
     );
@@ -363,10 +367,13 @@ export const EditableCell = (props: EditableCellProps) => {
         [onDeleteCheckClick, onDeleteClick]
     );
 
-    const onSelect = useCallback(() => {
-        onSelection && onSelection(rowIndex, colDesc.dfid);
-        return false;
-    }, [onSelection, rowIndex, colDesc.dfid]);
+    const onSelect = useCallback(
+        (e: MouseEvent<HTMLDivElement>) => {
+            e.stopPropagation();
+            onSelection && onSelection(rowIndex, colDesc.dfid);
+        },
+        [onSelection, rowIndex, colDesc.dfid]
+    );
 
     useEffect(() => {
         !onValidation && setEdit(false);

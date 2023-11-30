@@ -66,6 +66,7 @@ import {
     OnRowSelection,
     getRowIndex,
     getTooltip,
+    OnRowClick,
 } from "./tableUtils";
 import {
     useClassNames,
@@ -304,7 +305,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 createSendActionNameAction(updateVarName, module, {
                     action: onAdd,
                     index: startIndex,
-                    user_data: userData
+                    user_data: userData,
                 })
             ),
         [startIndex, dispatch, updateVarName, onAdd, module, userData]
@@ -378,16 +379,27 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     );
 
     const onRowSelection: OnRowSelection = useCallback(
-        (rowIndex: number, colName: string) =>
+        (rowIndex: number, colName?: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onAction,
                     index: getRowIndex(rows[rowIndex], rowIndex, startIndex),
-                    col: colName,
+                    col: colName === undefined ? null : colName,
                     user_data: userData,
                 })
             ),
         [dispatch, updateVarName, onAction, rows, startIndex, module, userData]
+    );
+
+    const onRowClick: OnRowClick = useCallback(
+        (e: MouseEvent<HTMLTableRowElement>) => {
+            const { index } = e.currentTarget.dataset || {};
+            const rowIndex = index === undefined ? NaN : Number(index);
+            if (!isNaN(rowIndex)) {
+                onRowSelection(rowIndex);
+            }
+        },
+        [onRowSelection]
     );
 
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
@@ -492,6 +504,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             selected={sel > -1}
                                             ref={sel == 0 ? selectedRowRef : undefined}
                                             className={getClassName(row, props.lineStyle)}
+                                            data-index={index}
+                                            onClick={active && onAction ? onRowClick : undefined}
                                         >
                                             {colsOrder.map((col, cidx) => (
                                                 <EditableCell
