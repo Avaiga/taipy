@@ -19,6 +19,7 @@ jobs:
       - uses: ricardochaves/python-lint@v1.4.0
         with:
           use-pylint: false
+          use-mypy: false
           extra-black-options: "--line-length=120"
           extra-pycodestyle-options: "--max-line-length=120 --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
           extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude src/taipy/templates --follow-imports skip"

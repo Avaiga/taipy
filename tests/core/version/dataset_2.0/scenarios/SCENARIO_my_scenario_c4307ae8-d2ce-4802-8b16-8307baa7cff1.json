@@ -1,0 +1,13 @@
+{
+"id": "SCENARIO_my_scenario_c4307ae8-d2ce-4802-8b16-8307baa7cff1",
+"config_id": "my_scenario",
+"sequences": [
+"SEQUENCE_my_sequence_1b97a539-ca51-4eb8-aa64-c232269618c6"
+],
+"properties": {"custom_prop": "foo"},
+"creation_date": "2023-01-18T17:28:05.354251",
+"primary_scenario": true,
+"subscribers": [],
+"tags": [],
+"cycle": "CYCLE_Frequency.DAILY_2023-01-18T172525.892619_8956558e-d108-4ac4-8684-60f3e5ef9e8f"
+}

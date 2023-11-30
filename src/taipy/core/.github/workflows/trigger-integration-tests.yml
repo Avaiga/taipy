@@ -1,0 +1,24 @@
+name: Integration testings on taipy-integration-testing
+on:
+  push:
+    branches: [ develop, dev/* ]
+  pull_request:
+    branches: [ develop , dev/* ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger taipy-integration-testing
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: Avaiga
+          repo: taipy-integration-testing
+          github_token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
+          workflow_file_name: tests.yml
+          ref: develop
+          wait_interval: 60
+          propagate_failure: true
+          trigger_workflow: true
+          wait_workflow: true
+          client_payload: '{"repo": "taipy-core", "commitSHA": "${{ github.sha }}"}'

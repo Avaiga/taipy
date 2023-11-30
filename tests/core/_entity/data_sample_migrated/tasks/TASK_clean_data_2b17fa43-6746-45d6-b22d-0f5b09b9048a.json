@@ -1,0 +1,19 @@
+{
+"id": "TASK_clean_data_2b17fa43-6746-45d6-b22d-0f5b09b9048a",
+"config_id": "clean_data",
+"input_ids": [
+"DATANODE_initial_dataset_7d571742-92a5-457f-aef2-5d2eff3a3e99"
+],
+"function_name": "clean_data",
+"function_module": "algos.algos",
+"output_ids": [
+"DATANODE_cleaned_dataset_0e715489-98ee-4a06-9b38-21409ed04d03"
+],
+"version": "b11ea9f9-b2d7-4b58-a1c2-c6b1700bed97",
+"properties": {},
+"parent_ids": [
+"SCENARIO_scenario_62d29866-610e-4173-bd22-6a0555e80ff4"
+],
+"owner_id": null,
+"skippable": true
+}

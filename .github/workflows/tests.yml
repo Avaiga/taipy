@@ -10,6 +10,7 @@ jobs:
   backend:
     timeout-minutes: 40
     strategy:
+      fail-fast: false
       matrix:
         python-versions: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest, macos-latest]
