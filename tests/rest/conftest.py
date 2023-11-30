@@ -311,6 +311,8 @@ def create_job_list():
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_files():
     Config.unblock_update()
+    Config.configure_core(repository_type="filesystem")
+
     if os.path.exists(".data"):
         shutil.rmtree(".data", ignore_errors=True)
     if os.path.exists(".my_data"):
