@@ -1,92 +1,91 @@
 # Installation
 
 There are different ways to install Taipy GUI, depending on how
-you plan to use it.
+you plan to use it:
 
-If your goal is to look into the code, modify and improve it, go straight
-to the [source installation](#installing-for-development) section.
+- [Installing the latest release](#installing-the-latest-release)
+- [Installing the development version](#installing-the-development-version)
+  - [1 - Clone the repository](#1---clone-the-repository)
+  - [2 - Install Node.js](#2---install-nodejs)
+  - [3 - Build the JavaScript bundle](#3---build-the-javascript-bundle)
+  - [4 - Install the package as editable](#4---install-the-package-as-editable)
+- [Debugging the JavaScript bundle](#debugging-the-javascript-bundle)
+- [Running the tests](#running-the-tests)
 
-Taipy GUI needs your system to have Python 3.8 or above installed.
 
-## Installing from PyPI
 
-The easiest way to install Taipy GUI is from the
-[Pypi software repository](https://pypi.org/project/taipy-gui/).
+Taipy GUI needs your system to have **Python 3.8** or above installed.
+
+## Installing the latest release
+
+The easiest way to install Taipy GUI is using pip
 
 Run the command:
-```console
-$ pip install taipy-gui
+```bash
+pip install taipy-gui
 ```
 
-If you are running in a virtual environment, you will have to
-issue the command:
-```console
-$ pipenv install taipy-gui
-```
-
-These commands install the `taipy-gui` package in the Python environment
-with all its dependencies.
-
-## Installing from GitHub
+## Installing the development version
 
 The development version of Taipy GUI is updated daily with changes from the
 Taipy R&D and external contributors that we praise for their input.
 
-The development version of Taipy GUI can be installed using _pip_ and _git_:
+You should also install this version if you want to contribute to the development of Taipy GUI. Here are the steps to follow:
 
-```console
-$ pip install git+https://git@github.com/Avaiga/taipy-gui
+### 1 - Clone the repository
+
+Clone the repository using the following command:
+```bash
+git clone https://github.com/Avaiga/taipy-gui.git
 ```
 
-## Installing for development
-
-If you need the source code for Taipy GUI on your system, so you can see
-how things are done or maybe participate in the improvement of the package,
-you can clone the GitHub repository:
-
-```console
-$ git clone https://github.com/Avaiga/taipy-gui.git
-```
-
-This creates the 'taipy-gui' directory that holds all the package's source code.
-
-### Building the JavaScript bundle
+### 2 - Install Node.js
 
 Taipy GUI has some code dealing with the client side of the web applications.
-This code is written in [TypeScript](https://www.typescriptlang.org/), relies on
-[React](https://reactjs.org/) components, and is packaged into a JavaScript bundle
+This code is written in <a href="https://www.typescriptlang.org/" target="_blank">TypeScript</a>, relies on <a href="https://reactjs.org/" target="_blank">React</a> components, and is packaged into a JavaScript bundle
 that is sent to browsers when they connect to all Taipy GUI applications.
 
-Here is how you can build this bundle.
+This bundle needs to be built before being usable by Taipy GUI.
 
-You need to make sure that the [Node.js](https://nodejs.org/) JavaScript runtime version 18
-or above is installed on your machine.<br/>
-Note that Node.js comes with the [`npm` package manager](https://www.npmjs.com/) as part
-of the standard installation.
+First you need to install <a href="https://nodejs.org/" target="_blank">Node.js</a> on your system.
 
-Here is the sequence of commands that must be issued, assuming your current directory
-is the root directory of the repository:
+**Select the "Recommended For Most Users" version, and follow the instructions for your system.**
 
-```console
-# Current directory is the repository's root directory
-# Move to the 'gui' directory
-$ cd gui
-# Install the DOM dependencies (once and for all)
-$ cd dom
-$ npm i
-$ cd ..
-# Install the web app dependencies
-$ npm i --omit=optional
-# Build the web app
-$ npm run build
-$ cd ..
-# Current directory is the repository's root directory
+**Select "Automatically install the necessary tools" when asked.**
+
+### 3 - Build the JavaScript bundle
+
+Open a new terminal and run the following commands:
+
+- Install the DOM dependencies
+```bash
+cd gui
+cd dom
+npm i
+```
+- Install the web app dependencies
+```bash
+cd ..
+npm i --omit=optional
+```
+- Build the web app
+```bash
+npm run build
 ```
 
-This creates the directory `src/taipy/gui/webapp` in the root directory of the repository
+After a few minutes, this creates the directory `src/taipy/gui/webapp` in the root directory of the repository
 where the front-end code for Taipy GUI is split into a set of JavaScript bundles.
 
-### Debugging the JavaScript bundle
+### 4 - Install the package as editable
+
+In a terminal, **at the root of the repository**, run:
+```bash	
+pip install -e . --user
+```
+
+This should install the dev version of Taipy GUI as editable. You are now ready to use it.
+
+## Debugging the JavaScript bundle
 
 If you plan to modify the front-end code and need to debug the TypeScript
 code, you must use the following:
