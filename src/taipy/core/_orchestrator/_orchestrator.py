@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import itertools
-import uuid
 from datetime import datetime
 from multiprocessing import Lock
 from queue import Queue
@@ -66,7 +65,10 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created Jobs.
         """
-        submission = _SubmissionManagerFactory._build_manager()._create(submittable.id)  # type: ignore
+        submission = _SubmissionManagerFactory._build_manager()._create(
+            submittable.id, submittable._ID_PREFIX  # type: ignore
+        )
+
         jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
@@ -117,7 +119,7 @@ class _Orchestrator(_AbstractOrchestrator):
         Returns:
             The created `Job^`.
         """
-        submission = _SubmissionManagerFactory._build_manager()._create(task.id)
+        submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX)
         submit_id = submission.id
         with cls.lock:
             job = cls._lock_dn_output_and_create_job(
@@ -221,7 +223,6 @@ class _Orchestrator(_AbstractOrchestrator):
         if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
         elif job.is_failed():
-            print(f"\nJob {job.id} failed, abandoning subsequent jobs.\n")
             cls._fail_subsequent_jobs(job)
 
     @classmethod
@@ -294,7 +295,6 @@ class _Orchestrator(_AbstractOrchestrator):
                 cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys()))
             )
             for job in to_fail_or_abandon_jobs:
-                print(f"Abandoning job: {job.id}")
                 job.abandoned()
             to_fail_or_abandon_jobs.update([failed_job])
             cls.__remove_blocked_jobs(to_fail_or_abandon_jobs)
@@ -308,7 +308,7 @@ class _Orchestrator(_AbstractOrchestrator):
         for job in jobs:
             if job.id in _OrchestratorFactory._dispatcher._dispatched_processes.keys():  # type: ignore
                 cls.__logger.info(f"{job.id} is running and cannot be canceled.")
-            elif job.is_completed() or job.is_skipped():
+            elif job.is_completed():
                 cls.__logger.info(f"{job.id} has already been completed and cannot be canceled.")
             elif job.is_skipped():
                 cls.__logger.info(f"{job.id} has already been skipped and cannot be canceled.")

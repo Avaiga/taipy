@@ -17,7 +17,6 @@ from time import sleep
 from unittest import mock
 
 import pytest
-
 from src.taipy.config.common.scope import Scope
 from src.taipy.config.config import Config
 from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
@@ -30,6 +29,7 @@ from src.taipy.core.exceptions.exceptions import JobNotDeletedException
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job_id import JobId
 from src.taipy.core.job.status import Status
+from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
@@ -349,8 +349,8 @@ def test_cancel_subsequent_jobs():
     task_3 = Task("task_config_3", {}, print, [dn_4], id="task_3")
 
     # Can't get tasks under 1 scenario due to partial not serializable
-    submission_1 = submission_manager._create("scenario_id")
-    submission_2 = submission_manager._create("scenario_id")
+    submission_1 = submission_manager._create("scenario_id", Scenario._ID_PREFIX)
+    submission_2 = submission_manager._create("scenario_id", Scenario._ID_PREFIX)
 
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)

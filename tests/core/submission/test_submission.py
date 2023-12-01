@@ -29,7 +29,7 @@ from src.taipy.core.task.task import Task
 
 
 def test_create_submission(scenario, job, current_datetime):
-    submission_1 = Submission(scenario.id)
+    submission_1 = Submission(scenario.id, scenario._ID_PREFIX)
 
     assert submission_1.id is not None
     assert submission_1.entity_id == scenario.id
@@ -39,7 +39,13 @@ def test_create_submission(scenario, job, current_datetime):
     assert submission_1._version is not None
 
     submission_2 = Submission(
-        scenario.id, "submission_id", [job], current_datetime, SubmissionStatus.COMPLETED, "version_id"
+        scenario.id,
+        scenario._ID_PREFIX,
+        "submission_id",
+        [job],
+        current_datetime,
+        SubmissionStatus.COMPLETED,
+        "version_id",
     )
 
     assert submission_2.id == "submission_id"
@@ -106,7 +112,7 @@ def __test_update_submission_status(job_ids, expected_submission_status):
             return_value=(mock_get_jobs(job_ids)),
         )
     ):
-        submission = Submission("submission_id")
+        submission = Submission("submission_id", "ENTITY_TYPE")
         submission._update_submission_status(None)
         assert submission.submission_status == expected_submission_status
 
@@ -263,7 +269,7 @@ def test_update_submission_status_with_wrong_case_abandoned_without_cancel_or_fa
 
 def test_auto_set_and_reload():
     task = Task(config_id="name_1", properties={}, function=print, id=TaskId("task_1"))
-    submission_1 = Submission(task.id)
+    submission_1 = Submission(task.id, task._ID_PREFIX)
     job_1 = Job("job_1", task, submission_1.id, submission_1.entity_id)
     job_2 = Job("job_2", task, submission_1.id, submission_1.entity_id)
 

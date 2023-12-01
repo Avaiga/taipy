@@ -20,7 +20,7 @@ from src.taipy.core.task.task import Task
 
 
 def test_create_submission(scenario):
-    submission_1 = _SubmissionManagerFactory._build_manager()._create(scenario.id)
+    submission_1 = _SubmissionManagerFactory._build_manager()._create(scenario.id, scenario._ID_PREFIX)
 
     assert submission_1.id is not None
     assert submission_1.entity_id == scenario.id
@@ -34,7 +34,7 @@ def test_get_submission():
 
     assert submission_manager._get("random_submission_id") is None
 
-    submission_1 = submission_manager._create("entity_id")
+    submission_1 = submission_manager._create("entity_id", "ENTITY_TYPE")
     submission_2 = submission_manager._get(submission_1.id)
 
     assert submission_1.id == submission_2.id
@@ -69,22 +69,22 @@ def test_get_latest_submission():
     task_2 = Task("task_config_2", {}, print, id="task_id_2")
 
     submission_manager = _SubmissionManagerFactory._build_manager()
-    submission_1 = submission_manager._create(task_1.id)
+    submission_1 = submission_manager._create(task_1.id, task_1._ID_PREFIX)
     assert submission_manager._get_latest(task_1) == submission_1
     assert submission_manager._get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    submission_2 = submission_manager._create(task_2.id)
+    submission_2 = submission_manager._create(task_2.id, task_2._ID_PREFIX)
     assert submission_manager._get_latest(task_1) == submission_1
     assert submission_manager._get_latest(task_2) == submission_2
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    submission_3 = submission_manager._create(task_1.id)
+    submission_3 = submission_manager._create(task_1.id, task_1._ID_PREFIX)
     assert submission_manager._get_latest(task_1) == submission_3
     assert submission_manager._get_latest(task_2) == submission_2
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    submission_4 = submission_manager._create(task_2.id)
+    submission_4 = submission_manager._create(task_2.id, task_2._ID_PREFIX)
     assert submission_manager._get_latest(task_1) == submission_3
     assert submission_manager._get_latest(task_2) == submission_4
 
