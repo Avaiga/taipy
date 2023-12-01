@@ -47,22 +47,22 @@ class _TaskFunctionWrapper:
             inputs = list(self.task.input.values())
             outputs = list(self.task.output.values())
 
-            arguments = self.__read_inputs(inputs)
-            results = self.__execute_fct(arguments)
-            return self.__write_data(outputs, results, self.job_id)
+            arguments = self._read_inputs(inputs)
+            results = self._execute_fct(arguments)
+            return self._write_data(outputs, results, self.job_id)
         except Exception as e:
             logger.error("Error during task function execution!", exc_info=1)
             return [e]
 
-    def __read_inputs(self, inputs: List[DataNode]) -> List[Any]:
+    def _read_inputs(self, inputs: List[DataNode]) -> List[Any]:
         data_manager = _DataManagerFactory._build_manager()
         return [data_manager._get(dn.id).read_or_raise() for dn in inputs]
 
-    def __write_data(self, outputs: List[DataNode], results, job_id: JobId):
+    def _write_data(self, outputs: List[DataNode], results, job_id: JobId):
         data_manager = _DataManagerFactory._build_manager()
         try:
             if outputs:
-                _results = self.__extract_results(outputs, results)
+                _results = self._extract_results(outputs, results)
                 exceptions = []
                 for res, dn in zip(_results, outputs):
                     try:
@@ -76,10 +76,10 @@ class _TaskFunctionWrapper:
         except Exception as e:
             return [e]
 
-    def __execute_fct(self, arguments: List[Any]) -> Any:
+    def _execute_fct(self, arguments: List[Any]) -> Any:
         return self.task.function(*arguments)
 
-    def __extract_results(self, outputs: List[DataNode], results: Any) -> List[Any]:
+    def _extract_results(self, outputs: List[DataNode], results: Any) -> List[Any]:
         _results: List[Any] = [results] if len(outputs) == 1 else results
         if len(_results) != len(outputs):
             raise DataNodeWritingError("Error: wrong number of result or task output")
