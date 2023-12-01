@@ -603,7 +603,7 @@ def _make_event_for_scenario(
     attribute_value: Optional[Any] = None,
     **kwargs,
 ) -> Event:
-    metadata = {"config_id": scenario.config_id, "version": scenario.version, **kwargs}
+    metadata = {"config_id": scenario.config_id, "version": scenario._version, **kwargs}
     return Event(
         entity_type=EventEntityType.SCENARIO,
         entity_id=scenario.id,
