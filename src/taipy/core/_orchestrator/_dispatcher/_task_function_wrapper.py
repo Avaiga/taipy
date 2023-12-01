@@ -13,6 +13,7 @@ from typing import Any, List
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...data._data_manager_factory import _DataManagerFactory
 from ...data.data_node import DataNode
@@ -20,38 +21,48 @@ from ...exceptions import DataNodeWritingError
 from ...job.job_id import JobId
 from ...task.task import Task
 
+logger = _TaipyLogger._get_logger()
+
 
 class _TaskFunctionWrapper:
-    @classmethod
-    def _wrapped_function_with_config_load(cls, config_as_string, job_id: JobId, task: Task):
-        Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
-        Config.block_update()
-        return cls._wrapped_function(job_id, task)
+    """Wrapper around task function."""
 
-    @classmethod
-    def _wrapped_function(cls, job_id: JobId, task: Task):
+    def __init__(self, job_id: JobId, task: Task):
+        self.job_id = job_id
+        self.task = task
+
+    def __call__(self, **kwargs):
+        """Make this object callable as a function. Actually calls `execute`."""
+        return self.execute(**kwargs)
+
+    def execute(self, **kwargs):
+        """Execute the wrapped function. If `config_as_string` is given, then it will be reapplied to the config."""
         try:
-            inputs: List[DataNode] = list(task.input.values())
-            outputs: List[DataNode] = list(task.output.values())
+            config_as_string = kwargs.pop("config_as_string", None)
+            if config_as_string:
+                logger.info("Updating with given config.")
+                Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
+                Config.block_update()
 
-            fct = task.function
+            inputs = list(self.task.input.values())
+            outputs = list(self.task.output.values())
 
-            results = fct(*cls.__read_inputs(inputs))
-            return cls.__write_data(outputs, results, job_id)
+            arguments = self.__read_inputs(inputs)
+            results = self.__execute_fct(arguments)
+            return self.__write_data(outputs, results, self.job_id)
         except Exception as e:
+            logger.error("Error during task function execution!", exc_info=1)
             return [e]
 
-    @classmethod
-    def __read_inputs(cls, inputs: List[DataNode]) -> List[Any]:
+    def __read_inputs(self, inputs: List[DataNode]) -> List[Any]:
         data_manager = _DataManagerFactory._build_manager()
         return [data_manager._get(dn.id).read_or_raise() for dn in inputs]
 
-    @classmethod
-    def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
+    def __write_data(self, outputs: List[DataNode], results, job_id: JobId):
         data_manager = _DataManagerFactory._build_manager()
         try:
             if outputs:
-                _results = cls.__extract_results(outputs, results)
+                _results = self.__extract_results(outputs, results)
                 exceptions = []
                 for res, dn in zip(_results, outputs):
                     try:
@@ -59,13 +70,16 @@ class _TaskFunctionWrapper:
                         data_node.write(res, job_id=job_id)
                         data_manager._set(data_node)
                     except Exception as e:
+                        logger.error("Error during write", exc_info=1)
                         exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))
                 return exceptions
         except Exception as e:
             return [e]
 
-    @classmethod
-    def __extract_results(cls, outputs: List[DataNode], results: Any) -> List[Any]:
+    def __execute_fct(self, arguments: List[Any]) -> Any:
+        return self.task.function(*arguments)
+
+    def __extract_results(self, outputs: List[DataNode], results: Any) -> List[Any]:
         _results: List[Any] = [results] if len(outputs) == 1 else results
         if len(_results) != len(outputs):
             raise DataNodeWritingError("Error: wrong number of result or task output")

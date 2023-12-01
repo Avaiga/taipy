@@ -19,6 +19,7 @@ from taipy.config.config import Config
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher
+from ._task_function_wrapper import _TaskFunctionWrapper
 
 
 class _StandaloneJobDispatcher(_JobDispatcher):
@@ -38,7 +39,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._nb_available_workers -= 1
 
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)
-        future = self._executor.submit(self._wrapped_function_with_config_load, config_as_string, job.id, job.task)
+        future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
         future.add_done_callback(self._release_worker)
