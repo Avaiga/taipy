@@ -1,11 +1,17 @@
-.idea
+# Environment files
+.env
 .venv
-__pycache__
+.envrc
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
 
 # Distribution / packaging
 Pipfile.lock
 build/
 *.egg-info/
+
 # mypy
 .mypy_cache/
 dist/
@@ -22,3 +28,6 @@ dist/
 # demo files
 demo-*
 demo_*/
+
+# Gui node_modules
+gui/node_modules
