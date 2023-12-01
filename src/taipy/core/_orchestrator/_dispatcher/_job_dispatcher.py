@@ -21,10 +21,9 @@ from ...job._job_manager_factory import _JobManagerFactory
 from ...job.job import Job
 from ...task.task import Task
 from .._abstract_orchestrator import _AbstractOrchestrator
-from ._task_function_wrapper import _TaskFunctionWrapper
 
 
-class _JobDispatcher(threading.Thread, _TaskFunctionWrapper):
+class _JobDispatcher(threading.Thread):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
     _STOP_FLAG = False

@@ -13,6 +13,7 @@ from typing import Optional
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher
+from ._task_function_wrapper import _TaskFunctionWrapper
 
 
 class _DevelopmentJobDispatcher(_JobDispatcher):
@@ -39,5 +40,5 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
         Parameters:
             job (Job^): The job to submit on an executor with an available worker.
         """
-        rs = self._wrapped_function(job.id, job.task)
+        rs = _TaskFunctionWrapper(job.id, job.task).execute()
         self._update_job_status(job, rs)
