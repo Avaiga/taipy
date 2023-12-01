@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+toml = "==0.10"
+deepdiff = "==6.2.2"
+
+[dev-packages]
+black = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = ">=3.6"
+tox = ">=3.24"
+types-toml = ">=0.10.0"
+autopep8 = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
