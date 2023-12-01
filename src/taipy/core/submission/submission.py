@@ -191,12 +191,12 @@ def _make_event_for_submission(
     attribute_value: Optional[Any] = None,
     **kwargs,
 ) -> Event:
-    metadata = {"creation_date": submission.creation_date, "version": submission._version}
+    metadata = {"creation_date": submission.creation_date, "version": submission._version, **kwargs}
     return Event(
         entity_type=EventEntityType.SUBMISSION,
         entity_id=submission.id,
         operation=operation,
         attribute_name=attribute_name,
         attribute_value=attribute_value,
-        metadata={**metadata, **kwargs},
+        metadata=metadata,
     )

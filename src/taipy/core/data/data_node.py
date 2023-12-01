@@ -567,7 +567,7 @@ def make_event_for_datanode(
     attribute_value: Optional[Any] = None,
     **kwargs,
 ) -> Event:
-    metadata = {"config_id": data_node.config_id, **kwargs}
+    metadata = {"config_id": data_node.config_id, "version": data_node._version, **kwargs}
     return Event(
         entity_type=EventEntityType.DATA_NODE,
         entity_id=data_node.id,
