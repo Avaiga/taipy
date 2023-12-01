@@ -109,8 +109,6 @@ def test_register():
 
     Notifier.unregister(registration_id_1)
     assert len(Notifier._topics_registrations_list.keys()) == 2
-
-    print(Notifier._topics_registrations_list.keys())
     assert all(topic not in Notifier._topics_registrations_list.keys() for topic in [topic_0, topic_1])
 
     Notifier.unregister(registration_id_2)
