@@ -119,7 +119,7 @@ def test_comparison(task):
 
 
 def test_status_job(task):
-    submission = _SubmissionManagerFactory._build_manager()._create(task.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX)
     job = Job("job_id", task, submission.id, "SCENARIO_scenario_config")
     submission.jobs = [job]
 
@@ -150,7 +150,7 @@ def test_status_job(task):
 
 def test_notification_job(task):
     subscribe = MagicMock()
-    submission = _SubmissionManagerFactory._build_manager()._create(task.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX)
     job = Job("job_id", task, submission.id, "SCENARIO_scenario_config")
     submission.jobs = [job]
 
@@ -170,7 +170,7 @@ def test_notification_job(task):
 
 def test_handle_exception_in_user_function(task_id, job_id):
     task = Task(config_id="name", properties={}, input=[], function=_error, output=[], id=task_id)
-    submission = _SubmissionManagerFactory._build_manager()._create(task.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX)
     job = Job(job_id, task, submission.id, "scenario_entity_id")
     submission.jobs = [job]
 
@@ -184,7 +184,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 def test_handle_exception_in_input_data_node(task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", properties={}, input=[data_node], function=print, output=[], id=task_id)
-    submission = _SubmissionManagerFactory._build_manager()._create(task.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX)
     job = Job(job_id, task, submission.id, "scenario_entity_id")
     submission.jobs = [job]
 
@@ -198,7 +198,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", properties={}, input=[], function=_foo, output=[data_node], id=task_id)
-    submission = _SubmissionManagerFactory._build_manager()._create(task.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX)
     job = Job(job_id, task, submission.id, "scenario_entity_id")
     submission.jobs = [job]
 
@@ -213,7 +213,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
 def test_auto_set_and_reload(current_datetime, job_id):
     task_1 = Task(config_id="name_1", properties={}, function=_foo, id=TaskId("task_1"))
     task_2 = Task(config_id="name_2", properties={}, function=_foo, id=TaskId("task_2"))
-    submission = _SubmissionManagerFactory._build_manager()._create(task_1.id)
+    submission = _SubmissionManagerFactory._build_manager()._create(task_1.id, task_1._ID_PREFIX)
     job_1 = Job(job_id, task_1, submission.id, "scenario_entity_id")
     submission.jobs = [job_1]
 
