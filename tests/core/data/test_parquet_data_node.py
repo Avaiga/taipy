@@ -500,7 +500,6 @@ class TestParquetDataNode:
         dn.write(df)
 
         assert set(pd.read_parquet(temp_file_path).columns) == {"id", "integer", "text"}
-        print(dn.read())
         assert set(dn.read().columns) == set(read_kwargs["columns"])
 
         # !!! filter doesn't work with `fastparquet` without partition_cols
