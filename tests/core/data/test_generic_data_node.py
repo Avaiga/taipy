@@ -10,13 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
-
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.exceptions.exceptions import InvalidConfigurationId
 from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.generic import GenericDataNode
 from src.taipy.core.exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 def read_fct():

@@ -12,8 +12,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-from taipy.config.common.scope import Scope
-
+from ...config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 from .data_node import DataNode

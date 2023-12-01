@@ -11,7 +11,7 @@
 
 import pytest
 
-from taipy.config.config import Config
+from src.taipy.config.config import Config
 
 
 def test_job_config():

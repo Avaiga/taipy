@@ -12,7 +12,7 @@
 
 import os
 
-from taipy.config import Config
+from ...config import Config
 
 __BACKUP_FILE_PATH_ENVIRONMENT_VARIABLE_NAME = "TAIPY_BACKUP_FILE_PATH"
 

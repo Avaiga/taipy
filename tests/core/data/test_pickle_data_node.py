@@ -18,12 +18,12 @@ import modin.pandas as modin_pd
 import pandas as pd
 import pytest
 
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
+from src.taipy.config.exceptions.exceptions import InvalidConfigurationId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import NoData
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 @pytest.fixture(scope="function", autouse=True)

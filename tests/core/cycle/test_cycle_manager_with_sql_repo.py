@@ -11,6 +11,9 @@
 
 from datetime import datetime
 
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -23,9 +26,6 @@ from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.task._task_manager import _TaskManager
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 
 
 def test_save_and_get_cycle_entity(init_sql_repo, cycle, current_datetime):

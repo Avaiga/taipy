@@ -9,9 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from src.taipy.config.common.scope import Scope
 from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
-from taipy.config.common.scope import Scope
 
 
 class FakeDataNode(InMemoryDataNode):

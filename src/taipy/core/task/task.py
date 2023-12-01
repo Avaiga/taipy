@@ -12,10 +12,9 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.config.common._validate_id import _validate_id
-from taipy.config.common.scope import Scope
-
+from ...config.common._template_handler import _TemplateHandler as _tpl
+from ...config.common._validate_id import _validate_id
+from ...config.common.scope import Scope
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties

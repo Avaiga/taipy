@@ -17,10 +17,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import networkx as nx
 
-from taipy.config.common._validate_id import _validate_id
-from taipy.config.common.scope import Scope
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ...config.common._validate_id import _validate_id
+from ...config.common.scope import Scope
+from ...logger._taipy_logger import _TaipyLogger
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties

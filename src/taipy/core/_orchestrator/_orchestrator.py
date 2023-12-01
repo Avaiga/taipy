@@ -17,9 +17,8 @@ from queue import Queue
 from time import sleep
 from typing import Callable, Iterable, List, Optional, Set, Union
 
-from taipy.config.config import Config
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ...config.config import Config
+from ...logger._taipy_logger import _TaipyLogger
 from .._entity.submittable import Submittable
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory

@@ -9,13 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config import _inject_section
-from taipy.config.checker._checker import _Checker
-from taipy.config.common.frequency import Frequency  # type: ignore
-from taipy.config.common.scope import Scope  # type: ignore
-from taipy.config.config import Config  # type: ignore
-from taipy.config.global_app.global_app_config import GlobalAppConfig  # type: ignore
-
+from ...config import _inject_section
+from ...config.checker._checker import _Checker
+from ...config.common.frequency import Frequency  # type: ignore
+from ...config.common.scope import Scope  # type: ignore
+from ...config.config import Config  # type: ignore
+from ...config.global_app.global_app_config import GlobalAppConfig  # type: ignore
 from .checkers._config_id_checker import _ConfigIdChecker
 from .checkers._core_section_checker import _CoreSectionChecker
 from .checkers._data_node_config_checker import _DataNodeConfigChecker

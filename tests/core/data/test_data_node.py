@@ -15,8 +15,10 @@ from time import sleep
 from unittest import mock
 
 import pytest
-
 import src.taipy.core as tp
+from src.taipy.config import Config
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.exceptions.exceptions import InvalidConfigurationId
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
@@ -25,9 +27,6 @@ from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import DataNodeIsBeingEdited, NoData
 from src.taipy.core.job.job_id import JobId
-from taipy.config import Config
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 from .utils import FakeDataNode
 

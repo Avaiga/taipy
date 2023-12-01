@@ -12,11 +12,10 @@
 from datetime import timedelta
 from typing import Dict
 
-from taipy.config._config import _Config
-from taipy.config.checker._checker import _ConfigChecker
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.scope import Scope
-
+from ....config._config import _Config
+from ....config.checker._checker import _ConfigChecker
+from ....config.checker.issue_collector import IssueCollector
+from ....config.common.scope import Scope
 from ..data_node_config import DataNodeConfig
 
 

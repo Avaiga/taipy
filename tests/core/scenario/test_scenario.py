@@ -13,7 +13,9 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 import pytest
-
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.exceptions.exceptions import InvalidConfigurationId
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from src.taipy.core.cycle.cycle import Cycle, CycleId
@@ -28,9 +30,6 @@ from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task, TaskId
-from taipy.config import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 def test_create_primary_scenario(cycle):

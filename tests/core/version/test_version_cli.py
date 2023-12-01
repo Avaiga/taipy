@@ -14,6 +14,9 @@ from unittest.mock import patch
 
 import pytest
 
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core import Core
 from src.taipy.core._version._cli._version_cli import _VersionCLI
 from src.taipy.core._version._version_manager import _VersionManager
@@ -22,9 +25,6 @@ from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.task._task_manager import _TaskManager
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 from tests.core.conftest import init_config
 
 

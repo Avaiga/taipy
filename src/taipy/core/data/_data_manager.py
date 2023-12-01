@@ -12,10 +12,9 @@
 import os
 from typing import Dict, Iterable, List, Optional, Set, Union
 
-from taipy.config._config import _Config
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-
+from ...config._config import _Config
+from ...config.common.scope import Scope
+from ...config.config import Config
 from .._backup._backup import _append_to_backup_file, _remove_from_backup_file
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin

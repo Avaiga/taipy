@@ -11,9 +11,8 @@
 
 from typing import Callable, List, Optional, Type, Union
 
-from taipy.config import Config
-from taipy.config.common.scope import Scope
-
+from ...config import Config
+from ...config.common.scope import Scope
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._orchestrator._abstract_orchestrator import _AbstractOrchestrator

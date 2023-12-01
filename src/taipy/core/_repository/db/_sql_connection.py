@@ -16,8 +16,7 @@ from sqlite3 import Connection
 from sqlalchemy.dialects import sqlite
 from sqlalchemy.schema import CreateTable
 
-from taipy.config.config import Config
-
+from ....config.config import Config
 from ...exceptions import MissingRequiredProperty
 
 

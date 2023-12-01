@@ -19,6 +19,14 @@ import pandas as pd
 import pytest
 from sqlalchemy import create_engine, text
 
+from src.taipy.config import _inject_section
+from src.taipy.config._config import _Config
+from src.taipy.config._serializer._toml_serializer import _TomlSerializer
+from src.taipy.config.checker._checker import _Checker
+from src.taipy.config.checker.issue_collector import IssueCollector
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core._core import Core
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core._repository.db._sql_connection import _SQLConnection
@@ -60,14 +68,6 @@ from src.taipy.core.submission._submission_manager_factory import _SubmissionMan
 from src.taipy.core.submission._submission_model import _SubmissionModel
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
-from taipy.config import _inject_section
-from taipy.config._config import _Config
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.checker._checker import _Checker
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 
 current_time = datetime.now()
 _OrchestratorFactory._build_orchestrator()

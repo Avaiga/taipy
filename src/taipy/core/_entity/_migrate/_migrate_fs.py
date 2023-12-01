@@ -14,8 +14,7 @@ import os
 import shutil
 from typing import Dict
 
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ....logger._taipy_logger import _TaipyLogger
 from ._utils import _migrate
 
 __logger = _TaipyLogger._get_logger()

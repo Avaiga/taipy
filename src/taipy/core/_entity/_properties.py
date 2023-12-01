@@ -44,7 +44,7 @@ class _Properties(UserDict):
                 self._entity_owner._in_context_attributes_changed_collector.append(event)
 
     def __getitem__(self, key):
-        from taipy.config.common._template_handler import _TemplateHandler as _tpl
+        from ...config.common._template_handler import _TemplateHandler as _tpl
 
         return _tpl._replace_templates(super(_Properties, self).__getitem__(key))
 

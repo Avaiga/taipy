@@ -19,7 +19,7 @@ class _AbstractFileDataNode(object):
     __EXTENSION_MAP = {"csv": "csv", "excel": "xlsx", "parquet": "parquet", "pickle": "p", "json": "json"}
 
     def _build_path(self, storage_type):
-        from taipy.config.config import Config
+        from ...config.config import Config
 
         folder = f"{storage_type}s"
         dir_path = pathlib.Path(Config.core.storage_folder) / folder

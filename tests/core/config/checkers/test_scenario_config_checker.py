@@ -12,13 +12,12 @@
 from copy import copy
 
 import pytest
-
+from src.taipy.config.checker.issue_collector import IssueCollector
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.config import Config
 from src.taipy.core.config import ScenarioConfig
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.config.task_config import TaskConfig
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.frequency import Frequency
-from taipy.config.config import Config
 
 
 def subtraction(n1, n2):

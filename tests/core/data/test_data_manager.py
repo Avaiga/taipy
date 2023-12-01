@@ -13,6 +13,8 @@ import pathlib
 
 import pytest
 
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.data._data_manager import _DataManager
@@ -21,8 +23,6 @@ from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 

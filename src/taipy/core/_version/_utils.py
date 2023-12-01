@@ -11,8 +11,7 @@
 
 from typing import Callable, List
 
-from taipy.config.config import Config
-
+from ...config.config import Config
 from .._entity._reload import _Reloader
 from ..config import MigrationConfig
 from ._version_manager_factory import _VersionManagerFactory

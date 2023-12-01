@@ -13,6 +13,7 @@ from unittest import mock
 
 import pytest
 
+from src.taipy.config.common.scope import Scope
 from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.data.data_node import DataNode
@@ -25,7 +26,6 @@ from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task, TaskId
-from taipy.config.common.scope import Scope
 
 
 def test_create_sequence():

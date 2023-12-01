@@ -12,9 +12,8 @@
 import sys
 from typing import List
 
-from taipy._cli._base_cli import _CLI
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ..._cli._base_cli import _CLI
+from ...logger._taipy_logger import _TaipyLogger
 from ._migrate import (
     _migrate_fs_entities,
     _migrate_mongo_entities,

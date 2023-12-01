@@ -13,8 +13,7 @@ import pathlib
 from importlib import metadata
 from typing import Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ...logger._taipy_logger import _TaipyLogger
 from .._entity._entity_ids import _EntityIds
 from .._repository._abstract_repository import _AbstractRepository
 from ..exceptions.exceptions import ModelNotFound

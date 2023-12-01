@@ -15,9 +15,8 @@ import pathlib
 import shutil
 
 import pytest
-
+from src.taipy.config.config import Config
 from src.taipy.core.exceptions.exceptions import InvalidExportPath
-from taipy.config.config import Config
 
 from .mocks import MockConverter, MockFSRepository, MockModel, MockObj, MockSQLRepository
 

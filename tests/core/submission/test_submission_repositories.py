@@ -12,7 +12,7 @@
 import os
 
 import pytest
-
+from src.taipy.config.config import Config
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.exceptions import ModelNotFound
 from src.taipy.core.job._job_manager_factory import _JobManagerFactory
@@ -20,7 +20,6 @@ from src.taipy.core.submission._submission_manager_factory import _SubmissionMan
 from src.taipy.core.submission.submission import Submission
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
-from taipy.config.config import Config
 from tests.core.conftest import init_sql_repo
 
 

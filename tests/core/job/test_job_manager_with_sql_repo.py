@@ -17,6 +17,8 @@ from time import sleep
 
 import pytest
 
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core import Task
 from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -32,8 +34,6 @@ from src.taipy.core.job.job_id import JobId
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 from tests.core.utils import assert_true_after_time
 
 

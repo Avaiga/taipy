@@ -11,11 +11,10 @@
 
 import sys
 
-from taipy._cli._base_cli import _CLI
-from taipy.config import Config
-from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ...._cli._base_cli import _CLI
+from ....config import Config
+from ....config.exceptions.exceptions import InconsistentEnvVariableError
+from ....logger._taipy_logger import _TaipyLogger
 from ...data._data_manager_factory import _DataManagerFactory
 from ...exceptions.exceptions import VersionIsNotProductionVersion
 from ...job._job_manager_factory import _JobManagerFactory

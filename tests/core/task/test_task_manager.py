@@ -13,7 +13,8 @@ import uuid
 from unittest import mock
 
 import pytest
-
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core import taipy
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._version._version_manager import _VersionManager
@@ -24,8 +25,6 @@ from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 
 
 def test_create_and_save():

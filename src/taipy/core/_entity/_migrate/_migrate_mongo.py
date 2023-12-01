@@ -17,8 +17,7 @@ from typing import Dict
 import bson
 import pymongo
 
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ....logger._taipy_logger import _TaipyLogger
 from ._utils import _migrate
 
 __logger = _TaipyLogger._get_logger()

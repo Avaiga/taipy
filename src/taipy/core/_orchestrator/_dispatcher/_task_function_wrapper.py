@@ -11,9 +11,8 @@
 
 from typing import Any, List
 
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.config import Config
-
+from ....config._serializer._toml_serializer import _TomlSerializer
+from ....config.config import Config
 from ...data._data_manager_factory import _DataManagerFactory
 from ...data.data_node import DataNode
 from ...exceptions import DataNodeWritingError

@@ -13,8 +13,7 @@ from abc import abstractmethod
 from importlib import util
 from typing import Type
 
-from taipy.config import Config
-
+from ...config import Config
 from ._manager import _Manager
 
 

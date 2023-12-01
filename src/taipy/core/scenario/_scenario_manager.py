@@ -13,8 +13,7 @@ import datetime
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
-from taipy.config import Config
-
+from ...config import Config
 from .._entity._entity_ids import _EntityIds
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository

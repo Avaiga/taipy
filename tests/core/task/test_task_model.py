@@ -9,10 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from src.taipy.config.common.scope import Scope
 from src.taipy.core.data import InMemoryDataNode
 from src.taipy.core.data._data_manager_factory import _DataManagerFactory
 from src.taipy.core.task._task_model import _TaskModel
-from taipy.config.common.scope import Scope
 
 
 def test_none_properties_attribute_compatible():

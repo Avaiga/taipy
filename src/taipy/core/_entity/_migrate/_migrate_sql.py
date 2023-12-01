@@ -15,8 +15,7 @@ import shutil
 import sqlite3
 from typing import Dict, Tuple
 
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ....logger._taipy_logger import _TaipyLogger
 from ._utils import _migrate
 
 __logger = _TaipyLogger._get_logger()

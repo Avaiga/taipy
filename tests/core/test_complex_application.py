@@ -17,10 +17,10 @@ from unittest.mock import patch
 import pandas as pd
 
 import src.taipy.core.taipy as tp
+from src.taipy.config import Config
 from src.taipy.core import Core, Status
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
-from taipy.config import Config
 
 # ################################  USER FUNCTIONS  ##################################
 

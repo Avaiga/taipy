@@ -11,8 +11,8 @@
 
 import pytest
 
+from src.taipy.config import Config
 from src.taipy.core.common._utils import _retry_read_entity
-from taipy.config import Config
 
 
 def test_retry_decorator(mocker):

@@ -14,8 +14,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy import JSON, Boolean, Column, Enum, Float, String, Table, UniqueConstraint
 
-from taipy.config.common.scope import Scope
-
+from ...config.common.scope import Scope
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
 from .data_node_id import Edit

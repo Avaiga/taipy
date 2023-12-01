@@ -12,8 +12,7 @@
 from importlib import util
 from typing import Optional, Type
 
-from taipy.config.config import Config
-
+from ...config.config import Config
 from ..common._utils import _load_fct
 from ..exceptions.exceptions import ModeNotAvailable, OrchestratorNotBuilt
 from ._abstract_orchestrator import _AbstractOrchestrator

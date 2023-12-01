@@ -14,8 +14,7 @@ from typing import Any, Dict
 
 from sqlalchemy import JSON, Column, Enum, String, Table
 
-from taipy.config.common.frequency import Frequency
-
+from ...config.common.frequency import Frequency
 from .._repository._base_taipy_model import _BaseModel
 from .._repository.db._sql_base_model import mapper_registry
 from .cycle_id import CycleId

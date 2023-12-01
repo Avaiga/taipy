@@ -11,11 +11,12 @@
 
 from queue import SimpleQueue
 
+from src.taipy.config import Config
+from src.taipy.config.common.frequency import Frequency
 from src.taipy.core import taipy as tp
 from src.taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from src.taipy.core.notification.event import Event, EventEntityType, EventOperation
 from src.taipy.core.notification.notifier import Notifier
-from taipy.config import Config, Frequency
 from tests.core.utils import assert_true_after_time
 
 

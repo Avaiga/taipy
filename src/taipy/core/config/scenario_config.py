@@ -13,13 +13,12 @@ from collections import defaultdict
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from taipy.config._config import _Config
-from taipy.config.common._template_handler import _TemplateHandler as _tpl
-from taipy.config.common._validate_id import _validate_id
-from taipy.config.common.frequency import Frequency
-from taipy.config.config import Config
-from taipy.config.section import Section
-
+from ...config._config import _Config
+from ...config.common._template_handler import _TemplateHandler as _tpl
+from ...config.common._validate_id import _validate_id
+from ...config.common.frequency import Frequency
+from ...config.config import Config
+from ...config.section import Section
 from .data_node_config import DataNodeConfig
 from .task_config import TaskConfig
 

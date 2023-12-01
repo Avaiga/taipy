@@ -18,7 +18,9 @@ from functools import partial
 from time import sleep
 
 import pytest
-
+from src.taipy.config import Config
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from src.taipy.core import taipy
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -31,9 +33,6 @@ from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.sequence.sequence import Sequence
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
-from taipy.config import Config
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from tests.core.utils import assert_true_after_time
 
 # ################################  USER FUNCTIONS  ##################################
@@ -875,7 +874,7 @@ def test_task_orchestrator_create_standalone_dispatcher():
 
 
 def modified_config_task(n):
-    from taipy.config import Config
+    from src.taipy.config import Config
 
     assert_true_after_time(lambda: Config.core.storage_folder == ".my_data/")
     assert_true_after_time(lambda: Config.core.custom_property == "custom_property")
@@ -903,7 +902,7 @@ def test_can_exec_task_with_modified_config():
 
 
 def update_config_task(n):
-    from taipy.config import Config
+    from src.taipy.config import Config
 
     # The exception will be saved to logger, and there is no way to check for it
     # so it will be checked here

@@ -14,9 +14,8 @@ import shutil
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union, overload
 
-from taipy.config.common.scope import Scope
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ..config.common.scope import Scope
+from ..logger._taipy_logger import _TaipyLogger
 from ._entity._entity import _Entity
 from ._version._version_manager_factory import _VersionManagerFactory
 from .common._warnings import _warn_no_core_service

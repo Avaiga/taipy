@@ -19,14 +19,13 @@ import pymongo
 import pytest
 from bson import ObjectId
 from bson.errors import InvalidDocument
-
+from src.taipy.config.common.scope import Scope
 from src.taipy.core import MongoDefaultDocument
 from src.taipy.core.common._mongo_connector import _connect_mongodb
 from src.taipy.core.data.data_node_id import DataNodeId
 from src.taipy.core.data.mongo import MongoCollectionDataNode
 from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
-from taipy.config.common.scope import Scope
 
 
 @pytest.fixture(scope="function", autouse=True)

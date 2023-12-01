@@ -15,8 +15,7 @@ import traceback
 from datetime import datetime
 from typing import Any, Callable, List, Optional
 
-from taipy.logger._taipy_logger import _TaipyLogger
-
+from ...logger._taipy_logger import _TaipyLogger
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._reload import _self_reload, _self_setter

@@ -18,6 +18,10 @@ from unittest import mock
 import pytest
 
 import src.taipy.core.taipy as tp
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
+from src.taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from src.taipy.core import (
     Core,
     Cycle,
@@ -45,10 +49,6 @@ from src.taipy.core.job.job import Job
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.sequence._sequence_manager import _SequenceManager
 from src.taipy.core.task._task_manager import _TaskManager
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 class TestTaipy:

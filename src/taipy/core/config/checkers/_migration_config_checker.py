@@ -9,10 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config._config import _Config
-from taipy.config.checker._checkers._config_checker import _ConfigChecker
-from taipy.config.checker.issue_collector import IssueCollector
-
+from ....config._config import _Config
+from ....config.checker._checkers._config_checker import _ConfigChecker
+from ....config.checker.issue_collector import IssueCollector
 from ..._version._version_manager_factory import _VersionManagerFactory
 from ..migration_config import MigrationConfig
 

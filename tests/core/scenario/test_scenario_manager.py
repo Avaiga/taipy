@@ -15,6 +15,9 @@ from unittest.mock import ANY, patch
 
 import pytest
 
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core import Job
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -47,9 +50,6 @@ from src.taipy.core.sequence.sequence_id import SequenceId
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from src.taipy.core.task.task_id import TaskId
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 from tests.core.utils import assert_true_after_time
 from tests.core.utils.NotifyMock import NotifyMock
 

@@ -12,9 +12,9 @@
 import os
 from unittest import mock
 
+from src.taipy.config.common.scope import Scope
+from src.taipy.config.config import Config
 from src.taipy.core.config import DataNodeConfig
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 

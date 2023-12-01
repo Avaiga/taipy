@@ -9,12 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.config import Config
-from taipy.config._config import _Config
-from taipy.config.checker._checkers._config_checker import _ConfigChecker
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.frequency import Frequency
-
+from ....config import Config
+from ....config._config import _Config
+from ....config.checker._checkers._config_checker import _ConfigChecker
+from ....config.checker.issue_collector import IssueCollector
+from ....config.common.frequency import Frequency
 from ..data_node_config import DataNodeConfig
 from ..scenario_config import ScenarioConfig
 from ..task_config import TaskConfig

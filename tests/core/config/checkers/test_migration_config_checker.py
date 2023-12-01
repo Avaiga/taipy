@@ -13,10 +13,10 @@ from unittest.mock import patch
 
 import pytest
 
+from src.taipy.config.config import Config
 from src.taipy.core import Core
 from src.taipy.core._version._version_manager import _VersionManager
 from src.taipy.core.config import MigrationConfig
-from taipy.config.config import Config
 
 
 def mock_func():

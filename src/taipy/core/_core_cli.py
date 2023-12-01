@@ -11,8 +11,7 @@
 
 from typing import Dict
 
-from taipy._cli._base_cli import _CLI
-
+from .._cli._base_cli import _CLI
 from .config import CoreSection
 
 

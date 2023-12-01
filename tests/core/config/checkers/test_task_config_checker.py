@@ -12,11 +12,10 @@
 from copy import copy
 
 import pytest
-
+from src.taipy.config.checker.issue_collector import IssueCollector
+from src.taipy.config.config import Config
 from src.taipy.core.config import TaskConfig
 from src.taipy.core.config.data_node_config import DataNodeConfig
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.config import Config
 
 
 class TestTaskConfigChecker:

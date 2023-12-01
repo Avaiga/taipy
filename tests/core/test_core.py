@@ -13,14 +13,14 @@ from unittest.mock import patch
 
 import pytest
 
+from src.taipy.config import Config
+from src.taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from src.taipy.core import Core
 from src.taipy.core._orchestrator._dispatcher import _DevelopmentJobDispatcher, _StandaloneJobDispatcher
 from src.taipy.core._orchestrator._orchestrator import _Orchestrator
 from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.exceptions.exceptions import CoreServiceIsAlreadyRunning
-from taipy.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 
 
 class TestCore:

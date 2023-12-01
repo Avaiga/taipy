@@ -17,8 +17,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import MetaData, Table
 
-from taipy.config.common.scope import Scope
-
+from ...config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..exceptions.exceptions import MissingRequiredProperty
 from ._abstract_sql import _AbstractSQLDataNode

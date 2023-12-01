@@ -13,9 +13,8 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import Optional
 
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.config import Config
-
+from ....config._serializer._toml_serializer import _TomlSerializer
+from ....config.config import Config
 from ...job.job import Job
 from .._abstract_orchestrator import _AbstractOrchestrator
 from ._job_dispatcher import _JobDispatcher

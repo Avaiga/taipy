@@ -13,9 +13,11 @@ from unittest import mock
 
 import pytest
 
+from src.taipy.config import Config
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
 from src.taipy.core import taipy
 from src.taipy.core._entity._labeled import _Labeled
-from taipy.config import Config, Frequency, Scope
 
 
 class MockOwner:

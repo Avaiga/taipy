@@ -13,8 +13,7 @@ from datetime import datetime, timedelta
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from taipy.config.common.scope import Scope
-
+from ...config.common.scope import Scope
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._mongo_connector import _connect_mongodb
 from ..data.operator import JoinOperator, Operator

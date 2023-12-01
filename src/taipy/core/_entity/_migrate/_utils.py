@@ -12,7 +12,7 @@
 import json
 from typing import Dict, List, Optional, Tuple
 
-from taipy.logger._taipy_logger import _TaipyLogger
+from ....logger._taipy_logger import _TaipyLogger
 
 __logger = _TaipyLogger._get_logger()
 
