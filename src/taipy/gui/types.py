@@ -142,26 +142,26 @@ def _get_taipy_type(a_type: None) -> None:
     ...
 
 
-@t.overload  # noqa: F811
-def _get_taipy_type(a_type: t.Type[_TaipyBase]) -> t.Type[_TaipyBase]:
+@t.overload
+def _get_taipy_type(a_type: t.Type[_TaipyBase]) -> t.Type[_TaipyBase]:  # noqa: F811
     ...
 
 
-@t.overload  # noqa: F811
-def _get_taipy_type(a_type: PropertyType) -> t.Type[_TaipyBase]:
+@t.overload
+def _get_taipy_type(a_type: PropertyType) -> t.Type[_TaipyBase]:  # noqa: F811
     ...
 
 
-@t.overload  # noqa: F811
+@t.overload
 def _get_taipy_type(
     a_type: t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]
-) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:
+) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:  # noqa: F811
     ...
 
 
 def _get_taipy_type(
     a_type: t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]
-) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:
+) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:  # noqa: F811
     if a_type is None:
         return None
     if isinstance(a_type, PropertyType) and not isinstance(a_type.value, str):
