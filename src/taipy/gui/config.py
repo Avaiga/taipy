@@ -17,9 +17,8 @@ from importlib.util import find_spec
 import pytz
 import tzlocal
 from dotenv import dotenv_values
-from werkzeug.serving import is_running_from_reloader
-
 from taipy.logger._taipy_logger import _TaipyLogger
+from werkzeug.serving import is_running_from_reloader
 
 from ._gui_cli import _GuiCLI
 from ._page import _Page
@@ -242,7 +241,9 @@ class _Config(object):
                         config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
                     except Exception as e:
                         _warn(
-                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type", e, )  # noqa: E501
+                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
+                            e,
+                        )
 
         # Taipy-config
         if find_spec("taipy") and find_spec("taipy.config"):

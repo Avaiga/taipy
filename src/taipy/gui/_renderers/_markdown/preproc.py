@@ -104,7 +104,7 @@ class _Preprocessor(MdPreprocessor):
             # Other controls
             for m in _Preprocessor.__CONTROL_RE.finditer(line):
                 control_name, properties = self._process_control(m.group(1), line_count)
-                new_line += line[last_index: m.start()]
+                new_line += line[last_index : m.start()]
                 control_text = _MarkdownFactory._TAIPY_START + control_name
                 for property in properties:
                     prop_value = property[1].replace('"', '\\"')
@@ -118,7 +118,7 @@ class _Preprocessor(MdPreprocessor):
             new_line = ""
             last_index = 0
             for m in _Preprocessor.__LINK_RE.finditer(line):
-                new_line += line[last_index: m.end()]
+                new_line += line[last_index : m.end()]
                 new_line += "{: key=" + _Builder._get_key("link") + "}"
                 last_index = m.end()
             new_line = line if last_index == 0 else new_line + line[last_index:]
@@ -147,13 +147,13 @@ class _Preprocessor(MdPreprocessor):
                         + _MarkdownFactory._END_SUFFIX
                         + _MarkdownFactory._TAIPY_END
                         + "\n"
-                        + new_line[m.end():]
+                        + new_line[m.end() :]
                     )
                 else:
                     new_line = (
                         new_line[: m.start()]
                         + f"<div>No matching opened tag on line {line_count}</div>"
-                        + new_line[m.end():]
+                        + new_line[m.end() :]
                     )
                     _warn(f"Line {line_count} has an unmatched closing tag.")
             # append the new line

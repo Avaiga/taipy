@@ -2,7 +2,6 @@ import random
 import string
 
 from example_library import ExampleLibrary
-
 from taipy.gui import Gui
 
 # Initial value

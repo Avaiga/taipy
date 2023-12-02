@@ -134,8 +134,9 @@ class _PandasDataAccessor(_DataAccessor):
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
         dataframe = dataframe.iloc[new_indexes] if new_indexes is not None else dataframe
-        dataframe = dataframe.loc[:, dataframe.dtypes[dataframe.dtypes.index.astype(
-            str).isin(cols)].index]  # type: ignore
+        dataframe = dataframe.loc[
+            :, dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(cols)].index
+        ]  # type: ignore
         return dataframe
 
     def __apply_user_function(
@@ -221,7 +222,7 @@ class _PandasDataAccessor(_DataAccessor):
     ) -> t.Dict[str, t.Any]:
         columns = payload.get("columns", [])
         if col_prefix:
-            columns = [c[len(col_prefix):] if c.startswith(col_prefix) else c for c in columns]
+            columns = [c[len(col_prefix) :] if c.startswith(col_prefix) else c for c in columns]
         ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
         is_copied = False

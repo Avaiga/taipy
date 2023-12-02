@@ -15,7 +15,6 @@
 # You may need to install the yfinance package as well.
 # -----------------------------------------------------------------------------------------
 import yfinance
-
 from taipy import Gui
 
 # Extraction of a month of stock data for AAPL using the

@@ -96,7 +96,10 @@ class _Evaluator:
             args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
             targets = [
                 # type: ignore
-                compr.target.id for node in ast.walk(st) if isinstance(node, ast.ListComp) for compr in node.generators
+                compr.target.id
+                for node in ast.walk(st)
+                if isinstance(node, ast.ListComp)
+                for compr in node.generators
             ]
             for node in ast.walk(st):
                 if isinstance(node, ast.Name):

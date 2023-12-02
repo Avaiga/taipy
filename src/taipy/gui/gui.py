@@ -32,9 +32,8 @@ import __main__
 import markdown as md_lib
 import tzlocal
 from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
-from werkzeug.utils import secure_filename
-
 from taipy.logger._taipy_logger import _TaipyLogger
+from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
@@ -677,12 +676,12 @@ class Gui:
         if var_name.startswith(_TaipyBase._HOLDER_PREFIX):
             for hp in _TaipyBase._get_holder_prefixes():
                 if var_name.startswith(hp):
-                    var_name = var_name[len(hp):]
+                    var_name = var_name[len(hp) :]
                     break
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
-            suffix_var_name = var_name[first_dot_index + 1:]
+            suffix_var_name = var_name[first_dot_index + 1 :]
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
@@ -1006,7 +1005,9 @@ class Gui:
                                 break
                         except Exception as e:  # pragma: no cover
                             _warn(
-                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)'", e, )  # noqa: E501
+                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)'",  # noqa: E501
+                                e,
+                            )
             if not isinstance(ret_payload, dict):
                 ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload})

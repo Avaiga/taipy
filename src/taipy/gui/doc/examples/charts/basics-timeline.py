@@ -15,7 +15,6 @@
 # -----------------------------------------------------------------------------------------
 import numpy
 import pandas
-
 from taipy.gui import Gui
 
 # Generate a random value for every hour on a given day

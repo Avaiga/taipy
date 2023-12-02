@@ -9,19 +9,22 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-# flake8: noqa: E402
-from .singleton import _Singleton
-from .is_port_open import _is_port_open
-from twisted.web.server import NOT_DONE_YET, Site
-from twisted.web.resource import Resource
-from twisted.web.proxy import ProxyClient, ProxyClientFactory
-from twisted.internet import reactor
 import contextlib
 import typing as t
 import warnings
 from threading import Thread
 from urllib.parse import quote as urlquote
 from urllib.parse import urlparse
+
+from twisted.internet import reactor
+from twisted.web.proxy import ProxyClient, ProxyClientFactory
+from twisted.web.resource import Resource
+from twisted.web.server import NOT_DONE_YET, Site
+
+from .is_port_open import _is_port_open
+
+# flake8: noqa: E402
+from .singleton import _Singleton
 
 warnings.filterwarnings(
     "ignore",

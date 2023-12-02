@@ -162,7 +162,7 @@ class Element:
                     while m := Element.__RE_PROP_VAR.search(val):
                         var = attributes.get(m.group(1))
                         hash_value = "None" if var is None else gui._evaluate_expr(var)
-                        val = val[: m.start()] + hash_value + val[m.end():]
+                        val = val[: m.start()] + hash_value + val[m.end() :]
                 attributes[prop] = val
         # this modifies attributes
         hash_names = _Builder._get_variable_hash_names(gui, attributes)  # variable replacement

@@ -18,7 +18,6 @@ from os.path import exists
 
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
-
 from taipy.gui import Gui
 
 # Let scikit-learn generate a random regression problem

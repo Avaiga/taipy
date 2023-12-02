@@ -29,9 +29,8 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
 from kthread import KThread
-from werkzeug.serving import is_running_from_reloader
-
 from taipy.logger._taipy_logger import _TaipyLogger
+from werkzeug.serving import is_running_from_reloader
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
@@ -176,11 +175,11 @@ class _Server:
                 if (
                     path.startswith(f"{k}/")
                     and str(
-                        os.path.normpath(file_path := ((base_path := v + os.path.sep) + path[len(k) + 1:]))
+                        os.path.normpath(file_path := ((base_path := v + os.path.sep) + path[len(k) + 1 :]))
                     ).startswith(base_path)
                     and os.path.isfile(file_path)
                 ):
-                    return send_from_directory(base_path, path[len(k) + 1:])
+                    return send_from_directory(base_path, path[len(k) + 1 :])
             if (
                 hasattr(__main__, "__file__")
                 and str(

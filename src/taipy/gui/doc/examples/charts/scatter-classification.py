@@ -17,7 +17,6 @@
 import numpy
 import pandas
 from sklearn.datasets import make_classification
-
 from taipy.gui import Gui
 
 # Let scikit-learn generate a random 2-class classification problem
