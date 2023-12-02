@@ -1,0 +1,4 @@
+dist/
+*.egg-info/
+example_library/front-end/package-lock.json
+example_library/front-end/node_modules/

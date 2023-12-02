@@ -1,0 +1,65 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
+flask = "==3.0.0"
+flask-cors = "==4.0.0"
+flask-socketio = "==5.3.6"
+gevent = "==23.7.0"
+gevent-websocket = "==0.10.1"
+kthread = "==0.2.3"
+markdown = "==3.4.4"
+pandas = "==2.0.0"
+pyarrow = "==10.0.1"
+pyngrok = "==5.1"
+python-dotenv = "==1.0.0"
+python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
+python-magic-bin = {version = "==0.4.14", markers="sys_platform == 'win32'"}
+pytz = "==2021.3"
+simple-websocket = "==0.10.1"
+taipy-config = {ref = "develop", git = "https://github.com/avaiga/taipy-config.git"}
+tzlocal = "==3.0"
+gitignore-parser = "==0.1.1"
+twisted = "==23.8.0"
+
+[dev-packages]
+black = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+isort = "*"
+mkdocs = "*"
+mkdocs-autorefs = "*"
+mkdocs-include-markdown-plugin = "*"
+mkdocs-macros-plugin = "*"
+mkdocs-material = "==7.3.0"
+mkdocs-material-extensions = "*"
+mkdocstrings = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
+tox = "*"
+twine = "*"
+playwright = "*"
+pytest-playwright = "*"
+types-Markdown = "*"
+types-python-dateutil = "*"
+types-pytz = "*"
+types-tzlocal = "*"
+types-flask = "*"
+types-Flask-Cors = "*"
+pandas-stubs = "*"
+pyopenssl = "*"
+pytest-timeout = "*"
+testbook = "*"
+ipython = "*"
+ipykernel = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true

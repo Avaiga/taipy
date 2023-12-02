@@ -1,0 +1,4 @@
+recursive-include src/taipy/gui/webapp *
+include src/taipy/gui/version.json
+include src/taipy/gui/viselements.json
+include src/taipy/gui/*.pyi
