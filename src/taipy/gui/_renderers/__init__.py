@@ -32,7 +32,7 @@ class _Renderer(Page, ABC):
 
         If *content* is a path to a readable file, the file is read entirely as the text template.
         """
-        from ..builder._element import _Element
+        from ..builder._element import _Element  # noqa: F811
 
         super().__init__(**kwargs)
         content: t.Optional[t.Union[str, _Element]] = kwargs.get("content", None)
