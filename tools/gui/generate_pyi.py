@@ -1,6 +1,7 @@
 # ############################################################
 # Generate Python interface definition files
 # ############################################################
+from src.taipy.gui.config import Config
 import json
 import os
 import typing as t
@@ -13,7 +14,6 @@ gui_pyi_file = gui_py_file + "i"
 
 os.system(f"pipenv run stubgen {gui_py_file} --no-import --parse-only --export-less -o ./")
 
-from src.taipy.gui.config import Config
 
 gui_config = "".join(
     f", {k}: {v.__name__} = ..."
@@ -72,7 +72,7 @@ def build_doc(element: t.Dict[str, t.Any]):
     if "doc" not in element:
         return ""
     doc = str(element["doc"]).replace("\n", f'\n{16*" "}')
-    return f"{element['name']} ({element['type']}): {doc} {'(default: '+element['default_value'] + ')' if 'default_value' in element else ''}"
+    return f"{element['name']} ({element['type']}): {doc} {'(default: '+element['default_value'] + ')' if 'default_value' in element else ''}"  # noqa: E501
 
 
 for control_element in viselements["controls"]:
