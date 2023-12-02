@@ -85,13 +85,13 @@ class _Adapter:
             tpl_res = self._get_valid_result(result, id_only)
             if tpl_res is None:
                 _warn(
-                    f"Adapter for {var_name} did not return a valid result. Please check the documentation on List of Values Adapters."
+                    f"Adapter for {var_name} did not return a valid result. Please check the documentation on List of Values Adapters."  # noqa: E501
                 )
             else:
                 if not id_only and len(tpl_res) > 2 and isinstance(tpl_res[2], list) and len(tpl_res[2]) > 0:
                     tpl_res = (tpl_res[0], tpl_res[1], self.__on_tree(adapter, tpl_res[2]))
                 return (
-                    (tpl_res + result[len(tpl_res) :])
+                    (tpl_res + result[len(tpl_res):])
                     if isinstance(result, tuple) and isinstance(tpl_res, tuple)
                     else tpl_res
                 )

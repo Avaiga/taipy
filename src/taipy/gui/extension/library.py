@@ -114,7 +114,7 @@ class Element:
             render_xhtml (Optional[callable[[dict[str, Any]], str]]): A function that receives a
                 dictionary containing the element's properties and their values
                 and that must return a valid XHTML string.
-        """
+        """  # noqa: E501
         self.default_attribute = default_property
         self.attributes = properties
         self.inner_properties = inner_properties
@@ -162,7 +162,7 @@ class Element:
                     while m := Element.__RE_PROP_VAR.search(val):
                         var = attributes.get(m.group(1))
                         hash_value = "None" if var is None else gui._evaluate_expr(var)
-                        val = val[: m.start()] + hash_value + val[m.end() :]
+                        val = val[: m.start()] + hash_value + val[m.end():]
                 attributes[prop] = val
         # this modifies attributes
         hash_names = _Builder._get_variable_hash_names(gui, attributes)  # variable replacement
@@ -333,7 +333,7 @@ class ElementLibrary(ABC):
 
         Arguments:
             name (str): The name of the resource for which a local Path should be returned.
-        """
+        """  # noqa: E501
         module_obj = sys.modules.get(self.__class__.__module__)
         base = (Path(".") if module_obj is None else Path(module_obj.__file__).parent).resolve()  # type: ignore
         base = base if base.exists() else Path(".").resolve()

@@ -44,7 +44,7 @@ class _TaipyBase(ABC):
                 self.__hash_name[5:] if self.__hash_name.startswith("tpec_") else self.__hash_name
             )
             return name if mod is None or mod == "__main__" else f"{mod}.{name}"
-        except:
+        except BaseException:
             return self.__hash_name
 
     @staticmethod

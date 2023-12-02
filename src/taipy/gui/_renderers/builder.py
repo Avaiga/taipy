@@ -99,7 +99,8 @@ class _Builder:
         if default_property_value is None and default_value is not None:
             self.__attributes[self.__default_property_name] = default_value
 
-        # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
+        # Bind properties dictionary to attributes if condition is matched (will
+        # leave the binding for function at the builder )
         if "properties" in self.__attributes:
             (prop_dict, prop_hash) = _Builder.__parse_attribute_value(gui, self.__attributes["properties"])
             if prop_hash is None:
@@ -465,7 +466,7 @@ class _Builder:
                 self.__gui._set_building(True)
                 return self.__gui._evaluate_expr(
                     "{"
-                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{k}={v2}" for k, v2 in {v: self.__gui._get_real_var_name(v)[0] for v in hashes.values()}.items()])})'
+                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{k}={v2}" for k, v2 in {v: self.__gui._get_real_var_name(v)[0] for v in hashes.values()}.items()])})'  # noqa: E501
                     + "}"
                 )
             finally:

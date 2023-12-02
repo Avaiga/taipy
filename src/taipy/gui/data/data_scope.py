@@ -33,13 +33,14 @@ class _DataScopes:
     def get_scope(self, client_id: t.Optional[str]) -> SimpleNamespace:
         if self.__single_client:
             return self.__scopes[_DataScopes._GLOBAL_ID]
-        # global context in case request is not registered or client_id is not available (such as in the context of running tests)
+        # global context in case request is not registered or client_id is not
+        # available (such as in the context of running tests)
         if not client_id:
             _warn("Empty session id, using global scope instead.")
             return self.__scopes[_DataScopes._GLOBAL_ID]
         if client_id not in self.__scopes:
             _warn(
-                f"Session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you may have to reload your page."
+                f"Session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you may have to reload your page."  # noqa: E501
             )
             self.create_scope(client_id)
         return self.__scopes[client_id]

@@ -230,7 +230,7 @@ class _Config(object):
                         config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
                 except Exception as e:
                     _warn(
-                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type",
+                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
                         e,
                     )
         # Load config from env file
@@ -242,9 +242,7 @@ class _Config(object):
                         config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
                     except Exception as e:
                         _warn(
-                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",
-                            e,
-                        )
+                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type", e, )  # noqa: E501
 
         # Taipy-config
         if find_spec("taipy") and find_spec("taipy.config"):
@@ -293,7 +291,7 @@ class _Config(object):
             app_config["async_mode"] = "threading"
             self.__log_outside_reloader(
                 logger,
-                "'async_mode' parameter has been overridden to 'threading'. Using Flask built-in development server with debug mode",
+                "'async_mode' parameter has been overridden to 'threading'. Using Flask built-in development server with debug mode",  # noqa: E501
             )
 
         self._resolve_notebook_proxy()

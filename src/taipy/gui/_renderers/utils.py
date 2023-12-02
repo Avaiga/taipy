@@ -37,7 +37,7 @@ def _get_columns_dict_from_list(
             idx += 1
         elif col:
             _warn(
-                f'Error column "{col}" is not present in the Dataframe "{value.head(0) if hasattr(value, "head") else value}".'
+                f'Error column "{col}" is not present in the Dataframe "{value.head(0) if hasattr(value, "head") else value}".'  # noqa: E501
             )
     return col_dict
 

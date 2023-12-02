@@ -87,7 +87,7 @@ class RDP(Decimator):
             # Calculate distance to points
             P1 = data[start]
             P2 = data[end]
-            points = data[start + 1 : end]
+            points = data[start + 1: end]
             dsq = RDP.dsquared_line_points(P1, P2, points)
 
             mask_eps = dsq > epsilon**2
@@ -103,7 +103,7 @@ class RDP(Decimator):
 
             else:
                 # Points in between are redundant
-                mask[start + 1 : end] = False
+                mask[start + 1: end] = False
 
         return mask
 
@@ -127,7 +127,7 @@ class RDP(Decimator):
             (start, end) = stack.pop()
             if end - start <= 1:
                 continue
-            dsq = RDP.dsquared_line_points(M[start], M[end], M[start + 1 : end])
+            dsq = RDP.dsquared_line_points(M[start], M[end], M[start + 1: end])
             max_dist_index = np.argmax(dsq) + start + 1
             weights[max_dist_index] = np.amax(dsq)
             stack.append((start, max_dist_index))

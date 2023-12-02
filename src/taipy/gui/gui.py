@@ -400,7 +400,7 @@ class Gui:
             content_type: The type of the content that triggers the content provider.
             content_provider: The function that converts content of type *type* into an HTML string.
 
-        """
+        """  # noqa: E501
         if Gui.__content_providers.get(content_type):
             _warn(f"The type {content_type} is already associated with a provider.")
             return
@@ -677,12 +677,12 @@ class Gui:
         if var_name.startswith(_TaipyBase._HOLDER_PREFIX):
             for hp in _TaipyBase._get_holder_prefixes():
                 if var_name.startswith(hp):
-                    var_name = var_name[len(hp) :]
+                    var_name = var_name[len(hp):]
                     break
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
-            suffix_var_name = var_name[first_dot_index + 1 :]
+            suffix_var_name = var_name[first_dot_index + 1:]
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
@@ -1006,9 +1006,7 @@ class Gui:
                                 break
                         except Exception as e:  # pragma: no cover
                             _warn(
-                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)'",
-                                e,
-                            )
+                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)'", e, )  # noqa: E501
             if not isinstance(ret_payload, dict):
                 ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload})
@@ -1505,7 +1503,7 @@ class Gui:
             raise Exception("name is required for add_page() function.")
         if not Gui.__RE_PAGE_NAME.match(name):  # pragma: no cover
             raise SyntaxError(
-                f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'
+                f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'  # noqa: E501
             )
         if name.startswith("/"):  # pragma: no cover
             raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character.')
@@ -1695,7 +1693,7 @@ class Gui:
                 self._bind(encoded_var_name, bind_locals[var_name])
             else:
                 _warn(
-                    f"Variable '{var_name}' is not available in either the '{self._get_locals_context()}' or '__main__' modules."
+                    f"Variable '{var_name}' is not available in either the '{self._get_locals_context()}' or '__main__' modules."  # noqa: E501
                 )
         return encoded_var_name
 
@@ -2098,7 +2096,7 @@ class Gui:
                 _warn(f"Using webapp_path: '{_conf_webapp_path}'.")
             else:  # pragma: no cover
                 _warn(
-                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."
+                    f"webapp_path: '{_conf_webapp_path}' is not a valid directory path. Falling back to '{_webapp_path}'."  # noqa: E501
                 )
 
         self._flask_blueprint.append(
@@ -2255,7 +2253,7 @@ class Gui:
                             glob_ctx[lib_context[0]] = lib_context[1]
                     elif lib_context:
                         _warn(
-                            f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier."
+                            f"Method {name}.on_init() should return a Tuple[str, Any] where the first element must be a valid Python identifier."  # noqa: E501
                         )
                 except Exception as e:  # pragma: no cover
                     if not self._call_on_exception(f"{name}.on_init", e):

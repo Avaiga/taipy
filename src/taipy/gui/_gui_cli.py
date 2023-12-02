@@ -48,7 +48,7 @@ class _GuiCLI:
             "nargs": "?",
             "default": "",
             "const": "",
-            "help": "The path to the web app to be used. The default is the webapp directory under gui in the Taipy GUI package directory.",
+            "help": "The path to the web app to be used. The default is the webapp directory under gui in the Taipy GUI package directory.",  # noqa: E501
         },
     }
 

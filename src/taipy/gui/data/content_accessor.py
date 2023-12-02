@@ -126,6 +126,6 @@ class _ContentAccessor:
                 return "Cannot be base64 encoded"
         else:
             _warn(
-                "python-magic (and python-magic-bin on Windows) packages need to be installed if you want to process content as an array of bytes."
+                "python-magic (and python-magic-bin on Windows) packages need to be installed if you want to process content as an array of bytes."  # noqa: E501
             )
             return "Cannot guess content type"

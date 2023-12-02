@@ -62,8 +62,8 @@ extras_require = {
 def _build_webapp():
     already_exists = Path("./src/taipy/gui/webapp/index.html").exists()
     if not already_exists:
-        os.system("cd frontend/taipy-gui/dom && npm ci")
-        os.system("cd frontend/taipy-gui && npm ci --omit=optional && npm run build")
+        os.system("cd ../../../frontend/taipy-gui/dom && npm ci")
+        os.system("cd ../../../frontend/taipy-gui && npm ci --omit=optional && npm run build")
 
 
 class NPMInstall(build_py):

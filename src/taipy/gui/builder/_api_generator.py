@@ -68,7 +68,7 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         library_name = library.get_name()
         if self.__module is None:
             _TaipyLogger._get_logger().info(
-                f"Python API for extension library '{library_name}' is not available. To fix this, import 'taipy.gui.builder' before importing the extension library."
+                f"Python API for extension library '{library_name}' is not available. To fix this, import 'taipy.gui.builder' before importing the extension library."  # noqa: E501
             )
             return
         library_module = getattr(self.__module, library_name, None)

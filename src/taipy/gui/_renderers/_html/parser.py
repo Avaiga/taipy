@@ -72,7 +72,7 @@ class _TaipyHTMLParser(HTMLParser):
             opening_tag, opening_tag_line = self._tag_queue.pop()
             if opening_tag != tag:
                 _warn(
-                    f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag '{tag}' at line {self._line_count}."
+                    f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag '{tag}' at line {self._line_count}."  # noqa: E501
                 )
         if tag in ["head", "body", "html"]:
             return

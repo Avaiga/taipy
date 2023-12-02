@@ -10,6 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 # flake8: noqa: E402
+from .singleton import _Singleton
+from .is_port_open import _is_port_open
+from twisted.web.server import NOT_DONE_YET, Site
+from twisted.web.resource import Resource
+from twisted.web.proxy import ProxyClient, ProxyClientFactory
+from twisted.internet import reactor
 import contextlib
 import typing as t
 import warnings
@@ -20,15 +26,9 @@ from urllib.parse import urlparse
 warnings.filterwarnings(
     "ignore",
     category=UserWarning,
-    message="You do not have a working installation of the service_identity module: 'No module named 'service_identity''.*",
+    message="You do not have a working installation of the service_identity module: 'No module named 'service_identity''.*",  # noqa: E501
 )
-from twisted.internet import reactor
-from twisted.web.proxy import ProxyClient, ProxyClientFactory
-from twisted.web.resource import Resource
-from twisted.web.server import NOT_DONE_YET, Site
 
-from .is_port_open import _is_port_open
-from .singleton import _Singleton
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -98,7 +98,7 @@ class NotebookProxy(object, metaclass=_Singleton):
         port = self._listening_port
         if _is_port_open(host, port):
             raise ConnectionError(
-                f"Port {port} is already opened on {host}. You have another server application running on the same port."
+                f"Port {port} is already opened on {host}. You have another server application running on the same port."  # noqa: E501
             )
         site = Site(_TaipyReverseProxyResource(host, b"", self._gui))
         reactor.listenTCP(port, site)

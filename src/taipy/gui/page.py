@@ -98,7 +98,7 @@ class Page:
         return (
             None
             if (frame := self._get_frame()) is None
-            else f"{_get_module_name_from_frame(frame)}{'.' if self._class_module_name else ''}{self._class_module_name}"
+            else f"{_get_module_name_from_frame(frame)}{'.' if self._class_module_name else ''}{self._class_module_name}"  # noqa: E501
         )
 
     def _get_content_detail(self, gui) -> str:

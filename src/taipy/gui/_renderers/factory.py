@@ -574,7 +574,7 @@ class _Factory:
             if control_name.endswith(_Factory._END_SUFFIX)
             else control_name
         )
-        name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
+        name = name[len(_Factory.__TAIPY_NAME_SPACE):] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         prop = _Factory.__CONTROL_DEFAULT_PROP_NAME.get(name)
         if prop is None:
             _, _, element = _Factory.__get_library_element(name)
@@ -608,7 +608,7 @@ class _Factory:
     def call_builder(
         gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None, is_html: t.Optional[bool] = False
     ) -> t.Optional[t.Union[t.Any, t.Tuple[str, str]]]:
-        name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
+        name = name[len(_Factory.__TAIPY_NAME_SPACE):] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
         if builder is None:

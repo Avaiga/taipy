@@ -47,7 +47,7 @@ class _Renderer(Page, ABC):
             self._base_element = content
         else:
             raise ValueError(
-                f"'content' argument has incorrect type '{type(content).__name__}'. This must be a string or an Builder element."
+                f"'content' argument has incorrect type '{type(content).__name__}'. This must be a string or an Builder element."  # noqa: E501
             )
 
     def __process_content(self, content: str) -> None:

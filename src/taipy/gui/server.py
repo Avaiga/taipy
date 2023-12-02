@@ -162,7 +162,7 @@ class _Server:
                     )
                 except Exception:  # pragma: no cover
                     raise RuntimeError(
-                        "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."
+                        "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."  # noqa: E501
                     )
 
             if path == "taipy.status.json":
@@ -176,11 +176,11 @@ class _Server:
                 if (
                     path.startswith(f"{k}/")
                     and str(
-                        os.path.normpath(file_path := ((base_path := v + os.path.sep) + path[len(k) + 1 :]))
+                        os.path.normpath(file_path := ((base_path := v + os.path.sep) + path[len(k) + 1:]))
                     ).startswith(base_path)
                     and os.path.isfile(file_path)
                 ):
-                    return send_from_directory(base_path, path[len(k) + 1 :])
+                    return send_from_directory(base_path, path[len(k) + 1:])
             if (
                 hasattr(__main__, "__file__")
                 and str(
@@ -269,7 +269,7 @@ class _Server:
             runtime_manager.add_gui(self._gui, port)
         if debug and not is_running_from_reloader() and _is_port_open(host_value, port):
             raise ConnectionError(
-                f"Port {port} is already opened on {host_value}. You have another server application running on the same port."
+                f"Port {port} is already opened on {host_value}. You have another server application running on the same port."  # noqa: E501
             )
         if not flask_log:
             log = logging.getLogger("werkzeug")
