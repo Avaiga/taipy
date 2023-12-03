@@ -20,8 +20,8 @@ from inspect import isclass
 from urllib.parse import quote
 
 from .._warnings import _warn
-from ..partial import Partial
 from ..gui_types import PropertyType, _get_taipy_type
+from ..partial import Partial
 from ..utils import (
     _date_to_string,
     _get_broadcast_var_name,
