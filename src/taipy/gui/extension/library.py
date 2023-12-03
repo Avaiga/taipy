@@ -20,7 +20,7 @@ from urllib.parse import urlencode
 
 from .._renderers.builder import _Builder
 from .._warnings import _warn
-from ..types import PropertyType
+from ..gui_types import PropertyType
 from ..utils import _get_broadcast_var_name, _TaipyBase, _to_camel_case
 
 if t.TYPE_CHECKING:

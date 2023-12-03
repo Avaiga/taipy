@@ -21,7 +21,7 @@ from urllib.parse import quote
 
 from .._warnings import _warn
 from ..partial import Partial
-from ..types import PropertyType, _get_taipy_type
+from ..gui_types import PropertyType, _get_taipy_type
 from ..utils import (
     _date_to_string,
     _get_broadcast_var_name,

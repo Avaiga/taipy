@@ -57,7 +57,7 @@ from .page import Page
 from .partial import Partial
 from .server import _Server
 from .state import State
-from .types import _WsType
+from .gui_types import _WsType
 from .utils import (
     _delscopeattr,
     _filter_locals,

@@ -18,7 +18,7 @@ import pandas as pd
 
 from .._warnings import _warn
 from ..gui import Gui
-from ..types import PropertyType
+from ..gui_types import PropertyType
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
