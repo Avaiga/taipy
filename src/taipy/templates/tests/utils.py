@@ -11,7 +11,7 @@ def _run_template(main_path, time_out=30):
             proc.kill()
             stdout, stderr = proc.communicate()
 
-    # Print the eror if there is any (for debugging)
+    # Print the error if there is any (for debugging)
     if stderr := str(stderr, "utf-8"):
         print(stderr)
 
