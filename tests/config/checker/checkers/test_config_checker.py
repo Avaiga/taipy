@@ -19,7 +19,7 @@ from src.taipy.config.checker.issue_collector import IssueCollector
 
 
 class MyCustomChecker(_ConfigChecker):
-    def _check(self) -> IssueCollector:
+    def _check(self) -> IssueCollector:  # type: ignore
         pass
 
 

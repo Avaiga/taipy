@@ -18,7 +18,6 @@ from src.taipy.config import Config
 from src.taipy.config._serializer._json_serializer import _JsonSerializer
 from src.taipy.config.common.frequency import Frequency
 from src.taipy.config.common.scope import Scope
-
 from tests.config.utils.named_temporary_file import NamedTemporaryFile
 from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
@@ -206,8 +205,10 @@ def test_read_write_toml_configuration_file_with_function_and_class():
     expected_toml_config = """
 [TAIPY]
 
-[unique_section_name] attribute = "my_attribute" prop = "my_prop" prop_list = [
-"tests.config.test_section_serialization.CustomEncoder:class",
+[unique_section_name]
+attribute = "my_attribute"
+prop = "my_prop"
+prop_list = [ "tests.config.test_section_serialization.CustomEncoder:class", \
 "tests.config.test_section_serialization.CustomDecoder:class",]
 
 [section_name.default]
