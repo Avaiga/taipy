@@ -23,7 +23,7 @@ simple-websocket = "==0.10.1"
 taipy-config = {ref = "develop", git = "https://github.com/avaiga/taipy-config.git"}
 tzlocal = "==3.0"
 gitignore-parser = "==0.1.1"
-twisted = "==23.8.0"
+twisted = "==23.10.0"
 
 [dev-packages]
 black = "*"
