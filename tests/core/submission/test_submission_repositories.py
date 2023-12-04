@@ -43,7 +43,7 @@ class TestSubmissionRepository:
         job._task = task
         _JobManagerFactory._build_manager()._repository._save(job)
 
-        submission = Submission(task.id)
+        submission = Submission(task.id, task._ID_PREFIX)
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
         submission_repository._save(submission)
         submission.jobs = [job]
@@ -55,7 +55,7 @@ class TestSubmissionRepository:
     def test_exists(self, configure_repo):
         configure_repo()
 
-        submission = Submission("entity_id")
+        submission = Submission("entity_id", "ENTITY_TYPE")
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
         submission_repository._save(submission)
 
@@ -67,7 +67,7 @@ class TestSubmissionRepository:
         configure_repo()
 
         repository = _SubmissionManagerFactory._build_manager()._repository
-        submission = Submission("entity_id")
+        submission = Submission("entity_id", "ENTITY_TYPE")
         for i in range(10):
             submission.id = f"submission-{i}"
             repository._save(submission)
@@ -81,7 +81,7 @@ class TestSubmissionRepository:
 
         repository = _SubmissionManagerFactory._build_manager()._repository
 
-        submission = Submission("entity_id")
+        submission = Submission("entity_id", "ENTITY_TYPE")
         repository._save(submission)
 
         repository._delete(submission.id)
@@ -94,7 +94,7 @@ class TestSubmissionRepository:
         configure_repo()
 
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
-        submission = Submission("entity_id")
+        submission = Submission("entity_id", "ENTITY_TYPE")
 
         for i in range(10):
             submission.id = f"submission-{i}"
@@ -110,7 +110,7 @@ class TestSubmissionRepository:
     def test_delete_many(self, configure_repo):
         configure_repo()
 
-        submission = Submission("entity_id")
+        submission = Submission("entity_id", "ENTITY_TYPE")
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
 
         for i in range(10):
@@ -130,7 +130,7 @@ class TestSubmissionRepository:
 
         # Create 5 entities with version 1.0 and 5 entities with version 2.0
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
-        submission = Submission("entity_id")
+        submission = Submission("entity_id", "ENTITY_TYPE")
 
         for i in range(10):
             submission.id = f"submission-{i}"
@@ -148,7 +148,7 @@ class TestSubmissionRepository:
         configure_repo()
 
         submission_repository = _SubmissionManagerFactory._build_manager()._repository
-        submission = Submission("entity_id", version="random_version_number")
+        submission = Submission("entity_id", "ENTITY_TYPE", version="random_version_number")
         for i in range(10):
             submission.id = f"submission-{i}"
             submission_repository._save(submission)
@@ -170,7 +170,7 @@ class TestSubmissionRepository:
         configure_repo()
 
         repository = _SubmissionManagerFactory._build_manager()._repository
-        submission = Submission("entity_id")
+        submission = Submission("entity_id", "ENTITY_TYPE")
         repository._save(submission)
 
         repository._export(submission.id, tmpdir.strpath)

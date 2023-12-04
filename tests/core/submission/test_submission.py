@@ -29,7 +29,7 @@ from src.taipy.core.task.task import Task
 
 
 def test_create_submission(scenario, job, current_datetime):
-    submission_1 = Submission(scenario.id)
+    submission_1 = Submission(scenario.id, scenario._ID_PREFIX)
 
     assert submission_1.id is not None
     assert submission_1.entity_id == scenario.id
@@ -39,7 +39,13 @@ def test_create_submission(scenario, job, current_datetime):
     assert submission_1._version is not None
 
     submission_2 = Submission(
-        scenario.id, "submission_id", [job], current_datetime, SubmissionStatus.COMPLETED, "version_id"
+        scenario.id,
+        scenario._ID_PREFIX,
+        "submission_id",
+        [job],
+        current_datetime,
+        SubmissionStatus.COMPLETED,
+        "version_id",
     )
 
     assert submission_2.id == "submission_id"
@@ -83,7 +89,7 @@ class MockJob:
         return self.status == Status.SUBMITTED
 
 
-def mock_get_jobs(job_ids):
+def __test_update_submission_status(job_ids, expected_submission_status):
     jobs = {
         "job0_submitted": MockJob("job0_submitted", Status.SUBMITTED),
         "job1_failed": MockJob("job1_failed", Status.FAILED),
@@ -95,20 +101,13 @@ def mock_get_jobs(job_ids):
         "job7_skipped": MockJob("job7_skipped", Status.SKIPPED),
         "job8_abandoned": MockJob("job8_abandoned", Status.ABANDONED),
     }
-    return [jobs[job_id] for job_id in job_ids]
 
-
-def __test_update_submission_status(job_ids, expected_submission_status):
-    with (
-        patch(
-            "src.taipy.core.submission.submission.Submission.jobs",
-            new_callable=mock.PropertyMock,
-            return_value=(mock_get_jobs(job_ids)),
-        )
-    ):
-        submission = Submission("submission_id")
-        submission._update_submission_status(None)
-        assert submission.submission_status == expected_submission_status
+    submission = Submission("submission_id", "ENTITY_TYPE")
+    submission.jobs = [jobs[job_id] for job_id in job_ids]
+    for job_id in job_ids:
+        job = jobs[job_id]
+        submission._update_submission_status(job)
+    assert submission.submission_status == expected_submission_status
 
 
 @pytest.mark.parametrize(
@@ -263,7 +262,7 @@ def test_update_submission_status_with_wrong_case_abandoned_without_cancel_or_fa
 
 def test_auto_set_and_reload():
     task = Task(config_id="name_1", properties={}, function=print, id=TaskId("task_1"))
-    submission_1 = Submission(task.id)
+    submission_1 = Submission(task.id, task._ID_PREFIX)
     job_1 = Job("job_1", task, submission_1.id, submission_1.entity_id)
     job_2 = Job("job_2", task, submission_1.id, submission_1.entity_id)
 
@@ -319,3 +318,420 @@ def test_auto_set_and_reload():
     assert submission_1.submission_status == SubmissionStatus.PENDING
     assert submission_2.jobs == [job_1]
     assert submission_2.submission_status == SubmissionStatus.PENDING
+
+
+@pytest.mark.parametrize(
+    "job_statuses, expected_submission_statuses",
+    [
+        (
+            [Status.SUBMITTED, Status.PENDING, Status.RUNNING, Status.COMPLETED],
+            [SubmissionStatus.PENDING, SubmissionStatus.PENDING, SubmissionStatus.RUNNING, SubmissionStatus.COMPLETED],
+        ),
+        (
+            [Status.SUBMITTED, Status.PENDING, Status.RUNNING, Status.SKIPPED],
+            [SubmissionStatus.PENDING, SubmissionStatus.PENDING, SubmissionStatus.RUNNING, SubmissionStatus.COMPLETED],
+        ),
+        (
+            [Status.SUBMITTED, Status.PENDING, Status.RUNNING, Status.FAILED],
+            [SubmissionStatus.PENDING, SubmissionStatus.PENDING, SubmissionStatus.RUNNING, SubmissionStatus.FAILED],
+        ),
+        (
+            [Status.SUBMITTED, Status.PENDING, Status.CANCELED],
+            [SubmissionStatus.PENDING, SubmissionStatus.PENDING, SubmissionStatus.CANCELED],
+        ),
+        (
+            [Status.SUBMITTED, Status.PENDING, Status.RUNNING, Status.CANCELED],
+            [SubmissionStatus.PENDING, SubmissionStatus.PENDING, SubmissionStatus.RUNNING, SubmissionStatus.CANCELED],
+        ),
+        ([Status.SUBMITTED, Status.BLOCKED], [SubmissionStatus.PENDING, SubmissionStatus.BLOCKED]),
+        ([Status.SUBMITTED, Status.SKIPPED], [SubmissionStatus.PENDING, SubmissionStatus.COMPLETED]),
+    ],
+)
+def test_update_submission_status_with_single_job_completed(job_statuses, expected_submission_statuses):
+    job = MockJob("job_id", Status.SUBMITTED)
+    submission = Submission("submission_id", "ENTITY_TYPE")
+
+    assert submission.submission_status == SubmissionStatus.SUBMITTED
+
+    for job_status, submission_status in zip(job_statuses, expected_submission_statuses):
+        job.status = job_status
+        submission._update_submission_status(job)
+        assert submission.submission_status == submission_status
+
+
+def __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses):
+    jobs = {job_id: MockJob(job_id, Status.SUBMITTED) for job_id in job_ids}
+    submission = Submission("submission_id", "ENTITY_TYPE")
+
+    assert submission.submission_status == SubmissionStatus.SUBMITTED
+
+    for (job_id, job_status), submission_status in zip(job_statuses, expected_submission_statuses):
+        job = jobs[job_id]
+        job.status = job_status
+        submission._update_submission_status(job)
+        assert submission.submission_status == submission_status
+
+
+@pytest.mark.parametrize(
+    "job_ids, job_statuses, expected_submission_statuses",
+    [
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_2", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.RUNNING),
+                ("job_1", Status.COMPLETED),
+                ("job_2", Status.COMPLETED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.RUNNING),
+                ("job_1", Status.COMPLETED),
+                ("job_2", Status.COMPLETED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.BLOCKED),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.RUNNING),
+                ("job_2", Status.COMPLETED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_1", Status.COMPLETED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.BLOCKED,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+    ],
+)
+def test_update_submission_status_with_two_jobs_completed(job_ids, job_statuses, expected_submission_statuses):
+    __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses)
+
+
+@pytest.mark.parametrize(
+    "job_ids, job_statuses, expected_submission_statuses",
+    [
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_2", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.SKIPPED),
+                ("job_1", Status.COMPLETED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.SKIPPED),
+                ("job_1", Status.COMPLETED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.BLOCKED),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.RUNNING),
+                ("job_2", Status.COMPLETED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.SKIPPED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.BLOCKED,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_2", Status.PENDING),
+                ("job_1", Status.SKIPPED),
+                ("job_2", Status.SKIPPED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.SKIPPED),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.SKIPPED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.BLOCKED),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.SKIPPED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.SKIPPED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.BLOCKED,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.COMPLETED,
+            ],
+        ),
+    ],
+)
+def test_update_submission_status_with_two_jobs_skipped(job_ids, job_statuses, expected_submission_statuses):
+    __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses)
+
+
+@pytest.mark.parametrize(
+    "job_ids, job_statuses, expected_submission_statuses",
+    [
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_2", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.RUNNING),
+                ("job_1", Status.FAILED),
+                ("job_2", Status.COMPLETED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.FAILED,
+                SubmissionStatus.FAILED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.RUNNING),
+                ("job_1", Status.COMPLETED),
+                ("job_2", Status.FAILED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.FAILED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.BLOCKED),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.RUNNING),
+                ("job_2", Status.FAILED),
+                ("job_1", Status.ABANDONED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.FAILED,
+                SubmissionStatus.FAILED,
+            ],
+        ),
+    ],
+)
+def test_update_submission_status_with_two_jobs_failed(job_ids, job_statuses, expected_submission_statuses):
+    __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses)
+
+
+@pytest.mark.parametrize(
+    "job_ids, job_statuses, expected_submission_statuses",
+    [
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_2", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.RUNNING),
+                ("job_1", Status.CANCELED),
+                ("job_2", Status.COMPLETED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.CANCELED,
+                SubmissionStatus.CANCELED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.PENDING),
+                ("job_1", Status.RUNNING),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.RUNNING),
+                ("job_1", Status.COMPLETED),
+                ("job_2", Status.CANCELED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.CANCELED,
+            ],
+        ),
+        (
+            ["job_1", "job_2"],
+            [
+                ("job_1", Status.SUBMITTED),
+                ("job_2", Status.SUBMITTED),
+                ("job_1", Status.BLOCKED),
+                ("job_2", Status.PENDING),
+                ("job_2", Status.RUNNING),
+                ("job_2", Status.CANCELED),
+                ("job_1", Status.ABANDONED),
+            ],
+            [
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.PENDING,
+                SubmissionStatus.RUNNING,
+                SubmissionStatus.CANCELED,
+                SubmissionStatus.CANCELED,
+            ],
+        ),
+    ],
+)
+def test_update_submission_status_with_two_jobs_canceled(job_ids, job_statuses, expected_submission_statuses):
+    __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses)

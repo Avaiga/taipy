@@ -35,11 +35,8 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _create(
-        cls,
-        entity_id: str,
-    ) -> Submission:
-        submission = Submission(entity_id=entity_id)
+    def _create(cls, entity_id: str, entity_type: str) -> Submission:
+        submission = Submission(entity_id=entity_id, entity_type=entity_type)
         cls._set(submission)
 
         Notifier.publish(_make_event(submission, EventOperation.CREATION))
