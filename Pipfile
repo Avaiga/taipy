@@ -23,6 +23,7 @@ tox = "*"
 types-python-dateutil = "*"
 mongomock = "*"
 pytest-mock = "*"
+testbook = "*"
 
 [requires]
 python_version = "3"

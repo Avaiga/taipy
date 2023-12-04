@@ -15,7 +15,6 @@ from src.taipy.config import Config
 from src.taipy.config._config import _Config
 from src.taipy.config._config_comparator._comparator_result import _ComparatorResult
 from src.taipy.config.global_app.global_app_config import GlobalAppConfig
-
 from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 
