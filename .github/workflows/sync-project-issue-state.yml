@@ -1,0 +1,23 @@
+name: Project Issue State Sync
+
+on:
+  schedule:
+    # Run once every day at mid day
+    - cron: 00 12 * * *
+
+  workflow_dispatch:
+    # Manual trigger
+
+jobs:
+  issue-state-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync issue states
+        uses: dasmerlon/project-issue-state-sync@v2
+        with:
+          github_token: ${{ secrets.PROJECT_ISSUE_SYNC_TOKEN }}
+          owner: Avaiga
+          project_number: 6
+          closed_statuses: Closed
+          open_statuses: New Issue,Icebox,Contributor,Product Backlog,Sprint Backlog,In Progress,Review/QA,Done
