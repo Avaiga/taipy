@@ -16,7 +16,6 @@ from taipy.config.checker.issue_collector import IssueCollector
 
 
 class TestCoreSectionChecker:
-
     _CoreSectionChecker._ACCEPTED_REPOSITORY_TYPES.update(["mock_repo_type"])
 
     def test_check_valid_repository(self):

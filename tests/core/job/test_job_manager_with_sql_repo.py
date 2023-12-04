@@ -218,7 +218,6 @@ def test_force_deleting_unfinished_job(init_sql_repo):
 
 
 def test_is_deletable(init_sql_repo):
-
     init_managers()
 
     assert len(_JobManager._get_all()) == 0

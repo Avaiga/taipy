@@ -405,7 +405,6 @@ def test_is_deletable():
 
 
 def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
-
     dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.GLOBAL)
     dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.GLOBAL)
     dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.SCENARIO)
