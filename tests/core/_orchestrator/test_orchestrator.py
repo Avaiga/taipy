@@ -347,8 +347,14 @@ def test_update_status_fail_job_in_parallel_one_sequence():
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
-    sc = Scenario("scenario_config_1", set([task_0, task_1, task_2, task_3]), {}, set(), "scenario_1",
-                  sequences={"sequence_1": {"tasks": [task_0, task_1, task_2]}})
+    sc = Scenario(
+        "scenario_config_1",
+        set([task_0, task_1, task_2, task_3]),
+        {},
+        set(),
+        "scenario_1",
+        sequences={"sequence_1": {"tasks": [task_0, task_1, task_2]}},
+    )
     _DataManager._set(dn_0)
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)
@@ -380,7 +386,7 @@ def test_update_status_fail_job_in_parallel_one_scenario():
     task_1 = Task("task_config_1", {}, print, input=[dn_0], output=[dn_1], id="task_1")
     task_2 = Task("task_config_2", {}, print, input=[dn_1], id="task_2")
     task_3 = Task("task_config_3", {}, print, input=[dn_2], id="task_3")
-    scenario = Scenario("scenario_config_1", set([task_0, task_1, task_2, task_3]), {}, set(), "scenario_1")
+    sc = Scenario("scenario_config_1", set([task_0, task_1, task_2, task_3]), {}, set(), "scenario_1")
 
     _DataManager._set(dn_0)
     _DataManager._set(dn_1)
@@ -389,9 +395,9 @@ def test_update_status_fail_job_in_parallel_one_scenario():
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
     _TaskManager._set(task_3)
-    _ScenarioManager._set(scenario)
+    _ScenarioManager._set(sc)
 
-    jobs = _Orchestrator.submit(scenario)
+    jobs = _Orchestrator.submit(sc)
 
     tasks_jobs = {job._task.id: job for job in jobs}
     assert_true_after_time(tasks_jobs["task_0"].is_failed)
@@ -1063,7 +1069,7 @@ def test_can_exec_task_with_modified_config():
 def update_config_task(n):
     from taipy.config import Config
 
-    # The exception will be saved to logger, and there is no way to check for it
+    # The exception will be saved to logger, and there is no way to check for it,
     # so it will be checked here
     with pytest.raises(ConfigurationUpdateBlocked):
         Config.core.storage_folder = ".new_storage_folder/"
