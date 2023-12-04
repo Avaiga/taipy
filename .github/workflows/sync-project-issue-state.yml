@@ -2,8 +2,8 @@ name: Project Issue State Sync
 
 on:
   schedule:
-    # Run every 5 minutes between 10am and 11am
-    - cron: 0-59/5 10-11 * * *
+    # Run once every day at mid day
+    - cron: 00 12 * * *
 
   workflow_dispatch:
     # Manual trigger
