@@ -345,7 +345,6 @@ def test_submit_task():
             return None
 
     with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
-
         # Task does not exist, we expect an exception
         with pytest.raises(NonExistingTask):
             _TaskManager._submit(task_1)
