@@ -13,7 +13,7 @@ gevent-websocket = "==0.10.1"
 kthread = "==0.2.3"
 markdown = "==3.4.4"
 pandas = "==2.0.0"
-pyarrow = "==10.0.1"
+pyarrow = "==14.0.1"
 pyngrok = "==5.1"
 python-dotenv = "==1.0.0"
 python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
