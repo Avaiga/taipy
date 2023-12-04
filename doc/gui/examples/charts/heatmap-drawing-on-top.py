@@ -14,6 +14,7 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import numpy
+
 from taipy.gui import Gui
 
 
@@ -30,8 +31,8 @@ def spiral(th):
 
 # Prepare the heatmap x and y cell sizes along the axes
 golden_ratio = (1 + numpy.sqrt(5)) / 2.0  # Golden ratio
-grid_x = [0, 1, 1 + (1 / (golden_ratio**4)), 1 + (1 / (golden_ratio**3)), golden_ratio]
-grid_y = [0, 1 / (golden_ratio**3), 1 / golden_ratio**3 + 1 / golden_ratio**4, 1 / (golden_ratio**2), 1]
+grid_x = [0, 1, 1 + (1 / (golden_ratio ** 4)), 1 + (1 / (golden_ratio ** 3)), golden_ratio]
+grid_y = [0, 1 / (golden_ratio ** 3), 1 / golden_ratio ** 3 + 1 / golden_ratio ** 4, 1 / (golden_ratio ** 2), 1]
 
 # Main value is based on the Fibonacci sequence
 z = [[13, 3, 3, 5], [13, 2, 1, 5], [13, 10, 11, 12], [13, 8, 8, 8]]
