@@ -1,0 +1,54 @@
+/*
+ * Copyright 2023 Avaiga Private Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+/* Variables */
+@import 'variables/colors.css';
+@import 'variables/spacing.css';
+@import 'variables/typography.css';
+@import 'variables/shapes.css';
+@import 'variables/elements.css';
+@import 'variables/misc.css';
+
+/* Base */
+@import 'base/typography.css';
+@import 'base/base.css';
+@import 'base/fontfaces.css';
+
+/* Controls */
+@import 'controls/button.css';
+@import 'controls/table.css';
+@import 'controls/chart.css';
+@import 'controls/date.css';
+@import 'controls/expandable.css';
+@import 'controls/image.css';
+@import 'controls/input.css';
+@import 'controls/navbar.css';
+@import 'controls/number.css';
+@import 'controls/slider.css';
+@import 'controls/selector.css';
+@import 'controls/toggle.css';
+
+/* Blocks */
+@import 'blocks/layout.css';
+
+/* Additional CSS elements */
+@import 'elements/container.css';
+@import 'elements/header.css';
+@import 'elements/card.css';
+@import 'elements/sidebar.css';
+
+/* Utilities */
+@import 'utilities/colors.css';
+@import 'utilities/typography.css';
+@import 'utilities/spacing.css';
+@import 'utilities/misc.css';

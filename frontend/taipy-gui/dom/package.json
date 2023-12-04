@@ -1,0 +1,10 @@
+{
+  "name": "taipy-gui-dom",
+  "version": "3.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "taipy-gui": "file:../packaging"
+  }
+}
