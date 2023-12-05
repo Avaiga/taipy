@@ -51,7 +51,7 @@ jobs:
       - name: Install Taipy without dependencies
         run: |
           pip install .
-          rm -rf src
+          rm -rf taipy
 
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
