@@ -63,7 +63,7 @@ module.exports = (env, options) => {
         {
             mode: options.mode, //'development', //'production',
             name: taipyBundleName,
-            entry: ["./extensions/exports.ts"],
+            entry: ["./src/extensions/exports.ts"],
             output: {
                 filename: taipyBundle + ".js",
                 path: webAppPath,
@@ -111,7 +111,7 @@ module.exports = (env, options) => {
         {
             mode: options.mode, //'development', //'production',
             context: resolveApp("dom"),
-            entry: ["./index.tsx"],
+            entry: ["./src/index.tsx"],
             output: {
                 filename: "taipy-gui-dom.js",
                 path: webAppPath,
