@@ -41,7 +41,6 @@ def reset_configuration_singleton():
     _Checker._checkers = []
 
 
-
 def register_test_sections():
     Config._register_default(UniqueSectionForTest("default_attribute"))
     Config.configure_unique_section_for_tests = UniqueSectionForTest._configure
