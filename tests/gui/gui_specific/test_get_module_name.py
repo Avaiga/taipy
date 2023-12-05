@@ -17,11 +17,11 @@ x = 10
 
 
 def test_get_module_name():
-    assert "tests.taipy.gui.gui_specific.test_get_module_name" == _get_module_name_from_frame(inspect.currentframe())
+    assert "tests.gui.gui_specific.test_get_module_name" == _get_module_name_from_frame(inspect.currentframe())
 
 
 def test_get_module_name_imported_var():
-    assert "tests.taipy.gui.gui_specific.test_get_module_name" == _get_module_name_from_imported_var(
+    assert "tests.gui.gui_specific.test_get_module_name" == _get_module_name_from_imported_var(
         "x", 10, "test_get_module_name"
     )
     assert "test_get_module_name" == _get_module_name_from_imported_var("x", 11, "test_get_module_name")
