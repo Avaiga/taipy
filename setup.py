@@ -24,7 +24,7 @@ from setuptools.command.build_py import build_py
 with open("README.md", "rb") as readme_file:
     readme = readme_file.read().decode("UTF-8")
 
-with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
+with open(f"taipy{os.sep}version.json") as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
@@ -104,8 +104,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="taipy",
     name="taipy",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src") + find_packages(include=["taipy"]),
+    packages=find_namespace_packages(where="taipy") + find_packages(include=["taipy"]),
     include_package_data=True,
     test_suite="tests",
     url="https://github.com/avaiga/taipy",

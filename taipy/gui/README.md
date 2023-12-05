@@ -51,8 +51,8 @@ Want to be part of the *Taipy GUI* community? Check out our [`CODE_OF_CONDUCT.md
 
 ## Directory Structure
 
-- `gui`: Graphical user interface related files;
-- `src/taipy/gui`: Python source files;
+- `frontend/taipy-gui`: Graphical user interface related files;
+- `taipy/gui`: Python source files;
 - `tests/taipy/gui`: Unit tests;
 - `tools`: Files used to document `taipy-gui`;
 - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of `taipy-gui`;

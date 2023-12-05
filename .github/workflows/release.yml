@@ -26,7 +26,7 @@ jobs:
         run: |
           echo """
           import json, sys, os
-          with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
+          with open(f\"taipy{os.sep}version.json\") as version_file:
               version_o = json.load(version_file)
           version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
           if vext := version_o.get(\"ext\"):
@@ -40,7 +40,7 @@ jobs:
         run: |
           echo """
           import json, sys, os
-          with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
+          with open(f\"taipy{os.sep}version.json\") as version_file:
               version = json.load(version_file)
           if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
               raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')

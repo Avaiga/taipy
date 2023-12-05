@@ -31,7 +31,7 @@ jobs:
           echo """
           import json, sys, os
           SUFFIX = 'dev'
-          with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
+          with open(f\"taipy{os.sep}version.json\") as version_file:
               version_o = json.load(version_file)
           version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
           if vext := version_o.get(\"ext\"):
@@ -46,7 +46,7 @@ jobs:
         run: |
           echo """
           import json, os
-          with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
+          with open(f\"taipy{os.sep}version.json\") as version_file:
               version_o = json.load(version_file)
           version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
           if vext := version_o.get(\"ext\"):
@@ -149,17 +149,17 @@ jobs:
         run: |
           echo """
           import json, os
-          with open(f'src{os.sep}taipy{os.sep}version.json') as version_file:
+          with open(f'taipy{os.sep}version.json') as version_file:
               version_o = json.load(version_file)
               if version_o is None or 'dev' not in version_o['ext']:
                   raise ValueError('Invalid version file. Version must contain dev suffix.')
               prev_version = version_o['ext']
               new_version = 'dev' + str(int(version_o['ext'].replace('dev', '')) + 1)
-              with open(f'src{os.sep}taipy{os.sep}version.json') as r:
+              with open(f'taipy{os.sep}version.json') as r:
                   text = r.read().replace(prev_version, new_version)
-              with open(f'src{os.sep}taipy{os.sep}version.json', mode='w') as w:
+              with open(f'taipy{os.sep}version.json', mode='w') as w:
                   w.write(text)
-              with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
+              with open(f\"taipy{os.sep}version.json\") as version_file:
                   version_o = json.load(version_file)
               version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
               if vext := version_o.get(\"ext\"):

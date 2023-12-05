@@ -55,7 +55,7 @@ Want to be part of the _Taipy_ community? Check out our
 
 ## Directory Structure
 
-- `src/taipy/templates/`: Contains each template in a dedicated sub-folder with the
+- `taipy/templates/`: Contains each template in a dedicated sub-folder with the
     following structure:
 - `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy_.
 - `CONTRIBUTING.md`: Instructions to contribute to _taipy_.

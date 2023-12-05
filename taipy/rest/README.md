@@ -66,7 +66,7 @@ Want to be part of the _Taipy REST_ community? Check out our
 
 ## Directory Structure
 
-- `src/taipy/rest`: Main source code folder.
+- `taipy/rest`: Main source code folder.
     - `api`: Endpoints and schema definitions.
       - `resources`: Implementation of all endpoints related to taipy.
       - `schemas`: Schemas related to taipy objects. Used for marshalling and unmarshalling data.

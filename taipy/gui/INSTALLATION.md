@@ -73,7 +73,7 @@ npm i --omit=optional
 npm run build
 ```
 
-After a few minutes, this creates the directory `src/taipy/gui/webapp` in the root directory of the repository
+After a few minutes, this creates the directory `taipy/gui/webapp` in the root directory of the repository
 where the front-end code for Taipy GUI is split into a set of JavaScript bundles.
 
 ### 4 - Install the package as editable
