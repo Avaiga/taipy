@@ -24,6 +24,7 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..job.job_id import JobId
+from ..scenario.scenario import Scenario
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task.task import Task
 from ._abstract_orchestrator import _AbstractOrchestrator
@@ -67,7 +68,9 @@ class _Orchestrator(_AbstractOrchestrator):
             The created Jobs.
         """
         submission = _SubmissionManagerFactory._build_manager()._create(
-            submittable.id, submittable._ID_PREFIX, submittable.config_id  # type: ignore
+            submittable.id,  # type: ignore
+            submittable._ID_PREFIX,  # type: ignore
+            submittable.config_id if isinstance(submittable, Scenario) else None,  # type: ignore
         )
 
         jobs = []

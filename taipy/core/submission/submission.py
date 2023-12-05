@@ -48,7 +48,7 @@ class Submission(_Entity, _Labeled):
         self,
         entity_id: str,
         entity_type: str,
-        entity_config_id: str,
+        entity_config_id: Optional[str] = None,
         id: Optional[str] = None,
         jobs: Optional[Union[List[Job], List[JobId]]] = None,
         creation_date: Optional[datetime] = None,
@@ -86,7 +86,7 @@ class Submission(_Entity, _Labeled):
         return self._entity_type
 
     @property
-    def entity_config_id(self) -> str:
+    def entity_config_id(self) -> Optional[str]:
         return self._entity_config_id
 
     @property

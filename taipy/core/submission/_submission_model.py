@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import JSON, Column, Enum, String, Table
 
@@ -38,7 +38,7 @@ class _SubmissionModel(_BaseModel):
     id: str
     entity_id: str
     entity_type: str
-    entity_config_id: str
+    entity_config_id: Optional[str]
     job_ids: Union[List[JobId], List]
     creation_date: str
     submission_status: SubmissionStatus
@@ -50,7 +50,7 @@ class _SubmissionModel(_BaseModel):
             id=data["id"],
             entity_id=data["entity_id"],
             entity_type=data["entity_type"],
-            entity_config_id=data["entity_config_id"],
+            entity_config_id=_BaseModel._deserialize_attribute(data["entity_config_id"]),
             job_ids=_BaseModel._deserialize_attribute(data["job_ids"]),
             creation_date=data["creation_date"],
             submission_status=SubmissionStatus._from_repr(data["submission_status"]),
@@ -62,7 +62,7 @@ class _SubmissionModel(_BaseModel):
             self.id,
             self.entity_id,
             self.entity_type,
-            self.entity_config_id,
+            _BaseModel._serialize_attribute(self.entity_config_id),
             _BaseModel._serialize_attribute(self.job_ids),
             self.creation_date,
             repr(self.submission_status),
