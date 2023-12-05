@@ -47,7 +47,6 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
-tests/taipy/pipeline/.*
 
 # Translations
 *.mo

@@ -4,8 +4,8 @@ group:
     Avaiga/taipy-core
     Avaiga/taipy-gui
     Avaiga/taipy-rest
-    
-  files: 
+
+  files:
     - .flake8
     - .gitattributes
     - .license-header
@@ -14,7 +14,6 @@ group:
     - LICENSE
     - mypy.ini
     - pyproject.toml
-    - src/taipy/__init__.py
+    - taipy/__init__.py
     # - .isort.cfg
-    # - src/__init__.py
-    
+    # - __init__.py

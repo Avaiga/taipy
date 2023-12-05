@@ -1,2 +1,2 @@
-include src/taipy/core/*.json
-include src/taipy/core/config/*.json
+include taipy/core/*.json
+include taipy/core/config/*.json

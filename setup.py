@@ -53,7 +53,7 @@ extras_require = {
 
 
 def _build_webapp():
-    already_exists = Path("./src/taipy/gui_core/lib/taipy-gui-core.js").exists()
+    already_exists = Path("./taipy/gui_core/lib/taipy-gui-core.js").exists()
     if not already_exists:
         # default site-packages path is from the current python interpreter
         site_packages_path = sysconfig.get_path("purelib")

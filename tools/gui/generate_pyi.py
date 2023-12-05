@@ -21,7 +21,7 @@ from taipy.gui.config import Config
 # ############################################################
 # Generate gui pyi file (gui/gui.pyi)
 # ############################################################
-gui_py_file = "./src/taipy/gui/gui.py"
+gui_py_file = "./taipy/gui/gui.py"
 gui_pyi_file = gui_py_file + "i"
 
 os.system(f"pipenv run stubgen {gui_py_file} --no-import --parse-only --export-less -o ./")
@@ -49,9 +49,9 @@ with open(gui_pyi_file, "w") as write_file:
 # ############################################################
 # Generate Page Builder pyi file (gui/builder/__init__.pyi)
 # ############################################################
-builder_py_file = "./src/taipy/gui/builder/__init__.py"
+builder_py_file = "./taipy/gui/builder/__init__.py"
 builder_pyi_file = builder_py_file + "i"
-with open("./src/taipy/gui/viselements.json", "r") as file:
+with open("./taipy/gui/viselements.json", "r") as file:
     viselements = json.load(file)
 with open("./tools/builder/block.txt", "r") as file:
     block_template = file.read()

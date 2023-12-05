@@ -18,7 +18,7 @@ from .utils import _run_template
 
 def test_scenario_management_with_toml_config(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/scenario-management",
+        template="taipy/templates/scenario-management",
         output_dir=tmpdir,
         no_input=True,
         extra_context={
@@ -57,7 +57,7 @@ def test_scenario_management_with_toml_config(tmpdir):
 
 def test_scenario_management_without_toml_config(tmpdir):
     cookiecutter(
-        template="src/taipy/templates/scenario-management",
+        template="taipy/templates/scenario-management",
         output_dir=tmpdir,
         no_input=True,
         extra_context={

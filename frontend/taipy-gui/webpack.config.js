@@ -28,7 +28,7 @@ const taipyBundle = "taipy-gui"
 const reactBundleName = "TaipyGuiDependencies"
 const taipyBundleName = "TaipyGui"
 
-const basePath = "../../src/taipy/gui/webapp";
+const basePath = "../../taipy/gui/webapp";
 const webAppPath = resolveApp(basePath);
 const reactManifestPath = resolveApp(basePath + "/" + reactBundle + "-manifest.json");
 const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js")
@@ -63,7 +63,7 @@ module.exports = (env, options) => {
         {
             mode: options.mode, //'development', //'production',
             name: taipyBundleName,
-            entry: ["./src/extensions/exports.ts"],
+            entry: ["./extensions/exports.ts"],
             output: {
                 filename: taipyBundle + ".js",
                 path: webAppPath,
@@ -111,7 +111,7 @@ module.exports = (env, options) => {
         {
             mode: options.mode, //'development', //'production',
             context: resolveApp("dom"),
-            entry: ["./src/index.tsx"],
+            entry: ["./index.tsx"],
             output: {
                 filename: "taipy-gui-dom.js",
                 path: webAppPath,

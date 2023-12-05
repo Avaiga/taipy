@@ -140,15 +140,15 @@ def _build_header(filename):
 
 if __name__ == "__main__":
     header_file = "stubs/pyi_header.py"
-    config_init = Path("taipy-core/src/taipy/core/config/__init__.py")
-    base_config = "src/taipy/config/config.py"
+    config_init = Path("taipy-core/taipy/core/config/__init__.py")
+    base_config = "taipy/config/config.py"
 
-    dn_filename = "taipy-core/src/taipy/core/config/data_node_config.py"
-    job_filename = "taipy-core/src/taipy/core/config/job_config.py"
-    scenario_filename = "taipy-core/src/taipy/core/config/scenario_config.py"
-    task_filename = "taipy-core/src/taipy/core/config/task_config.py"
-    migration_filename = "taipy-core/src/taipy/core/config/migration_config.py"
-    core_filename = "taipy-core/src/taipy/core/config/core_section.py"
+    dn_filename = "taipy-core/taipy/core/config/data_node_config.py"
+    job_filename = "taipy-core/taipy/core/config/job_config.py"
+    scenario_filename = "taipy-core/taipy/core/config/scenario_config.py"
+    task_filename = "taipy-core/taipy/core/config/task_config.py"
+    migration_filename = "taipy-core/taipy/core/config/migration_config.py"
+    core_filename = "taipy-core/taipy/core/config/core_section.py"
 
     entities_map, property_map = _generate_entity_and_property_maps(config_init)
     pyi = _build_header(header_file)
@@ -161,5 +161,5 @@ if __name__ == "__main__":
     pyi = _build_entity_config_pyi(pyi, migration_filename, entities_map["MigrationConfig"])
     pyi = _build_entity_config_pyi(pyi, core_filename, entities_map["CoreSection"])
 
-    with open("src/taipy/config/config.pyi", "w") as f:
+    with open("taipy/config/config.pyi", "w") as f:
         f.writelines(pyi)
