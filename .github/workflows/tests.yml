@@ -22,6 +22,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
+      - name: install libmagic on macos
+        if: matrix.os == 'macos-latest'
+        run: brew install libmagic
+
       - name: Tests
         run: |
           pip install tox
