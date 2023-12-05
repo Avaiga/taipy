@@ -12,9 +12,9 @@
 from copy import copy
 from typing import Any, Dict, Optional
 
-from src.taipy.config import Config, Section
-from src.taipy.config._config import _Config
-from src.taipy.config.common._config_blocker import _ConfigBlocker
+from taipy.config import Config, Section
+from taipy.config._config import _Config
+from taipy.config.common._config_blocker import _ConfigBlocker
 
 
 class SectionForTest(Section):
