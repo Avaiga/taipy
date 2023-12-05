@@ -50,6 +50,9 @@ def clean_argparser():
 
     yield
 
+    _CLI._subparser_action = None
+    _CLI._sub_taipyparsers = {}
+
 
 def test_subparser(capfd):
     subcommand_1 = _CLI._add_subparser("subcommand_1", help="subcommand_1 help")
