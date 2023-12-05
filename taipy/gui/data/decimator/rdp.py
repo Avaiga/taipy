@@ -61,7 +61,7 @@ class RDP(Decimator):
         xdiff = P2[0] - P1[0]
         ydiff = P2[1] - P1[1]
         nom = (ydiff * points[:, 0] - xdiff * points[:, 1] + P2[0] * P1[1] - P2[1] * P1[0]) ** 2
-        denom = ydiff**2 + xdiff**2
+        denom = ydiff ** 2 + xdiff ** 2
         return np.divide(nom, denom)
 
     @staticmethod
@@ -89,7 +89,7 @@ class RDP(Decimator):
             points = data[start + 1 : end]
             dsq = RDP.dsquared_line_points(P1, P2, points)
 
-            mask_eps = dsq > epsilon**2
+            mask_eps = dsq > epsilon ** 2
 
             if mask_eps.any():
                 # max point outside eps
