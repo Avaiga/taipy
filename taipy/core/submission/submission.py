@@ -48,6 +48,7 @@ class Submission(_Entity, _Labeled):
         self,
         entity_id: str,
         entity_type: str,
+        entity_config_id: str,
         id: Optional[str] = None,
         jobs: Optional[Union[List[Job], List[JobId]]] = None,
         creation_date: Optional[datetime] = None,
@@ -56,6 +57,7 @@ class Submission(_Entity, _Labeled):
     ):
         self._entity_id = entity_id
         self._entity_type = entity_type
+        self._entity_config_id = entity_config_id
         self.id = id or self.__new_id()
         self._jobs: Union[List[Job], List[JobId], List] = jobs or []
         self._creation_date = creation_date or datetime.now()
@@ -82,6 +84,10 @@ class Submission(_Entity, _Labeled):
     @property
     def entity_type(self) -> str:
         return self._entity_type
+
+    @property
+    def entity_config_id(self) -> str:
+        return self._entity_config_id
 
     @property
     def creation_date(self):

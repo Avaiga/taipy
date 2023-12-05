@@ -28,10 +28,12 @@ from taipy.core.task.task import Task
 
 
 def test_create_submission(scenario, job, current_datetime):
-    submission_1 = Submission(scenario.id, scenario._ID_PREFIX)
+    submission_1 = Submission(scenario.id, scenario._ID_PREFIX, scenario.config_id)
 
     assert submission_1.id is not None
     assert submission_1.entity_id == scenario.id
+    assert submission_1.entity_type == scenario._ID_PREFIX
+    assert submission_1.entity_config_id == scenario.id
     assert submission_1.jobs == []
     assert isinstance(submission_1.creation_date, datetime)
     assert submission_1._submission_status == SubmissionStatus.SUBMITTED
@@ -40,6 +42,7 @@ def test_create_submission(scenario, job, current_datetime):
     submission_2 = Submission(
         scenario.id,
         scenario._ID_PREFIX,
+        scenario.config_id,
         "submission_id",
         [job],
         current_datetime,
@@ -49,6 +52,8 @@ def test_create_submission(scenario, job, current_datetime):
 
     assert submission_2.id == "submission_id"
     assert submission_2.entity_id == scenario.id
+    assert submission_2.entity_type == scenario._ID_PREFIX
+    assert submission_2.entity_config_id == scenario.id
     assert submission_2._jobs == [job]
     assert submission_2.creation_date == current_datetime
     assert submission_2._submission_status == SubmissionStatus.COMPLETED
@@ -101,7 +106,7 @@ def __test_update_submission_status(job_ids, expected_submission_status):
         "job8_abandoned": MockJob("job8_abandoned", Status.ABANDONED),
     }
 
-    submission = Submission("submission_id", "ENTITY_TYPE")
+    submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
     submission.jobs = [jobs[job_id] for job_id in job_ids]
     for job_id in job_ids:
         job = jobs[job_id]
@@ -360,7 +365,7 @@ def test_update_submission_status_with_single_job_completed(job_statuses, expect
 
 def __test_update_submission_status_with_two_jobs(job_ids, job_statuses, expected_submission_statuses):
     jobs = {job_id: MockJob(job_id, Status.SUBMITTED) for job_id in job_ids}
-    submission = Submission("submission_id", "ENTITY_TYPE")
+    submission = Submission("submission_id", "ENTITY_TYPE", "entity_config_id")
 
     assert submission.submission_status == SubmissionStatus.SUBMITTED
 

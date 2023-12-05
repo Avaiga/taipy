@@ -48,11 +48,13 @@ def test_get_all_submission():
     submission_manager = _SubmissionManagerFactory._build_manager()
     version_manager = _VersionManagerFactory._build_manager()
 
-    submission_manager._set(Submission("entity_id", "submission_id", version=version_manager._get_latest_version()))
+    submission_manager._set(
+        Submission("entity_id", "submission_id", "entity_config_id", version=version_manager._get_latest_version())
+    )
     for version_name in ["abc", "xyz"]:
         for i in range(10):
             submission_manager._set(
-                Submission("entity_id", f"submission_{version_name}_{i}", version=f"{version_name}")
+                Submission("entity_id", f"submission_{version_name}_{i}", "entity_config_id", version=f"{version_name}")
             )
 
     assert len(submission_manager._get_all()) == 1
@@ -92,11 +94,11 @@ def test_get_latest_submission():
 def test_delete_submission():
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission = Submission("entity_id", "submission_id")
+    submission = Submission("entity_id", "submission_id", "entity_config_id")
     submission_manager._set(submission)
 
     for i in range(10):
-        submission_manager._set(Submission("entity_id", f"submission_{i}"))
+        submission_manager._set(Submission("entity_id", f"submission_{i}", "entity_config_id"))
 
     assert len(submission_manager._get_all()) == 11
     assert isinstance(submission_manager._get(submission.id), Submission)

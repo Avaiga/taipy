@@ -29,7 +29,6 @@ from taipy.core.job.job import Job
 from taipy.core.job.status import Status
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from taipy.core.submission.submission import Submission
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
