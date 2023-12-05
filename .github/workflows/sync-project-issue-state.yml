@@ -16,8 +16,33 @@ jobs:
       - name: Sync issue states
         uses: dasmerlon/project-issue-state-sync@v2
         with:
+          # The secrets.PROJECT_ISSUE_SYNC_TOKEN is a fine-grained PAT with the following permissions:
+          #   - Repo
+          #     - Deployments: Read and write
+          #     - Issues: Read and write
+          #     - Pull requests: Read and write
+          # - Organization:
+          #     - Administration: Read only
+          #     - Projects: Read and write
+          #     - Secrets: Read only
+          # And has access to the following repos:
+          #     - taipy
+          #     - taipy-enterprise
+          #     - taipy-doc
+          #     - taipy-cloud
+          #     - website
+          #     - taipy-benchmark
+          #     - taipy-integration-testing
+          #     - taipy-enterprise-integration-testing
+          #     - taipy-studio
+          #     - taipy-studio-gui
+          #     - taipy-studio-config
+          #     - Taipy-config-builder
+          # If more repos are added to the project, the PAT needs to be recreated with new access.
           github_token: ${{ secrets.PROJECT_ISSUE_SYNC_TOKEN }}
           owner: Avaiga
           project_number: 6
+          # If the issue is in the Closed column, it will be closed.
           closed_statuses: Closed
+          # If the issue is in any of the following columns, it will be opened.
           open_statuses: New Issue,Icebox,Contributor,Product Backlog,Sprint Backlog,In Progress,Review/QA,Done
