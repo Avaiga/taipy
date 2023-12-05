@@ -13,20 +13,20 @@ from unittest.mock import patch
 
 import pytest
 
-from src.taipy.core import Core
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.common._utils import _load_fct
-from src.taipy.core.cycle._cycle_manager import _CycleManager
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.exceptions.exceptions import NonExistingVersion
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.task._task_manager import _TaskManager
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core import Core
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.common._utils import _load_fct
+from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.exceptions.exceptions import NonExistingVersion
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.sequence._sequence_manager import _SequenceManager
+from taipy.core.task._task_manager import _TaskManager
 from tests.core.conftest import init_config, init_managers
 from tests.core.utils import assert_true_after_time
 

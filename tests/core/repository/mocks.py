@@ -19,11 +19,11 @@ from sqlalchemy.dialects import sqlite
 from sqlalchemy.orm import declarative_base, registry
 from sqlalchemy.schema import CreateTable
 
-from src.taipy.core._repository._abstract_converter import _AbstractConverter
-from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
-from src.taipy.core._repository._sql_repository import _SQLRepository
-from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
+from taipy.core._repository._abstract_converter import _AbstractConverter
+from taipy.core._repository._filesystem_repository import _FileSystemRepository
+from taipy.core._repository._sql_repository import _SQLRepository
+from taipy.core._version._version_manager import _VersionManager
 
 
 class Base:

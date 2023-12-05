@@ -15,8 +15,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.taipy._entrypoint import _entrypoint
 from taipy._cli._base_cli import _CLI
+from taipy._entrypoint import _entrypoint
 
 
 def preprocess_stdout(stdout):

@@ -16,9 +16,12 @@ import shutil
 from unittest import mock
 
 import pytest
-
-import src.taipy.core.taipy as tp
-from src.taipy.core import (
+import taipy.core.taipy as tp
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
+from taipy.config.config import Config
+from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.core import (
     Core,
     Cycle,
     CycleId,
@@ -31,99 +34,95 @@ from src.taipy.core import (
     Task,
     TaskId,
 )
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.config.data_node_config import DataNodeConfig
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.config.scenario_config import ScenarioConfig
-from src.taipy.core.cycle._cycle_manager import _CycleManager
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal, InvalidExportPath
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.job.job import Job
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.task._task_manager import _TaskManager
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core.config.data_node_config import DataNodeConfig
+from taipy.core.config.job_config import JobConfig
+from taipy.core.config.scenario_config import ScenarioConfig
+from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.pickle import PickleDataNode
+from taipy.core.exceptions.exceptions import DataNodeConfigIsNotGlobal, InvalidExportPath
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.job.job import Job
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.sequence._sequence_manager import _SequenceManager
+from taipy.core.task._task_manager import _TaskManager
 
 
 class TestTaipy:
     def test_set(self, scenario, cycle, sequence, data_node, task):
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._set") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._set") as mck:
             tp.set(data_node)
             mck.assert_called_once_with(data_node)
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._set") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._set") as mck:
             tp.set(task)
             mck.assert_called_once_with(task)
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._set") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._set") as mck:
             tp.set(sequence)
             mck.assert_called_once_with(sequence)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._set") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._set") as mck:
             tp.set(scenario)
             mck.assert_called_once_with(scenario)
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._set") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._set") as mck:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
 
     def test_is_editable_is_called(self, cycle, job, data_node):
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
             cycle_id = CycleId("CYCLE_id")
             tp.is_editable(cycle_id)
             mck.assert_called_once_with(cycle_id)
 
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._is_editable") as mck:
             tp.is_editable(cycle)
             mck.assert_called_once_with(cycle)
 
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_editable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_editable") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.is_editable(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_editable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_editable") as mck:
             scenario = Scenario("scenario_config_id", [], {})
             tp.is_editable(scenario)
             mck.assert_called_once_with(scenario)
 
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_editable") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._is_editable") as mck:
             sequence_id = SequenceId("SEQUENCE_id")
             tp.is_editable(sequence_id)
             mck.assert_called_once_with(sequence_id)
 
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_editable") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._is_editable") as mck:
             sequence = Sequence({}, [], "sequence_id")
             tp.is_editable(sequence)
             mck.assert_called_once_with(sequence)
 
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_editable") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._is_editable") as mck:
             task_id = TaskId("TASK_id")
             tp.is_editable(task_id)
             mck.assert_called_once_with(task_id)
 
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_editable") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._is_editable") as mck:
             task = Task("task_config_id", {}, print)
             tp.is_editable(task)
             mck.assert_called_once_with(task)
 
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_editable") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._is_editable") as mck:
             job_id = JobId("JOB_id")
             tp.is_editable(job_id)
             mck.assert_called_once_with(job_id)
 
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_editable") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._is_editable") as mck:
             tp.is_editable(job)
             mck.assert_called_once_with(job)
 
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_editable") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._is_editable") as mck:
             dn_id = DataNodeId("DATANODE_id")
             tp.is_editable(dn_id)
             mck.assert_called_once_with(dn_id)
 
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_editable") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._is_editable") as mck:
             tp.is_editable(data_node)
             mck.assert_called_once_with(data_node)
 
@@ -152,60 +151,60 @@ class TestTaipy:
         assert tp.is_editable(dn)
 
     def test_is_readable_is_called(self, cycle, job, data_node):
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_readable") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._is_readable") as mck:
             cycle_id = CycleId("CYCLE_id")
             tp.is_readable(cycle_id)
             mck.assert_called_once_with(cycle_id)
 
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._is_readable") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._is_readable") as mck:
             tp.is_readable(cycle)
             mck.assert_called_once_with(cycle)
 
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_readable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_readable") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.is_readable(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_readable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_readable") as mck:
             scenario = Scenario("scenario_config_id", [], {})
             tp.is_readable(scenario)
             mck.assert_called_once_with(scenario)
 
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_readable") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._is_readable") as mck:
             sequence_id = SequenceId("SEQUENCE_id")
             tp.is_readable(sequence_id)
             mck.assert_called_once_with(sequence_id)
 
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_readable") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._is_readable") as mck:
             sequence = Sequence({}, [], "sequence_id")
             tp.is_readable(sequence)
             mck.assert_called_once_with(sequence)
 
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_readable") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._is_readable") as mck:
             task_id = TaskId("TASK_id")
             tp.is_readable(task_id)
             mck.assert_called_once_with(task_id)
 
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_readable") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._is_readable") as mck:
             task = Task("task_config_id", {}, print)
             tp.is_readable(task)
             mck.assert_called_once_with(task)
 
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_readable") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._is_readable") as mck:
             job_id = JobId("JOB_id")
             tp.is_readable(job_id)
             mck.assert_called_once_with(job_id)
 
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_readable") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._is_readable") as mck:
             tp.is_readable(job)
             mck.assert_called_once_with(job)
 
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_readable") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._is_readable") as mck:
             dn_id = DataNodeId("DATANODE_id")
             tp.is_readable(dn_id)
             mck.assert_called_once_with(dn_id)
 
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._is_readable") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._is_readable") as mck:
             tp.is_readable(data_node)
             mck.assert_called_once_with(data_node)
 
@@ -234,32 +233,32 @@ class TestTaipy:
         assert tp.is_readable(dn)
 
     def test_is_submittable_is_called(self):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.is_submittable(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_submittable") as mck:
             scenario = Scenario("scenario_config_id", [], {})
             tp.is_submittable(scenario)
             mck.assert_called_once_with(scenario)
 
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_submittable") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._is_submittable") as mck:
             sequence_id = SequenceId("SEQUENCE_id")
             tp.is_submittable(sequence_id)
             mck.assert_called_once_with(sequence_id)
 
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._is_submittable") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._is_submittable") as mck:
             sequence = Sequence({}, [], "sequence_id")
             tp.is_submittable(sequence)
             mck.assert_called_once_with(sequence)
 
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
             task_id = TaskId("TASK_id")
             tp.is_submittable(task_id)
             mck.assert_called_once_with(task_id)
 
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._is_submittable") as mck:
             task = Task("task_config_id", {}, print)
             tp.is_submittable(task)
             mck.assert_called_once_with(task)
@@ -289,31 +288,31 @@ class TestTaipy:
         assert not tp.is_submittable(dn)
 
     def test_submit(self, scenario, sequence, task):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario)
             mck.assert_called_once_with(scenario, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
             tp.submit(sequence)
             mck.assert_called_once_with(sequence, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mck:
             tp.submit(task)
             mck.assert_called_once_with(task, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario, False, False, None)
             mck.assert_called_once_with(scenario, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
             tp.submit(sequence, False, False, None)
             mck.assert_called_once_with(sequence, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mck:
             tp.submit(task, False, False, None)
             mck.assert_called_once_with(task, force=False, wait=False, timeout=None)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario, True, True, 60)
             mck.assert_called_once_with(scenario, force=True, wait=True, timeout=60)
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
             tp.submit(sequence, True, True, 60)
             mck.assert_called_once_with(sequence, force=True, wait=True, timeout=60)
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mck:
             tp.submit(task, True, True, 60)
             mck.assert_called_once_with(task, force=True, wait=True, timeout=60)
 
@@ -321,227 +320,227 @@ class TestTaipy:
         _OrchestratorFactory._remove_dispatcher()
 
         with pytest.warns(ResourceWarning) as warning:
-            with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit"):
+            with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit"):
                 tp.submit(scenario)
 
         assert len(warning) == 1
         assert warning[0].message.args[0] == "The Core service is NOT running"
 
     def test_get_tasks(self):
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._get_all") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._get_all") as mck:
             tp.get_tasks()
             mck.assert_called_once_with()
 
     def test_get_task(self, task):
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._get") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._get") as mck:
             task_id = TaskId("TASK_id")
             tp.get(task_id)
             mck.assert_called_once_with(task_id)
 
     def test_task_exists(self):
-        with mock.patch("src.taipy.core.task._task_manager._TaskManager._exists") as mck:
+        with mock.patch("taipy.core.task._task_manager._TaskManager._exists") as mck:
             task_id = TaskId("TASK_id")
             tp.exists(task_id)
             mck.assert_called_once_with(task_id)
 
     def test_is_deletable(self, task):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.is_deletable(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mck:
             scenario = Scenario("config_id", [], {})
             tp.is_deletable(scenario)
             mck.assert_called_once_with(scenario)
 
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_deletable") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._is_deletable") as mck:
             job_id = JobId("JOB_job_id")
             tp.is_deletable(job_id)
             mck.assert_called_once_with(job_id)
 
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._is_deletable") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._is_deletable") as mck:
             job = Job("job_id", task, "submit_id", task.id)
             tp.is_deletable(job)
             mck.assert_called_once_with(job)
 
     def test_is_promotable(self):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.is_promotable(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_promotable_to_primary") as mck:
             scenario = Scenario("config_id", [], {})
             tp.is_promotable(scenario)
             mck.assert_called_once_with(scenario)
 
     def test_delete_scenario(self):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._hard_delete") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._hard_delete") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.delete(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
     def test_delete(self):
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._hard_delete") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._hard_delete") as mck:
             cycle_id = CycleId("CYCLE_id")
             tp.delete(cycle_id)
             mck.assert_called_once_with(cycle_id)
 
     def test_get_scenarios(self, cycle):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._get_all") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_all") as mck:
             tp.get_scenarios()
             mck.assert_called_once_with()
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._get_all_by_cycle") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_all_by_cycle") as mck:
             tp.get_scenarios(cycle)
             mck.assert_called_once_with(cycle)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._get_all_by_tag") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_all_by_tag") as mck:
             tp.get_scenarios(tag="tag")
             mck.assert_called_once_with("tag")
 
     def test_get_scenario(self, scenario):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._get") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.get(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
     def test_scenario_exists(self):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._exists") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._exists") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.exists(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
     def test_get_primary(self, cycle):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._get_primary") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_primary") as mck:
             tp.get_primary(cycle)
             mck.assert_called_once_with(cycle)
 
     def test_get_primary_scenarios(self):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._get_primary_scenarios") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_primary_scenarios") as mck:
             tp.get_primary_scenarios()
             mck.assert_called_once_with()
 
     def test_set_primary(self, scenario):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._set_primary") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._set_primary") as mck:
             tp.set_primary(scenario)
             mck.assert_called_once_with(scenario)
 
     def test_tag_and_untag(self, scenario):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._tag") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._tag") as mck:
             tp.tag(scenario, "tag")
             mck.assert_called_once_with(scenario, "tag")
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._untag") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._untag") as mck:
             tp.untag(scenario, "tag")
             mck.assert_called_once_with(scenario, "tag")
 
     def test_compare_scenarios(self, scenario):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._compare") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._compare") as mck:
             tp.compare_scenarios(scenario, scenario, data_node_config_id="dn")
             mck.assert_called_once_with(scenario, scenario, data_node_config_id="dn")
 
     def test_subscribe_scenario(self, scenario):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
             tp.subscribe_scenario(print)
             mck.assert_called_once_with(print, [], None)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
             tp.subscribe_scenario(print, scenario=scenario)
             mck.assert_called_once_with(print, [], scenario)
 
     def test_unsubscribe_scenario(self, scenario):
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(print)
             mck.assert_called_once_with(print, None, None)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(print, scenario=scenario)
             mck.assert_called_once_with(print, None, scenario)
 
     def test_subscribe_sequence(self, sequence):
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
             tp.subscribe_sequence(print)
             mck.assert_called_once_with(print, None, None)
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
             tp.subscribe_sequence(print, sequence=sequence)
             mck.assert_called_once_with(print, None, sequence)
 
     def test_unsubscribe_sequence(self, sequence):
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
             tp.unsubscribe_sequence(callback=print)
             mck.assert_called_once_with(print, None, None)
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
             tp.unsubscribe_sequence(callback=print, sequence=sequence)
             mck.assert_called_once_with(print, None, sequence)
 
     def test_delete_sequence(self):
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._hard_delete") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._hard_delete") as mck:
             sequence_id = SequenceId("SEQUENCE_id")
             tp.delete(sequence_id)
             mck.assert_called_once_with(sequence_id)
 
     def test_get_sequence(self, sequence):
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._get") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._get") as mck:
             sequence_id = SequenceId("SEQUENCE_id")
             tp.get(sequence_id)
             mck.assert_called_once_with(sequence_id)
 
     def test_get_sequences(self):
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._get_all") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._get_all") as mck:
             tp.get_sequences()
             mck.assert_called_once_with()
 
     def test_sequence_exists(self):
-        with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._exists") as mck:
+        with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._exists") as mck:
             sequence_id = SequenceId("SEQUENCE_id")
             tp.exists(sequence_id)
             mck.assert_called_once_with(sequence_id)
 
     def test_get_job(self):
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._get") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._get") as mck:
             job_id = JobId("JOB_id")
             tp.get(job_id)
             mck.assert_called_once_with(job_id)
 
     def test_get_jobs(self):
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._get_all") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._get_all") as mck:
             tp.get_jobs()
             mck.assert_called_once_with()
 
     def test_job_exists(self):
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._exists") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._exists") as mck:
             job_id = JobId("JOB_id")
             tp.exists(job_id)
             mck.assert_called_once_with(job_id)
 
     def test_delete_job(self, task):
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._delete") as mck:
             job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job)
             mck.assert_called_once_with(job, False)
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._delete") as mck:
             job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, False)
             mck.assert_called_once_with(job, False)
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._delete") as mck:
             job = Job(JobId("job_id"), task, "submit_id", "scenario_id")
             tp.delete_job(job, True)
             mck.assert_called_once_with(job, True)
 
     def test_delete_jobs(self):
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._delete_all") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._delete_all") as mck:
             tp.delete_jobs()
             mck.assert_called_once_with()
 
     def test_get_latest_job(self, task):
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._get_latest") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._get_latest") as mck:
             tp.get_latest_job(task)
             mck.assert_called_once_with(task)
 
     def test_get_latest_submission(self, task):
-        with mock.patch("src.taipy.core.submission._submission_manager._SubmissionManager._get_latest") as mck:
+        with mock.patch("taipy.core.submission._submission_manager._SubmissionManager._get_latest") as mck:
             tp.get_latest_submission(task)
             mck.assert_called_once_with(task)
 
     def test_cancel_job(self):
-        with mock.patch("src.taipy.core.job._job_manager._JobManager._cancel") as mck:
+        with mock.patch("taipy.core.job._job_manager._JobManager._cancel") as mck:
             tp.cancel_job("job_id")
             mck.assert_called_once_with("job_id")
 
@@ -582,35 +581,35 @@ class TestTaipy:
         core.stop()
 
     def test_get_data_node(self, data_node):
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._get") as mck:
             tp.get(data_node.id)
             mck.assert_called_once_with(data_node.id)
 
     def test_get_data_nodes(self):
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._get_all") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._get_all") as mck:
             tp.get_data_nodes()
             mck.assert_called_once_with()
 
     def test_data_node_exists(self):
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._exists") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._exists") as mck:
             data_node_id = DataNodeId("DATANODE_id")
             tp.exists(data_node_id)
             mck.assert_called_once_with(data_node_id)
 
     def test_get_cycles(self):
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._get_all") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._get_all") as mck:
             tp.get_cycles()
             mck.assert_called_once_with()
 
     def test_cycle_exists(self):
-        with mock.patch("src.taipy.core.cycle._cycle_manager._CycleManager._exists") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._exists") as mck:
             cycle_id = CycleId("CYCLE_id")
             tp.exists(cycle_id)
             mck.assert_called_once_with(cycle_id)
 
     def test_create_global_data_node(self):
         dn_cfg = DataNodeConfig("id", "pickle", Scope.GLOBAL)
-        with mock.patch("src.taipy.core.data._data_manager._DataManager._create_and_set") as mck:
+        with mock.patch("taipy.core.data._data_manager._DataManager._create_and_set") as mck:
             dn = tp.create_global_data_node(dn_cfg)
             mck.assert_called_once_with(dn_cfg, None, None)
 
@@ -628,13 +627,13 @@ class TestTaipy:
 
     def test_create_scenario(self, scenario):
         scenario_config = ScenarioConfig("scenario_config")
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
             tp.create_scenario(scenario_config)
             mck.assert_called_once_with(scenario_config, None, None)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
             tp.create_scenario(scenario_config, datetime.datetime(2022, 2, 5))
             mck.assert_called_once_with(scenario_config, datetime.datetime(2022, 2, 5), None)
-        with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._create") as mck:
             tp.create_scenario(scenario_config, datetime.datetime(2022, 2, 5), "displayable_name")
             mck.assert_called_once_with(scenario_config, datetime.datetime(2022, 2, 5), "displayable_name")
 

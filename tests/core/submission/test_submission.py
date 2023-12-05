@@ -16,16 +16,15 @@ from unittest import mock
 from unittest.mock import patch
 
 import pytest
-
-from src.taipy.core import TaskId
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job.job import Job
-from src.taipy.core.job.status import Status
-from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from src.taipy.core.submission.submission import Submission
-from src.taipy.core.submission.submission_status import SubmissionStatus
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
+from taipy.core import TaskId
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.job.job import Job
+from taipy.core.job.status import Status
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
+from taipy.core.submission.submission_status import SubmissionStatus
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
+from taipy.core.task.task import Task
 
 
 def test_create_submission(scenario, job, current_datetime):

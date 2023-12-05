@@ -12,13 +12,12 @@
 from unittest import mock
 
 import pytest
-
-from src.taipy.core._orchestrator._dispatcher import _DevelopmentJobDispatcher, _JobDispatcher, _StandaloneJobDispatcher
-from src.taipy.core._orchestrator._orchestrator import _Orchestrator
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.exceptions.exceptions import OrchestratorNotBuilt
 from taipy.config import Config
+from taipy.core._orchestrator._dispatcher import _DevelopmentJobDispatcher, _JobDispatcher, _StandaloneJobDispatcher
+from taipy.core._orchestrator._orchestrator import _Orchestrator
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config.job_config import JobConfig
+from taipy.core.exceptions.exceptions import OrchestratorNotBuilt
 
 
 def test_build_orchestrator():
@@ -40,10 +39,8 @@ def test_build_orchestrator():
     assert _OrchestratorFactory._dispatcher is not None
 
     with mock.patch(
-        "src.taipy.core._orchestrator._orchestrator_factory._OrchestratorFactory._build_dispatcher"
-    ) as build_dispatcher, mock.patch(
-        "src.taipy.core._orchestrator._orchestrator._Orchestrator.initialize"
-    ) as initialize:
+        "taipy.core._orchestrator._orchestrator_factory._OrchestratorFactory._build_dispatcher"
+    ) as build_dispatcher, mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator.initialize") as initialize:
         orchestrator = _OrchestratorFactory._build_orchestrator()
         assert orchestrator == _Orchestrator
         assert _OrchestratorFactory._orchestrator == _Orchestrator

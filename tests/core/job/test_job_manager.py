@@ -17,23 +17,22 @@ from time import sleep
 from unittest import mock
 
 import pytest
-
-from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.exceptions.exceptions import JobNotDeletedException
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.job.job_id import JobId
-from src.taipy.core.job.status import Status
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config.job_config import JobConfig
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions.exceptions import JobNotDeletedException
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.job.job_id import JobId
+from taipy.core.job.status import Status
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
 from tests.core.utils import assert_true_after_time
 
 
@@ -227,10 +226,10 @@ def test_cancel_single_job():
 
 
 @mock.patch(
-    "src.taipy.core._orchestrator._orchestrator._Orchestrator._orchestrate_job_to_run_or_block",
+    "taipy.core._orchestrator._orchestrator._Orchestrator._orchestrate_job_to_run_or_block",
     return_value="orchestrated_job",
 )
-@mock.patch("src.taipy.core._orchestrator._orchestrator._Orchestrator._cancel_jobs")
+@mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._cancel_jobs")
 def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, orchestrated_job):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
 
@@ -265,10 +264,10 @@ def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, orchestrated_job):
 
 
 @mock.patch(
-    "src.taipy.core._orchestrator._orchestrator._Orchestrator._orchestrate_job_to_run_or_block",
+    "taipy.core._orchestrator._orchestrator._Orchestrator._orchestrate_job_to_run_or_block",
     return_value="orchestrated_job",
 )
-@mock.patch("src.taipy.core.job.job.Job.canceled")
+@mock.patch("taipy.core.job.job.Job.canceled")
 def test_cancel_completed_skipped_jobs(cancel_jobs, orchestrated_job):
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
     task = _create_task(multiply, name="cancel_single_job")

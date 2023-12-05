@@ -14,14 +14,13 @@ from math import exp
 from queue import SimpleQueue
 
 from colorama import init
-
-from src.taipy.core import taipy as tp
-from src.taipy.core.config import scenario_config
-from src.taipy.core.job.status import Status
-from src.taipy.core.notification.core_event_consumer import CoreEventConsumerBase
-from src.taipy.core.notification.event import Event, EventEntityType, EventOperation
-from src.taipy.core.notification.notifier import Notifier
 from taipy.config import Config, Frequency
+from taipy.core import taipy as tp
+from taipy.core.config import scenario_config
+from taipy.core.job.status import Status
+from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
+from taipy.core.notification.event import Event, EventEntityType, EventOperation
+from taipy.core.notification.notifier import Notifier
 from tests.core.utils import assert_true_after_time
 
 

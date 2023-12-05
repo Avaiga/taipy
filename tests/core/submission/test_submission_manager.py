@@ -12,11 +12,11 @@
 from datetime import datetime
 from time import sleep
 
-from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from src.taipy.core.submission.submission import Submission
-from src.taipy.core.submission.submission_status import SubmissionStatus
-from src.taipy.core.task.task import Task
+from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
+from taipy.core.submission.submission_status import SubmissionStatus
+from taipy.core.task.task import Task
 
 
 def test_create_submission(scenario):

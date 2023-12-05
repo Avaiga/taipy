@@ -21,20 +21,19 @@ import pandas as pd
 import pytest
 from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
-
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.operator import JoinOperator, Operator
-from src.taipy.core.data.parquet import ParquetDataNode
-from src.taipy.core.exceptions.exceptions import (
+from taipy.config.common.scope import Scope
+from taipy.config.config import Config
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.operator import JoinOperator, Operator
+from taipy.core.data.parquet import ParquetDataNode
+from taipy.core.exceptions.exceptions import (
     InvalidExposedType,
     NoData,
     UnknownCompressionAlgorithm,
     UnknownParquetEngine,
 )
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -14,12 +14,12 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from src.taipy.core._manager._manager import _Manager
-from src.taipy.core._repository._abstract_converter import _AbstractConverter
-from src.taipy.core._repository._abstract_repository import _AbstractRepository
-from src.taipy.core._repository._filesystem_repository import _FileSystemRepository
-from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
+from taipy.core._manager._manager import _Manager
+from taipy.core._repository._abstract_converter import _AbstractConverter
+from taipy.core._repository._abstract_repository import _AbstractRepository
+from taipy.core._repository._filesystem_repository import _FileSystemRepository
+from taipy.core._version._version_manager import _VersionManager
 
 
 @dataclass

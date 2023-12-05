@@ -12,17 +12,17 @@ import os
 import pathlib
 
 import pytest
-
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.config.data_node_config import DataNodeConfig
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.csv import CSVDataNode
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core.config.data_node_config import DataNodeConfig
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.csv import CSVDataNode
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.pickle import PickleDataNode
+from taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
+
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
@@ -536,7 +536,7 @@ class TestDataManager:
             [SCENARIO.s.comparators]
             """
         )
-        from src.taipy import core as tp
+        from taipy import core as tp
 
         Config.override(file_config.filename)
         tp.create_scenario(Config.scenarios["s"])
@@ -570,7 +570,7 @@ class TestDataManager:
             [SCENARIO.my_scenario.comparators]
             """
         )
-        from src.taipy import core as tp
+        from taipy import core as tp
 
         Config.override(file_config.filename)
         scenario = tp.create_scenario(Config.scenarios["my_scenario"])
@@ -604,7 +604,7 @@ class TestDataManager:
             [SCENARIO.my_scenario.comparators]
             """
         )
-        from src.taipy import core as tp
+        from taipy import core as tp
 
         Config.set_default_data_node_configuration(storage_type="csv")
         Config.override(file_config.filename)

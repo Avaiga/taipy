@@ -12,12 +12,11 @@
 import os
 
 import pytest
-
-from src.taipy.core.data._data_sql_repository import _DataSQLRepository
-from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.task._task_fs_repository import _TaskFSRepository
-from src.taipy.core.task._task_sql_repository import _TaskSQLRepository
-from src.taipy.core.task.task import Task, TaskId
+from taipy.core.data._data_sql_repository import _DataSQLRepository
+from taipy.core.exceptions import ModelNotFound
+from taipy.core.task._task_fs_repository import _TaskFSRepository
+from taipy.core.task._task_sql_repository import _TaskSQLRepository
+from taipy.core.task.task import Task, TaskId
 
 
 class TestTaskFSRepository:

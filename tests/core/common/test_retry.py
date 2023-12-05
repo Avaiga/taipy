@@ -10,9 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
-
-from src.taipy.core.common._utils import _retry_read_entity
 from taipy.config import Config
+from taipy.core.common._utils import _retry_read_entity
 
 
 def test_retry_decorator(mocker):

@@ -12,11 +12,10 @@
 from copy import copy
 
 import pytest
-
-from src.taipy.core.config import TaskConfig
-from src.taipy.core.config.data_node_config import DataNodeConfig
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
+from taipy.core.config import TaskConfig
+from taipy.core.config.data_node_config import DataNodeConfig
 
 
 class TestTaskConfigChecker:
@@ -135,7 +134,7 @@ class TestTaskConfigChecker:
         expected_error_message = (
             "inputs field of TaskConfig `new` must be populated with a list of"
             " DataNodeConfig objects. Current value of property `inputs` is"
-            " ['bar', <src.taipy.core.config.data_node_config.DataNodeConfig object at"
+            " ['bar', <taipy.core.config.data_node_config.DataNodeConfig object at"
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 1
@@ -189,7 +188,7 @@ class TestTaskConfigChecker:
         expected_error_message = (
             "outputs field of TaskConfig `new` must be populated with a list of"
             " DataNodeConfig objects. Current value of property `outputs` is"
-            " ['bar', <src.taipy.core.config.data_node_config.DataNodeConfig object at"
+            " ['bar', <taipy.core.config.data_node_config.DataNodeConfig object at"
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 1

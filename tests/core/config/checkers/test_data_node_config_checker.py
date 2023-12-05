@@ -14,10 +14,10 @@ from datetime import timedelta
 
 import pytest
 
-from src.taipy.core.config.data_node_config import DataNodeConfig
 from taipy.config import Config
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.scope import Scope
+from taipy.core.config.data_node_config import DataNodeConfig
 
 
 class MyCustomClass:

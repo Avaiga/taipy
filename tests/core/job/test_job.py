@@ -16,23 +16,22 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
-
-from src.taipy.core import JobId, Sequence, SequenceId, TaskId
-from src.taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
-from src.taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.job.job import Job
-from src.taipy.core.job.status import Status
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from src.taipy.core.submission.submission import Submission
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core import JobId, Sequence, SequenceId, TaskId
+from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
+from taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config.job_config import JobConfig
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.job.job import Job
+from taipy.core.job.status import Status
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
 
 
 @pytest.fixture
@@ -84,7 +83,7 @@ def _error():
 
 
 def test_create_job(scenario, task, job):
-    from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+    from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
     _ScenarioManagerFactory._build_manager()._set(scenario)
 
@@ -94,7 +93,7 @@ def test_create_job(scenario, task, job):
     assert job.submit_id is not None
     assert job.submit_entity_id == "SCENARIO_scenario_config"
     assert job.submit_entity == scenario
-    with mock.patch("src.taipy.core.get") as get_mck:
+    with mock.patch("taipy.core.get") as get_mck:
         get_mck.return_value = task
         assert job.get_label() == "name > " + job.id
     assert job.get_simple_label() == job.id
@@ -303,7 +302,7 @@ def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
 
 
 def test_is_deletable():
-    with mock.patch("src.taipy.core.job._job_manager._JobManager._is_deletable") as mock_submit:
+    with mock.patch("taipy.core.job._job_manager._JobManager._is_deletable") as mock_submit:
         task = Task(config_id="name_1", properties={}, function=_foo, id=TaskId("task_1"))
         job = Job(job_id, task, "submit_id_1", "scenario_entity_id")
         job.is_deletable()

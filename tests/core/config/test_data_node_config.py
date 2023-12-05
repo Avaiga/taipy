@@ -14,14 +14,13 @@ import os
 from unittest import mock
 
 import pytest
-
-from src.taipy.core import MongoDefaultDocument
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.config import DataNodeConfig
-from src.taipy.core.config.job_config import JobConfig
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
+from taipy.core import MongoDefaultDocument
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config import DataNodeConfig
+from taipy.core.config.job_config import JobConfig
 
 
 def test_data_node_config_default_parameter():

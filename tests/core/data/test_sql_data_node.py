@@ -19,11 +19,11 @@ import pytest
 from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
 
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.operator import JoinOperator, Operator
-from src.taipy.core.data.sql import SQLDataNode
-from src.taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
 from taipy.config.common.scope import Scope
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.operator import JoinOperator, Operator
+from taipy.core.data.sql import SQLDataNode
+from taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
 
 
 class MyCustomObject:

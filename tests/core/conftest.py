@@ -19,12 +19,20 @@ import pandas as pd
 import pytest
 from sqlalchemy import create_engine, text
 
-from src.taipy.core._core import Core
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db._sql_connection import _SQLConnection
-from src.taipy.core._version._version import _Version
-from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.config import (
+from taipy.config import _inject_section
+from taipy.config._config import _Config
+from taipy.config._serializer._toml_serializer import _TomlSerializer
+from taipy.config.checker._checker import _Checker
+from taipy.config.checker.issue_collector import IssueCollector
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
+from taipy.config.config import Config
+from taipy.core._core import Core
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._repository.db._sql_connection import _SQLConnection
+from taipy.core._version._version import _Version
+from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.config import (
     CoreSection,
     DataNodeConfig,
     JobConfig,
@@ -38,36 +46,28 @@ from src.taipy.core.config import (
     _ScenarioConfigChecker,
     _TaskConfigChecker,
 )
-from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
-from src.taipy.core.cycle._cycle_model import _CycleModel
-from src.taipy.core.cycle.cycle import Cycle
-from src.taipy.core.cycle.cycle_id import CycleId
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data._data_model import _DataNodeModel
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job.job import Job
-from src.taipy.core.job.job_id import JobId
-from src.taipy.core.notification.notifier import Notifier
-from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from src.taipy.core.scenario._scenario_model import _ScenarioModel
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.scenario.scenario_id import ScenarioId
-from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from src.taipy.core.submission._submission_model import _SubmissionModel
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
-from taipy.config import _inject_section
-from taipy.config._config import _Config
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.checker._checker import _Checker
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.cycle._cycle_model import _CycleModel
+from taipy.core.cycle.cycle import Cycle
+from taipy.core.cycle.cycle_id import CycleId
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.data._data_model import _DataNodeModel
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.job.job import Job
+from taipy.core.job.job_id import JobId
+from taipy.core.notification.notifier import Notifier
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.scenario._scenario_model import _ScenarioModel
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.scenario.scenario_id import ScenarioId
+from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+from taipy.core.sequence.sequence import Sequence
+from taipy.core.sequence.sequence_id import SequenceId
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission._submission_model import _SubmissionModel
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
+from taipy.core.task.task import Task
 
 current_time = datetime.now()
 _OrchestratorFactory._build_orchestrator()

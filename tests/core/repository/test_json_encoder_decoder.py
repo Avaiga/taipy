@@ -14,9 +14,8 @@ import os
 from datetime import datetime, timedelta
 
 import pytest
-
-from src.taipy.core._repository._decoder import _Decoder
-from src.taipy.core._repository._encoder import _Encoder
+from taipy.core._repository._decoder import _Decoder
+from taipy.core._repository._encoder import _Encoder
 
 
 @pytest.fixture(scope="function", autouse=True)

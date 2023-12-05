@@ -12,10 +12,10 @@
 import multiprocessing
 from unittest.mock import patch
 
-from src.taipy.core import Core, taipy
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.config.config import Config
+from taipy.core import Core, taipy
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from tests.core.conftest import init_config
 from tests.core.utils import assert_true_after_time
 

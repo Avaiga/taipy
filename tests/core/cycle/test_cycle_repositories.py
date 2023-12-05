@@ -13,10 +13,10 @@ import os
 
 import pytest
 
-from src.taipy.core.cycle._cycle_fs_repository import _CycleFSRepository
-from src.taipy.core.cycle._cycle_sql_repository import _CycleSQLRepository
-from src.taipy.core.cycle.cycle import Cycle, CycleId
-from src.taipy.core.exceptions import ModelNotFound
+from taipy.core.cycle._cycle_fs_repository import _CycleFSRepository
+from taipy.core.cycle._cycle_sql_repository import _CycleSQLRepository
+from taipy.core.cycle.cycle import Cycle, CycleId
+from taipy.core.exceptions import ModelNotFound
 
 
 class TestCycleRepositories:

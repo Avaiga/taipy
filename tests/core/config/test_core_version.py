@@ -12,11 +12,10 @@
 from unittest.mock import patch
 
 import pytest
-
-from src.taipy.core._init_version import _read_version
-from src.taipy.core.config.core_section import CoreSection
-from src.taipy.core.exceptions import ConfigCoreVersionMismatched
 from taipy.config.config import Config
+from taipy.core._init_version import _read_version
+from taipy.core.config.core_section import CoreSection
+from taipy.core.exceptions import ConfigCoreVersionMismatched
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 _MOCK_CORE_VERSION = "3.1.1"
@@ -24,7 +23,7 @@ _MOCK_CORE_VERSION = "3.1.1"
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_core_version():
-    with patch("src.taipy.core.config.core_section._read_version") as mock_read_version:
+    with patch("taipy.core.config.core_section._read_version") as mock_read_version:
         mock_read_version.return_value = _MOCK_CORE_VERSION
         CoreSection._CURRENT_CORE_VERSION = _MOCK_CORE_VERSION
         Config.unique_sections[CoreSection.name] = CoreSection.default_config()

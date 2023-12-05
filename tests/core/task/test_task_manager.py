@@ -14,18 +14,18 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core import taipy
-from src.taipy.core._orchestrator._orchestrator import _Orchestrator
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core import taipy
+from taipy.core._orchestrator._orchestrator import _Orchestrator
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
+from taipy.core.task.task import Task
+from taipy.core.task.task_id import TaskId
 
 
 def test_create_and_save():
@@ -344,7 +344,7 @@ def test_submit_task():
             self.submit_ids.append(submit_id)
             return None
 
-    with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
+    with mock.patch("taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         # Task does not exist, we expect an exception
         with pytest.raises(NonExistingTask):
             _TaskManager._submit(task_1)

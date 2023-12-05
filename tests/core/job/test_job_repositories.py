@@ -13,12 +13,12 @@ import os
 
 import pytest
 
-from src.taipy.core.data._data_sql_repository import _DataSQLRepository
-from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.job._job_fs_repository import _JobFSRepository
-from src.taipy.core.job._job_sql_repository import _JobSQLRepository
-from src.taipy.core.job.job import Job, JobId, Task
-from src.taipy.core.task._task_sql_repository import _TaskSQLRepository
+from taipy.core.data._data_sql_repository import _DataSQLRepository
+from taipy.core.exceptions import ModelNotFound
+from taipy.core.job._job_fs_repository import _JobFSRepository
+from taipy.core.job._job_sql_repository import _JobSQLRepository
+from taipy.core.job.job import Job, JobId, Task
+from taipy.core.task._task_sql_repository import _TaskSQLRepository
 
 
 class TestJobRepository:

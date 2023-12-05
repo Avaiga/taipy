@@ -16,24 +16,23 @@ from functools import partial
 from time import sleep
 
 import pytest
-
-from src.taipy.core import Task
-from src.taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db._sql_connection import _build_connection, _SQLConnection
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data import InMemoryDataNode
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.exceptions.exceptions import JobNotDeletedException
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job.job_id import JobId
-from src.taipy.core.job.status import Status
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core import Task
+from taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._repository.db._sql_connection import _build_connection, _SQLConnection
+from taipy.core.config.job_config import JobConfig
+from taipy.core.data import InMemoryDataNode
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.exceptions.exceptions import JobNotDeletedException
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.job.job_id import JobId
+from taipy.core.job.status import Status
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from tests.core.utils import assert_true_after_time
 
 

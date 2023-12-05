@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.taipy.core.data.operator import JoinOperator, Operator
+from taipy.core.data.operator import JoinOperator, Operator
 
 from .utils import (
     CustomClass,

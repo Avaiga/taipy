@@ -15,19 +15,18 @@ from time import sleep
 from unittest import mock
 
 import pytest
-
-import src.taipy.core as tp
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.data_node import DataNode
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.exceptions.exceptions import DataNodeIsBeingEdited, NoData
-from src.taipy.core.job.job_id import JobId
+import taipy.core as tp
 from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config.job_config import JobConfig
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.data_node import DataNode
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions.exceptions import DataNodeIsBeingEdited, NoData
+from taipy.core.job.job_id import JobId
 
 from .utils import FakeDataNode
 
@@ -649,7 +648,7 @@ class TestDataNode:
         assert "temp_key_5" not in dn_1.properties.keys()
 
     def test_get_parents(self, data_node):
-        with mock.patch("src.taipy.core.get_parents") as mck:
+        with mock.patch("taipy.core.get_parents") as mck:
             data_node.get_parents()
             mck.assert_called_once_with(data_node)
 
@@ -720,7 +719,7 @@ class TestDataNode:
             prop="erty",
             name="a name",
         )
-        with mock.patch("src.taipy.core.get") as get_mck:
+        with mock.patch("taipy.core.get") as get_mck:
 
             class MockOwner:
                 label = "owner_label"

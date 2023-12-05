@@ -12,9 +12,9 @@
 
 from queue import SimpleQueue
 
-from src.taipy.core.notification import EventEntityType, EventOperation
-from src.taipy.core.notification._registration import _Registration
-from src.taipy.core.notification._topic import _Topic
+from taipy.core.notification import EventEntityType, EventOperation
+from taipy.core.notification._registration import _Registration
+from taipy.core.notification._topic import _Topic
 
 
 def test_create_registration():

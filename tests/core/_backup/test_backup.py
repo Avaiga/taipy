@@ -14,14 +14,14 @@ from unittest.mock import patch
 
 import pytest
 
-from src.taipy.core import Core
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.csv import CSVDataNode
-from src.taipy.core.data.excel import ExcelDataNode
-from src.taipy.core.data.json import JSONDataNode
-from src.taipy.core.data.parquet import ParquetDataNode
-from src.taipy.core.data.pickle import PickleDataNode
 from taipy.config.config import Config
+from taipy.core import Core
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.csv import CSVDataNode
+from taipy.core.data.excel import ExcelDataNode
+from taipy.core.data.json import JSONDataNode
+from taipy.core.data.parquet import ParquetDataNode
+from taipy.core.data.pickle import PickleDataNode
 
 
 def read_backup_file(path):

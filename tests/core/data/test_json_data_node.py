@@ -21,14 +21,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.json import JSONDataNode
-from src.taipy.core.data.operator import JoinOperator, Operator
-from src.taipy.core.exceptions.exceptions import NoData
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.json import JSONDataNode
+from taipy.core.data.operator import JoinOperator, Operator
+from taipy.core.exceptions.exceptions import NoData
 
 
 @pytest.fixture(scope="function", autouse=True)
