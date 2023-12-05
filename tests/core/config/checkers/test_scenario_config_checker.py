@@ -84,7 +84,6 @@ class TestScenarioConfigChecker:
         assert expected_error_message in caplog.text
 
     def test_check_task_configs(self, caplog):
-
         Config._collector = IssueCollector()
         config = Config._applied_config
         Config._compile_configs()
@@ -148,7 +147,6 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.infos) == 0
 
     def test_check_additional_data_node_configs(self, caplog):
-
         Config._collector = IssueCollector()
         config = Config._applied_config
         Config._compile_configs()
@@ -213,7 +211,6 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.infos) == 0
 
     def test_check_additional_data_node_configs_not_in_task_input_output_data_nodes(self, caplog):
-
         Config._collector = IssueCollector()
         config = Config._applied_config
         Config._compile_configs()
@@ -271,7 +268,6 @@ class TestScenarioConfigChecker:
         assert len(Config._collector.infos) == 0
 
     def test_check_tasks_in_sequences_exist_in_scenario_tasks(self, caplog):
-
         Config._collector = IssueCollector()
         config = Config._applied_config
         Config._compile_configs()

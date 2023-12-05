@@ -68,7 +68,6 @@ def mult(n1, n2):
 
 
 def test_get_label_complex_case():
-
     dn1_cfg = Config.configure_data_node("dn1", scope=Scope.GLOBAL)
     dn2_cfg = Config.configure_data_node("dn2", scope=Scope.CYCLE)
     dn3_cfg = Config.configure_data_node("dn3", scope=Scope.CYCLE)
