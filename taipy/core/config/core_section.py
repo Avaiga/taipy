@@ -99,9 +99,9 @@ class CoreSection(UniqueSection):
         self._read_entity_retry = (
             read_entity_retry if read_entity_retry is not None else self._DEFAULT_READ_ENTITY_RETRY
         )
-        self.mode = mode or self._DEFAULT_MODE
-        self.version_number = version_number or self._DEFAULT_VERSION_NUMBER
-        self.force = force or self._DEFAULT_FORCE
+        self.mode = mode
+        self.version_number = version_number
+        self.force = force
 
         self._check_compatibility(core_version)
         self._core_version = core_version
@@ -245,38 +245,14 @@ class CoreSection(UniqueSection):
         )
 
     def _update(self, as_dict: Dict[str, Any]):
-        root_folder = _tpl._replace_templates(as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder))
-        if self._root_folder != root_folder:
-            self._root_folder = root_folder
-
-        storage_folder = _tpl._replace_templates(as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder))
-        if self._storage_folder != storage_folder:
-            self._storage_folder = storage_folder
-
-        repository_type = _tpl._replace_templates(as_dict.pop(self._REPOSITORY_TYPE_KEY, self._repository_type))
-        if self._repository_type != repository_type:
-            self._repository_type = repository_type
-
-        repository_properties = _tpl._replace_templates(
-            as_dict.pop(self._REPOSITORY_PROPERTIES_KEY, self._repository_properties)
-        )
-        self._repository_properties.update(repository_properties)
-
-        read_entity_retry = _tpl._replace_templates(as_dict.pop(self._READ_ENTITY_RETRY_KEY, self._read_entity_retry))
-        if self._read_entity_retry != read_entity_retry:
-            self._read_entity_retry = read_entity_retry
-
-        mode = _tpl._replace_templates(as_dict.pop(self._MODE_KEY, self.mode))
-        if self.mode != mode:
-            self.mode = mode
-
-        version_number = _tpl._replace_templates(as_dict.pop(self._VERSION_NUMBER_KEY, self.version_number))
-        if self.version_number != version_number:
-            self.version_number = version_number
-
-        force = _tpl._replace_templates(as_dict.pop(self._FORCE_KEY, self.force))
-        if self.force != force:
-            self.force = force
+        self.root_folder = as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder)
+        self.storage_folder = as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
+        self._repository_type = as_dict.pop(self._REPOSITORY_TYPE_KEY, self._repository_type)
+        self._repository_properties.update(as_dict.pop(self._REPOSITORY_PROPERTIES_KEY, self._repository_properties))
+        self._read_entity_retry = as_dict.pop(self._READ_ENTITY_RETRY_KEY, self._read_entity_retry)
+        self.mode = as_dict.pop(self._MODE_KEY, self.mode)
+        self.version_number = as_dict.pop(self._VERSION_NUMBER_KEY, self.version_number)
+        self.force = as_dict.pop(self._FORCE_KEY, self.force)
 
         core_version = as_dict.pop(self._CORE_VERSION_KEY, None)
         self._check_compatibility(core_version)
