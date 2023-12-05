@@ -22,8 +22,8 @@ from taipy.core._entity._migrate_cli import _MigrateCLI
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_data_folder():
-    if os.path.exists("tests/core/_entity/.data"):
-        shutil.rmtree("tests/core/_entity/.data")
+    if os.path.exists("core/_entity/.data"):
+        shutil.rmtree("core/_entity/.data")
     yield
 
 
@@ -39,10 +39,11 @@ def test_migrate_fs_default(caplog):
 
 def test_migrate_fs_specified_folder(caplog):
     _MigrateCLI.create_parser()
+    import os
 
     # Copy data_sample to .data folder for testing
-    data_sample_path = "tests/core/_entity/data_sample"
-    data_path = "tests/core/_entity/.data"
+    data_sample_path = "core/_entity/data_sample/"
+    data_path = "core/_entity/.data/"
     shutil.copytree(data_sample_path, data_path)
 
     # Run with --skip-backup to only test the migration
@@ -52,7 +53,7 @@ def test_migrate_fs_specified_folder(caplog):
     assert f"Starting entity migration from '{data_path}' folder" in caplog.text
 
     # Compare migrated .data folder with data_sample_migrated
-    dircmp_result = filecmp.dircmp(data_path, "tests/core/_entity/data_sample_migrated")
+    dircmp_result = filecmp.dircmp(data_path, "core/_entity/data_sample_migrated")
     assert not dircmp_result.diff_files and not dircmp_result.left_only and not dircmp_result.right_only
     for subdir in dircmp_result.subdirs.values():
         assert not subdir.diff_files and not subdir.left_only and not subdir.right_only
@@ -62,9 +63,9 @@ def test_migrate_fs_backup_and_remove(caplog):
     _MigrateCLI.create_parser()
 
     # Copy data_sample to .data folder for testing
-    data_sample_path = "tests/core/_entity/data_sample"
-    data_path = "tests/core/_entity/.data"
-    backup_path = "tests/core/_entity/.data_backup"
+    data_sample_path = "core/_entity/data_sample"
+    data_path = "core/_entity/.data"
+    backup_path = "core/_entity/.data_backup"
     shutil.copytree(data_sample_path, data_path)
 
     # Remove backup when it does not exist should raise an error
@@ -95,9 +96,9 @@ def test_migrate_fs_backup_and_restore(caplog):
     _MigrateCLI.create_parser()
 
     # Copy data_sample to .data folder for testing
-    data_sample_path = "tests/core/_entity/data_sample"
-    data_path = "tests/core/_entity/.data"
-    backup_path = "tests/core/_entity/.data_backup"
+    data_sample_path = "core/_entity/data_sample"
+    data_path = "core/_entity/.data"
+    backup_path = "core/_entity/.data_backup"
     shutil.copytree(data_sample_path, data_path)
 
     # Restore backup when it does not exist should raise an error
@@ -123,7 +124,7 @@ def test_migrate_fs_backup_and_restore(caplog):
     assert not os.path.exists(backup_path)
 
     # Compare migrated .data folder with data_sample to ensure restoreing the backup worked
-    dircmp_result = filecmp.dircmp(data_path, "tests/core/_entity/data_sample")
+    dircmp_result = filecmp.dircmp(data_path, "core/_entity/data_sample")
     assert not dircmp_result.diff_files and not dircmp_result.left_only and not dircmp_result.right_only
     for subdir in dircmp_result.subdirs.values():
         assert not subdir.diff_files and not subdir.left_only and not subdir.right_only
