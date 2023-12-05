@@ -83,7 +83,6 @@ class RDP(Decimator):
             # nothing to calculate if no points in between
             if end - start <= 1:
                 continue
-
             # Calculate distance to points
             P1 = data[start]
             P2 = data[end]
@@ -100,11 +99,9 @@ class RDP(Decimator):
                 mid = np.argmax(dsq) + 1 + start
                 stack.append((start, mid))  # type: ignore
                 stack.append((mid, end))  # type: ignore
-
             else:
                 # Points in between are redundant
                 mask[start + 1 : end] = False
-
         return mask
 
     @staticmethod
@@ -115,7 +112,6 @@ class RDP(Decimator):
             mask = np.empty(M_len, dtype=bool)
             mask.fill(True)
             return mask
-
         weights = np.empty(M_len)
         # weights.fill(0)
         weights[0] = float("inf")
@@ -132,7 +128,6 @@ class RDP(Decimator):
             weights[max_dist_index] = np.amax(dsq)
             stack.append((start, max_dist_index))
             stack.append((max_dist_index, end))
-
         maxTolerance = np.sort(weights)[M_len - n_out]
 
         return weights >= maxTolerance
