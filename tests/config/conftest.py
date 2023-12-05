@@ -11,12 +11,12 @@
 
 import pytest
 
-from src.taipy.config._config import _Config
-from src.taipy.config._config_comparator._config_comparator import _ConfigComparator
-from src.taipy.config._serializer._toml_serializer import _TomlSerializer
-from src.taipy.config.checker.issue_collector import IssueCollector
-from src.taipy.config.config import Config
-from src.taipy.config.section import Section
+from taipy.config._config import _Config
+from taipy.config._config_comparator._config_comparator import _ConfigComparator
+from taipy.config._serializer._toml_serializer import _TomlSerializer
+from taipy.config.checker.issue_collector import IssueCollector
+from taipy.config.config import Config
+from taipy.config.section import Section
 from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 

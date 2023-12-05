@@ -11,7 +11,7 @@
 
 import pytest
 
-from src.taipy.config.common._classproperty import _Classproperty
+from taipy.config.common._classproperty import _Classproperty
 
 
 class TestClassProperty:

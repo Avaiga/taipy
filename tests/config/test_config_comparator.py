@@ -11,10 +11,10 @@
 
 from unittest import mock
 
-from src.taipy.config import Config
-from src.taipy.config._config import _Config
-from src.taipy.config._config_comparator._comparator_result import _ComparatorResult
-from src.taipy.config.global_app.global_app_config import GlobalAppConfig
+from taipy.config import Config
+from taipy.config._config import _Config
+from taipy.config._config_comparator._comparator_result import _ComparatorResult
+from taipy.config.global_app.global_app_config import GlobalAppConfig
 from tests.config.utils.section_for_tests import SectionForTest
 from tests.config.utils.unique_section_for_tests import UniqueSectionForTest
 
@@ -34,7 +34,7 @@ class TestConfigComparator:
         _config_2 = _Config._default_config()
 
         with mock.patch(
-            "src.taipy.config._config_comparator._config_comparator._ConfigComparator._find_conflict_config"
+            "taipy.config._config_comparator._config_comparator._ConfigComparator._find_conflict_config"
         ) as mck:
             Config._comparator._find_conflict_config(_config_1, _config_2)
             mck.assert_called_once_with(_config_1, _config_2)
