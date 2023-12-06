@@ -263,7 +263,7 @@ def create_cycle_list():
     cycles = []
     manager = _CycleManager
     for i in range(10):
-        c = __create_cycle(f"cycle_{1}")
+        c = __create_cycle(f"cycle_{i}")
         manager._set(c)
     return cycles
 
@@ -309,10 +309,11 @@ def create_job_list():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def cleanup_files():
-    Config.unblock_update()
-    Config.configure_core(repository_type="filesystem")
+def cleanup_files(reset_configuration_singleton, inject_core_sections):
+    reset_configuration_singleton()
+    inject_core_sections()
 
+    Config.configure_core(repository_type="filesystem")
     if os.path.exists(".data"):
         shutil.rmtree(".data", ignore_errors=True)
     if os.path.exists(".my_data"):
