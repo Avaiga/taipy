@@ -70,7 +70,7 @@ class _Orchestrator(_AbstractOrchestrator):
         submission = _SubmissionManagerFactory._build_manager()._create(
             submittable.id,  # type: ignore
             submittable._ID_PREFIX,  # type: ignore
-            submittable.config_id if isinstance(submittable, Scenario) else None,  # type: ignore
+            getattr(submittable, "config_id", None),
         )
 
         jobs = []
