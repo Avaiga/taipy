@@ -28,25 +28,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Get taipy-gui version from setup.py
-        id: taipy_gui_version
+      - name: Build frontends
         run: |
-          echo """
-          with open('setup.py') as f:
-              for line in f:
-                  if 'taipy-gui' in line:
-                      start = line.find('taipy-gui')
-                      end = line.rstrip().find('\",')
-                      print(f'VERSION={line[start:end]}')
-                      break
-          """ > ${{ runner.temp }}/get_gui_version.py
-          python ${{ runner.temp }}/get_gui_version.py >> $GITHUB_OUTPUT
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # install taipy-gui from based on setup.py version
-          pip install "${{ steps.taipy_gui_version.outputs.VERSION }}"
+          python tools/frontend/bundle_build.py
 
       - name: Install Taipy without dependencies
         run: |

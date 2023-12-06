@@ -1,19 +1,31 @@
-import os
+# Copyright 2023 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
+import subprocess
 import sys
 from pathlib import Path
 
 
-def build_gui(root_path):
+def build_gui(root_path: Path):
     print(f"Building taipy-gui frontend bundle in {root_path}.")
     already_exists = (root_path / "taipy" / "gui" / "webapp" / "index.html").exists()
     if already_exists:
         print(f'Found taipy-gui frontend bundle in {root_path  / "taipy" / "gui" / "webapp"}.')
     else:
-        os.system("cd frontend/taipy-gui/dom && npm ci")
-        os.system("cd frontend/taipy-gui && npm ci --omit=optional && npm run build")
+        subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui" / "dom", check=True, shell=True)
+        subprocess.run(["npm", "ci", "--omit=optional"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=True)
+        subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=True)
 
 
-def build_taipy(root_path):
+def build_taipy(root_path: Path):
     print(f"Building taipy frontend bundle in {root_path}.")
     already_exists = (root_path / "taipy" / "gui_core" / "lib" / "taipy-gui-core.js").exists()
     if already_exists:
@@ -21,10 +33,11 @@ def build_taipy(root_path):
     else:
         # Specify the correct path to taipy-gui in gui/.env file
         env_file_path = root_path / "frontend" / "taipy" / ".env"
-        if not os.path.exists(env_file_path):
+        if not env_file_path.exists():
             with open(env_file_path, "w") as env_file:
                 env_file.write(f"TAIPY_GUI_DIR={root_path}\n")
-        os.system("cd frontend/taipy && npm ci && npm run build")
+        subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy", check=True, shell=True)
+        subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy", check=True, shell=True)
 
 
 if __name__ == "__main__":
