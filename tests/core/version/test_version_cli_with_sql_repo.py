@@ -26,7 +26,6 @@ from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
-from tests.core.conftest import init_config
 
 
 def test_delete_version(caplog, init_sql_repo):
@@ -240,7 +239,7 @@ def test_rename_version(caplog, init_sql_repo):
     assert len(_JobManager._get_all("2.1")) == 1
 
 
-def test_compare_version_config(caplog, init_sql_repo):
+def test_compare_version_config(caplog, init_sql_repo, init_config):
     _ScenarioManagerFactory._build_manager()
 
     scenario_config_1 = config_scenario()

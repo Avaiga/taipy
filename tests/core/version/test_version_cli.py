@@ -25,7 +25,6 @@ from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
-from tests.core.conftest import init_config
 
 
 def test_delete_version(caplog):
@@ -233,7 +232,7 @@ def test_rename_version(caplog):
     assert len(_JobManager._get_all("2.1")) == 1
 
 
-def test_compare_version_config(caplog):
+def test_compare_version_config(caplog, init_config):
     scenario_config_1 = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):

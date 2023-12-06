@@ -27,7 +27,6 @@ from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
-from tests.core.conftest import init_config, init_managers
 from tests.core.utils import assert_true_after_time
 
 
@@ -99,7 +98,7 @@ def test_core_cli_production_mode(init_sql_repo):
         core.stop()
 
 
-def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo):
+def test_dev_mode_clean_all_entities_of_the_latest_version(init_sql_repo, init_managers):
     scenario_config = config_scenario()
     init_managers()
 
@@ -303,7 +302,7 @@ def test_version_number_when_switching_mode(init_sql_repo):
         core.stop()
 
 
-def test_production_mode_load_all_entities_from_previous_production_version(init_sql_repo):
+def test_production_mode_load_all_entities_from_previous_production_version(init_sql_repo, init_managers):
     scenario_config = config_scenario()
     init_managers()
 
@@ -354,7 +353,7 @@ def test_production_mode_load_all_entities_from_previous_production_version(init
         core.stop()
 
 
-def test_force_override_experiment_version(init_sql_repo):
+def test_force_override_experiment_version(init_sql_repo, init_managers):
     scenario_config = config_scenario()
     init_managers()
 
@@ -407,7 +406,7 @@ def test_force_override_experiment_version(init_sql_repo):
     assert len(_JobManager._get_all()) == 2
 
 
-def test_force_override_production_version(init_sql_repo):
+def test_force_override_production_version(init_sql_repo, init_managers):
     scenario_config = config_scenario()
     init_managers()
 
@@ -462,7 +461,7 @@ def test_force_override_production_version(init_sql_repo):
         core.stop()
 
 
-def test_modify_config_properties_without_force(caplog, init_sql_repo):
+def test_modify_config_properties_without_force(caplog, init_sql_repo, init_config, init_managers):
     scenario_config = config_scenario()
     init_managers()
 
@@ -505,7 +504,7 @@ def test_modify_config_properties_without_force(caplog, init_sql_repo):
     assert 'DATA_NODE "d2" has attribute "exposed_type" modified' in error_message
 
 
-def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo):
+def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo, init_config, init_managers):
     scenario_config = config_scenario()
     init_managers()
 

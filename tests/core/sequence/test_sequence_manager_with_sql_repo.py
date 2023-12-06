@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
@@ -25,10 +26,9 @@ from taipy.core.sequence.sequence_id import SequenceId
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
-from tests.core.conftest import init_managers
 
 
-def test_set_and_get_sequence(init_sql_repo):
+def test_set_and_get_sequence(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -102,7 +102,7 @@ def test_set_and_get_sequence(init_sql_repo):
     assert _TaskManager._get(task.id).id == task.id
 
 
-def test_get_all_on_multiple_versions_environment(init_sql_repo):
+def test_get_all_on_multiple_versions_environment(init_sql_repo, init_managers):
     init_managers()
 
     # Create 5 sequences from Scenario with 2 versions each
@@ -165,7 +165,7 @@ def mult_by_3(nb: int):
     return nb * 3
 
 
-def test_get_or_create_data(init_sql_repo):
+def test_get_or_create_data(init_sql_repo, init_managers):
     # only create intermediate data node once
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
@@ -219,7 +219,7 @@ def test_get_or_create_data(init_sql_repo):
         sequence.WRONG.write(7)
 
 
-def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo):
+def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -250,7 +250,7 @@ def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo)
     assert len(_JobManager._get_all()) == 1
 
 
-def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo):
+def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -281,7 +281,7 @@ def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo):
     assert len(_JobManager._get_all()) == 1
 
 
-def test_hard_delete_shared_entities(init_sql_repo):
+def test_hard_delete_shared_entities(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()

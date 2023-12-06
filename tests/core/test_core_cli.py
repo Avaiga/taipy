@@ -12,6 +12,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -26,7 +27,6 @@ from taipy.core.job._job_manager import _JobManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.sequence._sequence_manager import _SequenceManager
 from taipy.core.task._task_manager import _TaskManager
-from tests.core.conftest import init_config
 from tests.core.utils import assert_true_after_time
 
 
@@ -78,7 +78,7 @@ def test_core_cli_experiment_mode_with_version():
         core.stop()
 
 
-def test_core_cli_experiment_mode_with_force_version():
+def test_core_cli_experiment_mode_with_force_version(init_config):
     with patch("sys.argv", ["prog", "--experiment", "2.1", "--taipy-force"]):
         init_config()
         core = Core()
@@ -458,7 +458,7 @@ def test_force_override_production_version():
         core.stop()
 
 
-def test_modify_job_configuration_dont_stop_application(caplog):
+def test_modify_job_configuration_dont_stop_application(caplog, init_config):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
@@ -487,7 +487,7 @@ def test_modify_job_configuration_dont_stop_application(caplog):
         core.stop()
 
 
-def test_modify_config_properties_without_force(caplog):
+def test_modify_config_properties_without_force(caplog, init_config):
     scenario_config = config_scenario()
 
     with patch("sys.argv", ["prog", "--experiment", "1.0"]):
