@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import json
+from unittest.mock import patch
 
 from taipy.gui.gui import Gui
 
@@ -17,8 +18,9 @@ from taipy.gui.gui import Gui
 def test_multiple_instance():
     gui1 = Gui("<|gui1|>")
     gui2 = Gui("<|gui2|>")
-    gui1.run(run_server=False)
-    gui2.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui1.run(run_server=False)
+        gui2.run(run_server=False)
     client1 = gui1._server.test_client()
     client2 = gui2._server.test_client()
     assert_multiple_instance(client1, 'value="gui1"')
