@@ -74,7 +74,8 @@ def cleanup_test(helpers):
 def test_gui_service_arguments_hierarchy():
     # Test default configuration
     gui = Gui()
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     service_config = gui._config.config
     assert not service_config["allow_unsafe_werkzeug"]
     assert service_config["async_mode"] == "gevent"
@@ -110,7 +111,8 @@ def test_gui_service_arguments_hierarchy():
 
     # Override default configuration by explicit defined arguments in Gui.run()
     gui = Gui()
-    gui.run(run_server=False, watermark="", host="my_host", port=5001)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, watermark="", host="my_host", port=5001)
     service_config = gui._config.config
     assert service_config["watermark"] == ""
     assert service_config["host"] == "my_host"
@@ -120,7 +122,8 @@ def test_gui_service_arguments_hierarchy():
     # Override Gui.run() arguments by explicit defined arguments in Config.configure_gui()
     Config.configure_gui(dark_mode=False, host="my_2nd_host", port=5002)
     gui = Gui()
-    gui.run(run_server=False, watermark="", host="my_host", port=5001)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, watermark="", host="my_host", port=5001)
     service_config = gui._config.config
     assert not service_config["dark_mode"]
     assert service_config["host"] == "my_2nd_host"
@@ -141,7 +144,8 @@ use_reloader = "true:bool"
     )
     Config.load(toml_config.filename)
     gui = Gui()
-    gui.run(run_server=False, host="my_host", port=5001)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, host="my_host", port=5001)
     service_config = gui._config.config
     assert service_config["host"] == "my_3rd_host"
     assert service_config["port"] == 5003

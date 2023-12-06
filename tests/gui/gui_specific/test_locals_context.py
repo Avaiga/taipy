@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from unittest.mock import patch
+
 import pytest
 
 from taipy.gui import Gui
@@ -17,7 +19,8 @@ from taipy.gui.utils._locals_context import _LocalsContext
 
 def test_locals_context(gui: Gui):
     lc = _LocalsContext()
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         with pytest.raises(KeyError):
             lc.get_default()

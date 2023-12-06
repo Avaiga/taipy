@@ -12,6 +12,7 @@
 import inspect
 import json
 import warnings
+from unittest.mock import patch
 
 from taipy.gui import Gui
 
@@ -20,7 +21,8 @@ def test_render_route(gui: Gui):
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", "# first page")
     gui.add_page("page2", "# second page")
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     with warnings.catch_warnings(record=True):
         client = gui._server.test_client()
         response = client.get("/taipy-init")

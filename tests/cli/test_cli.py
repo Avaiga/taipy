@@ -47,6 +47,9 @@ def clean_argparser():
 
     yield
 
+    _CLI._subparser_action = None
+    _CLI._sub_taipyparsers = {}
+
 
 expected_help = """{run,manage-versions,create,migrate,help} ...
 
