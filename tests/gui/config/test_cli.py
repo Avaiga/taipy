@@ -15,12 +15,10 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy.config import Config
-from taipy.config._config import _Config
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.checker._checker import _Checker
-from taipy.config.checker.issue_collector import IssueCollector
+from taipy.config import Config, _inject_section
 from taipy.gui import Gui
+from taipy.gui._default_config import default_config
+from taipy.gui._gui_section import _GuiSection
 
 
 class NamedTemporaryFile:
@@ -38,32 +36,24 @@ class NamedTemporaryFile:
         os.unlink(self.filename)
 
 
-def init_config():
-    Config.unblock_update()
-    Config._default_config = _Config()._default_config()
-    Config._python_config = _Config()
-    Config._file_config = None
-    Config._env_file_config = None
-    Config._applied_config = _Config._default_config()
-    Config._collector = IssueCollector()
-    Config._serializer = _TomlSerializer()
-    _Checker._checkers = []
+@pytest.fixture
+def init_config(reset_configuration_singleton):
+    def _init_config():
+        reset_configuration_singleton()
 
-    from taipy.config import _inject_section
-    from taipy.gui._default_config import default_config
-    from taipy.gui._gui_section import _GuiSection
+        _inject_section(
+            _GuiSection,
+            "gui_config",
+            _GuiSection(property_list=list(default_config)),
+            [("configure_gui", _GuiSection._configure)],
+            add_to_unconflicted_sections=True,
+        )
 
-    _inject_section(
-        _GuiSection,
-        "gui_config",
-        _GuiSection(property_list=list(default_config)),
-        [("configure_gui", _GuiSection._configure)],
-        add_to_unconflicted_sections=True,
-    )
+    return _init_config
 
 
 @pytest.fixture(scope="function", autouse=True)
-def cleanup_test(helpers):
+def cleanup_test(helpers, init_config):
     init_config()
     helpers.test_cleanup()
     yield
