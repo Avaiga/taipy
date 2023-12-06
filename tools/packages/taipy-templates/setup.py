@@ -49,7 +49,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="taipy-templates",
     name="taipy-templates",
-    package_dir = {"" : "../../.."},
+    package_dir={"": "../../.."},
     packages=find_packages(where=root_folder, include=["taipy"]),
     include_package_data=True,
     test_suite="tests",

@@ -69,7 +69,7 @@ setup(
     license="Apache License 2.0",
     keywords="taipy-core",
     name="taipy-core",
-    package_dir = {"" : "../../.."},
+    package_dir={"": "../../.."},
     packages=find_packages(where=root_folder, include=["taipy", "taipy.core", "taipy.core.*"]),
     include_package_data=True,
     test_suite="tests",

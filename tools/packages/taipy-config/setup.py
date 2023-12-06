@@ -54,8 +54,10 @@ setup(
     license="Apache License 2.0",
     keywords="taipy-config",
     name="taipy-config",
-    package_dir = {"" : "../../.."},
-    packages=find_packages(where=root_folder, include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]),
+    package_dir={"": "../../.."},
+    packages=find_packages(
+        where=root_folder, include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]
+    ),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-config",

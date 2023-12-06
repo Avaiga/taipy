@@ -63,7 +63,9 @@ extras_require = {
 
 class NPMInstall(build_py):
     def run(self):
-        subprocess.run(["python", "bundle_build.py", "gui"], cwd=root_folder / "tools" / "frontend", check=True, shell=True)
+        subprocess.run(
+            ["python", "bundle_build.py", "gui"], cwd=root_folder / "tools" / "frontend", check=True, shell=True
+        )
         build_py.run(self)
 
 
@@ -89,7 +91,7 @@ setup(
     include_package_data=True,
     keywords="taipy-gui",
     name="taipy-gui",
-    package_dir = {"" : "../../.."},
+    package_dir={"": "../../.."},
     packages=find_packages(where=root_folder, include=["taipy", "taipy.gui", "taipy.gui.*"]),
     test_suite="tests",
     tests_require=test_requirements,

@@ -31,7 +31,7 @@ setup(
     python_requires=">=3.8",
     version=version_string,
     author_email="dev@taipy.io",
-    package_dir = {"" : "../../.."},
+    package_dir={"": "../../.."},
     packages=find_packages(where=root_folder, include=["taipy", "taipy.rest", "taipy.rest.*"]),
     include_package_data=True,
     long_description=readme,

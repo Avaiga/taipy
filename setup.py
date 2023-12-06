@@ -32,17 +32,14 @@ with open(root_folder / "taipy" / "version.json") as version_file:
 requirements = [
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
     "cookiecutter>=2.1.1,<2.2",
-
     "toml>=0.10,<0.11",
     "deepdiff>=6.2,<6.3",
-
     "pyarrow>=10.0.1,<11.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.1.2,<3.2",
     "modin[dask]>=0.23.0,<1.0",
     "pymongo[srv]>=4.2.0,<5.0",
     "sqlalchemy>=2.0.16,<2.1",
-
     "flask>=3.0.0,<3.1",
     "flask-cors>=4.0.0,<5.0",
     "flask-socketio>=5.3.6,<6.0",
@@ -58,7 +55,6 @@ requirements = [
     "gitignore-parser>=0.1,<0.2",
     "simple-websocket>=0.10.1,<1.0",
     "twisted>=23.8.0,<24.0",
-
     "flask-restful>=0.3.9,<0.4",
     "passlib>=1.7.4,<1.8",
     "marshmallow>=3.20.1,<3.30",
@@ -66,9 +62,11 @@ requirements = [
     "apispec-webframeworks>=0.5.2,<0.6",
 ]
 
+
 def get_requirements():
-    #TODO get requirements from the different setups in tools/packages (removing taipy packages)
+    # TODO get requirements from the different setups in tools/packages (removing taipy packages)
     return requirements
+
 
 test_requirements = ["pytest>=3.8"]
 
