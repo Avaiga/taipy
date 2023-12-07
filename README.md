@@ -29,7 +29,7 @@ Taipy is an open-source Python library for easy, end-to-end application developm
 ## ⭐️ What's Taipy?
 
 Taipy was built exclusively for data scientists and machine learning engineers<br />who want to build production-ready web applications
-without having to learn new languages or frameworks.<br />Skip full-stack development and deployment focus on Data and AI algorithms.<br /><br />
+without having to learn<br />new languages or frameworks. Skip full-stack development and deployment focus on Data and AI algorithms.<br /><br />
 
 | User Interface Generation  | Scenario and Data Management |
 | --------  | -------- |
