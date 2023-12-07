@@ -1,104 +1,81 @@
-<br>
-<br>
-
-<img align="left" src="readme_img/readme_logo.png" alt="Taipy Logo" width="20%" ></img>
-<br>
-#  Taipy -Your Web Application Builder. Pure Python.
-<p align="left">
-    <a href="https://pypi.python.org/pypi/taipy/" alt="Taipy version">
-        <img alt="PyPI" src="https://img.shields.io/pypi/v/taipy.svg?label=pip&logo=PyPI&color=ff462b&labelColor=283282"></a>
-    <a href="https://pypi.org/project/taipy" alt="Python version">
-        <img alt="PyPI" src="https://img.shields.io/pypi/pyversions/taipy?color=ff462b&labelColor=283282"></a>
-    <a href="https://www.youtube.com/@taipy8009" alt="YouTube">
-        <img src="https://img.shields.io/badge/youtube-click_to_watch_videos-red.svg?color=ff462b&labelColor=283282&logo=youtube" /></a>
-     <a href="https://twitter.com/Taipy_io" alt="Twitter">
-        <img src="https://img.shields.io/badge/twitter-click_for_tweets-red.svg?color=ff462b&labelColor=283282&logo=twitter" /></a>
-
-
-<br>
-
-### Taipy is an open-source Python library for building your web application front-end & back-end. 
-### Turns data and AI algorithms into production-ready web applications in no time. 
-
-### <div align="center"> <a href="https://docs.taipy.io/en/latest/">Documentation</a> • <a href="https://discord.com/invite/SJyz2VJGxV">Join our Discord</a> • <a href="https://docs.taipy.io/en/latest/knowledge_base/demos/">Check out Taipy Applications</a>
+<div align="center">
+  <a href="https://taipy.io?utm_source=github" target="_blank">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Avaiga/taipy/assets/100117126/f59f70e9-1905-4abc-8760-8631b57c14c2">
+    <img alt="Taipy" src="readme_img/readme_logo.png" width="200" />
+  </picture>
+  </a>
 </div>
 
-<br>
+<h1 align="center">
+Data and AI algorithms into<br />a production-ready web applications
+</h1>
 
-#  <div align="center"> 📊 We make both ends meet ⚙️ </div>
-<br>
- <div align="center">
+<div align="center">
+Taipy is an open-source Python library for easy, end-to-end application development,<br />featuring what-if analyses, smart pipeline execution, built-in scheduling, and deployment tools.
+</div>
+
+  <p align="center">
+    <br />
+    <a href="https://docs.taipy.io/en/latest/"><strong>Explore the docs »</strong></a>
+    <br/><br/>
+    <a href="https://discord.com/invite/SJyz2VJGxV">Discord support</a>
+    ·
+    <a href="https://docs.taipy.io/en/latest/knowledge_base/demos">Demos & Examples</a>
+  </p>
+
+---
+
+## ⭐️ What's Taipy?
+
+Taipy was built exclusively for data scientists and machine learning engineers who want to build production-ready web applications <br />
+without having to learn new languages or frameworks. Skip full-stack development and deployment focus on Data and AI algorithms.<br /><br />
 
 | User Interface Generation  | Scenario and Data Management |
 | --------  | -------- |
 |<img src="readme_img/gui_creation.webp" alt="Interface Animation"  width="850px" height="250px" /> | <img src="readme_img/scenario_and_data_mgt.gif" alt="Back-End Animation"  width="100%"/>
 
+&nbsp;
 
-</div>
+## ✨ Features
+- **Python-Based UI Framework:** Taipy is designed for Python users, particularly those working in AI and data science. It allows them to create full stack applications without needing to learn additional skills like HTML, CSS, or JavaScript.
 
-<br>
-<br>
 
-## Installation
+- **Pre-Built Components for Data Pipelines:** Taipy includes pre-built components that allow users to interact with data pipelines, including visualization and management tools.
 
-Open a terminal and run:
 
-```bash
-$ pip install taipy
+- **Scenario and Data Management Features:** Taipy offers features for managing different business scenarios and data, which can be useful for applications like demand forecasting or production planning.
+
+
+- **Version Management and Pipeline Orchestration:** It includes tools for managing application versions, pipeline versions, and data versions, which are beneficial for multi-user environments.
+
+&nbsp;
+
+## ⚙️ Quickstart
+To install Taipy stable release run:
+```
+pip install taipy
 ```
 
-*You're all set! All aboard the Taipy journey 🚂*
+For further information, on installing Taipy on a Conda Environment or from source, please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
+To get started with Taipy, please refer to the [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).
 
-<br>
+&nbsp;
 
-## Community
+## 🔌 Scenario and Data Management
 
-Join our [Discord](https://discord.gg/XcFhrJZru3) to give us feedback, share your creations or just to have a chat with us.
+Let's create a scenario in Taipy that allows you to filter movie data based on your chosen genre.<br />
+This scenario is designed as a straightforward pipeline.<br />
+Every time you change your genre selection, the scenario runs to process your request.<br />
+It then displays the top seven most popular movies in that genre.
 
-<br>
+> ⚠️ Keep in mind, in this example, we're using a very basic pipeline that consists of just one task. However,<br />
+> Taipy is capable of handling much more complex pipelines 🚀
 
-## Ready, Set, GUI
+<br />
 
-### Tiny User Interface Demo
+Below is our filter function. This is a typical Python function and it's the only task used in this scenario.
 
-```python
-from taipy import Gui
-
-excitement_page = """
-# Welcome to Taipy
-### How excited are you to try Taipy?
-
-<|{excitement}|slider|min=1|max=100|>
-
-My excitement level: <|{excitement}|>
-"""
-excitement = 100
-
-Gui(page=excitement_page).run()
-```
-*RUN*🏃🏽‍♀️
-<div align="center">🎊 TA-DA! 🎊</div>
-<br>
-<div align="center"><img src="readme_img/tiny_demo_readme.gif" width="50%" alt="Tiny Demo"></img></div>
-
-<br>
-
-***<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/gui/)</div>***
-
-<br>
-<br>
-
-## Scenario and Data Management ⚙️
-
-**<div align="left">Let's create a *Scenario* in Taipy to filter movie data based on the genre you choose. This scenario models a simple pipeline. It is submitted (for execution) each time the genre selection changes and outputs the seven most popular movies of that genre. </div>**
-
-<br>
-
-<div align="center"> ⚠️ Here, the back-end involves the execution of a very simple pipeline (made of a single task). Note that Taipy is designed to build much more complex pipelines 🚀 (with many tasks!) </div>
-
-<br>
-
-*Here is our filter function: a standard Python function that is used by the unique task in the scenario*
 ```python
 def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
     filtered_dataset = initial_dataset[initial_dataset['genres'].str.contains(selected_genre)]
@@ -106,40 +83,26 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
     return filtered_data
 ```
 
-*This is the execution graph of the scenario we are implementing*
+This is the execution graph of the scenario we are implementing
+![execution graph](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_exec_graph.png)
 
-<div align="center"><img src="readme_img/readme_exec_graph.png" alt="Demo Execution Graph"  width="50%"/></div>
+### Taipy Studio
+You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code
 
+![TaipyStudio](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif)
 
-### Taipy Studio - The easy peasy way
-*You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code*
+Your configuration is automatically saved as a TOML file.
+Check out Taipy Studio [Documentation](https://docs.taipy.io/en/latest/manuals/studio/)
 
-<div align="center"><img src="readme_img/readme_demo_studio.gif" width="80%" alt="Demo Studio Gif"></img></div>
+For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/knowledge_base/demos/movie_genre_selector/).
 
-*Your configuration is automatically saved as a TOML file*
+&nbsp;
 
-<br>
+## User Interface Generation and Scenario & Data Management
+This simple Taipy application demonstrates how to create a basic film recommendation system using Taipy.<br />
+The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
+Here is the full code for both the frontend and backend of the application.
 
-***<div align="center">Check out our [Documentation](https://docs.taipy.io/en/latest/manuals/studio/) </div>***
-
-<br>
-<br>
-
-### Taipy Scenario & Data Management - a walk on the code side
-<div align="left">For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Taipy has your back! </div>
-
-*<div align="left">Check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/knowledge_base/demos/movie_genre_selector/) </div>*
-
-<br>
-
-***<div align="center">Check out our [Getting Started](https://docs.taipy.io/en/latest/getting_started/) and [Documentation](https://docs.taipy.io/en/latest/manuals/core/) </div>***
-
-<br>
-<br>
-
-
-## User Interface Generation ➕ Scenario & Data Management
-*Now, let's load this configuration and add a user interface on top for a 🎉FULL APPLICATION🎉*
 ```python
 import taipy as tp
 import pandas as pd
@@ -199,43 +162,26 @@ my_page = """
 """
 
 Gui(page=my_page).run()
-
 ```
-*RUN*🏃🏽‍♀️
 
-<br>
+And the final result:
+<img src="readme_img/readme_app.gif" />
 
-<div align="center">🎊TA-DA!🎊</div>
-<br>
-<div align="center"><img src="readme_img/readme_app.gif" width="80%" alt="Image of a Taipy demonstration application"></img></div>
+&nbsp;
 
-<br>
+## ☁️ Taipy cloud
+With Taipy Cloud, you can deploy your Taipy applications in a few clicks and for free!
+To learn more about Taipy Cloud, please refer to the [Taipy Cloud Documentation](https://docs.taipy.io/en/latest/cloud/).
 
-<br>
+![TaipyCloud](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_cloud_demo.gif)
 
-## ☁️Taipy Cloud☁️
-With Taipy Cloud, you can deploy your Taipy applications in a *few clicks* and *for free*!
+## ⚒️ Contributing
+Want to help build Taipy? Check out our [Contributing Guide](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 
-<div align="center"><img src="readme_img/readme_cloud_demo.gif" alt="Demonstration of Taipy Cloud" width="60%" ></img></div>
+## 🪄 Code of conduct
+Want to be part of the Taipy community? Check out our [Code of Conduct](https://github.com/Avaiga/taipy/blob/develop/CODE_OF_CONDUCT.md)
 
-<br>
-<br>
-
-***<div align="center"> Click [here](https://www.taipy.io/taipy-cloud/) to get started for free </div>***
-
-<br>
-<br>
-
-
-## Contributing ⚒⚒
-
-Want to help build _Taipy_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
-
-## Code of conduct
-
-Want to be part of the _Taipy_ community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
-
-## License
+## 🪪 License
 Copyright 2023 Avaiga Private Limited
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
