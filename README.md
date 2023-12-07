@@ -8,7 +8,7 @@
 </div>
 
 <h1 align="center">
-Data and AI algorithms into a production-ready web apps
+Data and AI algorithms into production-ready web apps
 </h1>
 
 <div align="center">
