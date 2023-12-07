@@ -8,7 +8,7 @@
 </div>
 
 <h1 align="center">
-Data and AI algorithms into<br />a production-ready web applications
+Data and AI algorithms into a production-ready web apps
 </h1>
 
 <div align="center">
@@ -24,7 +24,7 @@ Taipy is an open-source Python library for easy, end-to-end application developm
     <a href="https://docs.taipy.io/en/latest/knowledge_base/demos">Demos & Examples</a>
   </p>
 
----
+&nbsp;
 
 ## ⭐️ What's Taipy?
 
@@ -84,17 +84,19 @@ def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
 ```
 
 This is the execution graph of the scenario we are implementing
-![execution graph](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_exec_graph.png)
+<p align="center">
+<img src="https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_exec_graph.png" width="600" align="center" />
+</p>
 
 ### Taipy Studio
-You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code
-
-![TaipyStudio](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif)
-
-Your configuration is automatically saved as a TOML file.
+You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code<br />
+Your configuration is automatically saved as a TOML file.<br />
 Check out Taipy Studio [Documentation](https://docs.taipy.io/en/latest/manuals/studio/)
 
-For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio, Check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/knowledge_base/demos/movie_genre_selector/).
+For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio,<br />
+Check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/knowledge_base/demos/movie_genre_selector/).
+
+![TaipyStudio](https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif)
 
 &nbsp;
 
