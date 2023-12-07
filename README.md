@@ -33,7 +33,7 @@ Taipy is designed for data scientists and machine learning engineers to build fu
 
 ⭐️ Enables building production-ready web applications.<br />
 ⭐️ No need to learn new languages or full-stack frameworks.<br />
-⭐️ Allows to concentrate on Data and AI algorithms, avoiding development and deployment complexities.
+⭐️ Concentrate on Data and AI algorithms without development and deployment complexities.
 
 &nbsp;
 
