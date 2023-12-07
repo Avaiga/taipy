@@ -75,6 +75,8 @@ This scenario is designed as a straightforward pipeline.<br />
 Every time you change your genre selection, the scenario runs to process your request.<br />
 It then displays the top seven most popular movies in that genre.
 
+<br />
+
 > ⚠️ Keep in mind, in this example, we're using a very basic pipeline that consists of just one task. However,<br />
 > Taipy is capable of handling much more complex pipelines 🚀
 
