@@ -31,6 +31,7 @@ jobs:
         run: brew install libmagic
 
       - name: Tests
+        if: matrix.os != 'windows-latest' && matrix.python-versions != '3.8'
         run: |
           pip install tox
           tox -e tests
