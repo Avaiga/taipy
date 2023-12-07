@@ -63,7 +63,7 @@ To install Taipy stable release run:
 pip install taipy
 ```
 
-For further information, on installing Taipy on a Conda Environment or from source, <br /> please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
+To install Taipy on a Conda Environment or from source, please refer to the [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
 To get started with Taipy, please refer to the [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).
 
 &nbsp;
