@@ -10,6 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+import platform
+import subprocess
 import sys
 from pathlib import Path
 
@@ -20,14 +22,16 @@ def build_gui(root_path: Path):
     if already_exists:
         print(f'Found taipy-gui frontend bundle in {root_path  / "taipy" / "gui" / "webapp"}.')
     else:
-        # does not work in GH Action :-(
-        # subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui" / "dom", check=True, shell=True)
-        os.system(f'cd {root_path / "frontend" / "taipy-gui" / "dom"}; npm ci')
-        # subprocess.run(
-        #     ["npm", "ci", "--omit=optional"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=True
-        # )
-        # subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=True)
-        os.system(f'cd {root_path / "frontend" / "taipy-gui"}; npm ci --omit=optional && npm run build')
+        if platform.system() == "Windows":
+            subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui" / "dom", check=True, shell=True)
+            subprocess.run(
+                ["npm", "ci", "--omit=optional"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=True
+            )
+            subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=True)
+        else:
+            # subprocess does not work in GH Action *nix :-(
+            os.system(f'cd {root_path / "frontend" / "taipy-gui" / "dom"}; npm ci')
+            os.system(f'cd {root_path / "frontend" / "taipy-gui"}; npm ci --omit=optional && npm run build')
 
 
 def build_taipy(root_path: Path):
@@ -41,9 +45,11 @@ def build_taipy(root_path: Path):
         if not env_file_path.exists():
             with open(env_file_path, "w") as env_file:
                 env_file.write(f"TAIPY_GUI_DIR={root_path}\n")
-        # subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy", check=True, shell=True)
-        # subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy", check=True, shell=True)
-        os.system(f'cd {root_path / "frontend" / "taipy"}; npm ci && npm run build')
+        if platform.system() == "Windows":
+            subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy", check=True, shell=True)
+            subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy", check=True, shell=True)
+        else:
+            os.system(f'cd {root_path / "frontend" / "taipy"}; npm ci && npm run build')
 
 
 if __name__ == "__main__":
