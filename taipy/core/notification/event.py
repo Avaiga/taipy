@@ -50,7 +50,12 @@ class EventEntityType(_ReprEnum):
 
 
 _NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION])
-_UNSUBMITTABLE_ENTITY_TYPES = (EventEntityType.CYCLE, EventEntityType.DATA_NODE, EventEntityType.JOB)
+_UNSUBMITTABLE_ENTITY_TYPES = (
+    EventEntityType.CYCLE,
+    EventEntityType.DATA_NODE,
+    EventEntityType.JOB,
+    EventEntityType.SUBMISSION,
+)
 _ENTITY_TO_EVENT_ENTITY_TYPE = {
     "scenario": EventEntityType.SCENARIO,
     "sequence": EventEntityType.SEQUENCE,
