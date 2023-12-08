@@ -22,19 +22,19 @@ import pytest
 from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
 
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.excel import ExcelDataNode
-from src.taipy.core.data.operator import JoinOperator, Operator
-from src.taipy.core.exceptions.exceptions import (
+from taipy.config.common.scope import Scope
+from taipy.config.config import Config
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.excel import ExcelDataNode
+from taipy.core.data.operator import JoinOperator, Operator
+from taipy.core.exceptions.exceptions import (
     ExposedTypeLengthMismatch,
     InvalidExposedType,
     NoData,
     NonExistingExcelSheet,
     SheetNameLengthMismatch,
 )
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
 
 
 @pytest.fixture(scope="function", autouse=True)

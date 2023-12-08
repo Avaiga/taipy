@@ -12,7 +12,7 @@
 from functools import wraps
 from unittest.mock import MagicMock, patch
 
-from src.taipy.rest.api.middlewares._middleware import _middleware
+from taipy.rest.api.middlewares._middleware import _middleware
 
 
 def mock_enterprise_middleware(f):
@@ -23,8 +23,8 @@ def mock_enterprise_middleware(f):
     return wrapper
 
 
-@patch("src.taipy.rest.api.middlewares._middleware._using_enterprise")
-@patch("src.taipy.rest.api.middlewares._middleware._enterprise_middleware")
+@patch("taipy.rest.api.middlewares._middleware._using_enterprise")
+@patch("taipy.rest.api.middlewares._middleware._enterprise_middleware")
 def test_enterprise_middleware_applied_when_enterprise_is_installed(
     enterprise_middleware: MagicMock, using_enterprise: MagicMock
 ):
@@ -41,8 +41,8 @@ def test_enterprise_middleware_applied_when_enterprise_is_installed(
     enterprise_middleware.assert_called_once()
 
 
-@patch("src.taipy.rest.api.middlewares._middleware._using_enterprise")
-@patch("src.taipy.rest.api.middlewares._middleware._enterprise_middleware")
+@patch("taipy.rest.api.middlewares._middleware._using_enterprise")
+@patch("taipy.rest.api.middlewares._middleware._enterprise_middleware")
 def test_enterprise_middleware_not_applied_when_enterprise_is_not_installed(
     enterprise_middleware: MagicMock, using_enterprise: MagicMock
 ):

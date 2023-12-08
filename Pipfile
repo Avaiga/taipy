@@ -4,26 +4,75 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+apispec = {extras = ["yaml"], version = "==6.3"}
+apispec-webframeworks = "==0.5.2"
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
 cookiecutter = "==2.1.1"
-taipy-gui = {ref = "develop", git = "https://github.com/avaiga/taipy-gui.git"}
-taipy-rest = {ref = "develop", git = "https://github.com/avaiga/taipy-rest.git"}
-taipy-templates = {ref = "develop", git = "https://github.com/avaiga/taipy-templates.git"}
+deepdiff = "==6.2.2"
+flask = "==3.0.0"
+flask-cors = "==4.0.0"
+flask-socketio = "==5.3.6"
+Flask-RESTful = ">=0.3.9"
+gevent = "==23.7.0"
+gevent-websocket = "==0.10.1"
+gitignore-parser = "==0.1.1"
+kthread = "==0.2.3"
+markdown = "==3.4.4"
+marshmallow = "==3.20.1"
+modin = {extras = ["dask"], version = "==0.23.0"}
+networkx = "==2.6"
+openpyxl = "==3.1.2"
+pandas = "==2.0.0"
+pyarrow = "==10.0.1"
+pymongo = {extras = ["srv"], version = "==4.2.0"}
+python-dotenv = "==1.0.0"
+python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
+python-magic-bin = {version = "==0.4.14", markers="sys_platform == 'win32'"}
+pytz = "==2021.3"
+simple-websocket = "==0.10.1"
+sqlalchemy = "==2.0.16"
+toml = "==0.10"
+twisted = "==23.8.0"
+tzlocal = "==3.0"
 
 [dev-packages]
 autopep8 = "*"
 black = "*"
 flake8 = "*"
 flake8-docstrings = "*"
+ipython = "*"
+ipykernel = "*"
 isort = "*"
-mypy = "*"
-pre-commit = "*"
-pytest = "*"
-tox = "*"
-types-python-dateutil = "*"
+mkdocs = "*"
+mkdocs-autorefs = "*"
+mkdocs-include-markdown-plugin = "*"
+mkdocs-macros-plugin = "*"
+mkdocs-material = "==7.3.0"
+mkdocs-material-extensions = "*"
+mkdocstrings = "*"
 mongomock = "*"
+mypy = "*"
+requests = "*"
+pandas-stubs = "*"
+playwright = "*"
+pre-commit = "*"
+pyopenssl = "*"
+pytest = "*"
+pytest-cov = "*"
 pytest-mock = "*"
+pytest-playwright = "*"
+pytest-timeout = "*"
+python-dotenv = "*"
 testbook = "*"
+tox = "*"
+twine = "*"
+types-flask = "*"
+types-Flask-Cors = "*"
+types-Markdown = "*"
+types-python-dateutil = "*"
+types-pytz = "*"
+types-toml = ">=0.10.0"
+types-tzlocal = "*"
 
 [requires]
 python_version = "3"

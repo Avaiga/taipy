@@ -10,15 +10,16 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+from unittest.mock import patch
 
-import pytest
 from flask import g
 
 from taipy.gui import Gui
 
 
 def test_get_status(gui: Gui):
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     flask_client = gui._server.test_client()
     ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
@@ -32,7 +33,8 @@ def test_get_status(gui: Gui):
 
 
 def test_get_extended_status(gui: Gui):
-    gui.run(run_server=False, extended_status=True)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, extended_status=True)
     flask_client = gui._server.test_client()
     ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
@@ -56,7 +58,8 @@ def test_get_status_with_user_status(gui: Gui):
 
     gui._set_frame(inspect.currentframe())
 
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     flask_client = gui._server.test_client()
     ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"

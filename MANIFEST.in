@@ -1,3 +1,18 @@
-include src/taipy/*.json
-include src/taipy/gui_core/*.json
-include src/taipy/gui_core/lib/*.js
+include taipy/*.json
+include taipy/gui_core/*.json
+include taipy/gui_core/lib/*.js
+
+include taipy/config/*.pyi
+include taipy/config/*.json
+
+include taipy/core/*.json
+include taipy/core/config/*.json
+
+recursive-include taipy/gui/webapp *
+include taipy/gui/version.json
+include taipy/gui/viselements.json
+include taipy/gui/*.pyi
+
+include taipy/rest/*.json
+
+recursive-include taipy/templates *

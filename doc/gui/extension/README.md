@@ -56,8 +56,8 @@ the Taipy GUI installation:
 - If you build from a local copy (a clone, for example) of the
   [`taipy-gui` repository](https://github.com/Avaiga/taipy-gui/),
   this variable should be set to the path of the directory two levels above the directory where this
-  README file is located, then down to the "src" directory (i.e., the result of the Unix command
-  "``readlink -f `pwd`/../../src``").
+  README file is located, then down to the "taipy" directory (i.e., the result of the Unix command
+  "``readlink -f `pwd`/../../taipy``").
 - If you are building this extension library example from an installation of Taipy GUI, you can
   get that location issuing the command `pip show taipy-gui`.
 

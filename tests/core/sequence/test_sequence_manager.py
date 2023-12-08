@@ -16,34 +16,33 @@ from unittest import mock
 from unittest.mock import ANY
 
 import pytest
-
-from src.taipy.core._orchestrator._orchestrator import _Orchestrator
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.common import _utils
-from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.exceptions.exceptions import (
+from taipy.config.common.scope import Scope
+from taipy.config.config import Config
+from taipy.core._orchestrator._orchestrator import _Orchestrator
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core.common import _utils
+from taipy.core.common._utils import _Subscriber
+from taipy.core.config.job_config import JobConfig
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions.exceptions import (
     InvalidSequenceId,
     ModelNotFound,
     NonExistingSequence,
     NonExistingTask,
     SequenceBelongsToNonExistingScenario,
 )
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.sequence._sequence_manager import _SequenceManager
+from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+from taipy.core.sequence.sequence import Sequence
+from taipy.core.sequence.sequence_id import SequenceId
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
+from taipy.core.task.task_id import TaskId
 from tests.core.utils.NotifyMock import NotifyMock
 
 
@@ -272,7 +271,7 @@ def test_submit():
             cls.submit_calls.append(task)
             return super()._lock_dn_output_and_create_job(task, submit_id, submit_entity_id, callbacks, force)
 
-    with mock.patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
+    with mock.patch("taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         # sequence does not exists. We expect an exception to be raised
         with pytest.raises(NonExistingSequence):
             _SequenceManager._submit(sequence_id)
@@ -476,7 +475,7 @@ def notify_multi_param(*args, **kwargs):
 def test_sequence_notification_subscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     task_configs = [
         Config.configure_task(
@@ -530,7 +529,7 @@ def test_sequence_notification_subscribe(mocker):
 def test_sequence_notification_subscribe_multi_param(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     task_configs = [
         Config.configure_task(
@@ -565,7 +564,7 @@ def test_sequence_notification_subscribe_multi_param(mocker):
 def test_sequence_notification_unsubscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     task_configs = [
         Config.configure_task(

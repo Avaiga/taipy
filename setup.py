@@ -13,18 +13,17 @@
 
 
 import json
-import os
-import sysconfig
-from importlib.util import find_spec
+import subprocess
 from pathlib import Path
 
-from setuptools import find_namespace_packages, find_packages, setup
+from setuptools import find_packages, setup
 from setuptools.command.build_py import build_py
 
-with open("README.md", "rb") as readme_file:
-    readme = readme_file.read().decode("UTF-8")
+root_folder = Path(__file__).parent
 
-with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
+readme = Path(root_folder / "README.md").read_text("UTF-8")
+
+with open(root_folder / "taipy" / "version.json") as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
@@ -33,10 +32,41 @@ with open(f"src{os.sep}taipy{os.sep}version.json") as version_file:
 requirements = [
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
     "cookiecutter>=2.1.1,<2.2",
-    "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
-    "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
-    "taipy-templates@git+https://git@github.com/Avaiga/taipy-templates.git@develop",
+    "toml>=0.10,<0.11",
+    "deepdiff>=6.2,<6.3",
+    "pyarrow>=10.0.1,<11.0",
+    "networkx>=2.6,<3.0",
+    "openpyxl>=3.1.2,<3.2",
+    "modin[dask]>=0.23.0,<1.0",
+    "pymongo[srv]>=4.2.0,<5.0",
+    "sqlalchemy>=2.0.16,<2.1",
+    "flask>=3.0.0,<3.1",
+    "flask-cors>=4.0.0,<5.0",
+    "flask-socketio>=5.3.6,<6.0",
+    "markdown>=3.4.4,<4.0",
+    "pandas>=2.0.0,<3.0",
+    "python-dotenv>=1.0.0,<1.1",
+    "pytz>=2021.3,<2022.2",
+    "tzlocal>=3.0,<5.0",
+    "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
+    "gevent>=23.7.0,<24.0",
+    "gevent-websocket>=0.10.1,<0.11",
+    "kthread>=0.2.3,<0.3",
+    "gitignore-parser>=0.1,<0.2",
+    "simple-websocket>=0.10.1,<1.0",
+    "twisted>=23.8.0,<24.0",
+    "flask-restful>=0.3.9,<0.4",
+    "passlib>=1.7.4,<1.8",
+    "marshmallow>=3.20.1,<3.30",
+    "apispec[yaml]>=6.3,<7.0",
+    "apispec-webframeworks>=0.5.2,<0.6",
 ]
+
+
+def get_requirements():
+    # TODO get requirements from the different setups in tools/packages (removing taipy packages)
+    return requirements
+
 
 test_requirements = ["pytest>=3.8"]
 
@@ -52,29 +82,9 @@ extras_require = {
 }
 
 
-def _build_webapp():
-    already_exists = Path("./src/taipy/gui_core/lib/taipy-gui-core.js").exists()
-    if not already_exists:
-        # default site-packages path is from the current python interpreter
-        site_packages_path = sysconfig.get_path("purelib")
-        # taipy-gui should be available through setup_requires option
-        # taipy-gui at this step is installed in a backend site-packages separated from the one being used by pip
-        if find_spec("taipy") and find_spec("taipy.gui"):
-            import taipy
-
-            site_packages_path = Path(taipy.__file__).absolute().parent.parent
-
-        # Specify the correct path to taipy-gui in gui/.env file
-        env_file_path = Path(__file__).absolute().parent / "frontend" / "taipy" / ".env"
-        if not os.path.exists(env_file_path):
-            with open(env_file_path, "w") as env_file:
-                env_file.write(f"TAIPY_GUI_DIR={site_packages_path}\n")
-        os.system("cd frontend/taipy && npm ci && npm run build")
-
-
 class NPMInstall(build_py):
     def run(self):
-        _build_webapp()
+        subprocess.run(["python", "bundle_build.py"], cwd=root_folder / "tools" / "frontend", check=True, shell=True)
         build_py.run(self)
 
 
@@ -93,7 +103,7 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     description="A 360° open-source platform from Python pilots to production-ready web apps.",
-    install_requires=requirements,
+    install_requires=get_requirements(),
     entry_points={
         "console_scripts": [
             "taipy = taipy._entrypoint:_entrypoint",
@@ -104,8 +114,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="taipy",
     name="taipy",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src") + find_packages(include=["taipy"]),
+    packages=find_packages(include=["taipy", "taipy.*"]),
     include_package_data=True,
     test_suite="tests",
     url="https://github.com/avaiga/taipy",

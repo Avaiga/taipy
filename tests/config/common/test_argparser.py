@@ -15,7 +15,7 @@ import sys
 
 import pytest
 
-from src.taipy._cli._base_cli import _CLI
+from taipy._cli._base_cli import _CLI
 
 if sys.version_info >= (3, 10):
     argparse_options_str = "options:"
@@ -49,6 +49,9 @@ def clean_argparser():
         remove_subparser(subcommand)
 
     yield
+
+    _CLI._subparser_action = None
+    _CLI._sub_taipyparsers = {}
 
 
 def test_subparser(capfd):

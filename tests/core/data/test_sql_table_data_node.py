@@ -18,12 +18,11 @@ import pandas as pd
 import pytest
 from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
-
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.operator import JoinOperator, Operator
-from src.taipy.core.data.sql_table import SQLTableDataNode
-from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 from taipy.config.common.scope import Scope
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.operator import JoinOperator, Operator
+from taipy.core.data.sql_table import SQLTableDataNode
+from taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 
 
 class MyCustomObject:
@@ -204,10 +203,10 @@ class TestSQLTableDataNode:
         with pytest.raises(MissingRequiredProperty):
             SQLTableDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
-    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as", return_value="custom")
-    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
-    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_modin_dataframe", return_value="modin")
-    @patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_numpy", return_value="numpy")
+    @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as", return_value="custom")
+    @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_pandas_dataframe", return_value="pandas")
+    @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_modin_dataframe", return_value="modin")
+    @patch("taipy.core.data.sql_table.SQLTableDataNode._read_as_numpy", return_value="numpy")
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
     @pytest.mark.parametrize("modin_properties", __modin_properties)
     def test_read(
@@ -319,12 +318,12 @@ class TestSQLTableDataNode:
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
+            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ) as create_table_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch(f"src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode{called_func}") as mck:
+            with patch(f"taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode{called_func}") as mck:
                 dn.write(data)
                 mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock, True)
 
@@ -346,12 +345,12 @@ class TestSQLTableDataNode:
 
         df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
+            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__insert_dataframe") as mck:
+            with patch("taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__insert_dataframe") as mck:
                 dn.write(df)
                 assert mck.call_args[0][0].equals(df)
 
@@ -362,12 +361,12 @@ class TestSQLTableDataNode:
 
         df = modin_pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
+            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__insert_dataframe") as mck:
+            with patch("taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__insert_dataframe") as mck:
                 dn.write(df)
                 assert mck.call_args[0][0].equals(df)
 
@@ -385,12 +384,12 @@ class TestSQLTableDataNode:
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
+            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ) as create_table_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with patch("src.taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__delete_all_rows") as mck:
+            with patch("taipy.core.data.sql_table.SQLTableDataNode._SQLTableDataNode__delete_all_rows") as mck:
                 dn.write(data)
                 mck.assert_called_once_with(create_table_mock.return_value, cursor_mock, True)
 
@@ -406,7 +405,7 @@ class TestSQLTableDataNode:
         assert dn._engine is None
 
         with patch("sqlalchemy.engine.Engine.connect") as engine_mock, patch(
-            "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
+            "taipy.core.data.sql_table.SQLTableDataNode._create_table"
         ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None

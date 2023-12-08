@@ -18,7 +18,6 @@ import pandas as pd
 import pytest
 from dotenv import load_dotenv
 
-from src.taipy.rest.app import create_app
 from taipy.config import Config
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
@@ -27,6 +26,7 @@ from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_manager import _TaskManager
+from taipy.rest.app import create_app
 
 from .setup.shared.algorithms import evaluate, forecast
 
@@ -263,7 +263,7 @@ def create_cycle_list():
     cycles = []
     manager = _CycleManager
     for i in range(10):
-        c = __create_cycle(f"cycle_{1}")
+        c = __create_cycle(f"cycle_{i}")
         manager._set(c)
     return cycles
 
@@ -309,10 +309,11 @@ def create_job_list():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def cleanup_files():
-    Config.unblock_update()
-    Config.configure_core(repository_type="filesystem")
+def cleanup_files(reset_configuration_singleton, inject_core_sections):
+    reset_configuration_singleton()
+    inject_core_sections()
 
+    Config.configure_core(repository_type="filesystem")
     if os.path.exists(".data"):
         shutil.rmtree(".data", ignore_errors=True)
     if os.path.exists(".my_data"):

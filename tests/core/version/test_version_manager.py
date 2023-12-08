@@ -10,10 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
-
-from src.taipy.core._version._version import _Version
-from src.taipy.core._version._version_manager import _VersionManager
 from taipy.config.config import Config
+from taipy.core._version._version import _Version
+from taipy.core._version._version_manager import _VersionManager
 
 
 def test_save_and_get_version_entity(tmpdir):

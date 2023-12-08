@@ -13,9 +13,9 @@ import os
 from unittest import mock
 from unittest.mock import MagicMock
 
-from src.taipy.config import Config
-from src.taipy.config.checker._checker import _Checker
-from src.taipy.config.checker.issue_collector import IssueCollector
+from taipy.config import Config
+from taipy.config.checker._checker import _Checker
+from taipy.config.checker.issue_collector import IssueCollector
 from tests.config.utils.checker_for_tests import CheckerForTest
 
 

@@ -12,10 +12,9 @@
 from unittest import mock
 
 import pytest
-
-from src.taipy.core import taipy
-from src.taipy.core._entity._labeled import _Labeled
 from taipy.config import Config, Frequency, Scope
+from taipy.core import taipy
+from taipy.core._entity._labeled import _Labeled
 
 
 class MockOwner:
@@ -53,7 +52,7 @@ def test_get_label():
     assert labeled_entity._get_simple_label() == "a name"
 
     labeled_entity.owner_id = "owner_id"
-    with mock.patch("src.taipy.core.get") as get_mck:
+    with mock.patch("taipy.core.get") as get_mck:
         get_mck.return_value = MockOwner()
         assert labeled_entity._get_label() == "owner_label > a name"
         assert labeled_entity._get_simple_label() == "a name"

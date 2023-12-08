@@ -9,8 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from src.taipy.config._config import _Config
-from src.taipy.config.checker._checker import _Checker
+from taipy.config._config import _Config
+from taipy.config.checker._checker import _Checker
 
 
 class TestDefaultConfigChecker:

@@ -54,7 +54,7 @@ def test_create_scenario(client, default_scenario_config):
     rep = client.post(scenarios_url)
     assert rep.status_code == 404
 
-    with mock.patch("src.taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
+    with mock.patch("taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
         config_mock.return_value = default_scenario_config
         scenarios_url = url_for("api.scenarios", config_id="bar")
         rep = client.post(scenarios_url)
@@ -63,7 +63,7 @@ def test_create_scenario(client, default_scenario_config):
 
 def test_get_all_scenarios(client, default_sequence, default_scenario_config_list):
     for ds in range(10):
-        with mock.patch("src.taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
+        with mock.patch("taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
             config_mock.return_value = default_scenario_config_list[ds]
             scenarios_url = url_for("api.scenarios", config_id=config_mock.name)
             client.post(scenarios_url)

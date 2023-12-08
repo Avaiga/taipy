@@ -13,10 +13,10 @@ import os
 
 import pytest
 
-from src.taipy.core._version._version import _Version
-from src.taipy.core._version._version_fs_repository import _VersionFSRepository
-from src.taipy.core._version._version_sql_repository import _VersionSQLRepository
-from src.taipy.core.exceptions import ModelNotFound
+from taipy.core._version._version import _Version
+from taipy.core._version._version_fs_repository import _VersionFSRepository
+from taipy.core._version._version_sql_repository import _VersionSQLRepository
+from taipy.core.exceptions import ModelNotFound
 
 
 class TestVersionFSRepository:

@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+from unittest.mock import patch
 
 import pytest
 
@@ -28,7 +29,8 @@ def test_ru_selector(gui: Gui, helpers, csvdata):
         "test",
         Markdown("<|{selected_val}|selector|multiple|>"),
     )
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())

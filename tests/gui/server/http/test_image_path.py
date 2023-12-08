@@ -10,14 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
-
-import pytest
+from unittest.mock import patch
 
 from taipy.gui import Gui
 
 
 def test_image_path_not_found(gui: Gui, helpers):
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
@@ -29,7 +29,8 @@ def test_image_path_found(gui: Gui, helpers):
     url = gui._get_content(
         "img", str((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve()), True
     )
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)

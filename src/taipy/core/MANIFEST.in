@@ -1,2 +1,0 @@
-include src/taipy/core/*.json
-include src/taipy/core/config/*.json

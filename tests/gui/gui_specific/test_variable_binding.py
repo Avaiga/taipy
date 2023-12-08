@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from unittest.mock import patch
+
 from taipy.gui import Gui, Markdown
 
 
@@ -25,7 +27,8 @@ def test_variable_binding(helpers):
     z = "button label"
     gui = Gui()
     gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|on_action=another_function|>"))
-    gui.run(run_server=False, single_client=True)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, single_client=True)
     client = gui._server.test_client()
     jsx = client.get("/taipy-jsx/test").json["jsx"]
     for expected in ["<Button", 'defaultLabel="button label"', "label={tpec_TpExPr_z_TPMDL_0}"]:
@@ -43,7 +46,8 @@ def test_properties_binding(helpers):
     modifier = "nice "  # noqa: F841
     button_properties = {"label": "A {modifier}button"}  # noqa: F841
     gui.add_page("test", Markdown("<|button|properties=button_properties|>"))
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     client = gui._server.test_client()
     jsx = client.get("/taipy-jsx/test").json["jsx"]
     for expected in ["<Button", 'defaultLabel="A nice button"']:
@@ -57,7 +61,8 @@ def test_dict_binding(helpers):
     """
     d = {"k": "test"}  # noqa: F841
     gui = Gui("<|{d.k}|>")
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     client = gui._server.test_client()
     jsx = client.get("/taipy-jsx/TaiPy_root_page").json["jsx"]
     for expected in ["<Field", 'defaultValue="test"']:

@@ -11,25 +11,24 @@
 
 import pytest
 
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.conftest import init_managers
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core.config.job_config import JobConfig
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.sequence._sequence_manager import _SequenceManager
+from taipy.core.sequence.sequence_id import SequenceId
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
+from taipy.core.task.task_id import TaskId
 
 
-def test_set_and_get_sequence(init_sql_repo):
+def test_set_and_get_sequence(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -103,7 +102,7 @@ def test_set_and_get_sequence(init_sql_repo):
     assert _TaskManager._get(task.id).id == task.id
 
 
-def test_get_all_on_multiple_versions_environment(init_sql_repo):
+def test_get_all_on_multiple_versions_environment(init_sql_repo, init_managers):
     init_managers()
 
     # Create 5 sequences from Scenario with 2 versions each
@@ -166,7 +165,7 @@ def mult_by_3(nb: int):
     return nb * 3
 
 
-def test_get_or_create_data(init_sql_repo):
+def test_get_or_create_data(init_sql_repo, init_managers):
     # only create intermediate data node once
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
@@ -220,7 +219,7 @@ def test_get_or_create_data(init_sql_repo):
         sequence.WRONG.write(7)
 
 
-def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo):
+def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -251,7 +250,7 @@ def test_hard_delete_one_single_sequence_with_scenario_data_nodes(init_sql_repo)
     assert len(_JobManager._get_all()) == 1
 
 
-def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo):
+def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -282,7 +281,7 @@ def test_hard_delete_one_single_sequence_with_cycle_data_nodes(init_sql_repo):
     assert len(_JobManager._get_all()) == 1
 
 
-def test_hard_delete_shared_entities(init_sql_repo):
+def test_hard_delete_shared_entities(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()

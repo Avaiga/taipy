@@ -13,16 +13,16 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core.config.data_node_config import DataNodeConfig
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.csv import CSVDataNode
-from src.taipy.core.data.data_node import DataNode
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.config.data_node_config import DataNodeConfig
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.csv import CSVDataNode
+from taipy.core.data.data_node import DataNode
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
 
 
 @pytest.fixture
@@ -81,7 +81,7 @@ def test_create_task():
     assert task.name_1ea.path == path
     with pytest.raises(AttributeError):
         task.bar
-    with mock.patch("src.taipy.core.get") as get_mck:
+    with mock.patch("taipy.core.get") as get_mck:
 
         class MockOwner:
             label = "owner_label"
@@ -293,12 +293,12 @@ def test_auto_set_and_reload(data_node):
 
 
 def test_get_parents(task):
-    with mock.patch("src.taipy.core.get_parents") as mck:
+    with mock.patch("taipy.core.get_parents") as mck:
         task.get_parents()
         mck.assert_called_once_with(task)
 
 
 def test_submit_task(task: Task):
-    with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mock_submit:
+    with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mock_submit:
         task.submit([], True)
         mock_submit.assert_called_once_with(task, [], True, False, None)

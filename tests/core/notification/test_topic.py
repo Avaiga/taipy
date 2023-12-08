@@ -11,9 +11,9 @@
 
 import pytest
 
-from src.taipy.core.exceptions.exceptions import InvalidEventOperation
-from src.taipy.core.notification._topic import _Topic
-from src.taipy.core.notification.event import EventEntityType, EventOperation
+from taipy.core.exceptions.exceptions import InvalidEventOperation
+from taipy.core.notification._topic import _Topic
+from taipy.core.notification.event import EventEntityType, EventOperation
 
 
 def test_general_topic_creation():

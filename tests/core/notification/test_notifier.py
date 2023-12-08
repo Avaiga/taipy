@@ -11,12 +11,12 @@
 
 from queue import SimpleQueue
 
-from src.taipy.core import taipy as tp
-from src.taipy.core.notification import EventEntityType, EventOperation
-from src.taipy.core.notification._topic import _Topic
-from src.taipy.core.notification.event import Event
-from src.taipy.core.notification.notifier import Notifier
 from taipy.config import Config, Frequency
+from taipy.core import taipy as tp
+from taipy.core.notification import EventEntityType, EventOperation
+from taipy.core.notification._topic import _Topic
+from taipy.core.notification.event import Event
+from taipy.core.notification.notifier import Notifier
 
 
 def test_register():

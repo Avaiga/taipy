@@ -18,19 +18,18 @@ from queue import Queue
 import pandas as pd
 import pytest
 from sqlalchemy import create_engine, text
+from sqlalchemy.orm import close_all_sessions
 
-from src.taipy.core._core import Core
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._repository.db._sql_connection import _SQLConnection
-from src.taipy.core._version._version import _Version
-from src.taipy.core._version._version_manager_factory import _VersionManagerFactory
-from src.taipy.core.config import (
-    CoreSection,
-    DataNodeConfig,
-    JobConfig,
-    MigrationConfig,
-    ScenarioConfig,
-    TaskConfig,
+from taipy.config.checker._checker import _Checker
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
+from taipy.config.config import Config
+from taipy.core._core import Core
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._repository.db._sql_connection import _SQLConnection
+from taipy.core._version._version import _Version
+from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.config import (
     _ConfigIdChecker,
     _CoreSectionChecker,
     _DataNodeConfigChecker,
@@ -38,36 +37,27 @@ from src.taipy.core.config import (
     _ScenarioConfigChecker,
     _TaskConfigChecker,
 )
-from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
-from src.taipy.core.cycle._cycle_model import _CycleModel
-from src.taipy.core.cycle.cycle import Cycle
-from src.taipy.core.cycle.cycle_id import CycleId
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data._data_model import _DataNodeModel
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.job.job import Job
-from src.taipy.core.job.job_id import JobId
-from src.taipy.core.notification.notifier import Notifier
-from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from src.taipy.core.scenario._scenario_model import _ScenarioModel
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.scenario.scenario_id import ScenarioId
-from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from src.taipy.core.submission._submission_model import _SubmissionModel
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
-from taipy.config import _inject_section
-from taipy.config._config import _Config
-from taipy.config._serializer._toml_serializer import _TomlSerializer
-from taipy.config.checker._checker import _Checker
-from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.cycle._cycle_model import _CycleModel
+from taipy.core.cycle.cycle import Cycle
+from taipy.core.cycle.cycle_id import CycleId
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.data._data_model import _DataNodeModel
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.job.job import Job
+from taipy.core.job.job_id import JobId
+from taipy.core.notification.notifier import Notifier
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.scenario._scenario_model import _ScenarioModel
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.scenario.scenario_id import ScenarioId
+from taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
+from taipy.core.sequence.sequence import Sequence
+from taipy.core.sequence.sequence_id import SequenceId
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
+from taipy.core.task.task import Task
 
 current_time = datetime.now()
 _OrchestratorFactory._build_orchestrator()
@@ -320,9 +310,7 @@ def tmp_sqlite(tmpdir_factory):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def clean_repository():
-    from sqlalchemy.orm import close_all_sessions
-
+def clean_repository(init_config, init_managers, init_orchestrator, init_notifier):
     close_all_sessions()
     init_config()
     init_orchestrator()
@@ -333,104 +321,59 @@ def clean_repository():
     yield
 
 
-def init_config():
-    Config.unblock_update()
-    Config._default_config = _Config()._default_config()
-    Config._python_config = _Config()
-    Config._file_config = _Config()
-    Config._env_file_config = _Config()
-    Config._applied_config = _Config()
-    Config._collector = IssueCollector()
-    Config._serializer = _TomlSerializer()
-    _Checker._checkers = []
+@pytest.fixture
+def init_config(reset_configuration_singleton, inject_core_sections):
+    def _init_config():
+        reset_configuration_singleton()
+        inject_core_sections()
 
-    _inject_section(
-        JobConfig, "job_config", JobConfig("development"), [("configure_job_executions", JobConfig._configure)], True
-    )
-    _inject_section(
-        CoreSection,
-        "core",
-        CoreSection.default_config(),
-        [("configure_core", CoreSection._configure)],
-        add_to_unconflicted_sections=True,
-    )
-    _inject_section(
-        DataNodeConfig,
-        "data_nodes",
-        DataNodeConfig.default_config(),
-        [
-            ("configure_data_node", DataNodeConfig._configure),
-            ("configure_data_node_from", DataNodeConfig._configure_from),
-            ("set_default_data_node_configuration", DataNodeConfig._set_default_configuration),
-            ("configure_csv_data_node", DataNodeConfig._configure_csv),
-            ("configure_json_data_node", DataNodeConfig._configure_json),
-            ("configure_sql_table_data_node", DataNodeConfig._configure_sql_table),
-            ("configure_sql_data_node", DataNodeConfig._configure_sql),
-            ("configure_mongo_collection_data_node", DataNodeConfig._configure_mongo_collection),
-            ("configure_in_memory_data_node", DataNodeConfig._configure_in_memory),
-            ("configure_pickle_data_node", DataNodeConfig._configure_pickle),
-            ("configure_excel_data_node", DataNodeConfig._configure_excel),
-            ("configure_generic_data_node", DataNodeConfig._configure_generic),
-        ],
-    )
-    _inject_section(
-        TaskConfig,
-        "tasks",
-        TaskConfig.default_config(),
-        [
-            ("configure_task", TaskConfig._configure),
-            ("set_default_task_configuration", TaskConfig._set_default_configuration),
-        ],
-    )
-    _inject_section(
-        ScenarioConfig,
-        "scenarios",
-        ScenarioConfig.default_config(),
-        [
-            ("configure_scenario", ScenarioConfig._configure),
-            ("set_default_scenario_configuration", ScenarioConfig._set_default_configuration),
-        ],
-    )
-    _inject_section(
-        MigrationConfig,
-        "migration_functions",
-        MigrationConfig.default_config(),
-        [("add_migration_function", MigrationConfig._add_migration_function)],
-        True,
-    )
-    _Checker.add_checker(_ConfigIdChecker)
-    _Checker.add_checker(_CoreSectionChecker)
-    _Checker.add_checker(_DataNodeConfigChecker)
-    _Checker.add_checker(_JobConfigChecker)
-    # We don't need to add _MigrationConfigChecker because it is run only when the Core service is run.
-    _Checker.add_checker(_TaskConfigChecker)
-    _Checker.add_checker(_ScenarioConfigChecker)
+        _Checker.add_checker(_ConfigIdChecker)
+        _Checker.add_checker(_CoreSectionChecker)
+        _Checker.add_checker(_DataNodeConfigChecker)
+        _Checker.add_checker(_JobConfigChecker)
+        # We don't need to add _MigrationConfigChecker because it is run only when the Core service is run.
+        _Checker.add_checker(_TaskConfigChecker)
+        _Checker.add_checker(_ScenarioConfigChecker)
 
-    Config.configure_core(read_entity_retry=0)
-    Core._is_running = False
+        Config.configure_core(read_entity_retry=0)
+        Core._is_running = False
+
+    return _init_config
 
 
+@pytest.fixture
 def init_managers():
-    _CycleManagerFactory._build_manager()._delete_all()
-    _ScenarioManagerFactory._build_manager()._delete_all()
-    _SequenceManagerFactory._build_manager()._delete_all()
-    _JobManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _DataManagerFactory._build_manager()._delete_all()
-    _VersionManagerFactory._build_manager()._delete_all()
-    _SubmissionManagerFactory._build_manager()._delete_all()
+    def _init_managers():
+        _CycleManagerFactory._build_manager()._delete_all()
+        _ScenarioManagerFactory._build_manager()._delete_all()
+        _SequenceManagerFactory._build_manager()._delete_all()
+        _JobManagerFactory._build_manager()._delete_all()
+        _TaskManagerFactory._build_manager()._delete_all()
+        _DataManagerFactory._build_manager()._delete_all()
+        _VersionManagerFactory._build_manager()._delete_all()
+        _SubmissionManagerFactory._build_manager()._delete_all()
+
+    return _init_managers
 
 
+@pytest.fixture
 def init_orchestrator():
-    if _OrchestratorFactory._orchestrator is None:
-        _OrchestratorFactory._build_orchestrator()
-    _OrchestratorFactory._build_dispatcher()
-    _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
-    _OrchestratorFactory._orchestrator.blocked_jobs = []
+    def _init_orchestrator():
+        if _OrchestratorFactory._orchestrator is None:
+            _OrchestratorFactory._build_orchestrator()
+        _OrchestratorFactory._build_dispatcher()
+        _OrchestratorFactory._orchestrator.jobs_to_run = Queue()
+        _OrchestratorFactory._orchestrator.blocked_jobs = []
+
+    return _init_orchestrator
 
 
+@pytest.fixture
 def init_notifier():
-    Notifier._topics_registrations_list = {}
+    def _init_notifier():
+        Notifier._topics_registrations_list = {}
+
+    return _init_notifier
 
 
 @pytest.fixture

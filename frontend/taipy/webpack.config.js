@@ -22,7 +22,7 @@ module.exports = (_env, options) => {
         entry: ["./src/index.ts"],
         output: {
             filename: "taipy-gui-core.js",
-            path: path.resolve(__dirname, "../../src/taipy/gui_core/lib"),
+            path: path.resolve(__dirname, "../../taipy/gui_core/lib"),
             library: {
                 // Camel case transformation of the library name "example"
                 name: "TaipyGuiCore",

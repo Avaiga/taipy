@@ -11,12 +11,12 @@
 
 import pytest
 
-from src.taipy.core.data.data_node import DataNode
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.generic import GenericDataNode
-from src.taipy.core.exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.data.data_node import DataNode
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.generic import GenericDataNode
+from taipy.core.exceptions.exceptions import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 
 
 def read_fct():
@@ -37,7 +37,7 @@ def write_fct_with_args(data, inp):
 
 
 def read_fct_modify_data_node_name(data_node_id: DataNodeId, name: str):
-    import src.taipy.core as tp
+    import taipy.core as tp
 
     data_node = tp.get(data_node_id)
     assert isinstance(data_node, DataNode)

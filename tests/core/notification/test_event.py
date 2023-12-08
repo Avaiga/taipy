@@ -11,9 +11,9 @@
 
 import pytest
 
-from src.taipy.core.exceptions.exceptions import InvalidEventAttributeName, InvalidEventOperation
-from src.taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.config.common.frequency import Frequency
+from taipy.core.exceptions.exceptions import InvalidEventAttributeName, InvalidEventOperation
+from taipy.core.notification.event import Event, EventEntityType, EventOperation
 
 
 def test_event_creation_cycle():

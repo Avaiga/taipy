@@ -11,7 +11,7 @@
 
 from unittest import mock
 
-from src.taipy._run import _run
+from taipy._run import _run
 from taipy.core import Core
 from taipy.gui import Gui
 from taipy.rest import Rest

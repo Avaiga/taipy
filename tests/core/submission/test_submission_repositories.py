@@ -12,16 +12,16 @@
 import os
 
 import pytest
-
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.exceptions import ModelNotFound
-from src.taipy.core.job._job_manager_factory import _JobManagerFactory
-from src.taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
-from src.taipy.core.submission.submission import Submission
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
-from taipy.config.config import Config
 from tests.core.conftest import init_sql_repo
+
+from taipy.config.config import Config
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.exceptions import ModelNotFound
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
+from taipy.core.task.task import Task
 
 
 def configure_fs_repo():

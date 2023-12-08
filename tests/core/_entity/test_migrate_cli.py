@@ -17,8 +17,7 @@ from unittest.mock import patch
 
 import mongomock
 import pytest
-
-from src.taipy.core._entity._migrate_cli import _MigrateCLI
+from taipy.core._entity._migrate_cli import _MigrateCLI
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -141,7 +140,7 @@ def test_migrate_fs_non_existing_folder(caplog):
     assert "Folder 'non-existing-folder' does not exist." in caplog.text
 
 
-@patch("src.taipy.core._entity._migrate_cli._migrate_sql_entities")
+@patch("taipy.core._entity._migrate_cli._migrate_sql_entities")
 def test_migrate_sql_specified_path(_migrate_sql_entities_mock, tmp_sqlite):
     _MigrateCLI.create_parser()
 
@@ -240,7 +239,7 @@ def test_migrate_sql_non_existing_path(caplog):
     assert "File 'non-existing-path.sqlite' does not exist." in caplog.text
 
 
-@patch("src.taipy.core._entity._migrate_cli._migrate_mongo_entities")
+@patch("taipy.core._entity._migrate_cli._migrate_mongo_entities")
 def test_call_to_migrate_mongo(_migrate_mongo_entities_mock):
     _MigrateCLI.create_parser()
 

@@ -11,6 +11,7 @@
 
 import inspect
 import time
+from unittest.mock import patch
 
 from taipy.gui import Gui, Markdown
 
@@ -28,7 +29,8 @@ def test_a_button_pressed(gui: Gui, helpers):
     gui.add_page(
         "test", Markdown("<|Do something!|button|on_action=do_something|id=my_button|> | <|{x}|> | <|{text}|>")
     )
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())

@@ -53,7 +53,7 @@ def test_create_task(client, default_task_config):
     rep = client.post(tasks_url)
     assert rep.status_code == 404
 
-    with mock.patch("src.taipy.rest.api.resources.task.TaskList.fetch_config") as config_mock:
+    with mock.patch("taipy.rest.api.resources.task.TaskList.fetch_config") as config_mock:
         config_mock.return_value = default_task_config
         tasks_url = url_for("api.tasks", config_id="bar")
         rep = client.post(tasks_url)
@@ -62,7 +62,7 @@ def test_create_task(client, default_task_config):
 
 def test_get_all_tasks(client, task_data, default_task_config_list):
     for ds in range(10):
-        with mock.patch("src.taipy.rest.api.resources.task.TaskList.fetch_config") as config_mock:
+        with mock.patch("taipy.rest.api.resources.task.TaskList.fetch_config") as config_mock:
             config_mock.return_value = default_task_config_list[ds]
             tasks_url = url_for("api.tasks", config_id=config_mock.name)
             client.post(tasks_url)

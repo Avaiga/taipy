@@ -18,24 +18,24 @@ from functools import partial
 from time import sleep
 
 import pytest
+from tests.core.utils import assert_true_after_time
 
-from src.taipy.core import taipy
-from src.taipy.core._orchestrator._orchestrator import _Orchestrator
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.submission._submission_manager import _SubmissionManager
-from src.taipy.core.submission.submission_status import SubmissionStatus
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
 from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
-from tests.core.utils import assert_true_after_time
+from taipy.core import taipy
+from taipy.core._orchestrator._orchestrator import _Orchestrator
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config.job_config import JobConfig
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.sequence.sequence import Sequence
+from taipy.core.submission._submission_manager import _SubmissionManager
+from taipy.core.submission.submission_status import SubmissionStatus
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
+from taipy.core.data.pickle import PickleDataNode
 
 
 # ################################  USER FUNCTIONS  ##################################

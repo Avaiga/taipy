@@ -14,18 +14,20 @@ from typing import Callable, Iterable, Optional
 from unittest.mock import ANY, patch
 
 import pytest
-
-from src.taipy.core import Job
-from src.taipy.core._orchestrator._orchestrator import _Orchestrator
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.common import _utils
-from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.cycle._cycle_manager import _CycleManager
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.exceptions.exceptions import (
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
+from taipy.config.config import Config
+from taipy.core import Job
+from taipy.core._orchestrator._orchestrator import _Orchestrator
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core.common import _utils
+from taipy.core.common._utils import _Subscriber
+from taipy.core.config.job_config import JobConfig
+from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions.exceptions import (
     DeletingPrimaryScenario,
     DifferentScenarioConfigs,
     InsufficientScenarioToCompare,
@@ -36,20 +38,17 @@ from src.taipy.core.exceptions.exceptions import (
     SequenceTaskConfigDoesNotExistInSameScenarioConfig,
     UnauthorizedTagError,
 )
-from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.scenario.scenario_id import ScenarioId
-from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
-from taipy.config.common.frequency import Frequency
-from taipy.config.common.scope import Scope
-from taipy.config.config import Config
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.scenario.scenario_id import ScenarioId
+from taipy.core.sequence._sequence_manager import _SequenceManager
+from taipy.core.sequence.sequence import Sequence
+from taipy.core.sequence.sequence_id import SequenceId
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
+from taipy.core.task.task_id import TaskId
 from tests.core.utils import assert_true_after_time
 from tests.core.utils.NotifyMock import NotifyMock
 
@@ -593,7 +592,7 @@ def test_scenario_manager_only_creates_data_node_once():
 def test_notification_subscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -644,7 +643,7 @@ class Notify:
 def test_notification_subscribe_multiple_params(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -685,7 +684,7 @@ def notify2(*args, **kwargs):
 def test_notification_unsubscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
-    mocker.patch("src.taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core._entity._reload._Reloader._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -1058,7 +1057,7 @@ def test_submit():
             cls.submit_calls.append(task.id)
             return super()._lock_dn_output_and_create_job(task, submit_id, submit_entity_id, callbacks, force)
 
-    with patch("src.taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
+    with patch("taipy.core.task._task_manager._TaskManager._orchestrator", new=MockOrchestrator):
         with pytest.raises(NonExistingScenario):
             _ScenarioManager._submit(scenario.id)
         with pytest.raises(NonExistingScenario):

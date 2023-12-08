@@ -11,8 +11,8 @@
 
 import pytest
 
-from src.taipy.config.config import Config
-from src.taipy.config.exceptions.exceptions import LoadingError
+from taipy.config.config import Config
+from taipy.config.exceptions.exceptions import LoadingError
 from tests.config.utils.named_temporary_file import NamedTemporaryFile
 
 

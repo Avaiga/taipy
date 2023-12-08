@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+from unittest.mock import patch
 
 import pytest
 
@@ -26,7 +27,8 @@ class MyLibrary(ElementLibrary):
 
 
 def test_extension_no_config(gui: Gui, helpers):
-    gui.run(run_server=False, single_client=True)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     with pytest.warns(UserWarning):
         ret = flask_client.get("/taipy-extension/toto/titi")
@@ -35,7 +37,8 @@ def test_extension_no_config(gui: Gui, helpers):
 
 def test_extension_config_wrong_path(gui: Gui, helpers):
     Gui.add_library(MyLibrary())
-    gui.run(run_server=False, single_client=True)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     with pytest.warns(UserWarning):
         ret = flask_client.get("/taipy-extension/taipy_extension_example/titi")

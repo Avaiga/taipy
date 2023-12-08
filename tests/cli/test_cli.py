@@ -15,8 +15,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.taipy._entrypoint import _entrypoint
 from taipy._cli._base_cli import _CLI
+from taipy._entrypoint import _entrypoint
 
 
 def preprocess_stdout(stdout):
@@ -46,6 +46,9 @@ def clean_argparser():
         remove_subparser(subcommand)
 
     yield
+
+    _CLI._subparser_action = None
+    _CLI._sub_taipyparsers = {}
 
 
 expected_help = """{run,manage-versions,create,migrate,help} ...

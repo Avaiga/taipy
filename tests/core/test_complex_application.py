@@ -15,12 +15,11 @@ from time import sleep
 from unittest.mock import patch
 
 import pandas as pd
-
-import src.taipy.core.taipy as tp
-from src.taipy.core import Core, Status
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core.config.job_config import JobConfig
+import taipy.core.taipy as tp
 from taipy.config import Config
+from taipy.core import Core, Status
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config.job_config import JobConfig
 
 # ################################  USER FUNCTIONS  ##################################
 

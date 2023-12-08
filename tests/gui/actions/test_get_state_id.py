@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+from unittest.mock import patch
 
 from flask import g
 
@@ -24,7 +25,8 @@ def test_get_state_id(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
-    gui.run(run_server=False)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False)
     flask_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered

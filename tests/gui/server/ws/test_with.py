@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+from unittest.mock import patch
 
 from taipy.gui import Gui, Markdown
 from taipy.gui.data.data_scope import _DataScopes
@@ -23,7 +24,8 @@ def test_sending_messages_in_group(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
-    gui.run(run_server=False, single_client=True)
+    with patch("sys.argv", ["prog"]):
+        gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())

@@ -12,9 +12,9 @@
 import json
 from datetime import timedelta
 
-from src.taipy.core.common.mongo_default_document import MongoDefaultDocument
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
+from taipy.core.common.mongo_default_document import MongoDefaultDocument
 
 
 def test_set_default_data_node_configuration():

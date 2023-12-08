@@ -13,7 +13,7 @@ import os
 import pathlib
 from unittest import TestCase, mock
 
-from src.taipy.logger._taipy_logger import _TaipyLogger
+from taipy.logger._taipy_logger import _TaipyLogger
 
 
 class TestTaipyLogger(TestCase):

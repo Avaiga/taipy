@@ -8,16 +8,16 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from src.taipy.core.config import CoreSection
-from src.taipy.core.config.data_node_config import DataNodeConfig
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.config.migration_config import MigrationConfig
-from src.taipy.core.config.scenario_config import ScenarioConfig
-from src.taipy.core.config.task_config import TaskConfig
 from taipy.config._config import _Config
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.global_app.global_app_config import GlobalAppConfig
+from taipy.core.config import CoreSection
+from taipy.core.config.data_node_config import DataNodeConfig
+from taipy.core.config.job_config import JobConfig
+from taipy.core.config.migration_config import MigrationConfig
+from taipy.core.config.scenario_config import ScenarioConfig
+from taipy.core.config.task_config import TaskConfig
 
 
 def _test_default_job_config(job_config: JobConfig):

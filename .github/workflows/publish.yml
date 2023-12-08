@@ -25,7 +25,7 @@ jobs:
         run: |
           echo """
           import json, sys, os
-          with open(f\"src{os.sep}taipy{os.sep}version.json\") as version_file:
+          with open(f\"taipy{os.sep}version.json\") as version_file:
             version_o = json.load(version_file)
           version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
           if vext := version_o.get(\"ext\"):
@@ -87,12 +87,12 @@ jobs:
       - name: Prepare tests on unix
         if: matrix.os != 'windows-latest'
         run: |
-          rm -rf src
+          rm -rf taipy
 
       - name: Prepare tests on windows
         if: matrix.os == 'windows-latest'
         run: |
-          rmdir -Recurse -Force src
+          rmdir -Recurse -Force taipy
 
       - name: Install and test package
         run: |

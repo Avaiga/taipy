@@ -14,23 +14,23 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
-from src.taipy.core.cycle.cycle import Cycle, CycleId
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data.in_memory import DataNode, InMemoryDataNode
-from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.exceptions.exceptions import SequenceTaskDoesNotExistInScenario
-from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.scenario.scenario_id import ScenarioId
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task, TaskId
 from taipy.config import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.common._utils import _Subscriber
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.cycle.cycle import Cycle, CycleId
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.data.in_memory import DataNode, InMemoryDataNode
+from taipy.core.data.pickle import PickleDataNode
+from taipy.core.exceptions.exceptions import SequenceTaskDoesNotExistInScenario
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.scenario.scenario_id import ScenarioId
+from taipy.core.sequence.sequence import Sequence
+from taipy.core.sequence.sequence_id import SequenceId
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
+from taipy.core.task.task import Task, TaskId
 
 
 def test_create_primary_scenario(cycle):
@@ -49,7 +49,7 @@ def test_create_primary_scenario(cycle):
     assert scenario.tags == set()
     assert scenario.get_simple_label() == scenario.config_id
 
-    with mock.patch("src.taipy.core.get") as get_mck:
+    with mock.patch("taipy.core.get") as get_mck:
 
         class MockOwner:
             label = "owner_label"
@@ -684,42 +684,42 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
 
 
 def test_is_deletable():
-    with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mock_submit:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._is_deletable") as mock_submit:
         scenario = Scenario("foo", [], {})
         scenario.is_deletable()
         mock_submit.assert_called_once_with(scenario)
 
 
 def test_submit_scenario():
-    with mock.patch("src.taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mock_submit:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mock_submit:
         scenario = Scenario("foo", [], {})
         scenario.submit(force=False)
         mock_submit.assert_called_once_with(scenario, None, False, False, None)
 
 
 def test_subscribe_scenario():
-    with mock.patch("src.taipy.core.subscribe_scenario") as mock_subscribe:
+    with mock.patch("taipy.core.subscribe_scenario") as mock_subscribe:
         scenario = Scenario("foo", [], {})
         scenario.subscribe(None)
         mock_subscribe.assert_called_once_with(None, None, scenario)
 
 
 def test_unsubscribe_scenario():
-    with mock.patch("src.taipy.core.unsubscribe_scenario") as mock_unsubscribe:
+    with mock.patch("taipy.core.unsubscribe_scenario") as mock_unsubscribe:
         scenario = Scenario("foo", [], {})
         scenario.unsubscribe(None)
         mock_unsubscribe.assert_called_once_with(None, None, scenario)
 
 
 def test_add_tag_scenario():
-    with mock.patch("src.taipy.core.tag") as mock_add_tag:
+    with mock.patch("taipy.core.tag") as mock_add_tag:
         scenario = Scenario("foo", [], {})
         scenario.add_tag("tag")
         mock_add_tag.assert_called_once_with(scenario, "tag")
 
 
 def test_remove_tag_scenario():
-    with mock.patch("src.taipy.core.untag") as mock_remove_tag:
+    with mock.patch("taipy.core.untag") as mock_remove_tag:
         scenario = Scenario("foo", [], {})
         scenario.remove_tag("tag")
         mock_remove_tag.assert_called_once_with(scenario, "tag")

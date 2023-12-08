@@ -15,10 +15,10 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.config.common._template_handler import _TemplateHandler
-from src.taipy.config.common.frequency import Frequency
-from src.taipy.config.common.scope import Scope
-from src.taipy.config.exceptions.exceptions import InconsistentEnvVariableError
+from taipy.config.common._template_handler import _TemplateHandler
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
+from taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 
 
 def test_replace_if_template():

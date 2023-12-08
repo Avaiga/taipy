@@ -28,7 +28,7 @@ const taipyBundle = "taipy-gui"
 const reactBundleName = "TaipyGuiDependencies"
 const taipyBundleName = "TaipyGui"
 
-const basePath = "../../src/taipy/gui/webapp";
+const basePath = "../../taipy/gui/webapp";
 const webAppPath = resolveApp(basePath);
 const reactManifestPath = resolveApp(basePath + "/" + reactBundle + "-manifest.json");
 const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js")

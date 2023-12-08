@@ -13,12 +13,12 @@ from copy import copy
 
 import pytest
 
-from src.taipy.core.config import ScenarioConfig
-from src.taipy.core.config.data_node_config import DataNodeConfig
-from src.taipy.core.config.task_config import TaskConfig
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 from taipy.config.config import Config
+from taipy.core.config import ScenarioConfig
+from taipy.core.config.data_node_config import DataNodeConfig
+from taipy.core.config.task_config import TaskConfig
 
 
 def subtraction(n1, n2):
@@ -133,7 +133,7 @@ class TestScenarioConfigChecker:
         expected_error_message = (
             "tasks field of ScenarioConfig `new` must be populated with a list of"
             " TaskConfig objects. Current value of property `tasks` is"
-            " ['bar', <src.taipy.core.config.task_config.TaskConfig object at"
+            " ['bar', <taipy.core.config.task_config.TaskConfig object at"
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0
@@ -197,7 +197,7 @@ class TestScenarioConfigChecker:
         expected_error_message = (
             "additional_data_nodes field of ScenarioConfig `new` must be populated with a list of"
             " DataNodeConfig objects. Current value of property `additional_data_nodes` is"
-            " ['bar', <src.taipy.core.config.data_node_config.DataNodeConfig object at"
+            " ['bar', <taipy.core.config.data_node_config.DataNodeConfig object at"
         )
         assert expected_error_message in caplog.text
         assert len(Config._collector.warnings) == 0

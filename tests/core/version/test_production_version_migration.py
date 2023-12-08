@@ -12,11 +12,10 @@
 import multiprocessing
 from unittest.mock import patch
 
-from src.taipy.core import Core, taipy
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.config.config import Config
-from tests.core.conftest import init_config
+from taipy.core import Core, taipy
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from tests.core.utils import assert_true_after_time
 
 m = multiprocessing.Manager()
@@ -45,7 +44,7 @@ def migrate_foo_scenario(scenario):
     return scenario
 
 
-def test_migrate_datanode():
+def test_migrate_datanode(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -57,7 +56,7 @@ def test_migrate_datanode():
     assert v1.d1.path == "bar.pkl"
 
 
-def test_migrate_datanode_in_standalone_mode():
+def test_migrate_datanode_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -77,7 +76,7 @@ def test_migrate_datanode_in_standalone_mode():
         core.stop()
 
 
-def test_migrate_task():
+def test_migrate_task(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -89,7 +88,7 @@ def test_migrate_task():
     assert v1.my_task.skippable is True
 
 
-def test_migrate_task_in_standalone_mode():
+def test_migrate_task_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -109,7 +108,7 @@ def test_migrate_task_in_standalone_mode():
         core.stop()
 
 
-def test_migrate_scenario():
+def test_migrate_scenario(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -121,7 +120,7 @@ def test_migrate_scenario():
     assert v1.properties["foo"] == "bar"
 
 
-def test_migrate_scenario_in_standalone_mode():
+def test_migrate_scenario_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -141,7 +140,7 @@ def test_migrate_scenario_in_standalone_mode():
         core.stop()
 
 
-def test_migrate_all_entities():
+def test_migrate_all_entities(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -160,7 +159,7 @@ def test_migrate_all_entities():
     assert v1.properties["foo"] == "bar"
 
 
-def test_migrate_all_entities_in_standalone_mode():
+def test_migrate_all_entities_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 
     init_config()
@@ -180,7 +179,7 @@ def test_migrate_all_entities_in_standalone_mode():
         core.stop()
 
 
-def test_migrate_compatible_version():
+def test_migrate_compatible_version(init_config):
     scenario_cfg = config_scenario_v1()
     # Production 1.0
     with patch("sys.argv", ["prog", "--production", "1.0"]):

@@ -53,7 +53,7 @@ def test_create_datanode(client, default_datanode_config):
     rep = client.post(datanodes_url)
     assert rep.status_code == 404
 
-    with mock.patch("src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config") as config_mock:
+    with mock.patch("taipy.rest.api.resources.datanode.DataNodeList.fetch_config") as config_mock:
         config_mock.return_value = default_datanode_config
         datanodes_url = url_for("api.datanodes", config_id="bar")
         rep = client.post(datanodes_url)
@@ -62,7 +62,7 @@ def test_create_datanode(client, default_datanode_config):
 
 def test_get_all_datanodes(client, default_datanode_config_list):
     for ds in range(10):
-        with mock.patch("src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config") as config_mock:
+        with mock.patch("taipy.rest.api.resources.datanode.DataNodeList.fetch_config") as config_mock:
             config_mock.return_value = default_datanode_config_list[ds]
             datanodes_url = url_for("api.datanodes", config_id=config_mock.name)
             client.post(datanodes_url)

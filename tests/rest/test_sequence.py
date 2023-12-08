@@ -14,9 +14,9 @@ from unittest import mock
 import pytest
 from flask import url_for
 
-from src.taipy.rest.api.exceptions.exceptions import ScenarioIdMissingException, SequenceNameMissingException
 from taipy.core.exceptions.exceptions import NonExistingScenario
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
+from taipy.rest.api.exceptions.exceptions import ScenarioIdMissingException, SequenceNameMissingException
 
 
 def test_get_sequence(client, default_sequence):
@@ -74,7 +74,7 @@ def test_create_sequence(client, default_scenario):
 
 def test_get_all_sequences(client, default_scenario_config_list):
     for ds in range(10):
-        with mock.patch("src.taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
+        with mock.patch("taipy.rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
             config_mock.return_value = default_scenario_config_list[ds]
             scenario_url = url_for("api.scenarios", config_id=config_mock.name)
             client.post(scenario_url)

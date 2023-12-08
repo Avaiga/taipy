@@ -1,0 +1,3 @@
+include ../../../taipy/*.json
+include ../../../taipy/gui_core/*.json
+include ../../../taipy/gui_core/lib/*.js

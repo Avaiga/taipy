@@ -1,0 +1,2 @@
+include taipy/config/*.pyi
+include taipy/config/*.json

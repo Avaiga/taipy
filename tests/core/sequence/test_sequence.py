@@ -13,19 +13,19 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core.common._utils import _Subscriber
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data.data_node import DataNode
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.data.pickle import PickleDataNode
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task.task import Task, TaskId
 from taipy.config.common.scope import Scope
+from taipy.core.common._utils import _Subscriber
+from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.data.data_node import DataNode
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.pickle import PickleDataNode
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.sequence._sequence_manager import _SequenceManager
+from taipy.core.sequence.sequence import Sequence
+from taipy.core.sequence.sequence_id import SequenceId
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task, TaskId
 
 
 def test_create_sequence():
@@ -68,7 +68,7 @@ def test_create_sequence():
     assert sequence_1.data_nodes == {"input": input_1, "output": output_1}
     assert sequence_1.parent_ids == {"scenario_id"}
     assert sequence_1.id is not None
-    with mock.patch("src.taipy.core.get") as get_mck:
+    with mock.patch("taipy.core.get") as get_mck:
 
         class MockOwner:
             label = "owner_label"
@@ -93,7 +93,7 @@ def test_create_sequence():
     assert sequence_2.tasks == {task.config_id: task, task_1.config_id: task_1}
     assert sequence_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
     assert sequence_2.parent_ids == {"parent_id_1", "parent_id_2"}
-    with mock.patch("src.taipy.core.get") as get_mck:
+    with mock.patch("taipy.core.get") as get_mck:
 
         class MockOwner:
             label = "owner_label"
@@ -676,27 +676,27 @@ def test_auto_set_and_reload(task):
 
 
 def test_get_parents(sequence):
-    with mock.patch("src.taipy.core.get_parents") as mck:
+    with mock.patch("taipy.core.get_parents") as mck:
         sequence.get_parents()
         mck.assert_called_once_with(sequence)
 
 
 def test_subscribe_sequence():
-    with mock.patch("src.taipy.core.subscribe_sequence") as mck:
+    with mock.patch("taipy.core.subscribe_sequence") as mck:
         sequence = Sequence({}, [], "id")
         sequence.subscribe(None)
         mck.assert_called_once_with(None, None, sequence)
 
 
 def test_unsubscribe_sequence():
-    with mock.patch("src.taipy.core.unsubscribe_sequence") as mck:
+    with mock.patch("taipy.core.unsubscribe_sequence") as mck:
         sequence = Sequence({}, [], "id")
         sequence.unsubscribe(None)
         mck.assert_called_once_with(None, None, sequence)
 
 
 def test_submit_sequence():
-    with mock.patch("src.taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
+    with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._submit") as mck:
         sequence = Sequence({}, [], "id")
         sequence.submit(None, False)
         mck.assert_called_once_with(sequence, None, False, False, None)

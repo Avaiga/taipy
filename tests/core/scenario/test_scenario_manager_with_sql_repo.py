@@ -13,34 +13,26 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src.taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from src.taipy.core._version._version_manager import _VersionManager
-from src.taipy.core.config.job_config import JobConfig
-from src.taipy.core.cycle._cycle_manager import _CycleManager
-from src.taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
-from src.taipy.core.data._data_manager import _DataManager
-from src.taipy.core.data._data_manager_factory import _DataManagerFactory
-from src.taipy.core.data.in_memory import InMemoryDataNode
-from src.taipy.core.exceptions.exceptions import DeletingPrimaryScenario
-from src.taipy.core.scenario._scenario_manager import _ScenarioManager
-from src.taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from src.taipy.core.scenario.scenario import Scenario
-from src.taipy.core.scenario.scenario_id import ScenarioId
-from src.taipy.core.sequence._sequence_manager import _SequenceManager
-from src.taipy.core.sequence._sequence_manager_factory import _SequenceManagerFactory
-from src.taipy.core.sequence.sequence import Sequence
-from src.taipy.core.sequence.sequence_id import SequenceId
-from src.taipy.core.task._task_manager import _TaskManager
-from src.taipy.core.task._task_manager_factory import _TaskManagerFactory
-from src.taipy.core.task.task import Task
-from src.taipy.core.task.task_id import TaskId
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from tests.core.conftest import init_managers
+from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core._version._version_manager import _VersionManager
+from taipy.core.config.job_config import JobConfig
+from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.exceptions.exceptions import DeletingPrimaryScenario
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.scenario.scenario_id import ScenarioId
+from taipy.core.sequence._sequence_manager import _SequenceManager
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task.task import Task
+from taipy.core.task.task_id import TaskId
 
 
-def test_set_and_get_scenario(cycle, init_sql_repo):
+def test_set_and_get_scenario(cycle, init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -208,7 +200,7 @@ def test_set_and_get_scenario(cycle, init_sql_repo):
     assert _TaskManager._get(task_2.id).id == task_2.id
 
 
-def test_get_all_on_multiple_versions_environment(init_sql_repo):
+def test_get_all_on_multiple_versions_environment(init_sql_repo, init_managers):
     init_managers()
 
     # Create 5 scenarios with 2 versions each
@@ -241,7 +233,7 @@ def test_get_all_on_multiple_versions_environment(init_sql_repo):
     assert len(_ScenarioManager._get_all_by(filters=[{"version": "2.0", "config_id": "config_id_6"}])) == 1
 
 
-def test_create_scenario_does_not_modify_config(init_sql_repo):
+def test_create_scenario_does_not_modify_config(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -273,7 +265,7 @@ def test_create_scenario_does_not_modify_config(init_sql_repo):
     assert scenario_2.name is None
 
 
-def test_create_and_delete_scenario(init_sql_repo):
+def test_create_and_delete_scenario(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -358,7 +350,7 @@ def mult_by_4(nb: int):
     return nb * 4
 
 
-def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
+def test_scenario_manager_only_creates_data_node_once(init_sql_repo, init_managers):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
 
     init_managers()
@@ -417,7 +409,7 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo):
     assert len(_ScenarioManager._get_all()) == 2
 
 
-def test_get_scenarios_by_config_id(init_sql_repo):
+def test_get_scenarios_by_config_id(init_sql_repo, init_managers):
     init_managers()
 
     scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
@@ -449,7 +441,7 @@ def test_get_scenarios_by_config_id(init_sql_repo):
     assert sorted([s_3_1.id]) == sorted([scenario.id for scenario in s3_scenarios])
 
 
-def test_get_scenarios_by_config_id_in_multiple_versions_environment(init_sql_repo):
+def test_get_scenarios_by_config_id_in_multiple_versions_environment(init_sql_repo, init_managers):
     init_managers()
 
     scenario_config_1 = Config.configure_scenario("s1", sequence_configs=[])
