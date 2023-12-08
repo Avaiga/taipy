@@ -60,6 +60,7 @@ requirements = [
     "marshmallow>=3.20.1,<3.30",
     "apispec[yaml]>=6.3,<7.0",
     "apispec-webframeworks>=0.5.2,<0.6",
+    "boto3>=1.29.1",
 ]
 
 
