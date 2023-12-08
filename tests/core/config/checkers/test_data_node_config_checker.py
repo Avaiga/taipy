@@ -88,7 +88,7 @@ class TestDataNodeConfigChecker:
         assert len(Config._collector.errors) == 1
         expected_error_message = (
             "`storage_type` field of DataNodeConfig `new` must be either csv, sql_table,"
-            " sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory."
+            " sql, mongo_collection, pickle, excel, generic, json, parquet, s3_object, or in_memory."
             ' Current value of property `storage_type` is "bar".'
         )
         assert expected_error_message in caplog.text
@@ -170,6 +170,19 @@ class TestDataNodeConfigChecker:
         ]
         assert all(message in caplog.text for message in expected_error_messages)
 
+        config._sections[DataNodeConfig.name]["new"].storage_type = "s3_object"
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 4
+        expected_error_messages = [
+            "DataNodeConfig `new` is missing the required property `aws_access_key` for type `s3_object`.",
+            "DataNodeConfig `new` is missing the required property `aws_secret_access_key` for type `s3_object`.",
+            "DataNodeConfig `new` is missing the required property `aws_s3_bucket_name` for type `s3_object`.",
+            "DataNodeConfig `new` is missing the required property `aws_s3_object_key` for type `s3_object`.",
+        ]
+        assert all(message in caplog.text for message in expected_error_messages)    
+    
     def test_check_properties_of_sqlite_engine(self, caplog):
         config = Config._applied_config
         Config._compile_configs()
@@ -353,6 +366,17 @@ class TestDataNodeConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
 
+        config._sections[DataNodeConfig.name]["new"].storage_type = "s3_object"
+        config._sections[DataNodeConfig.name]["new"].properties = {
+            "aws_access_key": "access_key",
+            "aws_secret_access_key": "secret_acces_key",
+            "aws_s3_bucket_name": "s3_bucket_name",
+            "aws_s3_object_key": "s3_object_key",
+        }
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+        
         config._sections[DataNodeConfig.name]["new"].storage_type = "excel"
         Config._collector = IssueCollector()
         Config.check()
