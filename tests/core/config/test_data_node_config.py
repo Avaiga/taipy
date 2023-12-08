@@ -93,6 +93,19 @@ def test_data_node_config_default_parameter():
     assert mongo_dn_cfg.db_driver == ""
     assert mongo_dn_cfg.validity_period is None
 
+    aws_s3_object_dn_cfg = Config.configure_data_node(
+        "data_node_11", "s3_object", aws_access_key="test", aws_secret_access_key="test_secret",
+        aws_s3_bucket_name="test_bucket", aws_s3_object_key="test_file.txt"
+    )
+    assert aws_s3_object_dn_cfg.scope == Scope.SCENARIO
+    assert aws_s3_object_dn_cfg.aws_access_key == "test"
+    assert aws_s3_object_dn_cfg.aws_secret_access_key == "test_secret"
+    assert aws_s3_object_dn_cfg.aws_s3_bucket_name == "test_bucket"
+    assert aws_s3_object_dn_cfg.aws_s3_object_key == "test_file.txt"
+    assert aws_s3_object_dn_cfg.aws_region is None
+    assert aws_s3_object_dn_cfg.aws_s3_object_parameters is None
+    assert aws_s3_object_dn_cfg.validity_period is None
+
 
 def test_data_node_config_check(caplog):
     data_node_config = Config.configure_data_node("data_nodes1", "pickle")
@@ -114,7 +127,7 @@ def test_data_node_config_check(caplog):
         Config.check()
     expected_error_message = (
         "`storage_type` field of DataNodeConfig `data_nodes` must be either csv, sql_table,"
-        " sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory. Current"
+        " sql, mongo_collection, pickle, excel, generic, json, parquet, s3_object, or in_memory. Current"
         ' value of property `storage_type` is "bar".'
     )
     assert expected_error_message in caplog.text
@@ -136,7 +149,7 @@ def test_data_node_config_check(caplog):
         Config.check()
     expected_error_message = (
         "`storage_type` field of DataNodeConfig `data_nodes` must be either csv, sql_table,"
-        " sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory."
+        " sql, mongo_collection, pickle, excel, generic, json, parquet, s3_object, or in_memory."
         ' Current value of property `storage_type` is "bar".'
     )
     assert expected_error_message in caplog.text
