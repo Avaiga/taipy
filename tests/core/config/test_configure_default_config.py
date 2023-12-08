@@ -41,6 +41,12 @@ def test_set_default_data_node_configuration():
     assert data_node4.scope == Scope.SCENARIO
     assert data_node4.validity_period == timedelta(1)
 
+    Config.set_default_data_node_configuration("s3_object", validity_period=timedelta(1))
+    data_node5 = Config.configure_data_node(id="input_data5")
+    assert data_node5.storage_type == "s3_object"
+    assert data_node5.scope == Scope.SCENARIO
+    assert data_node5.validity_period == timedelta(1)
+
 
 def test_set_default_data_node_configuration_replace_old_default_config():
     Config.set_default_data_node_configuration(
