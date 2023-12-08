@@ -18,8 +18,7 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-# assuming we're in tools/packages/taipy-config
-root_folder = Path(__file__).parent.parent.parent.parent
+root_folder = Path(__file__).parent
 
 readme = Path(root_folder / "README.md").read_text("UTF-8")
 
@@ -29,7 +28,7 @@ with open(root_folder / "taipy" / "config" / "version.json") as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = ["toml>=0.10,<0.11", "deepdiff>=6.2,<6.3"]
+requirements = [r for r in (root_folder / "setup.requirements.txt").read_text("UTF-8").splitlines() if r]
 
 test_requirements = ["pytest>=3.8"]
 
@@ -54,7 +53,6 @@ setup(
     license="Apache License 2.0",
     keywords="taipy-config",
     name="taipy-config",
-    package_dir={"": "../../.."},
     packages=find_packages(
         where=root_folder, include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]
     ),

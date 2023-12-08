@@ -13,15 +13,16 @@
 
 
 import json
+import platform
 from pathlib import Path
+import subprocess
 
 from setuptools import find_packages, setup
 from setuptools.command.build_py import build_py
-import subprocess
 
-root_folder = Path(__file__).parent.parent.parent.parent
+root_folder = Path(__file__).parent
 
-readme = Path(root_folder / "README.md").read_text("UTF-8")
+readme = (root_folder / "README.md").read_text("UTF-8")
 
 with open(root_folder / "taipy" / "version.json") as version_file:
     version = json.load(version_file)
@@ -29,13 +30,7 @@ with open(root_folder / "taipy" / "version.json") as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [
-    "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "cookiecutter>=2.1.1,<2.2",
-    "taipy-gui",
-    "taipy-rest",
-    "taipy-templates",
-]
+requirements = [r for r in (root_folder / "setup.requirements.txt").read_text("UTF-8").splitlines() if r]
 
 test_requirements = ["pytest>=3.8"]
 
@@ -53,9 +48,20 @@ extras_require = {
 
 class NPMInstall(build_py):
     def run(self):
-        subprocess.run(
-            ["python", "bundle_build.py", "taipy"], cwd=root_folder / "tools" / "frontend", check=True, shell=True
-        )
+        with_shell = platform.system() == "Windows"
+        print(f"Building taipy frontend bundle in {root_folder}.")
+        already_exists = (root_folder / "taipy" / "gui_core" / "lib" / "taipy-gui-core.js").exists()
+        if already_exists:
+            print(f'Found taipy frontend bundle in {root_folder / "taipy" / "gui_core" / "lib"}.')
+        else:
+            # Specify the correct path to taipy-gui in gui/.env file
+            env_file_path = root_folder / "frontend" / "taipy" / ".env"
+            if not env_file_path.exists():
+                with open(env_file_path, "w") as env_file:
+                    env_file.write(f"TAIPY_GUI_DIR={root_folder}\n")
+            subprocess.run(["npm", "ci"], cwd=root_folder / "frontend" / "taipy", check=True, shell=with_shell)
+            subprocess.run(["npm", "run", "build"], cwd=root_folder / "frontend" / "taipy", check=True, shell=with_shell)
+
         build_py.run(self)
 
 
@@ -85,8 +91,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="taipy",
     name="taipy",
-    package_dir={"": "../../.."},
-    packages=find_packages(where=root_folder, include=["taipy", "taipy.gui_core", "taipy._cli"]),
+    packages=find_packages(include=["taipy", "taipy._cli", "taipy.gui_core"]),
     include_package_data=True,
     test_suite="tests",
     url="https://github.com/avaiga/taipy",
