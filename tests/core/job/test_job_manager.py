@@ -349,8 +349,8 @@ def test_cancel_subsequent_jobs():
     task_3 = Task("task_config_3", {}, print, [dn_4], id="task_3")
 
     # Can't get tasks under 1 scenario due to partial not serializable
-    submission_1 = submission_manager._create("scenario_id", Scenario._ID_PREFIX)
-    submission_2 = submission_manager._create("scenario_id", Scenario._ID_PREFIX)
+    submission_1 = submission_manager._create("scenario_id", Scenario._ID_PREFIX, "scenario_config_id")
+    submission_2 = submission_manager._create("scenario_id", Scenario._ID_PREFIX, "scenario_config_id")
 
     _DataManager._set(dn_1)
     _DataManager._set(dn_2)

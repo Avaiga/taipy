@@ -28,7 +28,9 @@ def init_managers():
 def test_create_submission(scenario, init_sql_repo):
     init_managers()
 
-    submission_1 = _SubmissionManagerFactory._build_manager()._create(scenario.id, scenario._ID_PREFIX)
+    submission_1 = _SubmissionManagerFactory._build_manager()._create(
+        scenario.id, scenario._ID_PREFIX, scenario.config_id
+    )
 
     assert submission_1.id is not None
     assert submission_1.entity_id == scenario.id
@@ -42,7 +44,7 @@ def test_get_submission(init_sql_repo):
 
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission_1 = submission_manager._create("entity_id", "ENTITY_TYPE")
+    submission_1 = submission_manager._create("entity_id", "ENTITY_TYPE", "entity_config_id")
     submission_2 = submission_manager._get(submission_1.id)
 
     assert submission_1.id == submission_2.id
@@ -58,11 +60,13 @@ def test_get_all_submission(init_sql_repo):
     submission_manager = _SubmissionManagerFactory._build_manager()
     version_manager = _VersionManagerFactory._build_manager()
 
-    submission_manager._set(Submission("entity_id", "submission_id", version=version_manager._get_latest_version()))
+    submission_manager._set(
+        Submission("entity_id", "submission_id", "entity_config_id", version=version_manager._get_latest_version())
+    )
     for version_name in ["abc", "xyz"]:
         for i in range(10):
             submission_manager._set(
-                Submission("entity_id", f"submission_{version_name}_{i}", version=f"{version_name}")
+                Submission("entity_id", f"submission_{version_name}_{i}", "entity_config_id", version=f"{version_name}")
             )
     assert len(submission_manager._get_all()) == 1
 
@@ -80,22 +84,22 @@ def test_get_latest_submission(init_sql_repo):
     task_2 = Task("task_config_2", {}, print, id="task_id_2")
 
     submission_manager = _SubmissionManagerFactory._build_manager()
-    submission_1 = submission_manager._create(task_1.id, task_1._ID_PREFIX)
+    submission_1 = submission_manager._create(task_1.id, task_1._ID_PREFIX, task_1.config_id)
     assert submission_manager._get_latest(task_1) == submission_1
     assert submission_manager._get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    submission_2 = submission_manager._create(task_2.id, task_2._ID_PREFIX)
+    submission_2 = submission_manager._create(task_2.id, task_2._ID_PREFIX, task_2.config_id)
     assert submission_manager._get_latest(task_1) == submission_1
     assert submission_manager._get_latest(task_2) == submission_2
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    submission_3 = submission_manager._create(task_1.id, task_1._ID_PREFIX)
+    submission_3 = submission_manager._create(task_1.id, task_1._ID_PREFIX, task_1.config_id)
     assert submission_manager._get_latest(task_1) == submission_3
     assert submission_manager._get_latest(task_2) == submission_2
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    submission_4 = submission_manager._create(task_2.id, task_2._ID_PREFIX)
+    submission_4 = submission_manager._create(task_2.id, task_2._ID_PREFIX, task_2.config_id)
     assert submission_manager._get_latest(task_1) == submission_3
     assert submission_manager._get_latest(task_2) == submission_4
 
@@ -105,11 +109,11 @@ def test_delete_submission(init_sql_repo):
 
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission = Submission("entity_id", "submission_id")
+    submission = Submission("entity_id", "submission_id", "entity_config_id")
     submission_manager._set(submission)
 
     for i in range(10):
-        submission_manager._set(Submission("entity_id", f"submission_{i}"))
+        submission_manager._set(Submission("entity_id", f"submission_{i}", "entity_config_id"))
 
     assert len(submission_manager._get_all()) == 11
     assert isinstance(submission_manager._get(submission.id), Submission)
