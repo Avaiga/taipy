@@ -656,4 +656,3 @@ def test_set_default_s3_object_data_node_configuration():
     assert dn3.aws_s3_object_parameters == {"default": "default"}
     assert dn3.scope == Scope.GLOBAL
     assert dn3.validity_period == timedelta(1)
-    
