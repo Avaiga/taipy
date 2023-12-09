@@ -17,9 +17,9 @@ import boto3
 from moto import mock_s3
 import pytest
 
-from src.taipy.core.data.data_node_id import DataNodeId
-from src.taipy.core.data.aws_s3 import S3ObjectDataNode
-from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
+from taipy.core.data.data_node_id import DataNodeId
+from taipy.core.data.aws_s3 import S3ObjectDataNode
+from taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
 
