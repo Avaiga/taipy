@@ -182,7 +182,7 @@ class TestDataNodeConfigChecker:
             "DataNodeConfig `new` is missing the required property `aws_s3_object_key` for type `s3_object`.",
         ]
         assert all(message in caplog.text for message in expected_error_messages)    
-    
+
     def test_check_properties_of_sqlite_engine(self, caplog):
         config = Config._applied_config
         Config._compile_configs()
@@ -376,7 +376,7 @@ class TestDataNodeConfigChecker:
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0
-        
+
         config._sections[DataNodeConfig.name]["new"].storage_type = "excel"
         Config._collector = IssueCollector()
         Config.check()
