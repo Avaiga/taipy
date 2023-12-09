@@ -121,4 +121,3 @@ class TestConfig:
         )
         Config.configure_s3_object_data_node(a, b, c, d, e, f, extra_args, scope, vp, property=k)
         assert len(Config.data_nodes) == 2
-        
