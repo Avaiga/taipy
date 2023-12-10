@@ -70,7 +70,7 @@ class TestS3ObjectDataNode:
         # Read the object with boto3
         response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
 
-        assert response['Body'].read().decode('utf-8') == "Hello, write world!"
+        assert response['Body'].read() == "Hello, write world!"
 
     @mock_s3
     @pytest.mark.parametrize('data', [('Hello, read world!'), ])
@@ -90,4 +90,4 @@ class TestS3ObjectDataNode:
         # Read the Object from bucket with Taipy
         response = aws_s3_object_dn._read()
 
-        assert response.decode('utf-8') == data
+        assert response == data
