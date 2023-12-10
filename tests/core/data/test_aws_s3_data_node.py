@@ -90,4 +90,4 @@ class TestS3ObjectDataNode:
         # Read the Object from bucket with Taipy
         response = aws_s3_object_dn._read()
 
-        assert response == data
+        assert response.decode('utf-8') == data
