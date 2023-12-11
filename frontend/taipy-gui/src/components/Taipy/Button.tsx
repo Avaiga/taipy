@@ -12,6 +12,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
+import CardHeader from "@mui/material/CardHeader";
 import MuiButton from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 
@@ -25,6 +26,8 @@ interface ButtonProps extends TaipyActiveProps {
     label: string;
     defaultLabel?: string;
 }
+
+const cardSx = { p: 0 };
 
 const Button = (props: ButtonProps) => {
     const { id, onAction = "", defaultLabel } = props;
@@ -61,6 +64,16 @@ const Button = (props: ButtonProps) => {
             <MuiButton id={id} variant="outlined" className={className} onClick={handleClick} disabled={!active}>
                 {typeof value === "string" ? (
                     value
+                ) : (value as Icon).text ? (
+                    <CardHeader
+                        sx={cardSx}
+                        avatar={
+                            <IconAvatar img={value as Icon} className={getSuffixedClassNames(className, "-image")} />
+                        }
+                        title={(value as Icon).text}
+                        disableTypography={true}
+                        className={getSuffixedClassNames(className, "-card")}
+                    />
                 ) : (
                     <IconAvatar img={value as Icon} className={getSuffixedClassNames(className, "-image")} />
                 )}
