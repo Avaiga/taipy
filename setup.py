@@ -66,7 +66,12 @@ extras_require = {
 
 class NPMInstall(build_py):
     def run(self):
-        subprocess.run(["python", "bundle_build.py"], cwd=root_folder / "tools" / "frontend", check=True, shell=platform.system() == "Windows")
+        subprocess.run(
+            ["python", "bundle_build.py"],
+            cwd=root_folder / "tools" / "frontend",
+            check=True,
+            shell=platform.system() == "Windows",
+        )
         build_py.run(self)
 
 
