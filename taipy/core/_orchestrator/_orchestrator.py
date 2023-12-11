@@ -217,7 +217,7 @@ class _Orchestrator(_AbstractOrchestrator):
         return any(not data_manager._get(dn.id).is_ready_for_reading for dn in input_data_nodes)
 
     @staticmethod
-    def _unlock_edit_on_jobs_outputs(jobs: Union[Job, List[Job], Set[Job]]):
+    def __unlock_edit_on_jobs_outputs(jobs: Union[Job, List[Job], Set[Job]]):
         jobs = [jobs] if isinstance(jobs, Job) else jobs
         for job in jobs:
             job._unlock_edit_on_outputs()
@@ -260,7 +260,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
                 cls._cancel_jobs(job.id, to_cancel_or_abandon_jobs)
-                cls._unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
+                cls.__unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -303,7 +303,7 @@ class _Orchestrator(_AbstractOrchestrator):
             to_fail_or_abandon_jobs.update([failed_job])
             cls.__remove_blocked_jobs(to_fail_or_abandon_jobs)
             cls.__remove_jobs_to_run(to_fail_or_abandon_jobs)
-            cls._unlock_edit_on_jobs_outputs(to_fail_or_abandon_jobs)
+            cls.__unlock_edit_on_jobs_outputs(to_fail_or_abandon_jobs)
 
     @classmethod
     def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
