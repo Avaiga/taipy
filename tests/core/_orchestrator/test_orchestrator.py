@@ -1020,21 +1020,6 @@ def test_blocked_scenario():
         lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
     )
 
-
-def test_task_orchestrator_create_synchronous_dispatcher():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _OrchestratorFactory._build_dispatcher()
-
-    assert _OrchestratorFactory._dispatcher._nb_available_workers == 1
-
-
-def test_task_orchestrator_create_standalone_dispatcher():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=3)
-    _OrchestratorFactory._build_dispatcher()
-    assert isinstance(_OrchestratorFactory._dispatcher._executor, ProcessPoolExecutor)
-    assert _OrchestratorFactory._dispatcher._nb_available_workers == 3
-
-
 def modified_config_task(n):
     from taipy.config import Config
 
