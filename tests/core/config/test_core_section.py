@@ -13,14 +13,13 @@ import os
 from unittest.mock import patch
 
 import pytest
+from taipy.config import Config
+from taipy.config.exceptions.exceptions import MissingEnvVariableError
 from taipy.core import Core
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.config import CoreSection
+
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
-
-from taipy.config import Config
-from taipy.config.exceptions.exceptions import MissingEnvVariableError
-
 
 
 def test_core_section():
