@@ -17,7 +17,7 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-root_folder = Path(__file__).parent.parent.parent.parent
+root_folder = Path(__file__).parent
 
 readme = Path(root_folder / "README.md").read_text("UTF-8")
 
@@ -26,6 +26,8 @@ with open(root_folder / "taipy" / "templates" / "version.json") as version_file:
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
+
+requirements = [r for r in (root_folder / "setup.requirements.txt").read_text("UTF-8").splitlines() if r]
 
 test_requirements = ["pytest>=3.8"]
 
@@ -49,7 +51,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords="taipy-templates",
     name="taipy-templates",
-    package_dir={"": "../../.."},
+    install_requires=requirements,
     packages=find_packages(where=root_folder, include=["taipy"]),
     include_package_data=True,
     test_suite="tests",

@@ -12,9 +12,9 @@ import json
 
 from pathlib import Path
 
-from setuptools import find_namespace_packages, find_packages, setup
+from setuptools import find_packages, setup
 
-root_folder = Path(__file__).parent.parent.parent.parent
+root_folder = Path(__file__).parent
 
 readme = Path(root_folder / "README.md").read_text("UTF-8")
 
@@ -24,6 +24,8 @@ with open(root_folder / "taipy" / "rest" / "version.json") as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
+requirements = [r for r in (root_folder / "setup.requirements.txt").read_text("UTF-8").splitlines() if r]
+
 setup(
     author="Avaiga",
     name="taipy-rest",
@@ -31,7 +33,6 @@ setup(
     python_requires=">=3.8",
     version=version_string,
     author_email="dev@taipy.io",
-    package_dir={"": "../../.."},
     packages=find_packages(where=root_folder, include=["taipy", "taipy.rest", "taipy.rest.*"]),
     include_package_data=True,
     long_description=readme,
@@ -48,13 +49,5 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    install_requires=[
-        "flask>=3.0.0,<3.1",
-        "flask-restful>=0.3.9,<0.4",
-        "passlib>=1.7.4,<1.8",
-        "marshmallow>=3.20.1,<3.30",
-        "apispec[yaml]>=6.3,<7.0",
-        "apispec-webframeworks>=0.5.2,<0.6",
-        "taipy-core@git+https://git@github.com/Avaiga/taipy-core.git@develop",
-    ],
+    install_requires=requirements,
 )
