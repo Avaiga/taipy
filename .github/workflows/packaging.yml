@@ -34,6 +34,7 @@ jobs:
 
       - name: Install Taipy without dependencies
         run: |
+          cat tools/packages/taipy*/MANIFEST.in > MANIFEST.in
           pip install .
           rm -rf taipy
 

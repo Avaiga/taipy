@@ -14,13 +14,14 @@
 """The setup script."""
 
 import json
+import platform
 from pathlib import Path
 import subprocess
 
 from setuptools import find_packages, setup
 from setuptools.command.build_py import build_py
 
-root_folder = Path(__file__).parent.parent.parent.parent
+root_folder = Path(__file__).parent
 
 readme = Path(root_folder / "README.md").read_text("UTF-8")
 
@@ -30,24 +31,7 @@ with open(root_folder / "taipy" / "gui" / "version.json") as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [
-    "flask>=3.0.0,<3.1",
-    "flask-cors>=4.0.0,<5.0",
-    "flask-socketio>=5.3.6,<6.0",
-    "markdown>=3.4.4,<4.0",
-    "pandas>=2.0.0,<3.0",
-    "python-dotenv>=1.0.0,<1.1",
-    "pytz>=2021.3,<2022.2",
-    "tzlocal>=3.0,<5.0",
-    "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "gevent>=23.7.0,<24.0",
-    "gevent-websocket>=0.10.1,<0.11",
-    "kthread>=0.2.3,<0.3",
-    "taipy-config",
-    "gitignore-parser>=0.1,<0.2",
-    "simple-websocket>=0.10.1,<1.0",
-    "twisted>=23.8.0,<24.0",
-]
+requirements = [r for r in (root_folder / "setup.requirements.txt").read_text("UTF-8").splitlines() if r]
 
 test_requirements = ["pytest>=3.8"]
 
@@ -63,9 +47,24 @@ extras_require = {
 
 class NPMInstall(build_py):
     def run(self):
-        subprocess.run(
-            ["python", "bundle_build.py", "gui"], cwd=root_folder / "tools" / "frontend", check=True, shell=True
-        )
+        with_shell = platform.system() == "Windows"
+        print(f"Building taipy-gui frontend bundle in {root_folder}.")
+        already_exists = (root_folder / "taipy" / "gui" / "webapp" / "index.html").exists()
+        if already_exists:
+            print(f'Found taipy-gui frontend bundle in {root_folder  / "taipy" / "gui" / "webapp"}.')
+        else:
+            subprocess.run(
+                ["npm", "ci"], cwd=root_folder / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell
+            )
+            subprocess.run(
+                ["npm", "ci", "--omit=optional"],
+                cwd=root_folder / "frontend" / "taipy-gui",
+                check=True,
+                shell=with_shell,
+            )
+            subprocess.run(
+                ["npm", "run", "build"], cwd=root_folder / "frontend" / "taipy-gui", check=True, shell=with_shell
+            )
         build_py.run(self)
 
 
@@ -91,7 +90,6 @@ setup(
     include_package_data=True,
     keywords="taipy-gui",
     name="taipy-gui",
-    package_dir={"": "../../.."},
     packages=find_packages(where=root_folder, include=["taipy", "taipy.gui", "taipy.gui.*"]),
     test_suite="tests",
     tests_require=test_requirements,
