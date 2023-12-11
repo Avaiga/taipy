@@ -9,34 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import multiprocessing
-import random
-import string
-from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime, timedelta
-from functools import partial
-from time import sleep
-from unittest import mock
-
-import pytest
-from tests.core.utils import assert_true_after_time
-
 from taipy.config import Config
-from taipy.config.common.scope import Scope
-from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config.job_config import JobConfig
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.scenario._scenario_manager import _ScenarioManager
-from taipy.core.scenario.scenario import Scenario
-from taipy.core.sequence.sequence import Sequence
-from taipy.core.submission._submission_manager import _SubmissionManager
-from taipy.core.submission.submission_status import SubmissionStatus
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
-from taipy.core.data.pickle import PickleDataNode
 
 
 def nothing(*args, **kwargs):
@@ -98,7 +74,7 @@ def test_lock_dn_and_create_job_one_output():
 
 
 def test_lock_dn_and_create_job_multiple_outputs_one_input():
-    dn_0 = Config.configure_data_node("input_0")
+    dn_0 = Config.configure_data_node("input_0", default_data=0)
     dn_1 = Config.configure_data_node("output_1")
     dn_2 = Config.configure_data_node("output_2")
     dn_3 = Config.configure_data_node("output_3")
@@ -109,6 +85,10 @@ def test_lock_dn_and_create_job_multiple_outputs_one_input():
     orchestrator._lock_dn_output_and_create_job(scenario.one_output, "submit_id", "scenario_id")
 
     assert not scenario.input_0.edit_in_progress
+    assert scenario.input_0.is_ready_for_reading
     assert scenario.output_1.edit_in_progress
+    assert not scenario.output_1.is_ready_for_reading
     assert scenario.output_2.edit_in_progress
+    assert not scenario.output_2.is_ready_for_reading
     assert scenario.output_3.edit_in_progress
+    assert not scenario.output_3.is_ready_for_reading
