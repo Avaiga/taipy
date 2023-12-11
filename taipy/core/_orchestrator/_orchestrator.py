@@ -227,7 +227,7 @@ class _Orchestrator(_AbstractOrchestrator):
         if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
         elif job.is_failed():
-            cls._fail_subsequent_jobs(job)
+            cls.__fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
@@ -259,7 +259,7 @@ class _Orchestrator(_AbstractOrchestrator):
                 to_cancel_or_abandon_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
                 cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
-                cls._cancel_jobs(job.id, to_cancel_or_abandon_jobs)
+                cls.__cancel_jobs(job.id, to_cancel_or_abandon_jobs)
                 cls.__unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
 
     @classmethod
@@ -292,7 +292,7 @@ class _Orchestrator(_AbstractOrchestrator):
         cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
-    def _fail_subsequent_jobs(cls, failed_job: Job):
+    def __fail_subsequent_jobs(cls, failed_job: Job):
         with cls.lock:
             to_fail_or_abandon_jobs = set()
             to_fail_or_abandon_jobs.update(
@@ -306,7 +306,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.__unlock_edit_on_jobs_outputs(to_fail_or_abandon_jobs)
 
     @classmethod
-    def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
+    def __cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
         from ._orchestrator_factory import _OrchestratorFactory
 
         for job in jobs:
