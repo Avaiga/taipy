@@ -72,7 +72,7 @@ const Button = (props: ButtonProps) => {
                         }
                         title={(value as Icon).text}
                         disableTypography={true}
-                        className={getSuffixedClassNames(className, "-card")}
+                        className={getSuffixedClassNames(className, "-image-text")}
                     />
                 ) : (
                     <IconAvatar img={value as Icon} className={getSuffixedClassNames(className, "-image")} />
