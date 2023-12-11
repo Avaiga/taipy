@@ -29,46 +29,12 @@ with open(root_folder / "taipy" / "version.json") as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-# requirements = [
-#     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-#     "cookiecutter>=2.1.1,<2.2",
-#     "toml>=0.10,<0.11",
-#     "deepdiff>=6.2,<6.3",
-#     "pyarrow>=10.0.1,<11.0",
-#     "networkx>=2.6,<3.0",
-#     "openpyxl>=3.1.2,<3.2",
-#     "modin[dask]>=0.23.0,<1.0",
-#     "pymongo[srv]>=4.2.0,<5.0",
-#     "sqlalchemy>=2.0.16,<2.1",
-#     "flask>=3.0.0,<3.1",
-#     "flask-cors>=4.0.0,<5.0",
-#     "flask-socketio>=5.3.6,<6.0",
-#     "markdown>=3.4.4,<4.0",
-#     "pandas>=2.0.0,<3.0",
-#     "python-dotenv>=1.0.0,<1.1",
-#     "pytz>=2021.3,<2022.2",
-#     "tzlocal>=3.0,<5.0",
-#     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-#     "gevent>=23.7.0,<24.0",
-#     "gevent-websocket>=0.10.1,<0.11",
-#     "kthread>=0.2.3,<0.3",
-#     "gitignore-parser>=0.1,<0.2",
-#     "simple-websocket>=0.10.1,<1.0",
-#     "twisted>=23.8.0,<24.0",
-#     "flask-restful>=0.3.9,<0.4",
-#     "passlib>=1.7.4,<1.8",
-#     "marshmallow>=3.20.1,<3.30",
-#     "apispec[yaml]>=6.3,<7.0",
-#     "apispec-webframeworks>=0.5.2,<0.6",
-# ]
-
 
 def get_requirements():
     # get requirements from the different setups in tools/packages (removing taipy packages)
-    reqs = []
+    reqs = set()
     for pkg in (root_folder / "tools" / "packages").iterdir():
-        print(f"get reqs from {pkg}")
-        reqs.extend((pkg / "setup.requirements.txt").read_text("UTF-8").splitlines())
+        reqs.update((pkg / "setup.requirements.txt").read_text("UTF-8").splitlines())
 
     return [r for r in reqs if r and not r.startswith("taipy")]
 
