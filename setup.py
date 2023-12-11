@@ -32,7 +32,11 @@ with open(root_folder / "taipy" / "version.json") as version_file:
 
 # build MANIFEST.in from tools/packages/taipy*/MANIFEST.in
 with open(root_folder / "MANIFEST.in", "w") as man:
-    for pman in [dir / "MANIFEST.in" for dir in (root_folder / "tools" / "packages").iterdir() if dir.is_dir() and dir.stem.startswith("taipy")]:
+    for pman in [
+        dir / "MANIFEST.in"
+        for dir in (root_folder / "tools" / "packages").iterdir()
+        if dir.is_dir() and dir.stem.startswith("taipy")
+    ]:
         man.write(pman.read_text("UTF-8"))
 
 
