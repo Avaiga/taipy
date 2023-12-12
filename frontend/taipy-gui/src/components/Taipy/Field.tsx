@@ -53,9 +53,7 @@ const Field = (props: TaipyFieldProps) => {
     return (
         <Tooltip title={hover || ""}>
             {mode == "pre" ? (
-                <pre className={className} id={id}>
-                    {value}
-                </pre>
+                <pre className={className} id={id}>{value}</pre>
             ) : mode == "markdown" || mode == "md" ? (
                 <Markdown className={className}>{value}</Markdown>
             ) : raw || mode == "raw" ? (
