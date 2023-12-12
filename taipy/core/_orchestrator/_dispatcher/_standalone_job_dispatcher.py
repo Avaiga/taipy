@@ -11,7 +11,7 @@
 
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from typing import Optional
+from typing import Callable, Optional
 
 from taipy.config._serializer._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
@@ -25,9 +25,11 @@ from ._task_function_wrapper import _TaskFunctionWrapper
 class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
-    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
+    def __init__(
+        self, orchestrator: Optional[_AbstractOrchestrator], subprocess_initializer: Optional[Callable] = None
+    ):
         super().__init__(orchestrator)
-        self._executor = ProcessPoolExecutor(Config.job_config.max_nb_of_workers or 1)  # type: ignore
+        self._executor = ProcessPoolExecutor(Config.job_config.max_nb_of_workers or 1, initializer=subprocess_initializer)  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _dispatch(self, job: Job):
