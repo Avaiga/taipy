@@ -41,7 +41,6 @@ def create_scenario():
     t2 = Config.configure_task("t2", nothing, [dn_1], [dn_2])
     t3 = Config.configure_task("t3", nothing, [dn_2], [dn_3])
     t2_bis = Config.configure_task("t2bis", nothing, [dn_1], [])
-    t3_bis = Config.configure_task("t2bis", nothing, [dn_1], [])
     sc_conf = Config.configure_scenario("scenario", [t1, t2, t3, t2_bis])
     return taipy.create_scenario(sc_conf)
 
@@ -162,5 +161,17 @@ def test_cancel_canceled_job():
 
 
 def test_cancel_completed_job():
-    pass
+    job = create_job(Status.COMPLETED)
+    orchestrator = _OrchestratorFactory._build_orchestrator()
 
+    orchestrator.cancel_job(job)
+
+    assert job.is_completed()
+
+def test_cancel_completed_job():
+    job = create_job(Status.SKIPPED)
+    orchestrator = _OrchestratorFactory._build_orchestrator()
+
+    orchestrator.cancel_job(job)
+
+    assert job.is_skipped()
