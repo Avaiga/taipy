@@ -2,3 +2,10 @@
 line-length = 120
 
 [tool.pyright]
+
+[tool.codespell]
+skip = '.git,*.pdf,*.svg,go.sum,package-lock.json,*.css'
+check-hidden = true
+ignore-regex = '^\s*"image/\S+": ".*|\b(inPort|anId|IST|Opps|Rouge|notifAction)\b'
+# some unfortunate names for variables
+ignore-words-list = 'ags,selt'
