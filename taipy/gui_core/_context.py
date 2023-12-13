@@ -140,7 +140,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 )
                 if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
                     self.gui._broadcast(
-                        _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
+                        _GuiCoreContext._CORE_CHANGED_NAME,
+                        {"scenario": list(sequence.parent_ids)},
                     )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
@@ -308,12 +309,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     core_delete(scenario_id)
                 except Exception as e:
                     state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR, f"Error deleting Scenario. {e}")
-            else:
-                if not self.__check_readable_editable(
+            elif self.__check_readable_editable(
                     state, scenario_id, "Scenario", _GuiCoreContext._SCENARIO_SELECTOR_ERROR_VAR
                 ):
-                    return
                 scenario = core_get(scenario_id)
+            else:
+                return
         else:
             config_id = data.get(_GuiCoreContext.__PROP_CONFIG_ID)
             scenario_config = Config.scenarios.get(config_id)
@@ -405,8 +406,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state, entity_id, data.get("type", "Scenario"), _GuiCoreContext._SCENARIO_VIZ_ERROR_VAR
         ):
             return
-        entity: t.Union[Scenario, Sequence] = core_get(entity_id)
-        if entity:
+        if entity := core_get(entity_id):
             try:
                 if isinstance(entity, Scenario):
                     primary = data.get(_GuiCoreContext.__PROP_SCENARIO_PRIMARY)
@@ -434,8 +434,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 f"{data.get('type', 'Scenario')} {entity_id} is not submittable.",
             )
             return
-        entity = core_get(entity_id)
-        if entity:
+        if entity := core_get(entity_id):
             try:
                 jobs = core_submit(entity)
                 if submission_cb := data.get("on_submission_change"):
@@ -520,35 +519,34 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
                 if isinstance(data, DataNode):
                     return (data.id, data.get_simple_label(), None, _EntityType.DATANODE.value, False)
-                else:
-                    with self.lock:
-                        self.__do_datanodes_tree()
-                        if self.data_nodes_by_owner:
-                            if isinstance(data, Cycle):
+                with self.lock:
+                    self.__do_datanodes_tree()
+                    if self.data_nodes_by_owner:
+                        if isinstance(data, Cycle):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
+                                _EntityType.CYCLE.value,
+                                False,
+                            )
+                        elif isinstance(data, Scenario):
+                            return (
+                                data.id,
+                                data.get_simple_label(),
+                                self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
+                                _EntityType.SCENARIO.value,
+                                data.is_primary,
+                            )
+                        elif isinstance(data, Sequence):
+                            if datanodes := self.data_nodes_by_owner.get(data.id):
                                 return (
                                     data.id,
                                     data.get_simple_label(),
-                                    self.data_nodes_by_owner[data.id] + self.scenario_by_cycle.get(data, []),
-                                    _EntityType.CYCLE.value,
+                                    datanodes,
+                                    _EntityType.SEQUENCE.value,
                                     False,
                                 )
-                            elif isinstance(data, Scenario):
-                                return (
-                                    data.id,
-                                    data.get_simple_label(),
-                                    self.data_nodes_by_owner[data.id] + list(data.sequences.values()),
-                                    _EntityType.SCENARIO.value,
-                                    data.is_primary,
-                                )
-                            elif isinstance(data, Sequence):
-                                if datanodes := self.data_nodes_by_owner.get(data.id):
-                                    return (
-                                        data.id,
-                                        data.get_simple_label(),
-                                        datanodes,
-                                        _EntityType.SEQUENCE.value,
-                                        False,
-                                    )
         except Exception as e:
             _warn(
                 f"Access to {type(data)} ({data.id if hasattr(data, 'id') else 'No_id'}) failed",
@@ -661,7 +659,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             if isinstance(ent, Scenario):
                 tags = data.get(_GuiCoreContext.__PROP_SCENARIO_TAGS)
                 if isinstance(tags, (list, tuple)):
-                    ent.tags = {t for t in tags}
+                    ent.tags = set(tags)
             name = data.get(_GuiCoreContext.__PROP_ENTITY_NAME)
             if isinstance(name, str):
                 ent.properties[_GuiCoreContext.__PROP_ENTITY_NAME] = name
@@ -700,62 +698,62 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def get_data_node_history(self, datanode: DataNode, id: str):
         if (
-            id
-            and isinstance(datanode, DataNode)
-            and id == datanode.id
-            and (dn := core_get(id))
-            and isinstance(dn, DataNode)
+            not id
+            or not isinstance(datanode, DataNode)
+            or id != datanode.id
+            or not (dn := core_get(id))
+            or not isinstance(dn, DataNode)
         ):
-            res = []
-            for e in dn.edits:
-                job_id = e.get("job_id")
-                job: Job = None
-                if job_id:
-                    if not is_readable(job_id):
-                        job_id += " not readable"
-                    else:
-                        job = core_get(job_id)
-                res.append(
-                    (
-                        e.get("timestamp"),
-                        job_id if job_id else e.get("writer_identifier", ""),
-                        f"Execution of task {job.task.get_simple_label()}."
-                        if job and job.task
-                        else e.get("comment", ""),
-                    )
+            return _DoNotUpdate()
+        res = []
+        for e in dn.edits:
+            job_id = e.get("job_id")
+            job: Job = None
+            if job_id:
+                if not is_readable(job_id):
+                    job_id += " not readable"
+                else:
+                    job = core_get(job_id)
+            res.append(
+                (
+                    e.get("timestamp"),
+                    job_id if job_id else e.get("writer_identifier", ""),
+                    f"Execution of task {job.task.get_simple_label()}."
+                    if job and job.task
+                    else e.get("comment", ""),
                 )
-            return list(reversed(sorted(res, key=lambda r: r[0])))
-        return _DoNotUpdate()
+            )
+        return list(reversed(sorted(res, key=lambda r: r[0])))
 
     def get_data_node_data(self, datanode: DataNode, id: str):
         if (
-            id
-            and isinstance(datanode, DataNode)
-            and id == datanode.id
-            and (dn := core_get(id))
-            and isinstance(dn, DataNode)
+            not id
+            or not isinstance(datanode, DataNode)
+            or id != datanode.id
+            or not (dn := core_get(id))
+            or not isinstance(dn, DataNode)
         ):
-            if dn._last_edit_date:
-                if isinstance(dn, _AbstractTabularDataNode):
+            return _DoNotUpdate()
+        if dn._last_edit_date:
+            if isinstance(dn, _AbstractTabularDataNode):
+                return (None, None, True, None)
+            try:
+                value = dn.read()
+                if isinstance(value, (pd.DataFrame, pd.Series)):
                     return (None, None, True, None)
-                try:
-                    value = dn.read()
-                    if isinstance(value, (pd.DataFrame, pd.Series)):
-                        return (None, None, True, None)
-                    return (
-                        value,
-                        "date"
-                        if "date" in type(value).__name__
-                        else type(value).__name__
-                        if isinstance(value, Number)
-                        else None,
-                        None,
-                        None,
-                    )
-                except Exception as e:
-                    return (None, None, None, f"read data_node: {e}")
-            return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
-        return _DoNotUpdate()
+                return (
+                    value,
+                    "date"
+                    if "date" in type(value).__name__
+                    else type(value).__name__
+                    if isinstance(value, Number)
+                    else None,
+                    None,
+                    None,
+                )
+            except Exception as e:
+                return (None, None, None, f"read data_node: {e}")
+        return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
 
     def __check_readable_editable(self, state: State, id: str, type: str, var: str):
         if not is_readable(id):

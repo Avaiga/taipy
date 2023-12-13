@@ -27,7 +27,16 @@ class TestConfig:
         assert len(Config.data_nodes) == 2
 
     def test_configure_generic_data_node(self):
-        a, b, c, d, e, f, g, h = "foo", print, print, tuple([]), tuple([]), Scope.SCENARIO, timedelta(1), "qux"
+        a, b, c, d, e, f, g, h = (
+            "foo",
+            print,
+            print,
+            (),
+            (),
+            Scope.SCENARIO,
+            timedelta(1),
+            "qux",
+        )
         Config.configure_generic_data_node(a, b, c, d, e, f, g, property=h)
         assert len(Config.data_nodes) == 2
 

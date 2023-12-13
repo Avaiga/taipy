@@ -18,10 +18,10 @@ from taipy.gui import Gui
 # Data set: the first 10 elements of the Fibonacci sequence
 n_numbers = 10
 fibonacci = [0, 1]
-for i in range(2, n_numbers):
-    fibonacci.append(fibonacci[i - 1] + fibonacci[i - 2])
-
-data = {"index": [i for i in range(1, n_numbers + 1)], "fibonacci": fibonacci}
+fibonacci.extend(
+    fibonacci[i - 1] + fibonacci[i - 2] for i in range(2, n_numbers)
+)
+data = {"index": list(range(1, n_numbers + 1)), "fibonacci": fibonacci}
 
 page = """
 # TreeMap - Simple

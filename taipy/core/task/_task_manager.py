@@ -70,7 +70,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                 Config.data_nodes[dnc.id] for dnc in task_config.input_configs
             ]
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
-            scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
+            scope = min((dn.scope for dn in task_config_data_nodes), default=Scope.GLOBAL)
             owner_id: Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]
             if scope == Scope.SCENARIO:
                 owner_id = scenario_id
@@ -87,9 +87,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
 
         tasks = []
         for task_config, owner_id in tasks_configs_and_owner_id:
-            if task := tasks_by_config.get((task_config, owner_id)):
-                tasks.append(task)
-            else:
+            if not (task := tasks_by_config.get((task_config, owner_id))):
                 version = _VersionManagerFactory._build_manager()._get_latest_version()
                 inputs = [
                     data_nodes[input_config]
@@ -115,7 +113,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                     dn._parent_ids.update([task.id])
                 cls._set(task)
                 Notifier.publish(_make_event(task, EventOperation.CREATION))
-                tasks.append(task)
+            tasks.append(task)
         return tasks
 
     @classmethod

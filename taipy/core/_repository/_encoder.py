@@ -27,14 +27,13 @@ class _Encoder(json.JSONEncoder):
 
     def default(self, o: Any):
         if isinstance(o, Enum):
-            result = o.value
+            return o.value
         elif isinstance(o, datetime):
-            result = {"__type__": "Datetime", "__value__": o.isoformat()}
+            return {"__type__": "Datetime", "__value__": o.isoformat()}
         elif isinstance(o, timedelta):
-            result = {"__type__": "Timedelta", "__value__": self._timedelta_to_str(o)}
+            return {"__type__": "Timedelta", "__value__": self._timedelta_to_str(o)}
         else:
-            result = json.JSONEncoder.default(self, o)
-        return result
+            return json.JSONEncoder.default(self, o)
 
 
 def dumps(d):

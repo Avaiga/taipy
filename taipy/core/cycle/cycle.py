@@ -141,10 +141,10 @@ class Cycle(_Entity, _Labeled):
             """
             Source: https://github.com/django/django/blob/main/django/utils/text.py
             """
-            s = str(name).strip().replace(" ", "_")
+            s = name.strip().replace(" ", "_")
             s = re.sub(r"(?u)[^-\w.]", "", s)
             if s in {"", ".", ".."}:
-                raise _SuspiciousFileOperation("Could not derive file name from '%s'" % name)
+                raise _SuspiciousFileOperation(f"Could not derive file name from '{name}'")
             s = str(s).strip().replace(" ", "_")
             return re.sub(r"(?u)[^-\w.]", "", s)
 
@@ -154,7 +154,9 @@ class Cycle(_Entity, _Labeled):
         protected_attribute_name = attribute_name
         if protected_attribute_name in self._properties:
             return self._properties[protected_attribute_name]
-        raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")
+        raise AttributeError(
+            f"{protected_attribute_name} is not an attribute of cycle {self.id}"
+        )
 
     def __eq__(self, other):
         return self.id == other.id

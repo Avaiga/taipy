@@ -150,14 +150,13 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         task_manager = _TaskManagerFactory._build_manager()
         _tasks: List[Task] = []
         for task in tasks:
-            if not isinstance(task, Task):
-                if _task := task_manager._get(task):
-                    _tasks.append(_task)
-                else:
-                    raise NonExistingTask(task)
-            else:
+            if isinstance(task, Task):
                 _tasks.append(task)
 
+            elif _task := task_manager._get(task):
+                _tasks.append(_task)
+            else:
+                raise NonExistingTask(task)
         properties = properties if properties else {}
         properties["name"] = sequence_name
         version = version if version else cls._get_latest_version()
@@ -226,9 +225,13 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
 
         filtered_sequences = []
         for sequence in sequences:
-            for filter in filters:
-                if all([getattr(sequence, key) == item for key, item in filter.items()]):
-                    filtered_sequences.append(sequence)
+            filtered_sequences.extend(
+                sequence
+                for filter in filters
+                if all(
+                    getattr(sequence, key) == item for key, item in filter.items()
+                )
+            )
         return filtered_sequences
 
     @classmethod
@@ -332,7 +335,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         """
         Returns True if the entity id exists.
         """
-        return True if cls._get(entity_id) else False
+        return bool(cls._get(entity_id))
 
     @classmethod
     def _export(cls, id: str, folder_path: Union[str, pathlib.Path]):
@@ -353,12 +356,11 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         sequence = {"id": id, "owner_id": scenario_id, "parent_ids": [scenario_id], "name": sequence_name}
 
         scenario = _ScenarioManagerFactory._build_manager()._get(scenario_id)
-        if sequence_data := scenario._sequences.get(sequence_name, None):
-            sequence.update(sequence_data)
-            with open(export_path, "w", encoding="utf-8") as export_file:
-                export_file.write(json.dumps(sequence))
-        else:
+        if not (sequence_data := scenario._sequences.get(sequence_name, None)):
             raise ModelNotFound(cls._model_name, id)
+        sequence.update(sequence_data)
+        with open(export_path, "w", encoding="utf-8") as export_file:
+            export_file.write(json.dumps(sequence))
 
     @classmethod
     def __log_error_entity_not_found(cls, sequence_id: Union[SequenceId, str]):

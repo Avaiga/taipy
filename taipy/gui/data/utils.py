@@ -52,12 +52,12 @@ class Decimator(ABC):
         if chart_mode not in self._CHART_MODES:
             _warn(f"{type(self).__name__} is only applicable for {' '.join(self._CHART_MODES)}.")
             return False
-        if self.threshold is None:
-            if nb_rows_max < len(data):
-                return True
-        elif self.threshold < len(data):
-            return True
-        return False
+        return (
+            self.threshold is None
+            and nb_rows_max < len(data)
+            or self.threshold is not None
+            and self.threshold < len(data)
+        )
 
     @abstractmethod
     def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:

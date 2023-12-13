@@ -26,11 +26,13 @@ class _CycleManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_CycleManager]:  # type: ignore
         if cls._using_enterprise():
             cycle_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager", "_CycleManager"
-            )  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.cycle._cycle_manager",
+                "_CycleManager",
+            )
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_manager_factory", "_CycleManagerFactory"
-            )._build_repository  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.cycle._cycle_manager_factory",
+                "_CycleManagerFactory",
+            )._build_repository
         else:
             cycle_manager = _CycleManager
             build_repository = cls._build_repository

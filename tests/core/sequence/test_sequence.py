@@ -70,6 +70,7 @@ def test_create_sequence():
     assert sequence_1.id is not None
     with mock.patch("taipy.core.get") as get_mck:
 
+
         class MockOwner:
             label = "owner_label"
 
@@ -77,7 +78,7 @@ def test_create_sequence():
                 return self.label
 
         get_mck.return_value = MockOwner()
-        assert sequence_1.get_label() == "owner_label > " + sequence_1.id
+        assert sequence_1.get_label() == f"owner_label > {sequence_1.id}"
         assert sequence_1.get_simple_label() == sequence_1.id
 
     sequence_2 = Sequence(
@@ -95,6 +96,7 @@ def test_create_sequence():
     assert sequence_2.parent_ids == {"parent_id_1", "parent_id_2"}
     with mock.patch("taipy.core.get") as get_mck:
 
+
         class MockOwner:
             label = "owner_label"
 
@@ -102,7 +104,7 @@ def test_create_sequence():
                 return self.label
 
         get_mck.return_value = MockOwner()
-        assert sequence_2.get_label() == "owner_label > " + sequence_2.name
+        assert sequence_2.get_label() == f"owner_label > {sequence_2.name}"
         assert sequence_2.get_simple_label() == sequence_2.name
 
 
@@ -188,7 +190,10 @@ def test_get_sorted_tasks():
                 return False
             else:
                 index_task_b = tasks_b.index(task_a)
-                if any([isinstance(task_b, list) for task_b in tasks_b[i : index_task_b + 1]]):
+                if any(
+                    isinstance(task_b, list)
+                    for task_b in tasks_b[i : index_task_b + 1]
+                ):
                     return False
         return True
 
@@ -579,7 +584,7 @@ def test_auto_set_and_reload(task):
     assert len(sequence_2.subscribers) == 2
 
     sequence_1.subscribers = []
-    assert len(sequence_1.subscribers) == 0
+    assert not sequence_1.subscribers
     assert len(sequence_2.subscribers) == 0
 
     # auto set & reload on properties attribute
@@ -659,14 +664,14 @@ def test_auto_set_and_reload(task):
 
         assert len(sequence.tasks) == 1
         assert sequence.tasks[task.config_id].id == task.id
-        assert len(sequence.subscribers) == 0
+        assert not sequence.subscribers
         assert sequence._is_in_context
         assert sequence.properties["qux"] == 5
         assert sequence.properties["temp_key_3"] == 1
         assert sequence.properties["temp_key_4"] == 0
         assert sequence.properties["temp_key_5"] == 0
 
-    assert len(sequence_1.tasks) == 0
+    assert not sequence_1.tasks
     assert len(sequence_1.subscribers) == 1
     assert not sequence_1._is_in_context
     assert sequence_1.properties["qux"] == 9

@@ -860,7 +860,7 @@ def get_parents(
     current_parent_dict: Dict[str, Set] = {}
     for parent in entity.parent_ids:
         parent_entity = get(parent)
-        if parent_entity._MANAGER_NAME in current_parent_dict.keys():
+        if parent_entity._MANAGER_NAME in current_parent_dict:
             current_parent_dict[parent_entity._MANAGER_NAME].add(parent_entity)
         else:
             current_parent_dict[parent_entity._MANAGER_NAME] = {parent_entity}
@@ -892,7 +892,7 @@ def get_cycles_scenarios() -> Dict[Optional[Cycle], List[Scenario]]:
 
     cycles_scenarios: Dict[Optional[Cycle], List[Scenario]] = {}
     for scenario in get_scenarios():
-        if scenario.cycle in cycles_scenarios.keys():
+        if scenario.cycle in cycles_scenarios:
             cycles_scenarios[scenario.cycle].append(scenario)
         else:
             cycles_scenarios[scenario.cycle] = [scenario]

@@ -87,7 +87,10 @@ class _DataNodeConverter(_AbstractConverter):
 
     @classmethod
     def __serialize_mongo_collection_dn_model_properties(cls, datanode_properties: dict) -> dict:
-        if MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY in datanode_properties.keys():
+        if (
+            MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY
+            in datanode_properties
+        ):
             datanode_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY] = (
                 f"{datanode_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY].__module__}."
                 f"{datanode_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY].__qualname__}"
@@ -242,7 +245,10 @@ class _DataNodeConverter(_AbstractConverter):
 
     @classmethod
     def __deserialize_mongo_collection_dn_model_properties(cls, datanode_model_properties: dict) -> dict:
-        if MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY in datanode_model_properties.keys():
+        if (
+            MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY
+            in datanode_model_properties
+        ):
             if isinstance(datanode_model_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY], str):
                 datanode_model_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY] = locate(
                     datanode_model_properties[MongoCollectionDataNode._CUSTOM_DOCUMENT_PROPERTY]

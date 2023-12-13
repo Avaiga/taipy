@@ -46,10 +46,16 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
     @classmethod
     def _get_latest(cls, entity: Union[Scenario, Sequence, Task]) -> Optional[Submission]:
         entity_id = entity.id if not isinstance(entity, str) else entity
-        submissions_of_task = list(filter(lambda submission: submission.entity_id == entity_id, cls._get_all()))
-        if len(submissions_of_task) == 0:
-            return None
-        if len(submissions_of_task) == 1:
-            return submissions_of_task[0]
+        if submissions_of_task := list(
+            filter(
+                lambda submission: submission.entity_id == entity_id,
+                cls._get_all(),
+            )
+        ):
+            return (
+                submissions_of_task[0]
+                if len(submissions_of_task) == 1
+                else max(submissions_of_task)
+            )
         else:
-            return max(submissions_of_task)
+            return None

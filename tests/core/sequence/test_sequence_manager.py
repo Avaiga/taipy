@@ -77,7 +77,7 @@ def __init():
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     task = Task("task", {}, print, [input_dn], [output_dn], TaskId("task_id"))
-    scenario = Scenario("scenario", set([task]), {}, set())
+    scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
     return scenario, task
 
@@ -208,10 +208,10 @@ def test_get_all_on_multiple_versions_environment():
 def test_is_submittable():
     dn = InMemoryDataNode("dn", Scope.SCENARIO, properties={"default_data": 10})
     task = Task("task", {}, print, [dn])
-    scenario = Scenario("scenario", set([task]), {}, set())
+    scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._set(scenario)
 
-    scenario.add_sequences({"sequence": list([task])})
+    scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]
 
     assert len(_SequenceManager._get_all()) == 1
@@ -294,7 +294,7 @@ def test_submit():
 
         _SequenceManager._submit(sequence)
         calls_ids = [t.id for t in _TaskManager._orchestrator().submit_calls]
-        tasks_ids = tasks_ids * 2
+        tasks_ids *= 2
         assert set(calls_ids) == set(tasks_ids)
 
 
@@ -769,11 +769,14 @@ def test_export(tmpdir_factory):
     task = Task("task", {}, print, id=TaskId("task_id"))
     scenario = Scenario(
         "scenario",
-        set([task]),
+        {task},
         {},
         set(),
         version="1.0",
-        sequences={"sequence_1": {}, "sequence_2": {"tasks": [task], "properties": {"xyz": "acb"}}},
+        sequences={
+            "sequence_1": {},
+            "sequence_2": {"tasks": [task], "properties": {"xyz": "acb"}},
+        },
     )
     _TaskManager._set(task)
     _ScenarioManager._set(scenario)
@@ -939,8 +942,11 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
         for input_dn in sequence.data_nodes.values()
         if input_dn not in sequence.get_inputs()
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(
+        expected_output not in stdout
+        for expected_output in not_expected_outputs
+    )
 
 
 def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
@@ -972,5 +978,8 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
         for input_dn in sequence.data_nodes.values()
         if input_dn.config_id != "wrong_csv_file_path"
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(
+        expected_output not in stdout
+        for expected_output in not_expected_outputs
+    )

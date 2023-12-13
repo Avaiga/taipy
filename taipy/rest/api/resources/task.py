@@ -194,10 +194,10 @@ class TaskList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        config = Config.tasks.get(config_id)
-        if not config:
+        if config := Config.tasks.get(config_id):
+            return config
+        else:
             raise NonExistingTaskConfig(config_id)
-        return config
 
     @_middleware
     def get(self):

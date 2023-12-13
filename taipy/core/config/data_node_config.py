@@ -299,10 +299,7 @@ class DataNodeConfig(Section):
     def cacheable(self):
         _warn_deprecated("cacheable", suggest="the skippable feature")
         cacheable = self._properties.get("cacheable")
-        if cacheable is not None:
-            return _tpl._replace_templates(cacheable)
-        else:
-            return False
+        return _tpl._replace_templates(cacheable) if cacheable is not None else False
 
     @cacheable.setter  # type: ignore
     @_ConfigBlocker._check()
@@ -454,20 +451,20 @@ class DataNodeConfig(Section):
         Returns:
             The new data node configuration.
         """
-        configuration_map: Dict[str, Callable] = {
-            cls._STORAGE_TYPE_VALUE_PICKLE: cls._configure_pickle,
-            cls._STORAGE_TYPE_VALUE_SQL_TABLE: cls._configure_sql_table,
-            cls._STORAGE_TYPE_VALUE_SQL: cls._configure_sql,
-            cls._STORAGE_TYPE_VALUE_MONGO_COLLECTION: cls._configure_mongo_collection,
-            cls._STORAGE_TYPE_VALUE_CSV: cls._configure_csv,
-            cls._STORAGE_TYPE_VALUE_EXCEL: cls._configure_excel,
-            cls._STORAGE_TYPE_VALUE_IN_MEMORY: cls._configure_in_memory,
-            cls._STORAGE_TYPE_VALUE_GENERIC: cls._configure_generic,
-            cls._STORAGE_TYPE_VALUE_JSON: cls._configure_json,
-            cls._STORAGE_TYPE_VALUE_PARQUET: cls._configure_parquet,
-        }
-
         if storage_type in cls._ALL_STORAGE_TYPES:
+            configuration_map: Dict[str, Callable] = {
+                cls._STORAGE_TYPE_VALUE_PICKLE: cls._configure_pickle,
+                cls._STORAGE_TYPE_VALUE_SQL_TABLE: cls._configure_sql_table,
+                cls._STORAGE_TYPE_VALUE_SQL: cls._configure_sql,
+                cls._STORAGE_TYPE_VALUE_MONGO_COLLECTION: cls._configure_mongo_collection,
+                cls._STORAGE_TYPE_VALUE_CSV: cls._configure_csv,
+                cls._STORAGE_TYPE_VALUE_EXCEL: cls._configure_excel,
+                cls._STORAGE_TYPE_VALUE_IN_MEMORY: cls._configure_in_memory,
+                cls._STORAGE_TYPE_VALUE_GENERIC: cls._configure_generic,
+                cls._STORAGE_TYPE_VALUE_JSON: cls._configure_json,
+                cls._STORAGE_TYPE_VALUE_PARQUET: cls._configure_parquet,
+            }
+
             return configuration_map[storage_type](id=id, scope=scope, validity_period=validity_period, **properties)
 
         return cls.__configure(id, storage_type, scope, validity_period, **properties)

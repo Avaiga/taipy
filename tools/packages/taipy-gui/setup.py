@@ -49,8 +49,9 @@ class NPMInstall(build_py):
     def run(self):
         with_shell = platform.system() == "Windows"
         print(f"Building taipy-gui frontend bundle in {root_folder}.")
-        already_exists = (root_folder / "taipy" / "gui" / "webapp" / "index.html").exists()
-        if already_exists:
+        if already_exists := (
+            root_folder / "taipy" / "gui" / "webapp" / "index.html"
+        ).exists():
             print(f'Found taipy-gui frontend bundle in {root_folder  / "taipy" / "gui" / "webapp"}.')
         else:
             subprocess.run(

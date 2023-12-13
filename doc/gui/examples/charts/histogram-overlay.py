@@ -18,7 +18,10 @@ import random
 from taipy.gui import Gui
 
 # Data set made of two series of random numbers
-data = [{"x": [random.random() + 1 for i in range(100)]}, {"x": [random.random() + 1.1 for i in range(100)]}]
+data = [
+    {"x": [random.random() + 1 for _ in range(100)]},
+    {"x": [random.random() + 1.1 for _ in range(100)]},
+]
 
 options = [
     # First data set displayed as semi-transparent, green bars

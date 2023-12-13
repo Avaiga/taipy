@@ -34,11 +34,11 @@ class CustomClass:
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, datetime):
-            result = {"__type__": "Datetime", "__value__": o.isoformat()}
-        else:
-            result = json.JSONEncoder.default(self, o)
-        return result
+        return (
+            {"__type__": "Datetime", "__value__": o.isoformat()}
+            if isinstance(o, datetime)
+            else json.JSONEncoder.default(self, o)
+        )
 
 
 class CustomDecoder(json.JSONDecoder):

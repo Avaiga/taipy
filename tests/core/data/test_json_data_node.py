@@ -194,12 +194,12 @@ class TestJSONDataNode:
         # Append another dictionary
         append_data_1 = {"d": 1, "e": 2, "f": 3}
         json_dn.append(append_data_1)
-        assert json_dn.read() == {**original_data, **append_data_1}
+        assert json_dn.read() == original_data | append_data_1
 
         # Append an overlap dictionary
         append_data_data_2 = {"a": 10, "b": 20, "g": 30}
         json_dn.append(append_data_data_2)
-        assert json_dn.read() == {**original_data, **append_data_1, **append_data_data_2}
+        assert json_dn.read() == original_data | append_data_1 | append_data_data_2
 
     def test_write(self, json_file):
         json_dn = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": json_file})

@@ -38,7 +38,7 @@ def _connect_mongodb(
 
     extra_args_str = "&".join(f"{k}={str(v)}" for k, v in db_extra_args)
     if extra_args_str:
-        extra_args_str = "/?" + extra_args_str
+        extra_args_str = f"/?{extra_args_str}"
 
     driver = "mongodb"
     if db_driver:

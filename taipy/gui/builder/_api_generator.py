@@ -31,10 +31,15 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
 
     @staticmethod
     def find_default_property(property_list: t.List[t.Dict[str, t.Any]]) -> str:
-        for property in property_list:
-            if "default_property" in property and property["default_property"] is True:
-                return property["name"]
-        return ""
+        return next(
+            (
+                property["name"]
+                for property in property_list
+                if "default_property" in property
+                and property["default_property"] is True
+            ),
+            "",
+        )
 
     def add_default(self):
         current_frame = inspect.currentframe()

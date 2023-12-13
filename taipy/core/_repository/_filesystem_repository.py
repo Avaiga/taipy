@@ -159,7 +159,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
                     res[key] = entity
                     configs_and_owner_ids.remove(key)
 
-                    if len(configs_and_owner_ids) == 0:
+                    if not configs_and_owner_ids:
                         return res
         except FileNotFoundError:
             # Folder with data was not created yet.
@@ -170,11 +170,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def _get_by_config_and_owner_id(
         self, config_id: str, owner_id: Optional[str], filters: Optional[List[Dict]] = None
     ) -> Optional[Entity]:
-        if not filters:
-            filters = [{}]
-        else:
-            filters = copy.deepcopy(filters)
-
+        filters = [{}] if not filters else copy.deepcopy(filters)
         if owner_id is not None:
             for fil in filters:
                 fil.update({"owner_id": owner_id})
@@ -228,8 +224,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         if isinstance(file_content, str):
             file_content = json.loads(file_content, cls=_Decoder)
         model = self.model_type.from_dict(file_content)
-        entity = self.converter._model_to_entity(model)
-        return entity
+        return self.converter._model_to_entity(model)
 
     def __filter_by(self, filepath: pathlib.Path, filters: Optional[List[Dict]]) -> Optional[Json]:
         if not filters:

@@ -24,8 +24,7 @@ class _BaseModel:
     __table__: Table
 
     def __iter__(self):
-        for attr, value in self.__dict__.items():
-            yield attr, value
+        yield from self.__dict__.items()
 
     def to_dict(self) -> Dict[str, Any]:
         model_dict = {**dataclasses.asdict(self)}

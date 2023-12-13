@@ -109,11 +109,14 @@ class Scenario(_Entity, Submittable, _Labeled):
         self._properties = _Properties(self, **properties)
         self._sequences: Dict[str, Dict] = sequences or {}
 
-        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in self._tasks])
+        _scenario_task_ids = {
+            task.id if isinstance(task, Task) else task for task in self._tasks
+        }
         for sequence_name, sequence_data in self._sequences.items():
-            sequence_task_ids = set(
-                [task.id if isinstance(task, Task) else task for task in sequence_data.get("tasks", [])]
-            )
+            sequence_task_ids = {
+                task.id if isinstance(task, Task) else task
+                for task in sequence_data.get("tasks", [])
+            }
             self.__check_sequence_tasks_exist_in_scenario_tasks(
                 sequence_name, sequence_task_ids, self.id, _scenario_task_ids
             )
@@ -168,7 +171,7 @@ class Scenario(_Entity, Submittable, _Labeled):
     ):
         self._sequences = sequences
         actual_sequences = self._get_sequences()
-        for sequence_name in sequences.keys():
+        for sequence_name in sequences:
             if not actual_sequences[sequence_name]._is_consistent():
                 raise InvalidSequence(actual_sequences[sequence_name].id)
 
@@ -192,8 +195,13 @@ class Scenario(_Entity, Submittable, _Labeled):
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _scenario_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
-        _sequence_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+        _scenario_task_ids = {
+            task.id if isinstance(task, Task) else task
+            for task in _scenario._tasks
+        }
+        _sequence_task_ids: Set[TaskId] = {
+            task.id if isinstance(task, Task) else task for task in tasks
+        }
         self.__check_sequence_tasks_exist_in_scenario_tasks(name, _sequence_task_ids, self.id, _scenario_task_ids)
         _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
         _sequences.update(
@@ -225,9 +233,14 @@ class Scenario(_Entity, Submittable, _Labeled):
             SequenceTaskDoesNotExistInScenario^: If a task in the sequence does not exist in the scenario.
         """
         _scenario = _Reloader()._reload(self._MANAGER_NAME, self)
-        _sc_task_ids = set([task.id if isinstance(task, Task) else task for task in _scenario._tasks])
+        _sc_task_ids = {
+            task.id if isinstance(task, Task) else task
+            for task in _scenario._tasks
+        }
         for name, tasks in sequences.items():
-            _seq_task_ids: Set[TaskId] = set([task.id if isinstance(task, Task) else task for task in tasks])
+            _seq_task_ids: Set[TaskId] = {
+                task.id if isinstance(task, Task) else task for task in tasks
+            }
             self.__check_sequence_tasks_exist_in_scenario_tasks(name, _seq_task_ids, self.id, _sc_task_ids)
         # Need to parse twice the sequences to avoid adding some sequences and not others in case of exception
         for name, tasks in sequences.items():
@@ -269,11 +282,11 @@ class Scenario(_Entity, Submittable, _Labeled):
     def __check_sequence_tasks_exist_in_scenario_tasks(
         sequence_name: str, sequence_task_ids: Set[TaskId], scenario_id: ScenarioId, scenario_task_ids: Set[TaskId]
     ):
-        non_existing_sequence_task_ids_in_scenario = set()
-        for sequence_task_id in sequence_task_ids:
-            if sequence_task_id not in scenario_task_ids:
-                non_existing_sequence_task_ids_in_scenario.add(sequence_task_id)
-        if len(non_existing_sequence_task_ids_in_scenario) > 0:
+        if non_existing_sequence_task_ids_in_scenario := {
+            sequence_task_id
+            for sequence_task_id in sequence_task_ids
+            if sequence_task_id not in scenario_task_ids
+        }:
             raise SequenceTaskDoesNotExistInScenario(
                 list(non_existing_sequence_task_ids_in_scenario), sequence_name, scenario_id
             )
@@ -584,13 +597,17 @@ class Scenario(_Entity, Submittable, _Labeled):
             return True
         if not nx.is_directed_acyclic_graph(dag):
             return False
-        for left_node, right_node in dag.edges:
-            if (isinstance(left_node, DataNode) and isinstance(right_node, Task)) or (
-                isinstance(left_node, Task) and isinstance(right_node, DataNode)
-            ):
-                continue
-            return False
-        return True
+        return not any(
+            (
+                not isinstance(left_node, DataNode)
+                or not isinstance(right_node, Task)
+            )
+            and (
+                not isinstance(left_node, Task)
+                or not isinstance(right_node, DataNode)
+            )
+            for left_node, right_node in dag.edges
+        )
 
 
 @_make_event.register(Scenario)

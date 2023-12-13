@@ -152,13 +152,15 @@ class html(_Block):
         self._content = args[1] if len(args) > 1 else ""
 
     def _render(self, gui: "Gui") -> str:
-        if self._ELEMENT_NAME:
-            attrs = ""
-            if self._properties:
-                attrs = " " + " ".join([f'{k}="{str(v)}"' for k, v in self._properties.items()])
-            return f"<{self._ELEMENT_NAME}{attrs}>{self._content}{self._render_children(gui)}</{self._ELEMENT_NAME}>"
-        else:
+        if not self._ELEMENT_NAME:
             return self._content
+        attrs = (
+            " "
+            + " ".join([f'{k}="{str(v)}"' for k, v in self._properties.items()])
+            if self._properties
+            else ""
+        )
+        return f"<{self._ELEMENT_NAME}{attrs}>{self._content}{self._render_children(gui)}</{self._ELEMENT_NAME}>"
 
 
 class _Control(_Element):

@@ -19,7 +19,7 @@ with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_fil
 
 # Use TOML config file or not
 use_toml_config = "{{ cookiecutter.__use_toml_config }}".upper()
-if use_toml_config == "YES" or use_toml_config == "Y":
+if use_toml_config in {"YES", "Y"}:
     os.remove(os.path.join(os.getcwd(), "config", "config.py"))
     os.rename(
         os.path.join(os.getcwd(), "config", "config_with_toml.py"), os.path.join(os.getcwd(), "config", "config.py")

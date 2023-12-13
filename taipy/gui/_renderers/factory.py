@@ -590,8 +590,7 @@ class _Factory:
             for lib in _Factory.__LIBRARIES.get(parts[0], []):
                 elts = lib.get_elements()
                 if isinstance(elts, dict):
-                    element = elts.get(element_name)
-                    if element:
+                    if element := elts.get(element_name):
                         return lib, element_name, element
         else:
             element_name = name
@@ -599,8 +598,7 @@ class _Factory:
                 for lib in libs:
                     elts = lib.get_elements()
                     if isinstance(elts, dict):
-                        element = elts.get(element_name)
-                        if element:
+                        if element := elts.get(element_name):
                             return lib, element_name, element
         return None, None, None
 

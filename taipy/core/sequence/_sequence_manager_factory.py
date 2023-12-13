@@ -19,10 +19,11 @@ from ._sequence_manager import _SequenceManager
 class _SequenceManagerFactory(_ManagerFactory):
     @classmethod
     def _build_manager(cls) -> Type[_SequenceManager]:  # type: ignore
-        if cls._using_enterprise():
-            sequence_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".sequence._sequence_manager", "_SequenceManager"
-            )  # type: ignore
-        else:
-            sequence_manager = _SequenceManager
-        return sequence_manager  # type: ignore
+        return (
+            _load_fct(
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.sequence._sequence_manager",
+                "_SequenceManager",
+            )
+            if cls._using_enterprise()
+            else _SequenceManager
+        )

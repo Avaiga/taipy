@@ -48,8 +48,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
         data = super().get()
         if isinstance(data, Scenario):
             try:
-                scenario = core_get(data.id)
-                if scenario:
+                if scenario := core_get(data.id):
                     return [
                         scenario.id,
                         scenario.is_primary,
@@ -85,7 +84,7 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Sc"
+        return f"{_TaipyBase._HOLDER_PREFIX}Sc"
 
 
 class _GuiCoreScenarioDagAdapter(_TaipyBase):
@@ -97,8 +96,7 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
         data = super().get()
         if isinstance(data, Scenario):
             try:
-                scenario = core_get(data.id)
-                if scenario:
+                if scenario := core_get(data.id):
                     dag = data._get_dag()
                     nodes = dict()
                     for id, node in dag.nodes.items():
@@ -131,7 +129,7 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "ScG"
+        return f"{_TaipyBase._HOLDER_PREFIX}ScG"
 
 
 class _GuiCoreDatanodeAdapter(_TaipyBase):
@@ -141,8 +139,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
         data = super().get()
         if isinstance(data, DataNode):
             try:
-                datanode = core_get(data.id)
-                if datanode:
+                if datanode := core_get(data.id):
                     owner = core_get(datanode.owner_id) if datanode.owner_id else None
                     return [
                         datanode.id,
@@ -175,4 +172,4 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Dn"
+        return f"{_TaipyBase._HOLDER_PREFIX}Dn"

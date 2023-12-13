@@ -56,25 +56,25 @@ class _BaseSerializer(object):
         if as_dict is None:
             return None
         if isinstance(as_dict, Section):
-            return as_dict.id + ":SECTION"
+            return f"{as_dict.id}:SECTION"
         if isinstance(as_dict, Scope):
-            return as_dict.name + ":SCOPE"
+            return f"{as_dict.name}:SCOPE"
         if isinstance(as_dict, Frequency):
-            return as_dict.name + ":FREQUENCY"
+            return f"{as_dict.name}:FREQUENCY"
         if isinstance(as_dict, bool):
-            return str(as_dict) + ":bool"
+            return f"{str(as_dict)}:bool"
         if isinstance(as_dict, int):
-            return str(as_dict) + ":int"
+            return f"{str(as_dict)}:int"
         if isinstance(as_dict, float):
-            return str(as_dict) + ":float"
+            return f"{str(as_dict)}:float"
         if isinstance(as_dict, datetime):
-            return as_dict.isoformat() + ":datetime"
+            return f"{as_dict.isoformat()}:datetime"
         if isinstance(as_dict, timedelta):
-            return cls._timedelta_to_str(as_dict) + ":timedelta"
+            return f"{cls._timedelta_to_str(as_dict)}:timedelta"
         if inspect.isfunction(as_dict) or isinstance(as_dict, types.BuiltinFunctionType):
-            return as_dict.__module__ + "." + as_dict.__name__ + ":function"
+            return f"{as_dict.__module__}.{as_dict.__name__}:function"
         if inspect.isclass(as_dict):
-            return as_dict.__module__ + "." + as_dict.__qualname__ + ":class"
+            return f"{as_dict.__module__}.{as_dict.__qualname__}:class"
         if isinstance(as_dict, dict):
             return {str(key): cls._stringify(val) for key, val in as_dict.items()}
         if isinstance(as_dict, list):
@@ -115,8 +115,7 @@ class _BaseSerializer(object):
                     r"^(.+):(\bbool\b|\bstr\b|\bint\b|\bfloat\b|\bdatetime\b||\btimedelta\b|"
                     r"\bfunction\b|\bclass\b|\bSCOPE\b|\bFREQUENCY\b|\bSECTION\b)?$"
                 )
-                match = re.fullmatch(TYPE_PATTERN, str(val))
-                if match:
+                if match := re.fullmatch(TYPE_PATTERN, str(val)):
                     actual_val = match.group(1)
                     dynamic_type = match.group(2)
                     if dynamic_type == "SECTION":

@@ -558,7 +558,7 @@ class TestTaipy:
         tp.submit(scenario_1)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            Config.configure_scenario("block_scenario", set([task_cfg_1]))
+            Config.configure_scenario("block_scenario", {task_cfg_1})
         core.stop()
 
     def test_block_config_when_core_is_running_in_standalone_mode(self):
@@ -577,7 +577,7 @@ class TestTaipy:
         tp.submit(scenario_1, wait=True)
 
         with pytest.raises(ConfigurationUpdateBlocked):
-            Config.configure_scenario("block_scenario", set([task_cfg_1]))
+            Config.configure_scenario("block_scenario", {task_cfg_1})
         core.stop()
 
     def test_get_data_node(self, data_node):
@@ -694,7 +694,7 @@ class TestTaipy:
             for key, items in expected_parents.items():
                 assert len(parents[key]) == len(expected_parents[key])
                 parent_ids = [parent.id for parent in parents[key]]
-                assert all([item.id in parent_ids for item in items])
+                assert all(item.id in parent_ids for item in items)
 
         dn_config_1 = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node(id="d2", storage_type="in_memory", scope=Scope.SCENARIO)

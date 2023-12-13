@@ -81,7 +81,13 @@ def test_scenario_management_without_toml_config(tmpdir):
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         config_content = config_file.read()
         assert 'Config.load("config/config.toml")' not in config_content
-        assert all([x in config_content for x in ["Config.configure_csv_data_node", "Config.configure_task"]])
+        assert all(
+            x in config_content
+            for x in [
+                "Config.configure_csv_data_node",
+                "Config.configure_task",
+            ]
+        )
 
     oldpwd = os.getcwd()
     os.chdir(os.path.join(tmpdir, "foo_app"))

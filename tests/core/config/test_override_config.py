@@ -20,7 +20,7 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_override_default_configuration_with_code_configuration():
-    assert not Config.core.root_folder == "foo"
+    assert Config.core.root_folder != "foo"
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
     assert len(Config.scenarios) == 1

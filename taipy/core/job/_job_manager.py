@@ -77,18 +77,13 @@ class _JobManager(_Manager[Job], _VersionMixin):
 
     @classmethod
     def _get_latest(cls, task: Task) -> Optional[Job]:
-        jobs_of_task = list(filter(lambda job: task in job, cls._get_all()))
-        if len(jobs_of_task) == 0:
-            return None
-        if len(jobs_of_task) == 1:
-            return jobs_of_task[0]
+        if jobs_of_task := list(filter(lambda job: task in job, cls._get_all())):
+            return jobs_of_task[0] if len(jobs_of_task) == 1 else max(jobs_of_task)
         else:
-            return max(jobs_of_task)
+            return None
 
     @classmethod
     def _is_deletable(cls, job: Union[Job, JobId]) -> bool:
         if isinstance(job, str):
             job = cls._get(job)
-        if job.is_finished():
-            return True
-        return False
+        return bool(job.is_finished())

@@ -26,11 +26,13 @@ class _DataManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_DataManager]:  # type: ignore
         if cls._using_enterprise():
             data_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager", "_DataManager"
-            )  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.data._data_manager",
+                "_DataManager",
+            )
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_manager_factory", "_DataManagerFactory"
-            )._build_repository  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.data._data_manager_factory",
+                "_DataManagerFactory",
+            )._build_repository
         else:
             data_manager = _DataManager
             build_repository = cls._build_repository

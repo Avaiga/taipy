@@ -20,8 +20,9 @@ with_shell = platform.system() == "Windows"
 
 def build_gui(root_path: Path):
     print(f"Building taipy-gui frontend bundle in {root_path}.")
-    already_exists = (root_path / "taipy" / "gui" / "webapp" / "index.html").exists()
-    if already_exists:
+    if already_exists := (
+        root_path / "taipy" / "gui" / "webapp" / "index.html"
+    ).exists():
         print(f'Found taipy-gui frontend bundle in {root_path  / "taipy" / "gui" / "webapp"}.')
     else:
         subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell)
@@ -33,8 +34,9 @@ def build_gui(root_path: Path):
 
 def build_taipy(root_path: Path):
     print(f"Building taipy frontend bundle in {root_path}.")
-    already_exists = (root_path / "taipy" / "gui_core" / "lib" / "taipy-gui-core.js").exists()
-    if already_exists:
+    if already_exists := (
+        root_path / "taipy" / "gui_core" / "lib" / "taipy-gui-core.js"
+    ).exists():
         print(f'Found taipy frontend bundle in {root_path / "taipy" / "gui_core" / "lib"}.')
     else:
         # Specify the correct path to taipy-gui in gui/.env file

@@ -151,10 +151,12 @@ def default_datanode_config():
 
 @pytest.fixture
 def default_datanode_config_list():
-    configs = []
-    for i in range(10):
-        configs.append(Config.configure_data_node(id=f"ds_{i}", storage_type="in_memory", scope=Scope.SCENARIO))
-    return configs
+    return [
+        Config.configure_data_node(
+            id=f"ds_{i}", storage_type="in_memory", scope=Scope.SCENARIO
+        )
+        for i in range(10)
+    ]
 
 
 def __default_task():
@@ -197,10 +199,7 @@ def default_task_config():
 
 @pytest.fixture
 def default_task_config_list():
-    configs = []
-    for i in range(10):
-        configs.append(Config.configure_task(f"task_{i}", print, [], []))
-    return configs
+    return [Config.configure_task(f"task_{i}", print, [], []) for i in range(10)]
 
 
 def __default_sequence():
@@ -260,12 +259,11 @@ def __create_cycle(name="foo"):
 
 @pytest.fixture
 def create_cycle_list():
-    cycles = []
     manager = _CycleManager
     for i in range(10):
         c = __create_cycle(f"cycle_{i}")
         manager._set(c)
-    return cycles
+    return []
 
 
 @pytest.fixture
@@ -300,12 +298,11 @@ def default_job():
 
 @pytest.fixture
 def create_job_list():
-    jobs = []
     manager = _JobManager
-    for i in range(10):
+    for _ in range(10):
         c = __create_job()
         manager._set(c)
-    return jobs
+    return []
 
 
 @pytest.fixture(scope="function", autouse=True)

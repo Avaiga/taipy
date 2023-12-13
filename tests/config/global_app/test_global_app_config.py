@@ -43,4 +43,4 @@ def test_block_update_global_app_config():
 
     # Test if the global_config stay as default
     assert Config.global_config.foo is None
-    assert len(Config.global_config.properties) == 0
+    assert not Config.global_config.properties

@@ -26,12 +26,13 @@ class _SubmissionManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_SubmissionManager]:  # type: ignore
         if cls._using_enterprise():
             submission_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager", "_SubmissionManager"
-            )  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.submission._submission_manager",
+                "_SubmissionManager",
+            )
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager_factory",
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.submission._submission_manager_factory",
                 "_SubmissionManagerFactory",
-            )._build_repository  # type: ignore
+            )._build_repository
         else:
             submission_manager = _SubmissionManager
             build_repository = cls._build_repository
