@@ -18,16 +18,14 @@ from typing import Callable, Iterable, List, Optional, Set, Union
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
-
+from ._abstract_orchestrator import _AbstractOrchestrator
 from .._entity.submittable import Submittable
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..job.job_id import JobId
-from ..scenario.scenario import Scenario
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task.task import Task
-from ._abstract_orchestrator import _AbstractOrchestrator
 
 
 class _Orchestrator(_AbstractOrchestrator):
@@ -96,7 +94,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(jobs, timeout=timeout)
+                cls._wait_until_job_finished(jobs, timeout=timeout)
 
         return jobs
 
@@ -113,7 +111,6 @@ class _Orchestrator(_AbstractOrchestrator):
 
         Parameters:
              task (Task^): The task to submit for execution.
-             submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
              wait (bool): Wait for the orchestrated job created from the task submission to be finished
@@ -143,7 +140,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(job, timeout=timeout)
+                cls._wait_until_job_finished(job, timeout=timeout)
 
         return job
 
@@ -182,23 +179,22 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.jobs_to_run.put(job)
 
     @classmethod
-    def __wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
-        def __check_if_timeout(start, timeout):
-            if timeout:
-                return (datetime.now() - start).seconds < timeout
+    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
+        #  Note: this method should be prefixed by two underscores, but it has only one, so it can be mocked in tests.
+        def __check_if_timeout(st, to):
+            if to:
+                return (datetime.now() - st).seconds < to
             return True
 
         start = datetime.now()
         jobs = jobs if isinstance(jobs, Iterable) else [jobs]
         index = 0
-
         while __check_if_timeout(start, timeout) and index < len(jobs):
             try:
                 if jobs[index]._is_finished():
                     index = index + 1
                 else:
                     sleep(0.5)  # Limit CPU usage
-
             except Exception:
                 pass
 
@@ -217,7 +213,7 @@ class _Orchestrator(_AbstractOrchestrator):
         return any(not data_manager._get(dn.id).is_ready_for_reading for dn in input_data_nodes)
 
     @staticmethod
-    def __unlock_edit_on_jobs_outputs(jobs: Union[Job, List[Job], Set[Job]]):
+    def _unlock_edit_on_jobs_outputs(jobs: Union[Job, List[Job], Set[Job]]):
         jobs = [jobs] if isinstance(jobs, Job) else jobs
         for job in jobs:
             job._unlock_edit_on_outputs()
@@ -227,7 +223,7 @@ class _Orchestrator(_AbstractOrchestrator):
         if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
         elif job.is_failed():
-            cls.__fail_subsequent_jobs(job)
+            cls._fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
@@ -259,8 +255,8 @@ class _Orchestrator(_AbstractOrchestrator):
                 to_cancel_or_abandon_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
                 cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
                 cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
-                cls.__cancel_jobs(job.id, to_cancel_or_abandon_jobs)
-                cls.__unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
+                cls._cancel_jobs(job.id, to_cancel_or_abandon_jobs)
+                cls._unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -292,7 +288,7 @@ class _Orchestrator(_AbstractOrchestrator):
         cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
-    def __fail_subsequent_jobs(cls, failed_job: Job):
+    def _fail_subsequent_jobs(cls, failed_job: Job):
         with cls.lock:
             to_fail_or_abandon_jobs = set()
             to_fail_or_abandon_jobs.update(
@@ -303,10 +299,10 @@ class _Orchestrator(_AbstractOrchestrator):
             to_fail_or_abandon_jobs.update([failed_job])
             cls.__remove_blocked_jobs(to_fail_or_abandon_jobs)
             cls.__remove_jobs_to_run(to_fail_or_abandon_jobs)
-            cls.__unlock_edit_on_jobs_outputs(to_fail_or_abandon_jobs)
+            cls._unlock_edit_on_jobs_outputs(to_fail_or_abandon_jobs)
 
     @classmethod
-    def __cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
+    def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
         from ._orchestrator_factory import _OrchestratorFactory
 
         for job in jobs:
