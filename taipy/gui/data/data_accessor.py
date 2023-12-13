@@ -85,7 +85,7 @@ class _DataAccessors(object):
             try:
                 inst = cls()
             except Exception as e:
-                raise TypeError(f"Class {cls.__name__} cannot be instanciated") from e
+                raise TypeError(f"Class {cls.__name__} cannot be instantiated") from e
             if inst:
                 for name in names:
                     self.__access_4_type[name] = inst  # type: ignore

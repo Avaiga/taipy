@@ -285,8 +285,8 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 cfg
                     ? storeConf(configId, {
                           ...cfg,
-                          traces: (cfg.traces || []).map((axises, idx) =>
-                              idx == trace ? (axises.map((a, j) => (j == axis ? col : a)) as [string, string]) : axises
+                          traces: (cfg.traces || []).map((axes, idx) =>
+                              idx == trace ? (axes.map((a, j) => (j == axis ? col : a)) as [string, string]) : axes
                           ),
                       })
                     : cfg
