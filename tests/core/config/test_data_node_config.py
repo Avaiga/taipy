@@ -94,8 +94,12 @@ def test_data_node_config_default_parameter():
     assert mongo_dn_cfg.validity_period is None
 
     aws_s3_object_dn_cfg = Config.configure_data_node(
-        "data_node_11", "s3_object", aws_access_key="test", aws_secret_access_key="test_secret",
-        aws_s3_bucket_name="test_bucket", aws_s3_object_key="test_file.txt"
+        "data_node_11",
+        "s3_object",
+        aws_access_key="test",
+        aws_secret_access_key="test_secret",
+        aws_s3_bucket_name="test_bucket",
+        aws_s3_object_key="test_file.txt",
     )
     assert aws_s3_object_dn_cfg.scope == Scope.SCENARIO
     assert aws_s3_object_dn_cfg.aws_access_key == "test"
