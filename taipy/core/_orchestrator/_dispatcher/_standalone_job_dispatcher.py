@@ -25,9 +25,7 @@ from ._task_function_wrapper import _TaskFunctionWrapper
 class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
-    def __init__(
-        self, orchestrator: Optional[_AbstractOrchestrator], subproc_initializer: Optional[Callable] = None
-    ):
+    def __init__(self, orchestrator: Optional[_AbstractOrchestrator], subproc_initializer: Optional[Callable] = None):
         super().__init__(orchestrator)
         max_workers = Config.job_config.max_nb_of_workers or 1
         self._executor = ProcessPoolExecutor(max_workers=max_workers, initializer=subproc_initializer)  # type: ignore
