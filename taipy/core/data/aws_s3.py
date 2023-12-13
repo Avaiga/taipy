@@ -78,7 +78,6 @@ class S3ObjectDataNode(DataNode):
         __AWS_SECRET_ACCESS_KEY,
         __AWS_STORAGE_BUCKET_NAME,
         __AWS_S3_OBJECT_KEY,
-
     ]
 
     def __init__(
@@ -121,7 +120,7 @@ class S3ObjectDataNode(DataNode):
         )
 
         self._s3_client = boto3.client(
-            's3',
+            "s3",
             aws_access_key_id=properties.get(self.__AWS_ACCESS_KEY_ID),
             aws_secret_access_key=properties.get(self.__AWS_SECRET_ACCESS_KEY),
         )
@@ -149,7 +148,7 @@ class S3ObjectDataNode(DataNode):
             Bucket=self.properties[self.__AWS_STORAGE_BUCKET_NAME],
             Key=self.properties[self.__AWS_S3_OBJECT_KEY],
         )
-        return aws_s3_object['Body'].read().decode('utf-8')
+        return aws_s3_object["Body"].read().decode("utf-8")
 
     def _write(self, data: Any):
         self._s3_client.put_object(
