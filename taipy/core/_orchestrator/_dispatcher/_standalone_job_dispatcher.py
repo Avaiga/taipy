@@ -26,10 +26,11 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
     def __init__(
-        self, orchestrator: Optional[_AbstractOrchestrator], subprocess_initializer: Optional[Callable] = None
+        self, orchestrator: Optional[_AbstractOrchestrator], subproc_initializer: Optional[Callable] = None
     ):
         super().__init__(orchestrator)
-        self._executor = ProcessPoolExecutor(Config.job_config.max_nb_of_workers or 1, initializer=subprocess_initializer)  # type: ignore
+        max_workers = Config.job_config.max_nb_of_workers or 1
+        self._executor = ProcessPoolExecutor(max_workers=max_workers, initializer=subproc_initializer)  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _dispatch(self, job: Job):
@@ -41,7 +42,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._nb_available_workers -= 1
 
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)
-        future = self._executor.submit(_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
+        future = self._executor.submit(fn=_TaskFunctionWrapper(job.id, job.task), config_as_string=config_as_string)
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
         future.add_done_callback(self._release_worker)
