@@ -53,12 +53,17 @@ class TestS3ObjectDataNode:
         assert aws_s3_object_dn.is_ready_for_reading
 
     @mock_s3
-    @pytest.mark.parametrize('data', [('Hello, write world!'), ])
+    @pytest.mark.parametrize(
+        "data",
+        [
+            ("Hello, write world!"),
+        ],
+    )
     @pytest.mark.parametrize("properties", __properties)
     def test_write(self, properties, data):
         bucket_name = properties["aws_s3_bucket_name"]
         # Create an S3 client
-        s3_client = boto3.client('s3')
+        s3_client = boto3.client("s3")
         # Create a bucket
         s3_client.create_bucket(Bucket=bucket_name)
         # Assign a name to the object
@@ -70,20 +75,25 @@ class TestS3ObjectDataNode:
         # Read the object with boto3
         response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
 
-        assert response['Body'].read().decode('utf-8') == "Hello, write world!"
+        assert response["Body"].read().decode("utf-8") == "Hello, write world!"
 
     @mock_s3
-    @pytest.mark.parametrize('data', [('Hello, read world!'), ])
+    @pytest.mark.parametrize(
+        "data",
+        [
+            ("Hello, read world!"),
+        ],
+    )
     @pytest.mark.parametrize("properties", __properties)
     def test_read(self, properties, data):
         bucket_name = properties["aws_s3_bucket_name"]
         # Create an S3 client
-        client = boto3.client('s3')
+        client = boto3.client("s3")
         # Create a bucket
         client.create_bucket(Bucket=bucket_name)
         # Put an object in the bucket with boto3
         object_key = properties["aws_s3_object_key"]
-        object_body = 'Hello, read world!'
+        object_body = "Hello, read world!"
         client.put_object(Body=object_body, Bucket=bucket_name, Key=object_key)
         # Create Taipy S3ObjectDataNode
         aws_s3_object_dn = S3ObjectDataNode("foo_aws_s3", Scope.SCENARIO, properties=properties)
