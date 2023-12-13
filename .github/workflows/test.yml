@@ -1,0 +1,72 @@
+name: Test Workflow
+
+on:
+  push:
+    branches: [ develop, dev/*, release/* ]
+  pull_request:
+    branches: [ develop, dev/*, release/* ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v4
+        # replace for Ruff in the future
+        - uses: ricardochaves/python-lint@v1.4.0
+          with:
+            use-pylint: false
+            use-isort: false
+            use-mypy: false
+            extra-black-options: "--line-length=120 --diff"
+            extra-pycodestyle-options: "--max-line-length=120  --exclude=tests/gui --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
+            extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py) --follow-imports skip"
+            extra-isort-options: "--line-length=120 --force-grid-wrap=10 --multi-line=VERTICAL_HANGING_INDENT --trailing-comma"
+  tests:
+    needs: lint
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+      - run: pipenv install --dev --python=${{ matrix.python-version }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup LibMagic (MacOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install libmagic
+
+      - name: Frontend Bundle Build
+        run: pipenv run python tools/frontend/bundle_build.py
+
+      - name: Install Playwright
+        run: pipenv run playwright install chromium --with-deps
+
+      - name: Pytest
+        run: pipenv run pytest --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+
+      - name: Coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-xml-coverage-path: ./overall-coverage.xml
+          title: Taipy Overall Coverage Report
+
+      - name: Notify user if failed
+        if: failure() && github.event_name == 'workflow_dispatch'
+        run: |
+          if [[ -n "${{ github.event.inputs.user-to-notify }}" ]]; then
+            curl "${{ secrets.notify_endpoint }}" -d '{"username": "${{ github.event.inputs.user-to-notify }}", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }' -H "Content-Type: application/json"
+          fi
+        shell: bash
