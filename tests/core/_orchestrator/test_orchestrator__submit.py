@@ -9,14 +9,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from datetime import datetime
+
 import freezegun
 
+from taipy import Scope, Task, Scenario
 from taipy.config import Config
 from taipy.core import taipy
-from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.data import PickleDataNode
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission_status import SubmissionStatus
+from taipy.core.task._task_manager import _TaskManager
 
 
 def nothing(*args, **kwargs):
@@ -403,6 +408,7 @@ def test_submit_sequence_standalone_mode():
     assert len(orchestrator.blocked_jobs) == 2
     assert orchestrator.jobs_to_run.qsize() == 1
 
+
 def test_submit_sequence_with_callbacks_and_force_and_wait():
     Config.configure_job_executions(mode="standalone")
     scenario = create_scenario()
@@ -426,3 +432,26 @@ def test_submit_sequence_with_callbacks_and_force_and_wait():
     assert len(mock_is_called) == 1
     assert mock_is_called[0][0] == jobs
     assert mock_is_called[0][1] == 5
+
+
+def test_submit_scenario_generate_unique_submit_id():
+    dn_1 = PickleDataNode("dn_config_id_1", Scope.SCENARIO)
+    dn_2 = PickleDataNode("dn_config_id_2", Scope.SCENARIO)
+    task_1 = Task("task_config_id_1", {}, print, [dn_1])
+    task_2 = Task("task_config_id_2", {}, print, [dn_1], [dn_2])
+
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+    _TaskManager._set(task_1)
+    _TaskManager._set(task_2)
+
+    scenario = Scenario("scenario", {task_1, task_2}, {})
+    _ScenarioManager._set(scenario)
+
+    jobs_1 = taipy.submit(scenario)
+    jobs_2 = taipy.submit(scenario)
+    assert len(jobs_1) == 2
+    assert len(jobs_2) == 2
+    assert jobs_1[0].submit_id == jobs_1[1].submit_id
+    assert jobs_2[0].submit_id == jobs_2[1].submit_id
+    assert jobs_1[0].submit_id != jobs_2[0].submit_id
