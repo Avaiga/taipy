@@ -60,7 +60,6 @@ class S3ObjectDataNode(DataNode):
                     or written. \n
             - _"aws _s3_object_parameters"_ `(str)`: A dictionary of additional arguments to be passed to interact with
                     the AWS service\n
-
     """
 
     __STORAGE_TYPE = "s3_object"
