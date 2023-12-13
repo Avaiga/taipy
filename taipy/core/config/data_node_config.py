@@ -179,7 +179,6 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_GENERIC: [],
         _STORAGE_TYPE_VALUE_JSON: [],
         _STORAGE_TYPE_VALUE_PARQUET: [],
-
         _STORAGE_TYPE_VALUE_S3_OBJECT: [
             _REQUIRED_AWS_ACCESS_KEY_ID_PROPERTY,
             _REQUIRED_AWS_SECRET_ACCESS_KEY_PROPERTY,
@@ -1103,9 +1102,7 @@ class DataNodeConfig(Section):
         if aws_s3_object_parameters is not None:
             properties[cls._OPTIONAL_AWS_S3_OBJECT_PARAMETERS_PROPERTY] = aws_s3_object_parameters
 
-        return cls.__configure(
-            id, DataNodeConfig._STORAGE_TYPE_VALUE_S3_OBJECT, scope, validity_period, **properties
-        )
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_S3_OBJECT, scope, validity_period, **properties)
 
     @staticmethod
     def __configure(
