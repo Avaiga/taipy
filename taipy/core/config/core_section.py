@@ -99,9 +99,9 @@ class CoreSection(UniqueSection):
         self._read_entity_retry = (
             read_entity_retry if read_entity_retry is not None else self._DEFAULT_READ_ENTITY_RETRY
         )
-        self.mode = mode
-        self.version_number = version_number
-        self.force = force
+        self._mode = mode
+        self._version_number = version_number
+        self._force = force
 
         self._check_compatibility(core_version)
         self._core_version = core_version
@@ -170,6 +170,33 @@ class CoreSection(UniqueSection):
     @_ConfigBlocker._check()
     def read_entity_retry(self, val):
         self._read_entity_retry = val
+
+    @property
+    def mode(self):
+        return _tpl._replace_templates(self._mode)
+
+    @mode.setter  # type: ignore
+    @_ConfigBlocker._check()
+    def mode(self, val):
+        self._mode = val
+
+    @property
+    def version_number(self):
+        return _tpl._replace_templates(self._version_number)
+
+    @version_number.setter  # type: ignore
+    @_ConfigBlocker._check()
+    def version_number(self, val):
+        self._version_number = val
+
+    @property
+    def force(self):
+        return _tpl._replace_templates(self._force)
+
+    @force.setter  # type: ignore
+    @_ConfigBlocker._check()
+    def force(self, val):
+        self._force = val
 
     @classmethod
     def default_config(cls):
@@ -245,14 +272,14 @@ class CoreSection(UniqueSection):
         )
 
     def _update(self, as_dict: Dict[str, Any]):
-        self.root_folder = as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder)
-        self.storage_folder = as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
+        self._root_folder = as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder)
+        self._storage_folder = as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
         self._repository_type = as_dict.pop(self._REPOSITORY_TYPE_KEY, self._repository_type)
         self._repository_properties.update(as_dict.pop(self._REPOSITORY_PROPERTIES_KEY, self._repository_properties))
         self._read_entity_retry = as_dict.pop(self._READ_ENTITY_RETRY_KEY, self._read_entity_retry)
-        self.mode = as_dict.pop(self._MODE_KEY, self.mode)
-        self.version_number = as_dict.pop(self._VERSION_NUMBER_KEY, self.version_number)
-        self.force = as_dict.pop(self._FORCE_KEY, self.force)
+        self._mode = as_dict.pop(self._MODE_KEY, self.mode)
+        self._version_number = as_dict.pop(self._VERSION_NUMBER_KEY, self.version_number)
+        self._force = as_dict.pop(self._FORCE_KEY, self.force)
 
         core_version = as_dict.pop(self._CORE_VERSION_KEY, None)
         self._check_compatibility(core_version)
