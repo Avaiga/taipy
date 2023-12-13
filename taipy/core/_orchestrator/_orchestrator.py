@@ -70,7 +70,6 @@ class _Orchestrator(_AbstractOrchestrator):
             submittable._ID_PREFIX,  # type: ignore
             getattr(submittable, "config_id", None),
         )
-
         jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
@@ -85,17 +84,13 @@ class _Orchestrator(_AbstractOrchestrator):
                             force=force,  # type: ignore
                         )
                     )
-
         submission.jobs = jobs  # type: ignore
-
         cls._orchestrate_job_to_run_or_block(jobs)
-
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
                 cls._wait_until_job_finished(jobs, timeout=timeout)
-
         return jobs
 
     @classmethod
@@ -130,18 +125,14 @@ class _Orchestrator(_AbstractOrchestrator):
                 itertools.chain([submission._update_submission_status], callbacks or []),
                 force,
             )
-
         jobs = [job]
         submission.jobs = jobs  # type: ignore
-
         cls._orchestrate_job_to_run_or_block(jobs)
-
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
                 cls._wait_until_job_finished(job, timeout=timeout)
-
         return job
 
     @classmethod
