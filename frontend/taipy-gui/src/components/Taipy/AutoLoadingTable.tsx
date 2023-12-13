@@ -183,7 +183,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         userData,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
-    const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
+    const [rowCount, setRowCount] = useState(1000); // need something > 0 to bootstrap the infinite loader
     const dispatch = useDispatch();
     const page = useRef<key2Rows>({ key: defaultKey, promises: {} });
     const [orderBy, setOrderBy] = useState("");

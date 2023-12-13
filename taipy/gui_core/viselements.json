@@ -60,7 +60,7 @@
                         "name": "show_pins",
                         "type": "bool",
                         "default_value": "False",
-                        "doc": "If True, a pin is shown on each item of the selector and allows to restrict the numnber of displayed items."
+                        "doc": "If True, a pin is shown on each item of the selector and allows to restrict the number of displayed items."
                     },
                     {
                       "name": "on_creation",

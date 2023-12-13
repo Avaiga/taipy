@@ -210,39 +210,39 @@ class TestDataNode:
         assert dn.job_ids == [job_id]
 
     def test_is_valid_no_validity_period(self):
-        # Test Never been writen
+        # Test Never been written
         dn = InMemoryDataNode("foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id")
         assert not dn.is_valid
 
-        # test has been writen
+        # test has been written
         dn.write("My data")
         assert dn.is_valid
 
     def test_is_valid_with_30_min_validity_period(self):
-        # Test Never been writen
+        # Test Never been written
         dn = InMemoryDataNode(
             "foo", Scope.SCENARIO, DataNodeId("id"), "name", "owner_id", validity_period=timedelta(minutes=30)
         )
         assert dn.is_valid is False
 
-        # Has been writen less than 30 minutes ago
+        # Has been written less than 30 minutes ago
         dn.write("My data")
         assert dn.is_valid is True
 
-        # Has been writen more than 30 minutes ago
+        # Has been written more than 30 minutes ago
         dn.last_edit_date = datetime.now() + timedelta(days=-1)
         assert dn.is_valid is False
 
     def test_is_valid_with_5_days_validity_period(self):
-        # Test Never been writen
+        # Test Never been written
         dn = InMemoryDataNode("foo", Scope.SCENARIO, validity_period=timedelta(days=5))
         assert dn.is_valid is False
 
-        # Has been writen less than 30 minutes ago
+        # Has been written less than 30 minutes ago
         dn.write("My data")
         assert dn.is_valid is True
 
-        # Has been writen more than 30 minutes ago
+        # Has been written more than 30 minutes ago
         dn._last_edit_date = datetime.now() - timedelta(days=6)
         _DataManager()._set(dn)
         assert dn.is_valid is False

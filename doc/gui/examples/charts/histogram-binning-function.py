@@ -39,7 +39,7 @@ properties = {
     "options": [
         # First trace: count the bins
         {"histfunc": "count"},
-        # Second trace: sum the bin occurences
+        # Second trace: sum the bin occurrences
         {"histfunc": "sum"},
     ],
     # Set x axis name
