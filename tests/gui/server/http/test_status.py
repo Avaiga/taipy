@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+from os import path
 from unittest.mock import patch
 
 from flask import g
@@ -43,7 +44,8 @@ def test_get_extended_status(gui: Gui):
     gui = ret.json.get("gui")
     assert "backend_version" in gui, "json.gui has no key backend_version"
     assert "flask_version" in gui, "json.gui has no key flask_version"
-    assert "frontend_version" in gui, "json.gui has no key frontend_version"
+    if path.exists(gui._get_webapp_path()):
+        assert "frontend_version" in gui, "json.gui has no key frontend_version"
     assert "host" in gui, "json.gui has no key host"
     assert "python_version" in gui, "json.gui has no key python_version"
     assert "user_status" in gui, "json.gui has no key user_status"
