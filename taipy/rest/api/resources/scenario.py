@@ -413,10 +413,10 @@ class ScenarioList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        config = Config.scenarios.get(config_id)
-        if not config:
+        if config := Config.scenarios.get(config_id):
+            return config
+        else:
             raise NonExistingScenarioConfig(config_id)
-        return config
 
     @_middleware
     def get(self):

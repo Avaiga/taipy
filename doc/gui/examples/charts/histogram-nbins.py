@@ -18,7 +18,7 @@ import random
 from taipy.gui import Gui
 
 # Random set of 100 samples
-samples = {"x": [random.gauss() for i in range(100)]}
+samples = {"x": [random.gauss() for _ in range(100)]}
 
 # Use the same data for both traces
 data = [samples, samples]

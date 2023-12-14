@@ -83,6 +83,7 @@ def test_create_task():
         task.bar
     with mock.patch("taipy.core.get") as get_mck:
 
+
         class MockOwner:
             label = "owner_label"
 
@@ -90,7 +91,7 @@ def test_create_task():
                 return self.label
 
         get_mck.return_value = MockOwner()
-        assert task.get_label() == "owner_label > " + task.config_id
+        assert task.get_label() == f"owner_label > {task.config_id}"
         assert task.get_simple_label() == task.config_id
 
 

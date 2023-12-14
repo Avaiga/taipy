@@ -26,16 +26,21 @@ from ..task.task import Task, TaskId
 class _ScenarioConverter(_AbstractConverter):
     @classmethod
     def _entity_to_model(cls, scenario: Scenario) -> _ScenarioModel:
-        sequences: Dict[str, Dict[str, Union[List[TaskId], Dict, List]]] = {}
-        for p_name, sequence_data in scenario._sequences.items():
-            sequences[p_name] = {
+        sequences: Dict[str, Dict[str, Union[List[TaskId], Dict, List]]] = {
+            p_name: {
                 Scenario._SEQUENCE_TASKS_KEY: [
-                    t.id if isinstance(t, Task) else t for t in sequence_data.get("tasks", [])
+                    t.id if isinstance(t, Task) else t
+                    for t in sequence_data.get("tasks", [])
                 ],
-                Scenario._SEQUENCE_PROPERTIES_KEY: sequence_data.get("properties", {}),
-                Scenario._SEQUENCE_SUBSCRIBERS_KEY: _utils._fcts_to_dict(sequence_data.get("subscribers", [])),
+                Scenario._SEQUENCE_PROPERTIES_KEY: sequence_data.get(
+                    "properties", {}
+                ),
+                Scenario._SEQUENCE_SUBSCRIBERS_KEY: _utils._fcts_to_dict(
+                    sequence_data.get("subscribers", [])
+                ),
             }
-
+            for p_name, sequence_data in scenario._sequences.items()
+        }
         return _ScenarioModel(
             id=scenario.id,
             config_id=scenario.config_id,
@@ -56,9 +61,7 @@ class _ScenarioConverter(_AbstractConverter):
 
     @classmethod
     def _model_to_entity(cls, model: _ScenarioModel) -> Scenario:
-        tasks: Union[Set[TaskId], Set[Task], Set] = set()
-        if model.tasks:
-            tasks = set(model.tasks)
+        tasks = set(model.tasks) if model.tasks else set()
         if model.sequences:
             for sequence_name, sequence_data in model.sequences.items():
                 if subscribers := sequence_data.get(Scenario._SEQUENCE_SUBSCRIBERS_KEY):

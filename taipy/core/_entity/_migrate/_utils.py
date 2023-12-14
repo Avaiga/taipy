@@ -48,8 +48,8 @@ def __search_parent_ids(entity_id: str, data: Dict) -> List:
             if entity_id in entity_data["input_ids"] or entity_id in entity_data["output_ids"]:
                 parents.append(_id)
 
-        if entity_type == "TASK" and "SCENARIO" in _id:
-            if entity_id in entity_data["tasks"]:
+        if entity_id in entity_data["tasks"]:
+            if entity_type == "TASK" and "SCENARIO" in _id:
                 parents.append(_id)
     parents.sort()
     return parents
@@ -60,8 +60,8 @@ def __search_parent_config(entity_id: str, config: Dict, entity_type: str) -> Li
     possible_parents = "TASK" if entity_type == "DATA_NODE" else "SCENARIO"
     data = config[possible_parents]
 
+    section_id = f"{entity_id}:SECTION"
     for _id, entity_data in data.items():
-        section_id = f"{entity_id}:SECTION"
         if entity_type == "DATANODE" and possible_parents == "TASK":
             if section_id in entity_data["input_ids"] or section_id in entity_data["output_ids"]:
                 parents.append(section_id)
@@ -281,7 +281,7 @@ def __migrate_entities(entity_type: str, data: Dict) -> Dict:
     _entities = {k: data[k] for k in data if entity_type in k}
 
     for k, v in _entities.items():
-        if entity_type in ["JOB", "VERSION"]:
+        if entity_type in {"JOB", "VERSION"}:
             v["data"] = migration_fct(v["data"])  # type: ignore
         else:
             v["data"] = migration_fct(v["data"], data)  # type: ignore

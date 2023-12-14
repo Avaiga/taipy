@@ -98,13 +98,13 @@ def handle_multi_page_app(pages):
         with open(os.path.join(os.getcwd(), "pages", "page_example", "page_example.md"), "r") as page_md_file:
             page_md_content = page_md_file.read()
         page_md_content = page_md_content.replace("Page example", page_name.replace("_", " ").title())
-        with open(os.path.join(os.getcwd(), "pages", page_name, page_name + ".md"), "w") as page_md_file:
+        with open(os.path.join(os.getcwd(), "pages", page_name, f"{page_name}.md"), "w") as page_md_file:
             page_md_file.write(page_md_content)
 
         with open(os.path.join(os.getcwd(), "pages", "page_example", "page_example.py"), "r") as page_content_file:
             page_py_content = page_content_file.read()
         page_py_content = page_py_content.replace("page_example", page_name)
-        with open(os.path.join(os.getcwd(), "pages", page_name, page_name + ".py"), "w") as page_content_file:
+        with open(os.path.join(os.getcwd(), "pages", page_name, f"{page_name}.py"), "w") as page_content_file:
             page_content_file.write(page_py_content)
 
     with open(os.path.join(os.getcwd(), "pages", "__init__.py"), "a") as page_init_file:
@@ -155,16 +155,14 @@ with open(os.path.join(os.getcwd(), "requirements.txt"), "a") as requirement_fil
 
 use_core = "{{ cookiecutter.__core }}".upper()
 use_rest = "{{ cookiecutter.__rest }}".upper()
-handle_services(use_rest in ["YES", "Y"], use_core in ["YES", "Y"])
+handle_services(use_rest in {"YES", "Y"}, use_core in {"YES", "Y"})
 
 pages = "{{ cookiecutter.__pages }}".split(" ")
-# Remove empty string from pages list
-pages = [page for page in pages if page != ""]
-if len(pages) == 0:
-    handle_single_page_app()
-else:
+if pages := [page for page in pages if page != ""]:
     handle_multi_page_app(pages)
 
+else:
+    handle_single_page_app()
 generate_main_file()
 
 # Remove the sections folder

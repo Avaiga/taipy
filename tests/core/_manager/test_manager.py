@@ -41,10 +41,7 @@ class MockEntity:
     def __init__(self, id: str, name: str, version: str = None) -> None:
         self.id = id
         self.name = name
-        if version:
-            self._version = version
-        else:
-            self._version = _VersionManager._get_latest_version()
+        self._version = version if version else _VersionManager._get_latest_version()
 
 
 class MockConverter(_AbstractConverter):

@@ -28,9 +28,10 @@ def configure():
         input=[initial_dataset_cfg, replacement_type_cfg],
         output=cleaned_dataset_cfg,
     )
-    scenario_cfg = Config.configure_scenario(
-        "scenario_configuration", task_configs=[clean_data_cfg], frequency=Frequency.DAILY
+    return Config.configure_scenario(
+        "scenario_configuration",
+        task_configs=[clean_data_cfg],
+        frequency=Frequency.DAILY,
     )
-    return scenario_cfg
     # Comment, remove or replace the previous lines with your own use case                                             #
     # ##################################################################################################################

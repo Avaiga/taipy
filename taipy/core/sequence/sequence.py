@@ -135,13 +135,17 @@ class Sequence(_Entity, Submittable, _Labeled):
             return False
         if not nx.is_weakly_connected(dag):
             return False
-        for left_node, right_node in dag.edges:
-            if (isinstance(left_node, DataNode) and isinstance(right_node, Task)) or (
-                isinstance(left_node, Task) and isinstance(right_node, DataNode)
-            ):
-                continue
-            return False
-        return True
+        return not any(
+            (
+                not isinstance(left_node, DataNode)
+                or not isinstance(right_node, Task)
+            )
+            and (
+                not isinstance(left_node, Task)
+                or not isinstance(right_node, DataNode)
+            )
+            for left_node, right_node in dag.edges
+        )
 
     def _get_tasks(self) -> Dict[str, Task]:
         from ..task._task_manager_factory import _TaskManagerFactory

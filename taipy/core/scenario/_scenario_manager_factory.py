@@ -26,11 +26,13 @@ class _ScenarioManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_ScenarioManager]:  # type: ignore
         if cls._using_enterprise():
             scenario_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager"
-            )  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.scenario._scenario_manager",
+                "_ScenarioManager",
+            )
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager_factory", "_ScenarioManagerFactory"
-            )._build_repository  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.scenario._scenario_manager_factory",
+                "_ScenarioManagerFactory",
+            )._build_repository
         else:
             scenario_manager = _ScenarioManager
             build_repository = cls._build_repository

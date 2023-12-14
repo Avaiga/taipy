@@ -73,8 +73,8 @@ class _Preprocessor(MdPreprocessor):
         return (prop_name, prop_value.replace("\\|", "|"))
 
     def run(self, lines: List[str]) -> List[str]:
-        new_lines = []
         tag_queue = []
+        new_lines = []
         for line_count, line in enumerate(lines, start=1):
             new_line = ""
             last_index = 0
@@ -150,11 +150,7 @@ class _Preprocessor(MdPreprocessor):
                         + new_line[m.end() :]
                     )
                 else:
-                    new_line = (
-                        new_line[: m.start()]
-                        + f"<div>No matching opened tag on line {line_count}</div>"
-                        + new_line[m.end() :]
-                    )
+                    new_line = f"{new_line[:m.start()]}<div>No matching opened tag on line {line_count}</div>{new_line[m.end():]}"
                     _warn(f"Line {line_count} has an unmatched closing tag.")
             # append the new line
             new_lines.append(new_line)

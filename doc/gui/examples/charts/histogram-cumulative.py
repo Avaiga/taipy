@@ -18,7 +18,7 @@ import random
 from taipy.gui import Gui
 
 # Random data set
-data = [random.random() for i in range(500)]
+data = [random.random() for _ in range(500)]
 
 options = {
     # Enable the cumulative histogram

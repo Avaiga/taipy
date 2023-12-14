@@ -30,15 +30,11 @@ def migrate_csv_path(dn):
 
 def compare_function(*data_node_results):
     comparison_result = {}
-    current_result_index = 0
-    for current_result in data_node_results:
+    for current_result_index, current_result in enumerate(data_node_results):
         comparison_result[current_result_index] = {}
-        next_result_index = 0
-        for next_result in data_node_results:
+        for next_result_index, next_result in enumerate(data_node_results):
             print(f"comparing result {current_result_index} with result {next_result_index}")
             comparison_result[current_result_index][next_result_index] = next_result - current_result
-            next_result_index += 1
-        current_result_index += 1
     return comparison_result
 
 
@@ -49,11 +45,11 @@ class CustomClass:
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, datetime):
-            result = {"__type__": "Datetime", "__value__": o.isoformat()}
-        else:
-            result = json.JSONEncoder.default(self, o)
-        return result
+        return (
+            {"__type__": "Datetime", "__value__": o.isoformat()}
+            if isinstance(o, datetime)
+            else json.JSONEncoder.default(self, o)
+        )
 
 
 class CustomDecoder(json.JSONDecoder):
@@ -270,9 +266,12 @@ sequence1 = [ "test_task:SECTION",]
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,
         Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
     ]
-    sequences = {}
-    for sequence_name, sequence_tasks in Config.sections[ScenarioConfig.name]["test_scenario"].sequences.items():
-        sequences[sequence_name] = [task.id for task in sequence_tasks]
+    sequences = {
+        sequence_name: [task.id for task in sequence_tasks]
+        for sequence_name, sequence_tasks in Config.sections[
+            ScenarioConfig.name
+        ]["test_scenario"].sequences.items()
+    }
     assert sequences == {"sequence1": [Config.sections[TaskConfig.name]["test_task"].id]}
 
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
@@ -469,9 +468,12 @@ def test_read_write_json_configuration_file():
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,
         Config.sections[DataNodeConfig.name]["test_pickle_dn"].id,
     ]
-    sequences = {}
-    for sequence_name, sequence_tasks in Config.sections[ScenarioConfig.name]["test_scenario"].sequences.items():
-        sequences[sequence_name] = [task.id for task in sequence_tasks]
+    sequences = {
+        sequence_name: [task.id for task in sequence_tasks]
+        for sequence_name, sequence_tasks in Config.sections[
+            ScenarioConfig.name
+        ]["test_scenario"].sequences.items()
+    }
     assert sequences == {"sequence1": [Config.sections[TaskConfig.name]["test_task"].id]}
 
     assert dict(Config.sections[ScenarioConfig.name]["test_scenario"].comparators) == {
@@ -610,10 +612,12 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
     ]
-    assert [
+    assert not [
         additional_data_node.id
-        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
-    ] == []
+        for additional_data_node in Config.sections[ScenarioConfig.name][
+            "test_scenario"
+        ].additional_data_nodes
+    ]
     assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
         Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,
@@ -784,10 +788,12 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
     assert [task.id for task in Config.sections[ScenarioConfig.name]["test_scenario"].tasks] == [
         Config.sections[TaskConfig.name]["test_task"].id
     ]
-    assert [
+    assert not [
         additional_data_node.id
-        for additional_data_node in Config.sections[ScenarioConfig.name]["test_scenario"].additional_data_nodes
-    ] == []
+        for additional_data_node in Config.sections[ScenarioConfig.name][
+            "test_scenario"
+        ].additional_data_nodes
+    ]
     assert sorted([data_node.id for data_node in Config.sections[ScenarioConfig.name]["test_scenario"].data_nodes]) == [
         Config.sections[DataNodeConfig.name]["test_csv_dn"].id,
         Config.sections[DataNodeConfig.name]["test_json_dn"].id,

@@ -43,8 +43,11 @@ def _config_doc(func):
 
                 for exposed_configuration_method, configuration_method in configuration_methods:
                     annotation = "    @staticmethod\n"
-                    sign = "    def " + exposed_configuration_method + str(signature(configuration_method)) + ":\n"
-                    doc = '        """' + configuration_method.__doc__ + '"""\n'
+                    sign = (
+                        f"    def {exposed_configuration_method}{str(signature(configuration_method))}"
+                        + ":\n"
+                    )
+                    doc = f'        """{configuration_method.__doc__}' + '"""\n'
                     content = "        pass\n\n"
                     f.write(annotation + sign + doc + content)
         return func(section, attribute_name, default, configuration_methods, add_to_unconflicted_sections)

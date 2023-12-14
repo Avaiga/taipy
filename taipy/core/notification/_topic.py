@@ -55,11 +55,9 @@ class _Topic:
         return hash((self.entity_type, self.entity_id, self.operation, self.attribute_name))
 
     def __eq__(self, __value) -> bool:
-        if (
+        return (
             self.entity_type == __value.entity_type
             and self.entity_id == __value.entity_id
             and self.operation == __value.operation
             and self.attribute_name == __value.attribute_name
-        ):
-            return True
-        return False
+        )

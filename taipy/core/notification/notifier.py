@@ -156,6 +156,8 @@ class Notifier:
             return False
         if topic.operation is not None and event.operation != topic.operation:
             return False
-        if topic.attribute_name is not None and event.attribute_name and event.attribute_name != topic.attribute_name:
-            return False
-        return True
+        return (
+            topic.attribute_name is None
+            or not event.attribute_name
+            or event.attribute_name == topic.attribute_name
+        )

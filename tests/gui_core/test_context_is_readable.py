@@ -39,9 +39,7 @@ def mock_core_get(entity_id):
         return a_scenario
     if entity_id == a_job.id:
         return a_job
-    if entity_id == a_datanode.id:
-        return a_datanode
-    return a_task
+    return a_datanode if entity_id == a_datanode.id else a_task
 
 
 class MockState:
@@ -143,12 +141,8 @@ class TestGuiCoreContext_is_readable:
             gui_core_context = _GuiCoreContext(Mock())
             gui_core_context.scenario_status_callback(a_job.id)
             mockget.assert_called()
-            found = False
-            for call in mockget.call_args_list:
-                if call.args[0] == a_job.id:
-                    found = True
-                    break
-            assert found is True
+            found = any(call.args[0] == a_job.id for call in mockget.call_args_list)
+            assert found
             mockget.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):
@@ -178,9 +172,9 @@ class TestGuiCoreContext_is_readable:
                 assert outcome is None
 
     def test_act_on_jobs(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
-        ):
+        with (patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
+                "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+            )):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
             gui_core_context.act_on_jobs(
@@ -194,7 +188,7 @@ class TestGuiCoreContext_is_readable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "gui_core_js_error"
-            assert str(assign.call_args.args[1]).find("is not readable.") == -1
+            assert "is not readable." not in str(assign.call_args.args[1])
             assign.reset_mock()
 
             gui_core_context.act_on_jobs(
@@ -208,7 +202,7 @@ class TestGuiCoreContext_is_readable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "gui_core_js_error"
-            assert str(assign.call_args.args[1]).find("is not readable.") == -1
+            assert "is not readable." not in str(assign.call_args.args[1])
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_readable_false):

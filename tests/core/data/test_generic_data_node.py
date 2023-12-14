@@ -46,7 +46,7 @@ def read_fct_modify_data_node_name(data_node_id: DataNodeId, name: str):
 
 
 def reset_data():
-    TestGenericDataNode.data = [i for i in range(10)]
+    TestGenericDataNode.data = list(range(10))
 
 
 class TestGenericDataNode:
@@ -201,7 +201,7 @@ class TestGenericDataNode:
             },
         )
 
-        assert all([a + 1 == b for a, b in zip(self.data, generic_dn.read())])
+        assert all(a + 1 == b for a, b in zip(self.data, generic_dn.read()))
         assert len(generic_dn.read()) == 10
 
         generic_dn.write(self.data)
@@ -221,7 +221,7 @@ class TestGenericDataNode:
             },
         )
 
-        assert all([a + 1 == b for a, b in zip(self.data, generic_dn.read())])
+        assert all(a + 1 == b for a, b in zip(self.data, generic_dn.read()))
         assert len(generic_dn.read()) == 10
 
         generic_dn.write(self.data)

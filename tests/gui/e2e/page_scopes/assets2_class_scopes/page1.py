@@ -20,5 +20,5 @@ class Page1(Page):
     def create_page(self):
         return Markdown("page1.md")
 
-    def reset(state):
-        state.operand_2 = 0
+    def reset(self):
+        self.operand_2 = 0

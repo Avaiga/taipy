@@ -26,11 +26,13 @@ class _JobManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_JobManager]:  # type: ignore
         if cls._using_enterprise():
             job_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_manager", "_JobManager"
-            )  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.job._job_manager",
+                "_JobManager",
+            )
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_manager_factory", "_JobManagerFactory"
-            )._build_repository  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.job._job_manager_factory",
+                "_JobManagerFactory",
+            )._build_repository
         else:
             job_manager = _JobManager
             build_repository = cls._build_repository

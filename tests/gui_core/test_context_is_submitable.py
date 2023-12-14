@@ -38,9 +38,7 @@ def mock_core_get(entity_id):
         return a_scenario
     if entity_id == a_job.id:
         return a_job
-    if entity_id == a_datanode.id:
-        return a_datanode
-    return a_task
+    return a_datanode if entity_id == a_datanode.id else a_task
 
 
 class MockState:

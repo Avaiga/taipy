@@ -51,6 +51,7 @@ def test_create_primary_scenario(cycle):
 
     with mock.patch("taipy.core.get") as get_mck:
 
+
         class MockOwner:
             label = "owner_label"
 
@@ -58,7 +59,7 @@ def test_create_primary_scenario(cycle):
                 return self.label
 
         get_mck.return_value = MockOwner()
-        assert scenario.get_label() == "owner_label > " + scenario.config_id
+        assert scenario.get_label() == f"owner_label > {scenario.config_id}"
 
 
 def test_create_scenario_at_time(current_datetime):
@@ -83,7 +84,9 @@ def test_create_scenario_with_task_and_additional_dn_and_sequence():
     dn_2 = PickleDataNode("abc", Scope.SCENARIO)
     task = Task("qux", {}, print, [dn_1])
 
-    scenario = Scenario("quux", set([task]), {}, set([dn_2]), sequences={"acb": {"tasks": [task]}})
+    scenario = Scenario(
+        "quux", {task}, {}, {dn_2}, sequences={"acb": {"tasks": [task]}}
+    )
     sequence = scenario.sequences["acb"]
     assert scenario.id is not None
     assert scenario.config_id == "quux"
@@ -123,7 +126,7 @@ def test_create_scenario_and_add_sequences():
     task_manager._set(task_1)
     task_manager._set(task_2)
 
-    scenario = Scenario("scenario", set([task_1]), {})
+    scenario = Scenario("scenario", {task_1}, {})
     scenario.sequences = {"sequence_1": {"tasks": [task_1]}, "sequence_2": {"tasks": []}}
     assert scenario.id is not None
     assert scenario.config_id == "scenario"
@@ -160,7 +163,7 @@ def test_create_scenario_overlapping_sequences():
     task_manager._set(task_1)
     task_manager._set(task_2)
 
-    scenario = Scenario("scenario", set([task_1, task_2]), {})
+    scenario = Scenario("scenario", {task_1, task_2}, {})
     scenario.add_sequence("sequence_1", [task_1])
     scenario.add_sequence("sequence_2", [task_1, task_2])
     assert scenario.id is not None
@@ -204,7 +207,7 @@ def test_create_scenario_one_additional_dn():
     task_manager._set(task_1)
     task_manager._set(task_2)
 
-    scenario = Scenario("scenario", set(), {}, set([additional_dn_1]))
+    scenario = Scenario("scenario", set(), {}, {additional_dn_1})
     assert scenario.id is not None
     assert scenario.config_id == "scenario"
     assert len(scenario.tasks) == 0
@@ -235,7 +238,7 @@ def test_create_scenario_wth_additional_dns():
     task_manager._set(task_1)
     task_manager._set(task_2)
 
-    scenario = Scenario("scenario", set(), {}, set([additional_dn_1, additional_dn_2]))
+    scenario = Scenario("scenario", set(), {}, {additional_dn_1, additional_dn_2})
     assert scenario.id is not None
     assert scenario.config_id == "scenario"
     assert len(scenario.tasks) == 0
@@ -251,7 +254,7 @@ def test_create_scenario_wth_additional_dns():
         additional_dn_2.config_id: additional_dn_2,
     }
 
-    scenario_1 = Scenario("scenario_1", set([task_1]), {}, set([additional_dn_1]))
+    scenario_1 = Scenario("scenario_1", {task_1}, {}, {additional_dn_1})
     assert scenario_1.id is not None
     assert scenario_1.config_id == "scenario_1"
     assert len(scenario_1.tasks) == 1
@@ -267,7 +270,9 @@ def test_create_scenario_wth_additional_dns():
         additional_dn_1.config_id: additional_dn_1,
     }
 
-    scenario_2 = Scenario("scenario_2", set([task_1, task_2]), {}, set([additional_dn_1, additional_dn_2]))
+    scenario_2 = Scenario(
+        "scenario_2", {task_1, task_2}, {}, {additional_dn_1, additional_dn_2}
+    )
     assert scenario_2.id is not None
     assert scenario_2.config_id == "scenario_2"
     assert len(scenario_2.tasks) == 2
@@ -541,7 +546,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
     assert len(scenario_2.subscribers) == 3
 
     scenario_1.subscribers = []
-    assert len(scenario_1.subscribers) == 0
+    assert not scenario_1.subscribers
     assert len(scenario_2.subscribers) == 0
 
     assert len(scenario_1.tags) == 0
@@ -656,7 +661,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert scenario.creation_date == new_datetime
         assert scenario.cycle == cycle
         assert scenario.is_primary
-        assert len(scenario.subscribers) == 0
+        assert not scenario.subscribers
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
         assert scenario.name == "baz"
@@ -666,16 +671,16 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert scenario.properties["temp_key_5"] == 0
 
     assert scenario_1.config_id == "foo"
-    assert len(scenario_1.sequences) == 0
-    assert len(scenario_1.tasks) == 0
-    assert len(scenario_1.additional_data_nodes) == 0
+    assert not scenario_1.sequences
+    assert not scenario_1.tasks
+    assert not scenario_1.additional_data_nodes
     assert scenario_1.tasks == {}
     assert scenario_1.additional_data_nodes == {}
     assert scenario_1.creation_date == new_datetime_2
     assert scenario_1.cycle is None
     assert not scenario_1.is_primary
     assert len(scenario_1.subscribers) == 1
-    assert len(scenario_1.tags) == 0
+    assert not scenario_1.tags
     assert not scenario_1._is_in_context
     assert scenario_1.properties["qux"] == 9
     assert "temp_key_3" not in scenario_1.properties.keys()

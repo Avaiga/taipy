@@ -116,7 +116,7 @@ class DataNode(_Entity, _Labeled):
         self._editor_expiration_date: Optional[datetime] = editor_expiration_date
 
         # Track edits
-        self._edits = edits or list()
+        self._edits = edits or []
 
         self._properties = _Properties(self, **kwargs)
 
@@ -144,9 +144,7 @@ class DataNode(_Entity, _Labeled):
         Returns:
             None if there has been no `Edit^` on this data node.
         """
-        if self._edits:
-            return self._edits[-1]
-        return None
+        return self._edits[-1] if self._edits else None
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -186,11 +184,10 @@ class DataNode(_Entity, _Labeled):
     @_self_reload(_MANAGER_NAME)
     def expiration_date(self) -> datetime:
         """Datetime instant of the expiration date of this data node."""
-        last_edit_date = self.last_edit_date
-        validity_period = self._validity_period
-
-        if not last_edit_date:
+        if not (last_edit_date := self.last_edit_date):
             raise NoData(f"Data node {self.id} from config {self.config_id} has not been written yet.")
+
+        validity_period = self._validity_period
 
         return last_edit_date + validity_period if validity_period else last_edit_date
 
@@ -371,10 +368,7 @@ class DataNode(_Entity, _Labeled):
             options (dict[str, any)): track `timestamp`, `comments`, `job_id`. The others are user-custom, users can
                 use options to attach any information to an external edit of a data node.
         """
-        edit = {}
-        for k, v in options.items():
-            if v is not None:
-                edit[k] = v
+        edit = {k: v for k, v in options.items() if v is not None}
         if "timestamp" not in edit:
             edit["timestamp"] = datetime.now()
         self.last_edit_date = edit.get("timestamp")
@@ -420,10 +414,9 @@ class DataNode(_Entity, _Labeled):
             and self.editor_expiration_date > datetime.now()
         ):
             raise DataNodeIsBeingEdited(self.id, self._editor_id)
-        else:
-            self.editor_id = None  # type: ignore
-            self.editor_expiration_date = None  # type: ignore
-            self.edit_in_progress = False  # type: ignore
+        self.editor_id = None  # type: ignore
+        self.editor_expiration_date = None  # type: ignore
+        self.edit_in_progress = False  # type: ignore
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """Read and filter the data referenced by this data node.
@@ -471,12 +464,7 @@ class DataNode(_Entity, _Labeled):
             False if the data is locked for modification or if the data has never been written.
                 True otherwise.
         """
-        if self._edit_in_progress:
-            return False
-        if not self._last_edit_date:
-            # Never been written so it is not up-to-date
-            return False
-        return True
+        return False if self._edit_in_progress else bool(self._last_edit_date)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -493,10 +481,7 @@ class DataNode(_Entity, _Labeled):
         if not self._validity_period:
             # No validity period and has already been written, so it is valid
             return True
-        if datetime.now() > self.expiration_date:
-            # expiration_date has been passed
-            return False
-        return True
+        return datetime.now() <= self.expiration_date
 
     @property
     def is_up_to_date(self) -> bool:

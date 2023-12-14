@@ -53,7 +53,9 @@ class _TaskModel(_BaseModel):
         return _TaskModel(
             id=data["id"],
             owner_id=data.get("owner_id"),
-            parent_ids=_BaseModel._deserialize_attribute(data.get("parent_ids", [])),
+            parent_ids=_BaseModel._deserialize_attribute(
+                data.get("parent_ids", [])
+            ),
             config_id=data["config_id"],
             input_ids=_BaseModel._deserialize_attribute(data["input_ids"]),
             function_name=data["function_name"],
@@ -61,7 +63,9 @@ class _TaskModel(_BaseModel):
             output_ids=_BaseModel._deserialize_attribute(data["output_ids"]),
             version=data["version"],
             skippable=data["skippable"],
-            properties=_BaseModel._deserialize_attribute(data["properties"] if "properties" in data.keys() else {}),
+            properties=_BaseModel._deserialize_attribute(
+                data.get("properties", {})
+            ),
         )
 
     def to_list(self):

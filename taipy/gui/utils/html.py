@@ -14,9 +14,5 @@ import typing as t
 
 def _get_css_var_value(value: t.Any) -> str:
     if isinstance(value, str):
-        if " " in value:
-            return f'"{value}"'
-        return value
-    if isinstance(value, int):
-        return f"{value}px"
-    return f"{value}"
+        return f'"{value}"' if " " in value else value
+    return f"{value}px" if isinstance(value, int) else f"{value}"

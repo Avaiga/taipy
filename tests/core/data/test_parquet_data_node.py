@@ -213,12 +213,12 @@ class TestParquetDataNode:
         dn = ParquetDataNode(
             "foo", Scope.SCENARIO, properties={"path": example_parquet_path, "exposed_type": MyCustomObject}
         )
-        assert all([isinstance(obj, MyCustomObject) for obj in dn.read()])
+        assert all(isinstance(obj, MyCustomObject) for obj in dn.read())
 
         dn = ParquetDataNode(
             "foo", Scope.SCENARIO, properties={"path": example_parquet_path, "exposed_type": create_custom_class}
         )
-        assert all([isinstance(obj, MyOtherCustomObject) for obj in dn.read()])
+        assert all(isinstance(obj, MyOtherCustomObject) for obj in dn.read())
 
     def test_raise_error_unknown_parquet_engine(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")

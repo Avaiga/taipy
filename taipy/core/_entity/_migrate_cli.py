@@ -77,7 +77,7 @@ class _MigrateCLI:
         if args.remove_backup:
             cls.__handle_remove_backup(repository_type, repository_args)
 
-        do_backup = False if args.skip_backup else True
+        do_backup = not args.skip_backup
         cls.__migrate_entities(repository_type, repository_args, do_backup)
         sys.exit(0)
 
@@ -124,13 +124,13 @@ class _MigrateCLI:
             if not _migrate_fs_entities(path, do_backup):
                 sys.exit(1)
 
-        elif repository_type == "sql":
-            if not _migrate_sql_entities(repository_args[0], do_backup):
-                sys.exit(1)
-
         elif repository_type == "mongo":
             mongo_args = repository_args[1:5] if repository_args[0] else []
             _migrate_mongo_entities(*mongo_args, backup=do_backup)  # type: ignore
+
+        elif repository_type == "sql":
+            if not _migrate_sql_entities(repository_args[0], do_backup):
+                sys.exit(1)
 
         else:
             cls.__logger.error(f"Unknown repository type {repository_type}")

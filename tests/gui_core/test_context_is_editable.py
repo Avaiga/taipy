@@ -31,9 +31,7 @@ def mock_core_get(entity_id):
         return a_scenario
     if entity_id == a_job.id:
         return a_job
-    if entity_id == a_datanode.id:
-        return a_datanode
-    return a_task
+    return a_datanode if entity_id == a_datanode.id else a_task
 
 
 def mock_is_editable_false(entity_id):
@@ -117,9 +115,9 @@ class TestGuiCoreContext_is_editable:
                 assert str(assign.call_args.args[1]).endswith("is not editable.")
 
     def test_act_on_jobs(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
-            "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
-        ):
+        with (patch("taipy.gui_core._context.core_get", side_effect=mock_core_get), patch(
+                "taipy.gui_core._context.is_deletable", side_effect=mock_is_true
+            )):
             gui_core_context = _GuiCoreContext(Mock())
             assign = Mock()
             gui_core_context.act_on_jobs(
@@ -133,7 +131,7 @@ class TestGuiCoreContext_is_editable:
             )
             assign.assert_called_once()
             assert assign.call_args.args[0] == "gui_core_js_error"
-            assert str(assign.call_args.args[1]).find("is not editable.") == -1
+            assert "is not editable." not in str(assign.call_args.args[1])
             assign.reset_mock()
 
             with patch("taipy.gui_core._context.is_readable", side_effect=mock_is_editable_false):

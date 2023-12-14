@@ -141,7 +141,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                     sequence_tasks.append(task)
                 else:
                     non_existing_sequence_task_config_in_scenario_config.add(sequence_task_config.id)
-            if len(non_existing_sequence_task_config_in_scenario_config) > 0:
+            if non_existing_sequence_task_config_in_scenario_config:
                 raise SequenceTaskConfigDoesNotExistInSameScenarioConfig(
                     list(non_existing_sequence_task_config_in_scenario_config), sequence_name, str(config.id)
                 )
@@ -182,7 +182,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             raise InvalidSscenario(scenario.id)
 
         actual_sequences = scenario._get_sequences()
-        for sequence_name in sequences.keys():
+        for sequence_name in sequences:
             if not actual_sequences[sequence_name]._is_consistent():
                 raise InvalidSequence(actual_sequences[sequence_name].id)
             Notifier.publish(_make_event(actual_sequences[sequence_name], EventOperation.CREATION))
@@ -230,26 +230,18 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _get_primary(cls, cycle: Cycle) -> Optional[Scenario]:
         scenarios = cls._get_all_by_cycle(cycle)
-        for scenario in scenarios:
-            if scenario.is_primary:
-                return scenario
-        return None
+        return next((scenario for scenario in scenarios if scenario.is_primary), None)
 
     @classmethod
     def _get_by_tag(cls, cycle: Cycle, tag: str) -> Optional[Scenario]:
         scenarios = cls._get_all_by_cycle(cycle)
-        for scenario in scenarios:
-            if scenario.has_tag(tag):
-                return scenario
-        return None
+        return next(
+            (scenario for scenario in scenarios if scenario.has_tag(tag)), None
+        )
 
     @classmethod
     def _get_all_by_tag(cls, tag: str) -> List[Scenario]:
-        scenarios = []
-        for scenario in cls._get_all():
-            if scenario.has_tag(tag):
-                scenarios.append(scenario)
-        return scenarios
+        return [scenario for scenario in cls._get_all() if scenario.has_tag(tag)]
 
     @classmethod
     def _get_all_by_cycle(cls, cycle: Cycle) -> List[Scenario]:
@@ -263,32 +255,25 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
     @classmethod
     def _get_primary_scenarios(cls) -> List[Scenario]:
-        primary_scenarios = []
-        for scenario in cls._get_all():
-            if scenario.is_primary:
-                primary_scenarios.append(scenario)
-        return primary_scenarios
+        return [scenario for scenario in cls._get_all() if scenario.is_primary]
 
     @classmethod
     def _is_promotable_to_primary(cls, scenario: Union[Scenario, ScenarioId]) -> bool:
         if isinstance(scenario, str):
             scenario = cls._get(scenario)
-        if scenario and not scenario.is_primary and scenario.cycle:
-            return True
-        return False
+        return bool(scenario and not scenario.is_primary and scenario.cycle)
 
     @classmethod
     def _set_primary(cls, scenario: Scenario):
-        if scenario.cycle:
-            primary_scenario = cls._get_primary(scenario.cycle)
-            # To prevent SAME scenario updating out of Context Manager
-            if primary_scenario and primary_scenario != scenario:
-                primary_scenario.is_primary = False  # type: ignore
-            scenario.is_primary = True  # type: ignore
-        else:
+        if not scenario.cycle:
             raise DoesNotBelongToACycle(
                 f"Can't set scenario {scenario.id} to primary because it doesn't belong to a cycle."
             )
+        primary_scenario = cls._get_primary(scenario.cycle)
+        # To prevent SAME scenario updating out of Context Manager
+        if primary_scenario and primary_scenario != scenario:
+            primary_scenario.is_primary = False  # type: ignore
+        scenario.is_primary = True  # type: ignore
 
     @classmethod
     def _tag(cls, scenario: Scenario, tag: str):
@@ -296,8 +281,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if len(tags) > 0 and tag not in tags:
             raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
         if scenario.cycle:
-            old_tagged_scenario = cls._get_by_tag(scenario.cycle, tag)
-            if old_tagged_scenario:
+            if old_tagged_scenario := cls._get_by_tag(scenario.cycle, tag):
                 old_tagged_scenario.remove_tag(tag)
                 cls._set(old_tagged_scenario)
         scenario._add_tag(tag)
@@ -319,29 +303,29 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if len(scenarios) < 2:
             raise InsufficientScenarioToCompare("At least two scenarios are required to compare.")
 
-        if not all(scenarios[0].config_id == scenario.config_id for scenario in scenarios):
+        if any(
+            scenarios[0].config_id != scenario.config_id for scenario in scenarios
+        ):
             raise DifferentScenarioConfigs("Scenarios to compare must have the same configuration.")
 
-        if scenario_config := _ScenarioManager.__get_config(scenarios[0]):
-            results = {}
-            if data_node_config_id:
-                if data_node_config_id in scenario_config.comparators.keys():
-                    dn_comparators = {data_node_config_id: scenario_config.comparators[data_node_config_id]}
-                else:
-                    raise NonExistingComparator(f"Data node config {data_node_config_id} has no comparator.")
-            else:
-                dn_comparators = scenario_config.comparators
-
-            for data_node_config_id, comparators in dn_comparators.items():
-                data_nodes = [scenario.__getattr__(data_node_config_id).read() for scenario in scenarios]
-                results[data_node_config_id] = {
-                    comparator.__name__: comparator(*data_nodes) for comparator in comparators
-                }
-
-            return results
-
-        else:
+        if not (scenario_config := _ScenarioManager.__get_config(scenarios[0])):
             raise NonExistingScenarioConfig(scenarios[0].config_id)
+        results = {}
+        if data_node_config_id:
+            if data_node_config_id in scenario_config.comparators.keys():
+                dn_comparators = {data_node_config_id: scenario_config.comparators[data_node_config_id]}
+            else:
+                raise NonExistingComparator(f"Data node config {data_node_config_id} has no comparator.")
+        else:
+            dn_comparators = scenario_config.comparators
+
+        for data_node_config_id, comparators in dn_comparators.items():
+            data_nodes = [scenario.__getattr__(data_node_config_id).read() for scenario in scenarios]
+            results[data_node_config_id] = {
+                comparator.__name__: comparator(*data_nodes) for comparator in comparators
+            }
+
+        return results
 
     @staticmethod
     def __get_config(scenario: Scenario):

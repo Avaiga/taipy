@@ -104,7 +104,7 @@ def excel_file_with_multi_sheet(tmpdir_factory) -> str:
     fn = tmpdir_factory.mktemp("data").join("df.xlsx")
 
     with pd.ExcelWriter(str(fn)) as writer:
-        for key in excel_multi_sheet.keys():
+        for key in excel_multi_sheet:
             excel_multi_sheet[key].to_excel(writer, key, index=False)
 
     return fn.strpath
@@ -275,7 +275,7 @@ def sequence():
         [],
         SequenceId("sequence_id"),
         owner_id="owner_id",
-        parent_ids=set(["parent_id_1", "parent_id_2"]),
+        parent_ids={"parent_id_1", "parent_id_2"},
         version="random_version_number",
     )
 

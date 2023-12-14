@@ -39,23 +39,15 @@ def test_map_dict():
     assert len(md) == 1
     md.clear()
     assert len(md) == 0
-    assert len(d) == 0
+    assert not d
     assert len(md_copy) == 3
-    v1 = ""
-    for k in md_copy:
-        v1 += k
+    v1 = "".join(md_copy)
     assert v1 == "abc"
-    v1 = ""
-    for k in md_copy.keys():
-        v1 += k
+    v1 = "".join(md_copy.keys())
     assert v1 == "abc"
-    v1 = ""
-    for k in md_copy.__reversed__():
-        v1 += k
+    v1 = "".join(md_copy.__reversed__())
     assert v1 == "cba"
-    v1 = 0
-    for k in md_copy.values():
-        v1 += k
+    v1 = sum(md_copy.values())
     assert v1 == 6  # 1+2+3
     v1 = md_copy.setdefault("a", 5)
     assert v1 == 1
@@ -66,8 +58,7 @@ def test_map_dict():
         md = _MapDict("not_a_dict")
         assert False
     except Exception:
-        assert True
-    pass
+        pass
 
 
 def test_map_dict_update():
@@ -76,14 +67,12 @@ def test_map_dict_update():
     def update(k, v):
         update_values[0] = k
         update_values[1] = v
-        pass
 
     d = {"a": 1, "b": "2"}
     md = _MapDict(d, update)
     md.__setitem__("a", 3)
     assert update_values[0] == "a"
     assert update_values[1] == 3
-    pass
 
 
 def test_map_dict_update_full_dictionary_1():

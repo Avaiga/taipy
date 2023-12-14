@@ -24,11 +24,13 @@ class _VersionManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> _VersionManager:  # type: ignore
         if cls._using_enterprise():
             version_manager = _utils._load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager", "_VersionManager"
-            )  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}._version._version_manager",
+                "_VersionManager",
+            )
             build_repository = _utils._load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + "._version._version_manager_factory", "_VersionManagerFactory"
-            )._build_repository  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}._version._version_manager_factory",
+                "_VersionManagerFactory",
+            )._build_repository
         else:
             version_manager = _VersionManager
             build_repository = cls._build_repository

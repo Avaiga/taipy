@@ -22,7 +22,7 @@ class _Entity:
 
     def __enter__(self):
         self._is_in_context = True
-        self._in_context_attributes_changed_collector = list()
+        self._in_context_attributes_changed_collector = []
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):

@@ -50,8 +50,9 @@ class NPMInstall(build_py):
     def run(self):
         with_shell = platform.system() == "Windows"
         print(f"Building taipy frontend bundle in {root_folder}.")
-        already_exists = (root_folder / "taipy" / "gui_core" / "lib" / "taipy-gui-core.js").exists()
-        if already_exists:
+        if already_exists := (
+            root_folder / "taipy" / "gui_core" / "lib" / "taipy-gui-core.js"
+        ).exists():
             print(f'Found taipy frontend bundle in {root_folder / "taipy" / "gui_core" / "lib"}.')
         else:
             # Specify the correct path to taipy-gui in gui/.env file

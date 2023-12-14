@@ -26,11 +26,13 @@ class _TaskManagerFactory(_ManagerFactory):
     def _build_manager(cls) -> Type[_TaskManager]:  # type: ignore
         if cls._using_enterprise():
             task_manager = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager"
-            )  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.task._task_manager",
+                "_TaskManager",
+            )
             build_repository = _load_fct(
-                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager_factory", "_TaskManagerFactory"
-            )._build_repository  # type: ignore
+                f"{cls._TAIPY_ENTERPRISE_CORE_MODULE}.task._task_manager_factory",
+                "_TaskManagerFactory",
+            )._build_repository
         else:
             task_manager = _TaskManager
             build_repository = cls._build_repository

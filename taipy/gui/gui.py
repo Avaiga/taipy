@@ -372,22 +372,20 @@ class Gui:
         elements in several `ElementLibrary^` instances, but still refer to these elements with the same
         prefix in the page definitions.
         """
-        if isinstance(library, ElementLibrary):
-            _Factory.set_library(library)
-            library_name = library.get_name()
-            if library_name.isidentifier():
-                libs = Gui.__extensions.get(library_name)
-                if libs is None:
-                    Gui.__extensions[library_name] = [library]
-                else:
-                    libs.append(library)
-                _ElementApiGenerator().add_library(library)
-            else:
-                raise NameError(f"ElementLibrary passed to add_library() has an invalid name: '{library_name}'")
-        else:  # pragma: no cover
+        if not isinstance(library, ElementLibrary):
             raise RuntimeError(
                 f"add_library() argument should be a subclass of ElementLibrary instead of '{type(library)}'"
             )
+        _Factory.set_library(library)
+        library_name = library.get_name()
+        if not library_name.isidentifier():
+            raise NameError(f"ElementLibrary passed to add_library() has an invalid name: '{library_name}'")
+        libs = Gui.__extensions.get(library_name)
+        if libs is None:
+            Gui.__extensions[library_name] = [library]
+        else:
+            libs.append(library)
+        _ElementApiGenerator().add_library(library)
 
     @staticmethod
     def register_content_provider(content_type: type, content_provider: t.Callable[..., str]) -> None:
@@ -1844,7 +1842,7 @@ class Gui:
     def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
         if hasattr(self, "on_exception") and callable(self.on_exception):
             try:
-                self.on_exception(self.__get_state(), str(function_name), exception)
+                self.on_exception(self.__get_state(), function_name, exception)
             except Exception as e:  # pragma: no cover
                 _warn("Exception raised in on_exception()", e)
             return True
@@ -1984,8 +1982,10 @@ class Gui:
     def __get_css_vars(self) -> str:
         css_vars = []
         if stylekit := self._get_config("stylekit", _default_stylekit):
-            for k, v in stylekit.items():
-                css_vars.append(f'--{k.replace("_", "-")}:{_get_css_var_value(v)};')
+            css_vars.extend(
+                f'--{k.replace("_", "-")}:{_get_css_var_value(v)};'
+                for k, v in stylekit.items()
+            )
         return " ".join(css_vars)
 
     def __init_server(self):

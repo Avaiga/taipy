@@ -112,13 +112,9 @@ class Submission(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def jobs(self) -> List[Job]:
-        jobs = []
         job_manager = _JobManagerFactory._build_manager()
 
-        for job in self._jobs:
-            jobs.append(job_manager._get(job))
-
-        return jobs
+        return [job_manager._get(job) for job in self._jobs]
 
     @jobs.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
@@ -169,13 +165,13 @@ class Submission(_Entity, _Labeled):
             elif job_status == Status.BLOCKED:
                 self.__blocked_jobs.add(job.id)
                 self.__pending_jobs.discard(job.id)
-            elif job_status == Status.PENDING or job_status == Status.SUBMITTED:
+            elif job_status in [Status.PENDING, Status.SUBMITTED]:
                 self.__pending_jobs.add(job.id)
                 self.__blocked_jobs.discard(job.id)
             elif job_status == Status.RUNNING:
                 self.__running_jobs.add(job.id)
                 self.__pending_jobs.discard(job.id)
-            elif job_status == Status.COMPLETED or job_status == Status.SKIPPED:
+            elif job_status in [Status.COMPLETED, Status.SKIPPED]:
                 self.__completed = True
                 self.__blocked_jobs.discard(job.id)
                 self.__pending_jobs.discard(job.id)

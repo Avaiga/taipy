@@ -26,14 +26,19 @@ from .operator import JoinOperator, Operator
 class _FilterDataNode:
     @staticmethod
     def __is_pandas_object(data) -> bool:
-        return isinstance(data, (pd.DataFrame, modin_pd.DataFrame)) or isinstance(data, (pd.Series, modin_pd.DataFrame))
+        return isinstance(
+            data, (pd.DataFrame, modin_pd.DataFrame, pd.Series, modin_pd.DataFrame)
+        )
 
     @staticmethod
     def __is_multi_sheet_excel(data) -> bool:
         if isinstance(data, Dict):
-            has_df_children = all([isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in data.values()])
-            has_list_children = all([isinstance(e, List) for e in data.values()])
-            has_np_array_children = all([isinstance(e, np.ndarray) for e in data.values()])
+            has_df_children = all(
+                isinstance(e, (pd.DataFrame, modin_pd.DataFrame))
+                for e in data.values()
+            )
+            has_list_children = all(isinstance(e, List) for e in data.values())
+            has_np_array_children = all(isinstance(e, np.ndarray) for e in data.values())
             return has_df_children or has_list_children or has_np_array_children
         return False
 
@@ -82,7 +87,7 @@ class _FilterDataNode:
         if _FilterDataNode.__is_pandas_object(data):
             return data[key]
         if _FilterDataNode.__is_list_of_dict(data):
-            filtered_data = list()
+            filtered_data = []
             for i, row in key.iterrows():
                 filtered_row = dict()
                 for col in row.index:
@@ -101,10 +106,10 @@ class _FilterDataNode:
     def __getitem_iterable(data, keys):
         if _FilterDataNode.__is_pandas_object(data):
             return data[keys]
-        filtered_data = []
-        for entry in data:
-            filtered_data.append({k: getattr(entry, k) for k in keys if hasattr(entry, k)})
-        return filtered_data
+        return [
+            {k: getattr(entry, k) for k in keys if hasattr(entry, k)}
+            for entry in data
+        ]
 
     @staticmethod
     def _filter(data, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
@@ -114,7 +119,7 @@ class _FilterDataNode:
         if isinstance(data, Dict):
             return {k: _FilterDataNode._filter(v, operators, join_operator) for k, v in data.items()}
 
-        if not ((isinstance(operators[0], list)) or (isinstance(operators[0], tuple))):
+        if not (isinstance(operators[0], (list, tuple))):
             if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
                 return _FilterDataNode.__filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
             if isinstance(data, np.ndarray):
@@ -135,20 +140,23 @@ class _FilterDataNode:
     def __filter_dataframe(
         df_data: Union[pd.DataFrame, modin_pd.DataFrame], operators: Union[List, Tuple], join_operator=JoinOperator.AND
     ):
-        filtered_df_data = []
         if join_operator == JoinOperator.AND:
             how = "inner"
         elif join_operator == JoinOperator.OR:
             how = "outer"
         else:
             return NotImplementedError
-        for key, value, operator in operators:
-            filtered_df_data.append(_FilterDataNode.__filter_dataframe_per_key_value(df_data, key, value, operator))
-
+        filtered_df_data = [
+            _FilterDataNode.__filter_dataframe_per_key_value(
+                df_data, key, value, operator
+            )
+            for key, value, operator in operators
+        ]
         if isinstance(df_data, modin_pd.DataFrame):
             if filtered_df_data:
                 return _FilterDataNode.__modin_dataframe_merge(filtered_df_data, how)
-            return modin_pd.DataFrame()
+            else:
+                return modin_pd.DataFrame()
 
         return _FilterDataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
 
@@ -181,10 +189,12 @@ class _FilterDataNode:
 
     @staticmethod
     def __filter_numpy_array(data: np.ndarray, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
-        conditions = []
-        for key, value, operator in operators:
-            conditions.append(_FilterDataNode.__get_filter_condition_per_key_value(data, key, value, operator))
-
+        conditions = [
+            _FilterDataNode.__get_filter_condition_per_key_value(
+                data, key, value, operator
+            )
+            for key, value, operator in operators
+        ]
         if join_operator == JoinOperator.AND:
             join_conditions = reduce(and_, conditions)
         elif join_operator == JoinOperator.OR:
@@ -216,10 +226,13 @@ class _FilterDataNode:
 
     @staticmethod
     def __filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
-        filtered_list_data = []
-        for key, value, operator in operators:
-            filtered_list_data.append(_FilterDataNode.__filter_list_per_key_value(list_data, key, value, operator))
-        if len(filtered_list_data) == 0:
+        filtered_list_data = [
+            _FilterDataNode.__filter_list_per_key_value(
+                list_data, key, value, operator
+            )
+            for key, value, operator in operators
+        ]
+        if not filtered_list_data:
             return filtered_list_data
         if join_operator == JoinOperator.AND:
             return _FilterDataNode.__list_intersect(filtered_list_data)

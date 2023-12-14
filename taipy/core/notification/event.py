@@ -49,7 +49,11 @@ class EventEntityType(_ReprEnum):
     SUBMISSION = 7
 
 
-_NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION])
+_NO_ATTRIBUTE_NAME_OPERATIONS = {
+    EventOperation.CREATION,
+    EventOperation.DELETION,
+    EventOperation.SUBMISSION,
+}
 _UNSUBMITTABLE_ENTITY_TYPES = (
     EventEntityType.CYCLE,
     EventEntityType.DATA_NODE,

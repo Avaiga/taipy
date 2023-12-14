@@ -33,7 +33,7 @@ class Submittable:
     """
 
     def __init__(self, subscribers: Optional[List[_Subscriber]] = None):
-        self._subscribers = _ListAttributes(self, subscribers or list())
+        self._subscribers = _ListAttributes(self, subscribers or [])
 
     @abc.abstractmethod
     def submit(
@@ -129,7 +129,11 @@ class Submittable:
         dag = self._build_dag()
         remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
         dag.remove_nodes_from(remove)
-        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
+        return [
+            nodes
+            for nodes in nx.topological_generations(dag)
+            if (Task in (type(node) for node in nodes))
+        ]
 
     def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         params = [] if params is None else params
@@ -138,8 +142,7 @@ class Submittable:
     def _remove_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         if params is not None:
             self._subscribers.remove(_Subscriber(callback, params))
-        else:
-            elem = [x for x in self._subscribers if x.callback == callback]
-            if not elem:
-                raise ValueError
+        elif elem := [x for x in self._subscribers if x.callback == callback]:
             self._subscribers.remove(elem[0])
+        else:
+            raise ValueError

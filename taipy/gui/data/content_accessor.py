@@ -40,16 +40,16 @@ class _ContentAccessor:
     def get_path(self, path: pathlib.Path) -> str:
         url_path = self.__paths.get(path)
         if url_path is None:
-            self.__paths[path] = url_path = "taipyStatic" + str(len(self.__paths))
+            self.__paths[path] = url_path = f"taipyStatic{len(self.__paths)}"
         return url_path
 
     def get_content_path(
         self, url_path: str, file_name: str, bypass: t.Optional[str]
     ) -> t.Tuple[t.Union[pathlib.Path, None], bool]:
-        content_path = self.__content_paths.get(url_path)
-        if not content_path:
+        if content_path := self.__content_paths.get(url_path):
+            return (content_path, bypass is not None or self.__url_is_image.get(f"{url_path}/{file_name}", False))
+        else:
             return (None, True)
-        return (content_path, bypass is not None or self.__url_is_image.get(f"{url_path}/{file_name}", False))
 
     def __get_mime_from_file(self, path: pathlib.Path):
         if _has_magic_module:
@@ -62,10 +62,8 @@ class _ContentAccessor:
     def __get_display_name(self, var_name: str) -> str:
         if not isinstance(var_name, str):
             return var_name
-        if var_name.startswith("_tpC_"):
-            var_name = var_name[5:]
-        if var_name.startswith("tpec_"):
-            var_name = var_name[5:]
+        var_name = var_name.removeprefix("_tpC_")
+        var_name = var_name.removeprefix("tpec_")
         return _variable_decode(var_name)[0]
 
     def get_info(self, var_name: str, value: t.Any, image: bool) -> t.Union[str, t.Tuple[str], t.Any]:  # noqa: C901

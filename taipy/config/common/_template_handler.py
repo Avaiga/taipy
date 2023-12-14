@@ -43,8 +43,7 @@ class _TemplateHandler:
     def _replace_template(cls, template, type, required, default):
         if "ENV" not in str(template):
             return template
-        match = re.fullmatch(cls._PATTERN, str(template))
-        if match:
+        if match := re.fullmatch(cls._PATTERN, str(template)):
             var = match.group(1)
             dynamic_type = match.group(3)
             val = os.environ.get(var)
@@ -77,7 +76,7 @@ class _TemplateHandler:
         possible_values = ["true", "false"]
         if str.lower(val) not in possible_values:
             raise InconsistentEnvVariableError("{val} is not a Boolean.")
-        return str.lower(val) == "true" or not (str.lower(val) == "false")
+        return str.lower(val) == "true" or str.lower(val) != "false"
 
     @staticmethod
     def _to_int(val: str) -> int:

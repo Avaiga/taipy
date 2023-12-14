@@ -85,7 +85,7 @@ class DataNodeIsBeingEdited(Exception):
     """Raised if a DataNode is being edited."""
 
     def __init__(self, data_node_id: str, editor_id: Optional[str] = None):
-        self.message = f"DataNode {data_node_id} is being edited{ ' by ' + editor_id if editor_id else ''}."
+        self.message = f"DataNode {data_node_id} is being edited{f' by {editor_id}' if editor_id else ''}."
 
 
 class NonExistingDataNodeConfig(Exception):

@@ -301,6 +301,6 @@ def config_scenario():
     )
     data_node_2_config = Config.configure_data_node(id="d2", storage_type="csv", default_path="foo.csv")
     task_config = Config.configure_task("my_task", twice, data_node_1_config, data_node_2_config)
-    scenario_config = Config.configure_scenario("my_scenario", [task_config], frequency=Frequency.DAILY)
-
-    return scenario_config
+    return Config.configure_scenario(
+        "my_scenario", [task_config], frequency=Frequency.DAILY
+    )

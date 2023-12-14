@@ -253,7 +253,7 @@ class _Builder:
                 vals = [x.strip().split(":") for x in dict_attr.split(";")]
                 dict_attr = {val[0].strip(): val[1].strip() for val in vals if len(val) > 1}
             if isinstance(dict_attr, (dict, _MapDict)):
-                self.__set_json_attribute(_to_camel_case("default_" + name), dict_attr)
+                self.__set_json_attribute(_to_camel_case(f"default_{name}"), dict_attr)
             else:
                 _warn(f"{self.__element_name}: {name} should be a dict: '{str(dict_attr)}'.")
         if dict_hash := self.__hashes.get(name):
@@ -438,7 +438,11 @@ class _Builder:
         return self
 
     def __filter_attribute_names(self, names: t.Iterable[str]):
-        return [k for k in self.__attributes if k in names or any(k.startswith(n + "[") for n in names)]
+        return [
+            k
+            for k in self.__attributes
+            if k in names or any(k.startswith(f"{n}[") for n in names)
+        ]
 
     def __get_holded_name(self, key: str):
         name = self.__hashes.get(key)
@@ -482,10 +486,10 @@ class _Builder:
             data, self.__attributes.get("columns", {}), col_types, date_format, self.__attributes.get("number_format")
         )
 
-        rebuild_fn_hash = self.__build_rebuild_fn(
-            self.__gui._get_rebuild_fn_name("_tbl_cols"), _Builder.__TABLE_COLUMNS_DEPS
-        )
-        if rebuild_fn_hash:
+        if rebuild_fn_hash := self.__build_rebuild_fn(
+            self.__gui._get_rebuild_fn_name("_tbl_cols"),
+            _Builder.__TABLE_COLUMNS_DEPS,
+        ):
             self.__set_react_attribute("columns", rebuild_fn_hash)
         if col_dict is not None:
             _enhance_columns(self.__attributes, self.__hashes, col_dict, self.__element_name)
@@ -517,10 +521,10 @@ class _Builder:
     def _get_chart_config(self, default_type: str, default_mode: str):
         self.__attributes["_default_type"] = default_type
         self.__attributes["_default_mode"] = default_mode
-        rebuild_fn_hash = self.__build_rebuild_fn(
-            self.__gui._get_rebuild_fn_name("_chart_conf"), _CHART_NAMES + ("_default_type", "_default_mode", "data")
-        )
-        if rebuild_fn_hash:
+        if rebuild_fn_hash := self.__build_rebuild_fn(
+            self.__gui._get_rebuild_fn_name("_chart_conf"),
+            _CHART_NAMES + ("_default_type", "_default_mode", "data"),
+        ):
             self.__set_react_attribute("config", rebuild_fn_hash)
 
         # read column definitions
@@ -588,11 +592,7 @@ class _Builder:
             if isinstance(list_val, str):
                 list_val = list(list_val.split(";"))
             if isinstance(list_val, list):
-                # TODO catch the cast exception
-                if list_type.value == PropertyType.number.value:
-                    list_val = [int(v) for v in list_val]
-                else:
-                    list_val = [int(v) for v in list_val]
+                list_val = [int(v) for v in list_val]
             else:
                 if list_val is not None:
                     _warn(f"{self.__element_name}: {name} should be a list.")
@@ -603,7 +603,10 @@ class _Builder:
         return self
 
     def __set_class_names(self):
-        self.set_attribute("libClassName", self.__lib_name + "-" + self.__control_type.replace("_", "-"))
+        self.set_attribute(
+            "libClassName",
+            f"{self.__lib_name}-" + self.__control_type.replace("_", "-"),
+        )
         return self.__set_dynamic_string_attribute("class_name", dynamic_property_name="dynamic_class_name")
 
     def _set_dataType(self):

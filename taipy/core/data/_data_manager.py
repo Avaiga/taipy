@@ -136,8 +136,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
 
     @classmethod
     def _delete(cls, data_node_id: DataNodeId):
-        data_node = cls._get(data_node_id, None)
-        if data_node:
+        if data_node := cls._get(data_node_id, None):
             cls._clean_pickle_file(data_node)
             cls._remove_dn_file_path_in_backup_file(data_node)
         super()._delete(data_node_id)

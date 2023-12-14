@@ -218,9 +218,9 @@ def test_filter_by_get_item(default_data_frame):
     assert len(filtered_df_dn) == len(default_data_frame[1])
     assert filtered_df_dn.to_dict() == default_data_frame[1].to_dict()
 
-    filtered_df_dn = df_dn[0:2]
+    filtered_df_dn = df_dn[:2]
     assert isinstance(filtered_df_dn, pd.DataFrame)
-    assert filtered_df_dn.shape == default_data_frame[0:2].shape
+    assert filtered_df_dn.shape == default_data_frame[:2].shape
     assert len(filtered_df_dn) == 2
 
     bool_df = default_data_frame.copy(deep=True) > 4
@@ -244,14 +244,14 @@ def test_filter_by_get_item(default_data_frame):
     filtered_custom_dn = custom_dn["a"]
     assert isinstance(filtered_custom_dn, List)
     assert len(filtered_custom_dn) == 10
-    assert filtered_custom_dn == [i for i in range(10)]
+    assert filtered_custom_dn == list(range(10))
 
-    filtered_custom_dn = custom_dn[0:5]
+    filtered_custom_dn = custom_dn[:5]
     assert isinstance(filtered_custom_dn, List)
-    assert all([isinstance(x, CustomClass) for x in filtered_custom_dn])
+    assert all(isinstance(x, CustomClass) for x in filtered_custom_dn)
     assert len(filtered_custom_dn) == 5
 
-    bool_1d_index = [True if i < 5 else False for i in range(10)]
+    bool_1d_index = [i < 5 for i in range(10)]
     filtered_custom_dn = custom_dn[bool_1d_index]
     assert isinstance(filtered_custom_dn, List)
     assert len(filtered_custom_dn) == 5
@@ -259,7 +259,7 @@ def test_filter_by_get_item(default_data_frame):
 
     filtered_custom_dn = custom_dn[["a", "b"]]
     assert isinstance(filtered_custom_dn, List)
-    assert all([isinstance(x, Dict) for x in filtered_custom_dn])
+    assert all(isinstance(x, Dict) for x in filtered_custom_dn)
     assert len(filtered_custom_dn) == 10
     assert filtered_custom_dn == [{"a": i, "b": i * 2} for i in range(10)]
 
@@ -276,8 +276,8 @@ def test_filter_by_get_item(default_data_frame):
     assert len(filtered_multi_sheet_excel_custom_dn) == 10
     expected_value = [CustomClass(i, i * 2) for i in range(10)]
     assert all(
-        [
-            expected.a == filtered.a and expected.b == filtered.b
-            for expected, filtered in zip(expected_value, filtered_multi_sheet_excel_custom_dn)
-        ]
+        expected.a == filtered.a and expected.b == filtered.b
+        for expected, filtered in zip(
+            expected_value, filtered_multi_sheet_excel_custom_dn
+        )
     )

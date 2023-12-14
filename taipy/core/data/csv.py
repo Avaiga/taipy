@@ -183,17 +183,15 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     def _read_as(self):
         custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         with open(self._path, encoding=self.properties[self.__ENCODING_KEY]) as csvFile:
-            res = list()
+            res = []
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
-                for line in reader:
-                    res.append(custom_class(**line))
+                res.extend(custom_class(**line) for line in reader)
             else:
                 reader = csv.reader(
                     csvFile,
                 )
-                for line in reader:
-                    res.append(custom_class(*line))
+                res.extend(custom_class(*line) for line in reader)
             return res
 
     def _read_as_numpy(self) -> np.ndarray:
@@ -204,15 +202,20 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     ) -> pd.DataFrame:
         try:
             if self.properties[self.__HAS_HEADER_PROPERTY]:
-                if column_names:
-                    return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
-                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
-            else:
-                if usecols:
-                    return pd.read_csv(
-                        self._path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
+                return (
+                    pd.read_csv(
+                        self._path, encoding=self.properties[self.__ENCODING_KEY]
+                    )[column_names]
+                    if column_names
+                    else pd.read_csv(
+                        self._path, encoding=self.properties[self.__ENCODING_KEY]
                     )
-                return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], header=None)
+                )
+            if usecols:
+                return pd.read_csv(
+                    self._path, encoding=self.properties[self.__ENCODING_KEY], header=None, usecols=usecols
+                )
+            return pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY], header=None)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
@@ -221,15 +224,20 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
     ) -> modin_pd.DataFrame:
         try:
             if self.properties[self.__HAS_HEADER_PROPERTY]:
-                if column_names:
-                    return modin_pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])[column_names]
-                return modin_pd.read_csv(self._path, encoding=self.properties[self.__ENCODING_KEY])
-            else:
-                if usecols:
-                    return modin_pd.read_csv(
-                        self._path, header=None, usecols=usecols, encoding=self.properties[self.__ENCODING_KEY]
+                return (
+                    modin_pd.read_csv(
+                        self._path, encoding=self.properties[self.__ENCODING_KEY]
+                    )[column_names]
+                    if column_names
+                    else modin_pd.read_csv(
+                        self._path, encoding=self.properties[self.__ENCODING_KEY]
                     )
-                return modin_pd.read_csv(self._path, header=None, encoding=self.properties[self.__ENCODING_KEY])
+                )
+            if usecols:
+                return modin_pd.read_csv(
+                    self._path, header=None, usecols=usecols, encoding=self.properties[self.__ENCODING_KEY]
+                )
+            return modin_pd.read_csv(self._path, header=None, encoding=self.properties[self.__ENCODING_KEY])
         except pd.errors.EmptyDataError:
             return modin_pd.DataFrame()
 
@@ -255,9 +263,6 @@ class CSVDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             columns (Optional[List[str]]): The list of column names to write.
             job_id (JobId^): An optional identifier of the writer.
         """
-        if not columns:
-            df = pd.DataFrame(data)
-        else:
-            df = pd.DataFrame(data, columns=columns)
+        df = pd.DataFrame(data) if not columns else pd.DataFrame(data, columns=columns)
         df.to_csv(self._path, index=False, encoding=self.properties[self.__ENCODING_KEY])
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

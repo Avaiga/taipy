@@ -184,9 +184,9 @@ def test_map_builder(gui: Gui, helpers):
 
 
 def test_chart_indexed_properties_builder(gui: Gui, helpers):
-    data: t.Dict[str, t.Any] = {}
-    data["Date"] = [datetime.datetime(2021, 12, i) for i in range(1, 31)]
-
+    data: t.Dict[str, t.Any] = {
+        "Date": [datetime.datetime(2021, 12, i) for i in range(1, 31)]
+    }
     data["La Rochelle"] = [10 + 6 * random.random() for _ in range(1, 31)]
     data["Montpellier"] = [16 + 6 * random.random() for _ in range(1, 31)]
     data["Paris"] = [6 + 6 * random.random() for _ in range(1, 31)]
@@ -217,9 +217,9 @@ def test_chart_indexed_properties_builder(gui: Gui, helpers):
 
 
 def test_chart_indexed_properties_with_arrays_builder(gui: Gui, helpers):
-    data: t.Dict[str, t.Any] = {}
-    data["Date"] = [datetime.datetime(2021, 12, i) for i in range(1, 31)]
-
+    data: t.Dict[str, t.Any] = {
+        "Date": [datetime.datetime(2021, 12, i) for i in range(1, 31)]
+    }
     data["La Rochelle"] = [10 + 6 * random.random() for _ in range(1, 31)]
     data["Montpellier"] = [16 + 6 * random.random() for _ in range(1, 31)]
     data["Paris"] = [6 + 6 * random.random() for _ in range(1, 31)]
