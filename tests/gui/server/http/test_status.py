@@ -41,15 +41,15 @@ def test_get_extended_status(gui: Gui):
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
     assert ret.json, "json is not defined"
-    gui = ret.json.get("gui")
-    assert "backend_version" in gui, "json.gui has no key backend_version"
-    assert "flask_version" in gui, "json.gui has no key flask_version"
+    gui_json = ret.json.get("gui")
+    assert "backend_version" in gui_json, "json.gui has no key backend_version"
+    assert "flask_version" in gui_json, "json.gui has no key flask_version"
     if path.exists(gui._get_webapp_path()):
-        assert "frontend_version" in gui, "json.gui has no key frontend_version"
-    assert "host" in gui, "json.gui has no key host"
-    assert "python_version" in gui, "json.gui has no key python_version"
-    assert "user_status" in gui, "json.gui has no key user_status"
-    assert gui.get("user_status") == "", "json.gui.user_status is not empty"
+        assert "frontend_version" in gui_json, "json.gui has no key frontend_version"
+    assert "host" in gui_json, "json.gui has no key host"
+    assert "python_version" in gui_json, "json.gui has no key python_version"
+    assert "user_status" in gui_json, "json.gui has no key user_status"
+    assert gui_json.get("user_status") == "", "json.gui.user_status is not empty"
 
 
 def test_get_status_with_user_status(gui: Gui):
