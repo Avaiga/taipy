@@ -14,6 +14,7 @@ from datetime import datetime
 
 from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
+from taipy.gui.utils import _TaipyBase
 
 from ..version import _get_version
 from ._adapters import _GuiCoreDatanodeAdapter, _GuiCoreScenarioAdapter, _GuiCoreScenarioDagAdapter
