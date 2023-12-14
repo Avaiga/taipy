@@ -13,11 +13,9 @@
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import CheckIcon from "@mui/icons-material/Check";
-import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import SendIcon from "@mui/icons-material/Send";
-import Button from "@mui/material/Button";
+import Badge from "@mui/material/Badge";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
@@ -84,7 +82,6 @@ const actionsByType = {
 } as Record<string, Record<string, string>>;
 
 const gridSx = { p: "0.5em" };
-const rightButtonSx = { ml: "auto" };
 
 const getActionsByType = (colType?: string) =>
     (colType && colType in actionsByType && actionsByType[colType]) || actionsByType["string"];
@@ -289,30 +286,28 @@ const TableFilter = (props: TableFilterProps) => {
 
     const onShowFilterClick = useCallback(() => setShowFilter((f) => !f), []);
 
-    const updateFilter = useCallback((idx: number, nfd: FilterDesc, remove?: boolean) => {
-        setFilters((fds) => {
-            if (idx > -1) {
-                if (remove) {
-                    fds.splice(idx, 1);
-                    return [...fds];
+    const updateFilter = useCallback(
+        (idx: number, nfd: FilterDesc, remove?: boolean) => {
+            setFilters((fds) => {
+                let newFds;
+                if (idx > -1) {
+                    if (remove) {
+                        fds.splice(idx, 1);
+                        newFds = [...fds];
+                    } else {
+                        newFds = fds.map((fd, index) => (index == idx ? nfd : fd));
+                    }
+                } else if (remove) {
+                    newFds = fds;
+                } else {
+                    newFds = [...fds, nfd];
                 }
-                return fds.map((fd, index) => (index == idx ? nfd : fd));
-            }
-            if (remove) {
-                return fds;
-            }
-            return [...fds, nfd];
-        });
-    }, []);
-
-    const onApply = useCallback(() => {
-        onValidate([...filters]);
-        onShowFilterClick();
-    }, [onValidate, filters, onShowFilterClick]);
-    const onRemove = useCallback(() => {
-        onValidate([]);
-        onShowFilterClick();
-    }, [onValidate, onShowFilterClick]);
+                onValidate([...newFds]);
+                return newFds;
+            });
+        },
+        [onValidate]
+    );
 
     useEffect(() => {
         columns &&
@@ -322,7 +317,7 @@ const TableFilter = (props: TableFilterProps) => {
 
     return (
         <>
-            <Tooltip title="Filter list">
+            <Tooltip title={`${filters.length} filter${filters.length > 1 ? "s" : ""} applied`}>
                 <IconButton
                     onClick={onShowFilterClick}
                     size="small"
@@ -330,7 +325,9 @@ const TableFilter = (props: TableFilterProps) => {
                     sx={iconInRowSx}
                     className={getSuffixedClassNames(className, "-filter-icon")}
                 >
-                    <FilterListIcon fontSize="inherit" />
+                    <Badge badgeContent={filters.length} color="primary" sx={{"& .MuiBadge-badge":{height: "10px", minWidth: "10px", width: "10px", borderRadius: "5px"}}}>
+                        <FilterListIcon fontSize="inherit" />
+                    </Badge>
                 </IconButton>
             </Tooltip>
             <Popover
@@ -359,29 +356,6 @@ const TableFilter = (props: TableFilterProps) => {
                             setFilter={updateFilter}
                         />
                     </LocalizationProvider>
-                    <Grid item xs={12} container>
-                        <Grid item>
-                            <Button
-                                endIcon={<ClearIcon />}
-                                onClick={onRemove}
-                                disabled={filters.length == 0}
-                                variant="outlined"
-                                color="inherit"
-                            >
-                                {`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}
-                            </Button>
-                        </Grid>
-                        <Grid item sx={rightButtonSx}>
-                            <Button
-                                endIcon={<SendIcon />}
-                                onClick={onApply}
-                                disabled={filters.length == 0}
-                                variant="outlined"
-                            >
-                                {`Apply ${filters.length} filter${filters.length > 1 ? "s" : ""}`}
-                            </Button>
-                        </Grid>
-                    </Grid>
                 </Grid>
             </Popover>
         </>
