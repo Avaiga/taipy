@@ -144,13 +144,18 @@ class TestGuiCoreContext_is_readable:
                 assert str(assign.call_args.args[1]).endswith("is not readable.")
 
     def test_scenario_status_callback(self):
-        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget, patch("taipy.gui_core._context.core_get_submission", side_effect=mock_core_get):
+        with patch("taipy.gui_core._context.core_get", side_effect=mock_core_get) as mockget, patch(
+            "taipy.gui_core._context.core_get_submission", side_effect=mock_core_get
+        ):
             mockget.reset_mock()
             gui_core_context = _GuiCoreContext(Mock())
 
             def sub_cb():
                 return True
-            gui_core_context.client_submission[a_submission.id] = _SubmissionDetails("client_id", "", sub_cb, a_submission)
+
+            gui_core_context.client_submission[a_submission.id] = _SubmissionDetails(
+                "client_id", "", sub_cb, a_submission
+            )
             gui_core_context.scenario_status_callback(a_submission.id)
             mockget.assert_called()
             found = False
