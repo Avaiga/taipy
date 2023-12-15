@@ -7,22 +7,7 @@ on:
     branches: [ develop, dev/*, release/* ]
 
 jobs:
-  linter:
-    runs-on: ubuntu-latest
-    steps:
-      # replace for Ruff in the future
-      - uses: actions/checkout@v4
-      - uses: ricardochaves/python-lint@v1.4.0
-        with:
-          use-pylint: false
-          use-isort: false
-          use-mypy: false
-          extra-black-options: "--line-length=120 --diff"
-          extra-pycodestyle-options: "--max-line-length=120  --exclude=tests/gui --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
-          extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py) --follow-imports skip"
-          extra-isort-options: "--line-length=120 --force-grid-wrap=10 --multi-line=VERTICAL_HANGING_INDENT --trailing-comma"
   tests:
-    needs: linter
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -44,7 +29,7 @@ jobs:
         run: pipenv install --dev --python=${{ inputs.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: ${{matrix.os}} == 'macos-latest'
+        if: matrix.os == 'macos-latest'
         run: brew install libmagic
 
       - uses: actions/setup-node@v4
