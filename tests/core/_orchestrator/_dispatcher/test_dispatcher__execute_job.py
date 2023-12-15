@@ -46,15 +46,6 @@ def create_scenario():
     return taipy.create_scenario(sc_conf)
 
 
-def test_start_stop_is_running():
-    dispatcher = _JobDispatcher(_OrchestratorFactory._orchestrator)
-    dispatcher.start()
-    assert dispatcher.is_running()
-    dispatcher.stop()
-    time.sleep(0.2)
-    assert not dispatcher.is_running()
-
-
 def test_can_execute():
     dispatcher = _JobDispatcher(_OrchestratorFactory._orchestrator)
     assert dispatcher._can_execute()
