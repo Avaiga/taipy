@@ -34,6 +34,8 @@ class Page:
     """
 
     def __init__(self, **kwargs) -> None:
+        from .external import CustomPage
+
         self._class_module_name = ""
         self._class_locals: t.Dict[str, t.Any] = {}
         self._frame: t.Optional[FrameType] = None
@@ -42,6 +44,8 @@ class Page:
             self._frame = kwargs.get("frame")
         elif self._renderer:
             self._frame = self._renderer._frame
+        elif isinstance(self, CustomPage):
+            self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame))
         elif len(inspect.stack()) < 4:
             raise RuntimeError(f"Can't resolve module. Page '{type(self).__name__}' is not registered.")
         else:

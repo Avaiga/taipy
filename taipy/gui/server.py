@@ -22,9 +22,10 @@ import typing as t
 import webbrowser
 from importlib import util
 from random import randint
+from urllib.parse import parse_qsl, urlparse
 
 import __main__
-from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
+from flask import Blueprint, Flask, json, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
@@ -34,6 +35,7 @@ from werkzeug.serving import is_running_from_reloader
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
+from .external._custom_page import _ExternalResourceHandlerManager
 from .utils import _is_in_notebook, _is_port_open, _RuntimeManager
 
 if t.TYPE_CHECKING:
@@ -45,6 +47,7 @@ class _Server:
     __RE_CLOSING_CURLY = re.compile(r"(\})([^\"])")
     __OPENING_CURLY = r"\1&#x7B;"
     __CLOSING_CURLY = r"&#x7D;\2"
+    _RESOURCE_HANDLER_ARG = "tprh"
 
     def __init__(
         self,
@@ -144,6 +147,18 @@ class _Server:
         @taipy_bp.route("/", defaults={"path": ""})
         @taipy_bp.route("/<path:path>")
         def my_index(path):
+            resource_handler_id = dict(parse_qsl(urlparse(request.referrer or "").query)).get(
+                _Server._RESOURCE_HANDLER_ARG
+            )
+            resource_handler_id = resource_handler_id or request.args.get(_Server._RESOURCE_HANDLER_ARG, None)
+            if resource_handler_id is not None:
+                resource_handler = _ExternalResourceHandlerManager().get(resource_handler_id)
+                if resource_handler is None:
+                    return (f"Invalid value for query {_Server._RESOURCE_HANDLER_ARG}", 404)
+                try:
+                    return resource_handler.get_resources(path)
+                except Exception:
+                    raise RuntimeError("Can't get resources from external resource handler")
             if path == "" or path == "index.html" or "." not in path:
                 try:
                     return render_template(

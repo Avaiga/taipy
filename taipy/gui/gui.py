@@ -25,13 +25,13 @@ import typing as t
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec
-from types import FrameType, SimpleNamespace
+from types import FrameType, FunctionType, LambdaType, ModuleType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
+from flask import Blueprint, Flask, g, has_app_context, jsonify, request, send_file, send_from_directory
 from taipy.logger._taipy_logger import _TaipyLogger
 from werkzeug.utils import secure_filename
 
@@ -53,6 +53,7 @@ from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
+from .external import CustomPage
 from .gui_types import _WsType
 from .page import Page
 from .partial import Partial
@@ -537,6 +538,8 @@ class Gui:
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None, force=False):
         if not client_id and request:
             client_id = request.args.get(Gui.__ARG_CLIENT_ID, "")
+        if not client_id and (ws_client_id := getattr(g, "ws_client_id", None)):
+            client_id = ws_client_id
         if not client_id and force:
             res = self._bindings()._get_or_create_scope("")
             client_id = res[0] if res[1] else None
@@ -583,7 +586,9 @@ class Gui:
             if msg_type == _WsType.CLIENT_ID.value:
                 res = self._bindings()._get_or_create_scope(message.get("payload", ""))
                 client_id = res[0] if res[1] else None
-            self.__set_client_id_in_context(client_id or message.get(Gui.__ARG_CLIENT_ID))
+            expected_client_id = client_id or message.get(Gui.__ARG_CLIENT_ID)
+            self.__set_client_id_in_context(expected_client_id)
+            g.ws_client_id = expected_client_id
             with self._set_locals_context(message.get("module_context") or None):
                 if msg_type == _WsType.UPDATE.value:
                     payload = message.get("payload", {})
@@ -600,6 +605,10 @@ class Gui:
                     self.__request_data_update(str(message.get("name")), message.get("payload"))
                 elif msg_type == _WsType.REQUEST_UPDATE.value:
                     self.__request_var_update(message.get("payload"))
+                elif msg_type == _WsType.GET_MODULE_CONTEXT.value:
+                    self.__handle_ws_get_module_context(payload)
+                elif msg_type == _WsType.GET_VARIABLES.value:
+                    self.__handle_ws_get_variables()
             self.__send_ack(message.get("ack_id"))
         except Exception as e:  # pragma: no cover
             _warn(f"Decoding Message has failed: {message}", e)
@@ -1023,6 +1032,54 @@ class Gui:
                         val if isinstance(val, _TaipyBase) else None,
                     )
             self.__send_var_list_update(payload["names"])
+
+    def __handle_ws_get_module_context(self, payload: t.Any):
+        if isinstance(payload, dict):
+            # Get Module Context
+            if mc := self._get_page_context(str(payload.get("path"))):
+                self._bind_custom_page_variables(
+                    self._get_page(str(payload.get("path")))._renderer, self._get_client_id()
+                )
+                self.__send_ws(
+                    {
+                        "type": _WsType.GET_MODULE_CONTEXT.value,
+                        "payload": {"data": mc},
+                    }
+                )
+
+    def __handle_ws_get_variables(self):
+        # Get Variables
+        self.__pre_render_pages()
+        # Module Context -> Variable -> Variable data (name, type, initial_value)
+        variable_tree: t.Dict[str, t.Dict[str, t.Dict[str, t.Any]]] = {}
+        data = vars(self._bindings()._get_data_scope())
+        data = {
+            k: v
+            for k, v in data.items()
+            if not k.startswith("_")
+            and not callable(v)
+            and "TpExPr" not in k
+            and not isinstance(v, (ModuleType, FunctionType, LambdaType, type, Page))
+        }
+        for k, v in data.items():
+            if isinstance(v, _TaipyBase):
+                data[k] = v.get()
+            var_name, var_module_name = _variable_decode(k)
+            if var_module_name == "" or var_module_name is None:
+                var_module_name = "__main__"
+            if var_module_name not in variable_tree:
+                variable_tree[var_module_name] = {}
+            variable_tree[var_module_name][var_name] = {
+                "type": type(v).__name__,
+                "value": data[k],
+                "encoded_name": k,
+            }
+        self.__send_ws(
+            {
+                "type": _WsType.GET_VARIABLES.value,
+                "payload": {"data": variable_tree},
+            }
+        )
 
     def __send_ws(self, payload: dict, allow_grouping=True) -> None:
         grouping_message = self.__get_message_grouping() if allow_grouping else None
@@ -1865,10 +1922,12 @@ class Gui:
         for page in self._config.pages:
             if page is not None:
                 with contextlib.suppress(Exception):
-                    page.render(self)
+                    if isinstance(page._renderer, CustomPage):
+                        self._bind_custom_page_variables(page._renderer, self._get_client_id())
+                    else:
+                        page.render(self)
 
-    def __render_page(self, page_name: str) -> t.Any:
-        self.__set_client_id_in_context()
+    def _get_navigated_page(self, page_name: str) -> t.Any:
         nav_page = page_name
         if hasattr(self, "on_navigate") and callable(self.on_navigate):
             try:
@@ -1889,8 +1948,26 @@ class Gui:
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception("on_navigate", e):
                     _warn("Exception raised in on_navigate()", e)
-        page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
+        return nav_page
 
+    def _get_page(self, page_name: str):
+        return next((page_i for page_i in self._config.pages if page_i._route == page_name), None)
+
+    def _bind_custom_page_variables(self, page: CustomPage, client_id: t.Optional[str]):
+        """Handle the bindings of custom page variables"""
+        with self.get_flask_app().app_context() if has_app_context() else contextlib.nullcontext():
+            self.__set_client_id_in_context(client_id)
+            with self._set_locals_context(page._get_module_name()):
+                for k in self._get_locals_bind().keys():
+                    if (not page._binding_variables or k in page._binding_variables) and not k.startswith("_"):
+                        self._bind_var(k)
+
+    def __render_page(self, page_name: str) -> t.Any:
+        self.__set_client_id_in_context()
+        nav_page = self._get_navigated_page(page_name)
+        if not isinstance(nav_page, str):
+            return nav_page
+        page = self._get_page(nav_page)
         # Try partials
         if page is None:
             page = self._get_partial(nav_page)
@@ -1901,6 +1978,19 @@ class Gui:
                 400,
                 {"Content-Type": "application/json; charset=utf-8"},
             )
+        # Handle custom pages
+        if (pr := page._renderer) is not None and isinstance(pr, CustomPage):
+            if self._navigate(
+                to=page_name,
+                params={
+                    _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
+                },
+            ):
+                # proactively handle the bindings of custom page variables
+                self._bind_custom_page_variables(pr, self._get_client_id())
+                return ("Successfully redirect to external resource handler", 200)
+            return ("Failed to navigate to external resource handler", 500)
+        # Handle page rendering
         context = page.render(self)
         if (
             nav_page == Gui.__root_page_name
