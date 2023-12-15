@@ -65,7 +65,6 @@ class _JobDispatcher(threading.Thread):
                 _TaipyLogger._get_logger().exception(e)
                 pass
 
-
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
         return self._nb_available_workers > 0
