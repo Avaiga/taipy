@@ -1020,6 +1020,7 @@ def test_blocked_scenario():
         lambda: _SubmissionManager._get(job_1.submit_id).submission_status == SubmissionStatus.COMPLETED
     )
 
+
 def modified_config_task(n):
     from taipy.config import Config
 
