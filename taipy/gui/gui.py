@@ -590,8 +590,8 @@ class Gui:
             self.__set_client_id_in_context(expected_client_id)
             g.ws_client_id = expected_client_id
             with self._set_locals_context(message.get("module_context") or None):
+                payload = message.get("payload", {})
                 if msg_type == _WsType.UPDATE.value:
-                    payload = message.get("payload", {})
                     self.__front_end_update(
                         str(message.get("name")),
                         payload.get("value"),
