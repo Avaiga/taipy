@@ -1,0 +1,16 @@
+name: Frontend Test Setup
+
+on:
+  workflow_call
+
+jobs:
+  frontend-test-setup:
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Frontend Bundle Build
+        run: pipenv run python tools/frontend/bundle_build.py
+
+      - name: Install Playwright
+        run: pipenv run playwright install chromium --with-deps

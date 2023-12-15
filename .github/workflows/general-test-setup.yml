@@ -1,0 +1,25 @@
+name: Test Setup
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+      os:
+        required: true
+        type: string
+
+
+jobs:
+  general-test-setup:
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+      - run: pipenv install --dev --python=${{ inputs.python-version }}
+      - name: Setup LibMagic (MacOS)
+        if: ${{ inputs.os }} == 'macos-latest'
+        run: brew install libmagic

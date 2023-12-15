@@ -1,0 +1,46 @@
+name: Test Workflow
+
+on:
+  push:
+    branches: [ develop, dev/*, release/* ]
+  pull_request:
+    branches: [ develop, dev/*, release/* ]
+jobs:
+  lint:
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/workflows/linter.yml
+
+  tests:
+    needs: lint
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/workflows/general-test-setup.yml
+        with:
+          python-version: ${{matrix.python-version}}
+          os: ${{matrix.os}}
+      - uses: ./.github/workflows/frontend-test-setup.yml
+      - name: Pytest
+        run: pipenv run pytest --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
+
+      - name: Coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-xml-coverage-path: ./overall-coverage.xml
+          title: Taipy Overall Coverage Report
+
+      - name: Notify user if failed
+        if: failure() && github.event_name == 'workflow_dispatch'
+        run: |
+          if [[ -n "${{ github.event.inputs.user-to-notify }}" ]]; then
+            curl "${{ secrets.notify_endpoint }}" -d '{"username": "${{ github.event.inputs.user-to-notify }}", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }' -H "Content-Type: application/json"
+          fi
+        shell: bash

@@ -1,0 +1,19 @@
+name: Linter Workflow
+
+on:
+  workflow_call:
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+        # replace for Ruff in the future
+        - uses: ricardochaves/python-lint@v1.4.0
+          with:
+            use-pylint: false
+            use-isort: false
+            use-mypy: false
+            extra-black-options: "--line-length=120 --diff"
+            extra-pycodestyle-options: "--max-line-length=120  --exclude=tests/gui --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
+            extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py) --follow-imports skip"
+            extra-isort-options: "--line-length=120 --force-grid-wrap=10 --multi-line=VERTICAL_HANGING_INDENT --trailing-comma"
