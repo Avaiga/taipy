@@ -5,14 +5,24 @@ on:
     branches: [ develop, dev/*, release/* ]
   pull_request:
     branches: [ develop, dev/*, release/* ]
-jobs:
-  lint:
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/workflows/linter.yml
 
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      # replace for Ruff in the future
+      - uses: actions/checkout@v4
+      - uses: ricardochaves/python-lint@v1.4.0
+        with:
+          use-pylint: false
+          use-isort: false
+          use-mypy: false
+          extra-black-options: "--line-length=120 --diff"
+          extra-pycodestyle-options: "--max-line-length=120  --exclude=tests/gui --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
+          extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py) --follow-imports skip"
+          extra-isort-options: "--line-length=120 --force-grid-wrap=10 --multi-line=VERTICAL_HANGING_INDENT --trailing-comma"
   tests:
-    needs: lint
+    needs: linter
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -22,11 +32,30 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/workflows/general-test-setup.yml
+
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{matrix.python-version}}
-          os: ${{matrix.os}}
-      - uses: ./.github/workflows/frontend-test-setup.yml
+
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+
+      - name: Install Dependencies
+        run: pipenv install --dev --python=${{ inputs.python-version }}
+
+      - name: Setup LibMagic (MacOS)
+        if: ${{matrix.os}} == 'macos-latest'
+        run: brew install libmagic
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Frontend Bundle Build
+        run: pipenv run python tools/frontend/bundle_build.py
+
+      - name: Install Playwright
+        run: pipenv run playwright install chromium --with-deps
+
       - name: Pytest
         run: pipenv run pytest --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
