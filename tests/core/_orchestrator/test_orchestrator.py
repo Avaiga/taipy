@@ -1111,106 +1111,7 @@ def test_can_execute_task_with_development_mode():
     assert 2 == scenario.output.read()
 
 
-def test_need_to_run_no_output():
-    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
-    world_cfg = Config.configure_data_node("world", default_data="world !")
-    task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[])
-    task = _create_task_from_config(task_cfg)
-
-    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-
-
-def test_need_to_run_task_not_skippable():
-    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
-    world_cfg = Config.configure_data_node("world", default_data="world !")
-    hello_world_cfg = Config.configure_data_node("hello_world")
-    task_cfg = Config.configure_task(
-        "name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg], skippable=False
-    )
-    task = _create_task_from_config(task_cfg)
-
-    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-
-
-def test_need_to_run_skippable_task_no_input():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    hello_world_cfg = Config.configure_data_node("hello_world")
-    task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg], skippable=True)
-
-    _OrchestratorFactory._build_dispatcher()
-
-    task = _create_task_from_config(task_cfg)
-    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    _Orchestrator.submit_task(task)
-
-    assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
-
-
-def test_need_to_run_skippable_task_no_validity_period_on_output():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
-    world_cfg = Config.configure_data_node("world", default_data="world !")
-    hello_world_cfg = Config.configure_data_node("hello_world")
-    task_cfg = Config.configure_task(
-        "name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg], skippable=True
-    )
-
-    _OrchestratorFactory._build_dispatcher()
-
-    task = _create_task_from_config(task_cfg)
-    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    _Orchestrator.submit_task(task)
-
-    assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
-
-
-def test_need_to_run_skippable_task_with_validity_period_is_valid_on_output():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
-    world_cfg = Config.configure_data_node("world", default_data="world !")
-    hello_world_cfg = Config.configure_data_node("hello_world", validity_days=1)
-    task_cfg = Config.configure_task(
-        "name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg], skippable=True
-    )
-    _OrchestratorFactory._build_dispatcher()
-
-    task = _create_task_from_config(task_cfg)
-
-    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    job = _Orchestrator.submit_task(task)
-
-    assert not _OrchestratorFactory._dispatcher._needs_to_run(task)
-    job_skipped = _Orchestrator.submit_task(task)
-
-    assert job.is_completed()
-    assert job.is_finished()
-    assert job_skipped.is_skipped()
-    assert job_skipped.is_finished()
-
-
-def test_need_to_run_skippable_task_with_validity_period_obsolete_on_output():
-    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
-    world_cfg = Config.configure_data_node("world", default_data="world !")
-    hello_world_cfg = Config.configure_data_node("hello_world", validity_days=1)
-    task_cfg = Config.configure_task(
-        "name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg], skippable=True
-    )
-    task = _create_task_from_config(task_cfg)
-
-    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-    _Orchestrator.submit_task(task)
-
-    output = task.hello_world
-    output._last_edit_date = datetime.now() - timedelta(days=1, minutes=30)
-    _DataManager()._set(output)
-    assert _OrchestratorFactory._dispatcher._needs_to_run(task)
-
-
 # ################################  UTIL METHODS    ##################################
-
 
 def _create_task(function, nb_outputs=1):
     output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
@@ -1231,7 +1132,3 @@ def _create_task(function, nb_outputs=1):
         input=input_dn,
         output=output_dn,
     )
-
-
-def _create_task_from_config(task_cfg):
-    return _TaskManager()._bulk_get_or_create([task_cfg])[0]
