@@ -91,20 +91,21 @@ def test_on_status_change_on_completed_job():
         if job.id == "to_be_unblocked":
             return False
         return True
-    orchestrator._is_blocked = mck_is_blocked
 
-    orchestrator._on_status_change(job_4_completed)
+    with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._is_blocked") as mck:
+        mck.side_effect = mck_is_blocked
+        orchestrator._on_status_change(job_4_completed)
 
-    assert job_1_blocked in orchestrator.blocked_jobs
-    assert job_1_blocked.is_blocked()
-    assert job_2_to_be_unblocked not in orchestrator.blocked_jobs
-    assert job_2_to_be_unblocked.is_pending()
-    assert job_3_blocked in orchestrator.blocked_jobs
-    assert job_3_blocked.is_blocked()
-    assert job_4_completed.is_completed()
-    assert len(orchestrator.blocked_jobs) == 2
-    assert orchestrator.jobs_to_run.qsize() == 1
-    assert orchestrator.jobs_to_run.get() == job_2_to_be_unblocked
+        assert job_1_blocked in orchestrator.blocked_jobs
+        assert job_1_blocked.is_blocked()
+        assert job_2_to_be_unblocked not in orchestrator.blocked_jobs
+        assert job_2_to_be_unblocked.is_pending()
+        assert job_3_blocked in orchestrator.blocked_jobs
+        assert job_3_blocked.is_blocked()
+        assert job_4_completed.is_completed()
+        assert len(orchestrator.blocked_jobs) == 2
+        assert orchestrator.jobs_to_run.qsize() == 1
+        assert orchestrator.jobs_to_run.get() == job_2_to_be_unblocked
 
 
 def test_on_status_change_on_skipped_job():
@@ -120,21 +121,23 @@ def test_on_status_change_on_skipped_job():
         if job.id == "to_be_unblocked":
             return False
         return True
-    orchestrator._is_blocked = mck_is_blocked
 
-    orchestrator._on_status_change(job_4_skipped)
+    with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._is_blocked") as mck:
+        mck.side_effect = mck_is_blocked
 
-    # Assert that when the status is skipped, the unblock jobs mechanism is executed
-    assert job_1_blocked in orchestrator.blocked_jobs
-    assert job_1_blocked.is_blocked()
-    assert job_2_to_be_unblocked not in orchestrator.blocked_jobs
-    assert job_2_to_be_unblocked.is_pending()
-    assert job_3_blocked in orchestrator.blocked_jobs
-    assert job_3_blocked.is_blocked()
-    assert job_4_skipped.is_skipped()
-    assert len(orchestrator.blocked_jobs) == 2
-    assert orchestrator.jobs_to_run.qsize() == 1
-    assert orchestrator.jobs_to_run.get() == job_2_to_be_unblocked
+        orchestrator._on_status_change(job_4_skipped)
+
+        # Assert that when the status is skipped, the unblock jobs mechanism is executed
+        assert job_1_blocked in orchestrator.blocked_jobs
+        assert job_1_blocked.is_blocked()
+        assert job_2_to_be_unblocked not in orchestrator.blocked_jobs
+        assert job_2_to_be_unblocked.is_pending()
+        assert job_3_blocked in orchestrator.blocked_jobs
+        assert job_3_blocked.is_blocked()
+        assert job_4_skipped.is_skipped()
+        assert len(orchestrator.blocked_jobs) == 2
+        assert orchestrator.jobs_to_run.qsize() == 1
+        assert orchestrator.jobs_to_run.get() == job_2_to_be_unblocked
 
 
 def test_on_status_change_on_failed_job():
