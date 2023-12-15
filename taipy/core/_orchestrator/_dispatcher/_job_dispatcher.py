@@ -11,6 +11,7 @@
 
 import threading
 from abc import abstractmethod
+from queue import Empty
 from typing import Dict, Optional
 
 from taipy.config.config import Config
@@ -31,7 +32,7 @@ class _JobDispatcher(threading.Thread):
     __logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
+    def __init__(self, orchestrator: _AbstractOrchestrator):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator
@@ -58,8 +59,12 @@ class _JobDispatcher(threading.Thread):
                     with self.lock:
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
-            except Exception:  # In case the last job of the queue has been removed.
+            except Empty:  # In case the last job of the queue has been removed.
                 pass
+            except Exception as e:
+                _TaipyLogger._get_logger().exception(e)
+                pass
+
 
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
