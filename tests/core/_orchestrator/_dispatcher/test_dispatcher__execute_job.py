@@ -48,9 +48,9 @@ def create_scenario():
 
 def test_can_execute():
     dispatcher = _JobDispatcher(_OrchestratorFactory._orchestrator)
-    assert _OrchestratorFactory._dispatcher == 1
+    assert dispatcher._nb_available_workers == 1
     assert dispatcher._can_execute()
-    _OrchestratorFactory._dispatcher = 0
+    dispatcher._nb_available_workers = 0
     assert not dispatcher._can_execute()
     dispatcher._nb_available_workers = -1
     assert not dispatcher._can_execute()
