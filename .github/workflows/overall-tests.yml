@@ -1,13 +1,12 @@
 name: Overall Test Workflow
 
 on:
-  push:
-    branches: [ develop, dev/*, release/* ]
-  pull_request:
-    branches: [ develop, dev/*, release/* ]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   tests:
+    if: github.event.review.state == 'approved'
     timeout-minutes: 40
     strategy:
       fail-fast: false

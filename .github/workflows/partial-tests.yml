@@ -1,4 +1,4 @@
-name: Overall Test Workflow
+name: Partial Tests Workflow
 
 on:
   push:
@@ -60,10 +60,10 @@ jobs:
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
       - name: Install Dependencies
-        run: pipenv install --dev --python=${{ inputs.python-version }}
+        run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: ${{matrix.os}} == 'macos-latest'
+        if: matrix.os == 'macos-latest'
         run: brew install libmagic
 
       - uses: actions/setup-node@v4
