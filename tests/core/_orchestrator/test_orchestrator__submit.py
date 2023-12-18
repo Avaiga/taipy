@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from datetime import datetime
+from unittest import mock
 
 import freezegun
 
@@ -17,6 +18,7 @@ from taipy.config import Config
 from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
+from taipy.core.config import JobConfig
 from taipy.core.data import PickleDataNode
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
@@ -204,7 +206,7 @@ def test_submit_scenario_development_mode_blocked_jobs():
 
 
 def test_submit_scenario_standalone_mode():
-    Config.configure_job_executions(mode="standalone")
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     sc = create_scenario()
     orchestrator = _OrchestratorFactory._build_orchestrator()
     sc.dn_0.write(0)  # input data is made ready
@@ -282,7 +284,7 @@ def test_submit_scenario_standalone_mode():
 
 
 def test_submit_scenario_with_callbacks_and_force_and_wait():
-    Config.configure_job_executions(mode="standalone")
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     scenario = create_scenario()
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
@@ -386,7 +388,7 @@ def test_submit_sequence_development_mode():
 
 
 def test_submit_sequence_standalone_mode():
-    Config.configure_job_executions(mode="standalone")
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     scenario = create_scenario()
     scenario.dn_0.write(0)  # input data is made ready
     scenario.add_sequence("seq", [scenario.t_1, scenario.t_2, scenario.t_3])
@@ -455,24 +457,16 @@ def test_submit_sequence_with_callbacks_and_force_and_wait():
     scenario = create_scenario()
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    # Mock the wait function
-    mock_is_called = []
+    with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._wait_until_job_finished") as mck:
+        jobs = orchestrator.submit(scenario, callbacks=[nothing], force=True, wait=True, timeout=5)
 
-    def mock(job, timeout):
-        mock_is_called.append((job, timeout))
-
-    orchestrator._wait_until_job_finished = mock
-
-    jobs = orchestrator.submit(scenario, callbacks=[nothing], force=True, wait=True, timeout=5)
+        mck.assert_called_once_with(jobs, timeout=5)
 
     # jobs are created in a specific order and are correct
     assert len(jobs) == 4
     assert len(jobs[0]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
     assert len(jobs[1]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
     assert len(jobs[2]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
-    assert len(mock_is_called) == 1
-    assert mock_is_called[0][0] == jobs
-    assert mock_is_called[0][1] == 5
 
 
 def test_submit_submittable_generate_unique_submit_id():
