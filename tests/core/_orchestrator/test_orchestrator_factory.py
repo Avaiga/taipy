@@ -26,7 +26,7 @@ def test_build_orchestrator():
     _OrchestratorFactory._orchestrator = None
     _OrchestratorFactory._dispatcher = None
 
-    with (mock.patch("taipy.core._orchestrator._orchestrator_factory._OrchestratorFactory._build_dispatcher") as bd):
+    with mock.patch("taipy.core._orchestrator._orchestrator_factory._OrchestratorFactory._build_dispatcher") as bd:
         with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator.initialize") as initialize:
             orchestrator = _OrchestratorFactory._build_orchestrator()
             assert orchestrator == _Orchestrator
@@ -74,8 +74,8 @@ def test_rebuild_standalone_dispatcher_and_force_restart():
     _OrchestratorFactory._build_orchestrator()
     _OrchestratorFactory._build_dispatcher()
 
-    with (mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.start") as start_mock):
-        with (mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock):
+    with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.start") as start_mock:
+        with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock:
             _OrchestratorFactory._build_dispatcher()  # Default force_restart=False
             assert isinstance(_OrchestratorFactory._dispatcher, _StandaloneJobDispatcher)
             stop_mock.assert_not_called()
@@ -101,7 +101,7 @@ def test_build_unknown_dispatcher():
 
 def test_remove_dispatcher_not_built():
     _OrchestratorFactory._dispatcher = None
-    with (mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock):
+    with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock:
         _OrchestratorFactory._remove_dispatcher()
         stop_mock.assert_not_called()
         assert _OrchestratorFactory._dispatcher is None
@@ -110,7 +110,7 @@ def test_remove_dispatcher_not_built():
 def test_remove_dispatcher_development():
     _OrchestratorFactory._build_orchestrator()
     _OrchestratorFactory._build_dispatcher()
-    with (mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock):
+    with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock:
         _OrchestratorFactory._remove_dispatcher()
         stop_mock.assert_not_called()
         assert _OrchestratorFactory._dispatcher is None
@@ -120,7 +120,7 @@ def test_remove_dispatcher_standalone():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     _OrchestratorFactory._build_orchestrator()
     _OrchestratorFactory._build_dispatcher()
-    with (mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock):
+    with mock.patch("taipy.core._orchestrator._dispatcher._job_dispatcher._JobDispatcher.stop") as stop_mock:
         _OrchestratorFactory._remove_dispatcher()
         stop_mock.assert_called_once()
         assert _OrchestratorFactory._dispatcher is None
