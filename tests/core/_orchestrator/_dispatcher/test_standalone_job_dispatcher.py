@@ -78,7 +78,7 @@ def test_dispatch_job():
     # test that the worker is released after the job is done
     assert len(dispatcher.release_worker_calls) == 1
 
-    # test that the job status is updated from the future
+    # test that the job status is updated after execution on future
     assert len(dispatcher.update_job_status_from_future_calls) == 1
     assert dispatcher.update_job_status_from_future_calls[0][0] == job
     assert dispatcher.update_job_status_from_future_calls[0][1] == dispatcher._executor.f[0]
