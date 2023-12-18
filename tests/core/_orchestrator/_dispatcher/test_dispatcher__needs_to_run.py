@@ -89,6 +89,7 @@ def test_need_to_run_skippable_task_with_validity_period_on_output():
     with freezegun.freeze_time(output_edit_time + timedelta(days=1, seconds=1)):  # 1 day and 1 second after edit time
         assert dispatcher._needs_to_run(task)  # output data is written but validity period expired
 
+
 def test_need_to_run_skippable_task_but_input_edited_after_output():
     hello_cfg = Config.configure_data_node("input", default_data="Hello ")
     hello_world_cfg = Config.configure_data_node("output")
