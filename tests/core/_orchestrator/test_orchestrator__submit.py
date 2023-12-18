@@ -475,7 +475,7 @@ def test_submit_sequence_with_callbacks_and_force_and_wait():
     assert mock_is_called[0][1] == 5
 
 
-def test_submit_scenario_generate_unique_submit_id():
+def test_submit_submittable_generate_unique_submit_id():
     dn_1 = PickleDataNode("dn_config_id_1", Scope.SCENARIO)
     dn_2 = PickleDataNode("dn_config_id_2", Scope.SCENARIO)
     task_1 = Task("task_config_id_1", {}, print, [dn_1])

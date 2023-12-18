@@ -12,22 +12,20 @@
 import multiprocessing
 import random
 import string
-from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import partial
 from time import sleep
 
 import pytest
-from tests.core.utils import assert_true_after_time
 
 from taipy.config import Config
 from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
-from taipy.core import taipy
 from taipy.core._orchestrator._orchestrator import _Orchestrator
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.pickle import PickleDataNode
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.sequence.sequence import Sequence
@@ -35,7 +33,7 @@ from taipy.core.submission._submission_manager import _SubmissionManager
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
-from taipy.core.data.pickle import PickleDataNode
+from tests.core.utils import assert_true_after_time
 
 
 # ################################  USER FUNCTIONS  ##################################
@@ -65,110 +63,6 @@ def concat(a, b):
 
 def _error():
     raise Exception
-
-
-# ################################  TEST METHODS    ##################################
-
-
-def test_submit_task():
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-
-    before_creation = datetime.now()
-    sleep(0.1)
-    task = _create_task(multiply)
-    output_dn_id = task.output[f"{task.config_id}_output0"].id
-
-    _OrchestratorFactory._build_dispatcher()
-
-    assert _DataManager._get(output_dn_id).last_edit_date > before_creation
-    assert _DataManager._get(output_dn_id).job_ids == []
-    assert _DataManager._get(output_dn_id).is_ready_for_reading
-
-    before_submission_creation = datetime.now()
-    sleep(0.1)
-    job = _Orchestrator.submit_task(task)
-    sleep(0.1)
-    after_submission_creation = datetime.now()
-    assert _DataManager._get(output_dn_id).read() == 42
-    assert _DataManager._get(output_dn_id).last_edit_date > before_submission_creation
-    assert _DataManager._get(output_dn_id).last_edit_date < after_submission_creation
-    assert _DataManager._get(output_dn_id).job_ids == [job.id]
-    assert _DataManager._get(output_dn_id).is_ready_for_reading
-    assert job.is_completed()
-    assert _SubmissionManager._get(job.submit_id).submission_status == SubmissionStatus.COMPLETED
-
-
-def test_submit_sequence_generate_unique_submit_id():
-    dn_1 = PickleDataNode("dn_config_id_1", Scope.SCENARIO)
-    dn_2 = PickleDataNode("dn_config_id_2", Scope.SCENARIO)
-    task_1 = Task("task_config_id_1", {}, print, [dn_1])
-    task_2 = Task("task_config_id_2", {}, print, [dn_1], [dn_2])
-
-    _DataManager._set(dn_1)
-    _DataManager._set(dn_2)
-    _TaskManager._set(task_1)
-    _TaskManager._set(task_2)
-
-    scenario = Scenario("scenario", [task_1, task_2], {}, sequences={"sequence": {"tasks": [task_1, task_2]}})
-    _ScenarioManager._set(scenario)
-
-    sequence = scenario.sequences["sequence"]
-
-    jobs_1 = taipy.submit(sequence)
-    jobs_2 = taipy.submit(sequence)
-    assert len(jobs_1) == 2
-    assert len(jobs_2) == 2
-    submit_ids_1 = [job.submit_id for job in jobs_1]
-    submit_ids_2 = [job.submit_id for job in jobs_2]
-    assert len(set(submit_ids_1)) == 1
-    assert len(set(submit_ids_2)) == 1
-    assert set(submit_ids_1) != set(submit_ids_2)
-
-
-def test_submit_scenario_generate_unique_submit_id():
-    dn_1 = PickleDataNode("dn_config_id_1", Scope.SCENARIO)
-    dn_2 = PickleDataNode("dn_config_id_2", Scope.SCENARIO)
-    dn_3 = PickleDataNode("dn_config_id_3", Scope.SCENARIO)
-    task_1 = Task("task_config_id_1", {}, print, [dn_1])
-    task_2 = Task("task_config_id_2", {}, print, [dn_2])
-    task_3 = Task("task_config_id_3", {}, print, [dn_3])
-    scenario = Scenario("scenario_config_id", [task_1, task_2, task_3], {})
-
-    _DataManager._set(dn_1)
-    _DataManager._set(dn_2)
-    _TaskManager._set(task_1)
-    _TaskManager._set(task_2)
-    _TaskManager._set(task_3)
-    _ScenarioManager._set(scenario)
-
-    jobs_1 = taipy.submit(scenario)
-    jobs_2 = taipy.submit(scenario)
-
-    assert len(jobs_1) == 3
-    assert len(jobs_2) == 3
-
-
-def test_submit_entity_store_entity_id_in_job():
-    dn_1 = PickleDataNode("dn_config_id_1", Scope.SCENARIO)
-    dn_2 = PickleDataNode("dn_config_id_2", Scope.SCENARIO)
-    dn_3 = PickleDataNode("dn_config_id_3", Scope.SCENARIO)
-    task_1 = Task("task_config_id_1", {}, print, [dn_1])
-    task_2 = Task("task_config_id_2", {}, print, [dn_2])
-    task_3 = Task("task_config_id_3", {}, print, [dn_3])
-    scenario = Scenario("scenario_config_id", [task_1, task_2, task_3], {})
-
-    _DataManager._set(dn_1)
-    _DataManager._set(dn_2)
-    _TaskManager._set(task_1)
-    _TaskManager._set(task_2)
-    _TaskManager._set(task_3)
-    _ScenarioManager._set(scenario)
-
-    jobs_1 = taipy.submit(scenario)
-    assert all(job.submit_entity_id == scenario.id for job in jobs_1)
-
-    job_1 = taipy.submit(task_1)
-    assert job_1.submit_entity_id == task_1.id
 
 
 def test_submit_task_that_return_multiple_outputs():
