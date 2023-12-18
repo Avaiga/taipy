@@ -109,6 +109,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
 def test_cannot_exec_task_that_update_config():
     def update_config_fct(n, m):
         from taipy.config import Config
+
         Config.core.storage_folder = ".new_storage_folder/"
         return n * m
 

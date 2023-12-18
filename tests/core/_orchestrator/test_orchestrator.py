@@ -347,7 +347,6 @@ def test_blocked_submittable():
 
 
 # ################################  UTIL METHODS    ##################################
-
 def _create_task(function, nb_outputs=1):
     output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     dn_input_configs = [

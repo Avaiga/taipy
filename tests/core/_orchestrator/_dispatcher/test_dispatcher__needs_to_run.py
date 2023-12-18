@@ -60,9 +60,7 @@ def test_need_to_run_skippable_task_no_input():
 def test_need_to_run_skippable_task_no_validity_period_on_output():
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     output_cfg = Config.configure_data_node("output")
-    task_cfg = Config.configure_task(
-        "name", input=[hello_cfg], function=nothing, output=[output_cfg], skippable=True
-    )
+    task_cfg = Config.configure_task("name", input=[hello_cfg], function=nothing, output=[output_cfg], skippable=True)
     task = _create_task_from_config(task_cfg)
     dispatcher = _JobDispatcher(_OrchestratorFactory._build_orchestrator())
     assert dispatcher._needs_to_run(task)  # output data is not written
