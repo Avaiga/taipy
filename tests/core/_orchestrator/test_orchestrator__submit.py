@@ -133,7 +133,7 @@ def test_submit_scenario_development_mode_blocked_jobs():
 
     s_time = datetime.now()
     with freezegun.freeze_time(s_time):
-        jobs = orchestrator.submit(scenario) # first task is blocked because input is not ready
+        jobs = orchestrator.submit(scenario)  # first task is blocked because input is not ready
 
     # dn should be locked for edition
     assert scenario.dn_2.edit_in_progress

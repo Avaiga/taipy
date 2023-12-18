@@ -156,7 +156,7 @@ def test_submit_task_standalone_mode_blocked_job():
         job = orchestrator.submit_task(sc.t2)  # No dispatcher running. t2 is not executed in standalone mode.
 
     # task output should NOT have been written
-    assert sc.dn_2.last_edit_date == None
+    assert sc.dn_2.last_edit_date is None
 
     # task output should be locked for edition
     assert sc.dn_2.edit_in_progress

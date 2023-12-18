@@ -168,6 +168,7 @@ def test_cancel_completed_job():
 
     assert job.is_completed()
 
+
 def test_cancel_completed_job():
     job = create_job(Status.SKIPPED)
     orchestrator = _OrchestratorFactory._build_orchestrator()

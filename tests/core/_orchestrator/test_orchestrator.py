@@ -96,6 +96,7 @@ def test_submit_task_multithreading_multiple_task():
     assert job_2.is_completed()
     assert _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
 
+
 def test_submit_submittable_multithreading_multiple_task():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 

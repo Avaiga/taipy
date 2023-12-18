@@ -90,7 +90,7 @@ def test_execute_job_to_skip():
 
             assert job.is_skipped()
             mck_1.assert_not_called()  # The job is expecting to be skipped, so it must not be dispatched
-            mck_2.assert_called_once_with(job.task) # this must be called to check if the job needs to run
+            mck_2.assert_called_once_with(job.task)  # this must be called to check if the job needs to run
             assert not scenario.dn.edit_in_progress  # outputs must have been unlocked
 
 
@@ -107,7 +107,7 @@ def test_execute_job_skippable_with_force():
             dispatcher = _JobDispatcher(_OrchestratorFactory._orchestrator)
             dispatcher._execute_job(job)
 
-            mck_1.assert_called_once_with(job) # This should be called to dispatch the job
+            mck_1.assert_called_once_with(job)  # This should be called to dispatch the job
             mck_2.assert_not_called()  # This should NOT be called since we force the execution anyway
             assert job.is_running()  # The job is not executed since the dispatch is mocked
             assert scenario.dn.edit_in_progress  # outputs must NOT have been unlocked because the disptach is mocked

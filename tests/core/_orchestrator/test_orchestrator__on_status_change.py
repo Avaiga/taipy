@@ -19,7 +19,6 @@ from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 
-
 def nothing(*args, **kwargs):
     pass
 
@@ -87,6 +86,7 @@ def test_on_status_change_on_completed_job():
     orchestrator.blocked_jobs.append(job_1_blocked)
     orchestrator.blocked_jobs.append(job_2_to_be_unblocked)
     orchestrator.blocked_jobs.append(job_3_blocked)
+
     def mck_is_blocked(job):
         if job.id == "to_be_unblocked":
             return False
@@ -117,6 +117,7 @@ def test_on_status_change_on_skipped_job():
     orchestrator.blocked_jobs.append(job_1_blocked)
     orchestrator.blocked_jobs.append(job_2_to_be_unblocked)
     orchestrator.blocked_jobs.append(job_3_blocked)
+
     def mck_is_blocked(job):
         if job.id == "to_be_unblocked":
             return False

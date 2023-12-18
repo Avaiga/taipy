@@ -134,4 +134,4 @@ def test_can_execute_task_with_a_modified_config():
     cfg_as_str = _TomlSerializer()._serialize(Config._applied_config)
     res = _TaskFunctionWrapper("job_id", task_asserting_cfg_is_correct).execute(config_as_string=cfg_as_str)
 
-    assert len(res) == 0 # no exception raised so the asserts in the fct passed
+    assert len(res) == 0  # no exception raised so the asserts in the fct passed

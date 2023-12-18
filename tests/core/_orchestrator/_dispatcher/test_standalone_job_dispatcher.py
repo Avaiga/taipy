@@ -101,7 +101,7 @@ def test_update_job_status_from_future():
     dispatcher = _StandaloneJobDispatcher(orchestrator)
     ft = Future()
     ft.set_result(None)
-    dispatcher. _set_dispatched_processes(job.id, ft) # the job is dispatched to a process
+    dispatcher. _set_dispatched_processes(job.id, ft)  # the job is dispatched to a process
 
     dispatcher._update_job_status_from_future(job, ft)
 
