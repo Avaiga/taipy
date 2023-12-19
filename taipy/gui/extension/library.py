@@ -39,7 +39,7 @@ class ElementProperty:
 
     def __init__(
         self,
-        property_type: PropertyType,
+        property_type: t.Union[PropertyType, t.Type[_TaipyBase]],
         default_value: t.Optional[t.Any] = None,
         js_name: t.Optional[str] = None,
     ) -> None:
@@ -54,6 +54,7 @@ class ElementProperty:
                 JavaScript code.
         """
         self.default_value = default_value
+        self.property_type: t.Union[PropertyType, t.Type[_TaipyBase]]
         if property_type == PropertyType.broadcast:
             if isinstance(default_value, str):
                 self.default_value = _get_broadcast_var_name(default_value)
@@ -205,7 +206,7 @@ class Element:
             if default_attr is not None:
                 elt_built.set_value_and_default(
                     var_name=default_name,
-                    var_type=default_attr.property_type,
+                    var_type=t.cast(PropertyType, default_attr.property_type),
                     default_val=default_attr.default_value,
                     with_default=default_attr.property_type != PropertyType.data,
                 )

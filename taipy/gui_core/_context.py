@@ -12,7 +12,6 @@
 import json
 import typing as t
 from collections import defaultdict
-from enum import Enum
 from numbers import Number
 from threading import Lock
 
@@ -23,8 +22,21 @@ except ImportError:
 
 import pandas as pd
 from dateutil import parser
+
 from taipy.config import Config
-from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, cancel_job, create_scenario
+from taipy.core import (
+    Cycle,
+    DataNode,
+    DataNodeId,
+    Job,
+    JobId,
+    Scenario,
+    ScenarioId,
+    Sequence,
+    SequenceId,
+    cancel_job,
+    create_scenario,
+)
 from taipy.core import delete as core_delete
 from taipy.core import delete_job
 from taipy.core import get as core_get
@@ -44,22 +56,14 @@ from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
+from taipy.core.submission.submission import Submission
+from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
 from taipy.gui.gui import _DoNotUpdate
 
 from ._adapters import _EntityType
-
-
-class _SubmissionStatus(Enum):
-    SUBMITTED = 0
-    COMPLETED = 1
-    CANCELED = 2
-    FAILED = 3
-    BLOCKED = 4
-    WAITING = 5
-    RUNNING = 6
-    UNDEFINED = 7
 
 
 class _SubmissionDetails:
@@ -68,19 +72,15 @@ class _SubmissionDetails:
         client_id: str,
         module_context: str,
         callback: t.Callable,
-        entity_id: str,
-        status: _SubmissionStatus,
-        jobs: t.List[Job],
+        submission: Submission,
     ) -> None:
         self.client_id = client_id
         self.module_context = module_context
         self.callback = callback
-        self.entity_id = entity_id
-        self.status = status
-        self.jobs = jobs
+        self.submission = submission
 
-    def set_status(self, status: _SubmissionStatus):
-        self.status = status
+    def set_submission(self, submission: Submission):
+        self.submission = submission
         return self
 
 
@@ -112,7 +112,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.data_nodes_by_owner: t.Optional[t.Dict[t.Optional[str], DataNode]] = None
         self.scenario_configs: t.Optional[t.List[t.Tuple[str, str]]] = None
         self.jobs_list: t.Optional[t.List[Job]] = None
-        self.client_jobs_by_submission: t.Dict[str, _SubmissionDetails] = dict()
+        self.client_submission: t.Dict[str, _SubmissionDetails] = dict()
         # register to taipy core notification
         reg_id, reg_queue = Notifier.register()
         # locks
@@ -125,17 +125,19 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def process_event(self, event: Event):
         if event.entity_type == EventEntityType.SCENARIO:
             if event.operation == EventOperation.SUBMISSION:
-                self.scenario_status_callback(event.attribute_name, True)
+                self.scenario_status_callback(event.attribute_name)
                 return
             self.scenario_refresh(
-                event.entity_id if event.operation != EventOperation.DELETION and is_readable(event.entity_id) else None
+                event.entity_id
+                if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
+                else None
             )
         elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
             sequence = None
             try:
                 sequence = (
                     core_get(event.entity_id)
-                    if event.operation != EventOperation.DELETION and is_readable(event.entity_id)
+                    if event.operation != EventOperation.DELETION and is_readable(t.cast(SequenceId, event.entity_id))
                     else None
                 )
                 if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
@@ -147,6 +149,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         elif event.entity_type == EventEntityType.JOB:
             with self.lock:
                 self.jobs_list = None
+        elif event.entity_type == EventEntityType.SUBMISSION:
             self.scenario_status_callback(event.entity_id)
         elif event.entity_type == EventEntityType.DATA_NODE:
             with self.lock:
@@ -165,50 +168,43 @@ class _GuiCoreContext(CoreEventConsumerBase):
             {"scenario": scenario_id or True},
         )
 
-    def scenario_status_callback(self, job_id: str, is_submission: t.Optional[bool] = False):
-        if not job_id or not (is_submission or is_readable(job_id)):
+    def scenario_status_callback(self, submission_id: t.Optional[str]):
+        if not submission_id or not is_readable_submission(submission_id):
             return
         try:
-            if is_submission:
-                sub_id = job_id
-                job = None
-            else:
-                job = core_get(job_id)
-                if not job:
-                    return
-                sub_id = job.submit_id
-            sub_details = self.client_jobs_by_submission.get(sub_id)
+            sub_details: t.Optional[_SubmissionDetails] = self.client_submission.get(submission_id)
             if not sub_details:
                 return
 
-            if not sub_details.client_id or not sub_details.entity_id or not sub_details.jobs:
+            submission = core_get_submission(submission_id)
+            if not submission or not submission.entity_id:
                 return
 
-            entity = core_get(sub_details.entity_id)
+            entity = core_get(submission.entity_id)
             if not entity:
                 return
 
-            new_status = self._get_submittable_status(sub_details.jobs)
-            if sub_details.status != new_status:
+            new_status = submission.submission_status
+            if sub_details.submission.submission_status != new_status:
                 # callback
                 self.gui._call_user_callback(
                     sub_details.client_id,
                     sub_details.callback,
-                    [entity, {"submission_status": new_status.name, "job": job}],
+                    [entity, {"submission_status": new_status.name}],
                     sub_details.module_context,
                 )
             with self.submissions_lock:
                 if new_status in (
-                    _SubmissionStatus.COMPLETED,
-                    _SubmissionStatus.FAILED,
-                    _SubmissionStatus.CANCELED,
+                    SubmissionStatus.COMPLETED,
+                    SubmissionStatus.FAILED,
+                    SubmissionStatus.CANCELED,
                 ):
-                    self.client_jobs_by_submission.pop(sub_id, None)
+                    self.client_submission.pop(submission_id, None)
                 else:
-                    self.client_jobs_by_submission[sub_id] = sub_details.set_status(new_status)
+                    self.client_submission[submission_id] = sub_details.set_submission(submission)
 
         except Exception as e:
-            _warn(f"Job ({job_id}) is not available", e)
+            _warn(f"Submission ({submission_id}) is not available", e)
 
         finally:
             self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, {"jobs": True})
@@ -264,10 +260,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
         state.assign(_GuiCoreContext._SCENARIO_SELECTOR_ID_VAR, args[0])
 
     def get_scenario_by_id(self, id: str) -> t.Optional[Scenario]:
-        if not id or not is_readable(id):
+        if not id or not is_readable(t.cast(ScenarioId, id)):
             return None
         try:
-            return core_get(id)
+            return core_get(t.cast(ScenarioId, id))
         except Exception:
             return None
 
@@ -438,71 +434,25 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if entity:
             try:
                 jobs = core_submit(entity)
+                submission_entity = core_get_submission(jobs[0].submit_id if isinstance(jobs, list) else jobs.submit_id)
                 if submission_cb := data.get("on_submission_change"):
                     submission_fn = self.gui._get_user_function(submission_cb)
                     if callable(submission_fn):
-                        job_ids = [j.id for j in (jobs if isinstance(jobs, list) else [jobs])]
                         client_id = self.gui._get_client_id()
                         module_context = self.gui._get_locals_context()
-                        sub_id = jobs[0].submit_id if isinstance(jobs, list) else jobs.submit_id
                         with self.submissions_lock:
-                            self.client_jobs_by_submission[sub_id] = _SubmissionDetails(
+                            self.client_submission[submission_entity.id] = _SubmissionDetails(
                                 client_id,
                                 module_context,
                                 submission_fn,
-                                entity_id,
-                                _SubmissionStatus.SUBMITTED,
-                                job_ids,
+                                submission_entity,
                             )
                     else:
                         _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")
-                self.scenario_status_callback(jobs[0].id if len(jobs) else "" if isinstance(jobs, list) else jobs.id)
+                self.scenario_status_callback(submission_entity.id)
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, "")
             except Exception as e:
                 state.assign(_GuiCoreContext._SCENARIO_VIZ_ERROR_VAR, f"Error submitting entity. {e}")
-
-    def _get_submittable_status(self, jobs_ids: t.List[str]) -> _SubmissionStatus:
-        abandoned = False
-        canceled = False
-        blocked = False
-        waiting = False
-        running = False
-        completed = False
-        for id in jobs_ids:
-            job = core_get(id)
-            if not job:
-                continue
-            if job.is_failed():
-                return _SubmissionStatus.FAILED
-            if job.is_canceled():
-                canceled = True
-            if job.is_blocked():
-                blocked = True
-                continue
-            if job.is_pending() or job.is_submitted():
-                waiting = True
-                continue
-            if job.is_running():
-                running = True
-                continue
-            if job.is_completed() or job.is_skipped():
-                completed = True
-                continue
-            if job.is_abandoned():
-                abandoned = True
-        if canceled:
-            return _SubmissionStatus.CANCELED
-        if abandoned:
-            return _SubmissionStatus.UNDEFINED
-        if running:
-            return _SubmissionStatus.RUNNING
-        if waiting:
-            return _SubmissionStatus.WAITING
-        if blocked:
-            return _SubmissionStatus.BLOCKED
-        if completed:
-            return _SubmissionStatus.COMPLETED
-        return _SubmissionStatus.UNDEFINED
 
     def __do_datanodes_tree(self):
         if self.data_nodes_by_owner is None:
@@ -690,10 +640,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             cycles_scenarios.extend(scenarios)
                         else:
                             cycles_scenarios.append(cycle)
-                elif is_readable(owner_id):
+                elif is_readable(t.cast(ScenarioId, owner_id)):
                     entity = core_get(owner_id)
-                    if entity and (scenarios := self.scenario_by_cycle.get(entity)):
-                        cycles_scenarios.extend(scenarios)
+                    if entity and (scenarios_cycle := self.scenario_by_cycle.get(t.cast(Cycle, entity))):
+                        cycles_scenarios.extend(scenarios_cycle)
                     elif isinstance(entity, Scenario):
                         cycles_scenarios.append(entity)
         return cycles_scenarios
@@ -709,7 +659,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             res = []
             for e in dn.edits:
                 job_id = e.get("job_id")
-                job: Job = None
+                job: t.Optional[Job] = None
                 if job_id:
                     if not is_readable(job_id):
                         job_id += " not readable"
@@ -758,10 +708,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return _DoNotUpdate()
 
     def __check_readable_editable(self, state: State, id: str, type: str, var: str):
-        if not is_readable(id):
+        if not is_readable(t.cast(DataNodeId, id)):
             state.assign(var, f"{type} {id} is not readable.")
             return False
-        if not is_editable(id):
+        if not is_editable(t.cast(DataNodeId, id)):
             state.assign(var, f"{type} {id} is not editable.")
             return False
         return True
@@ -832,7 +782,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             id
             and isinstance(datanode, DataNode)
             and id == datanode.id
-            and is_readable(id)
+            and is_readable(t.cast(DataNodeId, id))
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
             and dn.is_ready_for_reading
@@ -848,7 +798,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             id
             and isinstance(datanode, DataNode)
             and id == datanode.id
-            and is_readable(id)
+            and is_readable(t.cast(DataNodeId, id))
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
             and dn.is_ready_for_reading
@@ -866,7 +816,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             id
             and isinstance(datanode, DataNode)
             and id == datanode.id
-            and is_readable(id)
+            and is_readable(t.cast(DataNodeId, id))
             and (dn := core_get(id))
             and isinstance(dn, DataNode)
             and dn.is_ready_for_reading
@@ -892,3 +842,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_ID_VAR, data_id)
         elif chart_id := data.get("chart_id"):
             state.assign(_GuiCoreContext._DATANODE_VIZ_DATA_CHART_ID_VAR, chart_id)
+
+
+# TODO remove when Submission is supported by Core API
+def is_readable_submission(id: str):
+    return _SubmissionManagerFactory._build_manager()._is_readable(t.cast(Submission, id))
+
+
+def core_get_submission(id: str):
+    return _SubmissionManagerFactory._build_manager()._get(id)
