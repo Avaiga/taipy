@@ -258,7 +258,7 @@
             "type": "string"
           },
           "aws_s3_object_parameters":{
-            "description": "storage_type: s3_object specific.Additional parameters when accesing s3 object, default is an empty dictionary",
+            "description": "storage_type: s3_object specific.Additional parameters when accessing s3 object, default is an empty dictionary",
             "type": "array"
           },
           "if": {
