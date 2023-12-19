@@ -30,7 +30,7 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
 
     Attributes:
         config_id (str): Identifier of the data node configuration. It must be a valid Python
-            identifer.
+            identifier.
         scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
         owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or

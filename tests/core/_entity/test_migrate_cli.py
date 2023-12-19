@@ -122,7 +122,7 @@ def test_migrate_fs_backup_and_restore(caplog):
     assert f"Restored entities from the backup folder '{backup_path}' to '{data_path}'." in caplog.text
     assert not os.path.exists(backup_path)
 
-    # Compare migrated .data folder with data_sample to ensure restoreing the backup worked
+    # Compare migrated .data folder with data_sample to ensure restoring the backup worked
     dircmp_result = filecmp.dircmp(data_path, "tests/core/_entity/data_sample")
     assert not dircmp_result.diff_files and not dircmp_result.left_only and not dircmp_result.right_only
     for subdir in dircmp_result.subdirs.values():
