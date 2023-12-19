@@ -742,7 +742,7 @@ def test_notification_unsubscribe_multi_param():
 
     assert len(scenario.subscribers) == 3
 
-    # if no params are passed, removes the first occurrence of the subscriber when theres more than one copy
+    # if no params are passed, removes the first occurrence of the subscriber when there's more than one copy
     scenario.unsubscribe(notify_multi_param)
     assert len(scenario.subscribers) == 2
     assert _Subscriber(notify_multi_param, ["foobar", 123, 0]) not in scenario.subscribers
