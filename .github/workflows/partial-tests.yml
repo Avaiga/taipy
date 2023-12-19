@@ -19,7 +19,7 @@ jobs:
           use-mypy: false
           extra-black-options: "--line-length=120 --diff"
           extra-pycodestyle-options: "--max-line-length=120  --exclude=tests/gui --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
-          extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py) --follow-imports skip"
+          extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py|tools) --follow-imports skip"
           extra-isort-options: "--line-length=120 --force-grid-wrap=10 --multi-line=VERTICAL_HANGING_INDENT --trailing-comma"
   tests:
     needs: linter
@@ -51,6 +51,8 @@ jobs:
               - 'taipy/logger/**'
             rest:
               - 'taipy/rest/**'
+            templates:
+              - 'taipy/templates/**'
 
       - uses: actions/setup-python@v5
         with:
@@ -104,3 +106,7 @@ jobs:
       - name: Pytest Rest
         if: steps.changes.outputs.rest == 'true'
         run: pipenv run pytest  tests/rest
+
+      - name: Pytest Rest
+        if: steps.changes.outputs.templates == 'true'
+        run: pipenv run pytest  tests/templates
