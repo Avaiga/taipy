@@ -40,17 +40,8 @@ Please specify relevant indications.
  - OS: [e.g. Linux, Windows] and version
  - Browser: [e.g. Chrome, Edge, Safari] and version (if relevant)
 and any other relevant information.
---------------------------------------------------------------------------------
-title: BUG-
-Labels: Malfunction
---------------------------------------------------------------------------------
-## Feature improvement
-Feature improvements add extra functionality to an existing feature.
---------------------------------------------------------------------------------
-**Description**
-What this improvement addresses (performance, API...).
 
 **Acceptance Criteria**
 - [ ] Ensure new code is unit tested, and check code coverage is at least 90%
-- [ ] Propagate any change on the demos and run all of them to ensure there is no breaking change
-- [ ] Ensure any change is well documented
+- [ ] Create related issue in taipy-doc for documentation and Release Notes if relevant
+
