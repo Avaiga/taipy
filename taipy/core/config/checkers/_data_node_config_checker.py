@@ -17,6 +17,7 @@ from taipy.config.checker._checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.scope import Scope
 
+from ...data.data_node import DataNode
 from ..data_node_config import DataNodeConfig
 
 
@@ -29,6 +30,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
         for data_node_config_id, data_node_config in data_node_configs.items():
             self._check_existing_config_id(data_node_config)
             self._check_if_entity_property_key_used_is_predefined(data_node_config)
+            self._check_if_config_id_is_overlapping_with_entity_attribute(data_node_config_id, data_node_config)
             self._check_storage_type(data_node_config_id, data_node_config)
             self._check_scope(data_node_config_id, data_node_config)
             self._check_validity_period(data_node_config_id, data_node_config)
@@ -37,6 +39,20 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_generic_read_write_fct_and_args(data_node_config_id, data_node_config)
             self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
+
+    def _check_if_config_id_is_overlapping_with_entity_attribute(
+        self, data_node_config_id: str, data_node_config: DataNodeConfig
+    ):
+        entity_attributes = [
+            attr for attr in dir(DataNode) if not callable(getattr(DataNode, attr)) and not attr.startswith("_")
+        ]
+        if data_node_config.id in entity_attributes:
+            self._error(
+                data_node_config._ID_KEY,
+                data_node_config.id,
+                f"The id of the DataNodeConfig `{data_node_config_id}` is overlapping with the "
+                f"attribute `{data_node_config.id}` of a DataNode entity.",
+            )
 
     def _check_storage_type(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type not in DataNodeConfig._ALL_STORAGE_TYPES:

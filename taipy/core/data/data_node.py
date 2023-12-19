@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import networkx as nx
+
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -103,9 +104,9 @@ class DataNode(_Entity, _Labeled):
         editor_expiration_date: Optional[datetime] = None,
         **kwargs,
     ):
-        self.config_id = _validate_id(config_id)
+        self._config_id = _validate_id(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
-        self.owner_id = owner_id
+        self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._scope = scope
         self._last_edit_date = last_edit_date
@@ -119,6 +120,22 @@ class DataNode(_Entity, _Labeled):
         self._edits = edits or list()
 
         self._properties = _Properties(self, **kwargs)
+
+    @property
+    def config_id(self):
+        return self._config_id
+
+    @config_id.setter
+    def config_id(self, val):
+        self._config_id = val
+
+    @property
+    def owner_id(self):
+        return self._owner_id
+
+    @owner_id.setter
+    def owner_id(self, val):
+        self._owner_id = val
 
     def get_parents(self):
         """Get all parents of this data node."""

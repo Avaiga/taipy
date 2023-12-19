@@ -17,6 +17,7 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
+
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
 
@@ -29,7 +30,6 @@ from .._version._version_manager_factory import _VersionManagerFactory
 from ..common._listattributes import _ListAttributes
 from ..common._utils import _Subscriber
 from ..cycle.cycle import Cycle
-from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..data.data_node_id import DataNodeId
 from ..exceptions.exceptions import (
@@ -42,7 +42,6 @@ from ..exceptions.exceptions import (
 from ..job.job import Job
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..sequence.sequence import Sequence
-from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
 from ..task.task_id import TaskId
 from .scenario_id import ScenarioId
@@ -96,7 +95,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         sequences: Optional[Dict[str, Dict]] = None,
     ):
         super().__init__(subscribers or [])
-        self.config_id = _validate_id(config_id)
+        self._config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
 
         self._tasks: Union[Set[TaskId], Set[Task], Set] = tasks or set()
@@ -155,6 +154,14 @@ class Scenario(_Entity, Submittable, _Labeled):
         if protected_attribute_name in data_nodes:
             return data_nodes[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
+
+    @property
+    def config_id(self):
+        return self._config_id
+
+    @config_id.setter
+    def config_id(self, val):
+        self._config_id = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -305,6 +312,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         return self.__get_tasks()
 
     def __get_tasks(self) -> Dict[str, Task]:
+        from ..task._task_manager_factory import _TaskManagerFactory
+
         _tasks = {}
         task_manager = _TaskManagerFactory._build_manager()
 
@@ -327,6 +336,8 @@ class Scenario(_Entity, Submittable, _Labeled):
         return self.__get_additional_data_nodes()
 
     def __get_additional_data_nodes(self):
+        from ..data._data_manager_factory import _DataManagerFactory
+
         additional_data_nodes = {}
         data_manager = _DataManagerFactory._build_manager()
 

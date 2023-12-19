@@ -13,6 +13,7 @@ from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 
+from ...task.task import Task
 from ..data_node_config import DataNodeConfig
 from ..task_config import TaskConfig
 
@@ -27,10 +28,25 @@ class _TaskConfigChecker(_ConfigChecker):
             if task_config_id != _Config.DEFAULT_KEY:
                 self._check_existing_config_id(task_config)
                 self._check_if_entity_property_key_used_is_predefined(task_config)
+                self._check_if_config_id_is_overlapping_with_entity_attribute(task_config_id, task_config)
                 self._check_existing_function(task_config_id, task_config)
                 self._check_inputs(task_config_id, task_config)
                 self._check_outputs(task_config_id, task_config)
         return self._collector
+
+    def _check_if_config_id_is_overlapping_with_entity_attribute(
+        self, task_config_id: str, task_config: DataNodeConfig
+    ):
+        entity_attributes = [
+            attr for attr in dir(Task) if not callable(getattr(Task, attr)) and not attr.startswith("_")
+        ]
+        if task_config.id in entity_attributes:
+            self._error(
+                task_config._ID_KEY,
+                task_config.id,
+                f"The id of the TaskConfig `{task_config_id}` is overlapping with the "
+                f"attribute `{task_config.id}` of a Task entity.",
+            )
 
     def _check_inputs(self, task_config_id: str, task_config: TaskConfig):
         self._check_children(

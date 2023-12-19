@@ -21,9 +21,7 @@ from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
 from .._entity._reload import _Reloader, _self_reload, _self_setter
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
-from ..exceptions.exceptions import NonExistingDataNode
 from ..notification.event import Event, EventEntityType, EventOperation, _make_event
 from .task_id import TaskId
 
@@ -71,9 +69,9 @@ class Task(_Entity, _Labeled):
         version: Optional[str] = None,
         skippable: bool = False,
     ):
-        self.config_id = _validate_id(config_id)
+        self._config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
-        self.owner_id = owner_id
+        self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
@@ -108,6 +106,22 @@ class Task(_Entity, _Labeled):
     def properties(self):
         self._properties = _Reloader()._reload(self._MANAGER_NAME, self)._properties
         return self._properties
+
+    @property
+    def config_id(self):
+        return self._config_id
+
+    @config_id.setter
+    def config_id(self, val):
+        self._config_id = val
+
+    @property
+    def owner_id(self):
+        return self._owner_id
+
+    @owner_id.setter
+    def owner_id(self, val):
+        self._owner_id = val
 
     def get_parents(self):
         """Get parents of the task."""

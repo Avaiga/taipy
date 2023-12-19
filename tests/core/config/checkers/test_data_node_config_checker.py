@@ -45,6 +45,48 @@ class TestDataNodeConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
 
+    def test_check_config_id_is_different_from_all_datanode_properties(self, caplog):
+        Config._collector = IssueCollector()
+        config = Config._applied_config
+        Config._compile_configs()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
+
+        for conflict_id in [
+            "cacheable",
+            "config_id",
+            "edit_in_progress",
+            "editor_expiration_date",
+            "editor_id",
+            "edits",
+            "expiration_date",
+            "is_ready_for_reading",
+            "is_up_to_date",
+            "is_valid",
+            "job_ids",
+            "last_edit_date",
+            "name",
+            "owner_id",
+            "parent_ids",
+            "properties",
+            "scope",
+            "validity_period",
+            "version",
+        ]:
+            config._sections[DataNodeConfig.name]["new"].id = conflict_id
+
+            with pytest.raises(SystemExit):
+                Config._collector = IssueCollector()
+                Config.check()
+            assert len(Config._collector.errors) == 1
+            expected_error_message = (
+                "The id of the DataNodeConfig `new` is overlapping with the attribute"
+                f" `{conflict_id}` of a DataNode entity."
+            )
+            assert expected_error_message in caplog.text
+
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
         config = Config._applied_config
