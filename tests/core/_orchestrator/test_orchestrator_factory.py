@@ -40,6 +40,7 @@ def test_build_dispatcher_no_orchestrator():
     _OrchestratorFactory._dispatcher = None
     with pytest.raises(OrchestratorNotBuilt):
         _OrchestratorFactory._build_dispatcher()
+        assert _OrchestratorFactory._dispatcher is None
 
 
 def test_build_dispatcher_default():
@@ -67,6 +68,7 @@ def test_build_standalone_dispatcher():
     _OrchestratorFactory._build_dispatcher()
     assert isinstance(_OrchestratorFactory._dispatcher, _StandaloneJobDispatcher)
     assert _OrchestratorFactory._dispatcher.is_running()
+    _OrchestratorFactory._dispatcher.stop()
 
 
 def test_rebuild_standalone_dispatcher_and_force_restart():
@@ -97,6 +99,7 @@ def test_build_unknown_dispatcher():
     _OrchestratorFactory._build_orchestrator()
     with pytest.raises(ModeNotAvailable):
         _OrchestratorFactory._build_dispatcher()
+        assert _OrchestratorFactory._dispatcher is None
 
 
 def test_remove_dispatcher_not_built():
