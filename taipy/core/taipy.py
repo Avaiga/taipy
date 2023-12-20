@@ -625,7 +625,7 @@ def get_jobs() -> List[Job]:
     return _JobManagerFactory._build_manager()._get_all()
 
 
-def delete_job(job: Job, force=False):
+def delete_job(job: Job, force: Optional[bool] = False):
     """Delete a job.
 
     This function deletes the specified job. If the job is not completed and
