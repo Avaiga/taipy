@@ -15,7 +15,6 @@ from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.frequency import Frequency
 
-from ...scenario.scenario import Scenario
 from ..data_node_config import DataNodeConfig
 from ..scenario_config import ScenarioConfig
 from ..task_config import TaskConfig
@@ -31,7 +30,6 @@ class _ScenarioConfigChecker(_ConfigChecker):
             if scenario_config_id != _Config.DEFAULT_KEY:
                 self._check_if_entity_property_key_used_is_predefined(scenario_config)
                 self._check_existing_config_id(scenario_config)
-                self._check_if_config_id_is_overlapping_with_entity_attribute(scenario_config_id, scenario_config)
                 self._check_frequency(scenario_config_id, scenario_config)
                 self._check_task_configs(scenario_config_id, scenario_config)
                 self._check_addition_data_node_configs(scenario_config_id, scenario_config)
@@ -40,20 +38,6 @@ class _ScenarioConfigChecker(_ConfigChecker):
                 self._check_comparators(scenario_config_id, scenario_config)
 
         return self._collector
-
-    def _check_if_config_id_is_overlapping_with_entity_attribute(
-        self, scenario_config_id: str, scenario_config: DataNodeConfig
-    ):
-        entity_attributes = [
-            attr for attr in dir(Scenario) if not callable(getattr(Scenario, attr)) and not attr.startswith("_")
-        ]
-        if scenario_config.id in entity_attributes:
-            self._error(
-                scenario_config._ID_KEY,
-                scenario_config.id,
-                f"The id of the ScenarioConfig `{scenario_config_id}` is overlapping with the "
-                f"attribute `{scenario_config.id}` of a Scenario entity.",
-            )
 
     def _check_task_configs(self, scenario_config_id: str, scenario_config: ScenarioConfig):
         self._check_children(

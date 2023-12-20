@@ -56,43 +56,6 @@ class TestScenarioConfigChecker:
         assert "tasks field of ScenarioConfig `new` is empty." in caplog.text
         assert len(Config._collector.infos) == 0
 
-    def test_check_config_id_is_different_from_all_scenario_properties(self, caplog):
-        Config._collector = IssueCollector()
-        config = Config._applied_config
-        Config._compile_configs()
-        Config.check()
-        assert len(Config._collector.errors) == 0
-
-        config._sections[ScenarioConfig.name]["new"] = copy(config._sections[ScenarioConfig.name]["default"])
-
-        for conflict_id in [
-            "additional_data_nodes",
-            "config_id",
-            "creation_date",
-            "cycle",
-            "data_nodes",
-            "is_primary",
-            "name",
-            "owner_id",
-            "properties",
-            "sequences",
-            "subscribers",
-            "tags",
-            "tasks",
-            "version",
-        ]:
-            config._sections[ScenarioConfig.name]["new"].id = conflict_id
-
-            with pytest.raises(SystemExit):
-                Config._collector = IssueCollector()
-                Config.check()
-            assert len(Config._collector.errors) == 1
-            expected_error_message = (
-                "The id of the ScenarioConfig `new` is overlapping with the attribute"
-                f" `{conflict_id}` of a Scenario entity."
-            )
-            assert expected_error_message in caplog.text
-
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
         config = Config._applied_config
