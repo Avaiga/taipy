@@ -47,7 +47,7 @@ def mult_by_2(n):
     return n * 2
 
 
-@pytest.mark.skip(reason="Too long")
+@pytest.mark.orchestrator_dispatcher
 def test_submit_task_multithreading_multiple_task():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
@@ -100,7 +100,7 @@ def test_submit_task_multithreading_multiple_task():
     assert _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
 
 
-@pytest.mark.skip(reason="Too long")
+@pytest.mark.orchestrator_dispatcher
 def test_submit_submittable_multithreading_multiple_task():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
@@ -147,7 +147,7 @@ def test_submit_submittable_multithreading_multiple_task():
     )
 
 
-@pytest.mark.skip(reason="Too long")
+@pytest.mark.orchestrator_dispatcher
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
@@ -230,7 +230,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     assert _SubmissionManager._get(job_2.submit_id).submission_status == SubmissionStatus.COMPLETED
 
 
-@pytest.mark.skip(reason="Too long")
+@pytest.mark.orchestrator_dispatcher
 def test_blocked_task():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
@@ -296,7 +296,7 @@ def test_blocked_task():
     )
 
 
-@pytest.mark.skip(reason="Too long")
+@pytest.mark.orchestrator_dispatcher
 def test_blocked_submittable():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
 
