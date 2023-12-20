@@ -25,74 +25,44 @@ jobs:
         run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
         id: extract_branch
 
-      - name: Ensure package version is properly set
+      - name: Setup Version
+        id: version-setup
         run: |
-          echo """
-          import json, sys, os
-          with open(f\"taipy{os.sep}version.json\") as version_file:
-              version_o = json.load(version_file)
-          version = f'{version_o.get(\"major\")}.{version_o.get(\"minor\")}.{version_o.get(\"patch\")}'
-          if vext := version_o.get(\"ext\"):
-              version = f'{version}.{vext}'
-          if version != sys.argv[1]:
-              raise ValueError(f\"Invalid version {version} / {sys.argv[1]}\")
-          """ > ${{ runner.temp }}/check1.py
-          python ${{ runner.temp }}/check1.py "${{ github.event.inputs.version }}"
-
-      - name: Validate branch name
-        run: |
-          echo """
-          import json, sys, os
-          with open(f\"taipy{os.sep}version.json\") as version_file:
-              version = json.load(version_file)
-          if f'release/{version.get(\"major\")}.{version.get(\"minor\")}' != sys.argv[1]:
-              raise ValueError(f'Branch name mismatch: release/{version.get(\"major\")}.{version.get(\"minor\")} != {sys.argv[1]}')
-          """ > ${{ runner.temp }}/check2.py
-          python ${{ runner.temp }}/check2.py "${{ steps.extract_branch.outputs.branch }}"
+          python tools/release/setup_version.py taipy prod "${{ github.event.inputs.version }}" "${{ steps.extract_branch.outputs.branch }}"
 
       - name: Modify README image file path
         run: |
-          cp tools/modify_readme.py ${{ runner.temp }}
-          python ${{ runner.temp }}/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
+          python tools/modify_readme.py "${{ github.event.repository.name }}" "${{ steps.extract_branch.outputs.branch }}"
 
       - name: Get taipy-gui version from setup.py
         id: taipy_gui_version
         run: |
-          echo """
-          with open('setup.py') as f:
-              for line in f:
-                  if 'taipy-gui' in line:
-                      start = line.find('taipy-gui')
-                      end = line.rstrip().find('\",')
-                      print(f'VERSION={line[start:end]}')
-                      break
-          """ > ${{ runner.temp }}/get_gui_version.py
-          python ${{ runner.temp }}/get_gui_version.py >> $GITHUB_OUTPUT
+          python tools/release/extract_from_setup.py >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install build wheel
+
+      - name: Install Taipy Gui
+        run: |
           # install taipy-gui from based on setup.py version
           pip install "${{ steps.taipy_gui_version.outputs.VERSION }}"
 
-      - name: Build and test the package
+      - name: Build Taipy package
         run: |
           python setup.py build_py && python -m build
           rm -rf taipy
-          pip install dist/*.tar.gz
-          python -c "import taipy as tp; tp.Scenario"
-          python -c "import taipy as tp; tp.gui"
-          python -c "import taipy as tp; tp.rest"
 
-          echo """
-          import taipy
-          from pathlib import Path
-          taipy_gui_core_path = Path(taipy.__file__).absolute().parent / 'gui_core' / 'lib' / 'taipy-gui-core.js'
-          if not taipy_gui_core_path.exists():
-              raise FileNotFoundError(f'taipy-gui-core.js not found in {taipy_gui_core_path}')
-          """ > ${{ runner.temp }}/verify_gui_core.py
-          python ${{ runner.temp }}/verify_gui_core.py
+      - name: Install the Taipy package and test it
+        run: |
+          # Install package
+          echo "Installing package..."
+          pip install dist/*.tar.gz
+
+      - name: Check Taipy Installation
+        run: |
+          python tools/validate_taipy_install.py
 
       - name: Extract commit hash
         shell: bash

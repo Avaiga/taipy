@@ -1,2 +1,2 @@
-include taipy/core/*.json
-include taipy/core/config/*.json
+include *.json
+include config/*.json

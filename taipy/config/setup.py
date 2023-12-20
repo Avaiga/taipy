@@ -20,7 +20,9 @@ from setuptools import find_namespace_packages, find_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open(f"src{os.sep}taipy{os.sep}config{os.sep}version.json") as version_file:
+version_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
+
+with open(version_path) as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
@@ -47,13 +49,12 @@ setup(
     install_requires=requirements,
     long_description=readme,
     long_description_content_type="text/markdown",
-    include_package_data=True,
     license="Apache License 2.0",
     keywords="taipy-config",
     name="taipy-config",
-    package_dir={"": "src"},
-    packages=find_namespace_packages(where="src")
+    packages=find_namespace_packages(where=".")
     + find_packages(include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]),
+    include_package_data=True,
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-config",
