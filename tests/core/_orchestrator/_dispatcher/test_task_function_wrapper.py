@@ -100,10 +100,10 @@ def test_data_node_not_written_due_to_wrong_result_nb():
 
     task_expecting_3_outputs = _create_task(fct_2_outputs, 3)
 
-    res = _TaskFunctionWrapper("job_id", task_expecting_3_outputs).execute()
+    exceptions = _TaskFunctionWrapper("job_id", task_expecting_3_outputs).execute()
 
-    assert len(res) == 1
-    assert isinstance(res[0], Exception)
+    assert len(exceptions) == 1
+    assert isinstance(exceptions[0], Exception)
 
 
 def test_cannot_exec_task_that_update_config():
