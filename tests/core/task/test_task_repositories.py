@@ -12,6 +12,7 @@
 import os
 
 import pytest
+
 from taipy.core.data._data_sql_repository import _DataSQLRepository
 from taipy.core.exceptions import ModelNotFound
 from taipy.core.task._task_fs_repository import _TaskFSRepository
@@ -63,7 +64,7 @@ class TestTaskFSRepository:
 
         for i in range(10):
             task.id = TaskId(f"task-{i}")
-            task.owner_id = f"owner-{i}"
+            task._owner_id = f"owner-{i}"
             repository._save(task)
         objs = repository._load_all(filters=[{"owner_id": "owner-2"}])
 
@@ -140,7 +141,7 @@ class TestTaskFSRepository:
 
         for i in range(10):
             task.id = TaskId(f"task-{i}")
-            task.owner_id = f"owner-{i}"
+            task._owner_id = f"owner-{i}"
             repository._save(task)
 
         assert len(repository._load_all()) == 10
