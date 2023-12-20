@@ -11,9 +11,6 @@
 
 import random
 import string
-from time import sleep
-
-import pytest
 
 from taipy.config import Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
@@ -21,7 +18,6 @@ from taipy.config.common.scope import Scope
 from taipy.config.exceptions import ConfigurationUpdateBlocked
 from taipy.core._orchestrator._dispatcher._task_function_wrapper import _TaskFunctionWrapper
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core.config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.task.task import Task
 
@@ -48,7 +44,6 @@ def _create_task(function, nb_outputs=1):
 
 
 def multiply(nb1: float, nb2: float):
-    sleep(0.1)
     return nb1 * nb2
 
 

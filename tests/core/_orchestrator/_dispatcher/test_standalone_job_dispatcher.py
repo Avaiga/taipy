@@ -11,6 +11,7 @@
 import time
 from concurrent.futures import ProcessPoolExecutor, Future
 from unittest import mock
+from unittest.mock import call
 
 from taipy import Config
 from taipy.config._serializer._toml_serializer import _TomlSerializer
@@ -130,4 +131,5 @@ def test_run():
         dispatcher.start()
         assert_true_after_time(lambda: mck.call_count == 4, msg="The 4 jobs were not dequeued.", time=5)
         dispatcher.stop()
-        mck.assert_called_with(job_4)
+        # mck.assert_called_with(job_4)
+        mck.assert_has_calls([call(job_1), call(job_2), call(job_3), call(job_4)])
