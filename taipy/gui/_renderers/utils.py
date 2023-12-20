@@ -37,7 +37,7 @@ def _get_columns_dict_from_list(
             col_dict[col] = {"index": idx}
             idx += 1
         elif col:
-            if isinstance(value,pd.DataFrame):
+            if isinstance(value, pd.DataFrame):
                 if col not in value.columns:
                     _warn(
                         f'Error column "{col}" is not present. Available columns: {list(value.columns)}.'  # noqa: E501
