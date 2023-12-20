@@ -20,14 +20,6 @@ from taipy.core._orchestrator._dispatcher import _StandaloneJobDispatcher
 from taipy.core._orchestrator._dispatcher._task_function_wrapper import _TaskFunctionWrapper
 
 
-class FutureMock:
-    def __init__(self, job):
-        self.job = job
-
-    def result(self):
-        return "result"
-
-
 class MockProcessPoolExecutor(Executor):
     submit_called = []
     f = []
