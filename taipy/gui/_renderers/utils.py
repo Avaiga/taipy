@@ -30,11 +30,6 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
 def _get_columns_dict_from_list(
     col_list: t.Union[t.List[str], t.Tuple[str]], col_types_keys: t.List[str], value: t.Any
 ):
-    #Check if 'Value' is a Dataframe
-    if not isinstance(value,pd.Dataframe):
-        _warn("The 'value' argument is not a pandas DataFrame.")
-        return {}
-    
     col_dict = {}
     idx = 0
     for col in col_list:
@@ -42,9 +37,13 @@ def _get_columns_dict_from_list(
             col_dict[col] = {"index": idx}
             idx += 1
         elif col:
-            _warn(
-                f'Error column "{col}" is not present. Available columns: {list(value.columns)}.'  # noqa: E501
-            )
+            if isinstance(value,pd.DataFrame):
+                if col not in value.columns:
+                    _warn(
+                        f'Error column "{col}" is not present. Available columns: {list(value.columns)}.'  # noqa: E501
+                    )
+            else:
+                _warn("The 'value' argument is not a pandas DataFrame.")
     return col_dict
 
 
