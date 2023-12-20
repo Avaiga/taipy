@@ -59,16 +59,19 @@ class TestTaskConfigChecker:
         config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
 
         for conflict_id in [
+            "additional_data_nodes",
             "config_id",
+            "creation_date",
+            "cycle",
             "data_nodes",
-            "function",
-            "input",
-            "output",
+            "is_primary",
+            "name",
             "owner_id",
-            "parent_ids",
             "properties",
-            "scope",
-            "skippable",
+            "sequences",
+            "subscribers",
+            "tags",
+            "tasks",
             "version",
         ]:
             config._sections[TaskConfig.name]["new"].id = conflict_id
@@ -78,7 +81,8 @@ class TestTaskConfigChecker:
                 Config.check()
             assert len(Config._collector.errors) == 2
             expected_error_message = (
-                "The id of the TaskConfig `new` is overlapping with the attribute" f" `{conflict_id}` of a Task entity."
+                "The id of the TaskConfig `new` is overlapping with the attribute"
+                f" `{conflict_id}` of a Scenario entity."
             )
             assert expected_error_message in caplog.text
 
