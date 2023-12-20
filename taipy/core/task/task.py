@@ -111,17 +111,9 @@ class Task(_Entity, _Labeled):
     def config_id(self):
         return self._config_id
 
-    @config_id.setter
-    def config_id(self, val):
-        self._config_id = val
-
     @property
     def owner_id(self):
         return self._owner_id
-
-    @owner_id.setter
-    def owner_id(self, val):
-        self._owner_id = val
 
     def get_parents(self):
         """Get parents of the task."""

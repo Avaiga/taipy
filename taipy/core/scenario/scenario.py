@@ -159,10 +159,6 @@ class Scenario(_Entity, Submittable, _Labeled):
     def config_id(self):
         return self._config_id
 
-    @config_id.setter
-    def config_id(self, val):
-        self._config_id = val
-
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def sequences(self) -> Dict[str, Sequence]:
