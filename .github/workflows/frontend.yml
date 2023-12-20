@@ -1,0 +1,47 @@
+name: Frontend Tests & Coverage
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+    paths:
+        - 'frontend/taipy-gui/**'
+  workflow_dispatch:
+
+jobs:
+  frontend-jest:
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        node-version: [20.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        working-directory: ./frontend/taipy-gui
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: npm build and test with node ${{ matrix.node-version }} on ${{ matrix.os }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dom dependencies
+        working-directory: ./frontend/taipy-gui/dom
+        run: npm ci
+      - name: Install dependencies
+        run: npm ci --omit=optional
+      - run: npm run build --if-present
+      - run: npm test
+
+      - name: Code coverage
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
+        uses: artiomtr/jest-coverage-report-action@v2.2.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: "80"
+          working-directory: "frontend/taipy-gui"
+          skip-step: "install"

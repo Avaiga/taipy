@@ -171,7 +171,7 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
             e.value for e in (axis[j] if j < len(axis) else axis[0]) + (_Chart_iprops.label, _Chart_iprops.text)
         )
         columns.update([trace[i] or "" for i in dt_idx if trace[i]])
-    # add optionnal column if any
+    # add optional column if any
     markers = [
         t[_Chart_iprops.marker.value]
         or ({"color": t[_Chart_iprops.color.value]} if t[_Chart_iprops.color.value] else None)

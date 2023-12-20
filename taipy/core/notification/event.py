@@ -50,7 +50,12 @@ class EventEntityType(_ReprEnum):
 
 
 _NO_ATTRIBUTE_NAME_OPERATIONS = set([EventOperation.CREATION, EventOperation.DELETION, EventOperation.SUBMISSION])
-_UNSUBMITTABLE_ENTITY_TYPES = (EventEntityType.CYCLE, EventEntityType.DATA_NODE, EventEntityType.JOB)
+_UNSUBMITTABLE_ENTITY_TYPES = (
+    EventEntityType.CYCLE,
+    EventEntityType.DATA_NODE,
+    EventEntityType.JOB,
+    EventEntityType.SUBMISSION,
+)
 _ENTITY_TO_EVENT_ENTITY_TYPE = {
     "scenario": EventEntityType.SCENARIO,
     "sequence": EventEntityType.SEQUENCE,
@@ -127,7 +132,7 @@ def _make_event(
             </ul>
         attribute_name (Optional[str]): The name of the updated attribute for a `EventOperation.UPDATE`.
             This argument is always given in case of an UPDATE.
-        attribute_value (Optional[Any]): The value of the udated attribute for a `EventOperation.UPDATE`.
+        attribute_value (Optional[Any]): The value of the updated attribute for a `EventOperation.UPDATE`.
             This argument is always given in case of an UPDATE.
         **kwargs (dict[str, any]): Any extra information that would be passed to the metadata event.
             Note: you should pass only simple types: str, float, double as values."""

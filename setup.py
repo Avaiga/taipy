@@ -13,6 +13,7 @@
 
 
 import json
+import platform
 import subprocess
 from pathlib import Path
 
@@ -21,51 +22,32 @@ from setuptools.command.build_py import build_py
 
 root_folder = Path(__file__).parent
 
-readme = Path(root_folder / "README.md").read_text("UTF-8")
+readme = (root_folder / "README.md").read_text("UTF-8")
 
+# get current version
 with open(root_folder / "taipy" / "version.json") as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [
-    "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "cookiecutter>=2.1.1,<2.2",
-    "toml>=0.10,<0.11",
-    "deepdiff>=6.2,<6.3",
-    "pyarrow>=10.0.1,<11.0",
-    "networkx>=2.6,<3.0",
-    "openpyxl>=3.1.2,<3.2",
-    "modin[dask]>=0.23.0,<1.0",
-    "pymongo[srv]>=4.2.0,<5.0",
-    "sqlalchemy>=2.0.16,<2.1",
-    "flask>=3.0.0,<3.1",
-    "flask-cors>=4.0.0,<5.0",
-    "flask-socketio>=5.3.6,<6.0",
-    "markdown>=3.4.4,<4.0",
-    "pandas>=2.0.0,<3.0",
-    "python-dotenv>=1.0.0,<1.1",
-    "pytz>=2021.3,<2022.2",
-    "tzlocal>=3.0,<5.0",
-    "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "gevent>=23.7.0,<24.0",
-    "gevent-websocket>=0.10.1,<0.11",
-    "kthread>=0.2.3,<0.3",
-    "gitignore-parser>=0.1,<0.2",
-    "simple-websocket>=0.10.1,<1.0",
-    "twisted>=23.8.0,<24.0",
-    "flask-restful>=0.3.9,<0.4",
-    "passlib>=1.7.4,<1.8",
-    "marshmallow>=3.20.1,<3.30",
-    "apispec[yaml]>=6.3,<7.0",
-    "apispec-webframeworks>=0.5.2,<0.6",
-]
+# build MANIFEST.in from tools/packages/taipy*/MANIFEST.in
+with open(root_folder / "MANIFEST.in", "w") as man:
+    for pman in [
+        dir / "MANIFEST.in"
+        for dir in (root_folder / "tools" / "packages").iterdir()
+        if dir.is_dir() and dir.stem.startswith("taipy")
+    ]:
+        man.write(pman.read_text("UTF-8"))
 
 
 def get_requirements():
-    # TODO get requirements from the different setups in tools/packages (removing taipy packages)
-    return requirements
+    # get requirements from the different setups in tools/packages (removing taipy packages)
+    reqs = set()
+    for pkg in (root_folder / "tools" / "packages").iterdir():
+        reqs.update((pkg / "setup.requirements.txt").read_text("UTF-8").splitlines())
+
+    return [r for r in reqs if r and not r.startswith("taipy")]
 
 
 test_requirements = ["pytest>=3.8"]
@@ -84,7 +66,12 @@ extras_require = {
 
 class NPMInstall(build_py):
     def run(self):
-        subprocess.run(["python", "bundle_build.py"], cwd=root_folder / "tools" / "frontend", check=True, shell=True)
+        subprocess.run(
+            ["python", "bundle_build.py"],
+            cwd=root_folder / "tools" / "frontend",
+            check=True,
+            shell=platform.system() == "Windows",
+        )
         build_py.run(self)
 
 

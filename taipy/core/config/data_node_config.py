@@ -35,8 +35,8 @@ class DataNodeConfig(Section):
     Attributes:
         id (str): Unique identifier of the data node config. It must be a valid Python variable name.
         storage_type (str): Storage type of the data nodes created from the data node config. The possible values
-            are : "csv", "excel", "pickle", "sql_table", "sql", "mongo_collection", "generic", "json", "parquet" and
-            "in_memory".
+            are : "csv", "excel", "pickle", "sql_table", "sql", "mongo_collection", "generic", "json", "parquet",
+            "in_memory and "s3_object".
             The default value is "pickle".
             Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
         scope (Optional[Scope^]): The optional `Scope^` of the data nodes instantiated from the data node config.
@@ -57,6 +57,8 @@ class DataNodeConfig(Section):
     _STORAGE_TYPE_VALUE_GENERIC = "generic"
     _STORAGE_TYPE_VALUE_JSON = "json"
     _STORAGE_TYPE_VALUE_PARQUET = "parquet"
+    _STORAGE_TYPE_VALUE_S3_OBJECT = "s3_object"
+
     _DEFAULT_STORAGE_TYPE = _STORAGE_TYPE_VALUE_PICKLE
     _ALL_STORAGE_TYPES = [
         _STORAGE_TYPE_VALUE_PICKLE,
@@ -69,6 +71,7 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_GENERIC,
         _STORAGE_TYPE_VALUE_JSON,
         _STORAGE_TYPE_VALUE_PARQUET,
+        _STORAGE_TYPE_VALUE_S3_OBJECT,
     ]
 
     _EXPOSED_TYPE_KEY = "exposed_type"
@@ -145,6 +148,13 @@ class DataNodeConfig(Section):
     _OPTIONAL_COMPRESSION_PARQUET_PROPERTY = "compression"
     _OPTIONAL_READ_KWARGS_PARQUET_PROPERTY = "read_kwargs"
     _OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY = "write_kwargs"
+    # S3object
+    _REQUIRED_AWS_ACCESS_KEY_ID_PROPERTY = "aws_access_key"
+    _REQUIRED_AWS_SECRET_ACCESS_KEY_PROPERTY = "aws_secret_access_key"
+    _REQUIRED_AWS_STORAGE_BUCKET_NAME_PROPERTY = "aws_s3_bucket_name"
+    _REQUIRED_AWS_S3_OBJECT_KEY_PROPERTY = "aws_s3_object_key"
+    _OPTIONAL_AWS_REGION_PROPERTY = "aws_region"
+    _OPTIONAL_AWS_S3_OBJECT_PARAMETERS_PROPERTY = "aws_s3_object_parameters"
 
     _REQUIRED_PROPERTIES: Dict[str, List] = {
         _STORAGE_TYPE_VALUE_PICKLE: [],
@@ -169,6 +179,12 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_GENERIC: [],
         _STORAGE_TYPE_VALUE_JSON: [],
         _STORAGE_TYPE_VALUE_PARQUET: [],
+        _STORAGE_TYPE_VALUE_S3_OBJECT: [
+            _REQUIRED_AWS_ACCESS_KEY_ID_PROPERTY,
+            _REQUIRED_AWS_SECRET_ACCESS_KEY_PROPERTY,
+            _REQUIRED_AWS_STORAGE_BUCKET_NAME_PROPERTY,
+            _REQUIRED_AWS_S3_OBJECT_KEY_PROPERTY,
+        ],
     }
 
     _OPTIONAL_PROPERTIES = {
@@ -240,6 +256,10 @@ class DataNodeConfig(Section):
             _OPTIONAL_READ_KWARGS_PARQUET_PROPERTY: None,
             _OPTIONAL_WRITE_KWARGS_PARQUET_PROPERTY: None,
             _OPTIONAL_EXPOSED_TYPE_PARQUET_PROPERTY: _DEFAULT_EXPOSED_TYPE,
+        },
+        _STORAGE_TYPE_VALUE_S3_OBJECT: {
+            _OPTIONAL_AWS_REGION_PROPERTY: None,
+            _OPTIONAL_AWS_S3_OBJECT_PARAMETERS_PROPERTY: None,
         },
     }
 
@@ -380,8 +400,8 @@ class DataNodeConfig(Section):
         Parameters:
             storage_type (str): The default storage type for all data node configurations.
                 The possible values are *"pickle"* (the default value), *"csv"*, *"excel"*,
-                *"sql"*, *"mongo_collection"*, *"in_memory"*, *"json"*, *"parquet"* or
-                *"generic"*.
+                *"sql"*, *"mongo_collection"*, *"in_memory"*, *"json"*, *"parquet"*, *"generic"*,
+                or *"s3_object"*.
             scope (Optional[Scope^]): The default scope for all data node configurations.<br/>
                 The default value is `Scope.SCENARIO`.
             validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
@@ -465,6 +485,7 @@ class DataNodeConfig(Section):
             cls._STORAGE_TYPE_VALUE_GENERIC: cls._configure_generic,
             cls._STORAGE_TYPE_VALUE_JSON: cls._configure_json,
             cls._STORAGE_TYPE_VALUE_PARQUET: cls._configure_parquet,
+            cls._STORAGE_TYPE_VALUE_S3_OBJECT: cls._configure_s3_object,
         }
 
         if storage_type in cls._ALL_STORAGE_TYPES:
@@ -1029,6 +1050,59 @@ class DataNodeConfig(Section):
         return cls.__configure(
             id, DataNodeConfig._STORAGE_TYPE_VALUE_MONGO_COLLECTION, scope, validity_period, **properties
         )
+
+    @classmethod
+    def _configure_s3_object(
+        cls,
+        id: str,
+        aws_access_key: str,
+        aws_secret_access_key: str,
+        aws_s3_bucket_name: str,
+        aws_s3_object_key: str,
+        aws_region: Optional[str] = None,
+        aws_s3_object_parameters: Optional[Dict[str, Any]] = None,
+        scope: Optional[Scope] = None,
+        validity_period: Optional[timedelta] = None,
+        **properties,
+    ) -> "DataNodeConfig":
+        """Configure a new S3 object data node configuration.
+
+        Parameters:
+            id (str): The unique identifier of the new S3 Object data node configuration.
+            aws_access_key (str): Amazon Web Services ID for to identify account.
+            aws_secret_access_key (str): Amazon Web Services access key to authenticate programmatic requests.
+            aws_s3_bucket_name (str): The bucket in S3 to read from and to write the data to.
+            aws_region (Optional[str]): Self-contained geographic area where Amazon Web Services (AWS)
+                infrastructure is located.
+            aws_s3_object_parameters (Optional[dict[str, any]]): A dictionary of additional arguments to be passed
+                into AWS S3 bucket access string.
+            scope (Optional[Scope^]): The scope of the S3 Object data node configuration.<br/>
+                The default value is `Scope.SCENARIO`.
+            validity_period (Optional[timedelta]): The duration since the last edit date for which the data node can be
+                considered up-to-date. Once the validity period has passed, the data node is considered stale and
+                relevant tasks will run even if they are skippable (see the
+                [Task configs page](../core/config/task-config.md) for more details).
+                If *validity_period* is set to None, the data node is always up-to-date.
+            **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
+        Returns:
+            The new S3 object data node configuration.
+        """
+        properties.update(
+            {
+                cls._REQUIRED_AWS_ACCESS_KEY_ID_PROPERTY: aws_access_key,
+                cls._REQUIRED_AWS_SECRET_ACCESS_KEY_PROPERTY: aws_secret_access_key,
+                cls._REQUIRED_AWS_STORAGE_BUCKET_NAME_PROPERTY: aws_s3_bucket_name,
+                cls._REQUIRED_AWS_S3_OBJECT_KEY_PROPERTY: aws_s3_object_key,
+            }
+        )
+
+        if aws_region is not None:
+            properties[cls._OPTIONAL_AWS_REGION_PROPERTY] = aws_region
+        if aws_s3_object_parameters is not None:
+            properties[cls._OPTIONAL_AWS_S3_OBJECT_PARAMETERS_PROPERTY] = aws_s3_object_parameters
+
+        return cls.__configure(id, DataNodeConfig._STORAGE_TYPE_VALUE_S3_OBJECT, scope, validity_period, **properties)
 
     @staticmethod
     def __configure(

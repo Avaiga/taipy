@@ -33,7 +33,7 @@ import Tooltip from "@mui/material/Tooltip";
 
 import { Chart, ColumnDesc, TraceValueType } from "taipy-gui";
 
-import { ChartViewType, MenuProps, TableViewType, selectSx, tabularHeaderSx } from "./utils";
+import { ChartViewType, MenuProps, TableViewType, tabularHeaderSx } from "./utils";
 
 interface DataNodeChartProps {
     active: boolean;
@@ -126,7 +126,7 @@ const ColSelect = (props: ColSelectProps) => {
     useEffect(() => setCol(getTraceCol(traceConf, trace, axis)), [traceConf, trace, axis]);
 
     return (
-        <FormControl sx={selectSx}>
+        <FormControl>
             <InputLabel id={labelId}>{label}</InputLabel>
             <Select
                 labelId={labelId}
@@ -174,7 +174,7 @@ const TypeSelect = (props: TypeSelectProps) => {
     useEffect(() => setType(value), [value]);
 
     return (
-        <FormControl sx={selectSx}>
+        <FormControl>
             <InputLabel id={labelId}>{label}</InputLabel>
             <Select
                 labelId={labelId}
@@ -285,8 +285,8 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 cfg
                     ? storeConf(configId, {
                           ...cfg,
-                          traces: (cfg.traces || []).map((axises, idx) =>
-                              idx == trace ? (axises.map((a, j) => (j == axis ? col : a)) as [string, string]) : axises
+                          traces: (cfg.traces || []).map((axes, idx) =>
+                              idx == trace ? (axes.map((a, j) => (j == axis ? col : a)) as [string, string]) : axes
                           ),
                       })
                     : cfg
