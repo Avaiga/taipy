@@ -88,6 +88,7 @@ def inject_core_sections():
                 ("configure_pickle_data_node", DataNodeConfig._configure_pickle),
                 ("configure_excel_data_node", DataNodeConfig._configure_excel),
                 ("configure_generic_data_node", DataNodeConfig._configure_generic),
+                ("configure_s3_object_data_node", DataNodeConfig._configure_s3_object),
             ],
         )
         _inject_section(

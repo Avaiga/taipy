@@ -22,7 +22,7 @@ if t.TYPE_CHECKING:
 
 
 class Partial(_Page):
-    """Re-usable Page content.
+    """Reusable Page content.
 
     Partials are used when you need to use a partial page content in different
     and not related pages. This allows not to have to repeat yourself when

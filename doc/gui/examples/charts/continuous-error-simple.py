@@ -25,7 +25,7 @@ samples = [5, 7, 8, 4, 5, 9, 8, 8, 6, 5]
 # Generate error data
 # Error that adds to the input data
 error_plus = [3 * random.random() + 0.5 for _ in x]
-# Error substracted from to the input data
+# Error subtracted from to the input data
 error_minus = [3 * random.random() + 0.5 for _ in x]
 
 # Upper bound (y + error_plus)
