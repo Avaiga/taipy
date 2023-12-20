@@ -33,7 +33,7 @@ def generate_hand_shapes():
 
     # Compute the angle that represents the minutes
     minutes_angle = 360 * ((minutes % 60) / 60 + (seconds % 60) / 60 / 60)
-    # Longer and slighly thinner hand for the minutes
+    # Longer and slightly thinner hand for the minutes
     minutes_hand = {"r": [0, 6, 8, 6, 0], "a": [0, minutes_angle - 4, minutes_angle, minutes_angle + 4, 0]}
 
     # Compute the angle that represents the seconds

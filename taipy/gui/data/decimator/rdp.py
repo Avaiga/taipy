@@ -26,7 +26,7 @@ class RDP(Decimator):
     This class can only be used with line charts.
     """
 
-    _CHART_MODES = ["lines+markers"]
+    _CHART_MODES = ["lines+markers", "lines", "markers"]
 
     def __init__(
         self,

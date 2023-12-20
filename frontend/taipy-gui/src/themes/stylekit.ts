@@ -168,7 +168,7 @@ export const stylekitModeThemes = {
       },
     },
     components: {
-      // Give popover paper a slighly lighter color to reflect superior elevation
+      // Give popover paper a slightly lighter color to reflect superior elevation
       MuiPopover: {
         styleOverrides: {
           paper: {
@@ -200,7 +200,7 @@ export const stylekitModeThemes = {
       },
     },
     components: {
-      // Give popover paper a slighly lighter color to reflect superior elevation
+      // Give popover paper a slightly lighter color to reflect superior elevation
       MuiPopover: {
         styleOverrides: {
           paper: {

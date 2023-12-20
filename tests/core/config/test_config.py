@@ -105,3 +105,19 @@ class TestConfig:
         )
         Config.configure_mongo_collection_data_node(a, b, c, d, e, f, g, h, extra_args, scope, vp, property=k)
         assert len(Config.data_nodes) == 2
+
+    def test_configure_s3_object_data_node(self):
+        a, b, c, d, e, f, extra_args, scope, vp, k = (
+            "foo",
+            "access_key",
+            "secret_acces_key",
+            "s3_bucket_name",
+            "s3_object_key",
+            None,
+            {"foo": "bar"},
+            Scope.SCENARIO,
+            timedelta(1),
+            "qux",
+        )
+        Config.configure_s3_object_data_node(a, b, c, d, e, f, extra_args, scope, vp, property=k)
+        assert len(Config.data_nodes) == 2

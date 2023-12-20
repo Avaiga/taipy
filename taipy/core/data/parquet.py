@@ -69,7 +69,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
             - *"read_kwargs"* (`Optional[dict]`): Additional parameters passed to the
                 *pandas.read_parquet()* function.
             - *"write_kwargs"* (`Optional[dict]`): Additional parameters passed to the
-                *pandas.DataFrame.write_parquet()* fucntion.
+                *pandas.DataFrame.write_parquet()* function.
                 The parameters in *"read_kwargs"* and *"write_kwargs"* have a
                 **higher precedence** than the top-level parameters which are also passed to
                 Pandas.

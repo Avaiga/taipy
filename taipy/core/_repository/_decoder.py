@@ -35,7 +35,7 @@ class _Decoder(json.JSONDecoder):
         if not parts:
             raise TypeError("Can not deserialize string into timedelta")
         time_params = {name: float(param) for name, param in parts.groupdict().items() if param}
-        # mypy has an issue with dynamic keyword parameters, hence the type ignore on the line bellow.
+        # mypy has an issue with dynamic keyword parameters, hence the type ignore on the line below.
         return timedelta(**time_params)  # type: ignore
 
     def object_hook(self, source):

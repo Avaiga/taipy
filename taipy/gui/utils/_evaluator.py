@@ -299,7 +299,7 @@ class _Evaluator:
         # A middle check to see if var_name is from _MapDict
         if "." in var_name:
             var_name = var_name[: var_name.index(".")]
-        # otherwise, thar var_name is correct and doesn't require any resolution
+        # otherwise, that var_name is correct and doesn't require any resolution
         if var_name not in self.__var_to_expr_list:
             # _warn("{var_name} not found.")
             return modified_vars
