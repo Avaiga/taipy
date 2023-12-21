@@ -53,7 +53,7 @@ def test_submit_scenario_development_mode():
     scenario.dn_0.write(0)  # input data is made ready
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    submit_time = datetime.now()
+    submit_time = datetime.now() + 1  # +1 to make sure the edit time of dn_0 is before the submit time
     with freezegun.freeze_time(submit_time):
         jobs = orchestrator.submit(scenario)  # scenario is executed directly in development mode
 
