@@ -288,33 +288,24 @@ def test_submit_scenario_with_callbacks_and_force_and_wait():
     scenario = create_scenario()
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    # Mock the wait function
-    mock_is_called = []
+    with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._wait_until_job_finished") as mck:
+        jobs = orchestrator.submit(scenario, callbacks=[nothing], force=True, wait=True, timeout=5)
 
-    def mock(job, timeout):
-        mock_is_called.append((job, timeout))
-
-    orchestrator._wait_until_job_finished = mock
-
-    jobs = orchestrator.submit(scenario, callbacks=[nothing], force=True, wait=True, timeout=5)
-
-    # jobs are created in a specific order and are correct
-    assert len(jobs) == 4
-    assert len(jobs[0]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
-    assert jobs[0]._subscribers[0].__code__ == nothing.__code__
-    assert jobs[0]._subscribers[1].__code__ == Submission._update_submission_status.__code__
-    assert jobs[0]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
-    assert len(jobs[1]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
-    assert jobs[1]._subscribers[0].__code__ == nothing.__code__
-    assert jobs[1]._subscribers[1].__code__ == Submission._update_submission_status.__code__
-    assert jobs[1]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
-    assert len(jobs[2]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
-    assert jobs[2]._subscribers[0].__code__ == nothing.__code__
-    assert jobs[2]._subscribers[1].__code__ == Submission._update_submission_status.__code__
-    assert jobs[2]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
-    assert len(mock_is_called) == 1
-    assert mock_is_called[0][0] == jobs
-    assert mock_is_called[0][1] == 5
+        # jobs are created in a specific order and are correct
+        assert len(jobs) == 4
+        assert len(jobs[0]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
+        assert jobs[0]._subscribers[0].__code__ == nothing.__code__
+        assert jobs[0]._subscribers[1].__code__ == Submission._update_submission_status.__code__
+        assert jobs[0]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
+        assert len(jobs[1]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
+        assert jobs[1]._subscribers[0].__code__ == nothing.__code__
+        assert jobs[1]._subscribers[1].__code__ == Submission._update_submission_status.__code__
+        assert jobs[1]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
+        assert len(jobs[2]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
+        assert jobs[2]._subscribers[0].__code__ == nothing.__code__
+        assert jobs[2]._subscribers[1].__code__ == Submission._update_submission_status.__code__
+        assert jobs[2]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
+        mck.assert_called_once_with(jobs, timeout=5)
 
 
 def test_submit_sequence_development_mode():
@@ -459,7 +450,6 @@ def test_submit_sequence_with_callbacks_and_force_and_wait():
 
     with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._wait_until_job_finished") as mck:
         jobs = orchestrator.submit(scenario, callbacks=[nothing], force=True, wait=True, timeout=5)
-
         mck.assert_called_once_with(jobs, timeout=5)
 
     # jobs are created in a specific order and are correct

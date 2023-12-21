@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from datetime import datetime
+from unittest import mock
+
 import freezegun
 
 from taipy.config import Config
@@ -189,20 +191,11 @@ def test_submit_task_with_callbacks_and_force_and_wait():
     scenario = create_scenario()
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    # Mock the wait function
-    mock_is_called = []
+    with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._wait_until_job_finished") as mck:
+        job = orchestrator.submit_task(scenario.t1, callbacks=[nothing], force=True, wait=True, timeout=2)
 
-    def mock(job, timeout):
-        mock_is_called.append((job, timeout))
-
-    orchestrator._wait_until_job_finished = mock
-
-    job = orchestrator.submit_task(scenario.t1, callbacks=[nothing], force=True, wait=True, timeout=2)
-
-    # job exists and is correct
-    assert job.task == scenario.t1
-    assert job.force
-    assert len(job._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
-    assert len(mock_is_called) == 1
-    assert mock_is_called[0][0] == job
-    assert mock_is_called[0][1] == 2
+        # job exists and is correct
+        assert job.task == scenario.t1
+        assert job.force
+        assert len(job._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
+        mck.assert_called_once_with(job, timeout=2)
