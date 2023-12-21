@@ -20,10 +20,10 @@ const getGuiEnv = (log = true) => {
         log && console.info("taipy-gui pip package is not installed.");
         const base = existsSync("package.json") ? `..${sep}..` : existsSync("frontend") ? "." : sep;
         if (existsSync(resolve(base, "taipy", "gui", "webapp", "package.json"))) {
-            log && console.info(`Looking for taipy-gui npm package in ${resolve(base, "taipy", "gui", "webapp")}`);
+            log && console.info(`Found npm package for taipy-gui in ${resolve(base, "taipy", "gui", "webapp")}`);
             return base;
         } else {
-            log && console.warn(`taipy-gui npm package should be build locally in ${resolve(base, "taipy", "gui", "webapp")} first.`);
+            log && console.warn(`taipy-gui npm package should be built locally in ${resolve(base, "taipy", "gui", "webapp")} first.`);
         }
     }
     return sep;
