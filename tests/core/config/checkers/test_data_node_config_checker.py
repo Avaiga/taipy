@@ -45,6 +45,48 @@ class TestDataNodeConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
 
+    def test_check_config_id_is_different_from_task_and_scenario_attributes(self, caplog):
+        Config._collector = IssueCollector()
+        config = Config._applied_config
+        Config._compile_configs()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["new"] = copy(config._sections[DataNodeConfig.name]["default"])
+
+        for conflict_id in [
+            "function",
+            "input",
+            "output",
+            "parent_ids",
+            "scope",
+            "skippable",
+            "additional_data_nodes",
+            "config_id",
+            "creation_date",
+            "cycle",
+            "data_nodes",
+            "is_primary",
+            "name",
+            "owner_id",
+            "properties",
+            "sequences",
+            "subscribers",
+            "tags",
+            "tasks",
+            "version",
+        ]:
+            config._sections[DataNodeConfig.name]["new"].id = conflict_id
+
+            with pytest.raises(SystemExit):
+                Config._collector = IssueCollector()
+                Config.check()
+            assert len(Config._collector.errors) == 1
+            expected_error_message = (
+                f"The id of the DataNodeConfig `new` is overlapping with the attribute `{conflict_id}` of a"
+            )
+            assert expected_error_message in caplog.text
+
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()
         config = Config._applied_config
