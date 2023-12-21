@@ -369,6 +369,11 @@ def invoke_long_callback(
     """
     if not state or not isinstance(state._gui, Gui):
         _warn("'invoke_long_callback()' must be called in the context of a callback.")
+
+    if user_status_function_args is None:
+        user_status_function_args = []
+    if user_function_args is None:
+        user_function_args = []
         return
 
     if user_status_function_args is None:

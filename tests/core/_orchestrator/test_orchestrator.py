@@ -29,7 +29,6 @@ from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.core.task.task import Task
 from tests.core.utils import assert_true_after_time
 
-
 # ################################  USER FUNCTIONS  ##################################
 
 
