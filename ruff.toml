@@ -29,13 +29,7 @@ select = [
 ]
 ignore = [
     "E203",  # whitespace before ':'
-    # "E266",  # too many leading '#' for block comment
-    # "E501",  # line too long (82 > 79 characters)
     "E722",  # do not use bare except
-    # "W503",  # line break before binary operator
-    # "F403",  # 'from module import *' used; unable to detect undefined names
-    # "F401", # module imported but unused
-    # "missing-imports",  # mypy: Missing module imports
     "C401",  # Unnecessary generator (rewrite as a `set` comprehension)
     "C405",  # Unnecessary list literal - rewrite as a literal
     "C408",  # Unnecessary dict call - rewrite as a literal
@@ -56,7 +50,6 @@ unfixable = []
 "tools/*" = ["T201"]  # `print` found
 
 [lint.mccabe]
-# Flag errors (`C901`) whenever the complexity level exceeds 5.
 max-complexity = 18
 
 [pydocstyle]
