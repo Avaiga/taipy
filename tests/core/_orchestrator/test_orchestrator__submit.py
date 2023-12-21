@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import mock
 
 import freezegun
@@ -53,7 +53,7 @@ def test_submit_scenario_development_mode():
     scenario.dn_0.write(0)  # input data is made ready
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    submit_time = datetime.now() + 1  # +1 to make sure the edit time of dn_0 is before the submit time
+    submit_time = datetime.now() + timedelta(seconds=1)  # +1 to ensure the edit time of dn_0 is before the submit time
     with freezegun.freeze_time(submit_time):
         jobs = orchestrator.submit(scenario)  # scenario is executed directly in development mode
 
@@ -131,7 +131,7 @@ def test_submit_scenario_development_mode_blocked_jobs():
     scenario = create_scenario()  # input data is not ready
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    s_time = datetime.now()
+    s_time = datetime.now() + timedelta(seconds=1)  # +1 to ensure the scenario creation is before the submit time
     with freezegun.freeze_time(s_time):
         jobs = orchestrator.submit(scenario)  # first task is blocked because input is not ready
 
@@ -210,7 +210,7 @@ def test_submit_scenario_standalone_mode():
     sc = create_scenario()
     orchestrator = _OrchestratorFactory._build_orchestrator()
     sc.dn_0.write(0)  # input data is made ready
-    submit_time = datetime.now()
+    submit_time = datetime.now() + timedelta(seconds=1)  # +1 to ensure the edit time of dn_0 is before the submit time
     with freezegun.freeze_time(submit_time):
         jobs = orchestrator.submit(sc)  # No dispatcher running. sc is not executed.
 
@@ -325,7 +325,7 @@ def test_submit_sequence_development_mode():
 
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    submit_time = datetime.now()
+    submit_time = datetime.now() + timedelta(seconds=1)  # +1 to ensure the edit time of dn_0 is before the submit time
     with freezegun.freeze_time(submit_time):
         jobs = orchestrator.submit(seq)  # sequence is executed directly in development mode
 
@@ -396,7 +396,7 @@ def test_submit_sequence_standalone_mode():
 
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
-    submit_time = datetime.now()
+    submit_time = datetime.now() + timedelta(seconds=1)  # +1 to ensure the edit time of dn_0 is before the submit time
     with freezegun.freeze_time(submit_time):
         jobs = orchestrator.submit(sequence)  # sequence is executed directly in development mode
 
