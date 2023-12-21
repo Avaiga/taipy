@@ -17,6 +17,7 @@ from time import sleep
 from unittest import mock
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher

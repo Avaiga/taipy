@@ -9,11 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from unittest.mock import Mock, patch
-
-import pytest
-
 import typing as t
+from unittest.mock import Mock, patch
 
 from taipy.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task

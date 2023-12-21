@@ -26,7 +26,7 @@ def test_table_builder_1(gui: Gui, helpers, csvdata):
         )
     expected_list = [
         "<Table",
-        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',  # noqa: E501
         'height="80vh"',
         'width="100%"',
         'pageSizeOptions="[10, 30, 100]"',
@@ -51,7 +51,7 @@ def test_table_reset_builder(gui: Gui, helpers, csvdata):
         )
     expected_list = [
         "<Table",
-        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;&#x7D;}"',  # noqa: E501
         'height="80vh"',
         'width="100%"',
         'pageSizeOptions="[10, 30, 100]"',
@@ -88,7 +88,7 @@ def test_table_builder_2(gui: Gui, helpers, csvdata):
         "allowAllRows={true}",
         "autoLoading={true}",
         "editable={false}",
-        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Entity&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;&#x7D;, &quot;Code&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;&#x7D;, &quot;Daily hospital occupancy&quot;: &#x7B;&quot;index&quot;: 3, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;&#x7D;, &quot;Day_str&quot;: &#x7B;&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime&quot;, &quot;dfid&quot;: &quot;Day&quot;&#x7D;}"',  # noqa: E501
         'height="60vh"',
         'width="60vw"',
         'pageSizeOptions="[10, 50, 100, 500]"',

@@ -131,4 +131,4 @@ class _VersionFSRepository(_FileSystemRepository, _VersionRepositoryInterface):
                 )
             )
         except FileNotFoundError:
-            raise VersionIsNotProductionVersion(f"Version '{version_number}' is not a production version.")
+            raise VersionIsNotProductionVersion(f"Version '{version_number}' is not a production version.") from None

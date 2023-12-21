@@ -149,7 +149,7 @@ class TestCSVDataNode:
         assert isinstance(data_custom, list)
         assert len(data_custom) == 10
 
-        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+        for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
             assert isinstance(row_custom, MyCustomObject)
             assert row_pandas["id"] == row_custom.id
             assert str(row_pandas["integer"]) == row_custom.integer
@@ -195,7 +195,7 @@ class TestCSVDataNode:
         assert isinstance(data_custom, list)
         assert len(data_custom) == 11
 
-        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+        for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
             assert isinstance(row_custom, MyCustomObject)
             assert row_pandas[0] == row_custom.id
             assert str(row_pandas[1]) == row_custom.integer

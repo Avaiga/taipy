@@ -64,7 +64,7 @@ def test_create_task():
     assert task.foo == foo_dn
     assert task.foo.path == path
     with pytest.raises(AttributeError):
-        task.bar
+        _ = task.bar
 
     task = Task("name_1", {}, print, [foo_dn], [], parent_ids={"parent_id"})
     assert task.parent_ids == {"parent_id"}
@@ -80,7 +80,7 @@ def test_create_task():
     assert task.name_1ea == abc_dn
     assert task.name_1ea.path == path
     with pytest.raises(AttributeError):
-        task.bar
+        _ = task.bar
     with mock.patch("taipy.core.get") as get_mck:
 
         class MockOwner:
@@ -97,7 +97,7 @@ def test_create_task():
 def test_can_not_change_task_output(output):
     task = Task("name_1", {}, print, output=output)
 
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         task.output = {}
 
     assert list(task.output.values()) == output
@@ -108,7 +108,7 @@ def test_can_not_change_task_output(output):
 def test_can_not_change_task_input(input):
     task = Task("name_1", {}, print, input=input)
 
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         task.input = {}
 
     assert list(task.input.values()) == input
@@ -120,7 +120,7 @@ def test_can_not_change_task_config_output(output_config):
     task_config = Config.configure_task("name_1", print, [], output=output_config)
 
     assert task_config.output_configs == output_config
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         task_config.output_configs = []
 
     output_config.append(output_config[0])

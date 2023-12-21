@@ -11,7 +11,7 @@
 
 from collections import UserDict
 
-from ..notification import _ENTITY_TO_EVENT_ENTITY_TYPE, EventOperation, Notifier, _make_event
+from ..notification import EventOperation, Notifier, _make_event
 
 
 class _Properties(UserDict):

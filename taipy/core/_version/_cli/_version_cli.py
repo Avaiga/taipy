@@ -71,7 +71,7 @@ class _VersionCLI:
             return
 
         if args.list:
-            print(cls.__list_versions())
+            print(cls.__list_versions())  # noqa: T201
             sys.exit(0)
 
         if args.rename:
@@ -99,7 +99,7 @@ class _VersionCLI:
                 )
                 sys.exit(0)
             except VersionIsNotProductionVersion as e:
-                raise SystemExit(e)
+                raise SystemExit(e) from None
 
         if args.delete:
             if clean_all_entities_by_version(args.delete):

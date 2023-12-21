@@ -91,7 +91,7 @@ class DataNode(_Entity, _Labeled):
     def __init__(
         self,
         config_id,
-        scope: Scope = Scope(Scope.SCENARIO),
+        scope: Scope = Scope(Scope.SCENARIO),  # noqa: B008
         id: Optional[DataNodeId] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,

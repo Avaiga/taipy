@@ -208,10 +208,10 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
             used_cols = {tr[ax.value] for ax in axis[i] if tr[ax.value]}
             unused_cols = [c for c in icols[i] if c not in used_cols]
             if unused_cols and not any(tr[ax.value] for ax in axis[i]):
-                traces[i] = list(
+                traces[i] = [
                     v or (unused_cols.pop(0) if unused_cols and _Chart_iprops(j) in axis[i] else v)
                     for j, v in enumerate(tr)
-                )
+                ]
 
     if col_dict is not None:
         reverse_cols = {str(cd.get("dfid")): c for c, cd in col_dict.items()}

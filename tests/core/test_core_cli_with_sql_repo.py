@@ -514,7 +514,7 @@ def test_modify_job_configuration_dont_stop_application(caplog, init_sql_repo, i
         core.run(force_restart=True)
         scenario = _ScenarioManager._create(scenario_config)
         jobs = _ScenarioManager._submit(scenario)
-        assert all([job.is_finished() for job in jobs])
+        assert all(job.is_finished() for job in jobs)
         core.stop()
 
     init_config()

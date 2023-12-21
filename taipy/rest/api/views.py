@@ -11,6 +11,7 @@
 
 from flask import Blueprint, current_app
 from flask_restful import Api
+
 from taipy.core.common._utils import _load_fct
 from taipy.logger._taipy_logger import _TaipyLogger
 

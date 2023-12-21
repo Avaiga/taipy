@@ -11,7 +11,6 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
 from taipy.config.common.scope import Scope
 from taipy.core import Job, Scenario, Task
 from taipy.core.data.pickle import PickleDataNode

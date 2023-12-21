@@ -12,6 +12,7 @@
 import os
 
 import pytest
+
 from taipy.core.exceptions import ModelNotFound
 from taipy.core.scenario._scenario_fs_repository import _ScenarioFSRepository
 from taipy.core.scenario._scenario_sql_repository import _ScenarioSQLRepository

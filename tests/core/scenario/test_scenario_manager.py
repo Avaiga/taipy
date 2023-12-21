@@ -14,6 +14,7 @@ from typing import Callable, Iterable, Optional
 from unittest.mock import ANY, patch
 
 import pytest
+
 from taipy.config.common.frequency import Frequency
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
@@ -44,8 +45,6 @@ from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactor
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario.scenario_id import ScenarioId
 from taipy.core.sequence._sequence_manager import _SequenceManager
-from taipy.core.sequence.sequence import Sequence
-from taipy.core.sequence.sequence_id import SequenceId
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
@@ -426,9 +425,9 @@ def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
     scenario_1 = _ScenarioManager._create(scenario_config_1)
     sequence_1_s1 = scenario_1.sequences["sequence_1"]
 
-    assert all([sequence.parent_ids == {scenario_1.id} for sequence in scenario_1.sequences.values()])
+    assert all(sequence.parent_ids == {scenario_1.id} for sequence in scenario_1.sequences.values())
     tasks = scenario_1.tasks.values()
-    assert all([task.parent_ids == {scenario_1.id, sequence_1_s1.id} for task in tasks])
+    assert all(task.parent_ids == {scenario_1.id, sequence_1_s1.id} for task in tasks)
     data_nodes = {}
     for task in tasks:
         data_nodes.update(task.data_nodes)
@@ -443,7 +442,7 @@ def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
     sequence_1_s2 = scenario_2.sequences["sequence_1"]
     sequence_2_s2 = scenario_2.sequences["sequence_2"]
 
-    assert all([sequence.parent_ids == {scenario_2.id} for sequence in scenario_2.sequences.values()])
+    assert all(sequence.parent_ids == {scenario_2.id} for sequence in scenario_2.sequences.values())
     assert scenario_1.tasks["task_1"] == scenario_2.tasks["task_1"]
     assert scenario_1.tasks["task_1"].parent_ids == {
         scenario_1.id,
@@ -487,7 +486,7 @@ def test_assign_scenario_as_parent_of_task_and_additional_data_nodes():
     sequence_1_s1 = scenario_1.sequences["sequence_1"]
     assert scenario_1.sequences["sequence_1"].parent_ids == {scenario_1.id}
     tasks = scenario_1.tasks.values()
-    assert all([task.parent_ids == {scenario_1.id, sequence_1_s1.id} for task in tasks])
+    assert all(task.parent_ids == {scenario_1.id, sequence_1_s1.id} for task in tasks)
     data_nodes = {}
     for task in tasks:
         data_nodes.update(task.data_nodes)
@@ -578,7 +577,7 @@ def test_scenario_manager_only_creates_data_node_once():
     scenario_1_sorted_tasks = scenario_1._get_sorted_tasks()
     expected = [{task_mult_by_2_config.id, task_mult_by_4_config.id}, {task_mult_by_3_config.id}]
     for i, list_tasks_by_level in enumerate(scenario_1_sorted_tasks):
-        assert set([t.config_id for t in list_tasks_by_level]) == expected[i]
+        assert set(t.config_id for t in list_tasks_by_level) == expected[i]
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
     _ScenarioManager._create(scenario_config)
@@ -1126,8 +1125,8 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
         for input_dn in scenario.data_nodes.values()
         if input_dn not in scenario.get_inputs()
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)
 
 
 def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
@@ -1155,8 +1154,8 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
         for input_dn in scenario.data_nodes.values()
         if input_dn.config_id != "wrong_csv_file_path"
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)
 
 
 def subtraction(n1, n2):

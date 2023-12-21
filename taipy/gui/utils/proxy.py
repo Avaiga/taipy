@@ -46,7 +46,7 @@ def _modifiedHandleResponseEnd(self):
     self.transport.loseConnection()
 
 
-setattr(ProxyClient, "handleResponseEnd", _modifiedHandleResponseEnd)
+setattr(ProxyClient, "handleResponseEnd", _modifiedHandleResponseEnd)  # noqa: B010
 
 
 class _TaipyReverseProxyResource(Resource):

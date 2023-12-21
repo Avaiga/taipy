@@ -13,10 +13,12 @@ import filecmp
 import os
 import shutil
 import sys
+from sqlite3 import OperationalError
 from unittest.mock import patch
 
 import mongomock
 import pytest
+
 from taipy.core._entity._migrate_cli import _MigrateCLI
 
 
@@ -170,7 +172,7 @@ def test_migrate_sql_backup_and_remove(caplog, tmp_sqlite):
     assert not os.path.exists(backup_sqlite)
 
     # Run without --skip-backup to create the backup database
-    with pytest.raises(Exception):
+    with pytest.raises((SystemExit, OperationalError)):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite]):
             _MigrateCLI.parse_arguments()
 
@@ -204,7 +206,7 @@ def test_migrate_sql_backup_and_restore(caplog, tmp_sqlite):
     assert not os.path.exists(backup_sqlite)
 
     # Run without --skip-backup to create the backup database
-    with pytest.raises(Exception):
+    with pytest.raises((SystemExit, OperationalError)):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "sql", tmp_sqlite]):
             _MigrateCLI.parse_arguments()
 
@@ -269,7 +271,7 @@ def test_migrate_mongo_backup_and_remove(caplog):
     assert not os.path.exists(mongo_backup_path)
 
     # Run without --skip-backup to create the backup database
-    with pytest.raises(Exception):
+    with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo"]):
             _MigrateCLI.parse_arguments()
 
@@ -298,7 +300,7 @@ def test_migrate_mongo_backup_and_restore(caplog):
     assert not os.path.exists(mongo_backup_path)
 
     # Run without --skip-backup to create the backup database
-    with pytest.raises(Exception):
+    with pytest.raises(SystemExit):
         with patch("sys.argv", ["prog", "migrate", "--repository-type", "mongo"]):
             _MigrateCLI.parse_arguments()
 

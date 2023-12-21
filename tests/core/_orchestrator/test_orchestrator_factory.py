@@ -12,6 +12,7 @@
 from unittest import mock
 
 import pytest
+
 from taipy.config import Config
 from taipy.core._orchestrator._dispatcher import _DevelopmentJobDispatcher, _JobDispatcher, _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator import _Orchestrator

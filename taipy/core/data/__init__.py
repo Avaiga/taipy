@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from .aws_s3 import S3ObjectDataNode
 from .csv import CSVDataNode
 from .data_node import DataNode
 from .excel import ExcelDataNode
@@ -21,4 +22,3 @@ from .parquet import ParquetDataNode
 from .pickle import PickleDataNode
 from .sql import SQLDataNode
 from .sql_table import SQLTableDataNode
-from .aws_s3 import S3ObjectDataNode

@@ -16,6 +16,7 @@
 from itertools import accumulate
 
 import numpy as np
+
 from taipy.gui import Gui
 
 grid_size = 10

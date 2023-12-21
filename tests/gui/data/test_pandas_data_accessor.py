@@ -203,7 +203,7 @@ def test_filter_by_date(gui: Gui, helpers, small_dataframe):
 
 
 def test_decimator(gui: Gui, helpers, small_dataframe):
-    a_decimator = ScatterDecimator()
+    a_decimator = ScatterDecimator()  # noqa: F841
 
     accessor = _PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)

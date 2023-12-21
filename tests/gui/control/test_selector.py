@@ -18,7 +18,7 @@ def test_selector_md_1(gui: Gui, test_client, helpers):
     md_string = "<|{selected_val}|selector|properties=selector_properties|multiple|>"
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',
+        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
@@ -48,10 +48,10 @@ def test_selector_md_3(gui: Gui, test_client, helpers):
         [{"id": "1", "name": "scenario 1"}, {"id": "3", "name": "scenario 3"}, {"id": "2", "name": "scenario 2"}],
     )
     gui._bind_var_val("selected_obj", {"id": "1", "name": "scenario 1"})
-    md_string = '<|{selected_obj}|selector|lov={scenario_list}|type=Scenario|adapter={lambda elt: (elt["id"], elt["name"])}|not propagate|>'
+    md_string = '<|{selected_obj}|selector|lov={scenario_list}|type=Scenario|adapter={lambda elt: (elt["id"], elt["name"])}|not propagate|>'  # noqa: E501
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
+        'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;1&quot;]"',
         "lov={_TpL_tpec_TpExPr_scenario_list_TPMDL_0}",
         "propagate={false}",
@@ -68,7 +68,7 @@ def test_selector_html_1_1(gui: Gui, test_client, helpers):
     html_string = '<taipy:selector value="{selected_val}" properties="selector_properties" multiple="True"/>'
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',
+        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
@@ -84,7 +84,7 @@ def test_selector_html_1_2(gui: Gui, test_client, helpers):
     html_string = '<taipy:selector properties="selector_properties" multiple="True">{selected_val}</taipy:selector>'
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',
+        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",

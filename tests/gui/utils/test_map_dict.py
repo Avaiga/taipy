@@ -62,13 +62,6 @@ def test_map_dict():
     v1 = md_copy.setdefault("d", 5)
     assert v1 == 5
 
-    try:
-        md = _MapDict("not_a_dict")
-        assert False
-    except Exception:
-        assert True
-    pass
-
 
 def test_map_dict_update():
     update_values = {}
@@ -145,5 +138,5 @@ def test_map_dict_items():
     del md["a"]
     with pytest.raises(KeyError):
         md["e"]
-    setattr(md, "a", 1)
+    setattr(md, "a", 1)  # noqa: B010
     assert md["a"] == 1

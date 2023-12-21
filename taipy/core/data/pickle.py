@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
 
 import modin.pandas as pd
+
 from taipy.config.common.scope import Scope
 
 from .._backup._backup import _replace_in_backup_file

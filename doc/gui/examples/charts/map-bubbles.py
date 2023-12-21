@@ -15,6 +15,7 @@
 # -----------------------------------------------------------------------------------------
 import numpy
 import pandas
+
 from taipy.gui import Gui
 
 # Largest cities: name, location and population

@@ -12,6 +12,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from taipy.config.config import Config
 from taipy.core import Core
 from taipy.core._version._version_manager import _VersionManager

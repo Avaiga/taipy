@@ -12,7 +12,6 @@
 import os
 
 import pytest
-from tests.core.conftest import init_sql_repo
 
 from taipy.config.config import Config
 from taipy.core.data._data_manager_factory import _DataManagerFactory
@@ -22,6 +21,7 @@ from taipy.core.submission._submission_manager_factory import _SubmissionManager
 from taipy.core.submission.submission import Submission
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
+from tests.core.conftest import init_sql_repo
 
 
 def configure_fs_repo():
@@ -29,7 +29,7 @@ def configure_fs_repo():
 
 
 def configure_sql_repo():
-    init_sql_repo
+    init_sql_repo  # noqa: B018
 
 
 class TestSubmissionRepository:

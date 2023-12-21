@@ -14,6 +14,7 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import pandas
+
 from taipy.gui import Gui
 
 dates = pandas.date_range("2023-01-01", periods=365, freq="D")

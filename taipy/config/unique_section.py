@@ -11,7 +11,6 @@
 
 from abc import ABC
 
-from .common._validate_id import _validate_id
 from .section import Section
 
 

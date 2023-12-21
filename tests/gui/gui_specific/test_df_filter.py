@@ -9,9 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import numpy as np
-import pandas as pd
-
 from taipy.gui.data.decimator.lttb import LTTB
 from taipy.gui.data.decimator.minmax import MinMaxDecimator
 from taipy.gui.data.decimator.rdp import RDP

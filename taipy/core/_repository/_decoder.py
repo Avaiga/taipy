@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 
 class _Decoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+        json.JSONDecoder.__init__(self, *args, **kwargs, object_hook=self.object_hook)
 
     def _str_to_timedelta(self, timedelta_str: str) -> timedelta:
         """

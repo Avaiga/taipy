@@ -19,7 +19,7 @@ def test_status_md(gui: Gui, helpers):
     md_string = "<|{status}|status|>"
     expected_list = [
         "<Status",
-        'defaultValue="[&#x7B;&quot;status&quot;: &quot;info&quot;, &quot;message&quot;: &quot;Info Message&quot;&#x7D;]"',
+        'defaultValue="[&#x7B;&quot;status&quot;: &quot;info&quot;, &quot;message&quot;: &quot;Info Message&quot;&#x7D;]"',  # noqa: E501
         "value={tpec_TpExPr_status_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
@@ -31,7 +31,7 @@ def test_status_html(gui: Gui, helpers):
     html_string = '<taipy:status value="{status}" />'
     expected_list = [
         "<Status",
-        'defaultValue="[&#x7B;&quot;status&quot;: &quot;info&quot;, &quot;message&quot;: &quot;Info Message&quot;&#x7D;]"',
+        'defaultValue="[&#x7B;&quot;status&quot;: &quot;info&quot;, &quot;message&quot;: &quot;Info Message&quot;&#x7D;]"',  # noqa: E501
         "value={tpec_TpExPr_status_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())

@@ -16,6 +16,7 @@
 import random
 
 import numpy
+
 from taipy.gui import Gui
 
 # x = [0..20]

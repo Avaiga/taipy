@@ -21,6 +21,7 @@ import pandas as pd
 import pytest
 from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
@@ -213,12 +214,12 @@ class TestParquetDataNode:
         dn = ParquetDataNode(
             "foo", Scope.SCENARIO, properties={"path": example_parquet_path, "exposed_type": MyCustomObject}
         )
-        assert all([isinstance(obj, MyCustomObject) for obj in dn.read()])
+        assert all(isinstance(obj, MyCustomObject) for obj in dn.read())
 
         dn = ParquetDataNode(
             "foo", Scope.SCENARIO, properties={"path": example_parquet_path, "exposed_type": create_custom_class}
         )
-        assert all([isinstance(obj, MyOtherCustomObject) for obj in dn.read()])
+        assert all(isinstance(obj, MyOtherCustomObject) for obj in dn.read())
 
     def test_raise_error_unknown_parquet_engine(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.parquet")
@@ -589,9 +590,7 @@ class TestParquetDataNode:
         temp_dir_path = str(tmpdir_factory.mktemp("data").join("temp_dir"))
 
         write_kwargs = {"partition_cols": ["a", "b"]}
-        dn = ParquetDataNode(
-            "foo", Scope.SCENARIO, properties={"path": temp_dir_path, "write_kwargs": write_kwargs}
-        )  # type: ignore
+        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_dir_path, "write_kwargs": write_kwargs})  # type: ignore
         dn.write(default_data_frame)
 
         assert pathlib.Path(temp_dir_path).is_dir()

@@ -302,7 +302,7 @@ def default_job():
 def create_job_list():
     jobs = []
     manager = _JobManager
-    for i in range(10):
+    for _ in range(10):
         c = __create_job()
         manager._set(c)
     return jobs

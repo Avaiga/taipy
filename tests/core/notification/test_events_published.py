@@ -9,19 +9,14 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from dataclasses import dataclass, field
-from math import exp
 from queue import SimpleQueue
 
-from colorama import init
 from taipy.config import Config, Frequency
 from taipy.core import taipy as tp
-from taipy.core.config import scenario_config
 from taipy.core.job.status import Status
 from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
-from tests.core.utils import assert_true_after_time
 
 
 class Snapshot:

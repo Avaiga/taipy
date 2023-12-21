@@ -18,6 +18,7 @@ import pandas as pd
 import pytest
 from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
+
 from taipy.config.common.scope import Scope
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.operator import JoinOperator, Operator

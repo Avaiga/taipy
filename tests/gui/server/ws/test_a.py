@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import time
 from unittest.mock import patch
 
 from taipy.gui import Gui, Markdown

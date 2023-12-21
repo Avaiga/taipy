@@ -9,13 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
-from unittest import mock
 from unittest.mock import MagicMock
 
 from taipy.config import Config
 from taipy.config.checker._checker import _Checker
-from taipy.config.checker.issue_collector import IssueCollector
 from tests.config.utils.checker_for_tests import CheckerForTest
 
 

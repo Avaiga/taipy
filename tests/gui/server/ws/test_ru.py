@@ -12,8 +12,6 @@
 import inspect
 from unittest.mock import patch
 
-import pytest
-
 from taipy.gui import Gui, Markdown
 
 

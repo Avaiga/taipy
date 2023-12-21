@@ -112,7 +112,7 @@ class _VersionManager(_Manager[_Version]):
             raise SystemExit(
                 f"Please add a new experiment version or run your application with --force option to"
                 f" override the Config of experiment {version_number}."
-            )
+            ) from None
         cls._repository._set_latest_version(version_number)
         return version_number
 
@@ -137,7 +137,7 @@ class _VersionManager(_Manager[_Version]):
                 f"Please add a new production version with migration functions.\n"
                 f"If old entities remain compatible with the new configuration, you can also run your application with"
                 f" --force option to override the production configuration of version {version_number}."
-            )
+            ) from None
         cls._repository._set_production_version(version_number)
         return version_number
 

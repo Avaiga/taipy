@@ -16,6 +16,7 @@ The configuration is run by the Core service.
 """
 
 from algorithms import *
+
 from taipy import Config
 
 # #############################################################################

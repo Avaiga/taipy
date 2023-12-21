@@ -24,16 +24,16 @@ __logger = _TaipyLogger._get_logger()
 def _load_all_entities_from_fs(root: str) -> Dict:
     # run through all files in the data folder and load them
     entities = {}
-    for root, dirs, files in os.walk(root):
+    for dirpath, _, files in os.walk(root):
         for file in files:
             if file.endswith(".json"):
-                with open(os.path.join(root, file)) as f:
+                with open(os.path.join(dirpath, file)) as f:
                     _id = file.split(".")[0]
-                    if "version" in root:
+                    if "version" in dirpath:
                         _id = f"VERSION_{_id}"
                     entities[_id] = {
                         "data": json.load(f),
-                        "path": os.path.join(root, file),
+                        "path": os.path.join(dirpath, file),
                     }
     return entities
 

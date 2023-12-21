@@ -16,7 +16,6 @@ from operator import attrgetter
 from types import FrameType
 
 from flask import has_app_context
-from flask.ctx import AppContext
 
 from .utils import _get_module_name_from_frame, _is_in_notebook
 from .utils._attributes import _attrsetter

@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
-from importlib import metadata
 from typing import Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger

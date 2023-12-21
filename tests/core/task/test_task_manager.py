@@ -391,8 +391,8 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
         f"path : {input_dn.path} "
         for input_dn in task.output.values()
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)
 
 
 def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
@@ -416,8 +416,8 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
         f"path : {input_dn.path} "
         for input_dn in [task.input["pickle_file_path"], task.output["wrong_parquet_file_path"]]
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)
 
 
 def test_get_tasks_by_config_id():

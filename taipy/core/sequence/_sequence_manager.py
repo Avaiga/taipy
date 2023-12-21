@@ -98,7 +98,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
                     Notifier.publish(Event(cls._EVENT_ENTITY_TYPE, EventOperation.DELETION, entity_id=sequence_id))
         except (ModelNotFound, KeyError):
             cls.__log_error_entity_not_found(sequence_id)
-            raise ModelNotFound(cls._model_name, sequence_id)
+            raise ModelNotFound(cls._model_name, sequence_id) from None
 
     @classmethod
     def _delete_by_version(cls, version_number: str):
@@ -185,7 +185,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
             return sequence_name, scenario_id
         except (ValueError, IndexError):
             cls._logger.error(f"SequenceId {sequence_id} is invalid.")
-            raise InvalidSequenceId(sequence_id)
+            raise InvalidSequenceId(sequence_id) from None
 
     @classmethod
     def _get(cls, sequence: Union[str, Sequence], default=None) -> Sequence:
@@ -227,7 +227,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         filtered_sequences = []
         for sequence in sequences:
             for filter in filters:
-                if all([getattr(sequence, key) == item for key, item in filter.items()]):
+                if all(getattr(sequence, key) == item for key, item in filter.items()):
                     filtered_sequences.append(sequence)
         return filtered_sequences
 

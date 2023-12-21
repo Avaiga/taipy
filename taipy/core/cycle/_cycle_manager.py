@@ -11,7 +11,7 @@
 
 import calendar
 from datetime import datetime, time, timedelta
-from typing import Callable, Dict, List, Optional
+from typing import Callable, List, Optional
 
 from taipy.config.common.frequency import Frequency
 

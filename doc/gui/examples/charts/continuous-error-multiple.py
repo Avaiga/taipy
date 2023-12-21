@@ -16,6 +16,7 @@
 import datetime
 
 import dateutil.relativedelta
+
 from taipy.gui import Gui
 
 # Data is collected from January 1st, 2010, every month

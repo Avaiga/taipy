@@ -12,6 +12,7 @@
 from datetime import datetime
 
 import pytest
+
 from taipy.core import TaskId
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job

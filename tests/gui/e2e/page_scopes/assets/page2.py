@@ -11,8 +11,8 @@
 
 from taipy.gui import Markdown
 
-from .page1 import x as y
-from .page1 import y as x
+from .page1 import x as y  # noqa: F401
+from .page1 import y as x  # noqa: F401
 
 
 def on_change(state, var, val):

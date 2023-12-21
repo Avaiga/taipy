@@ -15,6 +15,7 @@ import pathlib
 import shutil
 
 import pytest
+
 from taipy.config.config import Config
 from taipy.core.exceptions.exceptions import InvalidExportPath
 

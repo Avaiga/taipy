@@ -18,7 +18,7 @@ from types import FrameType
 from .utils import _filter_locals, _get_module_name_from_frame
 
 if t.TYPE_CHECKING:
-    from ._renderers import _Element
+    from ._renderers import _Element  # noqa: F401
 
 
 class Page:

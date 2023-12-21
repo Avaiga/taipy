@@ -43,7 +43,7 @@ class _Labeled:
         ls = []
         if not simple:
             if owner_id := self._get_owner_id():
-                if getattr(self, "id") != owner_id:
+                if getattr(self, "id") != owner_id:  # noqa: B009
                     from ... import core as tp
 
                     owner = tp.get(owner_id)
@@ -53,24 +53,24 @@ class _Labeled:
 
     def _get_explicit_label(self) -> Optional[str]:
         if hasattr(self, "_properties"):
-            return getattr(self, "_properties").get("label")
+            return getattr(self, "_properties").get("label")  # noqa: B009
         return None
 
     def _get_owner_id(self) -> Optional[str]:
         if hasattr(self, "owner_id"):
-            return getattr(self, "owner_id")
+            return getattr(self, "owner_id")  # noqa: B009
         return None
 
     def _get_name(self) -> Optional[str]:
         if hasattr(self, "name"):
-            return getattr(self, "name")
+            return getattr(self, "name")  # noqa: B009
         if hasattr(self, "_properties"):
-            return getattr(self, "_properties").get("name")
+            return getattr(self, "_properties").get("name")  # noqa: B009
         return None
 
     def _get_config_id(self) -> Optional[str]:
         if hasattr(self, "config_id"):
-            return getattr(self, "config_id")
+            return getattr(self, "config_id")  # noqa: B009
         return None
 
     def _generate_entity_label(self) -> str:
@@ -78,4 +78,4 @@ class _Labeled:
             return name
         if config_id := self._get_config_id():
             return config_id
-        return getattr(self, "id")
+        return getattr(self, "id")  # noqa: B009

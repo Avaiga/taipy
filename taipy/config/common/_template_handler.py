@@ -84,21 +84,21 @@ class _TemplateHandler:
         try:
             return int(val)
         except ValueError:
-            raise InconsistentEnvVariableError(f"{val} is not an integer.")
+            raise InconsistentEnvVariableError(f"{val} is not an integer.") from None
 
     @staticmethod
     def _to_float(val: str) -> float:
         try:
             return float(val)
         except ValueError:
-            raise InconsistentEnvVariableError(f"{val} is not a float.")
+            raise InconsistentEnvVariableError(f"{val} is not a float.") from None
 
     @staticmethod
     def _to_datetime(val: str) -> datetime:
         try:
             return datetime.fromisoformat(val)
         except ValueError:
-            raise InconsistentEnvVariableError(f"{val} is not a valid datetime.")
+            raise InconsistentEnvVariableError(f"{val} is not a valid datetime.") from None
 
     @staticmethod
     def _to_timedelta(val: str) -> timedelta:
@@ -125,14 +125,14 @@ class _TemplateHandler:
         try:
             return Scope[str.upper(val)]
         except Exception:
-            raise InconsistentEnvVariableError(f"{val} is not a valid scope.")
+            raise InconsistentEnvVariableError(f"{val} is not a valid scope.") from None
 
     @staticmethod
     def _to_frequency(val: str) -> Frequency:
         try:
             return Frequency[str.upper(val)]
         except Exception:
-            raise InconsistentEnvVariableError(f"{val} is not a valid frequency.")
+            raise InconsistentEnvVariableError(f"{val} is not a valid frequency.") from None
 
     @staticmethod
     def _to_function(val: str):
@@ -141,11 +141,11 @@ class _TemplateHandler:
             module = import_module(module_name)
             return attrgetter(fct_name)(module)
         except Exception:
-            raise InconsistentEnvVariableError(f"{val} is not a valid function.")
+            raise InconsistentEnvVariableError(f"{val} is not a valid function.") from None
 
     @staticmethod
     def _to_class(val: str):
         try:
             return locate(val)
         except Exception:
-            raise InconsistentEnvVariableError(f"{val} is not a valid class.")
+            raise InconsistentEnvVariableError(f"{val} is not a valid class.") from None

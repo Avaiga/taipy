@@ -88,12 +88,12 @@ bar_attribute = "ENV[BAR]:bool"
     with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
         with pytest.raises(InconsistentEnvVariableError):
             Config.load(tf.filename)
-            Config.global_config.foo_attribute
+            _ = Config.global_config.foo_attribute
 
     with mock.patch.dict(os.environ, {"FOO": "5"}):
         with pytest.raises(MissingEnvVariableError):
             Config.load(tf.filename)
-            Config.global_config.bar_attribute
+            _ = Config.global_config.bar_attribute
 
     with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
         Config.load(tf.filename)

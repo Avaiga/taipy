@@ -102,7 +102,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
                 properties=props,
             )
         except KeyError:
-            raise InvalidDataNodeType(data_node_config.storage_type)
+            raise InvalidDataNodeType(data_node_config.storage_type) from None
 
     @classmethod
     def _get_all(cls, version_number: Optional[str] = None) -> List[DataNode]:

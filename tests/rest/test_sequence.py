@@ -14,9 +14,7 @@ from unittest import mock
 import pytest
 from flask import url_for
 
-from taipy.core.exceptions.exceptions import NonExistingScenario
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from taipy.rest.api.exceptions.exceptions import ScenarioIdMissingException, SequenceNameMissingException
 
 
 def test_get_sequence(client, default_sequence):

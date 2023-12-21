@@ -387,7 +387,7 @@ class ElementLibrary(ABC):
         """
         return None
 
-    def on_user_init(self, state: "State"):
+    def on_user_init(self, state: "State"):  # noqa: B027
         """
         Initialize user state on first access.
 

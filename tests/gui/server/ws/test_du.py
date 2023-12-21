@@ -27,7 +27,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     gui.add_page(
         "test",
         Markdown(
-            "<|{csvdata}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|>"
+            "<|{csvdata}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|>"  # noqa: E501
         ),
     )
     with patch("sys.argv", ["prog"]):

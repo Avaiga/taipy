@@ -14,6 +14,7 @@ import os
 from datetime import datetime, timedelta
 
 import pytest
+
 from taipy.core._repository._decoder import _Decoder
 from taipy.core._repository._encoder import _Encoder
 

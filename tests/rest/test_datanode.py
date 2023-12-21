@@ -11,7 +11,6 @@
 
 from unittest import mock
 
-import pytest
 from flask import url_for
 
 

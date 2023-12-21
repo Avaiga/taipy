@@ -129,7 +129,7 @@ class Submittable:
         dag = self._build_dag()
         remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
         dag.remove_nodes_from(remove)
-        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
+        return [nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes))]
 
     def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         params = [] if params is None else params

@@ -57,7 +57,7 @@ class _JobConverter(_AbstractConverter):
                 fct_module, fct_name = it.get("fct_module"), it.get("fct_name")
                 job._subscribers.append(_load_fct(fct_module, fct_name))  # type: ignore
             except AttributeError:
-                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
+                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.") from None
         job._stacktrace = model.stacktrace
 
         return job

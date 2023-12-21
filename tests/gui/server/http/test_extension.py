@@ -9,13 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import inspect
 from unittest.mock import patch
 
 import pytest
 
 from taipy.gui import Gui
-from taipy.gui.extension import Element, ElementLibrary
+from taipy.gui.extension import ElementLibrary
 
 
 class MyLibrary(ElementLibrary):

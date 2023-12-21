@@ -224,7 +224,7 @@ class _DefaultJSONEncoder(json.JSONEncoder):
 
 class _DefaultJSONDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+        json.JSONDecoder.__init__(self, *args, **kwargs, object_hook=self.object_hook)
 
     def object_hook(self, source):
         if _type := source.get("__type__"):

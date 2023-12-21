@@ -12,8 +12,6 @@
 import inspect
 from unittest.mock import patch
 
-from flask import g
-
 from taipy.gui import Gui
 
 

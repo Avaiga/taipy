@@ -16,6 +16,7 @@ from typing import Dict
 
 import bson
 import pymongo
+
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._utils import _migrate
@@ -82,9 +83,8 @@ def __write_entities_to_mongo(
     client = _connect_mongodb(hostname, port, user, password)
     for collection in NEW_COLLECTIONS:
         db = client[DATABASE_NAME]
-        db[collection].insert_many(
-            [entity["data"] for entity in _entities.values() if collection in entity["data"]["id"]]
-        )
+        if insert_data := [entity["data"] for entity in _entities.values() if collection in entity["data"]["id"]]:
+            db[collection].insert_many(insert_data)
 
 
 def _backup_mongo_entities(

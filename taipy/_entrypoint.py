@@ -41,7 +41,7 @@ def _entrypoint():
 
     args = _CLI._parse()
     if args.version:
-        print(f"Taipy {_get_version()}")
+        print(f"Taipy {_get_version()}")  # noqa: T201
         sys.exit(0)
 
     _RunCLI.parse_arguments()

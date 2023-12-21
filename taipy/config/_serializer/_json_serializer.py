@@ -32,7 +32,7 @@ class _JsonSerializer(_BaseSerializer):
             return cls._from_dict(config_as_dict)
         except json.JSONDecodeError as e:
             error_msg = f"Can not load configuration {e}"
-            raise LoadingError(error_msg)
+            raise LoadingError(error_msg) from None
 
     @classmethod
     def _serialize(cls, configuration: _Config) -> str:

@@ -179,7 +179,6 @@ class TestConfigComparator:
 
     def test_comparator_with_different_order_list_attributes(self):
         _config_1 = _Config._default_config()
-        _config_1._unique_sections
         _config_1._sections[SectionForTest.name] = {"section_3": self.section_3b}
 
         # Create _config_2 with different order of list attributes

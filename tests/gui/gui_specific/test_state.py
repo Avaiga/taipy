@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy.gui import Gui, Markdown
+from taipy.gui import Gui
 
 from .state_asset.page1 import get_a, md_page1, set_a
 
@@ -32,7 +32,7 @@ def test_state(gui: Gui):
         assert state["tests.gui.gui_specific.state_asset.page1"].a == 20
         assert state._gui == gui
         with pytest.raises(Exception) as e:
-            state.b
+            _ = state.b
         assert e.value.args[0] == "Variable 'b' is not defined."
 
         with pytest.raises(Exception) as e:
@@ -40,7 +40,7 @@ def test_state(gui: Gui):
         assert e.value.args[0] == "Variable 'b' is not accessible."
 
         with pytest.raises(Exception) as e:
-            state._taipy_p1
+            _ = state._taipy_p1
         assert e.value.args[0] == "Variable '_taipy_p1' is protected and is not accessible."
 
         with pytest.raises(Exception) as e:

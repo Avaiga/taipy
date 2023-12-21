@@ -54,7 +54,7 @@ class _ConfigChecker:
         else:
             if not (
                 (isinstance(config_value, List) or isinstance(config_value, Set))
-                and all(map(lambda x: isinstance(x, child_config_class), config_value))
+                and all(isinstance(x, child_config_class) for x in config_value)
             ):
                 self._error(
                     config_key,

@@ -16,12 +16,12 @@ from functools import partial
 from time import sleep
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core import Task
 from taipy.core._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
-from taipy.core._repository.db._sql_connection import _build_connection, _SQLConnection
 from taipy.core.config.job_config import JobConfig
 from taipy.core.data import InMemoryDataNode
 from taipy.core.data._data_manager import _DataManager

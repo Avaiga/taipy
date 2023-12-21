@@ -31,9 +31,9 @@ class _FilterDataNode:
     @staticmethod
     def __is_multi_sheet_excel(data) -> bool:
         if isinstance(data, Dict):
-            has_df_children = all([isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in data.values()])
-            has_list_children = all([isinstance(e, List) for e in data.values()])
-            has_np_array_children = all([isinstance(e, np.ndarray) for e in data.values()])
+            has_df_children = all(isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in data.values())
+            has_list_children = all(isinstance(e, List) for e in data.values())
+            has_np_array_children = all(isinstance(e, np.ndarray) for e in data.values())
             return has_df_children or has_list_children or has_np_array_children
         return False
 

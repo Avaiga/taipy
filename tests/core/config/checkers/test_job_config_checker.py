@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
+
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
 from taipy.core.config.job_config import JobConfig

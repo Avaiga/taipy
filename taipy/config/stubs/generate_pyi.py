@@ -95,7 +95,7 @@ def _build_entity_config_pyi(base_pyi, filename, entity_map):
             func = __add_docstring(func, lines, end_line) + "\n"
             base_pyi += func
         except Exception:
-            print(f"key={k}")
+            print(f"key={k}")  # noqa: T201
             raise
 
     return base_pyi

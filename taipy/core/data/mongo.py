@@ -178,11 +178,11 @@ class MongoCollectionDataNode(DataNode):
 
     def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         cursor = self._read_by_query(operators, join_operator)
-        return list(map(lambda row: self._decoder(row), cursor))
+        return [self._decoder(row) for row in cursor]
 
     def _read(self):
         cursor = self._read_by_query()
-        return list(map(lambda row: self._decoder(row), cursor))
+        return [self._decoder(row) for row in cursor]
 
     def _read_by_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         """Query from a Mongo collection, exclude the _id field"""

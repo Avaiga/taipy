@@ -15,6 +15,7 @@ from time import sleep
 from unittest import mock
 
 import pytest
+
 import taipy.core as tp
 from taipy.config import Config
 from taipy.config.common.scope import Scope
@@ -398,7 +399,7 @@ class TestDataNode:
         dn = FakeDataNode("foo")
 
         with pytest.raises(NoData):
-            dn.expiration_date
+            _ = dn.expiration_date
 
     def test_validity_null_if_never_write(self):
         dn = FakeDataNode("foo")
@@ -655,13 +656,13 @@ class TestDataNode:
     def test_cacheable_deprecated_false(self):
         dn = FakeDataNode("foo")
         with pytest.warns(DeprecationWarning):
-            dn.cacheable
+            _ = dn.cacheable
         assert dn.cacheable is False
 
     def test_cacheable_deprecated_true(self):
         dn = FakeDataNode("foo", properties={"cacheable": True})
         with pytest.warns(DeprecationWarning):
-            dn.cacheable
+            _ = dn.cacheable
         assert dn.cacheable is True
 
     def test_data_node_with_env_variable_value_not_stored(self):

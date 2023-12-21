@@ -16,6 +16,7 @@
 from datetime import datetime
 
 import numpy
+
 from taipy.gui import Gui
 
 

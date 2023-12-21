@@ -12,6 +12,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from taipy.config import Config
 from taipy.config.exceptions.exceptions import ConfigurationUpdateBlocked
 from taipy.core import Core

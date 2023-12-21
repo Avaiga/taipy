@@ -20,7 +20,7 @@ def test_selector_builder_1(gui: Gui, test_client, helpers):
         tgb.selector(value="{selected_val}", properties="{selector_properties}", multiple=True)
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',
+        'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
@@ -60,7 +60,7 @@ def test_selector_builder_3(gui: Gui, test_client, helpers):
         )
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
+        'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;1&quot;]"',
         "lov={_TpL_tpec_TpExPr_scenario_list_TPMDL_0}",
         "propagate={false}",

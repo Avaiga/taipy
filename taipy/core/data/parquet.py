@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Set
 import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
+
 from taipy.config.common.scope import Scope
 
 from .._backup._backup import _replace_in_backup_file

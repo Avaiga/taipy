@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
 from sqlalchemy import text
+
 from taipy.config.common.scope import Scope
 
 from .._version._version_manager_factory import _VersionManagerFactory

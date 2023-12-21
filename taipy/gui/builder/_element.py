@@ -60,7 +60,7 @@ class _Element(ABC):
         if isinstance(value, (str, dict, Iterable)):
             return value
         if hasattr(value, "__name__"):
-            return str(getattr(value, "__name__"))
+            return str(getattr(value, "__name__"))  # noqa: B009
         return str(value)
 
     @abstractmethod

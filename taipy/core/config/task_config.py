@@ -139,7 +139,7 @@ class TaskConfig(Section):
 
     def _update(self, as_dict, default_section=None):
         function = as_dict.pop(self._FUNCTION, None)
-        if function is not None and type(function) is not str:
+        if function is not None and not isinstance(function, str):
             self.function = function
         self._inputs = as_dict.pop(self._INPUT_KEY, self._inputs)
         if self._inputs is None and default_section:

@@ -248,7 +248,7 @@ def test_filter_by_get_item(default_data_frame):
 
     filtered_custom_dn = custom_dn[0:5]
     assert isinstance(filtered_custom_dn, List)
-    assert all([isinstance(x, CustomClass) for x in filtered_custom_dn])
+    assert all(isinstance(x, CustomClass) for x in filtered_custom_dn)
     assert len(filtered_custom_dn) == 5
 
     bool_1d_index = [True if i < 5 else False for i in range(10)]
@@ -259,7 +259,7 @@ def test_filter_by_get_item(default_data_frame):
 
     filtered_custom_dn = custom_dn[["a", "b"]]
     assert isinstance(filtered_custom_dn, List)
-    assert all([isinstance(x, Dict) for x in filtered_custom_dn])
+    assert all(isinstance(x, Dict) for x in filtered_custom_dn)
     assert len(filtered_custom_dn) == 10
     assert filtered_custom_dn == [{"a": i, "b": i * 2} for i in range(10)]
 
@@ -276,8 +276,6 @@ def test_filter_by_get_item(default_data_frame):
     assert len(filtered_multi_sheet_excel_custom_dn) == 10
     expected_value = [CustomClass(i, i * 2) for i in range(10)]
     assert all(
-        [
-            expected.a == filtered.a and expected.b == filtered.b
-            for expected, filtered in zip(expected_value, filtered_multi_sheet_excel_custom_dn)
-        ]
+        expected.a == filtered.a and expected.b == filtered.b
+        for expected, filtered in zip(expected_value, filtered_multi_sheet_excel_custom_dn)
     )

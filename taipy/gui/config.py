@@ -17,8 +17,9 @@ from importlib.util import find_spec
 import pytz
 import tzlocal
 from dotenv import dotenv_values
-from taipy.logger._taipy_logger import _TaipyLogger
 from werkzeug.serving import is_running_from_reloader
+
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._gui_cli import _GuiCLI
 from ._page import _Page

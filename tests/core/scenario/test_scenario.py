@@ -980,7 +980,7 @@ def test_get_sorted_tasks():
                 return False
             else:
                 index_task_b = tasks_b.index(task_a)
-                if any([isinstance(task_b, list) for task_b in tasks_b[i : index_task_b + 1]]):
+                if any(isinstance(task_b, list) for task_b in tasks_b[i : index_task_b + 1]):
                     return False
         return True
 

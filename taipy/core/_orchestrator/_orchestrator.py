@@ -24,7 +24,6 @@ from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..job.job_id import JobId
-from ..scenario.scenario import Scenario
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task.task import Task
 from ._abstract_orchestrator import _AbstractOrchestrator

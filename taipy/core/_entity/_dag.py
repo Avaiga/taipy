@@ -31,7 +31,7 @@ class _Edge:
 
 class _DAG:
     def __init__(self, dag: nx.DiGraph):
-        self._sorted_nodes = list(nodes for nodes in nx.topological_generations(dag))
+        self._sorted_nodes = [nodes for nodes in nx.topological_generations(dag)]
         self._length, self._width = self.__compute_size()
         self._grid_length, self._grid_width = self.__compute_grid_size()
         self._nodes = self.__compute_nodes()

@@ -36,7 +36,7 @@ class _StartBlockProcessor(BlockProcessor):
     def run(self, parent, blocks):
         original_block = blocks[0]
         original_match = re.search(_StartBlockProcessor.__RE_FENCE_START, original_block)
-        blocks[0] = re.sub(_StartBlockProcessor.__RE_FENCE_START, "", blocks[0], 1)
+        blocks[0] = re.sub(_StartBlockProcessor.__RE_FENCE_START, "", blocks[0], count=1)
         tag = original_match.group(1)
         queue = [tag]
         # Find block with ending fence
@@ -53,7 +53,7 @@ class _StartBlockProcessor(BlockProcessor):
                     _MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + _MarkdownFactory._TAIPY_END,
                     "",
                     block,
-                    1,
+                    count=1,
                 )
                 # render fenced area inside a new div
                 e = _MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))

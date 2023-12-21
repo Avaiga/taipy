@@ -45,7 +45,7 @@ def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     function_evaluated = True
     try:
         page.wait_for_function(
-            'window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color") !== "rgb(255, 255, 255)"'
+            'window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color") !== "rgb(255, 255, 255)"'  # noqa: E501
         )
     except Exception as e:
         function_evaluated = False
