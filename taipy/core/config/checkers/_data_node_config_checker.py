@@ -10,13 +10,15 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import timedelta
-from typing import Dict
+from typing import Dict, List
 
 from taipy.config._config import _Config
 from taipy.config.checker._checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.scope import Scope
 
+from ...scenario.scenario import Scenario
+from ...task.task import Task
 from ..data_node_config import DataNodeConfig
 
 
@@ -26,9 +28,17 @@ class _DataNodeConfigChecker(_ConfigChecker):
 
     def _check(self) -> IssueCollector:
         data_node_configs: Dict[str, DataNodeConfig] = self._config._sections[DataNodeConfig.name]
+        task_attributes = [attr for attr in dir(Task) if not callable(getattr(Task, attr)) and not attr.startswith("_")]
+        scenario_attributes = [
+            attr for attr in dir(Scenario) if not callable(getattr(Scenario, attr)) and not attr.startswith("_")
+        ]
+
         for data_node_config_id, data_node_config in data_node_configs.items():
             self._check_existing_config_id(data_node_config)
             self._check_if_entity_property_key_used_is_predefined(data_node_config)
+            self._check_if_config_id_is_overlapping_with_task_and_scenario_attributes(
+                data_node_config_id, data_node_config, task_attributes, scenario_attributes
+            )
             self._check_storage_type(data_node_config_id, data_node_config)
             self._check_scope(data_node_config_id, data_node_config)
             self._check_validity_period(data_node_config_id, data_node_config)
@@ -37,6 +47,28 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_generic_read_write_fct_and_args(data_node_config_id, data_node_config)
             self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
+
+    def _check_if_config_id_is_overlapping_with_task_and_scenario_attributes(
+        self,
+        data_node_config_id: str,
+        data_node_config: DataNodeConfig,
+        task_attributes: List[str],
+        scenario_attributes: List[str],
+    ):
+        if data_node_config.id in task_attributes:
+            self._error(
+                data_node_config._ID_KEY,
+                data_node_config.id,
+                f"The id of the DataNodeConfig `{data_node_config_id}` is overlapping with the "
+                f"attribute `{data_node_config.id}` of a Task entity.",
+            )
+        elif data_node_config.id in scenario_attributes:
+            self._error(
+                data_node_config._ID_KEY,
+                data_node_config.id,
+                f"The id of the DataNodeConfig `{data_node_config_id}` is overlapping with the "
+                f"attribute `{data_node_config.id}` of a Scenario entity.",
+            )
 
     def _check_storage_type(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type not in DataNodeConfig._ALL_STORAGE_TYPES:

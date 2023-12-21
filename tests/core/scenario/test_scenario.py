@@ -628,7 +628,7 @@ def test_auto_set_and_reload(cycle, current_datetime, task, data_node):
         assert scenario.properties["temp_key_5"] == 0
 
         new_datetime_2 = new_datetime + timedelta(5)
-        scenario.config_id = "foo"
+        scenario._config_id = "foo"
         scenario.tasks = set()
         scenario.additional_data_nodes = set()
         scenario.remove_sequences([sequence_1_name])
