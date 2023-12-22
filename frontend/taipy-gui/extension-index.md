@@ -27,10 +27,10 @@ The Extension API is located by the 'taipy-gui' module.
 In order to import items from this module, you have to install it, using `npm`.
 The most simple way to install the Taipy GUI Extension module is:
 ```
-npm i <TAIPY_GUI_DIR>/webapp
+npm i <TAIPY_DIR>/taipy/gui/webapp
 ```
 
-Where *<TAIPY_GUI_DIR>* represents the directory where, in the development machine's
+Where *<TAIPY_DIR>* represents the directory where, in the development machine's
 filesystem, the Taipy GUI Python package has been installed.
 
 When the package is installed, your JavaScript code can import items from it:
