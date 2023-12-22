@@ -34,7 +34,7 @@ def test_default_answer(tmpdir):
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
 
 
 def test_main_file_with_and_without_extension(tmpdir):
@@ -84,8 +84,8 @@ def test_with_core_service(tmpdir):
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-    assert "[Taipy][INFO] Development mode: " in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
+    assert "[Taipy][INFO] Development mode: " in stdout
 
 
 def test_with_rest_service(tmpdir):
@@ -109,8 +109,8 @@ def test_with_rest_service(tmpdir):
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-    assert "[Taipy][INFO] Development mode: " in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
+    assert "[Taipy][INFO] Development mode: " in stdout
 
 
 def test_with_both_core_rest_services(tmpdir):
@@ -136,8 +136,8 @@ def test_with_both_core_rest_services(tmpdir):
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-    assert "[Taipy][INFO] Development mode: " in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
+    assert "[Taipy][INFO] Development mode: " in stdout
 
 
 def test_multipage_gui_template(tmpdir):
@@ -161,7 +161,7 @@ def test_multipage_gui_template(tmpdir):
 
     taipy_path = os.getcwd()
     stdout = _run_template(taipy_path, os.path.join(tmpdir, "foo_app"), "main.py")
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
 
 
 def test_multipage_gui_template_with_invalid_page_name(tmpdir, capfd):
