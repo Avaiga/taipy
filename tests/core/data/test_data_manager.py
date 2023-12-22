@@ -12,6 +12,7 @@ import os
 import pathlib
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core._version._version_manager import _VersionManager
@@ -22,7 +23,6 @@ from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
-
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
@@ -346,7 +346,7 @@ class TestDataManager:
         assert _DataManager._exists(dn.id)
 
         # changing data node attribute
-        dn.config_id = "foo"
+        dn._config_id = "foo"
         assert dn.config_id == "foo"
         _DataManager._set(dn)
         assert len(_DataManager._get_all()) == 1

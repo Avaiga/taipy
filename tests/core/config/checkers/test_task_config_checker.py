@@ -12,6 +12,7 @@
 from copy import copy
 
 import pytest
+
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
 from taipy.core.config import TaskConfig
@@ -47,6 +48,43 @@ class TestTaskConfigChecker:
             Config.check()
         assert len(Config._collector.errors) == 1
         assert len(Config._collector.warnings) == 2
+
+    def test_check_config_id_is_different_from_all_task_properties(self, caplog):
+        Config._collector = IssueCollector()
+        config = Config._applied_config
+        Config._compile_configs()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        config._sections[TaskConfig.name]["new"] = copy(config._sections[TaskConfig.name]["default"])
+
+        for conflict_id in [
+            "additional_data_nodes",
+            "config_id",
+            "creation_date",
+            "cycle",
+            "data_nodes",
+            "is_primary",
+            "name",
+            "owner_id",
+            "properties",
+            "sequences",
+            "subscribers",
+            "tags",
+            "tasks",
+            "version",
+        ]:
+            config._sections[TaskConfig.name]["new"].id = conflict_id
+
+            with pytest.raises(SystemExit):
+                Config._collector = IssueCollector()
+                Config.check()
+            assert len(Config._collector.errors) == 2
+            expected_error_message = (
+                "The id of the TaskConfig `new` is overlapping with the attribute"
+                f" `{conflict_id}` of a Scenario entity."
+            )
+            assert expected_error_message in caplog.text
 
     def test_check_if_entity_property_key_used_is_predefined(self, caplog):
         Config._collector = IssueCollector()

@@ -13,6 +13,7 @@ import os
 import pathlib
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core._version._version_manager import _VersionManager
@@ -162,7 +163,7 @@ class TestDataManager:
         assert _DataManager._exists(dn.id)
 
         # changing data node attribute
-        dn.config_id = "foo"
+        dn._config_id = "foo"
         assert dn.config_id == "foo"
         _DataManager._set(dn)
         assert len(_DataManager._get_all()) == 1
