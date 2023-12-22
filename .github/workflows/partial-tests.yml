@@ -59,7 +59,7 @@ jobs:
           python-version: ${{matrix.python-version}}
 
       - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python${{ matrix.python-version }}
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
