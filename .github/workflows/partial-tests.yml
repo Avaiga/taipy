@@ -89,7 +89,7 @@ jobs:
 
       - name: Pytest Core
         if: steps.changes.outputs.core == 'true'
-        run: pipenv run pytest -m "not orchestrator_dispatcher" tests/core
+        run: pipenv run pytest -m "not orchestrator_dispatcher and not modin" tests/core
 
       - name: Pytest GUI
         if: steps.changes.outputs.gui == 'true'

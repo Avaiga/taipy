@@ -124,9 +124,10 @@ class TestPickleDataNodeEntity:
         assert isinstance(pickle_dict.read(), dict)
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
+    @pytest.mark.modin
+    def test_read_and_write_modin(self):
         default_pandas = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         new_pandas_df = pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]})
-
         default_modin = modin_pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         new_modin_df = modin_pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]})
 
