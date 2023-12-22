@@ -270,7 +270,6 @@ class TestExcelDataNode:
         assert len(data_modin) == 6
         assert np.array_equal(data_modin.to_numpy(), pd.read_excel(path, header=None).to_numpy())
 
-
     @pytest.mark.parametrize(
         "content,columns",
         [

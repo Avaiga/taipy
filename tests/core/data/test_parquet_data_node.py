@@ -135,7 +135,6 @@ class TestParquetDataNode:
         dn = ParquetDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
         assert os.path.exists(dn.path) is exists
 
-
     @pytest.mark.parametrize("engine", __engine)
     def test_read_file(self, engine, parquet_file_path):
         not_existing_parquet = ParquetDataNode(
