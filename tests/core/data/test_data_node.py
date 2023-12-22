@@ -33,17 +33,17 @@ from .utils import FakeDataNode
 
 
 def funct_a_b(input: str):
-    print("task_a_b")
+    print("task_a_b")  # noqa: T201
     return "B"
 
 
 def funct_b_c(input: str):
-    print("task_b_c")
+    print("task_b_c")  # noqa: T201
     return "C"
 
 
 def funct_b_d(input: str):
-    print("task_b_d")
+    print("task_b_d")  # noqa: T201
     return "D"
 
 

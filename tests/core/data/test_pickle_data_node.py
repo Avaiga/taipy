@@ -41,7 +41,6 @@ class TestPickleDataNodeEntity:
         import glob
 
         for f in glob.glob("*.p"):
-            print(f"deleting file {f}")
             os.remove(f)
 
     def test_create(self):

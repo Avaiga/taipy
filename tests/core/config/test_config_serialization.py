@@ -35,7 +35,6 @@ def compare_function(*data_node_results):
         comparison_result[current_result_index] = {}
         next_result_index = 0
         for next_result in data_node_results:
-            print(f"comparing result {current_result_index} with result {next_result_index}")
             comparison_result[current_result_index][next_result_index] = next_result - current_result
             next_result_index += 1
         current_result_index += 1

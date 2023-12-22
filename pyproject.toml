@@ -15,7 +15,6 @@ exclude = [
 ]
 line-length = 120
 indent-width = 4
-ignore-init-module-imports = true
 
 [tool.ruff.lint]
 select = [
@@ -28,7 +27,7 @@ select = [
     "B", # flake8-bugbear best practices checker
     "I001", # isort import order
 ]
-ignore = [
+ignore = [      # TODO: to be removed
     "E203",  # whitespace before ':'
     "E722",  # do not use bare except
     "C401",  # Unnecessary generator (rewrite as a `set` comprehension)
@@ -47,8 +46,6 @@ unfixable = []
 "_init.py" = ["F401", "F403"]  # unused import
 "taipy/config/stubs/pyi_header.py" = ["F401", "F403"]  # unused import
 "taipy/templates/*" = ["F401", "F403", "T201"]  # unused import, `print` found
-"tests/*" = ["T201"]  # `print` found
-"tools/*" = ["T201"]  # `print` found
 
 [tool.ruff.lint.mccabe]
 max-complexity = 18

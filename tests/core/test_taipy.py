@@ -50,6 +50,10 @@ from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.task._task_manager import _TaskManager
 
 
+def cb(s, j):
+    print()  # noqa: T201
+
+
 class TestTaipy:
     def test_set(self, scenario, cycle, sequence, data_node, task):
         with mock.patch("taipy.core.data._data_manager._DataManager._set") as mck:
@@ -431,9 +435,6 @@ class TestTaipy:
             mck.assert_called_once_with(scenario, scenario, data_node_config_id="dn")
 
     def test_subscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
             tp.subscribe_scenario(cb)
             mck.assert_called_once_with(cb, [], None)
@@ -442,9 +443,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, [], scenario)
 
     def test_unsubscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -453,9 +451,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, scenario)
 
     def test_subscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
             tp.subscribe_sequence(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -464,9 +459,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, sequence)
 
     def test_unsubscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
             tp.unsubscribe_sequence(callback=cb)
             mck.assert_called_once_with(cb, None, None)

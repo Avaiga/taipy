@@ -49,7 +49,7 @@ if __name__ == "__main__":
     historical_temperature = pd.read_csv("../historical_temperature.csv")
     evaluation = evaluate(historical_temperature, forecasts, day)
 
-    print(evaluation["Dataframe"])
-    print()
-    print(f'Mean absolute error : {evaluation["Mean_absolute_error"]}')
-    print(f'Relative error in %: {evaluation["Relative_error"]}')
+    print(evaluation["Dataframe"])  # noqa: T201
+    print()  # noqa: T201
+    print(f'Mean absolute error : {evaluation["Mean_absolute_error"]}')  # noqa: T201
+    print(f'Relative error in %: {evaluation["Relative_error"]}')  # noqa: T201

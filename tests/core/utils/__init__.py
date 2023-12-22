@@ -22,9 +22,9 @@ def assert_true_after_time(assertion, msg=None, time=120):
             if assertion():
                 return
         except BaseException as e:
-            print("Raise : ", e)
+            print("Raise : ", e)  # noqa: T201
             loops += 1
             continue
     if msg:
-        print(msg)
+        print(msg)  # noqa: T201
     assert assertion()
