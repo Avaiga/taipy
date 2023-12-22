@@ -211,7 +211,7 @@ def test_is_submittable():
     scenario = Scenario("scenario", set([task]), {}, set())
     _ScenarioManager._set(scenario)
 
-    scenario.add_sequences({"sequence": list(task)})
+    scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]
 
     assert len(_SequenceManager._get_all()) == 1
