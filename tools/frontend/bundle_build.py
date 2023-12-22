@@ -41,7 +41,7 @@ def build_taipy(root_path: Path):
         env_file_path = root_path / "frontend" / "taipy" / ".env"
         if not env_file_path.exists():
             with open(env_file_path, "w") as env_file:
-                env_file.write(f"TAIPY_GUI_DIR={root_path}\n")
+                env_file.write(f"TAIPY_DIR={root_path}\n")
         subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy", check=True, shell=with_shell)
         subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy", check=True, shell=with_shell)
 
