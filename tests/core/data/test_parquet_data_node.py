@@ -358,6 +358,21 @@ class TestParquetDataNode:
         assert pathlib.Path(temp_file_path).exists()
         assert isinstance(dn.read(), pd.DataFrame)
 
+        @pytest.mark.modin
+        @pytest.mark.parametrize(
+            "data",
+            [
+                modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            ],
+        )
+        def test_write_to_disk_modin(self, tmpdir_factory, data):
+            temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
+            dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path})
+            dn.write(data)
+
+            assert pathlib.Path(temp_file_path).exists()
+            assert isinstance(dn.read(), pd.DataFrame)
+
     @pytest.mark.modin
     @pytest.mark.parametrize(
         "data",
