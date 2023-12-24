@@ -32,18 +32,22 @@ def _get_columns_dict_from_list(
 ):
     col_dict = {}
     idx = 0
+    cols = str(list(value.columns) if isinstance(value, pd.DataFrame) 
+            else list(value.keys()) if isinstance(value, (dict, _MapDict)) 
+            else value if isinstance(value, (list, tuple))
+            else value)
+    
     for col in col_list:
         if col in col_types_keys:
             col_dict[col] = {"index": idx}
             idx += 1
         elif col:
-            if isinstance(value, pd.DataFrame):
-                if col not in value.columns:
-                    _warn(
-                        f'Error column "{col}" is not present. Available columns: {list(value.columns)}.'  # noqa: E501
-                    )
+            if col not in cols:
+                _warn(
+                    f'Error column "{col}" is not present. Available columns/keys: {cols}.'  # noqa: E501
+                )
             else:
-                _warn("The 'value' argument is not a pandas DataFrame.")
+                _warn("The 'value' argument is of an unsupported type. Expected DataFrame, dict, list, or tuple.")
     return col_dict
 
 
