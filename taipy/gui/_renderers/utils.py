@@ -32,11 +32,11 @@ def _get_columns_dict_from_list(
 ):
     col_dict = {}
     idx = 0
-    cols = str(list(value.columns) if isinstance(value, pd.DataFrame) 
-            else list(value.keys()) if isinstance(value, (dict, _MapDict)) 
-            else value if isinstance(value, (list, tuple))
-            else value)
-    
+    cols = str(list(value.columns) if isinstance(value, pd.DataFrame)
+        else list(value.keys()) if isinstance(value, (dict, _MapDict))
+        else value if isinstance(value, (list, tuple))
+        else value)
+
     for col in col_list:
         if col in col_types_keys:
             col_dict[col] = {"index": idx}
