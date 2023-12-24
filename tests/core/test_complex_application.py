@@ -15,6 +15,7 @@ from time import sleep
 from unittest.mock import patch
 
 import pandas as pd
+
 import taipy.core.taipy as tp
 from taipy.config import Config
 from taipy.core import Core, Status
@@ -72,9 +73,9 @@ def return_a_number_with_sleep():
 def test_skipped_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _OrchestratorFactory._build_orchestrator()
-    input_config = Config.configure_data_node("input")
+    input_config = Config.configure_data_node("input_dn")
     intermediate_config = Config.configure_data_node("intermediate")
-    output_config = Config.configure_data_node("output")
+    output_config = Config.configure_data_node("output_dn")
     task_config_1 = Config.configure_task("first", mult_by_2, input_config, intermediate_config, skippable=True)
     task_config_2 = Config.configure_task("second", mult_by_2, intermediate_config, output_config, skippable=True)
     scenario_config = Config.configure_scenario("scenario", [task_config_1, task_config_2])
@@ -84,7 +85,7 @@ def test_skipped_jobs():
         core.run()
 
         scenario = tp.create_scenario(scenario_config)
-        scenario.input.write(2)
+        scenario.input_dn.write(2)
         scenario.submit()
         assert len(tp.get_jobs()) == 2
         for job in tp.get_jobs():
