@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import copy
+import re
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -28,6 +29,7 @@ class _Element(ABC):
 
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
+    __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)_([\d]+)$")
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -49,11 +51,19 @@ class _Element(ABC):
 
     # Convert property value to string
     def parse_properties(self):
-        self._properties = {k: _Element._parse_property(v) for k, v in self._properties.items()}
+        self._properties = {
+            _Element._parse_property_key(k): _Element._parse_property(v) for k, v in self._properties.items()
+        }
 
     # Get a deepcopy version of the properties
     def _deepcopy_properties(self):
         return copy.deepcopy(self._properties)
+
+    @staticmethod
+    def _parse_property_key(key: str) -> str:
+        if match := _Element.__RE_INDEXED_PROPERTY.match(key):
+            return f"{match.group(1)}[{match.group(2)}]"
+        return key
 
     @staticmethod
     def _parse_property(value: t.Any) -> t.Any:
