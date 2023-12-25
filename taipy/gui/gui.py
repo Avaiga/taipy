@@ -2182,7 +2182,7 @@ class Gui:
         # t.Optional[t.Union[ssl.SSLContext, t.Tuple[str, t.Optional[str]], t.Literal["adhoc"]]] = None
         #
         # With the doc:
-        #     ssl_context (Optional[Union[ssl.SSLContext, Tuple[str, Optional[str]], te.Literal['adhoc']]]):
+        #     ssl_context (Optional[Union[ssl.SSLContext, Tuple[str, Optional[str]], t.Literal['adhoc']]]):
         #         Configures TLS to serve over HTTPS. This value can be:
         #
         #         - An `ssl.SSLContext` object

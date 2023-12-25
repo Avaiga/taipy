@@ -9,13 +9,28 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
+import platform
 import subprocess
 import sys
 
 
-def _run_template(main_path, time_out=30):
+def _bytes_to_str(b: bytes):
+    return str(b, "latin-1" if platform.system() == "Windows" else "utf-8")
+
+
+def _run_template(taipy_path, cwd, main_path, time_out=30):
     """Run the templates on a subprocess and get stdout after timeout"""
-    with subprocess.Popen([sys.executable, main_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+    env = dict(PYTHONPATH=taipy_path)
+    if platform.system() == "Windows":
+        env.update(os.environ)
+    with subprocess.Popen(
+        [sys.executable, main_path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=cwd,
+        env=env,
+    ) as proc:
         try:
             stdout, stderr = proc.communicate(timeout=time_out)
         except subprocess.TimeoutExpired:
@@ -23,7 +38,7 @@ def _run_template(main_path, time_out=30):
             stdout, stderr = proc.communicate()
 
     # Print the error if there is any (for debugging)
-    if stderr := str(stderr, "utf-8"):
+    if stderr := _bytes_to_str(stderr):
         print(stderr)
 
-    return stdout
+    return _bytes_to_str(stdout)

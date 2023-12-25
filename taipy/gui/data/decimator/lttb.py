@@ -20,13 +20,13 @@ class LTTB(Decimator):
     """A decimator using the LTTB algorithm.
 
     The LTTB algorithm is an high performance algorithm that significantly reduces the number of
-    data points. It can work very well with time-series data to show trends using by using only
+    data points. It can work very well with time-series data to show trends using only
     a few data points.
 
     This class can only be used with line charts.
     """
 
-    _CHART_MODES = ["lines+markers"]
+    _CHART_MODES = ["lines+markers", "lines", "markers"]
 
     def __init__(self, n_out: int, threshold: t.Optional[int] = None, zoom: t.Optional[bool] = True) -> None:
         """Initialize a new `LTTB`.

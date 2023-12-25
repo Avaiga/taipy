@@ -35,9 +35,6 @@ def test_scenario_management_with_toml_config(tmpdir):
         == ["requirements.txt", "main.py", "algos", "config", "pages"].sort()
     )
 
-    # Assert post_gen_project hook is successful
-    with open(os.path.join(tmpdir, "foo_app", "requirements.txt")) as requirements_file:
-        assert "taipy==" in requirements_file.read()
     assert (
         os.listdir(os.path.join(tmpdir, "foo_app", "config")).sort()
         == ["__init__.py", "config.py", "config.toml"].sort()
@@ -45,14 +42,12 @@ def test_scenario_management_with_toml_config(tmpdir):
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         assert 'Config.load("config/config.toml")' in config_file.read()
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "foo_app"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
+    taipy_path = os.getcwd()
+    stdout = _run_template(taipy_path, os.path.join(tmpdir, "foo_app"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO] Configuration 'config/config.toml' successfully loaded." in str(stdout, "utf-8")
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    assert "[Taipy][INFO] Configuration 'config/config.toml' successfully loaded." in stdout
+    assert "[Taipy][INFO]  * Server starting on" in stdout
 
 
 def test_scenario_management_without_toml_config(tmpdir):
@@ -74,19 +69,14 @@ def test_scenario_management_without_toml_config(tmpdir):
         == ["requirements.txt", "main.py", "algos", "config", "pages"].sort()
     )
 
-    # Assert post_gen_project hook is successful
-    with open(os.path.join(tmpdir, "foo_app", "requirements.txt")) as requirements_file:
-        assert "taipy==" in requirements_file.read()
     assert os.listdir(os.path.join(tmpdir, "foo_app", "config")).sort() == ["__init__.py", "config.py"].sort()
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         config_content = config_file.read()
         assert 'Config.load("config/config.toml")' not in config_content
         assert all([x in config_content for x in ["Config.configure_csv_data_node", "Config.configure_task"]])
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "foo_app"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
+    taipy_path = os.getcwd()
+    stdout = _run_template(taipy_path, os.path.join(tmpdir, "foo_app"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout

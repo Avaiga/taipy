@@ -21,3 +21,4 @@ from .parquet import ParquetDataNode
 from .pickle import PickleDataNode
 from .sql import SQLDataNode
 from .sql_table import SQLTableDataNode
+from .aws_s3 import S3ObjectDataNode

@@ -31,7 +31,7 @@ class TestCore:
                 core.run()
         expected_error_message = (
             "`storage_type` field of DataNodeConfig `d0` must be either csv, sql_table,"
-            " sql, mongo_collection, pickle, excel, generic, json, parquet, or in_memory."
+            " sql, mongo_collection, pickle, excel, generic, json, parquet, s3_object, or in_memory."
             ' Current value of property `storage_type` is "toto".'
         )
         assert expected_error_message in caplog.text

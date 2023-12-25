@@ -292,7 +292,7 @@ def test_version_number_when_switching_mode(init_sql_repo):
         assert len(_VersionManager._get_all()) == 4
         core.stop()
 
-    # Run with dev mode, the version number is the same as the first dev version to overide it
+    # Run with dev mode, the version number is the same as the first dev version to override it
     with patch("sys.argv", ["prog", "--development"]):
         core = Core()
         core.run()

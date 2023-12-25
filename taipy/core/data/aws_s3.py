@@ -9,24 +9,21 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
-import pickle
+import boto3
 from datetime import datetime, timedelta
-from typing import Any, List, Optional, Set
+from inspect import isclass
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import modin.pandas as pd
 from taipy.config.common.scope import Scope
 
-from .._backup._backup import _replace_in_backup_file
-from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
-from ._abstract_file import _AbstractFileDataNode
+from ..exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class PickleDataNode(DataNode, _AbstractFileDataNode):
-    """Data Node stored as a pickle file.
+class S3ObjectDataNode(DataNode):
+    """Data Node object stored in an Amazon Web Service S3 Bucket.
 
     Attributes:
         config_id (str): Identifier of the data node configuration. It must be a valid Python
@@ -34,7 +31,7 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
         owner_id (str): The identifier of the owner (sequence_id, scenario_id, cycle_id) or
-            `None`.
+            None.
         parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         edits (List[Edit^]): The ordered list of edits for that job.
@@ -49,20 +46,37 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
             and not completed yet. False otherwise.
         editor_id (Optional[str]): The identifier of the user who is currently editing the data node.
         editor_expiration_date (Optional[datetime]): The expiration date of the editor lock.
-        properties (dict[str, Any]): A dictionary of additional properties.
-            When creating a pickle data node, if the _properties_ dictionary contains a
-            _"default_data"_ entry, the data node is automatically written with the corresponding
-            _"default_data"_ value.
-            If the _properties_ dictionary contains a _"default_path"_ or _"path"_ entry, the data will be stored
-            using the corresponding value as the name of the pickle file.
+        properties (dict[str, Any]): A dictionary of additional properties. Note that the
+            _properties_ parameter must at least contain an entry for _"aws_access_key"_ , _"aws_secret_access_key"_ ,
+            _aws_s3_bucket_name_ and _aws_s3_object_key_ :
+
+            - _"aws_access_key"_ `(str)`: Amazon Web Services ID for to identify account\n
+            - _"aws_secret_access_key"_ `(str)`: Amazon Web Services access key to authenticate programmatic requests.\n
+            - _"aws_region"_ `(Any)`: Self-contained geographic area where Amazon Web Services (AWS) infrastructure is
+                    located.\n
+            - _"aws_s3_bucket_name"_ `(str)`: unique identifier for a container that stores objects in Amazon Simple
+                    Storage Service (S3).\n
+            - _"aws_s3_object_key"_ `(str)`:  unique idntifier for the name of the object(file) that has to be read
+                    or written. \n
+            - _"aws _s3_object_parameters"_ `(str)`: A dictionary of additional arguments to be passed to interact with
+                    the AWS service\n
     """
 
-    __STORAGE_TYPE = "pickle"
-    __PATH_KEY = "path"
-    __DEFAULT_PATH_KEY = "default_path"
-    __DEFAULT_DATA_KEY = "default_data"
-    __IS_GENERATED_KEY = "is_generated"
-    _REQUIRED_PROPERTIES: List[str] = []
+    __STORAGE_TYPE = "s3_object"
+
+    __AWS_ACCESS_KEY_ID = "aws_access_key"
+    __AWS_SECRET_ACCESS_KEY = "aws_secret_access_key"
+    __AWS_STORAGE_BUCKET_NAME = "aws_s3_bucket_name"
+    __AWS_S3_OBJECT_KEY = "aws_s3_object_key"
+    __AWS_REGION = "aws_region"
+    __AWS_S3_OBJECT_PARAMETERS = "aws_s3_object_parameters"
+
+    _REQUIRED_PROPERTIES: List[str] = [
+        __AWS_ACCESS_KEY_ID,
+        __AWS_SECRET_ACCESS_KEY,
+        __AWS_STORAGE_BUCKET_NAME,
+        __AWS_S3_OBJECT_KEY,
+    ]
 
     def __init__(
         self,
@@ -78,16 +92,15 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         edit_in_progress: bool = False,
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
-        properties=None,
+        properties: Optional[Dict] = None,
     ):
         if properties is None:
             properties = {}
-        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
-        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
-        if self._path is not None:
-            properties[self.__PATH_KEY] = self._path
-        self._is_generated = properties.get(self.__IS_GENERATED_KEY, self._path is None)
-        properties[self.__IS_GENERATED_KEY] = self._is_generated
+        required = self._REQUIRED_PROPERTIES
+        if missing := set(required) - set(properties.keys()):
+            raise MissingRequiredProperty(
+                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required."
+            )
         super().__init__(
             config_id,
             scope,
@@ -103,29 +116,24 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
             editor_expiration_date,
             **properties,
         )
-        if self._path is None:
-            self._path = self._build_path(self.storage_type())
-        if not self._last_edit_date and os.path.exists(self._path):
+
+        self._s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=properties.get(self.__AWS_ACCESS_KEY_ID),
+            aws_secret_access_key=properties.get(self.__AWS_SECRET_ACCESS_KEY),
+        )
+
+        if not self._last_edit_date:
             self._last_edit_date = datetime.now()
-        if default_value is not None and not os.path.exists(self._path):
-            self._write(default_value)
-            self._last_edit_date = datetime.now()
-            self._edits.append(
-                Edit(
-                    {
-                        "timestamp": self._last_edit_date,
-                        "writer_identifier": "TAIPY",
-                        "comments": "Default data written.",
-                    }
-                )
-            )
 
         self._TAIPY_PROPERTIES.update(
             {
-                self.__PATH_KEY,
-                self.__DEFAULT_PATH_KEY,
-                self.__DEFAULT_DATA_KEY,
-                self.__IS_GENERATED_KEY,
+                self.__AWS_ACCESS_KEY_ID,
+                self.__AWS_SECRET_ACCESS_KEY,
+                self.__AWS_STORAGE_BUCKET_NAME,
+                self.__AWS_S3_OBJECT_KEY,
+                self.__AWS_REGION,
+                self.__AWS_S3_OBJECT_PARAMETERS,
             }
         )
 
@@ -133,31 +141,16 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    @property  # type: ignore
-    @_self_reload(DataNode._MANAGER_NAME)
-    def path(self) -> Any:
-        return self._path
-
-    @path.setter
-    def path(self, value):
-        tmp_old_path = self._path
-        self._path = value
-        self.properties[self.__PATH_KEY] = value
-        self.properties[self.__IS_GENERATED_KEY] = False
-        _replace_in_backup_file(old_file_path=tmp_old_path, new_file_path=self._path)
-
-    @property  # type: ignore
-    @_self_reload(DataNode._MANAGER_NAME)
-    def is_generated(self) -> bool:
-        return self._is_generated
-
     def _read(self):
-        os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
-        with open(self._path, "rb") as pf:
-            return pickle.load(pf)
+        aws_s3_object = self._s3_client.get_object(
+            Bucket=self.properties[self.__AWS_STORAGE_BUCKET_NAME],
+            Key=self.properties[self.__AWS_S3_OBJECT_KEY],
+        )
+        return aws_s3_object["Body"].read().decode("utf-8")
 
-    def _write(self, data):
-        if isinstance(data, (pd.DataFrame, pd.Series)):
-            os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
-        with open(self._path, "wb") as pf:
-            pickle.dump(data, pf)
+    def _write(self, data: Any):
+        self._s3_client.put_object(
+            Bucket=self.properties[self.__AWS_STORAGE_BUCKET_NAME],
+            Key=self.properties[self.__AWS_S3_OBJECT_KEY],
+            Body=data,
+        )

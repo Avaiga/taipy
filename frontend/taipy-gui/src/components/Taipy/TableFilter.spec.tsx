@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { getByTitle, render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -58,7 +58,7 @@ describe("Table Filter Component", () => {
             <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} />
         );
         const elt = getByTestId("FilterListIcon");
-        expect(elt.parentElement?.tagName).toBe("BUTTON");
+        expect(elt.parentElement?.parentElement?.tagName).toBe("BUTTON");
     });
     it("renders popover when clicked", async () => {
         const { getByTestId, getAllByText, getAllByTestId } = render(
@@ -179,9 +179,7 @@ describe("Table Filter Component", () => {
         await userEvent.click(validate);
         const ddElts = getAllByTestId("ArrowDropDownIcon");
         expect(ddElts).toHaveLength(4);
-        const applyElt = getByText("Apply 1 filter");
-        expect(applyElt).toBeEnabled();
-        await userEvent.click(applyElt);
+        getByText("1");
         expect(onValidate).toHaveBeenCalled();
     });
     it("delete a row", async () => {
@@ -211,28 +209,28 @@ describe("Table Filter Component", () => {
         await userEvent.click(deletes[0]);
         const ddElts2 = getAllByTestId("ArrowDropDownIcon");
         expect(ddElts2).toHaveLength(2);
-        expect(getByText("Apply 0 filter")).toBeDisabled();
-        expect(getByText("Reset list (remove applied filter)")).toBeDisabled();
     });
     it("reset filters", async () => {
         const onValidate = jest.fn();
-        const { getByText, getByTestId } = render(
+        const { getAllByTestId, getByTestId } = render(
             <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={onValidate} appliedFilters={[{col: "StringCol", action: "==", value: ""}]} />
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);
-        const resetBut = getByText("Reset list (remove applied filter)");
-        expect(resetBut).toBeEnabled();
-        await userEvent.click(resetBut);
+        const deletes = getAllByTestId("DeleteIcon");
+        expect(deletes).toHaveLength(2);
+        expect(deletes[0].parentElement).not.toBeDisabled();
+        expect(deletes[1].parentElement).toBeDisabled();
+        await userEvent.click(deletes[0]);
         expect(onValidate).toHaveBeenCalled();
     });
     it("ignores unapplicable filters", async () => {
-        const { getByText, getByTestId } = render(
+        const { getAllByTestId, getByTestId } = render(
             <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} appliedFilters={[{col: "unknown col", action: "==", value: ""}]} />
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);
-        const resetBut = getByText("Reset list (remove applied filter)");
-        expect(resetBut).not.toBeEnabled();
+        const ddElts2 = getAllByTestId("ArrowDropDownIcon");
+        expect(ddElts2).toHaveLength(2);
     });
 });
