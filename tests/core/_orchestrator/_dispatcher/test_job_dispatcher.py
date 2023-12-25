@@ -16,6 +16,7 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 from pytest import raises
+
 from taipy.config.config import Config
 from taipy.core import DataNodeId, JobId, TaskId
 from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
@@ -146,7 +147,7 @@ def test_exception_in_writing_data():
     job_id = JobId("id1")
     output = MagicMock()
     output.id = DataNodeId("output_id")
-    output.config_id = "my_raising_datanode"
+    output._config_id = "my_raising_datanode"
     output._is_in_cache = False
     output.write.side_effect = ValueError()
     task = Task(config_id="name", properties={}, input=[], function=print, output=[output], id=task_id)

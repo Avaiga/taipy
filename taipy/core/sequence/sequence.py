@@ -66,7 +66,7 @@ class Sequence(_Entity, Submittable, _Labeled):
         super().__init__(subscribers)
         self.id: SequenceId = sequence_id
         self._tasks = tasks
-        self.owner_id = owner_id
+        self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._properties = _Properties(self, **properties)
         self._version = version or _VersionManagerFactory._build_manager()._get_latest_version()
@@ -117,6 +117,10 @@ class Sequence(_Entity, Submittable, _Labeled):
     @property
     def parent_ids(self):
         return self._parent_ids
+
+    @property
+    def owner_id(self):
+        return self._owner_id
 
     @property
     def version(self):

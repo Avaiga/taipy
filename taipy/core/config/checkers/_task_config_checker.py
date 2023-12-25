@@ -9,10 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import List
+
 from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 
+from ...scenario.scenario import Scenario
 from ..data_node_config import DataNodeConfig
 from ..task_config import TaskConfig
 
@@ -23,14 +26,32 @@ class _TaskConfigChecker(_ConfigChecker):
 
     def _check(self) -> IssueCollector:
         task_configs = self._config._sections[TaskConfig.name]
+        scenario_attributes = [
+            attr for attr in dir(Scenario) if not callable(getattr(Scenario, attr)) and not attr.startswith("_")
+        ]
+
         for task_config_id, task_config in task_configs.items():
             if task_config_id != _Config.DEFAULT_KEY:
                 self._check_existing_config_id(task_config)
                 self._check_if_entity_property_key_used_is_predefined(task_config)
+                self._check_if_config_id_is_overlapping_with_scenario_attributes(
+                    task_config_id, task_config, scenario_attributes
+                )
                 self._check_existing_function(task_config_id, task_config)
                 self._check_inputs(task_config_id, task_config)
                 self._check_outputs(task_config_id, task_config)
         return self._collector
+
+    def _check_if_config_id_is_overlapping_with_scenario_attributes(
+        self, task_config_id: str, task_config: TaskConfig, scenario_attributes: List[str]
+    ):
+        if task_config.id in scenario_attributes:
+            self._error(
+                task_config._ID_KEY,
+                task_config.id,
+                f"The id of the TaskConfig `{task_config_id}` is overlapping with the "
+                f"attribute `{task_config.id}` of a Scenario entity.",
+            )
 
     def _check_inputs(self, task_config_id: str, task_config: TaskConfig):
         self._check_children(

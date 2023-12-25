@@ -746,7 +746,7 @@
             "name": "height",
             "type": "str",
             "default_value": "None",
-            "doc": "The height, in CSS units, of the indicator (used when orientation is vartical)."
+            "doc": "The height, in CSS units, of the indicator (used when orientation is vertical)."
           }
         ]
       }

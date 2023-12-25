@@ -52,7 +52,7 @@ class TestDataNodeRepository:
 
         for i in range(10):
             data_node.id = DataNodeId(f"data_node-{i}")
-            data_node.owner_id = f"task-{i}"
+            data_node._owner_id = f"task-{i}"
             repository._save(data_node)
         objs = repository._load_all(filters=[{"owner_id": "task-2"}])
 
@@ -119,7 +119,7 @@ class TestDataNodeRepository:
 
         for i in range(10):
             data_node.id = DataNodeId(f"data_node-{i}")
-            data_node.owner_id = f"task-{i}"
+            data_node._owner_id = f"task-{i}"
             repository._save(data_node)
 
         assert len(repository._load_all()) == 10

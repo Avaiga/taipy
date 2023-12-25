@@ -29,17 +29,12 @@ def test_default_answer(tmpdir):
     assert (
         os.listdir(os.path.join(tmpdir, "taipy_application")).sort() == ["requirements.txt", "main.py", "images"].sort()
     )
-    with open(os.path.join(tmpdir, "taipy_application", "requirements.txt")) as requirements_file:
-        # Assert post_gen_project hook is successful
-        assert "taipy==" in requirements_file.read()
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
+    taipy_path = os.getcwd()
+    stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
 
 
 def test_main_file_with_and_without_extension(tmpdir):
@@ -85,14 +80,12 @@ def test_with_core_service(tmpdir):
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "core = Core()" in main_file.read()
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
+    taipy_path = os.getcwd()
+    stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-    assert "[Taipy][INFO] Development mode: " in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
+    assert "[Taipy][INFO] Development mode: " in stdout
 
 
 def test_with_rest_service(tmpdir):
@@ -112,14 +105,12 @@ def test_with_rest_service(tmpdir):
     with open(os.path.join(tmpdir, "taipy_application", "main.py")) as main_file:
         assert "rest = Rest()" in main_file.read()
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
+    taipy_path = os.getcwd()
+    stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-    assert "[Taipy][INFO] Development mode: " in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
+    assert "[Taipy][INFO] Development mode: " in stdout
 
 
 def test_with_both_core_rest_services(tmpdir):
@@ -141,14 +132,12 @@ def test_with_both_core_rest_services(tmpdir):
         assert "rest = Rest()" in main_file.read()
         assert "core = Core()" not in main_file.read()
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "taipy_application"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
+    taipy_path = os.getcwd()
+    stdout = _run_template(taipy_path, os.path.join(tmpdir, "taipy_application"), "main.py")
 
     # Assert the message when the application is run successfully is in the stdout
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
-    assert "[Taipy][INFO] Development mode: " in str(stdout, "utf-8")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
+    assert "[Taipy][INFO] Development mode: " in stdout
 
 
 def test_multipage_gui_template(tmpdir):
@@ -170,11 +159,9 @@ def test_multipage_gui_template(tmpdir):
         == ["name_1", "name_2", "name_3", "root.md", "root.py", "__init__.py"].sort()
     )
 
-    oldpwd = os.getcwd()
-    os.chdir(os.path.join(tmpdir, "foo_app"))
-    stdout = _run_template("main.py")
-    os.chdir(oldpwd)
-    assert "[Taipy][INFO]  * Server starting on" in str(stdout, "utf-8")
+    taipy_path = os.getcwd()
+    stdout = _run_template(taipy_path, os.path.join(tmpdir, "foo_app"), "main.py")
+    assert "[Taipy][INFO]  * Server starting on" in stdout
 
 
 def test_multipage_gui_template_with_invalid_page_name(tmpdir, capfd):

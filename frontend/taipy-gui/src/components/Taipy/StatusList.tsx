@@ -47,7 +47,7 @@ const getStatusStrValue = (status: number) => {
         case 4:
             return "error";
         default:
-            return "unknwon";
+            return "unknown";
     }
 };
 

@@ -87,7 +87,7 @@ const process = (files: FileList, uploadUrl: string, varName: string, id: string
         }
         self.postMessage({
             progress: 100,
-            message: uploadedFiles.join(", ") + " Uploaded Succesfully",
+            message: uploadedFiles.join(", ") + " Uploaded Successfully",
             done: true,
         } as FileUploadReturn);
     }

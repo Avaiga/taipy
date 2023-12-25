@@ -58,10 +58,10 @@ describe("reducer", () => {
     it("set Menu", async () => {
         expect(taipyReducer({...INITIAL_STATE}, {type: "SET_MENU", menu: {}} as TaipyBaseAction).menu).toBeDefined();
     });
-    it("sets dowload", async () => {
+    it("sets download", async () => {
         expect(taipyReducer({...INITIAL_STATE}, {type: "DOWNLOAD_FILE", content: {}} as TaipyBaseAction).download).toBeDefined();
     });
-    it("resets dowload", async () => {
+    it("resets download", async () => {
         expect(taipyReducer({...INITIAL_STATE}, {type: "DOWNLOAD_FILE"} as TaipyBaseAction).download).toBeUndefined();
     });
     it("sets partial", async () => {

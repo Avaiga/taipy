@@ -58,7 +58,7 @@ class NPMInstall(build_py):
             env_file_path = root_folder / "frontend" / "taipy" / ".env"
             if not env_file_path.exists():
                 with open(env_file_path, "w") as env_file:
-                    env_file.write(f"TAIPY_GUI_DIR={root_folder}\n")
+                    env_file.write(f"TAIPY_DIR={root_folder}\n")
             subprocess.run(["npm", "ci"], cwd=root_folder / "frontend" / "taipy", check=True, shell=with_shell)
             subprocess.run(
                 ["npm", "run", "build"], cwd=root_folder / "frontend" / "taipy", check=True, shell=with_shell
