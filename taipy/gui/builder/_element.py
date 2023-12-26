@@ -29,7 +29,7 @@ class _Element(ABC):
 
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
-    __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)(__([\w\d]+)|_([\d]+))$")
+    __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)__([\w\d]+)$")
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
@@ -62,7 +62,7 @@ class _Element(ABC):
     @staticmethod
     def _parse_property_key(key: str) -> str:
         if match := _Element.__RE_INDEXED_PROPERTY.match(key):
-            return f"{match.group(1)}[{match.group(3) or match.group(4)}]"
+            return f"{match.group(1)}[{match.group(2)}]"
         return key
 
     @staticmethod
