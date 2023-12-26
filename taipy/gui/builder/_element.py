@@ -46,7 +46,7 @@ class _Element(ABC):
             for key, value in t.cast(FrameType, source_frame.frame).f_locals.items()
             if not key.startswith("__")
         }
-        # Analyze the source code of the call to get source code args and kwargs
+        # Analyze the source code of the object creation to get the original args and kwargs
         self.__code_arguments = arguments = {}
         code_context = source_frame.code_context or []
         for c in code_context:
