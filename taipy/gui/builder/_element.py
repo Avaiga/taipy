@@ -53,7 +53,7 @@ class _Element(ABC):
             parsed_ast = ast.parse(c.strip())
             for node in ast.walk(parsed_ast):
                 if isinstance(node, ast.Call):
-                    if len(node.args) > 0:
+                    if len(node.args) > 0 and self._DEFAULT_PROPERTY != "":
                         arg = node.args[0]
                         value = ast.literal_eval(arg) if not isinstance(arg, ast.Name) else arg.id
                         arguments[self._DEFAULT_PROPERTY] = value
