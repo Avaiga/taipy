@@ -29,7 +29,7 @@ class _Element(ABC):
 
     _ELEMENT_NAME = ""
     _DEFAULT_PROPERTY = ""
-    __RE_INDEXED_PROPERTY = re.compile(r"^(.*?)_([\d]+)$")
+    __RE_INDEXED_PROPERTY = re.compile(r'^(.*?)(__([\w\d]+)|_([\d]+))$')
 
     def __new__(cls, *args, **kwargs):
         obj = super(_Element, cls).__new__(cls)
