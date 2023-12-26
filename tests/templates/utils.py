@@ -39,6 +39,6 @@ def _run_template(taipy_path, cwd, main_path, time_out=30):
 
     # Print the error if there is any (for debugging)
     if stderr := _bytes_to_str(stderr):
-        print(stderr)
+        print(stderr)  # noqa: T201
 
     return _bytes_to_str(stdout)
