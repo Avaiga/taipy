@@ -346,7 +346,7 @@ class TestParquetDataNode:
         "data",
         [
             [{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}],
-            modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
+            pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
         ],
     )
     def test_write_to_disk(self, tmpdir_factory, data):
