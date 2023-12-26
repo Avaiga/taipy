@@ -162,7 +162,7 @@ class State:
             if pl_ctx != gui._get_locals_context():
                 return gui._set_locals_context(pl_ctx)
         if len(inspect.stack()) > 1:
-            ctx = _get_module_name_from_frame(t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame)))
+            ctx = _get_module_name_from_frame(t.cast(FrameType, inspect.stack()[2].frame))
             current_context = gui._get_locals_context()
             # ignore context if the current one starts with the new one (to resolve for class modules)
             if ctx != current_context and not current_context.startswith(str(ctx)):

@@ -45,7 +45,7 @@ class Page:
         elif len(inspect.stack()) < 4:
             raise RuntimeError(f"Can't resolve module. Page '{type(self).__name__}' is not registered.")
         else:
-            self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[3].frame))
+            self._frame = t.cast(FrameType, inspect.stack()[3].frame)
         if self._renderer:
             # Extract the page module's attributes and methods
             cls = type(self)

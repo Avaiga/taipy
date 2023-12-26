@@ -10,8 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 from __future__ import annotations
+import ast
 
 import copy
+import inspect
+from types import FrameType
 import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -37,7 +40,29 @@ class _Element(ABC):
         return obj
 
     def __init__(self, *args, **kwargs):
+        source_frame = inspect.stack()[3]
+        self.__locals = {
+            key: value
+            for key, value in t.cast(FrameType, source_frame.frame).f_locals.items()
+            if not key.startswith("__")
+        }
+        # Analyze the source code of the call to get source code args and kwargs
+        self.__code_arguments = arguments = {}
+        code_context = source_frame.code_context or []
+        for c in code_context:
+            parsed_ast = ast.parse(c.strip())
+            for node in ast.walk(parsed_ast):
+                if isinstance(node, ast.Call):
+                    if len(node.args) > 0:
+                        arg = node.args[0]
+                        value = ast.literal_eval(arg) if not isinstance(arg, ast.Name) else arg.id
+                        arguments[self._DEFAULT_PROPERTY] = value
+                    for kw in node.keywords:
+                        value = ast.literal_eval(kw.value) if not isinstance(kw.value, ast.Name) else kw.value.id
+                        arguments[kw.arg] = value
+        # Manage properties
         self._properties: t.Dict[str, t.Any] = {}
+        self.__parsed_properties = set()
         if args and self._DEFAULT_PROPERTY != "":
             self._properties = {self._DEFAULT_PROPERTY: args[0]}
         self._properties.update(kwargs)
@@ -45,22 +70,33 @@ class _Element(ABC):
 
     def update(self, **kwargs):
         self._properties.update(kwargs)
-        self.parse_properties()
+        self.parse_properties(kwargs.keys(), True)
 
     # Convert property value to string
-    def parse_properties(self):
-        self._properties = {k: _Element._parse_property(v) for k, v in self._properties.items()}
+    def parse_properties(self, updated_properties: t.Optional[t.Iterable] = None, force: bool = False):
+        updated_properties = updated_properties if updated_properties is not None else self._properties.keys()
+        for p in updated_properties:
+            if p not in self._properties:
+                continue
+            self._properties[p] = self._parse_property(p, self._properties[p], force)
 
     # Get a deepcopy version of the properties
     def _deepcopy_properties(self):
         return copy.deepcopy(self._properties)
 
-    @staticmethod
-    def _parse_property(value: t.Any) -> t.Any:
-        if isinstance(value, (str, dict, Iterable)):
+    def _parse_property(self, key: str, value: t.Any, force: bool = False) -> t.Any:
+        # Only evaluate once if it is not forced to parse
+        if key in self.__parsed_properties and not force:
             return value
+        self.__parsed_properties.add(key)
         if hasattr(value, "__name__"):
             return str(getattr(value, "__name__"))
+        # Handle variable as keyword argument value
+        for k, v in self.__locals.items():
+            if v is value and str(self.__code_arguments[key]).strip() == k.strip():
+                return "{" + k + "}"
+        if isinstance(value, (str, dict, Iterable)):
+            return value
         return str(value)
 
     @abstractmethod
