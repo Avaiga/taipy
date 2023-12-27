@@ -387,7 +387,8 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
     deleted without causing conflicts or issues.
 
     Parameters:
-        entity (Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]): The scenario, job or submission to check.
+        entity (Union[Scenario, Job, Submission, ScenarioId, JobId, SubmissionId]): The scenario,
+        job or submission to check.
 
     Returns:
         True if the given scenario, job or submission can be deleted. False otherwise.
