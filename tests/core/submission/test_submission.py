@@ -741,7 +741,7 @@ def test_update_submission_status_with_two_jobs_canceled(job_ids, job_statuses, 
 def test_is_finished():
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission = Submission("entity_id", "submission_id", "entity_config_id")
+    submission = Submission("entity_id", "entity_type", "entity_config_id", "submission_id")
     submission_manager._set(submission)
 
     assert len(submission_manager._get_all()) == 1
