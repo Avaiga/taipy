@@ -14,10 +14,11 @@ from typing import List, Optional, Union
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
+from ..exceptions.exceptions import SubmissionNotDeletedException
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario import Scenario
 from ..sequence.sequence import Sequence
-from ..submission.submission import Submission
+from ..submission.submission import Submission, SubmissionId
 from ..task.task import Task
 
 
@@ -53,3 +54,26 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             return submissions_of_task[0]
         else:
             return max(submissions_of_task)
+
+    @classmethod
+    def _is_editable(cls, entity: Union[Submission, str]) -> bool:
+        return False
+
+    @classmethod
+    def _delete(cls, submission: Union[Submission, SubmissionId]):
+        if isinstance(submission, str):
+            submission = cls._get(submission)
+        if cls._is_deletable(submission):
+            super()._delete(submission.id)
+        else:
+            err = SubmissionNotDeletedException(submission.id)
+            cls._logger.warning(err)
+            raise err
+
+    @classmethod
+    def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:
+        if isinstance(submission, str):
+            submission = cls._get(submission)
+        if submission.is_finished():
+            return True
+        return False

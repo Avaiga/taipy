@@ -57,7 +57,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
 
     @classmethod
     def _delete(cls, job: Job, force=False):
-        if job.is_finished() or force:
+        if cls._is_deletable(job) or force:
             super()._delete(job.id)
             from .._orchestrator._dispatcher._job_dispatcher import _JobDispatcher
 
@@ -91,4 +91,8 @@ class _JobManager(_Manager[Job], _VersionMixin):
             job = cls._get(job)
         if job.is_finished():
             return True
+        return False
+
+    @classmethod
+    def _is_editable(cls, entity: Union[Job, str]) -> bool:
         return False

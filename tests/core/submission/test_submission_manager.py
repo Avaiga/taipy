@@ -12,7 +12,10 @@
 from datetime import datetime
 from time import sleep
 
+import pytest
+
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
+from taipy.core.exceptions.exceptions import SubmissionNotDeletedException
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission import Submission
 from taipy.core.submission.submission_status import SubmissionStatus
@@ -99,6 +102,11 @@ def test_delete_submission():
     submission = Submission("entity_id", "submission_id", "entity_config_id")
     submission_manager._set(submission)
 
+    with pytest.raises(SubmissionNotDeletedException):
+        submission_manager._delete(submission.id)
+
+    submission.submission_status = SubmissionStatus.COMPLETED
+
     for i in range(10):
         submission_manager._set(Submission("entity_id", f"submission_{i}", "entity_config_id"))
 
@@ -111,3 +119,59 @@ def test_delete_submission():
 
     submission_manager._delete_all()
     assert len(submission_manager._get_all()) == 0
+
+
+def test_is_deletable():
+    submission_manager = _SubmissionManagerFactory._build_manager()
+
+    submission = Submission("entity_id", "submission_id", "entity_config_id")
+    submission_manager._set(submission)
+
+    assert len(submission_manager._get_all()) == 1
+
+    assert submission._submission_status == SubmissionStatus.SUBMITTED
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.UNDEFINED
+    assert submission.submission_status == SubmissionStatus.UNDEFINED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.CANCELED
+    assert submission.submission_status == SubmissionStatus.CANCELED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.FAILED
+    assert submission.submission_status == SubmissionStatus.FAILED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.BLOCKED
+    assert submission.submission_status == SubmissionStatus.BLOCKED
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.RUNNING
+    assert submission.submission_status == SubmissionStatus.RUNNING
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.PENDING
+    assert submission.submission_status == SubmissionStatus.PENDING
+    assert not submission.is_deletable()
+    assert not submission_manager._is_deletable(submission)
+    assert not submission_manager._is_deletable(submission.id)
+
+    submission.submission_status = SubmissionStatus.COMPLETED
+    assert submission.submission_status == SubmissionStatus.COMPLETED
+    assert submission.is_deletable()
+    assert submission_manager._is_deletable(submission)
+    assert submission_manager._is_deletable(submission.id)
