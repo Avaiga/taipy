@@ -1,4 +1,20 @@
 repos:
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+    -   id: mypy
+        additional_dependencies: [
+                'types-Markdown',
+                'types-python-dateutil',
+                'types-pytz',
+                'types-tzlocal',
+        ]
+        args:
+        - --ignore-missing-imports
+        - --implicit-optional
+        - --no-namespace-packages
+        - --exclude=(taipy/templates/|generate_pyi.py|tools)
+        - --follow-imports=skip
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.1.10
     hooks:
