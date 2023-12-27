@@ -33,7 +33,8 @@ def test_button_action(page: "Page", gui: Gui, helpers):
     def do_something_fn(state):
         state.x = state.x * 2
 
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("./test")

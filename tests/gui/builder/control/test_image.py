@@ -20,7 +20,7 @@ from taipy.gui import Gui
 def test_image_url_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("content", "some_url")
     with tgb.Page(frame=None) as page:
-        tgb.image(content="{content}")
+        tgb.image(content="{content}")  # type: ignore[attr-defined]
     expected_list = [
         "<Image",
         "content={_TpCi_tpec_TpExPr_content_TPMDL_0}",
@@ -33,7 +33,7 @@ def test_image_file_builder(gui: Gui, test_client, helpers):
     with open((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve(), "rb") as content:
         gui._bind_var_val("content", content.read())
         with tgb.Page(frame=None) as page:
-            tgb.image(content="{content}")
+            tgb.image(content="{content}")  # type: ignore[attr-defined]
         expected_list = [
             "<Image",
             'defaultContent="data:image/png;base64,',
@@ -48,7 +48,7 @@ def test_image_path_builder(gui: Gui, test_client, helpers):
         "content", str((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve())
     )
     with tgb.Page(frame=None) as page:
-        tgb.image(content="{content}")
+        tgb.image(content="{content}")  # type: ignore[attr-defined]
     expected_list = [
         "<Image",
         'defaultContent="/taipy-content/taipyStatic0/fred.png',
@@ -60,7 +60,7 @@ def test_image_bad_file_builder(gui: Gui, test_client, helpers):
     with open(os.path.abspath(__file__), "rb") as content:
         gui._bind_var_val("content", content.read())
         with tgb.Page(frame=None) as page:
-            tgb.image(content="{content}")
+            tgb.image(content="{content}")  # type: ignore[attr-defined]
         expected_list = [
             "<Image",
             'defaultContent="Invalid content: text/x',

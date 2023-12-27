@@ -56,9 +56,9 @@ continents = {
     "Antarctica": [{"name": "Whole", "surface": 14200000}],
 }
 
-name = []
-surface = []
-continent = []
+name: list = []
+surface: list = []
+continent: list = []
 
 for continent_name, countries in continents.items():
     # Create continent in root rectangle

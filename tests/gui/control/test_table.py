@@ -27,7 +27,8 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -45,7 +46,8 @@ def test_table_reset_md(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         "columns={tp_TpExPr_gui_tbl_cols_True_None_7B_22columns_22_3A_20_22Day_3BEntity_3BCode_3BDaily_20hospital_20occupancy_22_2C_20_22date_format_22_3A_20_22eee_20dd_20MMM_20yyyy_22_7D_7B_22data_22_3A_20_22tpec_TpExPr_csvdata_TPMDL_0_22_7D_tpec_TpExPr_csvdata_TPMDL_0_csvdata_TPMDL_0_0}",
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -80,7 +82,8 @@ def test_table_md_2(gui: Gui, helpers, csvdata):
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -97,7 +100,8 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -132,5 +136,6 @@ def test_table_html_2(gui: Gui, helpers, csvdata):
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_html(gui, html_string, expected_list)

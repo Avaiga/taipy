@@ -37,7 +37,8 @@ def helpers_assert_value(page, s1, s2, v1):
 @pytest.mark.teste2e
 @pytest.mark.filterwarnings("ignore::Warning")
 def test_class_scopes_binding(page: "Page", gui: Gui, helpers):
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     operand_1 = 0  # noqa: F841
     gui.add_page("page1", Page1())
     gui.add_page("page2", Page2())

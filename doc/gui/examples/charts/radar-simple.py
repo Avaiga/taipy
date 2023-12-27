@@ -13,10 +13,12 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+from typing import Dict, List
+
 from taipy.gui import Gui
 
 # Source: www.statista.com (Most used programming languages in 2022)
-data = {
+data: Dict[str, List] = {
     # List of programming languages
     "Language": ["JavaScript", "HTML/CSS", "SQL", "Python", "Typescript", "Java", "Bash/Shell"],
     # Percentage of usage, per language

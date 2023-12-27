@@ -16,7 +16,7 @@ from taipy.gui import Gui
 def test_indicator_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("val", 15)
     with tgb.Page(frame=None) as page:
-        tgb.indicator(display=12, value="{val}", min=1, max=20, format="%.2f")
+        tgb.indicator(display=12, value="{val}", min=1, max=20, format="%.2f")  # type: ignore[attr-defined]
     expected_list = [
         "<Indicator",
         'libClassName="taipy-indicator"',

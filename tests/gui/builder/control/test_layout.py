@@ -15,7 +15,7 @@ from taipy.gui import Gui
 
 def test_layout_builder_1(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
-        with tgb.layout(columns="1 1", gap="1rem"):
-            tgb.text(value="This is a layout section")
+        with tgb.layout(columns="1 1", gap="1rem"):  # type: ignore[attr-defined]
+            tgb.text(value="This is a layout section")  # type: ignore[attr-defined]
     expected_list = ["<Layout", 'columns="1 1', 'gap="1rem"', "This is a layout section"]
     helpers.test_control_builder(gui, page, expected_list)

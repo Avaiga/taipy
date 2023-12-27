@@ -110,14 +110,15 @@ def test_map_dict_set(gui: Gui, test_client):
     d = {"a": 1}  # noqa: F841
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
     with gui.get_flask_app().app_context():
-        assert isinstance(gui._Gui__state.d, _MapDict)
-        gui._Gui__state.d = {"b": 2}
-        assert isinstance(gui._Gui__state.d, _MapDict)
+        assert isinstance(gui._Gui__state.d, _MapDict)  # type: ignore[attr-defined]
+        gui._Gui__state.d = {"b": 2}  # type: ignore[attr-defined]
+        assert isinstance(gui._Gui__state.d, _MapDict)  # type: ignore[attr-defined]
         assert len(gui._Gui__state.d) == 1
         assert gui._Gui__state.d.get("a", None) is None
         assert gui._Gui__state.d.get("b", None) == 2

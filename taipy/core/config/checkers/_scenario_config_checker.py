@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import Dict, cast
+
 from taipy.config import Config
 from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
@@ -25,7 +27,8 @@ class _ScenarioConfigChecker(_ConfigChecker):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        scenario_configs = self._config._sections[ScenarioConfig.name]
+        scenario_configs = cast(Dict[str, ScenarioConfig], self._config._sections[ScenarioConfig.name])
+
         for scenario_config_id, scenario_config in scenario_configs.items():
             if scenario_config_id != _Config.DEFAULT_KEY:
                 self._check_if_entity_property_key_used_is_predefined(scenario_config)

@@ -9,16 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import List
+from typing import List, Type
 
-from ._checkers._config_checker import _ConfigChecker
+from ..common.typing import ConfigCheckerType
 from .issue_collector import IssueCollector
 
 
 class _Checker:
     """Holds the various checkers to perform on the config."""
 
-    _checkers: List[_ConfigChecker] = []
+    _checkers: List = []
 
     @classmethod
     def _check(cls, _applied_config):
@@ -28,5 +28,5 @@ class _Checker:
         return collector
 
     @classmethod
-    def add_checker(cls, checker_class: _ConfigChecker):
+    def add_checker(cls, checker_class: Type[ConfigCheckerType]):
         cls._checkers.append(checker_class)

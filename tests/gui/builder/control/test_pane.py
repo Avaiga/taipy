@@ -16,8 +16,8 @@ from taipy.gui import Gui
 def test_pane_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("show_pane", False)
     with tgb.Page(frame=None) as page:
-        with tgb.pane(open="{show_pane}"):
-            tgb.text(value="This is a Pane")
+        with tgb.pane(open="{show_pane}"):  # type: ignore[attr-defined]
+            tgb.text(value="This is a Pane")  # type: ignore[attr-defined]
     expected_list = [
         "<Pane",
         'anchor="left"',
@@ -31,8 +31,8 @@ def test_pane_builder(gui: Gui, test_client, helpers):
 def test_pane_persistent_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("show_pane", False)
     with tgb.Page(frame=None) as page:
-        with tgb.pane(open="{show_pane}", persistent=True):
-            tgb.text(value="This is a Pane")
+        with tgb.pane(open="{show_pane}", persistent=True):  # type: ignore[attr-defined]
+            tgb.text(value="This is a Pane")  # type: ignore[attr-defined]
     expected_list = [
         "<Pane",
         'anchor="left"',

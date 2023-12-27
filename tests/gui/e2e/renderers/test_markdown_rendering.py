@@ -35,7 +35,8 @@ def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     color: blue;
 }
 """
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page("page1", markdown_content, style=style)
     helpers.run_e2e(gui)
     page.goto("./page1")

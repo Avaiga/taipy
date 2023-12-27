@@ -209,7 +209,8 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
     pd = pandas.DataFrame(data=small_dataframe)
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     gui.add_page("test", "<|Hello {a_decimator}|button|id={btn_id}|>")
     with patch("sys.argv", ["prog"]):

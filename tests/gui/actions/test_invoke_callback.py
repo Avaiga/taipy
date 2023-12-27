@@ -27,7 +27,8 @@ def test_invoke_callback(gui: Gui, helpers):
         state.val = 10
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>\n<|{val}|>"))
     with patch("sys.argv", ["prog"]):
@@ -40,4 +41,4 @@ def test_invoke_callback(gui: Gui, helpers):
     with gui.get_flask_app().app_context():
         g.client_id = cid
         invoke_callback(gui, cid, user_callback, [])
-        assert gui._Gui__state.val == 10
+        assert gui._Gui__state.val == 10  # type: ignore[attr-defined]

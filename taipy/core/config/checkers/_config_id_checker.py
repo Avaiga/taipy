@@ -36,3 +36,4 @@ class _ConfigIdChecker(_ConfigChecker):
                     config_id,
                     f"`{config_id}` is used as the config_id of multiple configurations {str(entity_types)}",
                 )
+        return self._collector

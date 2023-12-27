@@ -19,7 +19,8 @@ from taipy.gui import Gui
 
 def test_folder_pages_binding(gui: Gui):
     folder_path = f"{Path(Path(__file__).parent.resolve())}{os.path.sep}sample_assets"
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_pages(folder_path)
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False)

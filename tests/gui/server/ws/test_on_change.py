@@ -24,7 +24,8 @@ def test_default_on_change(gui: Gui, helpers):
     x = 10  # noqa: F841
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     gui.add_page("test", Markdown("<|{x}|input|>"))
     with patch("sys.argv", ["prog"]):
@@ -53,7 +54,8 @@ def test_specific_on_change(gui: Gui, helpers):
     x = 10  # noqa: F841
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     gui.add_page("test", Markdown("<|{x}|input|on_change=on_input_change|>"))
     with patch("sys.argv", ["prog"]):

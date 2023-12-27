@@ -96,7 +96,8 @@ Gui.add_library(MyLibrary())
 
 def test_lib_input_md(gui: Gui, test_client, helpers):
     val = ""  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     md_string = "<|{val}|test_lib.testinput|multiline|>"
     expected_list = [
         "<TestLib_Input",
@@ -111,7 +112,8 @@ def test_lib_input_md(gui: Gui, test_client, helpers):
 
 def test_lib_xhtml_md(gui: Gui, test_client, helpers):
     val = "title"  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     md_string = "<|{val}|test_lib.title|>"
     expected = [f"<h1>{val}</h1>"]
     helpers.test_control_md(gui, md_string, expected)
@@ -119,7 +121,8 @@ def test_lib_xhtml_md(gui: Gui, test_client, helpers):
 
 def test_lib_xhtml_fail_md(gui: Gui, test_client, helpers):
     val = "title"  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     md_string = "<|{val}|test_lib.title_fail|>"
     expected = ["title_fail.render_xhtml() did not return a valid XHTML string. unclosed token: line 1, column 9"]
     helpers.test_control_md(gui, md_string, expected)
@@ -127,7 +130,8 @@ def test_lib_xhtml_fail_md(gui: Gui, test_client, helpers):
 
 def test_lib_input_html_1(gui: Gui, test_client, helpers):
     val = ""  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     html_string = '<test_lib:testinput value="{val}" multiline="true" />'
     expected_list = [
         "<TestLib_Input",
@@ -142,7 +146,8 @@ def test_lib_input_html_1(gui: Gui, test_client, helpers):
 
 def test_lib_input_html_2(gui: Gui, test_client, helpers):
     val = ""  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     html_string = '<test_lib:testinput multiline="true">{val}</test_lib:testinput>'
     expected_list = [
         "<TestLib_Input",
@@ -157,7 +162,8 @@ def test_lib_input_html_2(gui: Gui, test_client, helpers):
 
 def test_lib_inner_md(gui: Gui, test_client, helpers):
     val = "title"  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     md_string = "<|{val}|test_lib.inner|>"
     expected = [
         "<TestLib_Inner",
@@ -168,7 +174,8 @@ def test_lib_inner_md(gui: Gui, test_client, helpers):
 
 
 def test_lib_inner_no_value_md(gui: Gui, test_client, helpers):
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     md_string = "<|test_lib.inner|>"
     expected = ["<TestLib_Inner", "withProperty={tpec_TpExPr_None_TPMDL_0}"]
     helpers.test_control_md(gui, md_string, expected)

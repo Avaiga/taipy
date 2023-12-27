@@ -74,7 +74,8 @@ def test_slider_input_reload(page: "Page", gui: Gui, helpers):
 <|{val}|slider|id=input2|>
 """
     val = 0  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page(name="page1", page=page_md)
     helpers.run_e2e_multi_client(gui)
     page.goto("./page1")

@@ -21,7 +21,8 @@ def test_navigate(gui: Gui, helpers):
         navigate(state, "test")
 
     with warnings.catch_warnings(record=True):
-        gui._set_frame(inspect.currentframe())
+        if frame := inspect.currentframe():
+            gui._set_frame(frame)
         gui.add_page("test", Markdown("#This is a page"))
         with patch("sys.argv", ["prog"]):
             gui.run(run_server=False)
@@ -41,7 +42,8 @@ def test_navigate_to_no_route(gui: Gui, helpers):
         navigate(state, "toto")
 
     with warnings.catch_warnings(record=True):
-        gui._set_frame(inspect.currentframe())
+        if frame := inspect.currentframe():
+            gui._set_frame(frame)
         gui.add_page("test", Markdown("#This is a page"))
         with patch("sys.argv", ["prog"]):
             gui.run(run_server=False)
@@ -61,7 +63,8 @@ def test_on_navigate_to_inexistant(gui: Gui, helpers):
         return "test2" if page == "test" else page
 
     with warnings.catch_warnings(record=True) as records:
-        gui._set_frame(inspect.currentframe())
+        if frame := inspect.currentframe():
+            gui._set_frame(frame)
         gui.add_page("test", Markdown("#This is a page"))
         with patch("sys.argv", ["prog"]):
             gui.run(run_server=False)
@@ -80,7 +83,8 @@ def test_on_navigate_to_existant(gui: Gui, helpers):
         return "test2" if page == "test1" else page
 
     with warnings.catch_warnings(record=True):
-        gui._set_frame(inspect.currentframe())
+        if frame := inspect.currentframe():
+            gui._set_frame(frame)
         gui.add_page("test1", Markdown("#This is a page test1"))
         gui.add_page("test2", Markdown("#This is a page test2"))
         with patch("sys.argv", ["prog"]):

@@ -23,7 +23,8 @@ def test_a_button_pressed(gui: Gui, helpers):
     x = 10  # noqa: F841
     text = "hi"  # noqa: F841
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page(
         "test", Markdown("<|Do something!|button|on_action=do_something|id=my_button|> | <|{x}|> | <|{text}|>")

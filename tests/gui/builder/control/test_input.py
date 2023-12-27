@@ -17,9 +17,10 @@ from taipy.gui import Gui
 
 def test_input_builder(gui: Gui, helpers):
     x = "Hello World!"  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     with tgb.Page(frame=None) as page:
-        tgb.input(value="{x}")
+        tgb.input(value="{x}")  # type: ignore[attr-defined]
     expected_list = [
         "<Input",
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
@@ -32,9 +33,10 @@ def test_input_builder(gui: Gui, helpers):
 
 def test_password_builder(gui: Gui, helpers):
     x = "Hello World!"  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     with tgb.Page(frame=None) as page:
-        tgb.input(value="{x}", password=True)
+        tgb.input(value="{x}", password=True)  # type: ignore[attr-defined]
     expected_list = [
         "<Input",
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',

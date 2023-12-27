@@ -15,7 +15,7 @@ from taipy.gui import Gui
 
 def test_number_builder_1(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
-        tgb.number(value="10")
+        tgb.number(value="10")  # type: ignore[attr-defined]
     expected_list = ["<Input", 'value="10"', 'type="number"']
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -23,7 +23,7 @@ def test_number_builder_1(gui: Gui, helpers):
 def test_number_builder_2(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", "10")
     with tgb.Page(frame=None) as page:
-        tgb.number(value="{x}")
+        tgb.number(value="{x}")  # type: ignore[attr-defined]
     expected_list = [
         "<Input",
         'updateVarName="_TpN_tpec_TpExPr_x_TPMDL_0"',

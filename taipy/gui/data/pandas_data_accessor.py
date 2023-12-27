@@ -48,9 +48,9 @@ class _PandasDataAccessor(_DataAccessor):
         args = []
         if column_name:
             args.append(row[column_name])
-        args.extend((row.name, row))
+        args.extend((row.name, row))  # type: ignore[arg-type]
         if column_name:
-            args.append(column_name)
+            args.append(column_name)  # type: ignore[arg-type]
         try:
             return str(gui._call_function_with_state(user_function, args))
         except Exception as e:
@@ -134,9 +134,7 @@ class _PandasDataAccessor(_DataAccessor):
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
         dataframe = dataframe.iloc[new_indexes] if new_indexes is not None else dataframe
-        dataframe = dataframe.loc[
-            :, dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(cols)].index
-        ]  # type: ignore
+        dataframe = dataframe.loc[:, dataframe.dtypes[dataframe.dtypes.index.astype(str).isin(cols)].index]  # type: ignore
         return dataframe
 
     def __apply_user_function(

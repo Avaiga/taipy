@@ -20,7 +20,8 @@ def ws_u_assert_template(gui: Gui, helpers, value_before_update, value_after_upd
     var = value_before_update  # noqa: F841
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page("test", Markdown("<|{var}|>"))
@@ -47,7 +48,8 @@ def test_ws_u_string(gui: Gui, helpers):
     payload = {"value": value_after_update}
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)
 
@@ -58,6 +60,7 @@ def test_ws_u_number(gui: Gui, helpers):
     payload = {"value": value_after_update}
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)

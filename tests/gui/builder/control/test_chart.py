@@ -30,7 +30,7 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
     chart_type = [None, "scatter"]  # noqa: F841
     xaxis = [None, "x2"]  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{csvdata}",
             x="Day",
             selected_color="green",
@@ -58,14 +58,15 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_builder(gui, page, expected_list)
 
 
 def test_chart_builder_2(gui: Gui, helpers, csvdata):
     selected_indices = [14258]  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{csvdata}",
             x="Day",
             selected_color="green",
@@ -93,7 +94,8 @@ def test_chart_builder_2(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_builder(gui, page, expected_list)
 
 
@@ -161,7 +163,7 @@ def test_map_builder(gui: Gui, helpers):
         "margin": {"r": 0, "t": 0, "b": 0, "l": 0},
     }
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{mapData}",
             type="scattermapbox",
             marker="{marker}",
@@ -171,7 +173,8 @@ def test_map_builder(gui: Gui, helpers):
             text="Globvalue",
             mode="markers",
         )
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     expected_list = [
         "<Chart",
         "&quot;Lat&quot;: &#x7B;&quot;index&quot;:",
@@ -198,7 +201,7 @@ def test_chart_indexed_properties_builder(gui: Gui, helpers):
     data["Montpellier 2"] = [x * (1 - (random.random() / 10)) for x in data["Montpellier"]]
 
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{data}",
             x="Date",
             mode="lines",
@@ -207,7 +210,8 @@ def test_chart_indexed_properties_builder(gui: Gui, helpers):
             color=[None, "blue", "blue", None, "red", "red"],
         )
 
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     expected_list = [
         "<Chart",
         "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501
@@ -242,7 +246,7 @@ def test_chart_indexed_properties_with_arrays_builder(gui: Gui, helpers):
     colors = [None, "blue", "blue", None, "red", "red"]  # noqa: F841
 
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{data}",
             x="Date",
             mode="lines",
@@ -251,7 +255,8 @@ def test_chart_indexed_properties_with_arrays_builder(gui: Gui, helpers):
             color="{colors}",
         )
 
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     expected_list = [
         "<Chart",
         "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501

@@ -52,18 +52,18 @@ class _VersionManager(_Manager[_Version]):
     @classmethod
     def _get_or_create(cls, id: str, force: bool) -> _Version:
         if version := cls._get(id):
-            comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)
+            comparator_result = Config._comparator._find_conflict_config(version.config, Config._applied_config, id)  # type: ignore[attr-defined]
             if comparator_result.get(_ComparatorResult.CONFLICTED_SECTION_KEY):
                 if force:
                     cls.__logger.warning(
                         f"Option --force is detected, overriding the configuration of version {id} ..."
                     )
-                    version.config = Config._applied_config
+                    version.config = Config._applied_config  # type: ignore[attr-defined]
                 else:
                     raise ConflictedConfigurationError()
 
         else:
-            version = _Version(id=id, config=Config._applied_config)
+            version = _Version(id=id, config=Config._applied_config)  # type: ignore[attr-defined]
 
         cls._set(version)
         return version

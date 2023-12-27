@@ -20,7 +20,8 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     csvdata = csvdata
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     Gui._set_timezone("UTC")
 
     # Bind a page so that the variable will be evaluated as expression

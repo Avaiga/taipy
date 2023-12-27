@@ -57,7 +57,8 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, texts):
 <|{t}|id=text1|>
 """
     t = _string_to_date("2022-03-03T00:00:00.000Z")  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, time_zone=time_zone)
     page.goto("./test")
@@ -72,7 +73,8 @@ def test_date_only(page: "Page", gui: Gui, helpers):
 <|{t}|id=text1|>
 """
     t = _string_to_date("Wed Jul 28 1993")  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("./test")

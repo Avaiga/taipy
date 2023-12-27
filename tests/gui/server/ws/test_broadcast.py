@@ -20,7 +20,8 @@ def test_broadcast(gui: Gui, helpers):
     selected_val = ["value1", "value2"]  # noqa: F841
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page(

@@ -23,7 +23,8 @@ from taipy.gui import Gui
 @pytest.mark.teste2e
 def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
     table_data = csvdata  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page(
         name="test",
         page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",  # noqa: E501
@@ -39,7 +40,8 @@ def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
 def test_accessor_arrow(page: "Page", gui: Gui, csvdata, helpers):
     if util.find_spec("pyarrow"):
         table_data = csvdata  # noqa: F841
-        gui._set_frame(inspect.currentframe())
+        if frame := inspect.currentframe():
+            gui._set_frame(frame)
         gui.add_page(
             name="test",
             page="<|{table_data}|table|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",  # noqa: E501

@@ -22,7 +22,8 @@ def test_resume_control(gui: Gui, helpers):
     btn_id = "button1"  # noqa: F841
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
     with patch("sys.argv", ["prog"]):
@@ -35,7 +36,7 @@ def test_resume_control(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
-        resume_control(gui._Gui__state)
+        resume_control(gui._Gui__state)  # type: ignore[attr-defined]
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(received_messages[0], "BL", {"message": None})

@@ -95,8 +95,7 @@ class _Evaluator:
             st = ast.parse('f"{' + e + '}"' if _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(e) else e)
             args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
             targets = [
-                # type: ignore
-                compr.target.id
+                compr.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(st)
                 if isinstance(node, ast.ListComp)
                 for compr in node.generators

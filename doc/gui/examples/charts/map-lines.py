@@ -13,11 +13,13 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+from typing import Any, Dict, List
+
 from taipy.gui import Gui
 
 # Busiest US airports
 # Source: https://en.wikipedia.org/wiki/List_of_busiest_airports_by_passenger_traffic
-airports = {
+airports: Dict[str, Dict[str, float]] = {
     "AMS": {"lat": 52.31047296675518, "lon": 4.76819929439927},
     "ATL": {"lat": 33.64086185344307, "lon": -84.43600501711686},
     "AYT": {"lat": 36.90419539293911, "lon": 30.801855337974292},
@@ -72,7 +74,7 @@ airports = {
 
 # Inter US airports flights
 # Source: https://www.faa.gov/air_traffic/by_the_numbers
-flights = [
+flights: List[Dict[str, Any]] = [
     {"from": "ATL", "to": "DFW", "traffic": 580},
     {"from": "ATL", "to": "MIA", "traffic": 224},
     {"from": "BOS", "to": "LAX", "traffic": 168},

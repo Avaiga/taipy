@@ -18,7 +18,8 @@ from taipy.gui import Gui
 
 
 def test_render_route(gui: Gui):
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page("page1", "# first page")
     gui.add_page("page2", "# second page")
     with patch("sys.argv", ["prog"]):

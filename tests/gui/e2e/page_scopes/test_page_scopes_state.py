@@ -28,7 +28,8 @@ from .assets4.page1 import reset_d
 @pytest.mark.teste2e
 @pytest.mark.filterwarnings("ignore::Warning")
 def test_page_scopes_state_runtime(page: "Page", gui: Gui, helpers):
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     def test(state):
         reset_d(state)

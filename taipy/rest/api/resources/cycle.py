@@ -26,7 +26,7 @@ from ..schemas import CycleResponseSchema, CycleSchema
 REPOSITORY = "cycle"
 
 
-def _get_or_raise(cycle_id: str) -> None:
+def _get_or_raise(cycle_id: str) -> Cycle:
     manager = _CycleManagerFactory._build_manager()
     cycle = manager._get(cycle_id)
     if not cycle:

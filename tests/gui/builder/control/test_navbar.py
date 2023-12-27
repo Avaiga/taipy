@@ -24,7 +24,7 @@ def test_navbar_builder(gui: Gui, test_client, helpers):
         ],
     )
     with tgb.Page(frame=None) as page:
-        tgb.navbar(lov="{navlov}")
+        tgb.navbar(lov="{navlov}")  # type: ignore[attr-defined]
     expected_list = [
         "<NavBar",
         'defaultLov="[[&quot;/page1&quot;, &quot;Page 1&quot;], [&quot;/page2&quot;, &quot;Page 2&quot;], [&quot;/page3&quot;, &quot;Page 3&quot;], [&quot;/page4&quot;, &quot;Page 4&quot;]]"',  # noqa: E501

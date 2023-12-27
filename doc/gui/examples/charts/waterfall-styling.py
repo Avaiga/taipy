@@ -32,7 +32,7 @@ data = {
 }
 
 # Compute difference (Score-Par)
-data["Diff"] = [data["Score"][i] - data["Par"][i] for i in range(0, n_holes)] + [None]
+data["Diff"] = [data["Score"][i] - data["Par"][i] for i in range(0, n_holes)] + [None]  # type: ignore[index]
 
 # Show positive values in red, and negative values in green
 options = {"decreasing": {"marker": {"color": "green"}}, "increasing": {"marker": {"color": "red"}}}

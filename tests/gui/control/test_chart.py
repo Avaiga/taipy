@@ -35,7 +35,8 @@ def test_chart_md_1(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -57,7 +58,8 @@ def test_chart_html_1(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -79,7 +81,8 @@ def test_chart_html_2(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -147,7 +150,8 @@ def test_map_md(gui: Gui, helpers):
         "margin": {"r": 0, "t": 0, "b": 0, "l": 0},
     }
     md = "<|{mapData}|chart|type=scattermapbox|marker={marker}|layout={layout}|lat=Lat|lon=Lon|text=Globvalue|mode=markers|>"  # noqa: E501
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     expected_list = [
         "<Chart",
         "&quot;Lat&quot;: &#x7B;&quot;index&quot;:",
@@ -175,7 +179,8 @@ def test_chart_indexed_properties(gui: Gui, helpers):
 
     md = "<|{data}|chart|x=Date|mode=lines|y[1]=La Rochelle|y[2]=La Rochelle 1|y[3]=La Rochelle 2|y[4]=Montpellier|y[5]=Montpellier 1|y[6]=Montpellier 2|line[2]=dashdot|line[3]=dash|line[5]=dashdot|line[6]=dash|color[2]=blue|color[3]=blue|color[5]=red|color[6]=red|>"  # noqa: E501
 
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     expected_list = [
         "<Chart",
         "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501
@@ -211,7 +216,8 @@ def test_chart_indexed_properties_with_arrays(gui: Gui, helpers):
 
     md = "<|{data}|chart|x=Date|mode=lines|y={ys}|line={lines}|color={colors}|>"
 
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     expected_list = [
         "<Chart",
         "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501

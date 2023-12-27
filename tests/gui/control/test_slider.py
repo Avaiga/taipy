@@ -36,7 +36,8 @@ def test_slider_with_min_max(gui: Gui, test_client, helpers):
 def test_slider_with_dict_labels_md(gui: Gui, helpers):
     sel = "Item 1"  # noqa: F841
     labels = {"Item 1": "Label Start", "Item 3": "Label End"}  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     md_string = "<|{sel}|slider|lov=Item 1;Item 2;Item 3|labels={labels}|>"
     expected_list = [
         "<Slider",
@@ -47,7 +48,8 @@ def test_slider_with_dict_labels_md(gui: Gui, helpers):
 
 def test_slider_with_boolean_labels_md(gui: Gui, helpers):
     sel = "Item 1"  # noqa: F841
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     md_string = "<|{sel}|slider|lov=Item 1;Item 2;Item 3|labels|>"
     expected_list = ["<Slider", "labels={true}"]
     helpers.test_control_md(gui, md_string, expected_list)

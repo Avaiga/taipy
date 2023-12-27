@@ -22,7 +22,8 @@ def test_get_state_id(gui: Gui, helpers):
     btn_id = "button1"  # noqa: F841
 
     # set gui frame
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
     with patch("sys.argv", ["prog"]):
@@ -33,4 +34,4 @@ def test_get_state_id(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().app_context():
         g.client_id = cid
-        assert cid == get_state_id(gui._Gui__state)
+        assert cid == get_state_id(gui._Gui__state)  # type: ignore[attr-defined]

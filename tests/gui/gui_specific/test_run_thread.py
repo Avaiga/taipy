@@ -19,7 +19,8 @@ from taipy.gui import Gui
 
 # this hangs in github
 def test_run_thread(gui: Gui, helpers):
-    gui._set_frame(inspect.currentframe())
+    if frame := inspect.currentframe():
+        gui._set_frame(frame)
     gui.add_page("page1", "# first page")
     with patch("sys.argv", ["prog"]):
         gui.run(run_in_thread=True, run_browser=False)
