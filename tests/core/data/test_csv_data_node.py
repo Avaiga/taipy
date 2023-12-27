@@ -126,7 +126,7 @@ class TestCSVDataNode:
         assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path).to_numpy())
 
     @pytest.mark.modin
-    def test_read_with_header_pandas(self):
+    def test_read_with_header_modin(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         # Create CSVDataNode with modin exposed_type
         csv_data_node_as_modin = CSVDataNode("bar", Scope.SCENARIO, properties={"path": path, "exposed_type": "modin"})
