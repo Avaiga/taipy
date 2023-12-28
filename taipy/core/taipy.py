@@ -213,9 +213,13 @@ def submit(
             - If a `Task^` is provided, it will return the created `Job^`.
     """
     if _is_scenario(entity):
-        return _get_manager(Scenario._MANAGER_NAME)._submit(entity, force=force, wait=wait, timeout=timeout)  # type: ignore
+        return _get_manager(Scenario._MANAGER_NAME)._submit(  # type: ignore
+            entity, force=force, wait=wait, timeout=timeout
+        )
     if _is_sequence(entity):
-        return _get_manager(Sequence._MANAGER_NAME)._submit(entity, force=force, wait=wait, timeout=timeout)  # type: ignore
+        return _get_manager(Sequence._MANAGER_NAME)._submit(  # type: ignore
+            entity, force=force, wait=wait, timeout=timeout
+        )
     if _is_task(entity):
         return _get_manager(Task._MANAGER_NAME)._submit(entity, force=force, wait=wait, timeout=timeout)  # type: ignore
 
