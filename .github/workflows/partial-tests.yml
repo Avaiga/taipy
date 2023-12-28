@@ -144,7 +144,7 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest' and steps.changes.outputs.core == 'true'
+        if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
         run: brew install libmagic
 
       - name: Pytest Core orchestrator_dispatcher
@@ -183,7 +183,7 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest' and steps.changes.outputs.core == 'true'
+        if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
         run: brew install libmagic
 
       - name: Pytest Core standalone
@@ -222,7 +222,7 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest' and steps.changes.outputs.core == 'true'
+        if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
         run: brew install libmagic
 
       - name: Pytest Core modin
