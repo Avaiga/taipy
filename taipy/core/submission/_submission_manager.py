@@ -74,6 +74,4 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
     def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:
         if isinstance(submission, str):
             submission = cls._get(submission)
-        if submission.is_finished():
-            return True
-        return False
+        return submission.is_finished()
