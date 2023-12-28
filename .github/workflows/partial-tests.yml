@@ -112,7 +112,7 @@ jobs:
         run: pipenv run pytest tests/templates
 
   submit_tests:
-    needs: tests
+    needs: linter
     timeout-minutes: 20
     strategy:
       fail-fast: false
