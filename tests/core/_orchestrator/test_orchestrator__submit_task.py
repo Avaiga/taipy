@@ -12,6 +12,7 @@ from datetime import datetime
 from unittest import mock
 
 import freezegun
+import pytest
 
 from taipy.config import Config
 from taipy.core import taipy
@@ -110,6 +111,7 @@ def test_submit_task_development_mode_blocked_job():
     assert orchestrator.jobs_to_run.qsize() == 0
 
 
+@pytest.mark.standalone
 def test_submit_task_standalone_mode():
     Config.configure_job_executions(mode="standalone")
     sc = create_scenario()
@@ -148,6 +150,7 @@ def test_submit_task_standalone_mode():
     assert orchestrator.jobs_to_run.qsize() == 1
 
 
+@pytest.mark.standalone
 def test_submit_task_standalone_mode_blocked_job():
     Config.configure_job_executions(mode="standalone")
     sc = create_scenario()
@@ -186,6 +189,7 @@ def test_submit_task_standalone_mode_blocked_job():
     assert orchestrator.jobs_to_run.qsize() == 0
 
 
+@pytest.mark.standalone
 def test_submit_task_with_callbacks_and_force_and_wait():
     Config.configure_job_executions(mode="standalone")
     scenario = create_scenario()

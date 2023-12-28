@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from unittest import mock
 
 import freezegun
+import pytest
 
 from taipy import Scope, Task, Scenario
 from taipy.config import Config
@@ -205,6 +206,7 @@ def test_submit_scenario_development_mode_blocked_jobs():
     assert orchestrator.jobs_to_run.qsize() == 0
 
 
+@pytest.mark.standalone
 def test_submit_scenario_standalone_mode():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     sc = create_scenario()
@@ -378,6 +380,7 @@ def test_submit_sequence_development_mode():
     assert orchestrator.jobs_to_run.qsize() == 0
 
 
+@pytest.mark.standalone
 def test_submit_sequence_standalone_mode():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     scenario = create_scenario()
@@ -443,6 +446,7 @@ def test_submit_sequence_standalone_mode():
     assert orchestrator.jobs_to_run.qsize() == 1
 
 
+@pytest.mark.standalone
 def test_submit_sequence_with_callbacks_and_force_and_wait():
     Config.configure_job_executions(mode="standalone")
     scenario = create_scenario()

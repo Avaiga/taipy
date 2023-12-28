@@ -60,6 +60,7 @@ def test_build_development_dispatcher():
     assert isinstance(_OrchestratorFactory._dispatcher, _DevelopmentJobDispatcher)
 
 
+@pytest.mark.standalone
 def test_build_standalone_dispatcher():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     _OrchestratorFactory._orchestrator = None
@@ -71,6 +72,7 @@ def test_build_standalone_dispatcher():
     _OrchestratorFactory._dispatcher.stop()
 
 
+@pytest.mark.standalone
 def test_rebuild_standalone_dispatcher_and_force_restart():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     _OrchestratorFactory._build_orchestrator()
@@ -123,6 +125,7 @@ def test_remove_dispatcher_development():
     assert _OrchestratorFactory._dispatcher is None
 
 
+@pytest.mark.standalone
 def test_remove_dispatcher_standalone():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
     _OrchestratorFactory._build_orchestrator()
