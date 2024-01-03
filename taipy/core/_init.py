@@ -36,6 +36,7 @@ from .taipy import (
     get,
     get_cycles,
     get_cycles_scenarios,
+    get_scenarios_by_time,
     get_data_nodes,
     get_entities_by_config_id,
     get_jobs,
