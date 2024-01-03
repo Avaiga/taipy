@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 import traceback
 
-from taipy import Job, Task, Status, JobId
+from taipy import Job, JobId, Status, Task
 from taipy.core._orchestrator._dispatcher import _JobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.job._job_manager_factory import _JobManagerFactory
