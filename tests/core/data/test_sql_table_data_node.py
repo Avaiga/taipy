@@ -465,6 +465,7 @@ class TestSQLTableDataNode:
         dn.append(append_data_1)
         assert_frame_equal(dn.read(), pd.concat([original_data, append_data_1]).reset_index(drop=True))
 
+    @pytest.mark.modin
     def test_sqlite_append_modin(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {
@@ -540,6 +541,7 @@ class TestSQLTableDataNode:
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
         assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
 
+    @pytest.mark.modin
     def test_filter_modin_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {

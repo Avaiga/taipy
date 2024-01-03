@@ -110,6 +110,7 @@ class TestCore:
                 Config.configure_data_node(id="i1")
             core.stop()
 
+    @pytest.mark.standalone
     def test_block_config_update_when_core_service_is_running_standalone_mode(self):
         _OrchestratorFactory._dispatcher = None
 

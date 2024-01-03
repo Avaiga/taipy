@@ -80,7 +80,7 @@ __CHART_AXIS: t.Dict[str, t.Tuple[_Chart_iprops, ...]] = {
     "waterfall": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.measure),
 }
 __CHART_DEFAULT_AXIS: t.Tuple[_Chart_iprops, ...] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
-__CHART_MARKER_TO_COLS: t.Tuple[str, ...] = ("color", "size", "symbol", "opacity")
+__CHART_MARKER_TO_COLS: t.Tuple[str, ...] = ("color", "size", "symbol", "opacity", "colors")
 __CHART_NO_INDEX: t.Tuple[str, ...] = ("pie", "histogram", "heatmap", "funnelarea")
 _CHART_NAMES: t.Tuple[str, ...] = tuple(e.name[1:] if e.name[0] == "_" else e.name for e in _Chart_iprops)
 
