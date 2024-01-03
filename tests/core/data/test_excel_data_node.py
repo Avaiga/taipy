@@ -146,16 +146,6 @@ class TestExcelDataNode:
         assert len(data_pandas) == 5
         assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path).to_numpy())
 
-        # Create ExcelDataNode with modin exposed_type
-        excel_data_node_as_modin = ExcelDataNode(
-            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": "Sheet1", "exposed_type": "modin"}
-        )
-
-        data_modin = excel_data_node_as_modin.read()
-        assert isinstance(data_modin, modin_pd.DataFrame)
-        assert len(data_modin) == 5
-        assert np.array_equal(data_modin.to_numpy(), pd.read_excel(path).to_numpy())
-
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
             "bar", Scope.SCENARIO, properties={"path": path, "exposed_type": "numpy", "sheet_name": "Sheet1"}
@@ -191,6 +181,20 @@ class TestExcelDataNode:
             assert row_pandas["integer"] == row_custom.integer
             assert row_pandas["text"] == row_custom.text
 
+    @pytest.mark.modin
+    def test_read_with_header_modin(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+
+        # Create ExcelDataNode with modin exposed_type
+        excel_data_node_as_modin = ExcelDataNode(
+            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": "Sheet1", "exposed_type": "modin"}
+        )
+
+        data_modin = excel_data_node_as_modin.read()
+        assert isinstance(data_modin, modin_pd.DataFrame)
+        assert len(data_modin) == 5
+        assert np.array_equal(data_modin.to_numpy(), pd.read_excel(path).to_numpy())
+
     def test_read_without_header(self):
         not_existing_excel = ExcelDataNode(
             "foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx", "has_header": False}
@@ -209,17 +213,6 @@ class TestExcelDataNode:
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 6
         assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path, header=None).to_numpy())
-
-        # Create ExcelDataNode with modin exposed_type
-        excel_data_node_as_modin = ExcelDataNode(
-            "bar",
-            Scope.SCENARIO,
-            properties={"path": path, "has_header": False, "sheet_name": "Sheet1", "exposed_type": "modin"},
-        )
-        data_modin = excel_data_node_as_modin.read()
-        assert isinstance(data_modin, modin_pd.DataFrame)
-        assert len(data_modin) == 6
-        assert np.array_equal(data_modin.to_numpy(), pd.read_excel(path, header=None).to_numpy())
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
@@ -262,6 +255,20 @@ class TestExcelDataNode:
             assert row_pandas[0] == row_custom.id
             assert row_pandas[1] == row_custom.integer
             assert row_pandas[2] == row_custom.text
+
+    @pytest.mark.modin
+    def test_read_without_header_modin(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        # Create ExcelDataNode with modin exposed_type
+        excel_data_node_as_modin = ExcelDataNode(
+            "bar",
+            Scope.SCENARIO,
+            properties={"path": path, "has_header": False, "sheet_name": "Sheet1", "exposed_type": "modin"},
+        )
+        data_modin = excel_data_node_as_modin.read()
+        assert isinstance(data_modin, modin_pd.DataFrame)
+        assert len(data_modin) == 6
+        assert np.array_equal(data_modin.to_numpy(), pd.read_excel(path, header=None).to_numpy())
 
     @pytest.mark.parametrize(
         "content,columns",
@@ -398,6 +405,7 @@ class TestExcelDataNode:
         else:
             assert len(excel_dn.read()) == 1
 
+    @pytest.mark.modin
     @pytest.mark.parametrize(
         "content,columns",
         [
@@ -459,32 +467,6 @@ class TestExcelDataNode:
         for key in data_pandas_no_sheet_name.keys():
             assert isinstance(data_pandas_no_sheet_name[key], pd.DataFrame)
             assert data_pandas[key].equals(data_pandas_no_sheet_name[key])
-
-        # Create ExcelDataNode with modin exposed_type
-        excel_data_node_as_modin = ExcelDataNode(
-            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": sheet_names, "exposed_type": "modin"}
-        )
-
-        data_modin = excel_data_node_as_modin.read()
-        assert isinstance(data_modin, Dict)
-        assert len(data_modin) == 2
-        assert all(
-            len(data_modin[sheet_name] == 5) and isinstance(data_modin[sheet_name], modin_pd.DataFrame)
-            for sheet_name in sheet_names
-        )
-        assert list(data_modin.keys()) == sheet_names
-        for sheet_name in sheet_names:
-            assert data_modin[sheet_name].equals(modin_pd.read_excel(path, sheet_name=sheet_name))
-
-        excel_data_node_as_pandas_no_sheet_name = ExcelDataNode(
-            "bar", Scope.SCENARIO, properties={"path": path, "exposed_type": "modin"}
-        )
-
-        data_modin_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
-        assert isinstance(data_modin_no_sheet_name, Dict)
-        for key in data_modin_no_sheet_name.keys():
-            assert isinstance(data_modin_no_sheet_name[key], modin_pd.DataFrame)
-            assert data_modin[key].equals(data_modin_no_sheet_name[key])
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
@@ -636,6 +618,36 @@ class TestExcelDataNode:
                 assert row_custom_no_sheet_name.integer == row_custom.integer
                 assert row_custom_no_sheet_name.text == row_custom.text
 
+    @pytest.mark.modin
+    def test_read_multi_sheet_with_header_modin(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        sheet_names = ["Sheet1", "Sheet2"]
+
+        # Create ExcelDataNode with modin exposed_type
+        excel_data_node_as_modin = ExcelDataNode(
+            "bar", Scope.SCENARIO, properties={"path": path, "sheet_name": sheet_names, "exposed_type": "modin"}
+        )
+        data_modin = excel_data_node_as_modin.read()
+        assert isinstance(data_modin, Dict)
+        assert len(data_modin) == 2
+        assert all(
+            len(data_modin[sheet_name] == 5) and isinstance(data_modin[sheet_name], modin_pd.DataFrame)
+            for sheet_name in sheet_names
+        )
+        assert list(data_modin.keys()) == sheet_names
+        for sheet_name in sheet_names:
+            assert data_modin[sheet_name].equals(modin_pd.read_excel(path, sheet_name=sheet_name))
+
+        excel_data_node_as_pandas_no_sheet_name = ExcelDataNode(
+            "bar", Scope.SCENARIO, properties={"path": path, "exposed_type": "modin"}
+        )
+
+        data_modin_no_sheet_name = excel_data_node_as_pandas_no_sheet_name.read()
+        assert isinstance(data_modin_no_sheet_name, Dict)
+        for key in data_modin_no_sheet_name.keys():
+            assert isinstance(data_modin_no_sheet_name[key], modin_pd.DataFrame)
+            assert data_modin[key].equals(data_modin_no_sheet_name[key])
+
     def test_read_multi_sheet_without_header(self):
         not_existing_excel = ExcelDataNode(
             "foo",
@@ -670,30 +682,6 @@ class TestExcelDataNode:
         for key in data_pandas_no_sheet_name.keys():
             assert isinstance(data_pandas_no_sheet_name[key], pd.DataFrame)
             assert data_pandas[key].equals(data_pandas_no_sheet_name[key])
-
-        # Create ExcelDataNode with modin exposed_type
-        excel_data_node_as_modin = ExcelDataNode(
-            "bar",
-            Scope.SCENARIO,
-            properties={"path": path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "modin"},
-        )
-        data_modin = excel_data_node_as_modin.read()
-        assert isinstance(data_modin, Dict)
-        assert len(data_modin) == 2
-        assert all(len(data_modin[sheet_name]) == 6 for sheet_name in sheet_names)
-        assert list(data_modin.keys()) == sheet_names
-        for sheet_name in sheet_names:
-            assert isinstance(data_modin[sheet_name], modin_pd.DataFrame)
-            assert data_modin[sheet_name].equals(pd.read_excel(path, header=None, sheet_name=sheet_name))
-
-        excel_data_node_as_modin_no_sheet_name = ExcelDataNode(
-            "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "exposed_type": "modin"}
-        )
-        data_modin_no_sheet_name = excel_data_node_as_modin_no_sheet_name.read()
-        assert isinstance(data_modin_no_sheet_name, Dict)
-        for key in data_modin_no_sheet_name.keys():
-            assert isinstance(data_modin_no_sheet_name[key], modin_pd.DataFrame)
-            assert data_modin[key].equals(data_modin_no_sheet_name[key])
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
@@ -864,6 +852,34 @@ class TestExcelDataNode:
                 assert row_custom_no_sheet_name.integer == row_custom.integer
                 assert row_custom_no_sheet_name.text == row_custom.text
 
+    @pytest.mark.modin
+    def test_read_multi_sheet_without_header_modin(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        sheet_names = ["Sheet1", "Sheet2"]
+        # Create ExcelDataNode with modin exposed_type
+        excel_data_node_as_modin = ExcelDataNode(
+            "bar",
+            Scope.SCENARIO,
+            properties={"path": path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "modin"},
+        )
+        data_modin = excel_data_node_as_modin.read()
+        assert isinstance(data_modin, Dict)
+        assert len(data_modin) == 2
+        assert all(len(data_modin[sheet_name]) == 6 for sheet_name in sheet_names)
+        assert list(data_modin.keys()) == sheet_names
+        for sheet_name in sheet_names:
+            assert isinstance(data_modin[sheet_name], modin_pd.DataFrame)
+            assert data_modin[sheet_name].equals(pd.read_excel(path, header=None, sheet_name=sheet_name))
+
+        excel_data_node_as_modin_no_sheet_name = ExcelDataNode(
+            "bar", Scope.SCENARIO, properties={"path": path, "has_header": False, "exposed_type": "modin"}
+        )
+        data_modin_no_sheet_name = excel_data_node_as_modin_no_sheet_name.read()
+        assert isinstance(data_modin_no_sheet_name, Dict)
+        for key in data_modin_no_sheet_name.keys():
+            assert isinstance(data_modin_no_sheet_name[key], modin_pd.DataFrame)
+            assert data_modin[key].equals(data_modin_no_sheet_name[key])
+
     @pytest.mark.parametrize(
         "content,columns",
         [
@@ -908,6 +924,7 @@ class TestExcelDataNode:
         read_data = excel_dn.read()
         assert all(np.array_equal(data[sheet_name], read_data[sheet_name]) for sheet_name in sheet_names)
 
+    @pytest.mark.modin
     @pytest.mark.parametrize(
         "content,columns",
         [
@@ -1041,6 +1058,7 @@ class TestExcelDataNode:
         )
         assert_frame_equal(dn.read()["Sheet2"], default_multi_sheet_data_frame["Sheet2"])
 
+    @pytest.mark.modin
     @pytest.mark.parametrize(
         "content",
         [
@@ -1063,6 +1081,7 @@ class TestExcelDataNode:
             ).reset_index(drop=True),
         )
 
+    @pytest.mark.modin
     @pytest.mark.parametrize(
         "content",
         [
@@ -1083,6 +1102,7 @@ class TestExcelDataNode:
             ),
         )
 
+    @pytest.mark.modin
     @pytest.mark.parametrize(
         "content",
         [
@@ -1259,6 +1279,7 @@ class TestExcelDataNode:
         assert dn["sheet_1"][:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
         assert dn["sheet_2"][:2].equals(pd.DataFrame([{"foo": 1.0, "bar": 3.0}, {"foo": 1.0, "bar": 4.0}]))
 
+    @pytest.mark.modin
     def test_filter_modin_exposed_type_with_sheetname(self, excel_file):
         dn = ExcelDataNode(
             "foo", Scope.SCENARIO, properties={"path": excel_file, "sheet_name": "Sheet1", "exposed_type": "modin"}
@@ -1310,6 +1331,7 @@ class TestExcelDataNode:
         df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
         df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
 
+    @pytest.mark.modin
     def test_filter_modin_exposed_type_without_sheetname(self, excel_file):
         dn = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": excel_file, "exposed_type": "modin"})
         dn.write(
@@ -1331,6 +1353,7 @@ class TestExcelDataNode:
         assert dn["Sheet1"]["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
         assert dn["Sheet1"][:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
 
+    @pytest.mark.modin
     def test_filter_modin_exposed_type_multisheet(self, excel_file):
         dn = ExcelDataNode(
             "foo",

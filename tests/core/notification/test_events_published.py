@@ -64,7 +64,7 @@ class RecordingConsumer(CoreEventConsumerBase):
         return snapshot
 
     def process_event(self, event: Event):
-        # Nothing todo
+        # Nothing to do
         pass
 
     def start(self):
