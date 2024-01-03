@@ -420,6 +420,23 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
     return []
 
 
+def get_scenarios_by_time( Year: int , Month: int , Day: int, Hour: int , Minute : int ) -> List[Scenario]:
+    """Retrieve the all scenarios occuring within a specific period.
+
+    Parameters:
+        Year (int): The Year for which to retrieve the scenarios.
+        Month (int): The month of the year for which to retrieve the scenarios.
+        Day (int): The Week day for which to retrieve the scenarios.
+        Hour (int): The hour for which to retrieve the scenarios.
+        Minute (int): The minute for which to retrieve the scenarios.
+
+    Returns:
+        The scenarios  of the given time. If the time has no
+            scenario, this method returns an empty List.
+    """
+    return _ScenarioManagerFactory._build_manager()._get_scenarios_by_time(Year, Month, Day, Hour, Minute)
+
+
 def get_primary(cycle: Cycle) -> Optional[Scenario]:
     """Retrieve the primary scenario associated with a cycle.
 
