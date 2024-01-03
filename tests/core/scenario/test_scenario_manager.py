@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -1215,6 +1215,7 @@ def test_scenarios_comparison_development_mode():
         _ScenarioManager._compare(scenario_1, scenario_2, data_node_config_id="abc")
 
 
+@pytest.mark.standalone
 def test_scenarios_comparison_standalone_mode():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
 

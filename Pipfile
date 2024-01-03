@@ -19,7 +19,7 @@ gitignore-parser = "==0.1.1"
 kthread = "==0.2.3"
 markdown = "==3.4.4"
 marshmallow = "==3.20.1"
-modin = {extras = ["dask"], version = "==0.23.0"}
+modin = {extras = ["dask"], version = "==0.23.1"}
 networkx = "==2.6"
 openpyxl = "==3.1.2"
 pandas = "==2.0.0"
@@ -37,6 +37,7 @@ tzlocal = "==3.0"
 boto3 = "==1.29.1"
 
 [dev-packages]
+freezegun = "*"
 ipython = "*"
 ipykernel = "*"
 mkdocs = "*"

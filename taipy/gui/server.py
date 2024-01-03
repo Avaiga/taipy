@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -160,7 +160,7 @@ class _Server:
                         css_vars=css_vars,
                         base_url=base_url,
                     )
-                except Exception:  # pragma: no cover
+                except Exception:
                     raise RuntimeError(
                         "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."  # noqa: E501
                     ) from None

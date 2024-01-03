@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -110,6 +110,7 @@ class TestCore:
                 Config.configure_data_node(id="i1")
             core.stop()
 
+    @pytest.mark.standalone
     def test_block_config_update_when_core_service_is_running_standalone_mode(self):
         _OrchestratorFactory._dispatcher = None
 

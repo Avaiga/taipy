@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -30,7 +30,7 @@ requirements = [
     "pyarrow>=10.0.1,<11.0",
     "networkx>=2.6,<3.0",
     "openpyxl>=3.1.2,<3.2",
-    "modin[dask]>=0.23.0,<1.0",
+    "modin[dask]>=0.23.1,<1.0",
     "pymongo[srv]>=4.2.0,<5.0",
     "sqlalchemy>=2.0.16,<2.1",
     "toml>=0.10,<0.11",
