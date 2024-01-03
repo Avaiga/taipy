@@ -400,6 +400,11 @@ class TestTaipy:
             tp.get(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
+    def test_get_scenarios_by_time(self):
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_scenarios_by_time") as mck:
+            tp.get_scenarios_by_time(Year=2022, Month=10, Day=1, Hour=0, Minute=0)
+            mck.assert_called_once_with(2022, 10, 1, 0, 0)
+    
     def test_scenario_exists(self):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._exists") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
