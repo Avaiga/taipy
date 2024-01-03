@@ -12,6 +12,8 @@
 import multiprocessing
 from unittest.mock import patch
 
+import pytest
+
 from taipy.config.config import Config
 from taipy.core import Core, taipy
 from taipy.core.data._data_manager import _DataManager
@@ -56,6 +58,7 @@ def test_migrate_datanode(init_config):
     assert v1.d1.path == "bar.pkl"
 
 
+@pytest.mark.standalone
 def test_migrate_datanode_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 
@@ -88,6 +91,7 @@ def test_migrate_task(init_config):
     assert v1.my_task.skippable is True
 
 
+@pytest.mark.standalone
 def test_migrate_task_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 
@@ -120,6 +124,7 @@ def test_migrate_scenario(init_config):
     assert v1.properties["foo"] == "bar"
 
 
+@pytest.mark.standalone
 def test_migrate_scenario_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 
@@ -159,6 +164,7 @@ def test_migrate_all_entities(init_config):
     assert v1.properties["foo"] == "bar"
 
 
+@pytest.mark.standalone
 def test_migrate_all_entities_in_standalone_mode(init_config):
     scenario_v1 = submit_v1()
 

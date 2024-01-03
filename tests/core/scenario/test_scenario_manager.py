@@ -1216,6 +1216,7 @@ def test_scenarios_comparison_development_mode():
         _ScenarioManager._compare(scenario_1, scenario_2, data_node_config_id="abc")
 
 
+@pytest.mark.standalone
 def test_scenarios_comparison_standalone_mode():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE)
 

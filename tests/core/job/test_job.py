@@ -16,9 +16,10 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core import JobId, Sequence, SequenceId, TaskId
+from taipy.core import JobId, TaskId
 from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
