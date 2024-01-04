@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -23,14 +23,15 @@ import webbrowser
 from importlib import util
 from random import randint
 
-import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from gitignore_parser import parse_gitignore
 from kthread import KThread
-from taipy.logger._taipy_logger import _TaipyLogger
 from werkzeug.serving import is_running_from_reloader
+
+import __main__
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
@@ -159,10 +160,10 @@ class _Server:
                         css_vars=css_vars,
                         base_url=base_url,
                     )
-                except Exception:  # pragma: no cover
+                except Exception:
                     raise RuntimeError(
                         "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."  # noqa: E501
-                    )
+                    ) from None
 
             if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))

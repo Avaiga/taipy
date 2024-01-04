@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -8,7 +8,6 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 import itertools
 from datetime import datetime
 from multiprocessing import Lock
@@ -18,16 +17,14 @@ from typing import Callable, Iterable, List, Optional, Set, Union
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
-
+from ._abstract_orchestrator import _AbstractOrchestrator
 from .._entity.submittable import Submittable
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..job.job_id import JobId
-from ..scenario.scenario import Scenario
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..task.task import Task
-from ._abstract_orchestrator import _AbstractOrchestrator
 
 
 class _Orchestrator(_AbstractOrchestrator):
@@ -72,7 +69,6 @@ class _Orchestrator(_AbstractOrchestrator):
             submittable._ID_PREFIX,  # type: ignore
             getattr(submittable, "config_id", None),
         )
-
         jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
@@ -87,17 +83,13 @@ class _Orchestrator(_AbstractOrchestrator):
                             force=force,  # type: ignore
                         )
                     )
-
         submission.jobs = jobs  # type: ignore
-
         cls._orchestrate_job_to_run_or_block(jobs)
-
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(jobs, timeout=timeout)
-
+                cls._wait_until_job_finished(jobs, timeout=timeout)
         return jobs
 
     @classmethod
@@ -113,7 +105,6 @@ class _Orchestrator(_AbstractOrchestrator):
 
         Parameters:
              task (Task^): The task to submit for execution.
-             submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
              wait (bool): Wait for the orchestrated job created from the task submission to be finished
@@ -133,18 +124,14 @@ class _Orchestrator(_AbstractOrchestrator):
                 itertools.chain([submission._update_submission_status], callbacks or []),
                 force,
             )
-
         jobs = [job]
         submission.jobs = jobs  # type: ignore
-
         cls._orchestrate_job_to_run_or_block(jobs)
-
         if Config.job_config.is_development:
             cls._check_and_execute_jobs_if_development_mode()
         else:
             if wait:
-                cls.__wait_until_job_finished(job, timeout=timeout)
-
+                cls._wait_until_job_finished(job, timeout=timeout)
         return job
 
     @classmethod
@@ -182,23 +169,22 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.jobs_to_run.put(job)
 
     @classmethod
-    def __wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
-        def __check_if_timeout(start, timeout):
-            if timeout:
-                return (datetime.now() - start).seconds < timeout
+    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
+        #  Note: this method should be prefixed by two underscores, but it has only one, so it can be mocked in tests.
+        def __check_if_timeout(st, to):
+            if to:
+                return (datetime.now() - st).seconds < to
             return True
 
         start = datetime.now()
         jobs = jobs if isinstance(jobs, Iterable) else [jobs]
         index = 0
-
         while __check_if_timeout(start, timeout) and index < len(jobs):
             try:
                 if jobs[index]._is_finished():
                     index = index + 1
                 else:
                     sleep(0.5)  # Limit CPU usage
-
             except Exception:
                 pass
 

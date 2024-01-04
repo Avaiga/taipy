@@ -1,5 +1,55 @@
-[tool.black]
+[tool.ruff]
+exclude = [
+    ".git",
+    "__pycache__",
+    "setup.py",
+    "build",
+    "dist",
+    "releases",
+    ".venv",
+    ".tox",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".vscode",
+    ".github",
+]
 line-length = 120
+indent-width = 4
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes errors
+    "W",  # pycodestyle warnings
+    "C",  # mccabe complexity checker
+    "B",  # bugbear best practices checker
+    "T",  # mypy type errors
+    "B", # flake8-bugbear best practices checker
+    "I001", # isort import order
+]
+ignore = [      # TODO: to be removed
+    "C401",  # Unnecessary generator (rewrite as a `set` comprehension)
+    "C405",  # Unnecessary list literal - rewrite as a literal
+    "C408",  # Unnecessary dict call - rewrite as a literal
+    "C409",  # Unnecessary list passed to tuple() - rewrite as a tuple literal
+    "C416",  # Unnecessary `set` comprehension (rewrite using `set()`)
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]  # unused import
+"_init.py" = ["F401", "F403"]  # unused import
+"taipy/config/stubs/pyi_header.py" = ["F401", "F403"]  # unused import
+"taipy/templates/*" = ["F401", "F403", "T201"]  # unused import, `print` found
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.pyright]
 

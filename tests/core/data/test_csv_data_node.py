@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -111,7 +111,7 @@ class TestCSVDataNode:
         dn = CSVDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
         assert os.path.exists(dn.path) is exists
 
-    def test_read_with_header(self):
+    def test_read_with_header_pandas(self):
         not_existing_csv = CSVDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.csv", "has_header": True})
         with pytest.raises(NoData):
             assert not_existing_csv.read() is None
@@ -125,6 +125,9 @@ class TestCSVDataNode:
         assert len(data_pandas) == 10
         assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path).to_numpy())
 
+    @pytest.mark.modin
+    def test_read_with_header_modin(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         # Create CSVDataNode with modin exposed_type
         csv_data_node_as_modin = CSVDataNode("bar", Scope.SCENARIO, properties={"path": path, "exposed_type": "modin"})
         data_modin = csv_data_node_as_modin.read()
@@ -132,6 +135,8 @@ class TestCSVDataNode:
         assert len(data_modin) == 10
         assert np.array_equal(data_modin.to_numpy(), modin_pd.read_csv(path).to_numpy())
 
+    def test_read_with_header_numpy(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         # Create CSVDataNode with numpy exposed_type
         csv_data_node_as_numpy = CSVDataNode(
             "bar", Scope.SCENARIO, properties={"path": path, "has_header": True, "exposed_type": "numpy"}
@@ -141,6 +146,12 @@ class TestCSVDataNode:
         assert len(data_numpy) == 10
         assert np.array_equal(data_numpy, pd.read_csv(path).to_numpy())
 
+    def test_read_with_header_custom_exposed_type(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        csv_data_node_as_pandas = CSVDataNode("bar", Scope.SCENARIO, properties={"path": path})
+        data_pandas = csv_data_node_as_pandas.read()
+
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         # Create the same CSVDataNode but with custom exposed_type
         csv_data_node_as_custom_object = CSVDataNode(
             "bar", Scope.SCENARIO, properties={"path": path, "exposed_type": MyCustomObject}
@@ -149,7 +160,7 @@ class TestCSVDataNode:
         assert isinstance(data_custom, list)
         assert len(data_custom) == 10
 
-        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+        for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
             assert isinstance(row_custom, MyCustomObject)
             assert row_pandas["id"] == row_custom.id
             assert str(row_pandas["integer"]) == row_custom.integer
@@ -169,15 +180,6 @@ class TestCSVDataNode:
         assert len(data_pandas) == 11
         assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path, header=None).to_numpy())
 
-        # Create CSVDataNode with modin exposed_type
-        csv_data_node_as_modin = CSVDataNode(
-            "baz", Scope.SCENARIO, properties={"path": path, "has_header": False, "exposed_type": "modin"}
-        )
-        data_modin = csv_data_node_as_modin.read()
-        assert isinstance(data_modin, modin_pd.DataFrame)
-        assert len(data_modin) == 11
-        assert np.array_equal(data_modin.to_numpy(), modin_pd.read_csv(path, header=None).to_numpy())
-
         # Create CSVDataNode with numpy exposed_type
         csv_data_node_as_numpy = CSVDataNode(
             "qux", Scope.SCENARIO, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
@@ -195,11 +197,23 @@ class TestCSVDataNode:
         assert isinstance(data_custom, list)
         assert len(data_custom) == 11
 
-        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+        for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
             assert isinstance(row_custom, MyCustomObject)
             assert row_pandas[0] == row_custom.id
             assert str(row_pandas[1]) == row_custom.integer
             assert row_pandas[2] == row_custom.text
+
+    @pytest.mark.modin
+    def test_read_without_header_modin(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        # Create CSVDataNode with modin exposed_type
+        csv_data_node_as_modin = CSVDataNode(
+            "baz", Scope.SCENARIO, properties={"path": path, "has_header": False, "exposed_type": "modin"}
+        )
+        data_modin = csv_data_node_as_modin.read()
+        assert isinstance(data_modin, modin_pd.DataFrame)
+        assert len(data_modin) == 11
+        assert np.array_equal(data_modin.to_numpy(), modin_pd.read_csv(path, header=None).to_numpy())
 
     @pytest.mark.parametrize(
         "content",
@@ -219,6 +233,7 @@ class TestCSVDataNode:
             pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
         )
 
+    @pytest.mark.modin
     @pytest.mark.parametrize(
         "content",
         [
@@ -279,6 +294,7 @@ class TestCSVDataNode:
         with pytest.raises(UnicodeError):
             utf8_dn.read()
 
+    @pytest.mark.modin
     @pytest.mark.parametrize(
         "content,columns",
         [
@@ -302,6 +318,7 @@ class TestCSVDataNode:
         csv_dn.write(None)
         assert len(csv_dn.read()) == 0
 
+    @pytest.mark.modin
     def test_write_modin_with_different_encoding(self, csv_file):
         data = pd.DataFrame([{"≥a": 1, "b": 2}])
 
@@ -394,6 +411,7 @@ class TestCSVDataNode:
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
         assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
 
+    @pytest.mark.modin
     def test_filter_modin_exposed_type(self, csv_file):
         dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": csv_file, "exposed_type": "modin"})
         dn.write(

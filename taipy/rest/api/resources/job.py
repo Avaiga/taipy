@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,6 +14,7 @@ from typing import Optional
 
 from flask import request
 from flask_restful import Resource
+
 from taipy.config.config import Config
 from taipy.core import Job, JobId
 from taipy.core.exceptions.exceptions import NonExistingJob, NonExistingTaskConfig

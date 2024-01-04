@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -102,7 +102,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
                 properties=props,
             )
         except KeyError:
-            raise InvalidDataNodeType(data_node_config.storage_type)
+            raise InvalidDataNodeType(data_node_config.storage_type) from None
 
     @classmethod
     def _get_all(cls, version_number: Optional[str] = None) -> List[DataNode]:

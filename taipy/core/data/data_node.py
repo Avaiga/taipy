@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -91,7 +91,7 @@ class DataNode(_Entity, _Labeled):
     def __init__(
         self,
         config_id,
-        scope: Scope = Scope(Scope.SCENARIO),
+        scope: Scope = Scope(Scope.SCENARIO),  # noqa: B008
         id: Optional[DataNodeId] = None,
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,

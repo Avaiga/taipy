@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Avaiga Private Limited
+ * Copyright 2021-2024 Avaiga Private Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -156,9 +156,9 @@ const getDecimatorsPayload = (
 
 const selectedPropRe = /selected(\d+)/;
 
-const MARKER_TO_COL = ["color", "size", "symbol", "opacity"];
+const MARKER_TO_COL = ["color", "size", "symbol", "opacity", "colors"];
 
-const isOnClick = (types: string[]) => (types?.length ? types.every(t => t === "pie") : false);
+const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
 
 interface WithpointNumbers {
     pointNumbers: number[];
@@ -166,10 +166,11 @@ interface WithpointNumbers {
 const getPlotIndex = (pt: PlotDatum) =>
     pt.pointIndex === undefined
         ? pt.pointNumber === undefined
-        ? (pt as unknown as WithpointNumbers).pointNumbers?.length
-            ? (pt as unknown as WithpointNumbers).pointNumbers[0]
-            : 0
-        : pt.pointNumber : pt.pointIndex;
+            ? (pt as unknown as WithpointNumbers).pointNumbers?.length
+                ? (pt as unknown as WithpointNumbers).pointNumbers[0]
+                : 0
+            : pt.pointNumber
+        : pt.pointIndex;
 
 const defaultConfig = {
     columns: {} as Record<string, ColumnDesc>,
@@ -362,7 +363,7 @@ const Chart = (props: ChartProp) => {
                   ret.marker = getArrayValue(config.markers, idx, ret.marker || {});
                   MARKER_TO_COL.forEach((prop) => {
                       const val = (ret.marker as Record<string, unknown>)[prop];
-                      if (val !== undefined && typeof val === "string") {
+                      if (typeof val === "string") {
                           const arr = getValueFromCol(datum, val as string);
                           if (arr.length) {
                               (ret.marker as Record<string, unknown>)[prop] = arr;

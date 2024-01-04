@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -31,9 +31,9 @@ class _FilterDataNode:
     @staticmethod
     def __is_multi_sheet_excel(data) -> bool:
         if isinstance(data, Dict):
-            has_df_children = all([isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in data.values()])
-            has_list_children = all([isinstance(e, List) for e in data.values()])
-            has_np_array_children = all([isinstance(e, np.ndarray) for e in data.values()])
+            has_df_children = all(isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in data.values())
+            has_list_children = all(isinstance(e, List) for e in data.values())
+            has_np_array_children = all(isinstance(e, np.ndarray) for e in data.values())
             return has_df_children or has_list_children or has_np_array_children
         return False
 

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -203,7 +203,7 @@ def test_filter_by_date(gui: Gui, helpers, small_dataframe):
 
 
 def test_decimator(gui: Gui, helpers, small_dataframe):
-    a_decimator = ScatterDecimator()
+    a_decimator = ScatterDecimator()  # noqa: F841
 
     accessor = _PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
