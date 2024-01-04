@@ -32,8 +32,7 @@ def helpers_assert_text(page, s):
 @pytest.mark.teste2e
 @pytest.mark.filterwarnings("ignore::Warning")
 def test_page_scopes_main_var_access(page: "Page", gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     n = "Hello"  # noqa: F841
 
     root_md = Markdown(

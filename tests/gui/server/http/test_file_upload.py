@@ -109,8 +109,7 @@ def test_file_upload_multi_part(gui: Gui, helpers):
 
 def test_file_upload_multiple(gui: Gui, helpers):
     var_name = "varname"
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()

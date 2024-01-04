@@ -18,8 +18,7 @@ from taipy.gui import Gui
 
 def test_no_ignore_file(gui: Gui):
     with warnings.catch_warnings(record=True):
-        if frame := inspect.currentframe():
-            gui._set_frame(frame)
+        gui._set_frame(inspect.currentframe())
         with patch("sys.argv", ["prog"]):
             gui.run(run_server=False)
         client = gui._server.test_client()

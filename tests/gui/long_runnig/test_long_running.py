@@ -32,8 +32,7 @@ def test_long_callback(gui: Gui):
     def on_exception(state: State, function_name: str, e: Exception):
         state.status = -1
 
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
     state = gui._Gui__state  # type: ignore[attr-defined]

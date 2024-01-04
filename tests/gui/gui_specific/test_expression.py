@@ -31,8 +31,7 @@ def test_expression_text_control_int(gui: Gui, test_client, helpers):
 
 
 def test_expression_text_control_1(gui: Gui, test_client, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui._bind_var_val("x", 10)
     gui._bind_var_val("y", 20)
     md_string = "<|{x + y}|>"
@@ -46,8 +45,7 @@ def test_expression_text_control_1(gui: Gui, test_client, helpers):
 
 
 def test_expression_text_control_2(gui: Gui, test_client, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui._bind_var_val("x", 10)
     gui._bind_var_val("y", 20)
     md_string = "<|x + y = {x + y}|>"
@@ -61,8 +59,7 @@ def test_expression_text_control_2(gui: Gui, test_client, helpers):
 
 
 def test_expression_text_control_3(gui: Gui, test_client, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui._bind_var_val("x", "Mickey Mouse")
     gui._bind_var_val("y", "Donald Duck")
     md_string = "<|Hello {x} and {y}|>"
@@ -76,8 +73,7 @@ def test_expression_text_control_3(gui: Gui, test_client, helpers):
 
 
 def test_expression_text_gt_operator(gui: Gui, test_client, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui._bind_var_val("x", 0)
     md_string = "<|{x > 0}|>"
     expected_list = [
@@ -97,8 +93,7 @@ def test_expression_button_control(gui: Gui, test_client, helpers):
 
 
 def test_expression_table_control(gui: Gui, test_client, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui._bind_var_val("pd", pd)
     gui._bind_var_val("series_1", pd.Series(["a", "b", "c"], name="Letters"))
     gui._bind_var_val("series_2", pd.Series([1, 2, 3], name="Numbers"))

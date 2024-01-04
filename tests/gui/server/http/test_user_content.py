@@ -31,8 +31,7 @@ def test_user_content_with_wrong_callback(gui: Gui, helpers):
         return None
 
     on_user_content = on_user_content_cb  # noqa: F841
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
@@ -46,8 +45,7 @@ def test_user_content_with_callback(gui: Gui, helpers):
         return ""
 
     on_user_content = on_user_content_cb  # noqa: F841
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()

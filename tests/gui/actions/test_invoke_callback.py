@@ -27,8 +27,7 @@ def test_invoke_callback(gui: Gui, helpers):
         state.val = 10
 
     # set gui frame
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>\n<|{val}|>"))
     with patch("sys.argv", ["prog"]):

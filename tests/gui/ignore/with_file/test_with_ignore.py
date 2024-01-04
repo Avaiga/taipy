@@ -18,8 +18,7 @@ from taipy.gui import Gui
 
 def test_ignore_file_found(gui: Gui):
     with warnings.catch_warnings(record=True):
-        if frame := inspect.currentframe():
-            gui._set_frame(frame)
+        gui._set_frame(inspect.currentframe())
         with patch("sys.argv", ["prog"]):
             gui.run(run_server=False)
         client = gui._server.test_client()
@@ -31,8 +30,7 @@ def test_ignore_file_found(gui: Gui):
 
 def test_ignore_file_not_found(gui: Gui):
     with warnings.catch_warnings(record=True):
-        if frame := inspect.currentframe():
-            gui._set_frame(frame)
+        gui._set_frame(inspect.currentframe())
         with patch("sys.argv", ["prog"]):
             gui.run(run_server=False)
         client = gui._server.test_client()

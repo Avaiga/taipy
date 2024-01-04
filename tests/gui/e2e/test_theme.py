@@ -25,8 +25,7 @@ def test_theme_light(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
 """
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=False)
     page.goto("./")
@@ -43,8 +42,7 @@ def test_theme_dark(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
 """
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=True)
     page.goto("./")

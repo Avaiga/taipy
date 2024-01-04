@@ -22,8 +22,7 @@ def test_navigate(gui: Gui, helpers):
     btn_id = "button1"  # noqa: F841
 
     # set gui frame
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
     with patch("sys.argv", ["prog"]):

@@ -58,8 +58,7 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     helpers.test_control_builder(gui, page, expected_list)
 
 
@@ -94,8 +93,7 @@ def test_chart_builder_2(gui: Gui, helpers, csvdata):
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     helpers.test_control_builder(gui, page, expected_list)
 
 
@@ -173,8 +171,7 @@ def test_map_builder(gui: Gui, helpers):
             text="Globvalue",
             mode="markers",
         )
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
         "&quot;Lat&quot;: &#x7B;&quot;index&quot;:",
@@ -210,8 +207,7 @@ def test_chart_indexed_properties_builder(gui: Gui, helpers):
             color=[None, "blue", "blue", None, "red", "red"],
         )
 
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
         "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501
@@ -255,8 +251,7 @@ def test_chart_indexed_properties_with_arrays_builder(gui: Gui, helpers):
             color="{colors}",
         )
 
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
         "&quot;traces&quot;: [[&quot;Date_str&quot;, &quot;La Rochelle&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 1&quot;], [&quot;Date_str&quot;, &quot;La Rochelle 2&quot;], [&quot;Date_str&quot;, &quot;Montpellier&quot;], [&quot;Date_str&quot;, &quot;Montpellier 1&quot;], [&quot;Date_str&quot;, &quot;Montpellier 2&quot;]]",  # noqa: E501

@@ -21,8 +21,7 @@ from .state_asset.page1 import get_a, md_page1, set_a
 
 def test_state(gui: Gui):
     a = 10  # noqa: F841
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_page("page1", md_page1)
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)

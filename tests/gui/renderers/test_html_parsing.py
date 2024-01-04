@@ -18,8 +18,7 @@ from taipy.gui import Gui, Html
 def test_simple_html(gui: Gui, helpers):
     # html_string = "<html><head></head><body><h1>test</h1><taipy:field value=\"test\"/></body></html>"
     html_string = "<html><head></head><body><h1>test</h1></body></html>"
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_page("test", Html(html_string))
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False)

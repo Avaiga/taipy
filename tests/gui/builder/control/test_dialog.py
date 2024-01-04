@@ -17,8 +17,7 @@ from taipy.gui import Gui, Markdown
 
 def test_dialog_builder_1(gui: Gui, helpers):
     dialog_open = False  # noqa: F841
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     with tgb.Page(frame=None) as page:
         tgb.dialog(title="This is a Dialog", open="{dialog_open}", page="page_test", on_action="validate_action")  # type: ignore[attr-defined]
     expected_list = [
@@ -33,8 +32,7 @@ def test_dialog_builder_1(gui: Gui, helpers):
 
 
 def test_dialog_builder_2(gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     partial = gui.add_partial(Markdown("# A partial"))  # noqa: F841
     dialog_open = False  # noqa: F841
     with tgb.Page(frame=None) as page:
@@ -56,8 +54,7 @@ def test_dialog_builder_2(gui: Gui, helpers):
 
 
 def test_dialog_labels_builder(gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     dialog_open = False  # noqa: F841
     with tgb.Page(frame=None) as page:
         tgb.dialog(  # type: ignore[attr-defined]

@@ -39,8 +39,7 @@ def test_slider_with_min_max_builder(gui: Gui, test_client, helpers):
 def test_slider_with_dict_labels_builder(gui: Gui, helpers):
     sel = "Item 1"  # noqa: F841
     labels = {"Item 1": "Label Start", "Item 3": "Label End"}  # noqa: F841
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     with tgb.Page(frame=None) as page:
         tgb.slider(value="{sel}", lov="Item 1;Item 2;Item 3", labels=labels)  # type: ignore[attr-defined]
     expected_list = [
@@ -52,8 +51,7 @@ def test_slider_with_dict_labels_builder(gui: Gui, helpers):
 
 def test_slider_with_boolean_labels_builder(gui: Gui, helpers):
     sel = "Item 1"  # noqa: F841
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     with tgb.Page(frame=None) as page:
         tgb.slider(value="{sel}", lov="Item 1;Item 2;Item 3", labels=True)  # type: ignore[attr-defined]
     expected_list = ["<Slider", "labels={true}"]

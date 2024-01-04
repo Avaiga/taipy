@@ -38,8 +38,7 @@ def test_dict(page: "Page", gui: Gui, helpers):
     def on_action_2(state):
         state.a_dict[state.a_key] = "World"
 
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("./test")

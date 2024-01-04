@@ -24,8 +24,7 @@ from taipy.gui import Gui
 
 @pytest.mark.teste2e
 def test_navbar_navigate(page: "Page", gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="Data", page="<|navbar|id=nav1|> <|Data|id=text-data|>")
     gui.add_page(name="Test", page="<|navbar|id=nav1|> <|Test|id=text-test|>")
     helpers.run_e2e(gui)

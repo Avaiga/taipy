@@ -44,8 +44,7 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
     <taipy:text id="text2" class="custom-text">There</taipy:text>
 </body>
 </html>"""
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_page("page1", Html(html_content))
     helpers.run_e2e(gui)
     page.goto("./page1")
@@ -71,8 +70,7 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
 
 @pytest.mark.teste2e
 def test_html_render_bind_assets(page: "Page", gui: Gui, helpers, e2e_base_url, e2e_port):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     gui.add_pages(pages=f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets")
     helpers.run_e2e(gui)
     assert ".taipy-text" in urlopen(

@@ -54,8 +54,7 @@ def test_get_status_with_user_status(gui: Gui):
     def on_status(state):
         return user_status
 
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
 
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False)

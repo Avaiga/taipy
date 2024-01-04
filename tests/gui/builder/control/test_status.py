@@ -24,6 +24,5 @@ def test_status_builder(gui: Gui, helpers):
         'defaultValue="[&#x7B;&quot;status&quot;: &quot;info&quot;, &quot;message&quot;: &quot;Info Message&quot;&#x7D;]"',  # noqa: E501
         "value={tpec_TpExPr_status_TPMDL_0}",
     ]
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     helpers.test_control_builder(gui, page, expected_list)

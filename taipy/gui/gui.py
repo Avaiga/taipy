@@ -1944,7 +1944,7 @@ class Gui:
             return self._server.get_flask()
         raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
 
-    def _set_frame(self, frame: FrameType):
+    def _set_frame(self, frame: t.Optional[FrameType]):
         if not isinstance(frame, FrameType):  # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame

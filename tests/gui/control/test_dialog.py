@@ -16,8 +16,7 @@ from taipy.gui import Gui, Markdown
 
 def test_dialog_md_1(gui: Gui, helpers):
     dialog_open = False  # noqa: F841
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     md_string = "<|dialog|title=This is a Dialog|open={dialog_open}|page=page_test|on_action=validate_action|>"
     expected_list = [
         "<Dialog",
@@ -31,8 +30,7 @@ def test_dialog_md_1(gui: Gui, helpers):
 
 
 def test_dialog_md_2(gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     partial = gui.add_partial(Markdown("# A partial"))  # noqa: F841
     dialog_open = False  # noqa: F841
     md_string = "<|dialog|title=Another Dialog|open={dialog_open}|partial={partial}|on_action=validate_action|>"
@@ -48,8 +46,7 @@ def test_dialog_md_2(gui: Gui, helpers):
 
 
 def test_dialog_labels_md(gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     dialog_open = False  # noqa: F841
     md_string = (
         "<|dialog|title=Another Dialog|open={dialog_open}|page=page_test|labels=Cancel;Validate|close_label=MYClose|>"
@@ -67,8 +64,7 @@ def test_dialog_labels_md(gui: Gui, helpers):
 
 
 def test_dialog_html_1(gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     dialog_open = False  # noqa: F841
     html_string = (
         '<taipy:dialog title="This is a Dialog" open="{dialog_open}" page="page1" on_action="validate_action" />'
@@ -85,8 +81,7 @@ def test_dialog_html_1(gui: Gui, helpers):
 
 
 def test_dialog_html_2(gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     partial = gui.add_partial(Markdown("# A partial"))  # noqa: F841
     dialog_open = False  # noqa: F841
     html_string = (
@@ -104,8 +99,7 @@ def test_dialog_html_2(gui: Gui, helpers):
 
 
 def test_dialog_labels_html(gui: Gui, helpers):
-    if frame := inspect.currentframe():
-        gui._set_frame(frame)
+    gui._set_frame(inspect.currentframe())
     dialog_open = False  # noqa: F841
     html_string = (
         '<taipy:dialog title="Another Dialog" open="{dialog_open}" page="page_test" labels="Cancel;Validate" />'
