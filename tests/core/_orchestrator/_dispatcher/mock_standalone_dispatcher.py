@@ -8,8 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from concurrent.futures import Executor, Future
-from typing import Optional
+from typing import List, Optional
 
 from taipy.core import Job
 from taipy.core._orchestrator._abstract_orchestrator import _AbstractOrchestrator
@@ -17,8 +18,8 @@ from taipy.core._orchestrator._dispatcher import _StandaloneJobDispatcher
 
 
 class MockProcessPoolExecutor(Executor):
-    submit_called = []
-    f = []
+    submit_called: List = []
+    f: List = []
 
     def submit(self, fn, *args, **kwargs):
         self.submit_called.append((fn, args, kwargs))
@@ -36,15 +37,15 @@ class MockProcessPoolExecutor(Executor):
 class MockStandaloneDispatcher(_StandaloneJobDispatcher):
     def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
         super(_StandaloneJobDispatcher, self).__init__(orchestrator)
-        self._executor = MockProcessPoolExecutor()
-        self.dispatch_calls = []
-        self.release_worker_calls = []
-        self.set_dispatch_processes_calls = []
-        self.pop_dispatch_processes_calls = []
-        self.update_job_status_from_future_calls = []
+        self._executor: Executor = MockProcessPoolExecutor()
+        self.dispatch_calls: List = []
+        self.release_worker_calls: List = []
+        self.set_dispatch_processes_calls: List = []
+        self.pop_dispatch_processes_calls: List = []
+        self.update_job_status_from_future_calls: List = []
 
     def mock_exception_for_job(self, task_id, e: Exception):
-        self.exceptions[task_id] = e
+        self.exceptions[task_id] = e  # type: ignore[attr-defined]
 
     def _dispatch(self, job: Job):
         self.dispatch_calls.append(job)

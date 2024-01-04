@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import Executor, ProcessPoolExecutor
 from functools import partial
 from typing import Callable, Optional
 
@@ -28,7 +28,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
     def __init__(self, orchestrator: Optional[_AbstractOrchestrator], subproc_initializer: Optional[Callable] = None):
         super().__init__(orchestrator)
         max_workers = Config.job_config.max_nb_of_workers or 1
-        self._executor = ProcessPoolExecutor(max_workers=max_workers, initializer=subproc_initializer)  # type: ignore
+        self._executor: Executor = ProcessPoolExecutor(max_workers=max_workers, initializer=subproc_initializer)  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _dispatch(self, job: Job):
