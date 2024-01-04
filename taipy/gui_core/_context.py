@@ -56,8 +56,8 @@ from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
-from taipy.core.submission.submission import Submission
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
@@ -72,15 +72,15 @@ class _SubmissionDetails:
         client_id: str,
         module_context: str,
         callback: t.Callable,
-        submission: Submission,
+        submission_status: SubmissionStatus,
     ) -> None:
         self.client_id = client_id
         self.module_context = module_context
         self.callback = callback
-        self.submission = submission
+        self.submission_status = submission_status
 
-    def set_submission(self, submission: Submission):
-        self.submission = submission
+    def set_submission_status(self, submission_status: SubmissionStatus):
+        self.submission_status = submission_status
         return self
 
 
@@ -185,7 +185,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return
 
             new_status = submission.submission_status
-            if sub_details.submission.submission_status != new_status:
+            if sub_details.submission_status != new_status:
                 # callback
                 self.gui._call_user_callback(
                     sub_details.client_id,
@@ -201,7 +201,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 ):
                     self.client_submission.pop(submission_id, None)
                 else:
-                    self.client_submission[submission_id] = sub_details.set_submission(submission)
+                    self.client_submission[submission_id] = sub_details.set_submission_status(new_status)
 
         except Exception as e:
             _warn(f"Submission ({submission_id}) is not available", e)
@@ -445,7 +445,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                 client_id,
                                 module_context,
                                 submission_fn,
-                                submission_entity,
+                                submission_entity.submission_status,
                             )
                     else:
                         _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")
