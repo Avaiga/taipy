@@ -421,7 +421,7 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
 
 
 def get_scenarios_by_time( Year: int , Month: int , Day: int, Hour: int , Minute : int ) -> List[Scenario]:
-    """Retrieve the all scenarios occuring within a specific period.
+    """Retrieve the all scenarios occurring within a specific period.
 
     Parameters:
         Year (int): The Year for which to retrieve the scenarios.
