@@ -18,7 +18,7 @@ from ..exceptions.exceptions import SubmissionNotDeletedException
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario import Scenario
 from ..sequence.sequence import Sequence
-from ..submission.submission import Submission, SubmissionId
+from ..submission.submission import Submission, SubmissionId, SubmissionStatus
 from ..task.task import Task
 
 
@@ -67,11 +67,11 @@ class _SubmissionManager(_Manager[Submission], _VersionMixin):
             super()._delete(submission.id)
         else:
             err = SubmissionNotDeletedException(submission.id)
-            cls._logger.warning(err)
+            cls._logger.error(err)
             raise err
 
     @classmethod
     def _is_deletable(cls, submission: Union[Submission, SubmissionId]) -> bool:
         if isinstance(submission, str):
             submission = cls._get(submission)
-        return submission.is_finished()
+        return submission.is_finished() or submission.submission_status == SubmissionStatus.UNDEFINED

@@ -751,7 +751,7 @@ def test_is_finished():
 
     submission.submission_status = SubmissionStatus.UNDEFINED
     assert submission.submission_status == SubmissionStatus.UNDEFINED
-    assert submission.is_finished()
+    assert not submission.is_finished()
 
     submission.submission_status = SubmissionStatus.CANCELED
     assert submission.submission_status == SubmissionStatus.CANCELED

@@ -154,7 +154,7 @@ class NonExistingJob(RuntimeError):
 class SubmissionNotDeletedException(RuntimeError):
     """Raised if there is an attempt to delete a submission that cannot be deleted.
 
-    This exception can be raised by `taipy.delete_job()^`.
+    This exception can be raised by `taipy.delete()^`.
     """
 
     def __init__(self, submission_id: str):

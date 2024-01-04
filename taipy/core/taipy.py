@@ -20,15 +20,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 from ._entity._entity import _Entity
 from ._entity._reload import _get_manager
 from ._version._version_manager_factory import _VersionManagerFactory
-from .common._check_instance import (
-    _is_cycle,
-    _is_data_node,
-    _is_job,
-    _is_scenario,
-    _is_sequence,
-    _is_submission,
-    _is_task,
-)
+from .common._check_entity_and_get_manager import _check_entity_and_get_manager
 from .common._warnings import _warn_no_core_service
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
@@ -71,16 +63,8 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
         entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^]): The
             entity to save or update.
     """
-    if _is_cycle(entity):
-        return _get_manager(Cycle._MANAGER_NAME)._set(entity)
-    if _is_scenario(entity):
-        return _get_manager(Scenario._MANAGER_NAME)._set(entity)
-    if _is_sequence(entity):
-        return _get_manager(Sequence._MANAGER_NAME)._set(entity)
-    if _is_task(entity):
-        return _get_manager(Task._MANAGER_NAME)._set(entity)
-    if _is_data_node(entity):
-        return _get_manager(DataNode._MANAGER_NAME)._set(entity)
+    if manager := _check_entity_and_get_manager(entity, [Cycle, Scenario, Sequence, Task, DataNode]):
+        manager._set(entity)
 
 
 def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId]) -> bool:
@@ -91,12 +75,8 @@ def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Tas
     Returns:
         True if the given entity can be submitted. False otherwise.
     """
-    if _is_scenario(entity):
-        return _get_manager(Scenario._MANAGER_NAME)._is_submittable(entity)  # type: ignore
-    if _is_sequence(entity):
-        return _get_manager(Sequence._MANAGER_NAME)._is_submittable(entity)  # type: ignore
-    if _is_task(entity):
-        return _get_manager(Task._MANAGER_NAME)._is_submittable(entity)  # type: ignore
+    if manager := _check_entity_and_get_manager(entity, [Scenario, Sequence, Task]):
+        return manager._is_submittable(entity)  # type: ignore
     return False
 
 
@@ -125,20 +105,8 @@ def is_editable(
     Returns:
         True if the given entity can be edited. False otherwise.
     """
-    if _is_cycle(entity):
-        return _get_manager(Cycle._MANAGER_NAME)._is_editable(entity)
-    if _is_scenario(entity):
-        return _get_manager(Scenario._MANAGER_NAME)._is_editable(entity)
-    if _is_sequence(entity):
-        return _get_manager(Sequence._MANAGER_NAME)._is_editable(entity)
-    if _is_task(entity):
-        return _get_manager(Task._MANAGER_NAME)._is_editable(entity)
-    if _is_job(entity):
-        return _get_manager(Job._MANAGER_NAME)._is_editable(entity)
-    if _is_data_node(entity):
-        return _get_manager(DataNode._MANAGER_NAME)._is_editable(entity)
-    if _is_submission(entity):
-        return _get_manager(Submission._MANAGER_NAME)._is_editable(entity)
+    if manager := _check_entity_and_get_manager(entity, [Cycle, Scenario, Sequence, Task, Job, DataNode, Submission]):
+        return manager._is_editable(entity)
     return False
 
 
@@ -167,20 +135,8 @@ def is_readable(
     Returns:
         True if the given entity can be read. False otherwise.
     """
-    if _is_cycle(entity):
-        return _get_manager(Cycle._MANAGER_NAME)._is_readable(entity)
-    if _is_scenario(entity):
-        return _get_manager(Scenario._MANAGER_NAME)._is_readable(entity)
-    if _is_sequence(entity):
-        return _get_manager(Sequence._MANAGER_NAME)._is_readable(entity)
-    if _is_task(entity):
-        return _get_manager(Task._MANAGER_NAME)._is_readable(entity)
-    if _is_job(entity):
-        return _get_manager(Job._MANAGER_NAME)._is_readable(entity)
-    if _is_data_node(entity):
-        return _get_manager(DataNode._MANAGER_NAME)._is_readable(entity)
-    if _is_submission(entity):
-        return _get_manager(Submission._MANAGER_NAME)._is_readable(entity)
+    if manager := _check_entity_and_get_manager(entity, [Cycle, Scenario, Sequence, Task, Job, DataNode, Submission]):
+        return manager._is_readable(entity)
     return False
 
 
@@ -212,16 +168,8 @@ def submit(
             - If a `Scenario^` or a `Sequence^` is provided, it will return a list of `Job^`.
             - If a `Task^` is provided, it will return the created `Job^`.
     """
-    if _is_scenario(entity):
-        return _get_manager(Scenario._MANAGER_NAME)._submit(  # type: ignore
-            entity, force=force, wait=wait, timeout=timeout
-        )
-    if _is_sequence(entity):
-        return _get_manager(Sequence._MANAGER_NAME)._submit(  # type: ignore
-            entity, force=force, wait=wait, timeout=timeout
-        )
-    if _is_task(entity):
-        return _get_manager(Task._MANAGER_NAME)._submit(entity, force=force, wait=wait, timeout=timeout)  # type: ignore
+    if manager := _check_entity_and_get_manager(entity, [Scenario, Sequence, Task]):
+        return manager._submit(entity, force=force, wait=wait, timeout=timeout)  # type: ignore
 
 
 @overload
@@ -287,20 +235,11 @@ def exists(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
         (`Job^`, `Cycle^`, `Scenario^`, `Sequence^`, `Task^`, `DataNode^`)
         based on their respective identifier prefixes.
     """
-    if _is_job(entity_id):
-        return _get_manager(Job._MANAGER_NAME)._exists(JobId(entity_id))
-    if _is_cycle(entity_id):
-        return _get_manager(Cycle._MANAGER_NAME)._exists(CycleId(entity_id))
-    if _is_scenario(entity_id):
-        return _get_manager(Scenario._MANAGER_NAME)._exists(ScenarioId(entity_id))
-    if _is_sequence(entity_id):
-        return _get_manager(Sequence._MANAGER_NAME)._exists(SequenceId(entity_id))
-    if _is_task(entity_id):
-        return _get_manager(Task._MANAGER_NAME)._exists(TaskId(entity_id))
-    if _is_data_node(entity_id):
-        return _get_manager(DataNode._MANAGER_NAME)._exists(DataNodeId(entity_id))
-    if _is_submission(entity_id):
-        return _get_manager(Submission._MANAGER_NAME)._exists(SubmissionId(entity_id))
+    if manager := _check_entity_and_get_manager(
+        entity_id, [Cycle, Scenario, Sequence, Task, Job, DataNode, Submission]
+    ):
+        return manager._exists(entity_id)
+
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -366,20 +305,11 @@ def get(
     Raises:
         ModelNotFound^: If the provided *entity_id* does not match any known entity pattern.
     """
-    if _is_job(entity_id):
-        return _get_manager(Job._MANAGER_NAME)._get(JobId(entity_id))
-    if _is_cycle(entity_id):
-        return _get_manager(Cycle._MANAGER_NAME)._get(CycleId(entity_id))
-    if _is_scenario(entity_id):
-        return _get_manager(Scenario._MANAGER_NAME)._get(ScenarioId(entity_id))
-    if _is_sequence(entity_id):
-        return _get_manager(Sequence._MANAGER_NAME)._get(SequenceId(entity_id))
-    if _is_task(entity_id):
-        return _get_manager(Task._MANAGER_NAME)._get(TaskId(entity_id))
-    if _is_data_node(entity_id):
-        return _get_manager(DataNode._MANAGER_NAME)._get(DataNodeId(entity_id))
-    if _is_submission(entity_id):
-        return _get_manager(Submission._MANAGER_NAME)._get(SubmissionId(entity_id))
+    if manager := _check_entity_and_get_manager(
+        entity_id, [Cycle, Scenario, Sequence, Task, Job, DataNode, Submission]
+    ):
+        return manager._get(entity_id)
+
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -407,12 +337,8 @@ def is_deletable(entity: Union[Scenario, Job, Submission, ScenarioId, JobId, Sub
     Returns:
         True if the given scenario, job or submission can be deleted. False otherwise.
     """
-    if _is_job(entity):
-        return _get_manager(Job._MANAGER_NAME)._is_deletable(entity)  # type: ignore
-    if _is_scenario(entity):
-        return _get_manager(Scenario._MANAGER_NAME)._is_deletable(entity)  # type: ignore
-    if _is_submission(entity):
-        return _get_manager(Submission._MANAGER_NAME)._is_deletable(entity)  # type: ignore
+    if manager := _check_entity_and_get_manager(entity, [Scenario, Job, Submission]):
+        return manager._is_deletable(entity)  # type: ignore
     return True
 
 
@@ -439,22 +365,12 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
     Raises:
         ModelNotFound: No entity corresponds to the specified *entity_id*.
     """
-    if _is_job(entity_id):
-        job_manager = _get_manager(Job._MANAGER_NAME)
-        return job_manager._delete(job_manager._get(JobId(entity_id)))  # type: ignore
-    if _is_cycle(entity_id):
-        return _get_manager(Cycle._MANAGER_NAME)._hard_delete(CycleId(entity_id))  # type: ignore
-    if _is_scenario(entity_id):
-        return _get_manager(Scenario._MANAGER_NAME)._hard_delete(ScenarioId(entity_id))  # type: ignore
-    if _is_sequence(entity_id):
-        return _get_manager(Sequence._MANAGER_NAME)._hard_delete(SequenceId(entity_id))  # type: ignore
-    if _is_task(entity_id):
-        return _get_manager(Task._MANAGER_NAME)._hard_delete(TaskId(entity_id))  # type: ignore
-    if _is_data_node(entity_id):
-        return _get_manager(DataNode._MANAGER_NAME)._delete(DataNodeId(entity_id))  # type: ignore
-    if _is_submission(entity_id):
-        submission_manager = _get_manager(Submission._MANAGER_NAME)
-        return submission_manager._delete(submission_manager._get(SubmissionId(entity_id)))  # type: ignore
+    if manager := _check_entity_and_get_manager(entity_id, [Cycle, Scenario, Sequence, Task]):
+        return manager._hard_delete(entity_id)  # type: ignore
+
+    if manager := _check_entity_and_get_manager(entity_id, [Job, DataNode, Submission]):
+        return manager._delete(entity_id)  # type: ignore
+
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 

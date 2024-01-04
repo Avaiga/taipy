@@ -64,7 +64,7 @@ class _JobManager(_Manager[Job], _VersionMixin):
             _JobDispatcher._pop_dispatched_process(job.id)
         else:
             err = JobNotDeletedException(job.id)
-            cls._logger.warning(err)
+            cls._logger.error(err)
             raise err
 
     @classmethod

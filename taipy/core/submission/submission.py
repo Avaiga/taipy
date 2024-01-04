@@ -207,13 +207,11 @@ class Submission(_Entity, _Labeled):
         Returns:
             True if the submission is finished.
         """
-        submission_status = self.submission_status
-        return (
-            submission_status == SubmissionStatus.COMPLETED
-            or submission_status == SubmissionStatus.FAILED
-            or submission_status == SubmissionStatus.CANCELED
-            or submission_status == SubmissionStatus.UNDEFINED
-        )
+        return self.submission_status in [
+            SubmissionStatus.COMPLETED,
+            SubmissionStatus.FAILED,
+            SubmissionStatus.CANCELED,
+        ]
 
     def is_deletable(self) -> bool:
         """Indicate if the submission can be deleted.
