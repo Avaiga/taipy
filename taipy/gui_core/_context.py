@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -29,18 +29,13 @@ from taipy.core import (
     DataNode,
     DataNodeId,
     Job,
-    JobId,
     Scenario,
     ScenarioId,
     Sequence,
     SequenceId,
     cancel_job,
     create_scenario,
-)
-from taipy.core import delete as core_delete
-from taipy.core import delete_job
-from taipy.core import get as core_get
-from taipy.core import (
+    delete_job,
     get_cycles_scenarios,
     get_data_nodes,
     get_jobs,
@@ -51,13 +46,15 @@ from taipy.core import (
     is_submittable,
     set_primary,
 )
+from taipy.core import delete as core_delete
+from taipy.core import get as core_get
 from taipy.core import submit as core_submit
 from taipy.core.data._abstract_tabular import _AbstractTabularDataNode
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
-from taipy.core.submission.submission import Submission
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
+from taipy.core.submission.submission import Submission
 from taipy.core.submission.submission_status import SubmissionStatus
 from taipy.gui import Gui, State
 from taipy.gui._warnings import _warn
@@ -674,7 +671,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         else e.get("comment", ""),
                     )
                 )
-            return list(reversed(sorted(res, key=lambda r: r[0])))
+            return sorted(res, key=lambda r: r[0], reverse=True)
         return _DoNotUpdate()
 
     def get_data_node_data(self, datanode: DataNode, id: str):

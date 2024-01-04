@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 import numpy
 import pandas
 from sklearn.datasets import make_classification
+
 from taipy.gui import Gui
 
 # Let scikit-learn generate a random 2-class classification problem

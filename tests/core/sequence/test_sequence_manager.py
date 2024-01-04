@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -16,6 +16,7 @@ from unittest import mock
 from unittest.mock import ANY
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.core._orchestrator._orchestrator import _Orchestrator
@@ -30,7 +31,6 @@ from taipy.core.exceptions.exceptions import (
     InvalidSequenceId,
     ModelNotFound,
     NonExistingSequence,
-    NonExistingTask,
     SequenceBelongsToNonExistingScenario,
 )
 from taipy.core.job._job_manager import _JobManager
@@ -211,7 +211,7 @@ def test_is_submittable():
     scenario = Scenario("scenario", set([task]), {}, set())
     _ScenarioManager._set(scenario)
 
-    scenario.add_sequences({"sequence": list([task])})
+    scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]
 
     assert len(_SequenceManager._get_all()) == 1
@@ -908,7 +908,7 @@ def test_hard_delete_shared_entities():
 
 
 def my_print(a, b):
-    print(a + b)
+    print(a + b)  # noqa: T201
 
 
 def test_submit_task_with_input_dn_wrong_file_path(caplog):
@@ -939,8 +939,8 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
         for input_dn in sequence.data_nodes.values()
         if input_dn not in sequence.get_inputs()
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)
 
 
 def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
@@ -972,5 +972,5 @@ def test_submit_task_with_one_input_dn_wrong_file_path(caplog):
         for input_dn in sequence.data_nodes.values()
         if input_dn.config_id != "wrong_csv_file_path"
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)

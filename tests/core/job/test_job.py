@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -16,9 +16,10 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
+
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.core import JobId, Sequence, SequenceId, TaskId
+from taipy.core import JobId, TaskId
 from taipy.core._orchestrator._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from taipy.core._orchestrator._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -100,7 +100,7 @@ def test_expression_table_control(gui: Gui, test_client, helpers):
     md_string = "<|{pd.concat([series_1, series_2], axis=1)}|table|columns=Letters;Numbers|>"
     expected_list = [
         "<Table",
-        'defaultColumns="{&quot;Letters&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Letters&quot;&#x7D;, &quot;Numbers&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Numbers&quot;&#x7D;}"',
+        'defaultColumns="{&quot;Letters&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Letters&quot;&#x7D;, &quot;Numbers&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Numbers&quot;&#x7D;}"',  # noqa: E501
         'updateVarName="_TpD_tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0"',
         "data={_TpD_tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0}",
     ]
@@ -121,7 +121,7 @@ def test_lambda_expression_selector(gui: Gui, test_client, helpers):
     md_string = "<|{sel}|selector|lov={lov}|type=test|adapter={lambda elt: (elt['id'], elt['name'])}|>"
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
+        'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;1&quot;]"',
         'updateVars="lov=_TpL_tpec_TpExPr_lov_TPMDL_0"',
         "lov={_TpL_tpec_TpExPr_lov_TPMDL_0}",

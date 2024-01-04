@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -980,7 +980,7 @@ def test_get_sorted_tasks():
                 return False
             else:
                 index_task_b = tasks_b.index(task_a)
-                if any([isinstance(task_b, list) for task_b in tasks_b[i : index_task_b + 1]]):
+                if any(isinstance(task_b, list) for task_b in tasks_b[i : index_task_b + 1]):
                     return False
         return True
 

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -80,7 +80,7 @@ def _build_connection() -> Connection:
     try:
         db_location = properties["db_location"]
     except KeyError:
-        raise MissingRequiredProperty("Missing property db_location.")
+        raise MissingRequiredProperty("Missing property db_location.") from None
 
     return __build_connection(db_location)
 

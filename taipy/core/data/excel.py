@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
+
 from taipy.config.common.scope import Scope
 
 from .._backup._backup import _replace_in_backup_file
@@ -342,7 +343,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
     def _append(self, data: Any):
         if isinstance(data, Dict) and all(
-            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
+            isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()
         ):
             self.__append_excel_with_multiple_sheets(data)
         elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
@@ -378,7 +379,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
 
     def _write(self, data: Any):
         if isinstance(data, Dict) and all(
-            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
+            isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()
         ):
             self.__write_excel_with_multiple_sheets(data)
         elif isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
@@ -395,7 +396,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             job_id (JobId^): An optional identifier of the writer.
         """
         if isinstance(data, Dict) and all(
-            [isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()]
+            isinstance(x, (pd.DataFrame, modin_pd.DataFrame, np.ndarray)) for x in data.values()
         ):
             self.__write_excel_with_multiple_sheets(data, columns=columns)
         else:

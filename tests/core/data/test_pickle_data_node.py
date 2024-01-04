@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -41,7 +41,6 @@ class TestPickleDataNodeEntity:
         import glob
 
         for f in glob.glob("*.p"):
-            print(f"deleting file {f}")
             os.remove(f)
 
     def test_create(self):
@@ -124,9 +123,10 @@ class TestPickleDataNodeEntity:
         assert isinstance(pickle_dict.read(), dict)
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
+    @pytest.mark.modin
+    def test_read_and_write_modin(self):
         default_pandas = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         new_pandas_df = pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]})
-
         default_modin = modin_pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         new_modin_df = modin_pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]})
 

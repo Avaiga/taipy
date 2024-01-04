@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -35,7 +35,6 @@ def compare_function(*data_node_results):
         comparison_result[current_result_index] = {}
         next_result_index = 0
         for next_result in data_node_results:
-            print(f"comparing result {current_result_index} with result {next_result_index}")
             comparison_result[current_result_index][next_result_index] = next_result - current_result
             next_result_index += 1
         current_result_index += 1
@@ -58,7 +57,7 @@ class CustomEncoder(json.JSONEncoder):
 
 class CustomDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+        json.JSONDecoder.__init__(self, *args, **kwargs, object_hook=self.object_hook)
 
     def object_hook(self, source):
         if source.get("__type__") == "Datetime":

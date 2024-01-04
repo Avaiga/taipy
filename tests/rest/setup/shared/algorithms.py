@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     historical_temperature = pd.read_csv("../historical_temperature.csv")
     evaluation = evaluate(historical_temperature, forecasts, day)
 
-    print(evaluation["Dataframe"])
-    print()
-    print(f'Mean absolute error : {evaluation["Mean_absolute_error"]}')
-    print(f'Relative error in %: {evaluation["Relative_error"]}')
+    print(evaluation["Dataframe"])  # noqa: T201
+    print()  # noqa: T201
+    print(f'Mean absolute error : {evaluation["Mean_absolute_error"]}')  # noqa: T201
+    print(f'Relative error in %: {evaluation["Relative_error"]}')  # noqa: T201

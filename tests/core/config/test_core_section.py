@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -13,12 +13,12 @@ import os
 from unittest.mock import patch
 
 import pytest
+
 from taipy.config import Config
 from taipy.config.exceptions.exceptions import MissingEnvVariableError
 from taipy.core import Core
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.config import CoreSection
-
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
@@ -74,9 +74,9 @@ def test_config_attribute_overiden_by_code_config_including_env_variable_values(
     Config.configure_core(root_folder="ENV[ROOT_FOLDER]", storage_folder="ENV[STORAGE_FOLDER]")
 
     with pytest.raises(MissingEnvVariableError):
-        Config.core.root_folder
+        _ = Config.core.root_folder
     with pytest.raises(MissingEnvVariableError):
-        Config.core.storage_folder
+        _ = Config.core.storage_folder
 
     with patch.dict(os.environ, {"ROOT_FOLDER": "foo", "STORAGE_FOLDER": "bar"}):
         assert Config.core.root_folder == "foo"
