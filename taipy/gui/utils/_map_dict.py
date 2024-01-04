@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from __future__ import annotations
+import copy
 
 import typing as t
 
@@ -23,7 +24,7 @@ class _MapDict(object):
     __local_vars = ("_dict", "_update_var")
 
     def __init__(self, dict_import: dict, app_update_var=None):
-        self._dict = dict_import
+        self._dict = copy.deepcopy(dict_import)
         # Bind app update var function
         self._update_var = app_update_var
 
