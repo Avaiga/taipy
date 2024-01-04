@@ -137,6 +137,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if event.operation != EventOperation.DELETION and is_readable(t.cast(SequenceId, event.entity_id))
                     else None
                 )
+                t.cast(Scenario, sequence)
                 if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
                     self.gui._broadcast(
                         _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}

@@ -24,9 +24,9 @@ data = {
     # ["Hole1", "Hole2", ..., "Hole9"]
     "Hole": [f"Hole{h}" for h in range(1, n_holes + 1)] + ["Score"],
     # Par for each hole
-    "Par": [3, 4, 4, 5, 3, 5, 4, 5, 3] + [None],
+    "Par": [3, 4, 4, 5, 3, 5, 4, 5, 3] + [None],  # type: ignore
     # Score for each hole
-    "Score": [4, 4, 5, 4, 4, 5, 4, 5, 4] + [None],
+    "Score": [4, 4, 5, 4, 4, 5, 4, 5, 4] + [None],  # type: ignore
     # Represented as relative values except for the last one
     "M": n_holes * ["relative"] + ["total"],
 }

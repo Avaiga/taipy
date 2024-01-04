@@ -19,7 +19,7 @@ from taipy.core.submission.submission import Submission
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext, _SubmissionDetails
 
-a_scenario = Scenario("scenario_config_id", set(), {}, sequences={"sequence": {}})
+a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
 a_task = Task("task_config_id", {}, print)
 a_job = Job(t.cast(JobId, "JOB_job_id"), a_task, "submit_id", a_scenario.id)
 a_job.isfinished = lambda s: True  # type: ignore[attr-defined]
