@@ -47,7 +47,6 @@ from .sequence.sequence import Sequence
 from .sequence.sequence_id import SequenceId
 from .submission._submission_manager_factory import _SubmissionManagerFactory
 from .submission.submission import Submission, SubmissionId
-from .task._task_manager_factory import _TaskManagerFactory
 from .task.task import Task
 from .task.task_id import TaskId
 
