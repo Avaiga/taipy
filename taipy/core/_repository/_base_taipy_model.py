@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import dataclasses
 import enum
 import json
 from typing import Any, Dict
@@ -27,7 +28,7 @@ class _BaseModel:
             yield attr, value
 
     def to_dict(self) -> Dict[str, Any]:
-        model_dict = {**self.__dict__}
+        model_dict = {**dataclasses.asdict(self)}  # type: ignore[call-overload]
 
         for k, v in model_dict.items():
             if isinstance(v, enum.Enum):
