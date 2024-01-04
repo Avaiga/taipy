@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import threading
 from abc import abstractmethod
 from queue import Empty
@@ -15,11 +16,12 @@ from typing import Dict
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
-from .._abstract_orchestrator import _AbstractOrchestrator
+
 from ...data._data_manager_factory import _DataManagerFactory
 from ...job._job_manager_factory import _JobManagerFactory
 from ...job.job import Job
 from ...task.task import Task
+from .._abstract_orchestrator import _AbstractOrchestrator
 
 
 class _JobDispatcher(threading.Thread):
