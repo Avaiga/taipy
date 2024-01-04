@@ -260,7 +260,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for fil in filters:
             fil.update({"cycle": cycle.id})
         return cls._get_all_by(filters)
-        
+
     @classmethod
     def _get_scenarios_by_time(cls, Year: int, Month: int, Day: int, Hour: int, Minute: int) -> List[Scenario]:
         duration = datetime.datetime(Year, Month, Day, Hour, Minute)
@@ -271,7 +271,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             if scenario.creation_date != None and cycle.start_date >= duration <= cycle.end_date:
                 scenarios.append(scenario)
         return scenarios
-    
+
     @classmethod
     def _get_primary_scenarios(cls) -> List[Scenario]:
         primary_scenarios = []
