@@ -39,7 +39,7 @@ def pi(precision: int) -> list[int]:
         n, na = n + na, na + 8
         d, da = d + da, da + 32
         t = (t * n) / d
-        s += t
+        s += t  # type: ignore[assignment]
     digits = []
     while s != 0:
         integral = int(s)

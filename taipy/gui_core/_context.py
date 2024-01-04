@@ -137,9 +137,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if event.operation != EventOperation.DELETION and is_readable(t.cast(SequenceId, event.entity_id))
                     else None
                 )
-                if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
+                if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
                     self.gui._broadcast(
-                        _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
+                        _GuiCoreContext._CORE_CHANGED_NAME,
+                        {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
                     )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)

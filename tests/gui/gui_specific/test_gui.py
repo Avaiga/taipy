@@ -67,6 +67,8 @@ def test__tbl_cols(gui: Gui):
         gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         res = gui._tbl_cols(True, None, json.dumps({}), json.dumps({"data": "data"}), data=data)
+        assert isinstance(res, str)
+
         d = json.loads(res)
         assert isinstance(d, dict)
         assert d["col1"]["type"] == "int"
@@ -81,6 +83,8 @@ def test__chart_conf(gui: Gui):
         gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         res = gui._chart_conf(True, None, json.dumps({}), json.dumps({"data": "data"}), data=data)
+        assert isinstance(res, str)
+
         d = json.loads(res)
         assert isinstance(d, dict)
         assert d["columns"]["col1"]["type"] == "int"

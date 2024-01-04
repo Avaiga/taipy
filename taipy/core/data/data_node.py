@@ -463,7 +463,6 @@ class DataNode(_Entity, _Labeled):
     def _read(self):
         raise NotImplementedError
 
-    @abstractmethod
     def _append(self, data):
         raise NotImplementedError
 

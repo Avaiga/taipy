@@ -14,6 +14,7 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import random
+from typing import List
 
 import numpy
 
@@ -40,7 +41,7 @@ config = {
     "displayModeBar": False
 }
 
-selected_indices = []
+selected_indices: List = []
 
 mean_value = 0.0
 

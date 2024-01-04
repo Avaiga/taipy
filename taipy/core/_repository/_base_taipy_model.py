@@ -28,7 +28,7 @@ class _BaseModel:
             yield attr, value
 
     def to_dict(self) -> Dict[str, Any]:
-        model_dict = {**dataclasses.asdict(self)}
+        model_dict = {**dataclasses.asdict(self)}  # type: ignore[call-overload]
 
         for k, v in model_dict.items():
             if isinstance(v, enum.Enum):

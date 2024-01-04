@@ -16,7 +16,7 @@ from taipy.gui import Gui
 def test_file_selector_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("content", None)
     with tgb.Page(frame=None) as page:
-        tgb.file_selector(content="{content}", label="label", on_action="action")
+        tgb.file_selector(content="{content}", label="label", on_action="action")  # type: ignore[attr-defined]
     expected_list = [
         "<FileSelector",
         'updateVarName="tpec_TpExPr_content_TPMDL_0"',

@@ -30,7 +30,7 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
     chart_type = [None, "scatter"]  # noqa: F841
     xaxis = [None, "x2"]  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{csvdata}",
             x="Day",
             selected_color="green",
@@ -65,7 +65,7 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
 def test_chart_builder_2(gui: Gui, helpers, csvdata):
     selected_indices = [14258]  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{csvdata}",
             x="Day",
             selected_color="green",
@@ -161,7 +161,7 @@ def test_map_builder(gui: Gui, helpers):
         "margin": {"r": 0, "t": 0, "b": 0, "l": 0},
     }
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{mapData}",
             type="scattermapbox",
             marker="{marker}",
@@ -198,7 +198,7 @@ def test_chart_indexed_properties_builder(gui: Gui, helpers):
     data["Montpellier 2"] = [x * (1 - (random.random() / 10)) for x in data["Montpellier"]]
 
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{data}",
             x="Date",
             mode="lines",
@@ -242,7 +242,7 @@ def test_chart_indexed_properties_with_arrays_builder(gui: Gui, helpers):
     colors = [None, "blue", "blue", None, "red", "red"]  # noqa: F841
 
     with tgb.Page(frame=None) as page:
-        tgb.chart(
+        tgb.chart(  # type: ignore[attr-defined]
             data="{data}",
             x="Date",
             mode="lines",

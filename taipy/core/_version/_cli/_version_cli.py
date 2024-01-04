@@ -216,7 +216,7 @@ class _VersionCLI:
             cls.__logger.error(f"Version '{version_2}' does not exist.")
             sys.exit(1)
 
-        Config._comparator._compare(
+        Config._comparator._compare(  # type: ignore[attr-defined]
             version_entity_1.config,
             version_entity_2.config,
             version_1,

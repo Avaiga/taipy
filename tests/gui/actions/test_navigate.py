@@ -35,7 +35,7 @@ def test_navigate(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
-        navigate(gui._Gui__state, "test")
+        navigate(gui._Gui__state, "test")  # type: ignore[attr-defined]
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(received_messages[0], "NA", {"to": "test"})

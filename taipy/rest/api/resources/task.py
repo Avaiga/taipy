@@ -13,6 +13,7 @@ from flask import request
 from flask_restful import Resource
 
 from taipy.config.config import Config
+from taipy.core import Task
 from taipy.core.exceptions.exceptions import NonExistingTask, NonExistingTaskConfig
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
@@ -22,7 +23,7 @@ from ..middlewares._middleware import _middleware
 from ..schemas import TaskSchema
 
 
-def _get_or_raise(task_id: str):
+def _get_or_raise(task_id: str) -> Task:
     manager = _TaskManagerFactory._build_manager()
     task = manager._get(task_id)
     if task is None:
