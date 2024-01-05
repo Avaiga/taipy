@@ -271,7 +271,7 @@ class CoreSection(UniqueSection):
             **as_dict,
         )
 
-    def _update(self, as_dict: Dict[str, Any]):
+    def _update(self, as_dict: Dict[str, Any], default_section=None):
         self._root_folder = as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder)
         self._storage_folder = as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
         self._repository_type = as_dict.pop(self._REPOSITORY_TYPE_KEY, self._repository_type)

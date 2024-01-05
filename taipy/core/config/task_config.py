@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
@@ -127,11 +127,14 @@ class TaskConfig(Section):
     def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):
         as_dict.pop(cls._ID_KEY, id)
         funct = as_dict.pop(cls._FUNCTION, None)
-        dn_configs = config._sections.get(DataNodeConfig.name, None) or []  # type: ignore
-        inputs = []
+        dn_configs: Dict[str, DataNodeConfig] = {}
+        if config:
+            dn_configs = cast(Dict[str, DataNodeConfig], config._sections.get(DataNodeConfig.name))
+
+        inputs: List[DataNodeConfig] = []
         if inputs_as_str := as_dict.pop(cls._INPUT_KEY, None):
             inputs = [dn_configs[dn_id] for dn_id in inputs_as_str if dn_id in dn_configs]
-        outputs = []
+        outputs: List[DataNodeConfig] = []
         if outputs_as_str := as_dict.pop(cls._OUTPUT_KEY, None):
             outputs = [dn_configs[ds_id] for ds_id in outputs_as_str if ds_id in dn_configs]
         skippable = as_dict.pop(cls._IS_SKIPPABLE_KEY, False)

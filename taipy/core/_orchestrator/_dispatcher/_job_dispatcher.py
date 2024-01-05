@@ -12,7 +12,7 @@
 import threading
 from abc import abstractmethod
 from queue import Empty
-from typing import Dict
+from typing import Dict, Optional
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -32,7 +32,7 @@ class _JobDispatcher(threading.Thread):
     __logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, orchestrator: _AbstractOrchestrator):
+    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator

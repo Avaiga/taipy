@@ -33,4 +33,4 @@ def test_get_state_id(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().app_context():
         g.client_id = cid
-        assert cid == get_state_id(gui._Gui__state)
+        assert cid == get_state_id(gui._Gui__state)  # type: ignore[attr-defined]

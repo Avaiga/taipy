@@ -16,7 +16,7 @@ from taipy.gui import Gui
 def test_menu_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("lov", ["Item 1", "Item 2", "Item 3", "Item 4"])
     with tgb.Page(frame=None) as page:
-        tgb.menu(lov="{lov}", on_action="on_menu_action")
+        tgb.menu(lov="{lov}", on_action="on_menu_action")  # type: ignore[attr-defined]
     expected_list = [
         "<MenuCtl",
         'libClassName="taipy-menu"',

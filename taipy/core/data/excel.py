@@ -264,7 +264,7 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
             return {sheet_name: df.to_numpy() for sheet_name, df in sheets.items()}
         return sheets.to_numpy()
 
-    def _do_read_excel(self, engine, sheet_names, kwargs) -> pd.DataFrame:
+    def _do_read_excel(self, engine, sheet_names, kwargs) -> Union[Dict[Union[int, str], pd.DataFrame], pd.DataFrame]:
         df = pd.read_excel(
             self._path,
             sheet_name=sheet_names,
@@ -402,6 +402,6 @@ class ExcelDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode):
         else:
             df = pd.DataFrame(data)
             if columns:
-                df.columns = columns
+                df.columns = pd.Index(columns, dtype="object")
             self.__write_excel_with_single_sheet(df.to_excel, self.path, index=False)
         self.track_edit(timestamp=datetime.now(), job_id=job_id)

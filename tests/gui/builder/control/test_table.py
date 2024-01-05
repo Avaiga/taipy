@@ -17,7 +17,7 @@ from taipy.gui import Gui
 
 def test_table_builder_1(gui: Gui, helpers, csvdata):
     with tgb.Page(frame=None) as page:
-        tgb.table(
+        tgb.table(  # type: ignore[attr-defined]
             data="{csvdata}",
             page_size=10,
             page_size_options=[10, 30, 100],
@@ -41,7 +41,7 @@ def test_table_builder_1(gui: Gui, helpers, csvdata):
 
 def test_table_reset_builder(gui: Gui, helpers, csvdata):
     with tgb.Page(frame=None) as page:
-        tgb.table(
+        tgb.table(  # type: ignore[attr-defined]
             data="{csvdata}",
             rebuild=True,
             page_size=10,
@@ -82,7 +82,7 @@ def test_table_builder_2(gui: Gui, helpers, csvdata):
         "height": "60vh",
     }
     with tgb.Page(frame=None) as page:
-        tgb.table(data="{csvdata}", properties="table_properties", auto_loading=True, editable=False)
+        tgb.table(data="{csvdata}", properties="table_properties", auto_loading=True, editable=False)  # type: ignore[attr-defined]
     expected_list = [
         "<Table",
         "allowAllRows={true}",
