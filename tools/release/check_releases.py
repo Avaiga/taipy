@@ -1,6 +1,5 @@
-import sys
 import os
-
+import sys
 
 if __name__ == "__main__":
     _path = sys.argv[1]
@@ -17,5 +16,5 @@ if __name__ == "__main__":
 
     for package in packages:
         if not os.path.exists(os.path.join(_path, package)):
-            print(f"Package {package} does not exist")
+            print(f"Package {package} does not exist")  # noqa: T201
             sys.exit(1)

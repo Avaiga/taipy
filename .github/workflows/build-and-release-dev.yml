@@ -1,10 +1,7 @@
 name: Build a dev version for all packages and release them
 
 on:
-  pull_request_review:
-    types: [submitted]
-  push:
-    branches: [ develop, dev/*, release/*, feature/* ]
+  workflow_dispatch:
 
 jobs:
   fetch-versions:
@@ -79,6 +76,15 @@ jobs:
           fi
         shell: bash
 
+      - name: Update setup.requirements.txt
+        run: |
+          python tools/release/update_setup_requirements.py taipy-${{ matrix.package }} \
+            ${{needs.fetch-versions.outputs.config_VERSION}} \
+            ${{needs.fetch-versions.outputs.core_VERSION}} \
+            ${{needs.fetch-versions.outputs.gui_VERSION}} \
+            ${{needs.fetch-versions.outputs.rest_VERSION}} \
+            ${{needs.fetch-versions.outputs.templates_VERSION}}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -108,12 +114,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ssh-key: ${{secrets.DEPLOY_KEY}}
+      - name: Extract commit hash
+        shell: bash
+        run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: extract_hash
+
       - name: Set Build Variables
         id: set-variables
         run: |
           echo "package_version=${{needs.fetch-versions.outputs.VERSION}}" >> $GITHUB_OUTPUT
           echo "release_name=${{needs.fetch-versions.outputs.VERSION}}" >> $GITHUB_OUTPUT
           echo "tar_path=./dist/${{ github.event.repository.name }}-${{needs.fetch-versions.outputs.VERSION}}.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build wheel
 
       - name: Build Taipy package
         run: python setup.py build_py && python -m build
@@ -134,11 +150,13 @@ jobs:
 
       - name: Download packages
         run: |
-          gh release download ${{ needs.fetch-versions.outputs.config_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.core_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.gui_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.rest_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.templates_VERSION }} --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.config_VERSION }}-config --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.core_VERSION }}-core --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.gui_VERSION }}-gui --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.rest_VERSION }}-rest --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.templates_VERSION }}-templates --skip-existing --dir dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bundle all packages in main release tag
         run: |

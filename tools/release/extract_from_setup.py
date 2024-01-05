@@ -7,7 +7,7 @@ def extract_gui_version(base_path: str) -> None:
             if "taipy-gui" in line:
                 start = line.find("taipy-gui")
                 end = line.rstrip().find('",')
-                print(f"VERSION={line[start:end]}")
+                print(f"VERSION={line[start:end]}")  # noqa: T201
                 break
 
 

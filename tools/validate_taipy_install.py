@@ -23,8 +23,9 @@ def test_import_taipy_packages() -> bool:
 
 
 def test_taipy_gui_core() -> bool:
-    import taipy
     from pathlib import Path
+
+    import taipy
 
     taipy_gui_core_path = Path(taipy.__file__).absolute().parent / "gui_core" / "lib" / "taipy-gui-core.js"
     if not taipy_gui_core_path.exists():

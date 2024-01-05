@@ -79,15 +79,4 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install --no-cache-dir ${{ github.event.repository.name }}==${{ github.event.inputs.version }}
-          python -c "import taipy as tp; tp.Scenario"
-          python -c "import taipy as tp; tp.gui"
-          python -c "import taipy as tp; tp.rest"
-
-          echo """
-          import taipy
-          from pathlib import Path
-          taipy_gui_core_path = Path(taipy.__file__).absolute().parent / 'gui_core' / 'lib' / 'taipy-gui-core.js'
-          if not taipy_gui_core_path.exists():
-              raise FileNotFoundError(f'taipy-gui-core.js not found in {taipy_gui_core_path}')
-          """ > ${{ runner.temp }}/verify_gui_core.py
-          python ${{ runner.temp }}/verify_gui_core.py
+          python tools/validate_taipy_install.py

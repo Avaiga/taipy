@@ -1,8 +1,8 @@
-import sys
 import json
 import os
-from dataclasses import dataclass, asdict
 import re
+import sys
+from dataclasses import asdict, dataclass
 from typing import Optional
 
 
@@ -24,6 +24,16 @@ class Version:
     def validate_suffix(self, suffix="dev"):
         if suffix not in self.ext:
             raise Exception(f"Version does not contain suffix {suffix}")
+
+    @property
+    def name(self) -> str:
+        """returns a string representation of a version"""
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    @property
+    def dev_name(self) -> str:
+        """returns a string representation of a version"""
+        return f"{self.name}.{self.ext}"
 
     def __str__(self) -> str:
         """returns a string representation of a version"""
@@ -55,16 +65,18 @@ def extract_version(base_path: str) -> Version:
 def __setup_dev_version(
     version: Version, _base_path: str, name: Optional[str] = None, bump_dev_version: bool = False
 ) -> None:
-    name = f"{name}_VERSION" if name else "VERSION"
     version.validate_suffix()
-    print(f"{name}={version}")
-    if bump_dev_version:
-        version.bump_ext_version()
+
+    name = f"{name}_VERSION" if name else "VERSION"
+    print(f"{name}={version.dev_name}")  # noqa: T201
+
+    version.bump_ext_version()
+
     __write_version_to_path(_base_path, version)
-    print(f"NEW_{name}={version}")
+    print(f"NEW_{name}={version.dev_name}")  # noqa: T201
 
 
-def __setup_prod_version(version: Version, target_version: str, branch_name: str) -> None:
+def __setup_prod_version(version: Version, target_version: str, branch_name: str, name: str = None) -> None:
     if str(version) != target_version:
         raise ValueError(f"Current version={version} does not match target version={target_version}")
 
@@ -72,6 +84,9 @@ def __setup_prod_version(version: Version, target_version: str, branch_name: str
         raise ValueError(
             f"Branch name mismatch branch={branch_name} does not match target branch name={target_branch_name}"
         )
+
+    name = f"{name}_VERSION" if name else "VERSION"
+    print(f"{name}={version.name}")  # noqa: T201
 
 
 if __name__ == "__main__":
@@ -88,18 +103,13 @@ if __name__ == "__main__":
         ]
     )
     _environment = sys.argv[2]
-    should_bump = False
-
-    try:
-        should_bump = True if sys.argv[3] == "bump" else False
-    except IndexError:
-        pass
 
     for _path in paths:
         _version = extract_version(_path)
-        if _environment == "dev":
-            _name = None if _path == "taipy" else _path.split(os.sep)[-1]
-            __setup_dev_version(_version, _path, _name, should_bump)
+        _name = None if _path == "taipy" else _path.split(os.sep)[-1]
 
-        if _environment == "prod":
-            __setup_prod_version(_version, sys.argv[3], sys.argv[4])
+        if _environment == "dev":
+            __setup_dev_version(_version, _path, _name)
+
+        if _environment == "production":
+            __setup_prod_version(_version, sys.argv[3], sys.argv[4], _name)

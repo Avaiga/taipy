@@ -2,10 +2,7 @@ name: Build a dev version for all packages and release them
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "The release/package version to create (ex: 1.0.0)"
-        required: true
+
 jobs:
   fetch-versions:
     runs-on: ubuntu-latest
@@ -18,15 +15,11 @@ jobs:
         VERSION: ${{ steps.version-setup.outputs.VERSION }}
         NEW_VERSION: ${{ steps.version-setup.outputs.NEW_VERSION }}
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-        id: extract_branch
-
+      - uses: actions/checkout@v4
       - name: Setup Dev Version
         id: version-setup
         run: |
-          python tools/release/setup_version.py ALL prod ${{ github.event.inputs.version }} ${{ steps.extract_branch.outputs.branch }} >> $GITHUB_OUTPUT
+          python tools/release/setup_version.py ALL production >> $GITHUB_OUTPUT
 
   build-and-release-taipy-packages:
     needs: [fetch-versions]
@@ -35,6 +28,7 @@ jobs:
     strategy:
       matrix:
         package: [config, core, gui, rest, templates]
+      max-parallel: 1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -82,6 +76,16 @@ jobs:
           fi
         shell: bash
 
+      - name: Update setup.requirements.txt
+        run: |
+          python tools/release/update_setup_requirements.py taipy-${{ matrix.package }} \
+            ${{needs.fetch-versions.outputs.config_VERSION}} \
+            ${{needs.fetch-versions.outputs.core_VERSION}} \
+            ${{needs.fetch-versions.outputs.gui_VERSION}} \
+            ${{needs.fetch-versions.outputs.rest_VERSION}} \
+            ${{needs.fetch-versions.outputs.templates_VERSION}} \
+            dev
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -94,7 +98,7 @@ jobs:
       - name: Create tag and release
         working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
-          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -108,6 +112,14 @@ jobs:
     needs: [ build-and-release-taipy-dev-packages, fetch-versions ]
     timeout-minutes: 20
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{secrets.DEPLOY_KEY}}
+      - name: Extract commit hash
+        shell: bash
+        run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: extract_hash
+
       - name: Set Build Variables
         id: set-variables
         run: |
@@ -115,12 +127,17 @@ jobs:
           echo "release_name=${{needs.fetch-versions.outputs.VERSION}}" >> $GITHUB_OUTPUT
           echo "tar_path=./dist/${{ github.event.repository.name }}-${{needs.fetch-versions.outputs.VERSION}}.tar.gz" >> $GITHUB_OUTPUT
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build wheel
+
       - name: Build Taipy package
         run: python setup.py build_py && python -m build
 
       - name: Create tag and release Taipy
         run: |
-          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
+          gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -134,11 +151,13 @@ jobs:
 
       - name: Download packages
         run: |
-          gh release download ${{ needs.fetch-versions.outputs.config_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.core_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.gui_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.rest_VERSION }} --dir dist
-          gh release download ${{ needs.fetch-versions.outputs.templates_VERSION }} --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.config_VERSION }}-config --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.core_VERSION }}-core --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.gui_VERSION }}-gui --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.rest_VERSION }}-rest --skip-existing --dir dist
+          gh release download ${{ needs.fetch-versions.outputs.templates_VERSION }}-templates --skip-existing --dir dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bundle all packages in main release tag
         run: |
@@ -150,7 +169,3 @@ jobs:
         run: |
           git reset --hard HEAD
           git clean -fdx
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update version to ${{ needs.fetch-versions.outputs.NEW_VERSION }}
