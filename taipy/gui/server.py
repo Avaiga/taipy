@@ -36,7 +36,7 @@ from taipy.logger._taipy_logger import _TaipyLogger
 
 from ._renderers.json import _TaipyJsonProvider
 from .config import ServerConfig
-from .external._custom_page import _ExternalResourceHandlerManager
+from .custom._page import _ExternalResourceHandlerManager
 from .utils import _is_in_notebook, _is_port_open, _RuntimeManager
 
 if t.TYPE_CHECKING:
@@ -159,7 +159,7 @@ class _Server:
                 try:
                     return resource_handler.get_resources(path)
                 except Exception:
-                    raise RuntimeError("Can't get resources from external resource handler")
+                    raise RuntimeError("Can't get resources from custom resource handler")
             if path == "" or path == "index.html" or "." not in path:
                 try:
                     return render_template(

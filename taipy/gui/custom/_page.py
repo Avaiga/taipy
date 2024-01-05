@@ -14,15 +14,16 @@ from __future__ import annotations
 import typing as t
 from abc import ABC, abstractmethod
 
-from ..page import Page
+from ..page import Page as BasePage
 from ..utils.singleton import _Singleton
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-class CustomPage(Page):
-    """A custom page for external application that can be added to Taipy GUI"""
+class Page(BasePage):
+    """NOT DOCUMENTED
+    A custom page for external application that can be added to Taipy GUI"""
 
     def __init__(self, resource_handler: ResourceHandler, binding_variables: t.List[str] = None, **kwargs) -> None:
         if binding_variables is None:
@@ -33,7 +34,9 @@ class CustomPage(Page):
 
 
 class ResourceHandler(ABC):
-    """Resource handler for custom pages
+    """NOT DOCUMENTED
+    Resource handler for custom pages.
+
     User can implement this class to provide custom resources for the custom pages
     """
 
@@ -51,7 +54,9 @@ class ResourceHandler(ABC):
 
 
 class _ExternalResourceHandlerManager(object, metaclass=_Singleton):
-    """Manager for resource handlers
+    """NOT DOCUMENTED
+    Manager for resource handlers.
+
     This class is used to manage resource handlers for custom pages
     """
 

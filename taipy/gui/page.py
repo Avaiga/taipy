@@ -34,7 +34,7 @@ class Page:
     """
 
     def __init__(self, **kwargs) -> None:
-        from .external import CustomPage
+        from .custom import Page as CustomPage
 
         self._class_module_name = ""
         self._class_locals: t.Dict[str, t.Any] = {}

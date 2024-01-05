@@ -49,12 +49,12 @@ from ._renderers.utils import _get_columns_dict
 from ._warnings import TaipyGuiWarning, _warn
 from .builder import _ElementApiGenerator
 from .config import Config, ConfigParameter, _Config
+from .custom import Page as CustomPage
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
-from .external import CustomPage
 from .gui_types import _WsType
 from .page import Page
 from .partial import Partial
@@ -1989,10 +1989,10 @@ class Gui:
                     _Server._RESOURCE_HANDLER_ARG: pr._resource_handler.get_id(),
                 },
             ):
-                # proactively handle the bindings of custom page variables
+                # Proactively handle the bindings of custom page variables
                 self._bind_custom_page_variables(pr, self._get_client_id())
-                return ("Successfully redirect to external resource handler", 200)
-            return ("Failed to navigate to external resource handler", 500)
+                return ("Successfully redirect to custom resource handler", 200)
+            return ("Failed to navigate to custom resource handler", 500)
         # Handle page rendering
         context = page.render(self)
         if (
