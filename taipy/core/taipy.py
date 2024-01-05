@@ -95,7 +95,7 @@ def is_editable(
         ScenarioId,
         CycleId,
         SubmissionId,
-    ]
+    ],
 ) -> bool:
     """Indicate if an entity can be edited.
 
@@ -125,7 +125,7 @@ def is_readable(
         ScenarioId,
         CycleId,
         SubmissionId,
-    ]
+    ],
 ) -> bool:
     """Indicate if an entity can be read.
 
@@ -145,7 +145,7 @@ def submit(
     force: bool = False,
     wait: bool = False,
     timeout: Optional[Union[float, int]] = None,
-) -> Union[Job, List[Job]]:
+) -> Optional[Union[Job, List[Job]]]:
     """Submit a scenario, sequence or task entity for execution.
 
     This function submits the given entity for execution and returns the created job(s).
@@ -169,6 +169,7 @@ def submit(
     """
     if manager := _check_entity_and_get_manager(entity, [Scenario, Sequence, Task]):
         return manager._submit(entity, force=force, wait=wait, timeout=timeout)  # type: ignore
+    return None
 
 
 @overload
@@ -283,7 +284,7 @@ def get(entity_id: str) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle,
 
 
 def get(
-    entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str]
+    entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, CycleId, SubmissionId, str],
 ) -> Union[Task, DataNode, Sequence, Scenario, Job, Cycle, Submission]:
     """Retrieve an entity by its unique identifier.
 
@@ -354,6 +355,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, SequenceId, ScenarioId, JobId, C
       the scenario can be deleted.
     - If a `SequenceId` is provided, the related jobs are deleted.
     - If a `TaskId` is provided, the related data nodes, and jobs are deleted.
+    - If a `DataNodeId` is provided, the data node is deleted.
     - If a `SubmissionId^` or a `JobId^` is provided, the submission or job entity can only be deleted if
       the execution has been finished.
 
