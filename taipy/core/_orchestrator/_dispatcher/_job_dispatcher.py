@@ -8,18 +8,20 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 import threading
 from abc import abstractmethod
 from queue import Empty
-from typing import Dict
+from typing import Dict, Optional
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
-from .._abstract_orchestrator import _AbstractOrchestrator
+
 from ...data._data_manager_factory import _DataManagerFactory
 from ...job._job_manager_factory import _JobManagerFactory
 from ...job.job import Job
 from ...task.task import Task
+from .._abstract_orchestrator import _AbstractOrchestrator
 
 
 class _JobDispatcher(threading.Thread):
@@ -30,7 +32,7 @@ class _JobDispatcher(threading.Thread):
     __logger = _TaipyLogger._get_logger()
     _nb_available_workers: int = 1
 
-    def __init__(self, orchestrator: _AbstractOrchestrator):
+    def __init__(self, orchestrator: Optional[_AbstractOrchestrator]):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.orchestrator = orchestrator

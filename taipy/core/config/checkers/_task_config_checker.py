@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import List
+from typing import Dict, List, cast
 
 from taipy.config._config import _Config
 from taipy.config.checker._checkers._config_checker import _ConfigChecker
@@ -25,7 +25,7 @@ class _TaskConfigChecker(_ConfigChecker):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        task_configs = self._config._sections[TaskConfig.name]
+        task_configs = cast(Dict[str, TaskConfig], self._config._sections[TaskConfig.name])
         scenario_attributes = [
             attr for attr in dir(Scenario) if not callable(getattr(Scenario, attr)) and not attr.startswith("_")
         ]

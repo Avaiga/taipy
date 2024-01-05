@@ -9,17 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import taipy.gui.builder as tgb
-from taipy.gui import Gui
+from typing import TypeVar
 
+from ..checker._checkers._config_checker import _ConfigChecker
 
-def test_expandable_builder_1(gui: Gui, helpers):
-    with tgb.expandable(title="Expandable section", expanded=False) as content:  # type: ignore[attr-defined]
-        tgb.text(value="This is an expandable section")  # type: ignore[attr-defined]
-    expected_list = [
-        "<Expandable",
-        "expanded={false}",
-        'title="Expandable section"',
-        "This is an expandable section",
-    ]
-    helpers.test_control_builder(gui, tgb.Page(content, frame=None), expected_list)
+ConfigCheckerType = TypeVar("ConfigCheckerType", bound=_ConfigChecker)

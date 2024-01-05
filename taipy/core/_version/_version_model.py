@@ -32,7 +32,7 @@ class _VersionModel(_BaseModel):
         Column("is_latest", Boolean),
     )
     id: str
-    config: Dict[str, Any]
+    config: str
     creation_date: str
 
     @staticmethod

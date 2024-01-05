@@ -19,7 +19,6 @@ jobs:
           use-isort: false
           use-pycodestyle: false
           use-pylint: false
-          use-mypy: false  # TODO: re-enable mypy
           extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py|tools) --follow-imports skip"
 
       - uses: chartboost/ruff-action@v1

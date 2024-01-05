@@ -69,15 +69,15 @@ class _SubmissionDetails:
         client_id: str,
         module_context: str,
         callback: t.Callable,
-        submission: Submission,
+        submission_status: SubmissionStatus,
     ) -> None:
         self.client_id = client_id
         self.module_context = module_context
         self.callback = callback
-        self.submission = submission
+        self.submission_status = submission_status
 
-    def set_submission(self, submission: Submission):
-        self.submission = submission
+    def set_submission_status(self, submission_status: SubmissionStatus):
+        self.submission_status = submission_status
         return self
 
 
@@ -137,9 +137,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if event.operation != EventOperation.DELETION and is_readable(t.cast(SequenceId, event.entity_id))
                     else None
                 )
-                if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:
+                if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
                     self.gui._broadcast(
-                        _GuiCoreContext._CORE_CHANGED_NAME, {"scenario": [x for x in sequence.parent_ids]}
+                        _GuiCoreContext._CORE_CHANGED_NAME,
+                        {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
                     )
             except Exception as e:
                 _warn(f"Access to sequence {event.entity_id} failed", e)
@@ -182,7 +183,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 return
 
             new_status = submission.submission_status
-            if sub_details.submission.submission_status != new_status:
+            if sub_details.submission_status != new_status:
                 # callback
                 self.gui._call_user_callback(
                     sub_details.client_id,
@@ -198,7 +199,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 ):
                     self.client_submission.pop(submission_id, None)
                 else:
-                    self.client_submission[submission_id] = sub_details.set_submission(submission)
+                    self.client_submission[submission_id] = sub_details.set_submission_status(new_status)
 
         except Exception as e:
             _warn(f"Submission ({submission_id}) is not available", e)
@@ -442,7 +443,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                 client_id,
                                 module_context,
                                 submission_fn,
-                                submission_entity,
+                                submission_entity.submission_status,
                             )
                     else:
                         _warn(f"on_submission_change(): '{submission_cb}' is not a valid function.")

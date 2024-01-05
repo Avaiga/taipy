@@ -35,12 +35,12 @@ def test_long_callback(gui: Gui):
     gui._set_frame(inspect.currentframe())
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
-    state = gui._Gui__state
+    state = gui._Gui__state  # type: ignore[attr-defined]
 
     with gui.get_flask_app().app_context():
         assert state.status is None
         invoke_long_callback(state, heavy_function)
         invoke_long_callback(state, heavy_function_with_exception)
         invoke_long_callback(state, heavy_function, (), heavy_function_status)
-        invoke_long_callback(state, heavy_function, (2), heavy_function_status, (), 1000)
+        invoke_long_callback(state, heavy_function, (2,), heavy_function_status, (), 1000)
         invoke_long_callback(state, heavy_function_with_exception, (), heavy_function_status)

@@ -115,12 +115,12 @@ def test_map_dict_set(gui: Gui, test_client):
     with patch("sys.argv", ["prog"]):
         gui.run(run_server=False, single_client=True)
     with gui.get_flask_app().app_context():
-        assert isinstance(gui._Gui__state.d, _MapDict)
-        gui._Gui__state.d = {"b": 2}
-        assert isinstance(gui._Gui__state.d, _MapDict)
-        assert len(gui._Gui__state.d) == 1
-        assert gui._Gui__state.d.get("a", None) is None
-        assert gui._Gui__state.d.get("b", None) == 2
+        assert isinstance(gui._Gui__state.d, _MapDict)  # type: ignore[attr-defined]
+        gui._Gui__state.d = {"b": 2}  # type: ignore[attr-defined]
+        assert isinstance(gui._Gui__state.d, _MapDict)  # type: ignore[attr-defined]
+        assert len(gui._Gui__state.d) == 1  # type: ignore[attr-defined]
+        assert gui._Gui__state.d.get("a", None) is None  # type: ignore[attr-defined]
+        assert gui._Gui__state.d.get("b", None) == 2  # type: ignore[attr-defined]
 
 
 def test_map_dict_items():

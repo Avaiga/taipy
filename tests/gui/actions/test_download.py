@@ -38,7 +38,7 @@ def test_download(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
-        download(gui._Gui__state, "some text", "filename.txt", "on_download_action")
+        download(gui._Gui__state, "some text", "filename.txt", "on_download_action")  # type: ignore[attr-defined]
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(

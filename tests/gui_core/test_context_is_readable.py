@@ -19,10 +19,10 @@ from taipy.core.submission.submission import Submission
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext, _SubmissionDetails
 
-a_scenario = Scenario("scenario_config_id", [], {}, sequences={"sequence": {}})
+a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
 a_task = Task("task_config_id", {}, print)
 a_job = Job(t.cast(JobId, "JOB_job_id"), a_task, "submit_id", a_scenario.id)
-a_job.isfinished = lambda s: True
+a_job.isfinished = lambda s: True  # type: ignore[attr-defined]
 a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 a_submission = Submission(a_scenario.id, "Scenario", a_scenario.config_id)
 

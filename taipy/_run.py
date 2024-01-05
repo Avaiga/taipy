@@ -57,7 +57,7 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
         return None
 
     if gui and rest:
-        gui._set_flask(rest._app)  # type: ignore
+        gui._set_flask(rest._app)  # type: ignore[union-attr]
         return gui.run(**kwargs)
     else:
         app = rest or gui
@@ -65,15 +65,14 @@ def _run(*services: _AppType, **kwargs) -> t.Optional[Flask]:
         return app.run(**kwargs)
 
 
-# Avoid black adding too many empty lines
-# fmt: off
 if sys.version_info >= (3, 10):
+
     def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
         def filter_isinstance(tl: _AppType) -> TypeGuard[_AppTypeT]:
             return isinstance(tl, type_)
 
         return next(filter(filter_isinstance, apps), None)
 else:
+
     def __get_app(apps: t.Tuple[_AppType, ...], type_: t.Type[_AppTypeT]) -> t.Optional[_AppType]:
         return next(filter(lambda a: isinstance(a, type_), apps), None)
-# fmt: on

@@ -13,11 +13,13 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+from typing import Dict, List
+
 from taipy.gui import Gui
 
 # Skill categories
 skills = ["HTML", "CSS", "Java", "Python", "PHP", "JavaScript", "Photoshop"]
-data = [
+data: List[Dict[str, List]] = [
     # Proportion of skills used for Backend development
     {"Backend": [10, 10, 80, 70, 90, 30, 0], "Skills": skills},
     # Proportion of skills used for Frontend development

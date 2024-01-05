@@ -40,4 +40,4 @@ def test_invoke_callback(gui: Gui, helpers):
     with gui.get_flask_app().app_context():
         g.client_id = cid
         invoke_callback(gui, cid, user_callback, [])
-        assert gui._Gui__state.val == 10
+        assert gui._Gui__state.val == 10  # type: ignore[attr-defined]
