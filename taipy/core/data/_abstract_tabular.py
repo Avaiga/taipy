@@ -16,8 +16,15 @@ class _AbstractTabularDataNode(object):
     """Abstract base class for tabular data node implementations (CSVDataNode, ParquetDataNode, ExcelDataNode,
     SQLTableDataNode and SQLDataNode) that are tabular representable."""
 
+    _EXPOSED_TYPE_PROPERTY = "exposed_type"
+    _EXPOSED_TYPE_NUMPY = "numpy"
+    _EXPOSED_TYPE_PANDAS = "pandas"
+    _EXPOSED_TYPE_MODIN = "modin"  # Deprecated in favor of pandas since 3.1.0
+    __VALID_STRING_EXPOSED_TYPES = [_EXPOSED_TYPE_PANDAS, _EXPOSED_TYPE_NUMPY]
+
     @staticmethod
-    def _check_exposed_type(exposed_type, valid_string_exposed_types):
+    def _check_exposed_type(exposed_type):
+        valid_string_exposed_types = _AbstractTabularDataNode.__VALID_STRING_EXPOSED_TYPES
         if isinstance(exposed_type, str) and exposed_type not in valid_string_exposed_types:
             raise InvalidExposedType(
                 f"Invalid string exposed type {exposed_type}. Supported values are "

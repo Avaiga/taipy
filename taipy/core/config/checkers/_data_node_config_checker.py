@@ -220,5 +220,5 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 data_node_config._EXPOSED_TYPE_KEY,
                 data_node_config.exposed_type,
                 f"The `{data_node_config._EXPOSED_TYPE_KEY}` of DataNodeConfig `{data_node_config_id}` "
-                f'must be either "pandas", "modin", "numpy", or a custom type.',
+                f'must be either "pandas", "numpy", or a custom type.',
             )

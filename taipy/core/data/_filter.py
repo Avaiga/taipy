@@ -15,7 +15,6 @@ from itertools import chain
 from operator import and_, or_
 from typing import Dict, Iterable, List, Tuple, Union
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 from pandas.core.common import is_bool_indexer
@@ -26,12 +25,12 @@ from .operator import JoinOperator, Operator
 class _FilterDataNode:
     @staticmethod
     def __is_pandas_object(data) -> bool:
-        return isinstance(data, (pd.DataFrame, modin_pd.DataFrame)) or isinstance(data, (pd.Series, modin_pd.DataFrame))
+        return isinstance(data, pd.DataFrame) or isinstance(data, pd.Series)
 
     @staticmethod
     def __is_multi_sheet_excel(data) -> bool:
         if isinstance(data, Dict):
-            has_df_children = all(isinstance(e, (pd.DataFrame, modin_pd.DataFrame)) for e in data.values())
+            has_df_children = all(isinstance(e, pd.DataFrame) for e in data.values())
             has_list_children = all(isinstance(e, List) for e in data.values())
             has_np_array_children = all(isinstance(e, np.ndarray) for e in data.values())
             return has_df_children or has_list_children or has_np_array_children
@@ -52,7 +51,7 @@ class _FilterDataNode:
         if isinstance(key, Hashable):
             return _FilterDataNode.__getitem_hashable(data, key)
 
-        if isinstance(key, (pd.DataFrame, modin_pd.DataFrame)):
+        if isinstance(key, pd.DataFrame):
             return _FilterDataNode.__getitem_dataframe(data, key)
 
         if is_bool_indexer(key):
@@ -78,7 +77,7 @@ class _FilterDataNode:
         return data[key]
 
     @staticmethod
-    def __getitem_dataframe(data, key: Union[pd.DataFrame, modin_pd.DataFrame]):
+    def __getitem_dataframe(data, key: pd.DataFrame):
         if _FilterDataNode.__is_pandas_object(data):
             return data[key]
         if _FilterDataNode.__is_list_of_dict(data):
@@ -115,7 +114,7 @@ class _FilterDataNode:
             return {k: _FilterDataNode._filter(v, operators, join_operator) for k, v in data.items()}
 
         if not ((isinstance(operators[0], list)) or (isinstance(operators[0], tuple))):
-            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+            if isinstance(data, pd.DataFrame):
                 return _FilterDataNode.__filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
             if isinstance(data, np.ndarray):
                 list_operators = [operators]
@@ -123,7 +122,7 @@ class _FilterDataNode:
             if isinstance(data, List):
                 return _FilterDataNode.__filter_list_per_key_value(data, operators[0], operators[1], operators[2])
         else:
-            if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+            if isinstance(data, pd.DataFrame):
                 return _FilterDataNode.__filter_dataframe(data, operators, join_operator=join_operator)
             if isinstance(data, np.ndarray):
                 return _FilterDataNode.__filter_numpy_array(data, operators, join_operator=join_operator)
@@ -133,7 +132,7 @@ class _FilterDataNode:
 
     @staticmethod
     def __filter_dataframe(
-        df_data: Union[pd.DataFrame, modin_pd.DataFrame], operators: Union[List, Tuple], join_operator=JoinOperator.AND
+        df_data: pd.DataFrame, operators: Union[List, Tuple], join_operator=JoinOperator.AND
     ):
         filtered_df_data = []
         if join_operator == JoinOperator.AND:
@@ -145,16 +144,11 @@ class _FilterDataNode:
         for key, value, operator in operators:
             filtered_df_data.append(_FilterDataNode.__filter_dataframe_per_key_value(df_data, key, value, operator))
 
-        if isinstance(df_data, modin_pd.DataFrame):
-            if filtered_df_data:
-                return _FilterDataNode.__modin_dataframe_merge(filtered_df_data, how)
-            return modin_pd.DataFrame()
-
         return _FilterDataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
 
     @staticmethod
     def __filter_dataframe_per_key_value(
-        df_data: Union[pd.DataFrame, modin_pd.DataFrame], key: str, value, operator: Operator
+        df_data: pd.DataFrame, key: str, value, operator: Operator
     ):
         df_by_col = df_data[key]
         if operator == Operator.EQUAL:
@@ -174,10 +168,6 @@ class _FilterDataNode:
     @staticmethod
     def __dataframe_merge(df_list: List, how="inner"):
         return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
-
-    @staticmethod
-    def __modin_dataframe_merge(df_list: List, how="inner"):
-        return reduce(lambda df1, df2: modin_pd.merge(df1, df2, how=how), df_list)
 
     @staticmethod
     def __filter_numpy_array(data: np.ndarray, operators: Union[List, Tuple], join_operator=JoinOperator.AND):

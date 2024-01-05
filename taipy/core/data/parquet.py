@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from os.path import isdir, isfile
 from typing import Any, Dict, List, Optional, Set
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 
@@ -77,11 +76,6 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
     """
 
     __STORAGE_TYPE = "parquet"
-    __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __EXPOSED_TYPE_NUMPY = "numpy"
-    __EXPOSED_TYPE_PANDAS = "pandas"
-    __EXPOSED_TYPE_MODIN = "modin"
-    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_MODIN, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_DATA_KEY = "default_data"
     __DEFAULT_PATH_KEY = "default_path"
@@ -141,9 +135,12 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         if self.__WRITE_KWARGS_PROPERTY not in properties.keys():
             properties[self.__WRITE_KWARGS_PROPERTY] = {}
 
-        if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
-            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
-        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY], self.__VALID_STRING_EXPOSED_TYPES)
+        if self._EXPOSED_TYPE_PROPERTY not in properties.keys():
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        elif properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_MODIN:
+            # Deprecated in favor of pandas since 3.1.0
+            properties[self._EXPOSED_TYPE_PROPERTY] = self._EXPOSED_TYPE_PANDAS
+        self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
 
         super().__init__(
             config_id,
@@ -183,7 +180,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
 
         self._TAIPY_PROPERTIES.update(
             {
-                self.__EXPOSED_TYPE_PROPERTY,
+                self._EXPOSED_TYPE_PROPERTY,
                 self.__PATH_KEY,
                 self.__DEFAULT_PATH_KEY,
                 self.__DEFAULT_DATA_KEY,
@@ -214,7 +211,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         return self.read_with_kwargs()
 
     def _read_as(self, read_kwargs: Dict):
-        custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
+        custom_class = self.properties[self._EXPOSED_TYPE_PROPERTY]
         list_of_dicts = self._read_as_pandas_dataframe(read_kwargs).to_dict(orient="records")
         return [custom_class(**dct) for dct in list_of_dicts]
 
@@ -223,9 +220,6 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
 
     def _read_as_pandas_dataframe(self, read_kwargs: Dict) -> pd.DataFrame:
         return pd.read_parquet(self._path, **read_kwargs)
-
-    def _read_as_modin_dataframe(self, read_kwargs: Dict) -> modin_pd.DataFrame:
-        return modin_pd.read_parquet(self._path, **read_kwargs)
 
     def _append(self, data: Any):
         self.write_with_kwargs(data, engine="fastparquet", append=True)
@@ -250,7 +244,7 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         }
         kwargs.update(self.properties[self.__WRITE_KWARGS_PROPERTY])
         kwargs.update(write_kwargs)
-        if isinstance(data, (pd.DataFrame, modin_pd.DataFrame)):
+        if isinstance(data, pd.DataFrame):
             data.to_parquet(self._path, **kwargs)
         else:
             pd.DataFrame(data).to_parquet(self._path, **kwargs)
@@ -280,10 +274,8 @@ class ParquetDataNode(DataNode, _AbstractFileDataNode, _AbstractTabularDataNode)
         )
         kwargs.update(read_kwargs)
 
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe(kwargs)
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_MODIN:
-            return self._read_as_modin_dataframe(kwargs)
-        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+        if self.properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_NUMPY:
             return self._read_as_numpy(kwargs)
         return self._read_as(kwargs)
