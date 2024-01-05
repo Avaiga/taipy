@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,10 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import timedelta
-from typing import Dict, List
+from typing import Dict, List, cast
 
 from taipy.config._config import _Config
-from taipy.config.checker._checker import _ConfigChecker
+from taipy.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.scope import Scope
 
@@ -27,7 +27,10 @@ class _DataNodeConfigChecker(_ConfigChecker):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        data_node_configs: Dict[str, DataNodeConfig] = self._config._sections[DataNodeConfig.name]
+        data_node_configs: Dict[str, DataNodeConfig] = cast(
+            Dict[str, DataNodeConfig],
+            self._config._sections[DataNodeConfig.name],
+        )
         task_attributes = [attr for attr in dir(Task) if not callable(getattr(Task, attr)) and not attr.startswith("_")]
         scenario_attributes = [
             attr for attr in dir(Scenario) if not callable(getattr(Scenario, attr)) and not attr.startswith("_")

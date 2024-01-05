@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -24,10 +24,10 @@ def test_navbar_builder(gui: Gui, test_client, helpers):
         ],
     )
     with tgb.Page(frame=None) as page:
-        tgb.navbar(lov="{navlov}")
+        tgb.navbar(lov="{navlov}")  # type: ignore[attr-defined]
     expected_list = [
         "<NavBar",
-        'defaultLov="[[&quot;/page1&quot;, &quot;Page 1&quot;], [&quot;/page2&quot;, &quot;Page 2&quot;], [&quot;/page3&quot;, &quot;Page 3&quot;], [&quot;/page4&quot;, &quot;Page 4&quot;]]"',
+        'defaultLov="[[&quot;/page1&quot;, &quot;Page 1&quot;], [&quot;/page2&quot;, &quot;Page 2&quot;], [&quot;/page3&quot;, &quot;Page 3&quot;], [&quot;/page4&quot;, &quot;Page 4&quot;]]"',  # noqa: E501
         "lov={_TpL_tpec_TpExPr_navlov_TPMDL_0}",
     ]
     helpers.test_control_builder(gui, page, expected_list)

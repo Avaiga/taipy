@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -9,11 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from unittest.mock import Mock, patch
-
-import pytest
-
 import typing as t
+from unittest.mock import Mock, patch
 
 from taipy.config.common.scope import Scope
 from taipy.core import Job, JobId, Scenario, Task
@@ -22,10 +19,10 @@ from taipy.core.submission.submission import Submission
 from taipy.gui import Gui
 from taipy.gui_core._context import _GuiCoreContext, _SubmissionDetails
 
-a_scenario = Scenario("scenario_config_id", [], {}, sequences={"sequence": {}})
+a_scenario = Scenario("scenario_config_id", None, {}, sequences={"sequence": {}})
 a_task = Task("task_config_id", {}, print)
 a_job = Job(t.cast(JobId, "JOB_job_id"), a_task, "submit_id", a_scenario.id)
-a_job.isfinished = lambda s: True
+a_job.isfinished = lambda s: True  # type: ignore[attr-defined]
 a_datanode = PickleDataNode("data_node_config_id", Scope.SCENARIO)
 a_submission = Submission(a_scenario.id, "Scenario", a_scenario.config_id)
 

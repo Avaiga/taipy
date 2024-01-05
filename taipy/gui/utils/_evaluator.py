@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -95,8 +95,7 @@ class _Evaluator:
             st = ast.parse('f"{' + e + '}"' if _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(e) else e)
             args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
             targets = [
-                # type: ignore
-                compr.target.id
+                compr.target.id  # type: ignore[attr-defined]
                 for node in ast.walk(st)
                 if isinstance(node, ast.ListComp)
                 for compr in node.generators

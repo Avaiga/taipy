@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -398,7 +398,7 @@ def test_scenario_manager_only_creates_data_node_once(init_sql_repo, init_manage
     scenario_1_sorted_tasks = scenario_1._get_sorted_tasks()
     expected = [{task_mult_by_2_config.id, task_mult_by_4_config.id}, {task_mult_by_3_config.id}]
     for i, list_tasks_by_level in enumerate(scenario_1_sorted_tasks):
-        assert set([t.config_id for t in list_tasks_by_level]) == expected[i]
+        assert set(t.config_id for t in list_tasks_by_level) == expected[i]
     assert scenario_1.cycle.frequency == Frequency.DAILY
 
     _ScenarioManager._create(scenario_config)

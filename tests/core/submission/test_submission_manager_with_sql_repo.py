@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -13,7 +13,6 @@ from datetime import datetime
 from time import sleep
 
 from taipy.core import Task
-from taipy.core._repository.db._sql_connection import _SQLConnection
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission import Submission

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -64,8 +64,10 @@ class ScatterDecimator(Decimator):
         mask.fill(False)
         grid_x, grid_y = round(width / self._binning_ratio), round(height / self._binning_ratio)
         x_col, y_col = data[:, 0], data[:, 1]
-        min_x, max_x = np.amin(x_col), np.amax(x_col)
-        min_y, max_y = np.amin(y_col), np.amax(y_col)
+        min_x: float = np.amin(x_col)
+        max_x: float = np.amax(x_col)
+        min_y: float = np.amin(y_col)
+        max_y: float = np.amax(y_col)
         min_max_x_diff, min_max_y_diff = max_x - min_x, max_y - min_y
         x_grid_map = np.rint((x_col - min_x) * grid_x / min_max_x_diff).astype(int)
         y_grid_map = np.rint((y_col - min_y) * grid_y / min_max_y_diff).astype(int)
@@ -75,7 +77,8 @@ class ScatterDecimator(Decimator):
             grid_z = grid_x
             grid_shape = (grid_x + 1, grid_y + 1, grid_z + 1)  # type: ignore
             z_col = data[:, 2]
-            min_z, max_z = np.amin(z_col), np.amax(z_col)
+            min_z: float = np.amin(z_col)
+            max_z: float = np.amax(z_col)
             min_max_z_diff = max_z - min_z
             z_grid_map = np.rint((z_col - min_z) * grid_z / min_max_z_diff).astype(int)
         grid = np.empty(grid_shape, dtype=int)

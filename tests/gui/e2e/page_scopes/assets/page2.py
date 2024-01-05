@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,8 +11,8 @@
 
 from taipy.gui import Markdown
 
-from .page1 import x as y
-from .page1 import y as x
+from .page1 import x as y  # noqa: F401
+from .page1 import y as x  # noqa: F401
 
 
 def on_change(state, var, val):

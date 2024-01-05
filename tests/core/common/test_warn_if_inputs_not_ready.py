@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -28,7 +28,7 @@ def test_warn_inputs_all_not_ready(caplog):
         f"path : {input_dn.path} "
         for input_dn in data_nodes
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
 
 
 def test_warn_inputs_all_ready(caplog):
@@ -45,7 +45,7 @@ def test_warn_inputs_all_ready(caplog):
         f"path : {input_dn.path} "
         for input_dn in data_nodes
     ]
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)
 
 
 def test_warn_inputs_one_ready(caplog):
@@ -69,8 +69,8 @@ def test_warn_inputs_one_ready(caplog):
         for input_dn in [data_nodes[one]]
     ]
 
-    assert all([expected_output in stdout for expected_output in expected_outputs])
-    assert all([expected_output not in stdout for expected_output in not_expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)
+    assert all(expected_output not in stdout for expected_output in not_expected_outputs)
 
 
 def test_submit_task_with_input_dn_wrong_file_path(caplog):
@@ -92,4 +92,4 @@ def test_submit_task_with_input_dn_wrong_file_path(caplog):
         f"path : {input_dn.path} "
         for input_dn in dns
     ]
-    assert all([expected_output in stdout for expected_output in expected_outputs])
+    assert all(expected_output in stdout for expected_output in expected_outputs)

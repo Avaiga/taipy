@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -18,6 +18,7 @@ import pandas as pd
 import pytest
 from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
+
 from taipy.config.common.scope import Scope
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.operator import JoinOperator, Operator
@@ -464,6 +465,7 @@ class TestSQLTableDataNode:
         dn.append(append_data_1)
         assert_frame_equal(dn.read(), pd.concat([original_data, append_data_1]).reset_index(drop=True))
 
+    @pytest.mark.modin
     def test_sqlite_append_modin(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {
@@ -539,6 +541,7 @@ class TestSQLTableDataNode:
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
         assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
 
+    @pytest.mark.modin
     def test_filter_modin_exposed_type(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path
         properties = {

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 import os
 
 import pytest
+
 from taipy.core.exceptions import ModelNotFound
 from taipy.core.scenario._scenario_fs_repository import _ScenarioFSRepository
 from taipy.core.scenario._scenario_sql_repository import _ScenarioSQLRepository

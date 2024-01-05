@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 
 import threading
 from abc import abstractmethod
+from queue import Empty
 from typing import Dict, Optional
 
 from taipy.config.config import Config
@@ -58,7 +59,10 @@ class _JobDispatcher(threading.Thread):
                     with self.lock:
                         job = self.orchestrator.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
-            except Exception:  # In case the last job of the queue has been removed.
+            except Empty:  # In case the last job of the queue has been removed.
+                pass
+            except Exception as e:
+                _TaipyLogger._get_logger().exception(e)
                 pass
 
     def _can_execute(self) -> bool:

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -67,6 +67,8 @@ def test__tbl_cols(gui: Gui):
         gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         res = gui._tbl_cols(True, None, json.dumps({}), json.dumps({"data": "data"}), data=data)
+        assert isinstance(res, str)
+
         d = json.loads(res)
         assert isinstance(d, dict)
         assert d["col1"]["type"] == "int"
@@ -81,6 +83,8 @@ def test__chart_conf(gui: Gui):
         gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         res = gui._chart_conf(True, None, json.dumps({}), json.dumps({"data": "data"}), data=data)
+        assert isinstance(res, str)
+
         d = json.loads(res)
         assert isinstance(d, dict)
         assert d["columns"]["col1"]["type"] == "int"

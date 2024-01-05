@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -221,7 +221,7 @@ class _AbstractSQLDataNode(DataNode, _AbstractTabularDataNode):
         custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         with self._get_engine().connect() as connection:
             query_result = connection.execute(text(self._get_read_query(operators, join_operator)))
-        return list(map(lambda row: custom_class(**row), query_result))
+        return [custom_class(**row) for row in query_result]
 
     def _read_as_numpy(
         self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND

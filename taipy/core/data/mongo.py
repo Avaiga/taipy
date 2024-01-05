@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -178,11 +178,11 @@ class MongoCollectionDataNode(DataNode):
 
     def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         cursor = self._read_by_query(operators, join_operator)
-        return list(map(lambda row: self._decoder(row), cursor))
+        return [self._decoder(row) for row in cursor]
 
     def _read(self):
         cursor = self._read_by_query()
-        return list(map(lambda row: self._decoder(row), cursor))
+        return [self._decoder(row) for row in cursor]
 
     def _read_by_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
         """Query from a Mongo collection, exclude the _id field"""
