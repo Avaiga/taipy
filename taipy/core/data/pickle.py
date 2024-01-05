@@ -15,12 +15,13 @@ from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
 
 from taipy.config.common.scope import Scope
-from ._abstract_file import _AbstractFileDataNode
-from .data_node import DataNode
-from .data_node_id import DataNodeId, Edit
+
 from .._backup._backup import _replace_in_backup_file
 from .._entity._reload import _self_reload
 from .._version._version_manager_factory import _VersionManagerFactory
+from ._abstract_file import _AbstractFileDataNode
+from .data_node import DataNode
+from .data_node_id import DataNodeId, Edit
 
 
 class PickleDataNode(DataNode, _AbstractFileDataNode):
