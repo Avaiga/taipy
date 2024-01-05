@@ -313,7 +313,7 @@ class TestSQLTableDataNode:
         ],
     )
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    def test_write_1(self, data, written_data, called_func, pandas_properties):
+    def test_write(self, data, written_data, called_func, pandas_properties):
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
@@ -337,9 +337,7 @@ class TestSQLTableDataNode:
             SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    @pytest.mark.parametrize("modin_properties", __modin_properties)
-    def test_write_dataframe(self, pandas_properties, modin_properties):
-        # test write pandas dataframe
+    def test_write_pandas_dataframe(self, pandas_properties):
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)
@@ -355,7 +353,9 @@ class TestSQLTableDataNode:
                 dn.write(df)
                 assert mck.call_args[0][0].equals(df)
 
-        # test write modin dataframe
+    @pytest.mark.modin
+    @pytest.mark.parametrize("modin_properties", __modin_properties)
+    def test_write_modin_dataframe(self, modin_properties):
         custom_properties = modin_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode("foo", Scope.SCENARIO, properties=custom_properties)

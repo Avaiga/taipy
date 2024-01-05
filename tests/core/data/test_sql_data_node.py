@@ -241,8 +241,7 @@ class TestSQLDataNode:
             SQLDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"), properties=properties)
 
     @pytest.mark.parametrize("pandas_properties", __pandas_properties)
-    @pytest.mark.parametrize("modin_properties", __modin_properties)
-    def test_write_query_builder(self, pandas_properties, modin_properties):
+    def test_write_query_builder_with_pandas_df(self, pandas_properties):
         custom_properties = pandas_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
@@ -268,6 +267,9 @@ class TestSQLDataNode:
             assert len(engine_mock.mock_calls[4].args) == 1
             assert engine_mock.mock_calls[4].args[0].text == "DELETE FROM example"
 
+    @pytest.mark.modin
+    @pytest.mark.parametrize("modin_properties", __modin_properties)
+    def test_write_query_builder_with_modin_df(self, modin_properties):
         custom_properties = modin_properties.copy()
         custom_properties.pop("db_extra_args")
         dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
