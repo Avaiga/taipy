@@ -1499,3 +1499,15 @@ def test_get_scenarios_by_config_id_in_multiple_versions_environment():
 
     assert len(_ScenarioManager._get_by_config_id(scenario_config_1.id)) == 3
     assert len(_ScenarioManager._get_by_config_id(scenario_config_2.id)) == 2
+
+
+def test_get_all_by_cycle(cycle):
+    cycle_1 = _CycleManager._create(Frequency.DAILY, name="foo")
+    scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), cycle=cycle_1)
+
+    _CycleManager._set(cycle_1)
+    _ScenarioManager._set(scenario_1)
+
+    results = _ScenarioManager._get_all_by_cycle(cycle_1)
+
+    assert len(results) == 1
