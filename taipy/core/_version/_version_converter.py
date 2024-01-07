@@ -23,10 +23,10 @@ class _VersionConverter(_AbstractConverter):
     def _entity_to_model(cls, version: _Version) -> _VersionModel:
         return _VersionModel(
             id=version.id, config=Config._to_json(version.config), creation_date=version.creation_date.isoformat()
-        )
+        )  # type: ignore[attr-defined]
 
     @classmethod
     def _model_to_entity(cls, model: _VersionModel) -> _Version:
-        version = _Version(id=model.id, config=Config._from_json(model.config))
+        version = _Version(id=model.id, config=Config._from_json(model.config))  # type: ignore[attr-defined]
         version.creation_date = datetime.fromisoformat(model.creation_date)
         return version

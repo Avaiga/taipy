@@ -14,6 +14,7 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 import datetime
+from typing import Dict, List
 
 import dateutil.relativedelta
 
@@ -25,7 +26,7 @@ period = dateutil.relativedelta.relativedelta(months=1)
 
 # Data
 # All arrays have the same size (the number of months to track)
-prices = {
+prices: Dict[str, List] = {
     # Data for apples
     "apples": [2.48, 2.47, 2.5, 2.47, 2.46, 2.38, 2.31, 2.25, 2.39, 2.41, 2.59, 2.61],
     "apples_low": [1.58, 1.58, 1.59, 1.64, 1.79, 1.54, 1.53, 1.61, 1.65, 2.02, 1.92, 1.54],

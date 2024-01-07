@@ -51,6 +51,13 @@ max-complexity = 18
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.mypy]
+ignore_missing_imports = true
+implicit_optional = true
+namespace_packages = false
+exclude = "(taipy/templates/|generate_pyi.py|tools)"
+follow_imports = "skip"
+
 [tool.pyright]
 
 [tool.codespell]

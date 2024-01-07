@@ -18,7 +18,7 @@ from taipy.gui import Gui
 def test_date_builder_1(gui: Gui, test_client, helpers):
     gui._bind_var_val("date", datetime.strptime("15 Dec 2020", "%d %b %Y"))
     with tgb.Page(frame=None) as page:
-        tgb.date(id="date", date="{date}")
+        tgb.date(id="date", date="{date}")  # type: ignore[attr-defined]
     expected_list = [
         "<DateSelector",
         'defaultDate="2020-12-',
@@ -31,7 +31,7 @@ def test_date_builder_1(gui: Gui, test_client, helpers):
 def test_date_builder_2(gui: Gui, test_client, helpers):
     gui._bind_var_val("date", datetime.strptime("15 Dec 2020", "%d %b %Y"))
     with tgb.Page(frame=None) as page:
-        tgb.date(id="date", date="{date}", with_time=True)
+        tgb.date(id="date", date="{date}", with_time=True)  # type: ignore[attr-defined]
     expected_list = [
         "<DateSelector",
         'defaultDate="2020-12-',

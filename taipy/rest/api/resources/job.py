@@ -26,7 +26,7 @@ from ..middlewares._middleware import _middleware
 from ..schemas import JobSchema
 
 
-def _get_or_raise(job_id: str):
+def _get_or_raise(job_id: str) -> Job:
     manager = _JobManagerFactory._build_manager()
     job = manager._get(job_id)
     if job is None:
