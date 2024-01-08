@@ -31,12 +31,14 @@ def test_create_submission(scenario, init_sql_repo):
     init_managers()
 
     submission_1 = _SubmissionManagerFactory._build_manager()._create(
-        scenario.id, scenario._ID_PREFIX, scenario.config_id
+        scenario.id, scenario._ID_PREFIX, scenario.config_id, debug=True, log="log_file", retry_note=5
     )
 
+    assert isinstance(submission_1, Submission)
     assert submission_1.id is not None
     assert submission_1.entity_id == scenario.id
     assert submission_1.jobs == []
+    assert submission_1.properties == {"debug": True, "log": "log_file", "retry_note": 5}
     assert isinstance(submission_1.creation_date, datetime)
     assert submission_1._submission_status == SubmissionStatus.SUBMITTED
 
@@ -46,7 +48,9 @@ def test_get_submission(init_sql_repo):
 
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission_1 = submission_manager._create("entity_id", "ENTITY_TYPE", "entity_config_id")
+    submission_1 = submission_manager._create(
+        "entity_id", "ENTITY_TYPE", "entity_config_id", debug=True, log="log_file", retry_note=5
+    )
     submission_2 = submission_manager._get(submission_1.id)
 
     assert submission_1.id == submission_2.id
@@ -54,6 +58,8 @@ def test_get_submission(init_sql_repo):
     assert submission_1.jobs == submission_2.jobs
     assert submission_1.creation_date == submission_2.creation_date
     assert submission_1.submission_status == submission_2.submission_status
+    assert submission_1.properties == {"debug": True, "log": "log_file", "retry_note": 5}
+    assert submission_1.properties == submission_2.properties
 
 
 def test_get_all_submission(init_sql_repo):

@@ -28,6 +28,7 @@ from ..exceptions.exceptions import NonExistingTask
 from ..notification import EventEntityType, EventOperation, Notifier, _make_event
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
+from ..submission.submission import Submission
 from ..task.task import Task
 from .task_id import TaskId
 
@@ -175,16 +176,19 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
         check_inputs_are_ready: bool = True,
-    ):
+        **properties,
+    ) -> Submission:
         task_id = task.id if isinstance(task, Task) else task
         task = cls._get(task_id)
         if task is None:
             raise NonExistingTask(task_id)
         if check_inputs_are_ready:
             _warn_if_inputs_not_ready(task.input.values())
-        job = cls._orchestrator().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)
+        submission = cls._orchestrator().submit_task(
+            task, callbacks=callbacks, force=force, wait=wait, timeout=timeout, **properties
+        )
         Notifier.publish(_make_event(task, EventOperation.SUBMISSION))
-        return job
+        return submission
 
     @classmethod
     def _get_by_config_id(cls, config_id: str, version_number: Optional[str] = None) -> List[Task]:

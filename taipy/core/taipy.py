@@ -67,7 +67,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
     This function allows you to save or update an entity in Taipy.
 
     Parameters:
-        entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^]): The
+        entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^, Submission^]): The
             entity to save or update.
     """
     if isinstance(entity, Cycle):
@@ -80,6 +80,8 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
         return _TaskManagerFactory._build_manager()._set(entity)
     if isinstance(entity, DataNode):
         return _DataManagerFactory._build_manager()._set(entity)
+    if isinstance(entity, Submission):
+        return _SubmissionManagerFactory._build_manager()._set(entity)
 
 
 def is_submittable(entity: Union[Scenario, ScenarioId, Sequence, SequenceId, Task, TaskId, str]) -> bool:
@@ -176,7 +178,7 @@ def is_readable(
         SequenceId,
         ScenarioId,
         CycleId,
-        SubmissionId,
+        SubmissionId
     ],
 ) -> bool:
     """Indicate if an entity can be read.
@@ -223,7 +225,8 @@ def submit(
     force: bool = False,
     wait: bool = False,
     timeout: Optional[Union[float, int]] = None,
-) -> Optional[Union[Job, List[Job]]]:
+    **properties,
+) -> Submission:
     """Submit a scenario, sequence or task entity for execution.
 
     This function submits the given entity for execution and returns the created job(s).
@@ -238,19 +241,22 @@ def submit(
             in asynchronous mode.
         timeout (Union[float, int]): The optional maximum number of seconds to wait
             for the jobs to be finished before returning.
-
+        **properties (dict[str, any]): A keyworded variable length list of additional arguments.
     Returns:
-        The created `Job^` or a collection of the created `Job^` depends on the submitted entity.
-
-            - If a `Scenario^` or a `Sequence^` is provided, it will return a list of `Job^`.
-            - If a `Task^` is provided, it will return the created `Job^`.
+        The created `Submission^` containing the information about the submission.
     """
     if isinstance(entity, Scenario):
-        return _ScenarioManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
+        return _ScenarioManagerFactory._build_manager()._submit(
+            entity, force=force, wait=wait, timeout=timeout, **properties
+        )
     if isinstance(entity, Sequence):
-        return _SequenceManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
+        return _SequenceManagerFactory._build_manager()._submit(
+            entity, force=force, wait=wait, timeout=timeout, **properties
+        )
     if isinstance(entity, Task):
-        return _TaskManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
+        return _TaskManagerFactory._build_manager()._submit(
+            entity, force=force, wait=wait, timeout=timeout, **properties
+        )
     return None
 
 

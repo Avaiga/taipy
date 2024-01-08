@@ -707,7 +707,8 @@ def test_publish_submission_event():
 
     # Test SUBMISSION Event
 
-    job = scenario.submit()[0]
+    submission = scenario.submit()
+    job = submission.jobs[0]
 
     assert registration_queue.qsize() == 6
     published_events = []
@@ -731,7 +732,7 @@ def test_publish_submission_event():
         EventEntityType.SUBMISSION,
         EventEntityType.SCENARIO,
     ]
-    expected_event_entity_id = [job.submit_id, job.id, job.submit_id, job.id, job.submit_id, scenario.id]
+    expected_event_entity_id = [submission.id, job.id, submission.id, job.id, submission.id, scenario.id]
     assert all(
         event.entity_type == expected_event_types[i]
         and event.entity_id == expected_event_entity_id[i]
@@ -755,7 +756,8 @@ def test_publish_deletion_event():
     task = scenario.tasks[task_config.id]
     dn = scenario.data_nodes[dn_config.id]
     sequence = scenario.sequences["sequence_config"]
-    job = scenario.submit()[0]
+    submission = scenario.submit()
+    job = submission.jobs[0]
 
     assert registration_queue.qsize() == 11
     while registration_queue.qsize() > 0:
@@ -780,7 +782,7 @@ def test_publish_deletion_event():
         EventEntityType.SUBMISSION,
     ]
 
-    expected_event_entity_id = [cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id, job.submit_id]
+    expected_event_entity_id = [cycle.id, sequence.id, scenario.id, task.id, job.id, dn.id, submission.id]
     expected_event_operation_type = [EventOperation.DELETION] * len(expected_event_types)
 
     assert all(

@@ -47,7 +47,10 @@ def test_submit_task_development_mode():
 
     submit_time = datetime.now()
     with freezegun.freeze_time(submit_time):
-        job = orchestrator.submit_task(scenario.t1)  # t1 is executed directly in development mode
+        submission = orchestrator.submit_task(
+            scenario.t1, no_of_retry=10, log=True, log_file="file_path"
+        )  # t1 is executed directly in development mode
+        job = submission.jobs[0]
 
     # task output should have been written
     assert scenario.dn_1.last_edit_date == submit_time
@@ -62,14 +65,14 @@ def test_submit_task_development_mode():
     assert len(job._subscribers) == 2  # submission._update_submission_status and orchestrator._on_status_change
 
     # submission is created and correct
-    all_submissions = _SubmissionManagerFactory._build_manager()._get_all()
-    assert len(all_submissions) == 1
-    assert all_submissions[0].creation_date == submit_time
-    assert all_submissions[0].submission_status == SubmissionStatus.COMPLETED
-    assert all_submissions[0].jobs == [job]
-    assert all_submissions[0].entity_id == scenario.t1.id
-    assert all_submissions[0].entity_type == "TASK"
-    assert all_submissions[0].entity_config_id == "t1"
+    assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
+    assert submission.creation_date == submit_time
+    assert submission.submission_status == SubmissionStatus.COMPLETED
+    assert submission.jobs == [job]
+    assert submission.entity_id == scenario.t1.id
+    assert submission.entity_type == "TASK"
+    assert submission.entity_config_id == "t1"
+    assert submission.properties == {"no_of_retry": 10, "log": True, "log_file": "file_path"}
 
     # orchestrator state is correct
     assert len(orchestrator.blocked_jobs) == 0
@@ -82,7 +85,10 @@ def test_submit_task_development_mode_blocked_job():
 
     submit_time = datetime.now()
     with freezegun.freeze_time(submit_time):
-        job = orchestrator.submit_task(scenario.t2)  # t1 is executed directly in development mode
+        submission = orchestrator.submit_task(
+            scenario.t2, no_of_retry=10, log=True, log_file="file_path"
+        )  # t1 is executed directly in development mode
+        job = submission.jobs[0]
 
     # task output should have been written
     assert scenario.dn_2.edit_in_progress
@@ -104,6 +110,7 @@ def test_submit_task_development_mode_blocked_job():
     assert submission.entity_id == scenario.t2.id
     assert submission.entity_type == "TASK"
     assert submission.entity_config_id == "t2"
+    assert submission.properties == {"no_of_retry": 10, "log": True, "log_file": "file_path"}
 
     # orchestrator state is correct
     assert len(orchestrator.blocked_jobs) == 1
@@ -118,7 +125,10 @@ def test_submit_task_standalone_mode():
 
     submit_time = datetime.now()
     with freezegun.freeze_time(submit_time):
-        job = orchestrator.submit_task(sc.t1)  # No dispatcher running. t1 is not executed in standalone mode.
+        submission = orchestrator.submit_task(
+            sc.t1, no_of_retry=10, log=True, log_file="file_path"
+        )  # No dispatcher running. t1 is not executed in standalone mode.
+        job = submission.jobs[0]
 
     # task output should NOT have been written
     assert sc.dn_1.last_edit_date is None
@@ -143,6 +153,7 @@ def test_submit_task_standalone_mode():
     assert submission.entity_id == sc.t1.id
     assert submission.entity_type == "TASK"
     assert submission.entity_config_id == "t1"
+    assert submission.properties == {"no_of_retry": 10, "log": True, "log_file": "file_path"}
 
     # orchestrator state is correct
     assert len(orchestrator.blocked_jobs) == 0
@@ -157,7 +168,10 @@ def test_submit_task_standalone_mode_blocked_job():
 
     submit_time = datetime.now()
     with freezegun.freeze_time(submit_time):
-        job = orchestrator.submit_task(sc.t2)  # No dispatcher running. t2 is not executed in standalone mode.
+        submission = orchestrator.submit_task(
+            sc.t2, no_of_retry=10, log=True, log_file="file_path"
+        )  # No dispatcher running. t2 is not executed in standalone mode.
+        job = submission.jobs[0]
 
     # task output should NOT have been written
     assert sc.dn_2.last_edit_date is None
@@ -182,6 +196,7 @@ def test_submit_task_standalone_mode_blocked_job():
     assert submission.entity_id == sc.t2.id
     assert submission.entity_type == "TASK"
     assert submission.entity_config_id == "t2"
+    assert submission.properties == {"no_of_retry": 10, "log": True, "log_file": "file_path"}
 
     # orchestrator state is correct
     assert len(orchestrator.blocked_jobs) == 1
@@ -195,7 +210,7 @@ def test_submit_task_with_callbacks_and_force_and_wait():
     orchestrator = _OrchestratorFactory._build_orchestrator()
 
     with mock.patch("taipy.core._orchestrator._orchestrator._Orchestrator._wait_until_job_finished") as mck:
-        job = orchestrator.submit_task(scenario.t1, callbacks=[nothing], force=True, wait=True, timeout=2)
+        job = orchestrator.submit_task(scenario.t1, callbacks=[nothing], force=True, wait=True, timeout=2).jobs[0]
 
         # job exists and is correct
         assert job.task == scenario.t1
