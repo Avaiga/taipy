@@ -35,6 +35,7 @@ class _AbstractOrchestrator:
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
+        **properties,
     ) -> Submission:
         raise NotImplementedError
 
@@ -47,6 +48,7 @@ class _AbstractOrchestrator:
         force: bool = False,
         wait: bool = False,
         timeout: Optional[Union[float, int]] = None,
+        **properties,
     ) -> Submission:
         raise NotImplementedError
 
