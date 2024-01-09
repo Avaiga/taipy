@@ -11,7 +11,6 @@ on:
 
 jobs:
   tests:
-    if: github.event.review.state == 'approved'
     timeout-minutes: 40
     strategy:
       fail-fast: false
