@@ -12,7 +12,6 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 from sqlalchemy import MetaData, Table
@@ -133,7 +132,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
             delete_table (bool): indicates if the table should be deleted before inserting the data.
         """
         table = self._create_table(engine)
-        if isinstance(data, (modin_pd.DataFrame, pd.DataFrame)):
+        if isinstance(data, pd.DataFrame):
             self.__insert_dataframe(data, table, connection, delete_table)
             return
 
@@ -172,7 +171,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
 
     @classmethod
     def __insert_dataframe(
-        cls, df: Union[modin_pd.DataFrame, pd.DataFrame], table: Any, connection: Any, delete_table: bool
+        cls, df: pd.DataFrame, table: Any, connection: Any, delete_table: bool
     ) -> None:
         cls.__insert_dicts(df.to_dict(orient="records"), table, connection, delete_table)
 

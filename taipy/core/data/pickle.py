@@ -14,8 +14,6 @@ import pickle
 from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
 
-import modin.pandas as pd
-
 from taipy.config.common.scope import Scope
 
 from .._backup._backup import _replace_in_backup_file
@@ -153,12 +151,9 @@ class PickleDataNode(DataNode, _AbstractFileDataNode):
         return self._is_generated
 
     def _read(self):
-        os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
         with open(self._path, "rb") as pf:
             return pickle.load(pf)
 
     def _write(self, data):
-        if isinstance(data, (pd.DataFrame, pd.Series)):
-            os.environ["MODIN_PERSISTENT_PICKLE"] = "True"
         with open(self._path, "wb") as pf:
             pickle.dump(data, pf)

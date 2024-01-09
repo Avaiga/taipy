@@ -15,11 +15,9 @@ from datetime import datetime
 from importlib import util
 from time import sleep
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 import pytest
-from modin.pandas.test.utils import df_equals
 from pandas.testing import assert_frame_equal
 
 from taipy.config.common.scope import Scope
@@ -137,6 +135,15 @@ class TestParquetDataNode:
         assert os.path.exists(dn.path) is exists
 
     @pytest.mark.parametrize("engine", __engine)
+    def test_modin_deprecated_in_favor_of_pandas(self, engine, parquet_file_path):
+        # Create ParquetDataNode with modin exposed_type
+        props = {"path": parquet_file_path, "exposed_type": "modin", "engine": engine}
+        parquet_data_node_as_modin = ParquetDataNode("bar", Scope.SCENARIO, properties=props)
+        assert parquet_data_node_as_modin.properties["exposed_type"] == "pandas"
+        data_modin = parquet_data_node_as_modin.read()
+        assert isinstance(data_modin, pd.DataFrame)
+
+    @pytest.mark.parametrize("engine", __engine)
     def test_read_file(self, engine, parquet_file_path):
         not_existing_parquet = ParquetDataNode(
             "foo", Scope.SCENARIO, properties={"path": "nonexistent.parquet", "engine": engine}
@@ -164,20 +171,6 @@ class TestParquetDataNode:
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 2
         assert np.array_equal(data_numpy, df.to_numpy())
-
-    @pytest.mark.modin
-    @pytest.mark.parametrize("engine", __engine)
-    def test_read_file_modin(self, engine, parquet_file_path):
-        df = pd.read_parquet(parquet_file_path)
-        # Create ParquetDataNode with modin exposed_type
-        parquet_data_node_as_modin = ParquetDataNode(
-            "bar", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "modin", "engine": engine}
-        )
-        data_modin = parquet_data_node_as_modin.read()
-        assert isinstance(data_modin, modin_pd.DataFrame)
-        assert len(data_modin) == 2
-        assert data_modin.equals(df)
-        assert np.array_equal(data_modin.to_numpy(), df.to_numpy())
 
     @pytest.mark.parametrize("engine", __engine)
     def test_read_folder(self, engine):
@@ -322,27 +315,6 @@ class TestParquetDataNode:
             pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(drop=True),
         )
 
-    @pytest.mark.modin
-    @pytest.mark.skipif(not util.find_spec("fastparquet"), reason="Append parquet requires fastparquet to be installed")
-    @pytest.mark.parametrize(
-        "content",
-        [
-            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
-            (pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}])),
-        ],
-    )
-    def test_append_modin(self, parquet_file_path, default_data_frame, content):
-        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "modin"})
-        df_equals(dn.read(), modin_pd.DataFrame(default_data_frame))
-
-        dn.append(content)
-        df_equals(
-            dn.read(),
-            modin_pd.concat([default_data_frame, pd.DataFrame(content, columns=["a", "b", "c"])]).reset_index(
-                drop=True
-            ),
-        )
-
     @pytest.mark.parametrize(
         "data",
         [
@@ -351,36 +323,6 @@ class TestParquetDataNode:
         ],
     )
     def test_write_to_disk(self, tmpdir_factory, data):
-        temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
-        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path})
-        dn.write(data)
-
-        assert pathlib.Path(temp_file_path).exists()
-        assert isinstance(dn.read(), pd.DataFrame)
-
-        @pytest.mark.modin
-        @pytest.mark.parametrize(
-            "data",
-            [
-                modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
-            ],
-        )
-        def test_write_to_disk_modin(self, tmpdir_factory, data):
-            temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
-            dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path})
-            dn.write(data)
-
-            assert pathlib.Path(temp_file_path).exists()
-            assert isinstance(dn.read(), pd.DataFrame)
-
-    @pytest.mark.modin
-    @pytest.mark.parametrize(
-        "data",
-        [
-            modin_pd.DataFrame([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}]),
-        ],
-    )
-    def test_write_to_disk_modin(self, tmpdir_factory, data):
         temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.parquet"))
         dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": temp_file_path})
         dn.write(data)
@@ -436,56 +378,6 @@ class TestParquetDataNode:
         )
         assert_frame_equal(filtered_by_filter_method.reset_index(drop=True), expected_data)
         assert_frame_equal(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-    @pytest.mark.modin
-    def test_filter_modin_exposed_type(self, parquet_file_path):
-        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "modin"})
-        dn.write(
-            [
-                {"foo": 1, "bar": 1},
-                {"foo": 1, "bar": 2},
-                {"foo": 1},
-                {"foo": 2, "bar": 2},
-                {"bar": 2},
-            ]
-        )
-
-        # Test datanode indexing and slicing
-        assert dn["foo"].equals(modin_pd.Series([1, 1, 1, 2, None]))
-        assert dn["bar"].equals(modin_pd.Series([1, 2, None, 2, 2]))
-        assert dn[:2].equals(modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}]))
-
-        # Test filter data
-        filtered_by_filter_method = dn.filter(("foo", 1, Operator.EQUAL))
-        filtered_by_indexing = dn[dn["foo"] == 1]
-        expected_data = modin_pd.DataFrame([{"foo": 1.0, "bar": 1.0}, {"foo": 1.0, "bar": 2.0}, {"foo": 1.0}])
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-        filtered_by_filter_method = dn.filter(("foo", 1, Operator.NOT_EQUAL))
-        filtered_by_indexing = dn[dn["foo"] != 1]
-        expected_data = modin_pd.DataFrame([{"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-        filtered_by_filter_method = dn.filter(("bar", 2, Operator.EQUAL))
-        filtered_by_indexing = dn[dn["bar"] == 2]
-        expected_data = modin_pd.DataFrame([{"foo": 1.0, "bar": 2.0}, {"foo": 2.0, "bar": 2.0}, {"bar": 2.0}])
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
-
-        filtered_by_filter_method = dn.filter([("bar", 1, Operator.EQUAL), ("bar", 2, Operator.EQUAL)], JoinOperator.OR)
-        filtered_by_indexing = dn[(dn["bar"] == 1) | (dn["bar"] == 2)]
-        expected_data = modin_pd.DataFrame(
-            [
-                {"foo": 1.0, "bar": 1.0},
-                {"foo": 1.0, "bar": 2.0},
-                {"foo": 2.0, "bar": 2.0},
-                {"bar": 2.0},
-            ]
-        )
-        df_equals(filtered_by_filter_method.reset_index(drop=True), expected_data)
-        df_equals(filtered_by_indexing.reset_index(drop=True), expected_data)
 
     def test_filter_numpy_exposed_type(self, parquet_file_path):
         dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": parquet_file_path, "exposed_type": "numpy"})
