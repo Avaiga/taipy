@@ -11,6 +11,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{secrets.TAIPY_INTEGRATION_TESTING_ACCESS_TOKEN}}
-          repository: avaiga/taipy-integration-testing
+          repository: avaiga/taipy-benchmark
           event-type: benchmark
           client-payload: '{"repo": "taipy-core", "commitSHA": "${{ github.sha }}"}'
