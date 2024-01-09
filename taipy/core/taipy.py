@@ -171,15 +171,23 @@ def is_readable(
         Sequence,
         Scenario,
         Cycle,
+<<<<<<< HEAD
         Submission,
+=======
+>>>>>>> 7b7fef75 (update gui-core and minor changes)
         DataNodeId,
         TaskId,
         JobId,
         SequenceId,
         ScenarioId,
+<<<<<<< HEAD
         CycleId,
         SubmissionId
     ],
+=======
+        CycleId
+    ]
+>>>>>>> 7b7fef75 (update gui-core and minor changes)
 ) -> bool:
     """Indicate if an entity can be read.
 
@@ -242,6 +250,7 @@ def submit(
         timeout (Union[float, int]): The optional maximum number of seconds to wait
             for the jobs to be finished before returning.
         **properties (dict[str, any]): A keyworded variable length list of additional arguments.
+
     Returns:
         The created `Submission^` containing the information about the submission.
     """
@@ -746,6 +755,7 @@ def delete_job(job: Job, force: Optional[bool] = False):
         job (Job^): The job to delete.
         force (Optional[bool]): If True, forces the deletion of _job_, even
             if it is not completed yet.
+
     Raises:
         JobNotDeletedException^: If the job is not finished.
     """
@@ -775,6 +785,7 @@ def get_latest_job(task: Task) -> Optional[Job]:
 
     Parameters:
         task (Task^): The task to retrieve the latest job from.
+
     Returns:
         The latest job created from _task_, or None if no job has been created from _task_.
     """
@@ -789,6 +800,7 @@ def get_latest_submission(entity: Union[Scenario, Sequence, Task]) -> Optional[S
     Parameters:
         entity (Union[Scenario^, Sequence^, Task^]): The scenario, sequence or task to
         retrieve the latest submission from.
+
     Returns:
         The latest submission created from _scenario_, _sequence_ and _task_, or None
         if no submission has been created from _scenario_, _sequence_ and _task_.
@@ -829,6 +841,7 @@ def create_scenario(
         creation_date (Optional[datetime.datetime]): The creation date of the scenario.
             If None, the current date time is used.
         name (Optional[str]): The displayable name of the scenario.
+
     Returns:
         The new scenario.
     """

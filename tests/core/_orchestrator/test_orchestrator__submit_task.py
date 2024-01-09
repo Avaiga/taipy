@@ -66,6 +66,7 @@ def test_submit_task_development_mode():
 
     # submission is created and correct
     assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
+    submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
     assert submission.creation_date == submit_time
     assert submission.submission_status == SubmissionStatus.COMPLETED
     assert submission.jobs == [job]
@@ -103,6 +104,7 @@ def test_submit_task_development_mode_blocked_job():
     assert job.stacktrace == []
 
     # submission is created and correct
+    assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
     submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
     assert submission.submission_status == SubmissionStatus.BLOCKED
     assert submission.creation_date == submit_time
@@ -146,6 +148,7 @@ def test_submit_task_standalone_mode():
     assert job.stacktrace == []
 
     # submission is created and correct
+    assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
     submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
     assert submission.creation_date == submit_time
     assert submission.submission_status == SubmissionStatus.PENDING
@@ -189,6 +192,7 @@ def test_submit_task_standalone_mode_blocked_job():
     assert job.submit_entity_id == sc.t2.id
 
     # submission is created and correct
+    assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
     submission = _SubmissionManagerFactory._build_manager()._get(job.submit_id)
     assert submission.creation_date == submit_time
     assert submission.submission_status == SubmissionStatus.BLOCKED
