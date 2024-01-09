@@ -199,6 +199,7 @@ def test_submit_scenario_development_mode_blocked_jobs():
 
     # submission is created and correct
     assert len(_SubmissionManagerFactory._build_manager()._get_all()) == 1
+    submission = _SubmissionManagerFactory._build_manager()._get(job_1.submit_id)
     assert submission.submission_status == SubmissionStatus.BLOCKED
     assert submission.jobs == jobs
     assert submission.creation_date == s_time
