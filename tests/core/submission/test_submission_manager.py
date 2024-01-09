@@ -16,9 +16,12 @@ import pytest
 
 from taipy.core._version._version_manager_factory import _VersionManagerFactory
 from taipy.core.exceptions.exceptions import SubmissionNotDeletedException
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.job.job import Job
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission import Submission
 from taipy.core.submission.submission_status import SubmissionStatus
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 
@@ -54,12 +57,24 @@ def test_get_all_submission():
     version_manager = _VersionManagerFactory._build_manager()
 
     submission_manager._set(
-        Submission("entity_id", "submission_id", "entity_config_id", version=version_manager._get_latest_version())
+        Submission(
+            "entity_id",
+            "entity_type",
+            "entity_config_id",
+            "submission_id",
+            version=version_manager._get_latest_version(),
+        )
     )
     for version_name in ["abc", "xyz"]:
         for i in range(10):
             submission_manager._set(
-                Submission("entity_id", f"submission_{version_name}_{i}", "entity_config_id", version=f"{version_name}")
+                Submission(
+                    "entity_id",
+                    "entity_type",
+                    "entity_config_id",
+                    f"submission_{version_name}_{i}",
+                    version=f"{version_name}",
+                )
             )
 
     assert len(submission_manager._get_all()) == 1
@@ -99,7 +114,8 @@ def test_get_latest_submission():
 def test_delete_submission():
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission = Submission("entity_id", "submission_id", "entity_config_id")
+    submission = Submission("entity_id", "entity_type", "entity_config_id", "submission_id")
+
     submission_manager._set(submission)
 
     with pytest.raises(SubmissionNotDeletedException):
@@ -108,7 +124,7 @@ def test_delete_submission():
     submission.submission_status = SubmissionStatus.COMPLETED
 
     for i in range(10):
-        submission_manager._set(Submission("entity_id", f"submission_{i}", "entity_config_id"))
+        submission_manager._set(Submission("entity_id", "entity_type", "entity_config_id", f"submission_{i}"))
 
     assert len(submission_manager._get_all()) == 11
     assert isinstance(submission_manager._get(submission.id), Submission)
@@ -124,7 +140,7 @@ def test_delete_submission():
 def test_is_deletable():
     submission_manager = _SubmissionManagerFactory._build_manager()
 
-    submission = Submission("entity_id", "submission_id", "entity_config_id")
+    submission = Submission("entity_id", "entity_type", "entity_config_id", "submission_id")
     submission_manager._set(submission)
 
     assert len(submission_manager._get_all()) == 1
@@ -175,3 +191,26 @@ def test_is_deletable():
     assert submission.is_deletable()
     assert submission_manager._is_deletable(submission)
     assert submission_manager._is_deletable(submission.id)
+
+
+def test_hard_delete():
+    submission_manager = _SubmissionManagerFactory._build_manager()
+    job_manager = _JobManagerFactory._build_manager()
+    task_manager = _TaskManagerFactory._build_manager()
+
+    task = Task("task_config_id", {}, print)
+    submission = Submission(task.id, task._ID_PREFIX, task.config_id, "SUBMISSION_submission_id")
+    job_1 = Job("JOB_job_id_1", task, submission.id, submission.entity_id)  # will be deleted with submission
+    job_2 = Job("JOB_job_id_2", task, "SUBMISSION_submission_id_2", submission.entity_id)  # will not be deleted
+    submission.jobs = [job_1]
+
+    task_manager._set(task)
+    submission_manager._set(submission)
+    job_manager._set(job_1)
+    job_manager._set(job_2)
+
+    assert len(job_manager._get_all()) == 2
+    assert len(submission_manager._get_all()) == 1
+    submission_manager._hard_delete(submission.id)
+    assert len(job_manager._get_all()) == 1
+    assert len(submission_manager._get_all()) == 0
