@@ -47,6 +47,7 @@ mkdocs-material = "==7.3.0"
 mkdocs-material-extensions = "*"
 mkdocstrings = "*"
 mongomock = "*"
+moto = {extras = ["s3"], version = "==4.2.13"}
 requests = "*"
 ruff = "*"
 pandas-stubs = "*"
@@ -69,7 +70,6 @@ types-python-dateutil = "*"
 types-pytz = "*"
 types-toml = ">=0.10.0"
 types-tzlocal = "*"
-moto = ">=4.2.9"
 
 [requires]
 python_version = "3"
