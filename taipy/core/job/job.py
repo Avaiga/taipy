@@ -133,6 +133,7 @@ class Job(_Entity, _Labeled):
         self._creation_date = val
 
     @property
+    @_self_reload(_MANAGER_NAME)
     def stacktrace(self) -> List[str]:
         return self._stacktrace
 
