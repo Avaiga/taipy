@@ -151,7 +151,7 @@ describe("Chart Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByTestId } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chart data={undefined} defaultConfig={chartConfig} testId="test" />
+                <Chart data={undefined} updateVarName="data_var" defaultConfig={chartConfig} testId="test" />
             </TaipyContext.Provider>
         );
         const elt = getByTestId("test");
@@ -159,7 +159,7 @@ describe("Chart Component", () => {
         const modebar = elt.querySelector(".modebar");
         modebar && await userEvent.click(modebar);
         expect(dispatch).toHaveBeenCalledWith({
-            name: "",
+            name: "data_var",
             payload: {
                 alldata: true,
                 columns: ["Day","Daily hospital occupancy"],
@@ -176,6 +176,7 @@ describe("Chart Component", () => {
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Chart
                     id="table"
+                    updateVarName="data_var"
                     data={state.data.table as undefined}
                     defaultConfig={chartConfig}
                     updateVars="varname=varname"
@@ -187,6 +188,7 @@ describe("Chart Component", () => {
             <TaipyContext.Provider value={{ state: newState, dispatch }}>
                 <Chart
                     id="table"
+                    updateVarName="data_var"
                     data={newState.data.table as Record<string, TraceValueType>}
                     defaultConfig={chartConfig}
                     updateVars="varname=varname"
@@ -196,7 +198,7 @@ describe("Chart Component", () => {
         const elt = getByLabelText("Go to next page");
         await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
-            name: "",
+            name: "data_var",
             payload: {
                 columns: ["Entity"],
                 end: 200,
