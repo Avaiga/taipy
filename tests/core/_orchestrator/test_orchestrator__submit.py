@@ -22,6 +22,7 @@ from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.config import JobConfig
 from taipy.core.data import PickleDataNode
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.job.job import Job
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.submission._submission_manager_factory import _SubmissionManagerFactory
 from taipy.core.submission.submission_status import SubmissionStatus
@@ -76,8 +77,8 @@ def test_submit_scenario_development_mode():
     assert job_1.submit_entity_id == scenario.id
     assert job_1.creation_date == submit_time
     assert job_1.stacktrace == []
-    assert len(job_1._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_1._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_1._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_1._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_1._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     # t2 or t2_bis
     job_2 = jobs[1]
@@ -87,8 +88,8 @@ def test_submit_scenario_development_mode():
     assert job_2.submit_entity_id == scenario.id
     assert job_2.creation_date == submit_time
     assert job_2.stacktrace == []
-    assert len(job_2._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_2._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_2._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_2._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_2._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     # t2_bis or t2
     job_2bis = jobs[2]
@@ -97,8 +98,8 @@ def test_submit_scenario_development_mode():
     assert not job_2bis.force
     assert job_2bis.submit_entity_id == scenario.id
     assert job_2bis.creation_date == submit_time
-    assert len(job_2bis._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_2bis._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_2bis._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_2bis._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_2bis._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job_2bis.stacktrace == []
     # t3
@@ -108,8 +109,8 @@ def test_submit_scenario_development_mode():
     assert job_3.is_completed()
     assert job_3.submit_entity_id == scenario.id
     assert job_3.creation_date == submit_time
-    assert len(job_3._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_3._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_3._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_3._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_3._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job_3.stacktrace == []
 
@@ -157,8 +158,8 @@ def test_submit_scenario_development_mode_blocked_jobs():
     assert job_1.submit_entity_id == scenario.id
     assert job_1.creation_date == s_time
     assert job_1.stacktrace == []
-    assert len(job_1._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_1._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_1._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_1._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_1._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     # t2 or t2_bis
     job_2 = jobs[1]
@@ -168,8 +169,8 @@ def test_submit_scenario_development_mode_blocked_jobs():
     assert job_2.submit_entity_id == scenario.id
     assert job_2.creation_date == s_time
     assert job_2.stacktrace == []
-    assert len(job_2._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_2._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_2._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_2._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_2._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     # t2_bis or t2
     job_2bis = jobs[2]
@@ -178,8 +179,8 @@ def test_submit_scenario_development_mode_blocked_jobs():
     assert job_2bis.submit_entity_id == scenario.id
     assert not job_2bis.force
     assert job_2bis.creation_date == s_time
-    assert len(job_2bis._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_2bis._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_2bis._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_2bis._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_2bis._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job_2bis.stacktrace == []
     # t3
@@ -190,8 +191,8 @@ def test_submit_scenario_development_mode_blocked_jobs():
     assert job_3.submit_entity_id == scenario.id
     assert job_3.creation_date == s_time
     assert job_3.stacktrace == []
-    assert len(job_3._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_3._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_3._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_3._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_3._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
 
     # Same submit_id
@@ -240,8 +241,8 @@ def test_submit_scenario_standalone_mode():
     assert job_1.is_pending()
     assert job_1.creation_date == submit_time
     assert job_1.submit_entity_id == sc.id
-    assert len(job_1._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_1._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_1._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_1._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_1._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job_1.stacktrace == []
     # t2 or t2_bis
@@ -252,18 +253,18 @@ def test_submit_scenario_standalone_mode():
     assert job_2.submit_entity_id == sc.id
     assert job_2.creation_date == submit_time
     assert job_2.stacktrace == []
-    assert len(job_2._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
+    assert len(job_2._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
     assert job_2._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
-    assert job_2._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert job_2._subscribers[0].__code__ == Job._update_submission_status.__code__
     # t2_bis or t2
     job_2bis = jobs[2]
     assert job_2bis.task == sc.t_2bis or job_2bis.task == sc.t_2
     assert job_2bis.is_blocked()
     assert not job_2bis.force
     assert job_2bis.submit_entity_id == sc.id
-    assert len(job_2bis._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
+    assert len(job_2bis._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
     assert job_2bis._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
-    assert job_2bis._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert job_2bis._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_2bis.creation_date == submit_time
     assert job_2bis.stacktrace == []
     # t3
@@ -272,9 +273,9 @@ def test_submit_scenario_standalone_mode():
     assert not job_3.force
     assert job_3.is_blocked()
     assert job_3.submit_entity_id == sc.id
-    assert len(job_3._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
+    assert len(job_3._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
     assert job_3._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
-    assert job_3._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert job_3._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_3.creation_date == submit_time
     assert job_3.stacktrace == []
 
@@ -309,15 +310,15 @@ def test_submit_scenario_with_callbacks_and_force_and_wait():
         assert len(jobs) == 4
         assert len(jobs[0]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
         assert jobs[0]._subscribers[0].__code__ == nothing.__code__
-        assert jobs[0]._subscribers[1].__code__ == _Orchestrator._update_submission_status.__code__
+        assert jobs[0]._subscribers[1].__code__ == Job._update_submission_status.__code__
         assert jobs[0]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
         assert len(jobs[1]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
         assert jobs[1]._subscribers[0].__code__ == nothing.__code__
-        assert jobs[1]._subscribers[1].__code__ == _Orchestrator._update_submission_status.__code__
+        assert jobs[1]._subscribers[1].__code__ == Job._update_submission_status.__code__
         assert jobs[1]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
         assert len(jobs[2]._subscribers) == 3  # nothing, _update_submission_status, and _on_status_change
         assert jobs[2]._subscribers[0].__code__ == nothing.__code__
-        assert jobs[2]._subscribers[1].__code__ == _Orchestrator._update_submission_status.__code__
+        assert jobs[2]._subscribers[1].__code__ == Job._update_submission_status.__code__
         assert jobs[2]._subscribers[2].__code__ == _Orchestrator._on_status_change.__code__
         mck.assert_called_once_with(jobs, timeout=5)
 
@@ -351,8 +352,8 @@ def test_submit_sequence_development_mode():
     assert job_1.submit_entity_id == seq.id
     assert job_1.creation_date == submit_time
     assert job_1.stacktrace == []
-    assert len(job_1._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_1._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_1._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_1._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_1._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     # t2
     job_2 = jobs[1]
@@ -362,8 +363,8 @@ def test_submit_sequence_development_mode():
     assert job_2.submit_entity_id == seq.id
     assert job_2.creation_date == submit_time
     assert job_2.stacktrace == []
-    assert len(job_2._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_2._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_2._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_2._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_2._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     # t3
     job_3 = jobs[2]
@@ -371,8 +372,8 @@ def test_submit_sequence_development_mode():
     assert not job_3.force
     assert job_3.is_completed()
     assert job_3.submit_entity_id == seq.id
-    assert len(job_3._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
-    assert job_3._subscribers[0].__code__ == _Orchestrator._update_submission_status.__code__
+    assert len(job_3._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
+    assert job_3._subscribers[0].__code__ == Job._update_submission_status.__code__
     assert job_3._subscribers[1].__code__ == _Orchestrator._on_status_change.__code__
     assert job_3.creation_date == submit_time
     assert job_3.stacktrace == []
@@ -426,7 +427,7 @@ def test_submit_sequence_standalone_mode():
     assert job_1.creation_date == submit_time
     assert job_1.submit_entity_id == sequence.id
     assert job_1.stacktrace == []
-    assert len(job_1._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
+    assert len(job_1._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
     # t2
     job_2 = jobs[1]
     assert job_2.task == scenario.t_2
@@ -435,7 +436,7 @@ def test_submit_sequence_standalone_mode():
     assert job_2.submit_entity_id == sequence.id
     assert job_2.creation_date == submit_time
     assert job_2.stacktrace == []
-    assert len(job_2._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
+    assert len(job_2._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
     # t3
     job_3 = jobs[2]
     assert job_3.task == scenario.t_3
@@ -443,7 +444,7 @@ def test_submit_sequence_standalone_mode():
     assert job_3.is_blocked()
     assert job_3.creation_date == submit_time
     assert job_3.submit_entity_id == sequence.id
-    assert len(job_3._subscribers) == 2  # _Orchestrator._update_submission_status and orchestrator._on_status_change
+    assert len(job_3._subscribers) == 2  # Job._update_submission_status and orchestrator._on_status_change
     assert job_3.stacktrace == []
 
     assert job_1.submit_id == job_2.submit_id == job_3.submit_id

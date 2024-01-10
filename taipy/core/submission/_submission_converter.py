@@ -12,6 +12,7 @@
 from datetime import datetime
 
 from .._repository._abstract_converter import _AbstractConverter
+from ..common._self_setter_set import _SelfSetterSet
 from ..job.job import Job, JobId
 from ..submission._submission_model import _SubmissionModel
 from ..submission.submission import Submission
@@ -31,6 +32,12 @@ class _SubmissionConverter(_AbstractConverter):
             creation_date=submission._creation_date.isoformat(),
             submission_status=submission._submission_status,
             version=submission._version,
+            is_abandoned=submission._is_abandoned,
+            is_completed=submission._is_completed,
+            is_canceled=submission._is_canceled,
+            running_jobs=list(submission._running_jobs.data),
+            blocked_jobs=list(submission._blocked_jobs.data),
+            pending_jobs=list(submission._pending_jobs.data),
         )
 
     @classmethod
@@ -46,4 +53,13 @@ class _SubmissionConverter(_AbstractConverter):
             submission_status=model.submission_status,
             version=model.version,
         )
+
+        submission._is_abandoned = model.is_abandoned
+        submission._is_completed = model.is_completed
+        submission._is_canceled = model.is_canceled
+
+        submission._running_jobs = _SelfSetterSet(submission, model.running_jobs)
+        submission._blocked_jobs = _SelfSetterSet(submission, model.blocked_jobs)
+        submission._pending_jobs = _SelfSetterSet(submission, model.pending_jobs)
+
         return submission

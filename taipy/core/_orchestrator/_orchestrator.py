@@ -14,7 +14,7 @@ from datetime import datetime
 from multiprocessing import Lock
 from queue import Queue
 from time import sleep
-from typing import Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Callable, Iterable, List, Optional, Set, Union
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -39,7 +39,6 @@ class _Orchestrator(_AbstractOrchestrator):
     blocked_jobs: List = []
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
-    _submission_entities: Dict[str, Submission] = {}
 
     @classmethod
     def initialize(cls):
@@ -76,7 +75,6 @@ class _Orchestrator(_AbstractOrchestrator):
             getattr(submittable, "config_id", None),
             **properties,
         )
-        cls._submission_entities[submission.id] = submission
         jobs = []
         tasks = submittable._get_sorted_tasks()
         with cls.lock:
@@ -87,7 +85,7 @@ class _Orchestrator(_AbstractOrchestrator):
                             task,
                             submission.id,
                             submission.entity_id,
-                            callbacks=itertools.chain([cls._update_submission_status], callbacks or []),
+                            callbacks=itertools.chain([Job._update_submission_status], callbacks or []),
                             force=force,  # type: ignore
                         )
                     )
@@ -128,13 +126,12 @@ class _Orchestrator(_AbstractOrchestrator):
             task.id, task._ID_PREFIX, task.config_id, **properties
         )
         submit_id = submission.id
-        cls._submission_entities[submission.id] = submission
         with cls.lock:
             job = cls._lock_dn_output_and_create_job(
                 task,
                 submit_id,
                 submission.entity_id,
-                itertools.chain([cls._update_submission_status], callbacks or []),
+                itertools.chain([Job._update_submission_status], callbacks or []),
                 force,
             )
         jobs = [job]
@@ -146,10 +143,6 @@ class _Orchestrator(_AbstractOrchestrator):
             if wait:
                 cls._wait_until_job_finished(job, timeout=timeout)
         return submission
-
-    @classmethod
-    def _update_submission_status(cls, job: Job):
-        cls._submission_entities[job.submit_id]._update_submission_status(job)
 
     @classmethod
     def _lock_dn_output_and_create_job(
