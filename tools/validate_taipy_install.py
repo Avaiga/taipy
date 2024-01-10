@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 
@@ -22,7 +23,7 @@ def test_import_taipy_packages() -> bool:
     return valid_install
 
 
-def test_taipy_gui_core() -> bool:
+def is_taipy_gui_install_valid() -> bool:
     from pathlib import Path
 
     import taipy
@@ -31,6 +32,16 @@ def test_taipy_gui_core() -> bool:
     if not taipy_gui_core_path.exists():
         logging.error("File taipy-gui-core.js not found in taipy installation path")
         return False
+
+    taipy_gui_webapp_path = Path(taipy.__file__).absolute().parent / "gui" / "webapp"
+
+    if not os.path.exists(taipy_gui_webapp_path):
+        return False
+
+    if not any(fname.endswith('.js') for fname in os.listdir(taipy_gui_webapp_path)):
+        logging.error("Missing js files inside taipy gui webapp folder")
+        return False
+
     return True
 
 
@@ -38,7 +49,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     logging.info("Trying to import taipy and verify it's main attributes")
-    if not test_import_taipy_packages() or not test_taipy_gui_core():
+    if not test_import_taipy_packages() or not is_taipy_gui_install_valid():
         sys.exit(1)
 
     logging.info("Taipy installation Validated")
