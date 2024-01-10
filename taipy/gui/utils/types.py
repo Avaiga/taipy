@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+
+from importlib.util import find_spec
 import json
 import typing as t
 from abc import ABC
@@ -186,3 +188,25 @@ class _TaipyDict(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Di"
+
+
+class _TaipyToJson(_TaipyBase):
+    def get(self):
+        val = super().get()
+        if not val:
+            return None
+        if find_spec("plotly") and find_spec("plotly.graph_objs"):
+            from plotly.graph_objs import Figure as PlotlyFigure
+
+            if isinstance(val, PlotlyFigure):
+                try:
+                    return [json.loads(val.to_json())]
+                except Exception as e:
+                    _warn("Issue while serailizing Plotly Figure", e)
+                    return None
+        _warn("chart.figure should be of type Plotly Figure")
+        return None
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + "Tj"
