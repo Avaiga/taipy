@@ -222,7 +222,7 @@ class Submission(_Entity, _Labeled):
 
         with self.lock:
             if job_status == Status.CANCELED:
-                self.is_canceled = True
+                self.is_canceled = True  # type: ignore
             elif job_status == Status.BLOCKED:
                 self.blocked_jobs.add(job.id)
                 self.pending_jobs.discard(job.id)
@@ -233,12 +233,12 @@ class Submission(_Entity, _Labeled):
                 self.running_jobs.add(job.id)
                 self.pending_jobs.discard(job.id)
             elif job_status == Status.COMPLETED or job_status == Status.SKIPPED:
-                self.is_completed = True
+                self.is_completed = True  # type: ignore
                 self.blocked_jobs.discard(job.id)
                 self.pending_jobs.discard(job.id)
                 self.running_jobs.discard(job.id)
             elif job_status == Status.ABANDONED:
-                self.is_abandoned = True
+                self.is_abandoned = True  # type: ignore
                 self.running_jobs.discard(job.id)
                 self.blocked_jobs.discard(job.id)
                 self.pending_jobs.discard(job.id)
