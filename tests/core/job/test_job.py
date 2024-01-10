@@ -156,8 +156,7 @@ File "<stdin>", line 1, in <module>
 ZeroDivisionError: division by zero""".splitlines()
 
     job.stacktrace = fake_stacktrace
-    assert len(job.stacktrace) == 3
-    assert all(st == fake_stacktrace[idx] for idx, st in enumerate(job.stacktrace))
+    assert job.stacktrace == fake_stacktrace
 
 
 def test_notification_job(task):
