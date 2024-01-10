@@ -126,7 +126,7 @@ describe("Chart Component", () => {
         const selProps = { selected0: JSON.stringify([2, 4, 6]) };
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chart id="chart" data={undefined} defaultConfig={chartConfig} updateVars="varname=varname" {...selProps} />
+                <Chart id="chart" data={undefined} updateVarName="data_var" defaultConfig={chartConfig} updateVars="varname=varname" {...selProps} />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -135,7 +135,7 @@ describe("Chart Component", () => {
             type: "REQUEST_UPDATE",
         });
         expect(dispatch).toHaveBeenCalledWith({
-            name: "",
+            name: "data_var",
             payload: {
                 alldata: true,
                 pagekey: "Day-Daily hospital occupancy",
