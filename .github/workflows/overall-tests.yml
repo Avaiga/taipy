@@ -1,12 +1,17 @@
 name: Overall Test Workflow
 
 on:
-  pull_request_review:
-    types: [submitted]
+  push:
+    branches: [ develop, dev/*, release/* ]
+  pull_request:
+    branches: [ develop, dev/*, release/* ]
 
 jobs:
-  tests:
-    if: github.event.review.state == 'approved'
+  partial-tests:
+    uses: ./.github/workflows/partial-tests.yml
+
+  overall-tests:
+    needs: [partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -50,16 +55,8 @@ jobs:
           pytest-xml-coverage-path: ./overall-coverage.xml
           title: Taipy Overall Coverage Report
 
-      - name: Notify user if failed
-        if: failure() && github.event_name == 'workflow_dispatch'
-        run: |
-          if [[ -n "${{ github.event.inputs.user-to-notify }}" ]]; then
-            curl "${{ secrets.notify_endpoint }}" -d '{"username": "${{ github.event.inputs.user-to-notify }}", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }' -H "Content-Type: application/json"
-          fi
-        shell: bash
-
   submit_tests:
-    needs: linter
+    needs: [partial-tests]
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -80,14 +77,14 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
+        if: matrix.os == 'macos-latest'
         run: brew install libmagic
 
       - name: Pytest Core orchestrator_dispatcher
         run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
 
   standalone_tests:
-    needs: linter
+    needs: [partial-tests]
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -109,7 +106,7 @@ jobs:
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest' && steps.changes.outputs.core == 'true'
+        if: matrix.os == 'macos-latest'
         run: brew install libmagic
 
       - name: Pytest Core standalone
