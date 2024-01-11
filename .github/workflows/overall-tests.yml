@@ -79,7 +79,7 @@ jobs:
           title: Taipy Overall Coverage Report
 
   submit_tests:
-    needs: [partial-tests]
+    #needs: [partial-tests]
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -107,7 +107,7 @@ jobs:
         run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
 
   standalone_tests:
-    needs: [partial-tests]
+    #needs: [partial-tests]
     timeout-minutes: 20
     strategy:
       fail-fast: false
