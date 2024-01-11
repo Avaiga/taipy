@@ -38,6 +38,7 @@ jobs:
         if: matrix.pipenv-version == 'max'
         run: |
           # Override the current Pipfile with the Pipfile containing the max versions
+          rm Pipfile
           mv Pipfile.sup Pipfile
           pipenv install --dev --python=${{ matrix.python-version }}
 
@@ -51,7 +52,7 @@ jobs:
           python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
       
       - name: Install Dependencies
-        if: matrix.pipenv-version == 'latest' && steps.install-dependencies.outputs.status == 'success'
+        if: matrix.pipenv-version == 'latest' && steps.install-dependencies.outputs.exit_code == 0
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
