@@ -20,7 +20,7 @@ jobs:
         run: pip install tabulate toml requests
       
       - name: Update packages
-        run: python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt .\Pipfile
+        run: python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
       
       - name: Install new packages
         run: pipenv install --dev --python=${{ matrix.python-version }}
