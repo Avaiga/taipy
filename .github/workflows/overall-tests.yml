@@ -7,11 +7,11 @@ on:
     branches: [ develop, dev/*, release/* ]
 
 jobs:
-  partial-tests:
-    uses: ./.github/workflows/partial-tests.yml
+  #partial-tests:
+  #  uses: ./.github/workflows/partial-tests.yml
 
   overall-tests:
-    needs: [partial-tests]
+    #needs: [partial-tests]
     timeout-minutes: 40
     strategy:
       fail-fast: false
