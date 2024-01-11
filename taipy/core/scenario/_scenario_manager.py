@@ -268,7 +268,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         scenarios = []
         for scenario in cls._get_all():
             cycle = scenario.cycle
-            if cycle.start_date >= duration <= cycle.end_date:
+            if cycle.start_date <= duration and duration <= cycle.end_date:
                 scenarios.append(scenario)
         return scenarios
 
