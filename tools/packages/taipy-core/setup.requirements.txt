@@ -4,6 +4,6 @@ openpyxl>=3.1.2,<3.2
 pandas>=2.0.0,<=2.1.4
 pymongo[srv]>=4.2.0,<5.0
 sqlalchemy>=2.0.16,<2.1
-toml>=0.10,<0.11
+toml>=0.10,<=0.11
 boto3>=1.29.4,<1.33.12
 taipy-config
