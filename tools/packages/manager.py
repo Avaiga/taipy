@@ -45,11 +45,11 @@ class Package:
     # Taipy packages are ignored.
     is_taipy: bool
     # Optional packages
-    extras_packages: list[str]
+    extras_packages: List[str]
     # Files where the package is set as requirement.
-    files: list[str]
+    files: List[str]
     # List of releases of the package.
-    releases: list[Release] = field(default_factory=list)
+    releases: List[Release] = field(default_factory=list)
     # Min release of the package.
     # Also present in the releases list.
     min_release: Release = None
