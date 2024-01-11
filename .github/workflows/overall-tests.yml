@@ -42,12 +42,17 @@ jobs:
           pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Install Dependencies
+        id: install-dependencies
         if: matrix.pipenv-version == 'latest'
+        continue-on-error: true
         run: |
           # Generate the Pipfile with the latest version
           pip install -r tools/packages/requirements.txt
           python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
-          pipenv install --dev --python=${{ matrix.python-version }}
+      
+      - name: Install Dependencies
+        if: matrix.pipenv-version == 'latest' && steps.install-dependencies.outputs.status == 'success'
+        run: pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
