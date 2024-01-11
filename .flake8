@@ -1,4 +1,5 @@
 [flake8]
+
 # required by black, https://github.com/psf/black/blob/master/.flake8
 max-line-length = 120
 max-complexity = 18
