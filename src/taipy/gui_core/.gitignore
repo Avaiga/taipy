@@ -1,2 +1,0 @@
-# This file won't be present on CI and would prevent the lib to be included if building package locally
-lib/
