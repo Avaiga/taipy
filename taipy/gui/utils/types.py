@@ -202,9 +202,9 @@ class _TaipyToJson(_TaipyBase):
                 try:
                     return [json.loads(val.to_json())]
                 except Exception as e:
-                    _warn("Issue while serailizing Plotly Figure", e)
+                    _warn("Issue while serializing Plotly Figure", e)
                     return None
-        _warn("chart.figure should be of type Plotly Figure")
+        _warn("'figure' property value must be a plotly.graph_objects.Figure.")
         return None
 
     @staticmethod

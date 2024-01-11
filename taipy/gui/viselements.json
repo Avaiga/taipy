@@ -557,7 +557,7 @@
           },
           {
             "name": "figure",
-            "type": "Plotly Figure",
+            "type": "plotly.graph_objects.Figure",
             "doc": "A figure as produced by plotly."
           }
         ]
