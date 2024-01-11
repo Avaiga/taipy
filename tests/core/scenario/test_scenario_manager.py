@@ -1501,13 +1501,22 @@ def test_get_scenarios_by_config_id_in_multiple_versions_environment():
     assert len(_ScenarioManager._get_by_config_id(scenario_config_2.id)) == 2
 
 
-def test_get_all_by_cycle(cycle):
-    cycle_1 = _CycleManager._create(Frequency.DAILY, name="foo")
-    scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), cycle=cycle_1)
+def test_get_scenarios_by_time(Year=2024, Month=1, Day=11, Hour=0, Minute=0):
 
-    _CycleManager._set(cycle_1)
-    _ScenarioManager._set(scenario_1)
+    #Initialize Yearly Scenario
+    scenario_config = Config.configure_scenario("sc", None, None, Frequency.YEARLY)
+    creation_date = datetime(2024,1,1)
+    scenario_1 = _ScenarioManager._create(
+        scenario_config, creation_date=creation_date, name="1"
+    )
 
-    results = _ScenarioManager._get_all_by_cycle(cycle_1)
+    #Initialize Monthly Scenario
+    scenario_config_2 = Config.configure_scenario("sc2", None, None, Frequency.MONTHLY)
+    creation_date_2 = datetime(2024,1,1)
+    scenario_2 = _ScenarioManager._create(
+        scenario_config_2, creation_date=creation_date_2, name="2"
+    )
 
-    assert len(results) == 1
+    results = _ScenarioManager._get_scenarios_by_time(Year, Month, Day, Hour, Minute)
+
+    assert len(results) == 2
