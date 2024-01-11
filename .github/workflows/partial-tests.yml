@@ -1,10 +1,7 @@
 name: Partial Tests Workflow
 
 on:
-  push:
-    branches: [ develop, dev/*, release/* ]
-  pull_request:
-    branches: [ develop, dev/*, release/* ]
+  workflow_call:
 
 jobs:
   linter:
