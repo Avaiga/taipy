@@ -22,13 +22,27 @@ jobs:
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
       - name: Install Dependencies
-        run: pip install tabulate toml requests
+        run: pip install -r tools/packages/requirements.txt
       
       - name: Update packages
-        run: python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
+        run: python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile >> $GITHUB_OUTPUT
       
       - name: Install new packages
         run: pipenv install --dev --python=${{ matrix.python-version }}
+
+      - name: Setup LibMagic (MacOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install libmagic
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Frontend Bundle Build
+        run: pipenv run python tools/frontend/bundle_build.py
+
+      - name: Install Playwright
+        run: pipenv run playwright install chromium --with-deps
 
       - name: Pytest CLI
         run: pipenv run pytest tests/cli
