@@ -18,6 +18,7 @@ jobs:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest, macos-latest]
+        pipenv-version: ['min', 'max', 'latest']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +31,23 @@ jobs:
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
       - name: Install Dependencies
+        if: matrix.pipenv-version == 'min'
         run: pipenv install --dev --python=${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        if: matrix.pipenv-version == 'max'
+        run: |
+          # Override the current Pipfile with the Pipfile containing the max versions
+          mv Pipfile.sup Pipfile
+          pipenv install --dev --python=${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        if: matrix.pipenv-version == 'latest'
+        run: |
+          # Generate the Pipfile with the latest version
+          pip install -r tools/packages/requirements.txt
+          python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
+          pipenv install --dev --python=${{ matrix.python-version }}
 
       - name: Setup LibMagic (MacOS)
         if: matrix.os == 'macos-latest'
@@ -39,6 +56,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Frontend Bundle Build
         run: pipenv run python tools/frontend/bundle_build.py
 
@@ -49,7 +67,7 @@ jobs:
         run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" --cov=taipy --cov-append --cov-report="xml:overall-coverage.xml" --cov-report term-missing tests
 
       - name: Coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipenv-version == 'min'
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-xml-coverage-path: ./overall-coverage.xml
