@@ -7,106 +7,152 @@ on:
     branches: [ develop, dev/*, release/* ]
 
 jobs:
-  linter:
+  update-packages:
     runs-on: ubuntu-latest
-    steps:
-      # replace for Ruff in the future
-      - uses: actions/checkout@v4
-      - uses: ricardochaves/python-lint@v1.4.0
-        with:
-          use-pylint: false
-          use-isort: false
-          use-mypy: false
-          extra-black-options: "--line-length=120 --diff"
-          extra-pycodestyle-options: "--max-line-length=120  --exclude=tests/gui --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
-          extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py|tools) --follow-imports skip"
-          extra-isort-options: "--line-length=120 --force-grid-wrap=10 --multi-line=VERTICAL_HANGING_INDENT --trailing-comma"
-  tests:
-    needs: linter
     timeout-minutes: 40
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        python-version: ['3.8'] #, '3.9', '3.10', '3.11']
+        os: [ubuntu-latest] #, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            cli:
-              - 'taipy/_cli/**'
-            config:
-              - 'taipy/config/**'
-            core:
-              - 'taipy/core/**'
-            gui:
-              - 'taipy/gui/**'
-            gui-core:
-              - 'taipy/gui_core/**'
-            logger:
-              - 'taipy/logger/**'
-            rest:
-              - 'taipy/rest/**'
-            templates:
-              - 'taipy/templates/**'
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python-version}}
-
       - name: Install pipenv
         run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
       - name: Install Dependencies
+        run: pip install tabulate, toml, requests
+      
+      - name: Update packages
+        run: python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt .\Pipfile
+      
+      - name: Install new packages
         run: pipenv install --dev --python=${{ matrix.python-version }}
 
-      - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest'
-        run: brew install libmagic
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Frontend Bundle Build
-        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
-        run: pipenv run python tools/frontend/bundle_build.py
-
-      - name: Install Playwright
-        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
-        run: pipenv run playwright install chromium --with-deps
-
       - name: Pytest CLI
-        if: steps.changes.outputs.cli == 'true'
-        run: pipenv run pytest  tests/cli
+        run: pipenv run pytest tests/cli
 
       - name: Pytest Config
-        if: steps.changes.outputs.config == 'true'
-        run: pipenv run pytest  tests/config
+        run: pipenv run pytest tests/config
 
       - name: Pytest Core
-        if: steps.changes.outputs.core == 'true'
-        run: pipenv run pytest  tests/core
+        run: pipenv run pytest tests/core
 
       - name: Pytest GUI
-        if: steps.changes.outputs.gui == 'true'
-        run: pipenv run pytest  tests/gui
+        run: pipenv run pytest tests/gui
 
       - name: Pytest GUI Core
-        if: steps.changes.outputs.gui-core == 'true'
-        run: pipenv run pytest  tests/gui_core
+        run: pipenv run pytest tests/gui_core
 
       - name: Pytest Logger
-        if: steps.changes.outputs.logger == 'true'
-        run: pipenv run pytest  tests/logger
+        run: pipenv run pytest tests/logger
 
       - name: Pytest Rest
-        if: steps.changes.outputs.rest == 'true'
-        run: pipenv run pytest  tests/rest
+        run: pipenv run pytest tests/rest
 
-      - name: Pytest Rest
-        if: steps.changes.outputs.templates == 'true'
-        run: pipenv run pytest  tests/templates
+      - name: Pytest templates
+        run: pipenv run pytest tests/templates
+
+
+  # linter:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # replace for Ruff in the future
+  #     - uses: actions/checkout@v4
+  #     - uses: ricardochaves/python-lint@v1.4.0
+  #       with:
+  #         use-pylint: false
+  #         use-isort: false
+  #         use-mypy: false
+  #         extra-black-options: "--line-length=120 --diff"
+  #         extra-pycodestyle-options: "--max-line-length=120  --exclude=tests/gui --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E203"
+  #         extra-mypy-options: "--ignore-missing-imports --implicit-optional --no-namespace-packages --exclude (taipy/templates/|generate_pyi.py|tools) --follow-imports skip"
+  #         extra-isort-options: "--line-length=120 --force-grid-wrap=10 --multi-line=VERTICAL_HANGING_INDENT --trailing-comma"
+  # tests:
+  #   needs: linter
+  #   timeout-minutes: 40
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ['3.8', '3.9', '3.10', '3.11']
+  #       os: [ubuntu-latest, windows-latest, macos-latest]
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - uses: dorny/paths-filter@v2
+  #       id: changes
+  #       with:
+  #         filters: |
+  #           cli:
+  #             - 'taipy/_cli/**'
+  #           config:
+  #             - 'taipy/config/**'
+  #           core:
+  #             - 'taipy/core/**'
+  #           gui:
+  #             - 'taipy/gui/**'
+  #           gui-core:
+  #             - 'taipy/gui_core/**'
+  #           logger:
+  #             - 'taipy/logger/**'
+  #           rest:
+  #             - 'taipy/rest/**'
+  #           templates:
+  #             - 'taipy/templates/**'
+
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{matrix.python-version}}
+
+  #     - name: Install pipenv
+  #       run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+
+  #     - name: Install Dependencies
+  #       run: pipenv install --dev --python=${{ matrix.python-version }}
+
+  #     - name: Setup LibMagic (MacOS)
+  #       if: matrix.os == 'macos-latest'
+  #       run: brew install libmagic
+
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #     - name: Frontend Bundle Build
+  #       if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+  #       run: pipenv run python tools/frontend/bundle_build.py
+
+  #     - name: Install Playwright
+  #       if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+  #       run: pipenv run playwright install chromium --with-deps
+
+  #     - name: Pytest CLI
+  #       if: steps.changes.outputs.cli == 'true'
+  #       run: pipenv run pytest  tests/cli
+
+  #     - name: Pytest Config
+  #       if: steps.changes.outputs.config == 'true'
+  #       run: pipenv run pytest  tests/config
+
+  #     - name: Pytest Core
+  #       if: steps.changes.outputs.core == 'true'
+  #       run: pipenv run pytest  tests/core
+
+  #     - name: Pytest GUI
+  #       if: steps.changes.outputs.gui == 'true'
+  #       run: pipenv run pytest  tests/gui
+
+  #     - name: Pytest GUI Core
+  #       if: steps.changes.outputs.gui-core == 'true'
+  #       run: pipenv run pytest  tests/gui_core
+
+  #     - name: Pytest Logger
+  #       if: steps.changes.outputs.logger == 'true'
+  #       run: pipenv run pytest  tests/logger
+
+  #     - name: Pytest Rest
+  #       if: steps.changes.outputs.rest == 'true'
+  #       run: pipenv run pytest  tests/rest
+
+  #     - name: Pytest Rest
+  #       if: steps.changes.outputs.templates == 'true'
+  #       run: pipenv run pytest  tests/templates

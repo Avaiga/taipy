@@ -4,6 +4,8 @@ Display and update in place packages versions in requirements files.
 Usage:
     # Update in place requirements files.
     python tools/packages/manager.py tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt
+    # Update in place requirements files and update the pipfile.
+    python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt
 """
 import sys
 from typing import List
@@ -13,6 +15,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from datetime import datetime
 
+import toml
 import tabulate
 
 
@@ -103,6 +106,27 @@ class Package:
         if self.installation_markers:
             return f'{name}>={self.min_version},<={self.latest_release.version};{self.installation_markers}'
         return f'{name}>={self.min_version},<={self.latest_release.version}'
+
+    def as_pipfile_line(self, min_version=True) -> str:
+        """
+        Return the package as a pipfile line.
+        If min_version is True, the min version is used.
+        """
+        if self.is_taipy:
+            version = self.latest_release.version
+        else:
+            version = self.min_version if min_version else self.max_version
+        line = f'"{self.name}" = {{version="<={version}"'
+
+        if self.installation_markers:
+            line += f', markers="{self.installation_markers}"'
+
+        if self.extras_packages:
+            packages = ','.join(f'"{p}"' for p in self.extras_packages)
+            line += f', extras=[{packages}]'
+
+        line += '}'
+        return line
 
     @classmethod
     def check_format(cls, package: str):
@@ -269,8 +293,25 @@ def update_packages(requirements_filenames: List[str], packages: List[Package]):
         )
 
 
+def update_pipfile(packages: List[Package], pipfile: str):
+    pipfile_obj = toml.load(pipfile)
+    del pipfile_obj['packages']
+    toml_str = toml.dumps(pipfile_obj)
+    packages_str = "\n".join(p.as_pipfile_line(min_version=True) for p in packages.values())
+    Path(pipfile).write_text(f'{toml_str}\n\n[packages]\n{packages_str}', 'UTF-8')
+
+
 if __name__ == '__main__':
-    _requirements_filenames = sys.argv[1: len(sys.argv)]
+    must_update_pipfile = sys.argv[1] == 'pipfile'
+
+    if must_update_pipfile:
+        _requirements_filenames = sys.argv[2: len(sys.argv) - 1]
+    else:
+        _requirements_filenames = sys.argv[1: len(sys.argv)]
+
     _packages = load_packages(_requirements_filenames)
     display_packages_versions(_packages)
     update_packages(_requirements_filenames, _packages)
+
+    if must_update_pipfile:
+        update_pipfile(_packages, sys.argv[len(sys.argv) - 1])
