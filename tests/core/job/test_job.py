@@ -151,12 +151,16 @@ def test_stacktrace_job(task):
     submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX, task.config_id)
     job = Job("job_id", task, submission.id, "SCENARIO_scenario_config")
 
-    fake_stacktrace = """Traceback (most recent call last):
+    fake_stacktraces = [
+        """Traceback (most recent call last):
 File "<stdin>", line 1, in <module>
-ZeroDivisionError: division by zero""".splitlines()
+ZeroDivisionError: division by zero""",
+        "Another error",
+        "yet\nAnother\nError",
+    ]
 
-    job.stacktrace = fake_stacktrace
-    assert job.stacktrace == fake_stacktrace
+    job.stacktrace = fake_stacktraces
+    assert job.stacktrace == fake_stacktraces
 
 
 def test_notification_job(task):
