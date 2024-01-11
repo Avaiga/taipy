@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -80,7 +80,7 @@ __CHART_AXIS: t.Dict[str, t.Tuple[_Chart_iprops, ...]] = {
     "waterfall": (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.measure),
 }
 __CHART_DEFAULT_AXIS: t.Tuple[_Chart_iprops, ...] = (_Chart_iprops.x, _Chart_iprops.y, _Chart_iprops.z)
-__CHART_MARKER_TO_COLS: t.Tuple[str, ...] = ("color", "size", "symbol", "opacity")
+__CHART_MARKER_TO_COLS: t.Tuple[str, ...] = ("color", "size", "symbol", "opacity", "colors")
 __CHART_NO_INDEX: t.Tuple[str, ...] = ("pie", "histogram", "heatmap", "funnelarea")
 _CHART_NAMES: t.Tuple[str, ...] = tuple(e.name[1:] if e.name[0] == "_" else e.name for e in _Chart_iprops)
 
@@ -208,10 +208,10 @@ def _build_chart_config(gui: "Gui", attributes: t.Dict[str, t.Any], col_types: t
             used_cols = {tr[ax.value] for ax in axis[i] if tr[ax.value]}
             unused_cols = [c for c in icols[i] if c not in used_cols]
             if unused_cols and not any(tr[ax.value] for ax in axis[i]):
-                traces[i] = list(
+                traces[i] = [
                     v or (unused_cols.pop(0) if unused_cols and _Chart_iprops(j) in axis[i] else v)
                     for j, v in enumerate(tr)
-                )
+                ]
 
     if col_dict is not None:
         reverse_cols = {str(cd.get("dfid")): c for c, cd in col_dict.items()}

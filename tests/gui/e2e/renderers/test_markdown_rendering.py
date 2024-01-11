@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -45,7 +45,7 @@ def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     function_evaluated = True
     try:
         page.wait_for_function(
-            'window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color") !== "rgb(255, 255, 255)"'
+            'window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color") !== "rgb(255, 255, 255)"'  # noqa: E501
         )
     except Exception as e:
         function_evaluated = False

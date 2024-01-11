@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ def test_dialog_builder_1(gui: Gui, helpers):
     dialog_open = False  # noqa: F841
     gui._set_frame(inspect.currentframe())
     with tgb.Page(frame=None) as page:
-        tgb.dialog(title="This is a Dialog", open="{dialog_open}", page="page_test", on_action="validate_action")
+        tgb.dialog(title="This is a Dialog", open="{dialog_open}", page="page_test", on_action="validate_action")  # type: ignore[attr-defined]
     expected_list = [
         "<Dialog",
         'onAction="validate_action"',
@@ -36,7 +36,7 @@ def test_dialog_builder_2(gui: Gui, helpers):
     partial = gui.add_partial(Markdown("# A partial"))  # noqa: F841
     dialog_open = False  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.dialog(
+        tgb.dialog(  # type: ignore[attr-defined]
             title="Another Dialog",
             open="{dialog_open}",
             partial="{partial}",
@@ -57,7 +57,7 @@ def test_dialog_labels_builder(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     dialog_open = False  # noqa: F841
     with tgb.Page(frame=None) as page:
-        tgb.dialog(
+        tgb.dialog(  # type: ignore[attr-defined]
             title="Another Dialog",
             open="{dialog_open}",
             page="page_test",

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -48,6 +48,10 @@ from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.task._task_manager import _TaskManager
+
+
+def cb(s, j):
+    print()  # noqa: T201
 
 
 class TestTaipy:
@@ -431,9 +435,6 @@ class TestTaipy:
             mck.assert_called_once_with(scenario, scenario, data_node_config_id="dn")
 
     def test_subscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mck:
             tp.subscribe_scenario(cb)
             mck.assert_called_once_with(cb, [], None)
@@ -442,9 +443,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, [], scenario)
 
     def test_unsubscribe_scenario(self, scenario):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -453,9 +451,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, scenario)
 
     def test_subscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._subscribe") as mck:
             tp.subscribe_sequence(cb)
             mck.assert_called_once_with(cb, None, None)
@@ -464,9 +459,6 @@ class TestTaipy:
             mck.assert_called_once_with(cb, None, sequence)
 
     def test_unsubscribe_sequence(self, sequence):
-        def cb(s, j):
-            print()
-
         with mock.patch("taipy.core.sequence._sequence_manager._SequenceManager._unsubscribe") as mck:
             tp.unsubscribe_sequence(callback=cb)
             mck.assert_called_once_with(cb, None, None)
@@ -677,7 +669,7 @@ class TestTaipy:
             for key, items in expected_parents.items():
                 assert len(parents[key]) == len(expected_parents[key])
                 parent_ids = [parent.id for parent in parents[key]]
-                assert all([item.id in parent_ids for item in items])
+                assert all(item.id in parent_ids for item in items)
 
         dn_config_1 = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         dn_config_2 = Config.configure_data_node(id="d2", storage_type="in_memory", scope=Scope.SCENARIO)

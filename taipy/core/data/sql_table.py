@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -12,7 +12,6 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import modin.pandas as modin_pd
 import numpy as np
 import pandas as pd
 from sqlalchemy import MetaData, Table
@@ -133,7 +132,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
             delete_table (bool): indicates if the table should be deleted before inserting the data.
         """
         table = self._create_table(engine)
-        if isinstance(data, (modin_pd.DataFrame, pd.DataFrame)):
+        if isinstance(data, pd.DataFrame):
             self.__insert_dataframe(data, table, connection, delete_table)
             return
 
@@ -172,7 +171,7 @@ class SQLTableDataNode(_AbstractSQLDataNode):
 
     @classmethod
     def __insert_dataframe(
-        cls, df: Union[modin_pd.DataFrame, pd.DataFrame], table: Any, connection: Any, delete_table: bool
+        cls, df: pd.DataFrame, table: Any, connection: Any, delete_table: bool
     ) -> None:
         cls.__insert_dicts(df.to_dict(orient="records"), table, connection, delete_table)
 

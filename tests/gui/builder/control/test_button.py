@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -16,6 +16,6 @@ def test_button_builder_1(gui: Gui, test_client, helpers):
     gui._bind_var_val("name", "World!")
     gui._bind_var_val("btn_id", "button1")
     with tgb.Page(frame=None) as page:
-        tgb.button(label="Hello {name}", id="{btn_id}")
+        tgb.button(label="Hello {name}", id="{btn_id}")  # type: ignore[attr-defined]
     expected_list = ["<Button", 'defaultLabel="Hello World!"', "label={tp_TpExPr_Hello_name_TPMDL_0_0"]
     helpers.test_control_builder(gui, page, expected_list)

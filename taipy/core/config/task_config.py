@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from taipy.config._config import _Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
@@ -127,11 +127,14 @@ class TaskConfig(Section):
     def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):
         as_dict.pop(cls._ID_KEY, id)
         funct = as_dict.pop(cls._FUNCTION, None)
-        dn_configs = config._sections.get(DataNodeConfig.name, None) or []  # type: ignore
-        inputs = []
+        dn_configs: Dict[str, DataNodeConfig] = {}
+        if config:
+            dn_configs = cast(Dict[str, DataNodeConfig], config._sections.get(DataNodeConfig.name))
+
+        inputs: List[DataNodeConfig] = []
         if inputs_as_str := as_dict.pop(cls._INPUT_KEY, None):
             inputs = [dn_configs[dn_id] for dn_id in inputs_as_str if dn_id in dn_configs]
-        outputs = []
+        outputs: List[DataNodeConfig] = []
         if outputs_as_str := as_dict.pop(cls._OUTPUT_KEY, None):
             outputs = [dn_configs[ds_id] for ds_id in outputs_as_str if ds_id in dn_configs]
         skippable = as_dict.pop(cls._IS_SKIPPABLE_KEY, False)
@@ -139,7 +142,7 @@ class TaskConfig(Section):
 
     def _update(self, as_dict, default_section=None):
         function = as_dict.pop(self._FUNCTION, None)
-        if function is not None and type(function) is not str:
+        if function is not None and not isinstance(function, str):
             self.function = function
         self._inputs = as_dict.pop(self._INPUT_KEY, self._inputs)
         if self._inputs is None and default_section:

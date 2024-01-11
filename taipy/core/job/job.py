@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -132,9 +132,15 @@ class Job(_Entity, _Labeled):
     def creation_date(self, val):
         self._creation_date = val
 
-    @property
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
     def stacktrace(self) -> List[str]:
         return self._stacktrace
+
+    @stacktrace.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def stacktrace(self, val):
+        self._stacktrace = val
 
     @property
     def version(self):

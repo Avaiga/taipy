@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -23,10 +23,10 @@ class _VersionConverter(_AbstractConverter):
     def _entity_to_model(cls, version: _Version) -> _VersionModel:
         return _VersionModel(
             id=version.id, config=Config._to_json(version.config), creation_date=version.creation_date.isoformat()
-        )
+        )  # type: ignore[attr-defined]
 
     @classmethod
     def _model_to_entity(cls, model: _VersionModel) -> _Version:
-        version = _Version(id=model.id, config=Config._from_json(model.config))
+        version = _Version(id=model.id, config=Config._from_json(model.config))  # type: ignore[attr-defined]
         version.creation_date = datetime.fromisoformat(model.creation_date)
         return version

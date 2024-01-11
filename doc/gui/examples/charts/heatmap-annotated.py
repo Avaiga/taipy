@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -13,9 +13,11 @@
 # Python environment and run:
 #     python <script>
 # -----------------------------------------------------------------------------------------
+from typing import Dict, List
+
 from taipy.gui import Gui
 
-data = {
+data: Dict[str, List] = {
     "Temperatures": [
         [17.2, 27.4, 28.6, 21.5],
         [5.6, 15.1, 20.2, 8.1],
@@ -59,7 +61,7 @@ for city in range(len(cities)):
             "showarrow": False,
         }
         # Add the annotation to the layout's annotations array
-        layout["annotations"].append(annotation)
+        layout["annotations"].append(annotation)  # type: ignore[attr-defined]
 
 page = """
 ## Heatmap - Annotated

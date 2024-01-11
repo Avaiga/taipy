@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -81,7 +81,7 @@ class _TaipyNumber(_TaipyBase):
         try:
             return float(super().get())
         except Exception as e:
-            raise TypeError(f"Variable '{self._get_readable_name()}' should hold a number: {e}")
+            raise TypeError(f"Variable '{self._get_readable_name()}' should hold a number: {e}") from None
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
@@ -101,7 +101,7 @@ class _TaipyLoNumbers(_TaipyBase):
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
             try:
-                return list(map(lambda f: float(f), value[1:-1].split(",")))
+                return [float(f) for f in value[1:-1].split(",")]
             except Exception as e:
                 _warn(f"{self._get_readable_name()}: Parsing {value} as an array of numbers", e)
                 return []

@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -54,7 +54,7 @@ class _ConfigChecker:
         else:
             if not (
                 (isinstance(config_value, List) or isinstance(config_value, Set))
-                and all(map(lambda x: isinstance(x, child_config_class), config_value))
+                and all(isinstance(x, child_config_class) for x in config_value)
             ):
                 self._error(
                     config_key,

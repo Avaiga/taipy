@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -26,7 +26,7 @@ from ..schemas import CycleResponseSchema, CycleSchema
 REPOSITORY = "cycle"
 
 
-def _get_or_raise(cycle_id: str) -> None:
+def _get_or_raise(cycle_id: str) -> Cycle:
     manager = _CycleManagerFactory._build_manager()
     cycle = manager._get(cycle_id)
     if not cycle:

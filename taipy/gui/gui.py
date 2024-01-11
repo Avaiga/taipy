@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -28,12 +28,13 @@ from importlib.util import find_spec
 from types import FrameType, SimpleNamespace
 from urllib.parse import unquote, urlencode, urlparse
 
-import __main__
 import markdown as md_lib
 import tzlocal
 from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
-from taipy.logger._taipy_logger import _TaipyLogger
 from werkzeug.utils import secure_filename
+
+import __main__  # noqa: F401
+from taipy.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
@@ -237,7 +238,7 @@ class Gui:
         page: t.Optional[t.Union[str, Page]] = None,
         pages: t.Optional[dict] = None,
         css_file: t.Optional[str] = None,
-        path_mapping: t.Optional[dict] = {},
+        path_mapping: t.Optional[dict] = None,
         env_filename: t.Optional[str] = None,
         libraries: t.Optional[t.List[ElementLibrary]] = None,
         flask: t.Optional[Flask] = None,
@@ -292,6 +293,8 @@ class Gui:
         self._set_css_file(css_file)
 
         # Preserve server config for server initialization
+        if path_mapping is None:
+            path_mapping = {}
         self._path_mapping = path_mapping
         self._flask = flask
 
@@ -552,7 +555,7 @@ class Gui:
     def __is_var_modified_in_context(self, var_name: str, derived_vars: t.Set[str]) -> bool:
         modified_vars: t.Optional[t.Set[str]] = getattr(g, "modified_vars", None)
         der_vars: t.Optional[t.Set[str]] = getattr(g, "derived_vars", None)
-        setattr(g, "update_count", getattr(g, "update_count", 0) + 1)
+        setattr(g, "update_count", getattr(g, "update_count", 0) + 1)  # noqa: B010
         if modified_vars is None:
             modified_vars = set()
             g.modified_vars = modified_vars
@@ -574,7 +577,7 @@ class Gui:
             delattr(g, "derived_vars")
             return derived_vars
         else:
-            setattr(g, "update_count", update_count)
+            setattr(g, "update_count", update_count)  # noqa: B010
             return None
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
@@ -980,7 +983,7 @@ class Gui:
                             # do not send data that is not serializable
                             continue
                 for w in debug_warnings:
-                    warnings.warn(w.message, w.category)
+                    warnings.warn(w.message, w.category)  # noqa: B028
             ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
@@ -1941,7 +1944,7 @@ class Gui:
             return self._server.get_flask()
         raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
 
-    def _set_frame(self, frame: FrameType):
+    def _set_frame(self, frame: t.Optional[FrameType]):
         if not isinstance(frame, FrameType):  # pragma: no cover
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame

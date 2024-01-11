@@ -1,4 +1,4 @@
-# Copyright 2023 Avaiga Private Limited
+# Copyright 2021-2024 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -77,12 +77,15 @@ class _Builder:
         control_type: str,
         element_name: str,
         attributes: t.Optional[t.Dict[str, t.Any]],
-        hash_names: t.Dict[str, str] = {},
+        hash_names: t.Dict[str, str] = None,
         default_value="<Empty>",
         lib_name: str = "taipy",
     ):
         from ..gui import Gui
         from .factory import _Factory
+
+        if hash_names is None:
+            hash_names = {}
 
         self.el = etree.Element(element_name)
 
@@ -142,8 +145,10 @@ class _Builder:
 
     @staticmethod
     def _get_variable_hash_names(
-        gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str] = {}
+        gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str] = None
     ) -> t.Dict[str, str]:
+        if hash_names is None:
+            hash_names = {}
         hashes = {}
         # Bind potential function and expressions in self.attributes
         for k, v in attributes.items():
@@ -294,7 +299,7 @@ class _Builder:
             try:
                 val = float(value)
             except ValueError:
-                raise ValueError(f"Property {name} expects a number for control {self.__control_type}")
+                raise ValueError(f"Property {name} expects a number for control {self.__control_type}") from None
         elif isinstance(value, numbers.Number):
             val = value  # type: ignore
         else:
@@ -799,7 +804,9 @@ class _Builder:
             self.set_attribute("updateVars", ";".join(self.__update_vars))
         return self
 
-    def _set_table_pagesize_options(self, default_size=[50, 100, 500]):
+    def _set_table_pagesize_options(self, default_size=None):
+        if default_size is None:
+            default_size = [50, 100, 500]
         page_size_options = self.__attributes.get("page_size_options", default_size)
         if isinstance(page_size_options, str):
             try:
