@@ -2,23 +2,23 @@ name: install
 description: Install the package and dependencies
 inputs:
   python-version:
-    type: string
     required: true
     description: 'The python version to use'
   os:
-    type: string
     required: true
     description: 'The OS to use'
   install-gui:
-    type: boolean
     required: false
     description: 'Whether to install the GUI dependencies'
     default: true
   pipfile-version:
-    type: string
     required: false
     description: 'The pipfile version to use. Can be min, max, latest'
     default: 'min'
+  can-comment-pr:
+    required: false
+    description: 'Whether to comment the PR if there is a diff'
+    default: false
 outputs:
   to-update:
     description: "True if the dependencies can be updated"
@@ -65,8 +65,7 @@ runs:
       shell: bash
 
     - name: Comment PR
-      # If there is a diff and only once per workflow
-      if: steps.install-dependencies.outputs.diff != '' && inputs.os == 'ubuntu-latest' && inputs.python-version == '3.11'
+      if: inputs.can-comment-pr && steps.install-dependencies.outputs.diff != ''
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
@@ -99,4 +98,3 @@ runs:
       if: inputs.install-gui
       run: pipenv run playwright install chromium --with-deps
       shell: bash
-

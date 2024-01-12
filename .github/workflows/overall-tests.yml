@@ -30,6 +30,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
           pipenv-version: ${{ matrix.pipenv-version }}
+          can-comment-pr: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' && matrix.pipenv-version == 'latest'
 
       - name: Pytest
         continue-on-error: ${{ steps.install-dependencies.outputs.to-update }}
