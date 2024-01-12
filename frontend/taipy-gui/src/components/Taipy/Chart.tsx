@@ -54,6 +54,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Dark_?: string;
     template_Light_?: string;
     //[key: `selected_${number}`]: number[];
+    figure?: Array<Record<string, unknown>>;
 }
 
 interface ChartConfig {
@@ -261,7 +262,7 @@ const Chart = (props: ChartProp) => {
     const config = useDynamicJsonProperty(props.config, props.defaultConfig, defaultConfig);
 
     useEffect(() => {
-        if (refresh || !data[dataKey]) {
+        if (updateVarName && (refresh || !data[dataKey])) {
             const backCols = Object.values(config.columns).map((col) => col.dfid);
             const dtKey = backCols.join("-") + (config.decimators ? `--${config.decimators.join("")}` : "");
             setDataKey(dtKey);
@@ -306,6 +307,14 @@ const Chart = (props: ChartProp) => {
         if (template) {
             baseLayout.template = template;
         }
+        if (props.figure) {
+            return {
+                ...(props.figure[0].layout as Partial<Layout>),
+                ...baseLayout,
+                title: title || baseLayout.title || (props.figure[0].layout as Partial<Layout>).title,
+                clickmode: "event+select",
+            } as Layout;
+        }
         return {
             ...baseLayout,
             title: title || baseLayout.title,
@@ -334,6 +343,7 @@ const Chart = (props: ChartProp) => {
         props.template,
         props.template_Dark_,
         props.template_Light_,
+        props.figure,
     ]);
 
     const style = useMemo(
@@ -543,7 +553,18 @@ const Chart = (props: ChartProp) => {
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
             <Tooltip title={hover || ""}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
+                {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ?
                     <Plot
+                    data={props.figure[0].data as Data[]}
+                    layout={layout}
+                    style={style}
+                    onRelayout={onRelayout}
+                    onAfterPlot={onAfterPlot}
+                    onSelected={onSelect}
+                    onDeselect={onSelect}
+                    config={plotConfig}
+                />
+:                <Plot
                         data={dataPl}
                         layout={layout}
                         style={style}
@@ -554,6 +575,7 @@ const Chart = (props: ChartProp) => {
                         onClick={isOnClick(config.types) ? onSelect : undefined}
                         config={plotConfig}
                     />
+                    }
                 </Suspense>
             </Tooltip>
         </Box>
