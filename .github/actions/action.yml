@@ -1,4 +1,4 @@
-name: Install the package and dependencies
+name: install
 description: Install the package and dependencies
 inputs:
   python-version:
