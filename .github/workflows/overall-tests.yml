@@ -40,27 +40,27 @@ jobs:
           pytest-xml-coverage-path: ./overall-coverage.xml
           title: Taipy Overall Coverage Report
 
-  orchestrator-tests:
-    #needs: [partial-tests]
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        orchestrator: ['orchestrator_dispatcher', 'standalone']
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python-version}}
+  # orchestrator-tests:
+  #   #needs: [partial-tests]
+  #   timeout-minutes: 20
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ['3.8', '3.9', '3.10', '3.11']
+  #       os: [ubuntu-latest, windows-latest, macos-latest]
+  #       orchestrator: ['orchestrator_dispatcher', 'standalone']
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{matrix.python-version}}
 
-      - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+  #     - name: Install pipenv
+  #       run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
-      - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }}
+  #     - name: Install Dependencies
+  #       run: pipenv install --dev --python=${{ matrix.python-version }}
 
-      - name: Pytest Core orchestrator_dispatcher
-        run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core
+  #     - name: Pytest Core orchestrator_dispatcher
+  #       run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core

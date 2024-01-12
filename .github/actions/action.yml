@@ -28,10 +28,12 @@ runs:
 
     - name: Install pipenv
       run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+      shell: bash
 
     - name: Install minium supported dependencies
       if: inputs.pipenv-version == 'min'
       run: pipenv install --dev --python=${{ inputs.python-version }}
+      shell: bash
 
     - name: Install unperbound supported dependencies
       if: inputs.pipenv-version == 'max'
@@ -40,6 +42,7 @@ runs:
         rm Pipfile
         mv Pipfile.sup Pipfile
         pipenv install --dev --python=${{ inputs.python-version }}
+      shell: bash
 
     - name: Check if the latest version supported is up to date.
       id: install-dependencies
@@ -55,6 +58,7 @@ runs:
           echo `diff Pipfile Pipfile.sup | tail -n +1`
           echo EOF
         } >> "$GITHUB_OUTPUT"
+      shell: bash
 
     - name: Comment PR
       # If there is a diff and only once per workflow
@@ -70,10 +74,12 @@ runs:
     - name: Install Dependencies
       if: inputs.pipenv-version == 'latest' && steps.install-dependencies.outputs.exit_code == 0
       run: pipenv install --dev --python=${{ inputs.python-version }}
+      shell: bash
 
     - name: Setup LibMagic (MacOS)
       if: inputs.os == 'macos-latest'
       run: brew install libmagic
+      shell: bash
 
     - uses: actions/setup-node@v4
       if: inputs.install-gui
@@ -83,8 +89,10 @@ runs:
     - name: Frontend Bundle Build
       if: inputs.install-gui
       run: pipenv run python tools/frontend/bundle_build.py
+      shell: bash
 
     - name: Install Playwright
       if: inputs.install-gui
       run: pipenv run playwright install chromium --with-deps
+      shell: bash
 
