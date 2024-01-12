@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install packages
-        uses: ./.github/actions/install
+        uses: ./.github/actions/action
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
