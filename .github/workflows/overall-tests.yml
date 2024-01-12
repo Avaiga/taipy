@@ -96,7 +96,7 @@ jobs:
           pytest-xml-coverage-path: ./overall-coverage.xml
           title: Taipy Overall Coverage Report
 
-  submit_tests:
+  orchestrator-tests:
     #needs: [partial-tests]
     timeout-minutes: 20
     strategy:
@@ -104,6 +104,7 @@ jobs:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest, macos-latest]
+        orchestrator: ['orchestrator_dispatcher', 'standalone']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -122,33 +123,4 @@ jobs:
         run: brew install libmagic
 
       - name: Pytest Core orchestrator_dispatcher
-        run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
-
-  standalone_tests:
-    #needs: [partial-tests]
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python-version}}
-
-      - name: Install pipenv
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
-
-      - name: Install Dependencies
-        run: pipenv install --dev --python=${{ matrix.python-version }}
-
-      - name: Setup LibMagic (MacOS)
-        if: matrix.os == 'macos-latest'
-        run: brew install libmagic
-
-      - name: Pytest Core standalone
-        run: pipenv run pytest -m "standalone" tests/core
+        run: pipenv run pytest -m "${{ matrix.orchestrator }}" tests/core
