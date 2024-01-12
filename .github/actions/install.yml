@@ -1,4 +1,5 @@
 name: Install the package and dependencies
+description: Install the package and dependencies
 inputs:
   python-version:
     type: string
