@@ -835,7 +835,6 @@ def clean_all_entities_by_version(version_number=None) -> bool:
         __logger.warning(f"{e.message} Abort cleaning the entities of version '{version_number}'.")
         return False
 
-    _SubmissionManagerFactory._build_manager()._delete_by_version(version_number)
     _ScenarioManagerFactory._build_manager()._delete_by_version(version_number)
     _SequenceManagerFactory._build_manager()._delete_by_version(version_number)
     _TaskManagerFactory._build_manager()._delete_by_version(version_number)
