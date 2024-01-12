@@ -516,11 +516,13 @@ const Chart = (props: ChartProp) => {
     const getRealIndex = useCallback(
         (index?: number) =>
             typeof index === "number"
-                ? data[dataKey].tp_index
+                ? props.figure
+                    ? index
+                    : data[dataKey].tp_index
                     ? (data[dataKey].tp_index[index] as number)
                     : index
                 : 0,
-        [data, dataKey]
+        [data, dataKey, props.figure]
     );
 
     const onSelect = useCallback(
@@ -553,29 +555,30 @@ const Chart = (props: ChartProp) => {
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
             <Tooltip title={hover || ""}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ?
-                    <Plot
-                    data={props.figure[0].data as Data[]}
-                    layout={layout}
-                    style={style}
-                    onRelayout={onRelayout}
-                    onAfterPlot={onAfterPlot}
-                    onSelected={onSelect}
-                    onDeselect={onSelect}
-                    config={plotConfig}
-                />
-:                <Plot
-                        data={dataPl}
-                        layout={layout}
-                        style={style}
-                        onRelayout={onRelayout}
-                        onAfterPlot={onAfterPlot}
-                        onSelected={isOnClick(config.types) ? undefined : onSelect}
-                        onDeselect={isOnClick(config.types) ? undefined : onSelect}
-                        onClick={isOnClick(config.types) ? onSelect : undefined}
-                        config={plotConfig}
-                    />
-                    }
+                    {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
+                        <Plot
+                            data={props.figure[0].data as Data[]}
+                            layout={layout}
+                            style={style}
+                            onRelayout={onRelayout}
+                            onAfterPlot={onAfterPlot}
+                            onSelected={onSelect}
+                            onDeselect={onSelect}
+                            config={plotConfig}
+                        />
+                    ) : (
+                        <Plot
+                            data={dataPl}
+                            layout={layout}
+                            style={style}
+                            onRelayout={onRelayout}
+                            onAfterPlot={onAfterPlot}
+                            onSelected={isOnClick(config.types) ? undefined : onSelect}
+                            onDeselect={isOnClick(config.types) ? undefined : onSelect}
+                            onClick={isOnClick(config.types) ? onSelect : undefined}
+                            config={plotConfig}
+                        />
+                    )}
                 </Suspense>
             </Tooltip>
         </Box>
