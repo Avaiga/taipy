@@ -307,6 +307,14 @@ const Chart = (props: ChartProp) => {
         if (template) {
             baseLayout.template = template;
         }
+        if (props.figure) {
+            return {
+                ...(props.figure[0].layout as Partial<Layout>),
+                ...baseLayout,
+                title: title || baseLayout.title || (props.figure[0].layout as Partial<Layout>).title,
+                clickmode: "event+select",
+            } as Layout;
+        }
         return {
             ...baseLayout,
             title: title || baseLayout.title,
@@ -335,6 +343,7 @@ const Chart = (props: ChartProp) => {
         props.template,
         props.template_Dark_,
         props.template_Light_,
+        props.figure,
     ]);
 
     const style = useMemo(
@@ -547,7 +556,7 @@ const Chart = (props: ChartProp) => {
                 {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ?
                     <Plot
                     data={props.figure[0].data as Data[]}
-                    layout={props.figure[0].layout as Partial<Layout>}
+                    layout={layout}
                     style={style}
                     onRelayout={onRelayout}
                     onAfterPlot={onAfterPlot}
