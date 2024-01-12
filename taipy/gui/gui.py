@@ -84,6 +84,7 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
+    _TaipyToJson,
     _to_camel_case,
     _variable_decode,
     is_debugging,
@@ -965,6 +966,8 @@ class Gui:
                         ]
                     else:
                         newvalue = self.__adapter._run_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                elif isinstance(newvalue, _TaipyToJson):
+                    newvalue = newvalue.get()
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
                 debug_warnings: t.List[warnings.WarningMessage] = []

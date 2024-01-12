@@ -554,6 +554,11 @@
             "type": "dynamic(bool)",
             "default_value": "False",
             "doc": "Allows dynamic config refresh if set to True."
+          },
+          {
+            "name": "figure",
+            "type": "plotly.graph_objects.Figure",
+            "doc": "A figure as produced by plotly."
           }
         ]
       }
