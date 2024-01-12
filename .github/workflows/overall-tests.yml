@@ -51,10 +51,9 @@ jobs:
           pip install -r tools/packages/requirements.txt
           python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
-          $DIFF=`diff Pipfile Pipfile.sup | tail -n +1`
           {
             echo 'diff<<EOF'
-            echo $DIFF
+            echo `diff Pipfile Pipfile.sup | tail -n +1`
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
