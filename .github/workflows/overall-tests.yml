@@ -53,7 +53,7 @@ jobs:
           # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
           $DIFF=`diff Pipfile Pipfile.sup | tail -n +1`
           {
-            echo 'Diff between packages<<EOF'
+            echo 'diff=<<EOF'
             echo $DIFF
             echo EOF
           } >> "$GITHUB_OUTPUT"
