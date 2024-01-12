@@ -1506,16 +1506,12 @@ def test_get_scenarios_by_time(Year=2024, Month=1, Day=11, Hour=0, Minute=0):
     #Initialize Yearly Scenario
     scenario_config = Config.configure_scenario("sc", None, None, Frequency.YEARLY)
     creation_date = datetime(2024,1,1)
-    scenario_1 = _ScenarioManager._create(
-        scenario_config, creation_date=creation_date, name="1"
-    )
+    _ScenarioManager._create(scenario_config, creation_date=creation_date, name="1")
 
     #Initialize Monthly Scenario
     scenario_config_2 = Config.configure_scenario("sc2", None, None, Frequency.MONTHLY)
     creation_date_2 = datetime(2024,1,1)
-    scenario_2 = _ScenarioManager._create(
-        scenario_config_2, creation_date=creation_date_2, name="2"
-    )
+    _ScenarioManager._create(scenario_config_2, creation_date=creation_date_2, name="2")
 
     results = _ScenarioManager._get_scenarios_by_time(Year, Month, Day, Hour, Minute)
 
