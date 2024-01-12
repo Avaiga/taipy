@@ -50,7 +50,19 @@ jobs:
           # Generate the Pipfile with the latest version
           pip install -r tools/packages/requirements.txt
           python tools/packages/manager.py pipfile tools/packages/taipy-core/setup.requirements.txt tools/packages/taipy/setup.requirements.txt tools/packages/taipy-gui/setup.requirements.txt tools/packages/taipy-config/setup.requirements.txt tools/packages/taipy-rest/setup.requirements.txt Pipfile
-      
+          # If Pipfile and Pipfile.sup are different, put something in the GitHub convertation
+          echo "diff=`diff Pipfile Pipfile.sup`" >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR
+        if: steps.install-dependencies.outputs.diff != ''
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Diff deteteced ! Please update the Pipfile.sup file with the following diff:
+            ```
+            ${{ steps.install-dependencies.outputs.diff }}
+            ```
+
       - name: Install Dependencies
         if: matrix.pipenv-version == 'latest' && steps.install-dependencies.outputs.exit_code == 0
         run: pipenv install --dev --python=${{ matrix.python-version }}
