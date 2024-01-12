@@ -70,7 +70,7 @@ def set(entity: Union[DataNode, Task, Sequence, Scenario, Cycle]):
         entity (Union[DataNode^, Task^, Sequence^, Scenario^, Cycle^]): The
             entity to save or update.
     """
-    if _is_cycle(entity):
+    if isinstance(entity, Cycle) or (isinstance(entity, str) and entity.startswith(Cycle._ID_PREFIX)):
         return _CycleManagerFactory._build_manager()._set(entity)
     if _is_scenario(entity):
         return _ScenarioManagerFactory._build_manager()._set(entity)
